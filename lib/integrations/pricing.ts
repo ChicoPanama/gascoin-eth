@@ -20,20 +20,40 @@ async function fromDexScreener(): Promise<MarketSnapshot | null> {
     gascoinPriceUsd: Number(pair.priceUsd || 0),
     marketCapUsd: Number(pair.marketCap || pair.fdv || 0),
     volume24hUsd: Number(pair?.volume?.h24 || 0),
-    solPriceUsd: Number(pair?.priceNative || 0) || 180,
+    solPriceUsd: Number(pair?.priceNative || 0) || 0,
     source: 'dexscreener'
   };
 }
 
+// Fetch live SOL price from CoinGecko (no API key required)
+async function fetchSolPrice(): Promise<number> {
+  try {
+    const r = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=solana&vs_currencies=usd', { cache: 'no-store' });
+    if (!r.ok) return 0;
+    const j = (await r.json()) as any;
+    return Number(j?.solana?.usd || 0);
+  } catch {
+    return 0;
+  }
+}
+
 export async function getMarketSnapshot(): Promise<MarketSnapshot> {
   const ds = await fromDexScreener();
-  if (ds && ds.gascoinPriceUsd > 0) return ds;
+  if (ds && ds.gascoinPriceUsd > 0) {
+    // Supplement with live SOL price if DexScreener didn't provide it
+    if (!ds.solPriceUsd) ds.solPriceUsd = await fetchSolPrice();
+    return ds;
+  }
+
+  // No DexScreener data — fetch at least the live SOL price
+  const solPrice = await fetchSolPrice();
+
   return {
-    gascoinPriceUsd: 0.0042,
-    marketCapUsd: 4_200_000,
-    volume24hUsd: 518_000,
-    solPriceUsd: 188,
-    source: 'fallback_mock'
+    gascoinPriceUsd: 0,
+    marketCapUsd: 0,
+    volume24hUsd: 0,
+    solPriceUsd: solPrice,
+    source: solPrice > 0 ? 'coingecko' : 'unavailable'
   };
 }
 

@@ -69,7 +69,7 @@ export function RankingsTable({ entries, loading, connectedWallet, onRowClick }:
         </thead>
         <tbody>
           {loading ? (
-            <SkeletonRows />
+            <tr><td colSpan={8} style={{ textAlign: 'center', padding: 48, fontFamily: 'IBM Plex Mono', fontSize: 12, color: 'rgba(255,255,255,0.3)' }}>Loading rankings...</td></tr>
           ) : (
             paged.map((e) => {
               const isYou = connectedWallet === e.wallet_address;

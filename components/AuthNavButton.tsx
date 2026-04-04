@@ -25,9 +25,8 @@ function readHandle(user: any): string {
 export function AuthNavButton() {
   const { ready, authenticated, login, logout, user, linkWallet } = usePrivy();
 
-  if (!ready) {
-    return <button className="btn" type="button" disabled>Loading…</button>;
-  }
+  // Render nothing while loading — no "Loading..." text
+  if (!ready) return null;
 
   if (!authenticated) {
     return (

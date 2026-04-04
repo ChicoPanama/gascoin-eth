@@ -10,8 +10,8 @@ import { ReferralTeaser } from '../components/referral/ReferralTeaser';
 export default async function Home() {
   let treasuryUsd = '—';
   let treasurySub = 'SOL';
-  let marketCap = '$4.2M';
-  let volume = '$518K';
+  let marketCap = '—';
+  let volume = '—';
   let gates = '11';
 
   try {
@@ -29,8 +29,8 @@ export default async function Home() {
     const m = await getMarketSnapshot();
     const mc = Number(m.marketCapUsd);
     const vol = Number(m.volume24hUsd);
-    marketCap = mc >= 1_000_000 ? `$${(mc / 1_000_000).toFixed(1)}M` : `$${mc.toLocaleString()}`;
-    volume = vol >= 1_000_000 ? `$${(vol / 1_000_000).toFixed(1)}M` : vol >= 1_000 ? `$${(vol / 1_000).toFixed(0)}K` : `$${vol.toLocaleString()}`;
+    if (mc > 0) marketCap = mc >= 1_000_000 ? `$${(mc / 1_000_000).toFixed(1)}M` : `$${mc.toLocaleString()}`;
+    if (vol > 0) volume = vol >= 1_000_000 ? `$${(vol / 1_000_000).toFixed(1)}M` : vol >= 1_000 ? `$${(vol / 1_000).toFixed(0)}K` : `$${vol.toLocaleString()}`;
   } catch {}
 
   // Gate count is static — reflects the number of verification steps in lib/policy.ts

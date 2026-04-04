@@ -34,7 +34,7 @@ export function LeaderboardStatsStrip({ stats, loading }: { stats: Stats | null;
   const paid = useAnimatedValue(stats?.total_sol_paid ?? 0);
 
   const cards = [
-    { label: 'Total Referrals', value: stats ? Math.round(referrals).toLocaleString() : null, sub: 'Coming Soon' },
+    { label: 'Total Referrals', value: stats ? (referrals > 0 ? Math.round(referrals).toLocaleString() : '—') : null },
     { label: 'Active Earners', value: stats ? Math.round(earners).toLocaleString() : null },
     { label: 'GASCOIN Held', value: stats ? Math.round(gcHeld).toLocaleString() : null, sub: 'By Earners' },
     { label: 'SOL Paid Out', value: stats ? `${paid.toFixed(4)}` : null, sub: 'SOL' },

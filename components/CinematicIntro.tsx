@@ -28,16 +28,6 @@ export function CinematicIntro() {
 }
 
 export function SiteReveal({ children }: { children: React.ReactNode }) {
-  const [visible, setVisible] = useState(false);
-
-  useEffect(() => {
-    const t = setTimeout(() => setVisible(true), 3400);
-    return () => clearTimeout(t);
-  }, []);
-
-  return (
-    <div className={`gc-site-content${visible ? ' gc-site-content--visible' : ''}`}>
-      {children}
-    </div>
-  );
+  // Content is always visible — intro overlays on top with z-index
+  return <>{children}</>;
 }
