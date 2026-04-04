@@ -10,7 +10,6 @@ export function HomeNav() {
       <div className="gc-nav-links">
         <Link href="/submit">Submit</Link>
         <Link href="/gates">Gates</Link>
-        <Link href="/docs">Docs</Link>
         <Link href="/wallet">Tracker</Link>
         <Link href="/referral">Refer</Link>
         <Link href="/perks">Perks</Link>
@@ -19,6 +18,7 @@ export function HomeNav() {
         <Link href="/dashboard">Treasury</Link>
       </div>
       <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+        <Link href="/docs" className="gc-nav-links">Docs</Link>
         <WalletButton />
         <Link href="/submit" className="gc-nav-cta">Submit Receipt</Link>
       </div>

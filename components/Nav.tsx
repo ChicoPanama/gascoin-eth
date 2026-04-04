@@ -7,7 +7,6 @@ export function Nav() {
     <Link href="/" className="nav-brand">GASCOIN</Link>
     <Link href="/submit">Submit</Link>
     <Link href="/gates">Gates</Link>
-    <Link href="/docs">Docs</Link>
     <Link href="/wallet">Tracker</Link>
     <Link href="/referral">Refer</Link>
     <Link href="/perks">Perks</Link>
@@ -16,6 +15,7 @@ export function Nav() {
     <Link href="/dashboard">Treasury</Link>
     <Link href="/admin">Admin</Link>
     <span style={{ marginLeft: 'auto', display: 'flex', gap: 8, alignItems: 'center' }}>
+      <Link href="/docs">Docs</Link>
       <WalletButton />
       <AuthNavButton />
     </span>
