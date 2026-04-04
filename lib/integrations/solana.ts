@@ -36,6 +36,36 @@ export async function hasMinimumGascoinUsd(wallet: string, minUsd = 1): Promise<
   return { ok: usdValue >= minUsd, usdValue, tokenBalance };
 }
 
+export async function getTreasuryBalances(): Promise<{
+  solBalance: number;
+  solUsd: number;
+  gascoinBalance: number;
+  gascoinUsd: number;
+}> {
+  const wallet = process.env.GASCOIN_TREASURY_WALLET;
+  if (!wallet) return { solBalance: 0, solUsd: 0, gascoinBalance: 0, gascoinUsd: 0 };
+
+  try {
+    const conn = connection();
+    const pubkey = new PublicKey(wallet);
+
+    const [lamports, gascoinBalance, { getMarketSnapshot }] = await Promise.all([
+      conn.getBalance(pubkey),
+      getWalletGascoinBalance(wallet),
+      import('./pricing')
+    ]);
+
+    const market = await getMarketSnapshot();
+    const solBalance = lamports / LAMPORTS_PER_SOL;
+    const solUsd = solBalance * market.solPriceUsd;
+    const gascoinUsd = gascoinBalance * market.gascoinPriceUsd;
+
+    return { solBalance, solUsd, gascoinBalance, gascoinUsd };
+  } catch {
+    return { solBalance: 0, solUsd: 0, gascoinBalance: 0, gascoinUsd: 0 };
+  }
+}
+
 export async function sendSolPayout(wallet: string, amountSol: number): Promise<{ ok: boolean; txHash?: string; error?: string }> {
   const live = process.env.ENABLE_LIVE_PAYOUT === 'true';
   if (!live) {

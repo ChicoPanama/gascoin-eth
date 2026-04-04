@@ -92,6 +92,27 @@ async function verifyViaOEmbed(tweetUrl: string, expectedHandle: string): Promis
   };
 }
 
+export async function getFollowerCount(handle: string): Promise<number> {
+  const token = process.env.X_BEARER_TOKEN;
+  if (!token) return -1;
+
+  const username = handle.replace(/^@/, '');
+  const endpoint = new URL(`https://api.x.com/2/users/by/username/${username}`);
+  endpoint.searchParams.set('user.fields', 'public_metrics');
+
+  try {
+    const r = await fetchWithRetry(endpoint.toString(), {
+      headers: { authorization: `Bearer ${token}` },
+      cache: 'no-store'
+    }, 2);
+    if (!r.ok) return -1;
+    const j = (await r.json()) as any;
+    return Number(j?.data?.public_metrics?.followers_count ?? -1);
+  } catch {
+    return -1;
+  }
+}
+
 export async function verifyTweetProof(tweetUrl: string, expectedHandle: string): Promise<TweetProofResult> {
   if (!tweetUrl.includes('x.com') && !tweetUrl.includes('twitter.com')) {
     return { ok: false, reason: 'invalid_tweet_url' };

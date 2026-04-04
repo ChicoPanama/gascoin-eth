@@ -1,7 +1,7 @@
 import crypto from 'crypto';
 import { NextResponse } from 'next/server';
 import { evaluateClaim } from '../../../../lib/policy';
-import { verifyTweetProof } from '../../../../lib/integrations/x';
+import { verifyTweetProof, getFollowerCount } from '../../../../lib/integrations/x';
 import { analyzeReceipt } from '../../../../lib/integrations/ocr';
 import { runFraudChecks } from '../../../../lib/integrations/fraud';
 import { hasMinimumGascoinUsd } from '../../../../lib/integrations/solana';
@@ -81,11 +81,12 @@ export async function POST(req: Request){
     await supabase.from('idempotency_keys').insert({ key: idemKey, scope: 'claim_submit', request_hash: reqHash, status: 'processing' });
   }
 
-  const [tweet, ocr, fraudBase, minHold] = await Promise.all([
+  const [tweet, ocr, fraudBase, minHold, followerCount] = await Promise.all([
     verifyTweetProof(tweetUrl, `@${session.xHandle}`),
     analyzeReceipt(receipt),
     runFraudChecks(receiptBuffer),
-    hasMinimumGascoinUsd(wallet, 1)
+    hasMinimumGascoinUsd(wallet, 1),
+    getFollowerCount(session.xHandle)
   ]);
 
   const walletOnReceipt = walletOnReceiptInput || ocr.walletOnReceipt || '';
@@ -117,7 +118,8 @@ export async function POST(req: Request){
     duplicateHash,
     duplicatePhash,
     cooldownOk: true,
-    amountUsd
+    amountUsd,
+    followerCount
   });
 
   // upsert user and wallet linkage

@@ -1,34 +1,36 @@
 import { NextResponse } from 'next/server';
-import { getSupabaseAdmin } from '../../../../lib/supabase';
+import { getTreasuryBalances } from '../../../../lib/integrations/solana';
 
-export async function GET(){
+export const dynamic = 'force-dynamic';
+
+export async function GET() {
   try {
-    const supabase = getSupabaseAdmin();
-    const { data } = await supabase
-      .from('treasury_snapshots')
-      .select('sol_balance,usd_value,gascoin_balance,gascoin_usd_value,ts')
-      .order('ts', { ascending: false })
-      .limit(1)
-      .maybeSingle();
+    const t = await getTreasuryBalances();
+    const avgPayoutSol = 0.05;
+    const capacity = avgPayoutSol > 0 ? Math.floor(t.solBalance / avgPayoutSol) : 0;
 
-    if (data) {
-      const solBalance = Number(data.sol_balance || 0);
-      const usdValue = Number(data.usd_value || 0);
-      const avgPayoutSol = 0.05;
-      const capacity = avgPayoutSol > 0 ? Math.floor(solBalance / avgPayoutSol) : 0;
-      return NextResponse.json({
-        treasuryUsd: usdValue.toLocaleString(),
-        solBalance: solBalance.toLocaleString(),
-        refundCapacity: `${capacity.toLocaleString()} claims`,
-        updatedAt: data.ts
-      });
-    }
-  } catch {}
-
-  return NextResponse.json({
-    treasuryUsd: '--',
-    solBalance: '--',
-    refundCapacity: '--',
-    updatedAt: new Date().toISOString()
-  });
+    return NextResponse.json({
+      live: true,
+      solBalance: +t.solBalance.toFixed(4),
+      solUsd: +t.solUsd.toFixed(2),
+      gascoinBalance: +t.gascoinBalance.toFixed(2),
+      gascoinUsd: +t.gascoinUsd.toFixed(2),
+      totalUsd: +(t.solUsd + t.gascoinUsd).toFixed(2),
+      refundCapacity: capacity,
+      wallet: process.env.GASCOIN_TREASURY_WALLET || null,
+      fetchedAt: new Date().toISOString()
+    });
+  } catch {
+    return NextResponse.json({
+      live: false,
+      solBalance: 0,
+      solUsd: 0,
+      gascoinBalance: 0,
+      gascoinUsd: 0,
+      totalUsd: 0,
+      refundCapacity: 0,
+      wallet: null,
+      fetchedAt: new Date().toISOString()
+    }, { status: 500 });
+  }
 }

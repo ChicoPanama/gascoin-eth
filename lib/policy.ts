@@ -14,6 +14,7 @@ export type ClaimInput = {
   duplicatePhash: boolean;
   cooldownOk: boolean;
   amountUsd: number;
+  followerCount: number;
 };
 
 export function evaluateClaim(c: ClaimInput){
@@ -28,6 +29,7 @@ export function evaluateClaim(c: ClaimInput){
   gates.push({ gate:'ai_image_check', passed:c.aiScore<0.65, score:c.aiScore, reason:'AI probability too high' });
   gates.push({ gate:'tamper_check', passed:c.tamperScore<0.55, score:c.tamperScore, reason:'Tamper risk too high' });
   gates.push({ gate:'cooldown', passed:c.cooldownOk, reason:'Cooldown window active' });
+  gates.push({ gate:'min_followers', passed:c.followerCount >= 100, score:c.followerCount, reason:'Account must have at least 100 followers' });
 
   const failed = gates.filter(g=>!g.passed);
   const riskScore = Math.min(1, (failed.length * 0.09) + (c.aiScore*0.35) + (c.tamperScore*0.25) + (c.amountUsd>200?0.08:0));
