@@ -30,6 +30,7 @@ export default async function Admin(){
   return <>
     <Nav />
     <h2>Admin Queue</h2>
+    <p>Review pending claims. Approve, reject, or ban users.</p>
     <AdminQueueClient initialRows={rows} />
   </>;
 }

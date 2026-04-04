@@ -1,14 +1,41 @@
+import { getMarketSnapshot } from '../lib/integrations/pricing';
+import { getSupabaseAdmin } from '../lib/supabase';
+
 export async function LiveTreasuryBar(){
-  const [treasury, market] = await Promise.all([
-    fetch(process.env.NEXT_PUBLIC_BASE_URL ? `${process.env.NEXT_PUBLIC_BASE_URL}/api/public/treasury` : 'http://localhost:3000/api/public/treasury', { cache:'no-store' }).then(r=>r.json()).catch(()=>({ treasuryUsd:'--', refundCapacity:'--'})),
-    fetch(process.env.NEXT_PUBLIC_BASE_URL ? `${process.env.NEXT_PUBLIC_BASE_URL}/api/public/market` : 'http://localhost:3000/api/public/market', { cache:'no-store' }).then(r=>r.json()).catch(()=>({ marketCapUsd:'--', volume24hUsd:'--'}))
-  ]);
-  return <div className="card" style={{marginBottom:16}}>
-    <div className="grid cards-4">
-      <div><div className="k">Treasury USD</div><div className="v">${treasury.treasuryUsd}</div></div>
-      <div><div className="k">Refund Capacity</div><div className="v">{treasury.refundCapacity}</div></div>
-      <div><div className="k">Market Cap</div><div className="v">${market.marketCapUsd}</div></div>
-      <div><div className="k">24h Volume</div><div className="v">${market.volume24hUsd}</div></div>
+  let treasuryUsd = '--';
+  let solBalance = '--';
+  try {
+    const supabase = getSupabaseAdmin();
+    const { data } = await supabase
+      .from('treasury_snapshots')
+      .select('sol_balance,usd_value')
+      .order('ts', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (data) {
+      treasuryUsd = `$${Number(data.usd_value || 0).toLocaleString()}`;
+      solBalance = `${Number(data.sol_balance || 0).toLocaleString()} SOL`;
+    }
+  } catch {}
+
+  const market = await getMarketSnapshot();
+
+  return <div className="grid cards-4" style={{marginBottom:8}}>
+    <div className="card">
+      <div className="k">Treasury</div>
+      <div className="v">{treasuryUsd}</div>
+    </div>
+    <div className="card">
+      <div className="k">SOL Balance</div>
+      <div className="v">{solBalance}</div>
+    </div>
+    <div className="card">
+      <div className="k">Market Cap</div>
+      <div className="v">${Number(market.marketCapUsd).toLocaleString()}</div>
+    </div>
+    <div className="card">
+      <div className="k">24h Volume</div>
+      <div className="v">${Number(market.volume24hUsd).toLocaleString()}</div>
     </div>
   </div>
 }

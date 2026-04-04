@@ -102,39 +102,53 @@ function PrivySubmitForm() {
     }
   }
 
-  if (!ready) return <p>Loading login…</p>;
+  if (!ready) return <p style={{color:'var(--muted)'}}>Loading...</p>;
 
   return (
     <>
       {!authenticated ? (
-        <div className="card" style={{ marginBottom: 12 }}>
-          <p>Login required. Use the top-right <strong>Sign in</strong> button.</p>
+        <div className="card" style={{ marginBottom: 16 }}>
+          <p style={{margin:0}}>Login required. Use the top-right <strong>Sign in</strong> button.</p>
         </div>
       ) : (
-        <div className="card" style={{ marginBottom: 12 }}>
-          <p>Logged in{handle ? ` as @${handle}` : ''}.</p>
+        <div className="card" style={{ marginBottom: 16, display:'flex', alignItems:'center', justifyContent:'space-between', flexWrap:'wrap', gap:12 }}>
+          <p style={{margin:0,color:'var(--fg)'}}>Signed in{handle ? ` as @${handle}` : ''}</p>
           <div style={{ display: 'flex', gap: 8 }}>
-            <button className="btn" type="button" onClick={syncProfile} disabled={syncing}>
-              {syncing ? 'Syncing…' : 'Sync profile'}
+            <button className="btn btn-sm" type="button" onClick={syncProfile} disabled={syncing}>
+              {syncing ? 'Syncing...' : 'Sync profile'}
             </button>
-            <button className="btn" type="button" onClick={logout}>Logout</button>
           </div>
         </div>
       )}
 
-      <form className="grid" onSubmit={onSubmit} encType="multipart/form-data">
-        <label>Tweet URL<input name="tweetUrl" required /></label>
-        <label>Connected Wallet<input name="wallet" required defaultValue={wallet} /></label>
-        <label>Wallet written on receipt<input name="walletOnReceipt" required /></label>
-        <label>Claimed USD Amount<input name="amountUsd" type="number" step="0.01" required /></label>
-        <label>Receipt Image<input name="receipt" type="file" required /></label>
-        <button className="btn" type="submit" disabled={submitting || !authenticated}>
-          {submitting ? 'Submitting…' : 'Submit'}
+      <form className="grid" style={{gap:20}} onSubmit={onSubmit} encType="multipart/form-data">
+        <div>
+          <label>Tweet URL</label>
+          <input name="tweetUrl" required placeholder="https://x.com/you/status/..." />
+        </div>
+        <div>
+          <label>Connected Wallet</label>
+          <input name="wallet" required defaultValue={wallet} placeholder="Your Solana wallet address" />
+        </div>
+        <div>
+          <label>Wallet written on receipt</label>
+          <input name="walletOnReceipt" required placeholder="Wallet address shown on the receipt" />
+        </div>
+        <div>
+          <label>Claimed USD Amount</label>
+          <input name="amountUsd" type="number" step="0.01" required placeholder="0.00" />
+        </div>
+        <div>
+          <label>Receipt Image</label>
+          <input name="receipt" type="file" accept="image/*" required />
+        </div>
+        <button className="btn btn-primary" type="submit" disabled={submitting || !authenticated}>
+          {submitting ? 'Submitting...' : 'Submit Claim'}
         </button>
       </form>
 
-      {error ? <p style={{ color: 'crimson' }}>Error: {error}</p> : null}
-      {okText ? <p style={{ color: 'green' }}>{okText}</p> : null}
+      {error ? <p style={{ color: 'var(--danger)', marginTop: 16 }}>Error: {error}</p> : null}
+      {okText ? <p style={{ color: 'var(--success)', marginTop: 16 }}>{okText}</p> : null}
     </>
   );
 }

@@ -76,42 +76,49 @@ function AdminQueueInner({ initialRows }: { initialRows: QueueRow[] }) {
     }
   }
 
-  if (!ready) return <p>Loading admin auth…</p>;
+  if (!ready) return <p style={{color:'var(--muted)'}}>Loading...</p>;
+
+  const shortId = (id: string) => id?.length > 8 ? id.slice(0, 8) + '...' : id;
+  const shortWallet = (w: string) => w?.length > 12 ? w.slice(0, 4) + '...' + w.slice(-4) : w;
 
   return (
     <>
       {!authenticated ? (
-        <div className="card" style={{ marginBottom: 12 }}>
-          <p>Reviewer login required. Use the top-right <strong>Sign in</strong> button.</p>
+        <div className="card" style={{ marginBottom: 16 }}>
+          <p style={{margin:0}}>Reviewer login required. Use the top-right <strong>Sign in</strong> button.</p>
         </div>
       ) : null}
 
-      <table className="table">
-        <thead>
-          <tr><th>ID</th><th>X</th><th>Tweet</th><th>Wallet</th><th>Risk</th><th>Decision</th><th>Actions</th></tr>
-        </thead>
-        <tbody>
-          {rows.map((c) => (
-            <tr key={c.id}>
-              <td>{c.id}</td>
-              <td>{c.xHandle}</td>
-              <td><a href={c.tweetUrl} target="_blank">link</a></td>
-              <td>{c.wallet}</td>
-              <td>{c.riskScore}</td>
-              <td>{c.decision}</td>
-              <td>
-                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                  <button className="btn" type="button" onClick={() => runAction(c.id, 'approve')} disabled={!!busy}>{busy === `${c.id}:approve` ? 'Approving…' : 'Approve'}</button>
-                  <button className="btn" type="button" onClick={() => runAction(c.id, 'reject')} disabled={!!busy}>{busy === `${c.id}:reject` ? 'Rejecting…' : 'Reject'}</button>
-                  <button className="btn" type="button" onClick={() => runAction(c.id, 'ban')} disabled={!!busy}>{busy === `${c.id}:ban` ? 'Banning…' : 'Ban'}</button>
-                </div>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      {rows.length === 0 ? (
+        <div className="empty-state"><p>No claims in the queue.</p></div>
+      ) : (
+        <table className="table">
+          <thead>
+            <tr><th>ID</th><th>User</th><th>Tweet</th><th>Wallet</th><th>Risk</th><th>Status</th><th>Actions</th></tr>
+          </thead>
+          <tbody>
+            {rows.map((c) => (
+              <tr key={c.id}>
+                <td><span className="mono" title={c.id}>{shortId(c.id)}</span></td>
+                <td>{c.xHandle}</td>
+                <td><a href={c.tweetUrl} target="_blank" rel="noopener">View</a></td>
+                <td><span className="mono" title={c.wallet}>{shortWallet(c.wallet)}</span></td>
+                <td><span className="mono">{c.riskScore.toFixed(2)}</span></td>
+                <td><span className={`badge badge-${c.decision}`}>{c.decision}</span></td>
+                <td>
+                  <div style={{ display: 'flex', gap: 6 }}>
+                    <button className="btn btn-success btn-sm" type="button" onClick={() => runAction(c.id, 'approve')} disabled={!!busy}>{busy === `${c.id}:approve` ? '...' : 'Approve'}</button>
+                    <button className="btn btn-warn btn-sm" type="button" onClick={() => runAction(c.id, 'reject')} disabled={!!busy}>{busy === `${c.id}:reject` ? '...' : 'Reject'}</button>
+                    <button className="btn btn-danger btn-sm" type="button" onClick={() => runAction(c.id, 'ban')} disabled={!!busy}>{busy === `${c.id}:ban` ? '...' : 'Ban'}</button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
 
-      {error ? <p style={{ color: 'crimson' }}>Error: {error}</p> : null}
+      {error ? <p style={{ color: 'var(--danger)', marginTop: 12 }}>Error: {error}</p> : null}
     </>
   );
 }

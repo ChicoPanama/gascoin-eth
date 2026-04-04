@@ -48,15 +48,26 @@ export default async function Dashboard(){
   ]);
   return <>
     <Nav />
-    <h2>Treasury + Market Dashboard</h2>
+    <h2>Treasury + Market</h2>
     <div className="grid cards-4">
-      <div className="card"><div className="k">Treasury USD</div><div className="v">${treasury.treasuryUsd}</div></div>
+      <div className="card"><div className="k">Treasury</div><div className="v">${treasury.treasuryUsd}</div></div>
       <div className="card"><div className="k">SOL Balance</div><div className="v">{treasury.solBalance}</div></div>
       <div className="card"><div className="k">Market Cap</div><div className="v">${Number(market.marketCapUsd).toLocaleString()}</div></div>
       <div className="card"><div className="k">24h Volume</div><div className="v">${Number(market.volume24hUsd).toLocaleString()}</div></div>
     </div>
+    <div className="grid cards-4" style={{marginTop:16}}>
+      <div className="card"><div className="k">GASCOIN Price</div><div className="v">${market.gascoinPriceUsd}</div></div>
+      <div className="card"><div className="k">SOL Price</div><div className="v">${market.solPriceUsd}</div></div>
+      <div className="card"><div className="k">Data Source</div><div className="v" style={{fontSize:14}}>{market.source}</div></div>
+    </div>
     <h3>Global Gas Prices</h3>
-    <table className="table"><thead><tr><th>City</th><th>Country</th><th>Per Liter</th><th>Per Gallon (USD)</th></tr></thead>
-    <tbody>{gas.map((g:any)=><tr key={g.city}><td>{g.city}</td><td>{g.country}</td><td>{g.pricePerLiter}</td><td>{g.pricePerGallonUsd}</td></tr>)}</tbody></table>
+    {gas.length === 0 ? (
+      <div className="empty-state"><p>No gas price data available yet.</p></div>
+    ) : (
+      <table className="table">
+        <thead><tr><th>City</th><th>Country</th><th>Per Liter</th><th>Per Gallon (USD)</th></tr></thead>
+        <tbody>{gas.map((g:any)=><tr key={g.city}><td>{g.city}</td><td>{g.country}</td><td className="mono">{g.pricePerLiter}</td><td className="mono">{g.pricePerGallonUsd}</td></tr>)}</tbody>
+      </table>
+    )}
   </>;
 }
