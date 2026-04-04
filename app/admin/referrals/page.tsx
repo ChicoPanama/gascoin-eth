@@ -1,145 +1,164 @@
 import { redirect } from 'next/navigation';
+import Link from 'next/link';
 import { verifyAdminSession } from '../../actions/admin-auth';
 import { getSupabaseAdmin } from '../../../lib/supabase';
 import { getTreasuryBalances } from '../../../lib/integrations/solana';
 import { truncateWallet, formatSol, timeAgo } from '../../../lib/formatters';
-import { REFERRAL_CONFIG } from '../../../lib/referral-config';
+import { REFERRAL_CONFIG, SKIP_REASON_LABELS } from '../../../lib/referral-config';
 import { markReferralDispatched, skipReferralReward } from '../../actions/admin/referrals';
 
-export default async function ReferralsPage() {
+export default async function ReferralsPage(props: { searchParams: Promise<{ tab?: string }> }) {
   const session = await verifyAdminSession();
   if (!session.valid) redirect('/admin/login');
 
+  const searchParams = await props.searchParams;
+  const tab = searchParams.tab || 'DISPATCH';
+
   const supabase = getSupabaseAdmin();
 
+  const statusFilter = tab === 'DISPATCH' ? 'ready_for_dispatch'
+    : tab === 'PENDING' ? 'pending'
+    : tab === 'DISPATCHED' ? 'dispatched'
+    : tab === 'SKIPPED' ? 'skipped'
+    : undefined;
+
+  const query = supabase
+    .from('referral_conversions')
+    .select('id, referrer_wallet, referred_wallet, reward_sol, reward_status, reward_tx_signature, skip_reason, created_at, dispatched_at')
+    .order('created_at', { ascending: tab === 'DISPATCH' });
+
+  if (statusFilter) query.eq('reward_status', statusFilter);
+
   const [{ data: conversions }, treasury] = await Promise.all([
-    supabase
-      .from('referral_conversions')
-      .select('id, referrer_wallet, referred_wallet, reward_sol, reward_status, created_at, skip_reason')
-      .eq('reward_status', 'pending')
-      .order('created_at', { ascending: true })
-      .limit(100),
+    query.limit(100),
     getTreasuryBalances(),
   ]);
 
-  const totalPendingSol = (conversions ?? []).reduce(
-    (sum: number, c: any) => sum + (c.reward_sol ?? REFERRAL_CONFIG.REWARD_PER_CONVERSION_SOL),
-    0
-  );
+  const readyCount = (conversions || []).filter((c: any) => c.reward_status === 'ready_for_dispatch').length;
+  const totalPendingSol = (conversions || [])
+    .filter((c: any) => c.reward_status === 'ready_for_dispatch')
+    .reduce((s: number, c: any) => s + Number(c.reward_sol || 0), 0);
+
+  // Get counts for tabs
+  const { count: dispatchCount } = await supabase.from('referral_conversions').select('*', { count: 'exact', head: true }).eq('reward_status', 'ready_for_dispatch');
+  const { count: pendingCount } = await supabase.from('referral_conversions').select('*', { count: 'exact', head: true }).eq('reward_status', 'pending');
 
   return (
-    <div style={{ padding: '32px 40px' }}>
-      {/* Header */}
-      <div style={{ marginBottom: 32, borderBottom: '1px solid rgba(255,255,255,0.08)', paddingBottom: 24 }}>
-        <div style={{ fontFamily: 'IBM Plex Mono', fontSize: 10, color: 'rgba(255,255,255,0.3)', letterSpacing: '0.3em', textTransform: 'uppercase', marginBottom: 8 }}>
-          ADMIN / OPERATIONS
-        </div>
-        <div style={{ fontFamily: 'Bebas Neue', fontSize: 32, letterSpacing: '0.05em' }}>
-          REFERRAL REWARDS
-        </div>
-      </div>
+    <div>
+      <div className="admin-page-header">ADMIN / REFERRAL REWARDS</div>
+      <h1 className="admin-page-title">Referral Dispatch</h1>
 
-      {/* Treasury / stats strip */}
+      {/* Stats */}
       <div className="gc-stats" style={{ marginBottom: 32 }}>
-        <div className="gc-stats-grid" style={{ gridTemplateColumns: 'repeat(4, 1fr)' }}>
+        <div className="gc-stats-grid">
           <div className="gc-stat">
-            <div className="gc-stat-label">TREASURY SOL</div>
-            <div className="gc-stat-value">{treasury.solBalance.toFixed(3)}</div>
-            <div className="gc-stat-sub">${treasury.solUsd.toFixed(2)} USD</div>
+            <div className="gc-stat-label">Ready to Dispatch</div>
+            <div className="gc-stat-value" style={{ color: 'rgba(100,220,120,0.9)' }}>{dispatchCount ?? 0}</div>
           </div>
           <div className="gc-stat">
-            <div className="gc-stat-label">PENDING QUEUE</div>
-            <div className="gc-stat-value">{(conversions ?? []).length}</div>
-            <div className="gc-stat-sub">awaiting dispatch</div>
-          </div>
-          <div className="gc-stat">
-            <div className="gc-stat-label">PENDING SOL</div>
+            <div className="gc-stat-label">Pending SOL</div>
             <div className="gc-stat-value">{totalPendingSol.toFixed(4)}</div>
-            <div className="gc-stat-sub">total to dispatch</div>
+            <div className="gc-stat-sub">SOL to dispatch</div>
           </div>
           <div className="gc-stat">
-            <div className="gc-stat-label">REWARD RATE</div>
+            <div className="gc-stat-label">Treasury</div>
+            <div className="gc-stat-value">{treasury.solBalance.toFixed(2)}</div>
+            <div className="gc-stat-sub">SOL available</div>
+          </div>
+          <div className="gc-stat">
+            <div className="gc-stat-label">Reward Rate</div>
             <div className="gc-stat-value">{REFERRAL_CONFIG.REWARD_PER_CONVERSION_SOL}</div>
             <div className="gc-stat-sub">SOL per conversion</div>
           </div>
         </div>
       </div>
 
-      {/* Dispatch queue table */}
-      <div style={{ fontFamily: 'IBM Plex Mono', fontSize: 10, color: 'rgba(255,255,255,0.3)', letterSpacing: '0.3em', textTransform: 'uppercase', marginBottom: 16 }}>
-        DISPATCH QUEUE
+      {/* Tabs */}
+      <div style={{ display: 'flex', gap: 8, marginBottom: 24 }}>
+        {['DISPATCH', 'PENDING', 'DISPATCHED', 'SKIPPED', 'ALL'].map((t) => (
+          <Link key={t} href={`/admin/referrals?tab=${t}`}
+            className={`cf-filter-tab${tab === t ? ' cf-filter-tab--active' : ''}`}>
+            {t}{t === 'DISPATCH' && dispatchCount ? ` (${dispatchCount})` : ''}
+          </Link>
+        ))}
       </div>
 
-      <div className="lb-table-wrap" style={{ marginTop: 0 }}>
-        <table className="lb-table">
-          <thead>
-            <tr>
-              <th>REFERRER</th>
-              <th>REFERRED</th>
-              <th>REWARD SOL</th>
-              <th>STATUS</th>
-              <th>QUEUED</th>
-              <th>ACTIONS</th>
-            </tr>
-          </thead>
-          <tbody>
-            {!conversions || conversions.length === 0 ? (
-              <tr className="lb-table-row">
-                <td colSpan={6} style={{ padding: '32px 16px', fontFamily: 'IBM Plex Mono', fontSize: 12, color: 'rgba(255,255,255,0.25)', textAlign: 'center' }}>
-                  No pending referral rewards.
+      {/* Table */}
+      <table className="lb-table">
+        <thead>
+          <tr>
+            <th>Referrer</th>
+            <th>Referred</th>
+            <th>Reward</th>
+            <th>Status</th>
+            <th>When</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {(!conversions || conversions.length === 0) ? (
+            <tr><td colSpan={6} style={{ textAlign: 'center', padding: 48, color: 'rgba(255,255,255,0.3)', fontFamily: 'IBM Plex Mono', fontSize: 12 }}>
+              {tab === 'DISPATCH' ? 'No referral rewards ready for dispatch' : 'No conversions match this filter'}
+            </td></tr>
+          ) : conversions.map((c: any) => {
+            const canDispatch = c.reward_status === 'ready_for_dispatch';
+            const statusColors: Record<string, string> = {
+              ready_for_dispatch: 'rgba(100,220,120,0.9)',
+              pending: 'rgba(255,200,80,0.8)',
+              dispatched: 'rgba(100,180,255,0.9)',
+              skipped: 'rgba(255,80,80,0.7)',
+            };
+
+            return (
+              <tr key={c.id} className="lb-table-row">
+                <td className="lb-table-wallet">{truncateWallet(c.referrer_wallet)}</td>
+                <td className="lb-table-wallet">{truncateWallet(c.referred_wallet)}</td>
+                <td className="lb-table-sol">{c.reward_sol > 0 ? formatSol(c.reward_sol) : '—'}</td>
+                <td>
+                  <span style={{ fontFamily: 'IBM Plex Mono', fontSize: 9, fontWeight: 600, padding: '3px 8px', border: `1px solid ${statusColors[c.reward_status] || 'rgba(255,255,255,0.2)'}`, color: statusColors[c.reward_status] || 'rgba(255,255,255,0.4)' }}>
+                    {c.reward_status === 'ready_for_dispatch' ? 'READY' : c.reward_status.toUpperCase()}
+                  </span>
+                  {c.skip_reason && (
+                    <div style={{ fontFamily: 'IBM Plex Mono', fontSize: 9, color: 'rgba(255,255,255,0.25)', marginTop: 4 }}>
+                      {SKIP_REASON_LABELS[c.skip_reason] || c.skip_reason}
+                    </div>
+                  )}
+                </td>
+                <td className="lb-table-time">{timeAgo(c.created_at)}</td>
+                <td>
+                  {canDispatch && (
+                    <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
+                      <form action={async () => {
+                        'use server';
+                        await markReferralDispatched(c.id, `MANUAL_${Date.now()}`);
+                      }}>
+                        <button type="submit" className="sf-btn-solid" style={{ padding: '4px 12px', fontSize: 9 }}>
+                          APPROVE {formatSol(c.reward_sol)}
+                        </button>
+                      </form>
+                      <form action={async () => {
+                        'use server';
+                        await skipReferralReward(c.id, 'admin_skip');
+                      }}>
+                        <button type="submit" className="sf-btn-ghost" style={{ padding: '4px 12px', fontSize: 9 }}>SKIP</button>
+                      </form>
+                    </div>
+                  )}
+                  {c.reward_status === 'dispatched' && c.reward_tx_signature && (
+                    <a href={`https://solscan.io/tx/${c.reward_tx_signature}`} target="_blank" rel="noopener"
+                      style={{ fontFamily: 'IBM Plex Mono', fontSize: 9, color: 'rgba(255,255,255,0.4)' }}>
+                      View TX →
+                    </a>
+                  )}
                 </td>
               </tr>
-            ) : (
-              conversions.map((conv: any) => (
-                <tr key={conv.id} className="lb-table-row">
-                  <td className="lb-table-wallet">{truncateWallet(conv.referrer_wallet)}</td>
-                  <td className="lb-table-wallet">{truncateWallet(conv.referred_wallet)}</td>
-                  <td className="lb-table-sol">{formatSol(conv.reward_sol ?? REFERRAL_CONFIG.REWARD_PER_CONVERSION_SOL)}</td>
-                  <td className="lb-table-time">
-                    <span style={{ color: 'rgba(255,200,80,0.8)' }}>PENDING</span>
-                  </td>
-                  <td className="lb-table-time">{timeAgo(conv.created_at)}</td>
-                  <td className="lb-table-action">
-                    <form style={{ display: 'inline' }} action={async (fd: FormData) => {
-                      'use server';
-                      const txSig = fd.get('tx_sig') as string;
-                      if (txSig) await markReferralDispatched(conv.id, txSig);
-                    }}>
-                      <input
-                        type="text"
-                        name="tx_sig"
-                        placeholder="TX SIG"
-                        style={{
-                          fontFamily: 'IBM Plex Mono',
-                          fontSize: 10,
-                          background: 'transparent',
-                          border: '1px solid rgba(255,255,255,0.15)',
-                          color: 'rgba(255,255,255,0.6)',
-                          padding: '4px 8px',
-                          width: 160,
-                          marginRight: 6,
-                        }}
-                      />
-                      <button type="submit" className="sf-btn-ghost" style={{ padding: '6px 12px', fontSize: 10 }}>
-                        DISPATCH
-                      </button>
-                    </form>
-                    <form style={{ display: 'inline', marginLeft: 8 }} action={async (fd: FormData) => {
-                      'use server';
-                      const reason = fd.get('reason') as string;
-                      await skipReferralReward(conv.id, reason || 'admin_skip');
-                    }}>
-                      <input type="hidden" name="reason" value="admin_skip" />
-                      <button type="submit" className="sf-btn-ghost" style={{ padding: '6px 12px', fontSize: 10, color: 'rgba(255,80,80,0.7)', borderColor: 'rgba(255,80,80,0.3)' }}>
-                        SKIP
-                      </button>
-                    </form>
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
+            );
+          })}
+        </tbody>
+      </table>
+
+      <div style={{ marginTop: 24, fontFamily: 'IBM Plex Mono', fontSize: 10, color: 'rgba(255,255,255,0.2)' }}>
+        Pipeline: Referral click → referred user approved → worker verifies eligibility → ready_for_dispatch → admin approves → SOL dispatched
       </div>
     </div>
   );
