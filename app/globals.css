@@ -685,6 +685,168 @@ input:focus, textarea:focus, select:focus {
 .section { margin-top: 32px; }
 .empty-state { text-align: center; padding: 48px 24px; color: var(--muted); }
 
+/* ─── TECH SECTION ─── */
+.gc-tech {
+  padding: 100px 48px;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  background: #020202;
+}
+.gc-tech-inner { max-width: 900px; margin: 0 auto; }
+.gc-tech-header { margin-bottom: 64px; }
+.gc-tech-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(48px, 8vw, 80px);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  line-height: 0.92;
+  margin-bottom: 20px;
+}
+.gc-tech-title span { display: block; }
+.gc-tech-title-ghost { color: rgba(255,255,255,0.12); }
+.gc-tech-sub {
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-weight: 300;
+  font-size: 15px;
+  color: rgba(255,255,255,0.55);
+  line-height: 1.75;
+  max-width: 540px;
+}
+
+.gc-tech-pipeline { display: flex; flex-direction: column; gap: 0; }
+
+.gc-tech-layer {
+  display: flex;
+  gap: 24px;
+  padding: 32px;
+  border: 1px solid rgba(255,255,255,0.06);
+  position: relative;
+  transition: background 0.3s, border-color 0.3s;
+}
+.gc-tech-layer:hover {
+  background: rgba(255,255,255,0.02);
+  border-color: rgba(255,255,255,0.12);
+}
+.gc-tech-layer--ai {
+  border-color: rgba(255,255,255,0.15);
+  background: rgba(255,255,255,0.02);
+}
+.gc-tech-layer--ai:hover {
+  background: rgba(255,255,255,0.04);
+  border-color: rgba(255,255,255,0.25);
+}
+
+.gc-tech-layer-num {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 48px;
+  color: rgba(255,255,255,0.06);
+  line-height: 1;
+  min-width: 48px;
+}
+.gc-tech-layer:hover .gc-tech-layer-num { color: rgba(255,255,255,0.12); }
+
+.gc-tech-layer-icon {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255,255,255,0.25);
+  flex-shrink: 0;
+  margin-top: 4px;
+}
+.gc-tech-layer:hover .gc-tech-layer-icon { color: rgba(255,255,255,0.5); }
+
+.gc-tech-layer-content { flex: 1; min-width: 0; }
+
+.gc-tech-layer-title {
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-weight: 500;
+  font-size: 18px;
+  margin-bottom: 4px;
+}
+.gc-tech-layer-tag {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  color: rgba(255,255,255,0.3);
+  margin-bottom: 10px;
+}
+.gc-tech-layer-desc {
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-weight: 300;
+  font-size: 14px;
+  color: rgba(255,255,255,0.5);
+  line-height: 1.7;
+  margin-bottom: 12px;
+}
+.gc-tech-layer-catches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.gc-tech-catch {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.35);
+  border: 1px solid rgba(255,255,255,0.1);
+  padding: 3px 8px;
+}
+.gc-tech-layer:hover .gc-tech-catch {
+  border-color: rgba(255,255,255,0.2);
+  color: rgba(255,255,255,0.5);
+}
+
+.gc-tech-connector {
+  width: 1px;
+  height: 24px;
+  background: rgba(255,255,255,0.08);
+  margin-left: 56px;
+}
+
+.gc-tech-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1px;
+  background: rgba(255,255,255,0.06);
+  margin-top: 48px;
+}
+.gc-tech-stat {
+  background: #020202;
+  padding: 32px 24px;
+  text-align: center;
+}
+.gc-tech-stat-value {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 48px;
+  letter-spacing: 0.02em;
+  line-height: 1;
+  margin-bottom: 8px;
+}
+.gc-tech-stat-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.3);
+}
+
+.gc-tech-footer {
+  margin-top: 32px;
+  text-align: center;
+}
+
+@media (max-width: 900px) {
+  .gc-tech { padding: 60px 24px; }
+  .gc-tech-layer { flex-direction: column; gap: 12px; padding: 24px; }
+  .gc-tech-layer-num { font-size: 32px; }
+  .gc-tech-connector { margin-left: 24px; }
+  .gc-tech-stats { grid-template-columns: 1fr 1fr; }
+  .gc-tech-stat-value { font-size: 36px; }
+}
+
 /* ─── DOCS ─── */
 .docs-root { display: flex; min-height: 100vh; background: #000; color: #fff; }
 .docs-sidebar {

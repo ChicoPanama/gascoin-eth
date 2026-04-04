@@ -140,6 +140,151 @@ export default async function Home() {
           </div>
         </section>
 
+        {/* VERIFICATION TECH */}
+        <section className="gc-tech">
+          <div className="gc-tech-inner">
+            <div className="gc-tech-header">
+              <div className="gc-section-num">03 — The Technology</div>
+              <h2 className="gc-tech-title">
+                <span>4-Layer</span>
+                <span className="gc-tech-title-ghost">Fraud Detection</span>
+              </h2>
+              <p className="gc-tech-sub">
+                Every receipt passes through a multi-layer verification pipeline before
+                a single lamport leaves the treasury. AI vision, cryptographic hashing,
+                device forensics, and on-chain validation — running in under 8 seconds.
+              </p>
+            </div>
+
+            <div className="gc-tech-pipeline">
+              {/* Layer 1 */}
+              <div className="gc-tech-layer">
+                <div className="gc-tech-layer-num">01</div>
+                <div className="gc-tech-layer-icon">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                    <path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>
+                  </svg>
+                </div>
+                <div className="gc-tech-layer-content">
+                  <div className="gc-tech-layer-title">EXIF Forensics</div>
+                  <div className="gc-tech-layer-tag">FREE · INSTANT</div>
+                  <p className="gc-tech-layer-desc">
+                    Camera model, GPS coordinates, timestamps, editing software signatures.
+                    Real phone photos leave a forensic trail. AI images and screenshots don&apos;t.
+                  </p>
+                  <div className="gc-tech-layer-catches">
+                    <span className="gc-tech-catch">Screenshots</span>
+                    <span className="gc-tech-catch">AI Images</span>
+                    <span className="gc-tech-catch">Photoshop</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Connector */}
+              <div className="gc-tech-connector" />
+
+              {/* Layer 2 */}
+              <div className="gc-tech-layer">
+                <div className="gc-tech-layer-num">02</div>
+                <div className="gc-tech-layer-icon">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                    <rect x="3" y="3" width="18" height="18" rx="0"/><path d="M3 9h18"/><path d="M9 3v18"/>
+                  </svg>
+                </div>
+                <div className="gc-tech-layer-content">
+                  <div className="gc-tech-layer-title">Dimensional Analysis</div>
+                  <div className="gc-tech-layer-tag">FREE · INSTANT</div>
+                  <p className="gc-tech-layer-desc">
+                    Real phone photos are 3000-5000px. AI images are 1024x1024.
+                    Screenshots match exact screen resolutions. Pixel dimensions don&apos;t lie.
+                  </p>
+                  <div className="gc-tech-layer-catches">
+                    <span className="gc-tech-catch">DALL·E</span>
+                    <span className="gc-tech-catch">Midjourney</span>
+                    <span className="gc-tech-catch">Screen Grabs</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="gc-tech-connector" />
+
+              {/* Layer 3 */}
+              <div className="gc-tech-layer">
+                <div className="gc-tech-layer-num">03</div>
+                <div className="gc-tech-layer-icon">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                    <path d="M4 4h16v16H4z"/><path d="M4 4l16 16"/><path d="M20 4L4 20"/>
+                  </svg>
+                </div>
+                <div className="gc-tech-layer-content">
+                  <div className="gc-tech-layer-title">Perceptual Hashing</div>
+                  <div className="gc-tech-layer-tag">FREE · LOCAL</div>
+                  <p className="gc-tech-layer-desc">
+                    dHash fingerprint computed locally. Two photos of the same receipt
+                    from different angles produce similar hashes. SHA-256 catches exact duplicates.
+                  </p>
+                  <div className="gc-tech-layer-catches">
+                    <span className="gc-tech-catch">Receipt Reuse</span>
+                    <span className="gc-tech-catch">Angle Tricks</span>
+                    <span className="gc-tech-catch">Re-uploads</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="gc-tech-connector" />
+
+              {/* Layer 4 */}
+              <div className="gc-tech-layer gc-tech-layer--ai">
+                <div className="gc-tech-layer-num">04</div>
+                <div className="gc-tech-layer-icon">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                    <circle cx="12" cy="12" r="3"/><path d="M12 2v4"/><path d="M12 18v4"/><path d="M4.93 4.93l2.83 2.83"/><path d="M16.24 16.24l2.83 2.83"/><path d="M2 12h4"/><path d="M18 12h4"/><path d="M4.93 19.07l2.83-2.83"/><path d="M16.24 7.76l2.83-2.83"/>
+                  </svg>
+                </div>
+                <div className="gc-tech-layer-content">
+                  <div className="gc-tech-layer-title">AI Vision Extraction</div>
+                  <div className="gc-tech-layer-tag">GEMINI FLASH · {'<'}0.3¢</div>
+                  <p className="gc-tech-layer-desc">
+                    One API call extracts station name, city, date, total, and wallet address.
+                    Simultaneously scores 5 fraud signals: physical receipt, gas station,
+                    manipulation, handwriting, and wallet presence.
+                  </p>
+                  <div className="gc-tech-layer-catches">
+                    <span className="gc-tech-catch">Fake Receipts</span>
+                    <span className="gc-tech-catch">Digital Edits</span>
+                    <span className="gc-tech-catch">Non-Gas</span>
+                    <span className="gc-tech-catch">Missing Wallet</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Bottom stats */}
+            <div className="gc-tech-stats">
+              <div className="gc-tech-stat">
+                <div className="gc-tech-stat-value">{'<'}8s</div>
+                <div className="gc-tech-stat-label">Total Processing</div>
+              </div>
+              <div className="gc-tech-stat">
+                <div className="gc-tech-stat-value">3,300</div>
+                <div className="gc-tech-stat-label">Receipts Per Dollar</div>
+              </div>
+              <div className="gc-tech-stat">
+                <div className="gc-tech-stat-value">4</div>
+                <div className="gc-tech-stat-label">Detection Layers</div>
+              </div>
+              <div className="gc-tech-stat">
+                <div className="gc-tech-stat-value">0</div>
+                <div className="gc-tech-stat-label">Trusted Inputs</div>
+              </div>
+            </div>
+
+            <div className="gc-tech-footer">
+              <Link href="/gates" className="gc-teaser-link">See all 10 verification gates</Link>
+            </div>
+          </div>
+        </section>
+
         {/* LEADERBOARD TEASER */}
         <LeaderboardTeaser />
 
