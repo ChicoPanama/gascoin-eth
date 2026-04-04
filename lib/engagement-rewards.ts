@@ -16,27 +16,27 @@ export const ENGAGEMENT_REWARDS_CONFIG = {
   LEADERBOARD_MULTIPLIER_ENABLED: true,  // Rank-based refund multiplier always on
 
   // ─── Points earning rates ───
-  // Modeled after X: quality engagement (retweets, quotes) worth more than passive (impressions)
-  POINTS_PER_IMPRESSION: 0.1,        // 1000 impressions = 100 points
-  POINTS_PER_LIKE: 10,               // Direct engagement signal
-  POINTS_PER_RETWEET: 50,            // Amplification — high value for virality
-  POINTS_PER_QUOTE_TWEET: 75,        // Original content + amplification — highest
-  POINTS_PER_REPLY: 25,              // Conversation starter
+  // Aggressive rates — virality is the goal, make it worth chasing
+  POINTS_PER_IMPRESSION: 1,           // 1000 impressions = 1,000 points
+  POINTS_PER_LIKE: 50,               // Every like matters
+  POINTS_PER_RETWEET: 250,           // Amplification is gold — 5x a like
+  POINTS_PER_QUOTE_TWEET: 500,       // Original content + amplification — the holy grail
+  POINTS_PER_REPLY: 100,             // Conversation drives algorithm visibility
 
   // ─── Streak bonuses ───
-  POINTS_PER_STREAK_DAY: 50,         // Bonus per consecutive 30-day submission window
-  MAX_STREAK_MULTIPLIER: 3,          // Cap at 3x streak bonus (3 consecutive windows)
+  POINTS_PER_STREAK_DAY: 500,        // Significant bonus for consistency
+  MAX_STREAK_MULTIPLIER: 5,          // Up to 5 consecutive windows = 2,500 bonus
 
   // ─── Submission bonus ───
-  POINTS_PER_APPROVED_SUBMISSION: 200, // Base points for getting a receipt approved
+  POINTS_PER_APPROVED_SUBMISSION: 1000, // Big reward for actually submitting
 
   // ─── Referral bonus (on top of SOL reward) ───
-  POINTS_PER_REFERRAL_CONVERSION: 100,
+  POINTS_PER_REFERRAL_CONVERSION: 500, // Referrals compound — points + SOL
 
   // ─── Points → SOL conversion ───
-  POINTS_TO_SOL_RATE: 10000,         // 10,000 points = 0.01 SOL
-  MIN_POINTS_FOR_PAYOUT: 5000,       // Minimum to request payout (prevents dust)
-  MAX_WEEKLY_PAYOUT_SOL: 0.05,       // Cap per wallet per week
+  POINTS_TO_SOL_RATE: 5000,          // 5,000 points = 0.01 SOL (2x more generous)
+  MIN_POINTS_FOR_PAYOUT: 2500,       // Lower threshold — easier to hit first payout
+  MAX_WEEKLY_PAYOUT_SOL: 0.15,       // 3x higher cap — real money for real virality
   PAYOUT_CYCLE: 'weekly' as const,   // Weekly settlement
 
   // ─── Leaderboard rank multiplier (Option A) ───
