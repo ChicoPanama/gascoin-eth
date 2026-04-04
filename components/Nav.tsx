@@ -14,10 +14,10 @@ export function Nav() {
     <Link href="/leaderboard">Leaderboard</Link>
     <Link href="/dashboard">Treasury</Link>
     <Link href="/admin">Admin</Link>
-    <Link href="/docs" style={{ marginLeft: 'auto' }}>Docs</Link>
-    <span style={{ display: 'flex', gap: 8, alignItems: 'center', marginLeft: 16 }}>
+    <span style={{ marginLeft: 'auto', display: 'flex', gap: 8, alignItems: 'center' }}>
       <WalletButton />
       <AuthNavButton />
+      <Link href="/docs" className="btn" style={{ fontSize: 10, padding: '6px 14px', letterSpacing: '0.1em' }}>DOCS</Link>
     </span>
   </nav>
 }
