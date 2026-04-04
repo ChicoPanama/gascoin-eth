@@ -1,0 +1,264 @@
+-- GASCOIN platform schema (Supabase/Postgres)
+create table if not exists users (
+  id uuid primary key default gen_random_uuid(),
+  x_user_id text unique not null,
+  x_handle text not null,
+  x_verified boolean not null default false,
+  trust_score numeric not null default 0,
+  created_at timestamptz not null default now()
+);
+
+create table if not exists wallet_links (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references users(id) on delete cascade,
+  wallet text not null,
+  is_primary boolean not null default true,
+  verified_at timestamptz,
+  unique(user_id, wallet)
+);
+
+create table if not exists claims (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references users(id) on delete cascade,
+  wallet text not null,
+  tweet_url text not null,
+  nonce text not null,
+  status text not null default 'submitted',
+  claimed_amount numeric,
+  parsed_amount numeric,
+  claim_currency text default 'USD',
+  risk_score numeric,
+  decision_reason text,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create table if not exists claim_receipts (
+  id uuid primary key default gen_random_uuid(),
+  claim_id uuid not null references claims(id) on delete cascade,
+  storage_path_private text not null,
+  hash_sha256 text not null,
+  phash text,
+  ocr_text text,
+  ocr_confidence numeric,
+  ai_score numeric,
+  tamper_score numeric,
+  metadata_json jsonb,
+  created_at timestamptz not null default now()
+);
+
+create unique index if not exists claim_receipts_hash_sha256_uq on claim_receipts(hash_sha256);
+create index if not exists claim_receipts_phash_idx on claim_receipts(phash);
+
+create table if not exists gate_results (
+  id uuid primary key default gen_random_uuid(),
+  claim_id uuid not null references claims(id) on delete cascade,
+  gate_name text not null,
+  passed boolean not null,
+  score numeric,
+  reason_code text,
+  created_at timestamptz not null default now()
+);
+
+create table if not exists payouts (
+  id uuid primary key default gen_random_uuid(),
+  claim_id uuid not null references claims(id) on delete cascade,
+  wallet text not null,
+  amount_sol numeric not null,
+  tx_hash text,
+  status text not null default 'queued',
+  sent_at timestamptz,
+  fail_reason text,
+  created_at timestamptz not null default now()
+);
+
+create unique index if not exists payouts_paid_claim_uq on payouts(claim_id) where status = 'paid';
+
+create table if not exists payout_jobs (
+  id uuid primary key default gen_random_uuid(),
+  claim_id uuid not null references claims(id) on delete cascade,
+  wallet text not null,
+  amount_sol numeric not null,
+  status text not null default 'queued',
+  attempts int not null default 0,
+  max_attempts int not null default 5,
+  next_retry_at timestamptz not null default now(),
+  last_error text,
+  idempotency_key text,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  unique(claim_id)
+);
+
+create table if not exists idempotency_keys (
+  id bigserial primary key,
+  key text not null,
+  scope text not null,
+  request_hash text,
+  status text not null default 'processing',
+  response_json jsonb,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  unique(key, scope)
+);
+
+create table if not exists treasury_snapshots (
+  id bigserial primary key,
+  wallet text not null,
+  sol_balance numeric not null,
+  usd_value numeric not null,
+  gascoin_balance numeric,
+  gascoin_usd_value numeric,
+  ts timestamptz not null default now()
+);
+
+create table if not exists market_snapshots (
+  id bigserial primary key,
+  gascoin_price_usd numeric not null,
+  market_cap_usd numeric not null,
+  volume_24h_usd numeric not null,
+  source text not null,
+  ts timestamptz not null default now()
+);
+
+create table if not exists audit_logs (
+  id bigserial primary key,
+  actor_type text not null,
+  actor_id text,
+  action text not null,
+  target_type text,
+  target_id text,
+  payload_json jsonb,
+  ts timestamptz not null default now()
+);
+
+create table if not exists claim_status_events (
+  id bigserial primary key,
+  claim_id uuid not null references claims(id) on delete cascade,
+  from_status text,
+  to_status text not null,
+  actor_type text not null,
+  actor_id text,
+  reason text,
+  ts timestamptz not null default now()
+);
+
+create table if not exists user_bans (
+  id bigserial primary key,
+  user_id uuid not null references users(id) on delete cascade,
+  reason text not null,
+  active boolean not null default true,
+  created_by text,
+  created_at timestamptz not null default now()
+);
+
+create unique index if not exists user_bans_active_uq on user_bans(user_id) where active = true;
+
+-- Immutable audit log guardrails
+create or replace function prevent_audit_log_mutation()
+returns trigger
+language plpgsql
+as $$
+begin
+  raise exception 'audit_logs are immutable';
+end;
+$$;
+
+drop trigger if exists trg_prevent_audit_log_update on audit_logs;
+create trigger trg_prevent_audit_log_update
+before update on audit_logs
+for each row
+execute function prevent_audit_log_mutation();
+
+drop trigger if exists trg_prevent_audit_log_delete on audit_logs;
+create trigger trg_prevent_audit_log_delete
+before delete on audit_logs
+for each row
+execute function prevent_audit_log_mutation();
+
+create table if not exists gas_city_prices (
+  id bigserial primary key,
+  city text not null,
+  country text not null,
+  currency text not null,
+  price_per_liter numeric not null,
+  price_per_gallon_usd numeric not null,
+  source text not null,
+  ts timestamptz not null default now()
+);
+
+-- -----------------------------
+-- Row-Level Security hardening
+-- -----------------------------
+alter table if exists users enable row level security;
+alter table if exists wallet_links enable row level security;
+alter table if exists claims enable row level security;
+alter table if exists claim_receipts enable row level security;
+alter table if exists gate_results enable row level security;
+alter table if exists payouts enable row level security;
+alter table if exists treasury_snapshots enable row level security;
+alter table if exists market_snapshots enable row level security;
+alter table if exists audit_logs enable row level security;
+alter table if exists claim_status_events enable row level security;
+alter table if exists user_bans enable row level security;
+alter table if exists gas_city_prices enable row level security;
+alter table if exists payout_jobs enable row level security;
+alter table if exists idempotency_keys enable row level security;
+
+-- No permissive row policies are created here intentionally.
+-- Service-role access is used by backend APIs.
+
+-- Public-safe read view for community feed
+create or replace view public_claims_feed as
+select
+  p.id as payout_id,
+  c.id as claim_id,
+  u.x_handle,
+  c.tweet_url,
+  p.amount_sol,
+  p.tx_hash,
+  p.status,
+  p.created_at
+from payouts p
+join claims c on c.id = p.claim_id
+join users u on u.id = c.user_id;
+
+grant select on public_claims_feed to anon, authenticated;
+
+-- -----------------------------
+-- Storage hardening
+-- -----------------------------
+insert into storage.buckets (id, name, public)
+values ('receipts-private', 'receipts-private', false)
+on conflict (id) do nothing;
+
+-- Deny-by-default for client roles (service role bypasses RLS)
+drop policy if exists "deny_anon_receipts_private" on storage.objects;
+create policy "deny_anon_receipts_private"
+on storage.objects
+for all
+to anon, authenticated
+using (bucket_id <> 'receipts-private')
+with check (bucket_id <> 'receipts-private');
+
+-- Immutable claim status history guardrails
+create or replace function prevent_claim_status_mutation()
+returns trigger
+language plpgsql
+as $$
+begin
+  raise exception 'claim_status_events are immutable';
+end;
+$$;
+
+drop trigger if exists trg_prevent_claim_status_update on claim_status_events;
+create trigger trg_prevent_claim_status_update
+before update on claim_status_events
+for each row
+execute function prevent_claim_status_mutation();
+
+drop trigger if exists trg_prevent_claim_status_delete on claim_status_events;
+create trigger trg_prevent_claim_status_delete
+before delete on claim_status_events
+for each row
+execute function prevent_claim_status_mutation();

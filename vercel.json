@@ -1,0 +1,8 @@
+{
+  "crons": [
+    {
+      "path": "/api/workers/process-claims",
+      "schedule": "*/5 * * * *"
+    }
+  ]
+}
