@@ -16,7 +16,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
     <PrivyProvider
       appId={appId}
       config={{
-        loginMethods: ['twitter', 'wallet'],
+        loginMethods: ['twitter'],
         appearance: { theme: 'dark' }
       }}
     >

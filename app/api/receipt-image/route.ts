@@ -21,7 +21,8 @@ export async function GET(req: Request) {
       .maybeSingle();
 
     const claimStatus = (receipt as any)?.claims?.status;
-    if (!receipt || (claimStatus !== 'approved' && claimStatus !== 'paid')) {
+    const viewableStatuses = ['ready_for_dispatch', 'needs_review', 'approved', 'paid', 'rejected'];
+    if (!receipt || !viewableStatuses.includes(claimStatus)) {
       return NextResponse.json({ error: 'Not found' }, { status: 404 });
     }
 

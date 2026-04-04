@@ -22,7 +22,7 @@ export async function POST(req: Request) {
 
   const nowIso = new Date().toISOString();
 
-  // Normalize newly submitted claims to explicit auto_review stage when needed.
+  // Normalize newly submitted claims to explicit auto_review stage
   const { data: submitted, error: submittedErr } = await supabase
     .from('claims')
     .select('id,status')
@@ -47,41 +47,8 @@ export async function POST(req: Request) {
     transitioned += 1;
   }
 
-  // Process due payout retries.
-  // Also enqueue approved claims that do not yet have payout jobs.
-  const { data: approvedClaims } = await supabase
-    .from('claims')
-    .select('id,wallet,parsed_amount')
-    .eq('status', 'approved')
-    .limit(50);
-
-  const { data: existingJobs } = await supabase
-    .from('payout_jobs')
-    .select('claim_id')
-    .limit(5000);
-
-  const jobClaimIds = new Set((existingJobs || []).map((j: any) => j.claim_id));
-  const approvedNoJob = (approvedClaims || []).filter((a: any) => !jobClaimIds.has(a.id));
-
-  for (const a of approvedNoJob || []) {
-    const amountUsd = Number(a.parsed_amount || 0);
-    const amountSol = Math.max(0.001, +(amountUsd / 200).toFixed(6));
-    await supabase.from('payout_jobs').insert({
-      claim_id: a.id,
-      wallet: a.wallet,
-      amount_sol: amountSol,
-      status: 'queued'
-    });
-    await supabase.from('audit_logs').insert({
-      actor_type: 'system',
-      actor_id: 'claims_worker',
-      action: 'payout_job_enqueued',
-      target_type: 'claim',
-      target_id: a.id,
-      payload_json: { amountSol, source: 'approved_claim' }
-    });
-  }
-
+  // Process ONLY admin-created payout jobs (no auto-enqueue)
+  // Payout jobs are created exclusively by admin via approveSubmission()
   const { data: jobs, error: jobsErr } = await supabase
     .from('payout_jobs')
     .select('id,claim_id,wallet,amount_sol,attempts,max_attempts,status,next_retry_at')
@@ -111,6 +78,5 @@ export async function POST(req: Request) {
       nextRetryAt: j.next_retry_at
     })),
     payoutProcessing: results,
-    enqueuedApprovedClaims: (approvedNoJob || []).length
   });
 }

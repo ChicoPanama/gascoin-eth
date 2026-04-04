@@ -2,195 +2,231 @@ import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { verifyAdminSession } from '../../actions/admin-auth';
 import { getSupabaseAdmin } from '../../../lib/supabase';
-import { truncateWallet, timeAgo } from '../../../lib/formatters';
+import { truncateWallet, timeAgo, formatSol } from '../../../lib/formatters';
+import { approveSubmission, rejectSubmission } from '../../actions/admin/submissions';
 
-const ALL_STATUSES = ['submitted', 'auto_review', 'needs_manual_review', 'approved', 'rejected'] as const;
-type ClaimStatus = typeof ALL_STATUSES[number];
-
-const STATUS_LABELS: Record<ClaimStatus, string> = {
+const STATUS_LABELS: Record<string, string> = {
   submitted: 'SUBMITTED',
   auto_review: 'AUTO REVIEW',
-  needs_manual_review: 'MANUAL REVIEW',
-  approved: 'APPROVED',
+  ready_for_dispatch: 'READY',
+  needs_review: 'NEEDS REVIEW',
+  approved: 'DISPATCHED',
   rejected: 'REJECTED',
+  paid: 'PAID',
 };
 
-const FILTER_MAP: Record<string, ClaimStatus[]> = {
-  ALL: [...ALL_STATUSES],
-  PENDING: ['submitted', 'auto_review', 'needs_manual_review'],
-  APPROVED: ['approved'],
+const FILTER_MAP: Record<string, string[]> = {
+  DISPATCH: ['ready_for_dispatch'],
+  REVIEW: ['needs_review'],
+  DISPATCHED: ['approved', 'paid'],
   REJECTED: ['rejected'],
+  ALL: ['submitted', 'auto_review', 'ready_for_dispatch', 'needs_review', 'approved', 'rejected', 'paid'],
 };
 
-function statusStyle(status: ClaimStatus): React.CSSProperties {
-  const colors: Record<ClaimStatus, string> = {
+function statusColor(status: string): string {
+  const map: Record<string, string> = {
     submitted: 'rgba(255,255,255,0.4)',
     auto_review: 'rgba(255,200,80,0.8)',
-    needs_manual_review: 'rgba(255,120,60,0.9)',
-    approved: 'rgba(100,220,120,0.9)',
+    ready_for_dispatch: 'rgba(100,220,120,0.9)',
+    needs_review: 'rgba(255,120,60,0.9)',
+    approved: 'rgba(100,180,255,0.9)',
     rejected: 'rgba(255,80,80,0.8)',
+    paid: 'rgba(100,220,120,0.9)',
   };
-  return { color: colors[status] };
+  return map[status] || 'rgba(255,255,255,0.4)';
 }
 
-export default async function SubmissionsPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ filter?: string }>;
-}) {
+function riskColor(score: number): string {
+  if (score >= 0.7) return 'rgba(100,220,120,0.9)';
+  if (score >= 0.5) return 'rgba(255,200,80,0.9)';
+  return 'rgba(255,80,80,0.9)';
+}
+
+export default async function SubmissionsPage(props: { searchParams: Promise<{ filter?: string }> }) {
   const session = await verifyAdminSession();
   if (!session.valid) redirect('/admin/login');
 
-  const params = await searchParams;
-  const filter = (params.filter || 'ALL').toUpperCase();
-  const activeFilter = FILTER_MAP[filter] ? filter : 'ALL';
-  const statuses = FILTER_MAP[activeFilter];
+  const searchParams = await props.searchParams;
+  const activeFilter = searchParams.filter || 'DISPATCH';
+  const statuses = FILTER_MAP[activeFilter] || FILTER_MAP.ALL;
 
   const supabase = getSupabaseAdmin();
 
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const todayIso = today.toISOString();
+  // Get claims with receipts and gate results
+  const { data: claims } = await supabase
+    .from('claims')
+    .select(`
+      id, created_at, wallet, status, risk_score, parsed_amount, claimed_amount, decision_reason,
+      users(x_handle),
+      claim_receipts(storage_path_private, ai_score, tamper_score, ocr_confidence, metadata_json),
+      gate_results(gate_name, passed, score, reason_code)
+    `)
+    .in('status', statuses)
+    .order('created_at', { ascending: false })
+    .limit(100);
 
-  const [{ data: claims }, { count: pendingCount }, { count: approvedToday }, { count: rejectedToday }] =
-    await Promise.all([
-      supabase
-        .from('claims')
-        .select('id, created_at, wallet, status, gate_results(count)')
-        .in('status', statuses)
-        .order('created_at', { ascending: false })
-        .limit(200),
-      supabase
-        .from('claims')
-        .select('*', { count: 'exact', head: true })
-        .in('status', ['submitted', 'auto_review', 'needs_manual_review']),
-      supabase
-        .from('claims')
-        .select('*', { count: 'exact', head: true })
-        .eq('status', 'approved')
-        .gte('updated_at', todayIso),
-      supabase
-        .from('claims')
-        .select('*', { count: 'exact', head: true })
-        .eq('status', 'rejected')
-        .gte('updated_at', todayIso),
-    ]);
+  // Count ready for dispatch
+  const { count: readyCount } = await supabase
+    .from('claims')
+    .select('*', { count: 'exact', head: true })
+    .eq('status', 'ready_for_dispatch');
 
-  const TABS = ['ALL', 'PENDING', 'APPROVED', 'REJECTED'];
+  const { count: reviewCount } = await supabase
+    .from('claims')
+    .select('*', { count: 'exact', head: true })
+    .eq('status', 'needs_review');
 
   return (
-    <div style={{ padding: '32px 40px' }}>
-      {/* Header */}
-      <div style={{ marginBottom: 32, borderBottom: '1px solid rgba(255,255,255,0.08)', paddingBottom: 24 }}>
-        <div style={{ fontFamily: 'IBM Plex Mono', fontSize: 10, color: 'rgba(255,255,255,0.3)', letterSpacing: '0.3em', textTransform: 'uppercase', marginBottom: 8 }}>
-          ADMIN / OPERATIONS
-        </div>
-        <div style={{ fontFamily: 'Bebas Neue', fontSize: 32, letterSpacing: '0.05em' }}>
-          SUBMISSIONS
-        </div>
-      </div>
+    <div>
+      <div className="admin-page-header">ADMIN / SUBMISSIONS</div>
+      <h1 className="admin-page-title">Dispatch Queue</h1>
 
-      {/* Stats strip */}
+      {/* Stats */}
       <div className="gc-stats" style={{ marginBottom: 32 }}>
-        <div className="gc-stats-grid" style={{ gridTemplateColumns: 'repeat(3, 1fr)' }}>
+        <div className="gc-stats-grid">
           <div className="gc-stat">
-            <div className="gc-stat-label">PENDING REVIEW</div>
-            <div className="gc-stat-value">{pendingCount ?? 0}</div>
-            <div className="gc-stat-sub">awaiting decision</div>
+            <div className="gc-stat-label">Ready for Dispatch</div>
+            <div className="gc-stat-value" style={{ color: 'rgba(100,220,120,0.9)' }}>{readyCount ?? 0}</div>
           </div>
           <div className="gc-stat">
-            <div className="gc-stat-label">APPROVED TODAY</div>
-            <div className="gc-stat-value" style={{ color: 'rgba(100,220,120,0.9)' }}>{approvedToday ?? 0}</div>
-            <div className="gc-stat-sub">since midnight UTC</div>
+            <div className="gc-stat-label">Needs Review</div>
+            <div className="gc-stat-value" style={{ color: 'rgba(255,120,60,0.9)' }}>{reviewCount ?? 0}</div>
           </div>
           <div className="gc-stat">
-            <div className="gc-stat-label">REJECTED TODAY</div>
-            <div className="gc-stat-value" style={{ color: 'rgba(255,80,80,0.8)' }}>{rejectedToday ?? 0}</div>
-            <div className="gc-stat-sub">since midnight UTC</div>
+            <div className="gc-stat-label">Showing</div>
+            <div className="gc-stat-value">{(claims || []).length}</div>
+          </div>
+          <div className="gc-stat">
+            <div className="gc-stat-label">Filter</div>
+            <div className="gc-stat-value" style={{ fontSize: 20 }}>{activeFilter}</div>
           </div>
         </div>
       </div>
 
       {/* Filter tabs */}
-      <div style={{ display: 'flex', gap: 0, marginBottom: 24, borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
-        {TABS.map((tab) => (
+      <div style={{ display: 'flex', gap: 8, marginBottom: 24 }}>
+        {Object.keys(FILTER_MAP).map((f) => (
           <Link
-            key={tab}
-            href={`/admin/submissions?filter=${tab}`}
-            style={{
-              fontFamily: 'IBM Plex Mono',
-              fontSize: 11,
-              letterSpacing: '0.2em',
-              textTransform: 'uppercase',
-              padding: '12px 24px',
-              color: activeFilter === tab ? 'var(--fg)' : 'rgba(255,255,255,0.35)',
-              borderBottom: activeFilter === tab ? '2px solid var(--fg)' : '2px solid transparent',
-              textDecoration: 'none',
-              transition: 'color 0.2s',
-            }}
+            key={f}
+            href={`/admin/submissions?filter=${f}`}
+            className={`cf-filter-tab${activeFilter === f ? ' cf-filter-tab--active' : ''}`}
           >
-            {tab}
+            {f}
           </Link>
         ))}
       </div>
 
       {/* Table */}
-      <div className="lb-table-wrap" style={{ marginTop: 0 }}>
-        <table className="lb-table">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>SUBMITTED</th>
-              <th>WALLET</th>
-              <th>STATUS</th>
-              <th>GATES</th>
-              <th>ACTIONS</th>
-            </tr>
-          </thead>
-          <tbody>
-            {!claims || claims.length === 0 ? (
-              <tr className="lb-table-row">
-                <td colSpan={6} style={{ padding: '32px 16px', fontFamily: 'IBM Plex Mono', fontSize: 12, color: 'rgba(255,255,255,0.25)', textAlign: 'center' }}>
-                  No submissions found.
+      <table className="lb-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Submitted</th>
+            <th>Wallet</th>
+            <th>X Handle</th>
+            <th>Status</th>
+            <th>Risk</th>
+            <th>Auth Score</th>
+            <th>Gates</th>
+            <th>SOL</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {(claims || []).map((c: any) => {
+            const receipt = c.claim_receipts?.[0];
+            const meta = receipt?.metadata_json || {};
+            const gatesPassed = (c.gate_results || []).filter((g: any) => g.passed).length;
+            const gatesTotal = (c.gate_results || []).length;
+            const authScore = meta.authenticityScore;
+            const fraudRisk = meta.fraudRisk;
+            const recommendedSol = Math.max(0.001, +(Number(c.parsed_amount || 0) / 200).toFixed(6));
+            const canDispatch = ['ready_for_dispatch', 'needs_review'].includes(c.status);
+
+            return (
+              <tr key={c.id} className="lb-table-row">
+                <td style={{ fontFamily: 'IBM Plex Mono', fontSize: 9, color: 'rgba(255,255,255,0.3)' }}>
+                  {c.id.slice(0, 8)}
+                </td>
+                <td className="lb-table-time">{timeAgo(c.created_at)}</td>
+                <td className="lb-table-wallet">{truncateWallet(c.wallet)}</td>
+                <td className="lb-table-claims">{c.users?.x_handle || '—'}</td>
+                <td>
+                  <span style={{
+                    fontFamily: 'IBM Plex Mono', fontSize: 9, fontWeight: 600,
+                    padding: '3px 8px', border: `1px solid ${statusColor(c.status)}`,
+                    color: statusColor(c.status),
+                  }}>
+                    {STATUS_LABELS[c.status] || c.status}
+                  </span>
+                </td>
+                <td style={{ fontFamily: 'IBM Plex Mono', fontSize: 11, color: 'rgba(255,255,255,0.4)' }}>
+                  {Number(c.risk_score || 0).toFixed(2)}
+                </td>
+                <td>
+                  {authScore != null ? (
+                    <span style={{ fontFamily: 'IBM Plex Mono', fontSize: 11, color: riskColor(authScore) }}>
+                      {(authScore * 100).toFixed(0)}%
+                    </span>
+                  ) : '—'}
+                  {fraudRisk && (
+                    <span style={{ fontFamily: 'IBM Plex Mono', fontSize: 9, color: 'rgba(255,255,255,0.3)', marginLeft: 4 }}>
+                      {fraudRisk}
+                    </span>
+                  )}
+                </td>
+                <td style={{ fontFamily: 'IBM Plex Mono', fontSize: 11 }}>
+                  {gatesTotal > 0 ? `${gatesPassed}/${gatesTotal}` : '—'}
+                </td>
+                <td style={{ fontFamily: 'IBM Plex Mono', fontSize: 11 }}>
+                  {c.parsed_amount ? `$${Number(c.parsed_amount).toFixed(2)}` : '—'}
+                </td>
+                <td>
+                  {canDispatch && (
+                    <form action={async () => {
+                      'use server';
+                      await approveSubmission(c.id, recommendedSol, 'admin_dispatch');
+                    }}>
+                      <button type="submit" className="sf-btn-solid" style={{ padding: '4px 12px', fontSize: 9 }}>
+                        APPROVE {formatSol(recommendedSol)}
+                      </button>
+                    </form>
+                  )}
+                  {canDispatch && (
+                    <form action={async () => {
+                      'use server';
+                      await rejectSubmission(c.id, 'admin_rejected');
+                    }} style={{ marginTop: 4 }}>
+                      <button type="submit" className="sf-btn-ghost" style={{ padding: '4px 12px', fontSize: 9 }}>
+                        REJECT
+                      </button>
+                    </form>
+                  )}
+                  {!canDispatch && (
+                    <span style={{ fontFamily: 'IBM Plex Mono', fontSize: 9, color: 'rgba(255,255,255,0.2)' }}>
+                      {c.status === 'approved' ? 'Dispatched' : c.status === 'paid' ? 'Paid' : '—'}
+                    </span>
+                  )}
                 </td>
               </tr>
-            ) : (
-              claims.map((claim: any) => {
-                const gateCount = Array.isArray(claim.gate_results) ? claim.gate_results.length : 0;
-                return (
-                  <tr key={claim.id} className="lb-table-row">
-                    <td className="lb-table-time" style={{ fontFamily: 'IBM Plex Mono', fontSize: 11, padding: '14px 16px' }}>
-                      {claim.id.slice(0, 8)}…
-                    </td>
-                    <td className="lb-table-time">{timeAgo(claim.created_at)}</td>
-                    <td className="lb-table-wallet">{truncateWallet(claim.wallet)}</td>
-                    <td className="lb-table-time">
-                      <span style={statusStyle(claim.status as ClaimStatus)}>
-                        {STATUS_LABELS[claim.status as ClaimStatus] ?? claim.status}
-                      </span>
-                    </td>
-                    <td className="lb-table-claims">{gateCount}</td>
-                    <td className="lb-table-action">
-                      <Link
-                        href={`/admin/gates?claim=${claim.id}`}
-                        style={{ color: 'inherit', textDecoration: 'none', marginRight: 12 }}
-                      >
-                        GATES
-                      </Link>
-                      <Link
-                        href={`/admin/receipts?claim=${claim.id}`}
-                        style={{ color: 'inherit', textDecoration: 'none' }}
-                      >
-                        RECEIPT
-                      </Link>
-                    </td>
-                  </tr>
-                );
-              })
-            )}
-          </tbody>
-        </table>
-      </div>
+            );
+          })}
+          {(!claims || claims.length === 0) && (
+            <tr>
+              <td colSpan={10} style={{ textAlign: 'center', padding: 48, color: 'rgba(255,255,255,0.3)', fontFamily: 'IBM Plex Mono', fontSize: 12 }}>
+                {activeFilter === 'DISPATCH' ? 'No receipts ready for dispatch' : 'No claims match this filter'}
+              </td>
+            </tr>
+          )}
+        </tbody>
+      </table>
+
+      {/* Pipeline flags for ready_for_dispatch claims */}
+      {activeFilter === 'DISPATCH' && (claims || []).length > 0 && (
+        <div style={{ marginTop: 24, fontFamily: 'IBM Plex Mono', fontSize: 10, color: 'rgba(255,255,255,0.25)' }}>
+          Auth Score: EXIF (20%) + Dimensions (10%) + Model confidence (25%) + Physical receipt (15%) + Gas station (10%) + Not manipulated (10%) + Handwriting (5%) + Wallet found (5%)
+        </div>
+      )}
     </div>
   );
 }

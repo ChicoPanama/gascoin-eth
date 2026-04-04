@@ -15,12 +15,45 @@ export async function approveSubmission(claimId: string, solAmount: number, note
   const supabase = getSupabaseAdmin();
   const { data: before } = await supabase.from('claims').select('*').eq('id', claimId).single();
 
-  await supabase.from('claims').update({ status: 'approved', decision_reason: note || 'admin_approved', updated_at: new Date().toISOString() }).eq('id', claimId);
+  // Guard: only allow dispatch from these statuses
+  const allowedStatuses = ['ready_for_dispatch', 'needs_review', 'rejected'];
+  if (!before || !allowedStatuses.includes(before.status)) {
+    throw new Error(`Cannot approve claim in status: ${before?.status}`);
+  }
 
-  // Create payout job
-  await supabase.from('payout_jobs').upsert({ claim_id: claimId, wallet: before?.wallet, amount_sol: solAmount, status: 'queued' }, { onConflict: 'claim_id' });
+  await supabase.from('claims').update({
+    status: 'approved',
+    decision_reason: note || 'admin_dispatched',
+    updated_at: new Date().toISOString(),
+  }).eq('id', claimId);
 
-  await logAdminAction({ adminWallet, action: 'approve_submission', targetType: 'claim', targetId: claimId, beforeState: before, afterState: { status: 'approved', sol_amount: solAmount }, metadata: { note } });
+  // Record status transition
+  await supabase.from('claim_status_events').insert({
+    claim_id: claimId,
+    from_status: before.status,
+    to_status: 'approved',
+    actor_type: 'admin',
+    actor_id: adminWallet,
+    reason: note || 'admin_dispatched',
+  });
+
+  // Create payout job — this is the ONLY path payout jobs get created
+  await supabase.from('payout_jobs').upsert({
+    claim_id: claimId,
+    wallet: before.wallet,
+    amount_sol: solAmount,
+    status: 'queued',
+  }, { onConflict: 'claim_id' });
+
+  await logAdminAction({
+    adminWallet,
+    action: 'approve_submission',
+    targetType: 'claim',
+    targetId: claimId,
+    beforeState: before,
+    afterState: { status: 'approved', sol_amount: solAmount },
+    metadata: { note },
+  });
 }
 
 export async function rejectSubmission(claimId: string, reason: string) {
@@ -28,7 +61,20 @@ export async function rejectSubmission(claimId: string, reason: string) {
   const supabase = getSupabaseAdmin();
   const { data: before } = await supabase.from('claims').select('*').eq('id', claimId).single();
 
-  await supabase.from('claims').update({ status: 'rejected', decision_reason: reason, updated_at: new Date().toISOString() }).eq('id', claimId);
+  await supabase.from('claims').update({
+    status: 'rejected',
+    decision_reason: reason,
+    updated_at: new Date().toISOString(),
+  }).eq('id', claimId);
+
+  await supabase.from('claim_status_events').insert({
+    claim_id: claimId,
+    from_status: before?.status || 'unknown',
+    to_status: 'rejected',
+    actor_type: 'admin',
+    actor_id: adminWallet,
+    reason,
+  });
 
   await logAdminAction({ adminWallet, action: 'reject_submission', targetType: 'claim', targetId: claimId, beforeState: before, afterState: { status: 'rejected', reason } });
 }

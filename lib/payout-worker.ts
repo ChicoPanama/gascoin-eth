@@ -16,6 +16,17 @@ export async function processQueuedPayout(claimId: string) {
     return { ok: false, error: 'payout_job_not_found' };
   }
 
+  // Safety guard: only process payouts for admin-approved claims
+  const { data: claim } = await supabase
+    .from('claims')
+    .select('status')
+    .eq('id', claimId)
+    .single();
+
+  if (claim?.status !== 'approved' && job.status !== 'paid') {
+    return { ok: false, error: 'claim_not_admin_approved', claimStatus: claim?.status };
+  }
+
   if (job.status === 'paid') {
     const { data: existingPaid } = await supabase
       .from('payouts')

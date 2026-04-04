@@ -218,7 +218,22 @@ export async function POST(req: Request){
         walletOnReceipt,
         amountUsdDetected: ocr.amountUsd,
         duplicateHash,
-        duplicatePhash
+        duplicatePhash,
+        // Pipeline fraud signals
+        authenticityScore: fraudBase.authenticityScore,
+        fraudRisk: fraudBase.fraudRisk,
+        flags: fraudBase.flags,
+        exifScore: fraudBase.exifScore,
+        dimensionScore: fraudBase.dimensionScore,
+        // Extracted receipt data
+        stationName: ocr.pipeline?.extraction?.station_name ?? null,
+        stationCity: ocr.pipeline?.extraction?.station_city ?? null,
+        stationState: ocr.pipeline?.extraction?.station_state ?? null,
+        stationCountry: ocr.pipeline?.extraction?.station_country ?? null,
+        receiptDate: ocr.pipeline?.extraction?.receipt_date ?? null,
+        isPhysicalReceipt: ocr.pipeline?.extraction?.is_physical_receipt ?? null,
+        isDigitallyManipulated: ocr.pipeline?.extraction?.is_digitally_manipulated ?? null,
+        fraudNotes: ocr.pipeline?.extraction?.fraud_notes ?? null,
       }
     });
 

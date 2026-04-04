@@ -33,7 +33,7 @@ export function evaluateClaim(c: ClaimInput){
 
   const failed = gates.filter(g=>!g.passed);
   const riskScore = Math.min(1, (failed.length * 0.09) + (c.aiScore*0.35) + (c.tamperScore*0.25) + (c.amountUsd>200?0.08:0));
-  const decision = failed.length===0 && riskScore<0.35 ? 'approved' : (riskScore<0.6 ? 'needs_manual_review' : 'rejected');
+  const decision = failed.length===0 && riskScore<0.35 ? 'ready_for_dispatch' : (riskScore<0.6 ? 'needs_review' : 'rejected');
 
   return { gates, failed, riskScore: +riskScore.toFixed(4), decision };
 }

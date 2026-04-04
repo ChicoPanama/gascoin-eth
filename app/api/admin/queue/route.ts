@@ -12,7 +12,7 @@ export async function GET(){
   const { data, error } = await supabase
     .from('claims')
     .select('id,status,risk_score,wallet,tweet_url,decision_reason,created_at,users(x_handle)')
-    .in('status', ['submitted', 'auto_review', 'needs_manual_review', 'approved'])
+    .in('status', ['submitted', 'auto_review', 'ready_for_dispatch', 'needs_review', 'approved'])
     .order('created_at', { ascending: false })
     .limit(100);
 
