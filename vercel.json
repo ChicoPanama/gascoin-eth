@@ -3,6 +3,14 @@
     {
       "path": "/api/workers/process-claims",
       "schedule": "*/5 * * * *"
+    },
+    {
+      "path": "/api/workers/verify-referrals",
+      "schedule": "*/15 * * * *"
+    },
+    {
+      "path": "/api/workers/score-engagement",
+      "schedule": "0 */6 * * *"
     }
   ]
 }
