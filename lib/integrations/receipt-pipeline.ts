@@ -10,8 +10,8 @@ import crypto from 'crypto';
 // ═══════════════════════════════════════════
 
 const OPENROUTER_URL = 'https://openrouter.ai/api/v1/chat/completions';
-const OCR_MODEL = process.env.RECEIPT_OCR_MODEL || 'google/gemini-2.0-flash-lite';
-const FRAUD_MODEL = process.env.RECEIPT_FRAUD_MODEL || 'google/gemini-2.0-flash';
+const OCR_MODEL = process.env.RECEIPT_OCR_MODEL || 'google/gemini-2.0-flash-lite-001';
+const FRAUD_MODEL = process.env.RECEIPT_FRAUD_MODEL || 'google/gemini-2.0-flash-001';
 
 function getApiKey(): string {
   return process.env.OPENROUTER_API_KEY || '';
