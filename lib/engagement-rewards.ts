@@ -34,18 +34,22 @@ export const ENGAGEMENT_REWARDS_CONFIG = {
   POINTS_PER_REFERRAL_CONVERSION: 500, // Referrals compound — points + SOL
 
   // ─── Points → SOL conversion ───
-  POINTS_TO_SOL_RATE: 5000,          // 5,000 points = 0.01 SOL (2x more generous)
-  MIN_POINTS_FOR_PAYOUT: 2500,       // Lower threshold — easier to hit first payout
-  MAX_WEEKLY_PAYOUT_SOL: 0.15,       // 3x higher cap — real money for real virality
+  // Anchored: 1 SOL ≈ a tank of gas in California (~$80-100)
+  // Top engaged users should earn toward a tank through virality
+  POINTS_TO_SOL_RATE: 2500,          // 2,500 points = 0.01 SOL
+  MIN_POINTS_FOR_PAYOUT: 1000,       // Low barrier — first payout achievable fast
+  MAX_WEEKLY_PAYOUT_SOL: 0.50,       // Half a tank per week from engagement alone
   PAYOUT_CYCLE: 'weekly' as const,   // Weekly settlement
 
   // ─── Leaderboard rank multiplier (Option A) ───
   // Applied to max_sol_refund at submission time
+  // Fleet base is 1.0 SOL — rank 1 gets 1.5 SOL (more than a full tank)
   RANK_MULTIPLIERS: [
-    { minRank: 1, maxRank: 1, multiplier: 2.0 },    // #1: 2x refund
-    { minRank: 2, maxRank: 5, multiplier: 1.5 },     // #2-5: 1.5x
-    { minRank: 6, maxRank: 10, multiplier: 1.25 },   // #6-10: 1.25x
+    { minRank: 1, maxRank: 1, multiplier: 1.5 },     // #1: 1.5x (Fleet = 1.5 SOL)
+    { minRank: 2, maxRank: 5, multiplier: 1.3 },     // #2-5: 1.3x (Fleet = 1.3 SOL)
+    { minRank: 6, maxRank: 10, multiplier: 1.2 },    // #6-10: 1.2x
     { minRank: 11, maxRank: 25, multiplier: 1.1 },   // #11-25: 1.1x
+    { minRank: 26, maxRank: 50, multiplier: 1.05 },  // #26-50: 1.05x
   ] as const,
   DEFAULT_MULTIPLIER: 1.0,           // Everyone else: 1x
 } as const;
