@@ -25,8 +25,15 @@ export const DOC_CATEGORIES: DocCategory[] = [
         categorySlug: "overview",
         category: "Overview",
         description: "",
-        content: `<p>GASCOIN is a community-driven protocol on the Solana blockchain that refunds participants for real-world gasoline purchases. The protocol operates a treasury wallet funded with SOL (Solana's native cryptocurrency). Users who meet all verification requirements receive a SOL refund sent directly to their Solana wallet.</p>
-<p>The concept is straightforward: you pay for gas at a physical gas station, you prove it, and GASCOIN pays you back in SOL. The amount refunded in SOL is determined by the tier of GASCOIN tokens you hold in your wallet. The entire process is governed by 10 automated verification gates that run sequentially on every submission before any funds are released.</p>`,
+        content: `<div style="border:1px solid rgba(255,255,255,0.15);padding:16px 20px;margin-bottom:24px;background:rgba(255,255,255,0.03)">
+<p><strong>Document status — read before proceeding</strong></p>
+<p>This documentation describes the GASCOIN platform as designed and intended. Some features may be in the process of being deployed. If you notice a difference between this document and the live platform, the live platform takes precedence. This document will be updated as the platform rolls out.</p>
+<p>Last updated: April 2026 · Platform version: 1.0 · Document version: 1.1</p>
+</div><p>GASCOIN is a community-driven protocol on the Solana blockchain that refunds participants for real-world gasoline purchases. The protocol operates a treasury wallet funded with SOL (Solana's native cryptocurrency). Users who meet all verification requirements receive a SOL refund sent directly to their Solana wallet.</p>
+<p>The concept is straightforward: you pay for gas at a physical gas station, you prove it, and GASCOIN pays you back in SOL. The amount refunded in SOL is determined by the tier of GASCOIN tokens you hold in your wallet. The entire process is governed by 10 automated verification gates that run sequentially on every submission before any funds are released.</p><h3>Who Can Participate</h3>
+<p>GASCOIN is open to anyone worldwide who can obtain a gas station receipt and has a public X account. There is no geographic restriction. Gas stations in the United States, Canada, UK, Europe, Latin America, and anywhere else that issues paper receipts all qualify.</p>
+<p>The platform uses the term "gas station" but petrol stations, service stations, fuel depots, and any commercial fuel retailer that issues a paper receipt also qualify.</p>
+<p>There is no minimum purchase amount. A \$5 fuel purchase qualifies the same as a \$200 fill-up. The refund amount is set by the admin based on your tier cap — it is not proportional to how much you spent on fuel.</p>`,
         order: 1,
       },
       {
@@ -52,7 +59,14 @@ export const DOC_CATEGORIES: DocCategory[] = [
         categorySlug: "overview",
         category: "Overview",
         description: "",
-        content: `<p>The amount of SOL you can receive per submission depends on your GASCOIN token tier. The four tiers are:</p>
+        content: `<h3>Understanding SOL value</h3>
+<p>All refund amounts on GASCOIN are denominated in SOL, Solana's native cryptocurrency. SOL's price fluctuates with the market. As a rough guide:</p>
+<table><thead><tr><th>Tier</th><th>Max SOL Refund</th><th>Approx. USD at $180/SOL</th></tr></thead>
+<tbody><tr><td>Standard</td><td>0.05 SOL</td><td>~$9 USD</td></tr>
+<tr><td>Commuter</td><td>0.075 SOL</td><td>~$13.50 USD</td></tr>
+<tr><td>Road Warrior</td><td>0.10 SOL</td><td>~$18 USD</td></tr>
+<tr><td>Fleet</td><td>0.20 SOL</td><td>~$36 USD</td></tr></tbody></table>
+<p>Check the current SOL price on any exchange (Coinbase, Kraken, Binance) or on the GASCOIN Treasury page before submitting. The USD values above are approximate and change daily. The SOL amounts you receive are fixed by tier.</p>\n<p>The amount of SOL you can receive per submission depends on your GASCOIN token tier. The four tiers are:</p>
 <p>SOL values above are the maximum per submission. The admin sets the actual refund amount when approving your submission, up to the maximum for your tier. The Standard tier requires zero GASCOIN — anyone with a Solana wallet can participate immediately.</p>`,
         order: 3,
       },
@@ -168,7 +182,34 @@ export const DOC_CATEGORIES: DocCategory[] = [
 <li>The receipt date is visible</li>
 <li>My wallet address is written on the receipt</li>
 </ul>
-<p>All 3 checkboxes must be checked. The Next button remains disabled until all 3 are checked. This is by design — you are certifying that your upload meets the requirements before submitting.</p>`,
+<p>All 3 checkboxes must be checked. The Next button remains disabled until all 3 are checked. This is by design — you are certifying that your upload meets the requirements before submitting.</p><h3>Physical receipts only</h3>
+<p>GASCOIN requires a photograph of a physical paper receipt from the gas station. Digital receipts — including email receipts, in-app receipts, SMS receipts, and PDF receipts — cannot be accepted because the verification system requires you to write your Solana wallet address directly on the receipt in pen before photographing it.</p>
+<p>If your gas station does not offer paper receipts, ask the attendant for a printed copy at the time of purchase.</p>
+<h3>Receipt photography — do's and don'ts</h3>
+<p>Gate 5 (Wallet on Receipt) is the most commonly failed gate. Follow these rules exactly:</p>
+<p><strong>DO:</strong></p>
+<ul>
+<li>Write the wallet address on the BACK of the receipt if the front is too small</li>
+<li>Use a black ballpoint pen — felt tip and pencil both fail OCR</li>
+<li>Write each character at least 3-4mm tall</li>
+<li>Lay the receipt flat on a white or light-coloured surface</li>
+<li>Photograph from directly overhead — not at an angle</li>
+<li>Use good overhead lighting — natural daylight works best</li>
+<li>Zoom into your photo before uploading to verify every character is readable</li>
+</ul>
+<p><strong>DON'T:</strong></p>
+<ul>
+<li>Write in pencil, gel pen, or light-coloured ink</li>
+<li>Photograph on a dark surface — poor contrast</li>
+<li>Crumple, fold, or tear the receipt before photographing</li>
+<li>Take the photo at an angle — keystoning distorts text</li>
+<li>Use flash directly — causes glare on thermal receipt paper</li>
+<li>Submit if ANY character of the address is unclear — retake the photo</li>
+</ul>
+<p>Your wallet address is 44 characters long. On a narrow thermal receipt, you may need to write it across two lines. That is fine.</p>
+<h3>Your receipt image privacy</h3>
+<p>Receipt photos are stored in the GASCOIN secure storage system. If your submission is approved, your receipt image may appear on the Community Feed with your gas station location (city and state/country only) and refund amount visible. The admin team reviews every approved receipt and redacts any sensitive information. You can prevent your receipt from appearing on the community feed by contacting the admin team after approval. Receipt images are never sold or shared with third parties.</p>
+<p>→ See also: Gate 5 (Wallet on Receipt), Gate 6 (Receipt Legible)</p>`,
         order: 8,
       },
       {
@@ -369,7 +410,11 @@ export const DOC_CATEGORIES: DocCategory[] = [
 <li>Accidentally using a different wallet than intended (e.g., a hardware wallet alias)</li>
 </ul>
 <h3><strong>How to ensure Gate 8 passes</strong></h3>
-<p>Wait 30 full days after your last approved refund before submitting again. Use the Wallet Tracker at /wallet to check your cooldown status before starting a new submission. The tracker shows exactly when your cooldown expires.</p>`,
+<p>Wait 30 full days after your last approved refund before submitting again. Use the Wallet Tracker at /wallet to check your cooldown status before starting a new submission. The tracker shows exactly when your cooldown expires.</p><h3>Understanding the rolling 30-day window — worked example</h3>
+<p>The cooldown is not a calendar month. It is exactly 30 days from your last approval date.</p>
+<p><strong>Example:</strong> Your submission is approved on March 5th. Your next eligible submission date is April 4th (30 days later). Not April 1st. Not March 31st. Exactly 30 days from March 5th.</p>
+<p>You can check your exact cooldown expiry date at any moment by visiting the Wallet Tracker at /wallet and connecting your wallet.</p>
+<p>→ See also: Wallet Tracker to check your cooldown status</p>`,
         order: 19,
       },
       {
@@ -401,7 +446,14 @@ export const DOC_CATEGORIES: DocCategory[] = [
 <h3><strong>What happens if Gate 10 fails</strong></h3>
 <p>Unlike Gates 1-9, Gate 10 failure does NOT reject your submission. Instead, your submission enters a priority queue. The system automatically retries Gate 10 every 6 hours. When the treasury is replenished and has sufficient balance, your submission automatically moves to approved and SOL is dispatched to your wallet. You do not need to resubmit or take any action.</p>
 <h3><strong>How long does a Gate 10 queue take</strong></h3>
-<p>This depends entirely on when the treasury is next replenished. The treasury admin monitors the treasury balance and adds SOL as needed. Most Gate 10 queue situations resolve within 48-72 hours.</p>`,
+<p>This depends entirely on when the treasury is next replenished. The treasury admin monitors the treasury balance and adds SOL as needed. Most Gate 10 queue situations resolve within 48-72 hours.</p><h3>What to expect while in Gate 10 queue</h3>
+<p>When your submission enters the Gate 10 queue, three things happen automatically:</p>
+<ul>
+<li>Your submission status in the Wallet Tracker changes from "processing" to "pending queue"</li>
+<li>The system retries Gate 10 every 6 hours automatically — you do not need to do anything</li>
+<li>When the treasury is replenished and your retry passes, your status changes to "approved" and SOL dispatch is initiated</li>
+</ul>
+<p>Typical Gate 10 queue resolution time: 24-72 hours. The treasury balance is publicly visible on the Treasury page at /dashboard so you can monitor it yourself.</p>`,
         order: 21,
       },
     ],
@@ -501,7 +553,14 @@ export const DOC_CATEGORIES: DocCategory[] = [
 <h3><strong>Top 3 Podium</strong></h3>
 <p>When 3 or more wallets have submissions, the top 3 are displayed in a visual podium above the table. The rank 1 wallet appears in the center and is slightly taller. If your connected wallet is in the top 3, a YOU badge appears on your podium card.</p>
 <h3><strong>Live updates</strong></h3>
-<p>The leaderboard updates in real time via Supabase Realtime. When any submission status changes in the database, the leaderboard data refreshes automatically. The LIVE indicator in the page header shows the time since last update.</p>`,
+<p>The leaderboard updates in real time via Supabase Realtime. When any submission status changes in the database, the leaderboard data refreshes automatically. The LIVE indicator in the page header shows the time since last update.</p><h3>How scores are calculated</h3>
+<p>Each wallet's leaderboard position is determined by a composite score:</p>
+<table><thead><tr><th>Factor</th><th>Weight</th><th>What It Measures</th></tr></thead>
+<tbody><tr><td>Referrals</td><td>35%</td><td>Approved submissions from your referral link</td></tr>
+<tr><td>Engagement</td><td>30%</td><td>Submission streaks, featured receipts, referral chains</td></tr>
+<tr><td>GASCOIN Holdings</td><td>25%</td><td>Token balance in your wallet</td></tr>
+<tr><td>SOL Earned</td><td>10%</td><td>Total SOL from approved refunds</td></tr></tbody></table>
+<p>→ See also: Referral System — referrals are 35% of your score</p>`,
         order: 26,
       },
       {
@@ -547,7 +606,14 @@ export const DOC_CATEGORIES: DocCategory[] = [
 <h3><strong>Referral dashboard metrics</strong></h3>
 <p>The referral page dashboard shows: Total Clicks (how many times your link has been clicked), Unique Visitors (unique devices), Conversions (approved submissions through your link), Conversion Rate (unique clicks that resulted in an approved submission), and SOL Earned (total rewards dispatched to date).</p>
 <h3><strong>Referral leaderboard</strong></h3>
-<p>The bottom of the referral page shows the top 10 referrers across the entire platform ranked by total conversions. This leaderboard is public — no wallet connection required to view it.</p>`,
+<p>The bottom of the referral page shows the top 10 referrers across the entire platform ranked by total conversions. This leaderboard is public — no wallet connection required to view it.</p><h3>When referral rewards are skipped</h3>
+<p>A conversion is marked "skipped" rather than "pending" when eligibility rules prevent a reward:</p>
+<table><thead><tr><th>Skip Reason</th><th>What It Means</th><th>Reversible?</th></tr></thead>
+<tbody><tr><td>Self-referral</td><td>You submitted using your own referral link</td><td>No — permanent</td></tr>
+<tr><td>Referrer not approved</td><td>You had no approved submissions when the conversion occurred</td><td>No — permanent</td></tr>
+<tr><td>Monthly cap reached</td><td>You hit 20 conversions in the rolling 30-day window</td><td>Resets after 30 days</td></tr>
+<tr><td>Monthly SOL cap reached</td><td>You hit 0.10 SOL in referral rewards this window</td><td>Resets after 30 days</td></tr></tbody></table>
+<p>→ See also: Gates page — all 10 gates must pass for a conversion to count</p>`,
         order: 28,
       },
       {
@@ -565,7 +631,15 @@ export const DOC_CATEGORIES: DocCategory[] = [
 <h3><strong>Queue priority</strong></h3>
 <p>Higher tier submissions are processed before lower tier submissions. If multiple submissions are pending in the admin queue, a Fleet tier submission will appear above a Standard tier submission. This does not affect the automated gate processing — it affects the order in which the admin reviews and approves refund amounts.</p>
 <h3><strong>Where tier badges appear</strong></h3>
-<p>Once you have an approved submission, your tier badge appears on your leaderboard row, on your receipt cards in the community feed, and in the wallet tracker.</p>`,
+<p>Once you have an approved submission, your tier badge appears on your leaderboard row, on your receipt cards in the community feed, and in the wallet tracker.</p><h3>How to acquire GASCOIN tokens</h3>
+<p>GASCOIN tokens are available on Solana decentralised exchanges:</p>
+<ul>
+<li><strong>Raydium</strong> — <a href="https://raydium.io/swap" target="_blank">raydium.io/swap</a></li>
+<li><strong>Jupiter</strong> — <a href="https://jup.ag" target="_blank">jup.ag</a></li>
+</ul>
+<p>To buy GASCOIN: ensure your wallet has SOL for the purchase and transaction fees, visit the DEX, connect your wallet, swap SOL for GASCOIN, then return to the Perks page and click Refresh Balance to see your updated tier.</p>
+<p>Your tier is checked live at submission time. Tier upgrades take effect immediately — no re-connecting required.</p>
+<p>→ See also: Token Tiers for the full tier comparison</p>`,
         order: 29,
       },
       {
@@ -699,7 +773,8 @@ export const DOC_CATEGORIES: DocCategory[] = [
         categorySlug: "security",
         category: "Security & Admin",
         description: "",
-        content: `<p>GASCOIN uses multiple overlapping systems to prevent fraud, duplicate submissions, and gaming of the refund system.</p>`,
+        content: `<p>GASCOIN uses multiple overlapping systems to prevent fraud, duplicate submissions, and gaming of the refund system.</p><h3>Using Multiple Wallets</h3>
+<p>Each Solana wallet operates independently. Each has its own 30-day cooldown, history, and tier. You could submit from different wallets on consecutive days — Gate 8 only checks the submitting wallet. However, each requires a unique receipt (Gate 9), unique tweet, and unique gas purchase.</p>`,
         order: 48,
       },
       {
@@ -994,8 +1069,33 @@ export const DOC_CATEGORIES: DocCategory[] = [
         order: 68,
       },
       {
+        slug: "support-and-contact",
+        title: "10. Support and Contact",
+        categorySlug: "help",
+        category: "Help",
+        description: "Getting help with submissions and contacting the team.",
+        content: `<h3>Getting help with a submission</h3>
+<p>If you have a question about a specific submission, check these self-service resources first:</p>
+<ul>
+<li><strong>Wallet Tracker (/wallet)</strong> — shows your submission status, gate results, and failure reasons</li>
+<li><strong>Gates page (/gates)</strong> — explains every verification gate and how to fix failures</li>
+<li><strong>FAQ (this section)</strong> — covers the most common questions</li>
+</ul>
+<h3>Contacting the team</h3>
+<p>TODO: Add your support channel here — Discord / Telegram / Email</p>
+<p>When contacting support, include your:</p>
+<ul>
+<li>Submission ID (shown in Wallet Tracker as GC-YYYY-XXXXX)</li>
+<li>Wallet address (truncated is fine)</li>
+<li>Description of the issue</li>
+</ul>
+<h3>Urgent submissions</h3>
+<p>If you submitted with an error (wrong tweet URL, wrong wallet) before gates have started processing, contact the team immediately with your submission ID. After verification begins, submissions cannot be modified.</p>`,
+        order: 69,
+      },
+      {
         slug: "quick-reference-card",
-        title: "9. Quick Reference Card",
+        title: "11. Quick Reference Card",
         categorySlug: "help",
         category: "Help",
         description: "",
