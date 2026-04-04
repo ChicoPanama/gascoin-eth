@@ -14,8 +14,8 @@ export function Nav() {
     <Link href="/leaderboard">Leaderboard</Link>
     <Link href="/dashboard">Treasury</Link>
     <Link href="/admin">Admin</Link>
-    <span style={{ marginLeft: 'auto', display: 'flex', gap: 8, alignItems: 'center' }}>
-      <Link href="/docs">Docs</Link>
+    <Link href="/docs" style={{ marginLeft: 'auto' }}>Docs</Link>
+    <span style={{ display: 'flex', gap: 8, alignItems: 'center', marginLeft: 16 }}>
       <WalletButton />
       <AuthNavButton />
     </span>
