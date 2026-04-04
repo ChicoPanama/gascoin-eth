@@ -81,13 +81,17 @@ export async function POST(req: Request){
     await supabase.from('idempotency_keys').insert({ key: idemKey, scope: 'claim_submit', request_hash: reqHash, status: 'processing' });
   }
 
-  const [tweet, ocr, fraudBase, minHold, followerCount] = await Promise.all([
+  // Run tweet verification, OCR, balance check, and follower check in parallel
+  // Fraud check runs after OCR so it can reuse the pipeline data
+  const [tweet, ocr, minHold, followerCount] = await Promise.all([
     verifyTweetProof(tweetUrl, `@${session.xHandle}`),
     analyzeReceipt(receipt),
-    runFraudChecks(receiptBuffer),
     hasMinimumGascoinUsd(wallet, 1),
     getFollowerCount(session.xHandle)
   ]);
+
+  // Pass OCR pipeline data to fraud checks to avoid redundant processing
+  const fraudBase = await runFraudChecks(receiptBuffer, ocr.pipeline);
 
   const walletOnReceipt = walletOnReceiptInput || ocr.walletOnReceipt || '';
 
