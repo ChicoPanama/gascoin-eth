@@ -6,8 +6,7 @@ import { supabaseBrowser } from '../../lib/supabase-client';
 import { formatSol } from '../../lib/formatters';
 
 interface MiniReceipt {
-  city: string | null;
-  state: string | null;
+  country: string | null;
   sol: number;
   date: string;
 }
@@ -21,15 +20,14 @@ export function CommunityTeaser() {
       try {
         const { data } = await supabaseBrowser
           .from('payouts')
-          .select('amount_sol, created_at, claims(state, country, city)')
+          .select('amount_sol, created_at, claims(country)')
           .eq('status', 'paid')
           .order('created_at', { ascending: false })
           .limit(4);
 
         setItems(
           (data || []).map((p: any) => ({
-            city: p.claims?.city || null,
-            state: p.claims?.state || p.claims?.country || null,
+            country: p.claims?.country || null,
             sol: Number(p.amount_sol || 0),
             date: new Date(p.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
           }))
@@ -66,7 +64,7 @@ export function CommunityTeaser() {
               : items.map((item, i) => (
                   <div key={i} className="cf-teaser-card">
                     <div className="cf-teaser-card-loc">
-                      {item.city && item.state ? `${item.city}, ${item.state}` : item.state || 'Verified'}
+                      {item.country || 'Verified'}
                     </div>
                     <div className="cf-teaser-card-sol">{formatSol(item.sol)}</div>
                     <div className="cf-teaser-card-date">{item.date}</div>

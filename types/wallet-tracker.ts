@@ -4,8 +4,7 @@ export interface WalletSubmission {
   status: string;
   sol_amount: number;
   storage_path: string | null;
-  city: string | null;
-  state: string | null;
+  country: string | null;
   receipt_usd: number | null;
   receipt_date: string | null;
   created_at: string;

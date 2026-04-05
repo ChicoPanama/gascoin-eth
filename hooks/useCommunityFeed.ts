@@ -14,8 +14,7 @@ function mapPayoutToReceipt(p: any, connectedWallet: string | null): CommunityRe
     id: p.id,
     wallet: p.wallet || '',
     sol_amount: Number(p.amount_sol || 0),
-    city: claim.city || null,
-    state: claim.state || claim.country || null,
+    country: claim.country || null,
     receipt_usd: claim.parsed_amount ? Number(claim.parsed_amount) : null,
     receipt_date: claim.created_at || p.created_at,
     storage_path: receipt.storage_path_private || null,
@@ -48,7 +47,7 @@ export function useCommunityFeed(
     try {
       let query = supabaseBrowser
         .from('payouts')
-        .select('id, wallet, amount_sol, status, created_at, claim_id, claims(parsed_amount, created_at, city, state, country, is_featured, claim_receipts(storage_path_private, is_image_redacted))')
+        .select('id, wallet, amount_sol, status, created_at, claim_id, claims(parsed_amount, created_at, country, is_featured, claim_receipts(storage_path_private, is_image_redacted))')
         .eq('status', 'paid')
         .range(from, to);
 

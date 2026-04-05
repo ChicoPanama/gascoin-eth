@@ -169,8 +169,8 @@ export default async function Home() {
                   <div className="gc-tech-layer-title">AI Receipt Processing</div>
                   <div className="gc-tech-layer-tag">CLAUDE AI · {'<'}0.3¢ PER RECEIPT</div>
                   <p className="gc-tech-layer-desc">
-                    Upload a receipt photo and AI extracts everything in one call — station name,
-                    city, date, total amount, and your wallet address. Simultaneously scores
+                    Upload a receipt photo and AI extracts everything in one call — country,
+                    date, total amount, and your wallet address. Simultaneously scores
                     5 fraud signals: is it a physical receipt, from a real gas station, is it
                     manipulated, does it have handwriting, and is the wallet readable.
                   </p>
@@ -198,7 +198,7 @@ export default async function Home() {
                   <div className="gc-tech-layer-tag">FREE · INSTANT · ON-DEVICE</div>
                   <p className="gc-tech-layer-desc">
                     Before AI even sees the image, three free layers run instantly: EXIF forensics
-                    checks camera model, GPS, and editing software. Dimensional analysis flags
+                    checks camera model, timestamps, and editing software. Dimensional analysis flags
                     AI-generated image sizes. Perceptual hashing catches receipt reuse from any angle.
                     Zero cost. Zero latency.
                   </p>

@@ -13,20 +13,20 @@ export function useCommunityStats() {
       try {
         const { data, error } = await supabaseBrowser
           .from('payouts')
-          .select('amount_sol, wallet, claims(state, country)')
+          .select('amount_sol, wallet, claims(country)')
           .eq('status', 'paid');
 
         if (error) throw error;
 
         const total = (data || []).reduce((s: number, r: any) => s + Number(r.amount_sol || 0), 0);
-        const locations = new Set(
-          (data || []).map((r: any) => r.claims?.state || r.claims?.country).filter(Boolean)
+        const countries = new Set(
+          (data || []).map((r: any) => r.claims?.country).filter(Boolean)
         );
 
         setStats({
           total_approved: (data || []).length,
           total_sol_paid: total,
-          unique_states: locations.size,
+          unique_countries: countries.size,
           avg_refund_sol: (data || []).length > 0 ? total / (data || []).length : 0,
         });
       } catch (err) {

@@ -39,7 +39,7 @@ export const solanaHandlers = [
 export const openRouterHandlers = [
   http.post('https://openrouter.ai/api/v1/chat/completions', async () => {
     return HttpResponse.json({
-      choices: [{ message: { content: JSON.stringify({ station_name: 'Shell', station_city: 'Los Angeles', station_state: 'CA', receipt_date: '2026-04-01', total_amount: 52.40, currency: 'USD', wallet_address: null, has_handwriting: true, has_gascoin_hashtag: false, is_physical_receipt: true, is_gas_station: true, is_digitally_manipulated: false, confidence: 0.87, fraud_notes: '', raw_text: 'SHELL Total $52.40' }) } }],
+      choices: [{ message: { content: JSON.stringify({ station_country: 'US', receipt_date: '2026-04-01', total_amount: 52.40, currency: 'USD', wallet_address: null, has_handwriting: true, has_gascoin_hashtag: false, is_physical_receipt: true, is_gas_station: true, is_digitally_manipulated: false, confidence: 0.87, fraud_notes: '', raw_text: 'Total $52.40' }) } }],
       model: 'google/gemini-2.0-flash-001', usage: { prompt_tokens: 800, completion_tokens: 200 },
     });
   }),

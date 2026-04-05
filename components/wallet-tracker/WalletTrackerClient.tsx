@@ -308,7 +308,7 @@ export function WalletTrackerClient({ initialLookupAddress }: { initialLookupAdd
               {paged.map((s) => {
                 const isPending = ['submitted', 'auto_review', 'needs_manual_review'].includes(s.status);
                 const isRejected = s.status === 'rejected';
-                const loc = s.city && s.state ? `${s.city}, ${s.state}` : s.state || s.city || '—';
+                const loc = s.country || '—';
                 return (
                   <tr key={s.id} className={`lb-table-row${isRejected ? ' wt-row-rejected' : ''}`}
                     onClick={() => isRejected && setExpandedRejection(expandedRejection === s.id ? null : s.id)}>

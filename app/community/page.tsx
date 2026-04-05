@@ -52,7 +52,7 @@ export default function CommunityPage() {
 
   const aApproved = useAnimVal(stats?.total_approved ?? 0);
   const aPaid = useAnimVal(stats?.total_sol_paid ?? 0);
-  const aStates = useAnimVal(stats?.unique_states ?? 0);
+  const aCountries = useAnimVal(stats?.unique_countries ?? 0);
   const aAvg = useAnimVal(stats?.avg_refund_sol ?? 0);
 
   const handleConnectWallet = () => {
@@ -91,8 +91,8 @@ export default function CommunityPage() {
             <div className="gc-stat-value">{statsLoading ? <div className="lb-skeleton" /> : formatSol(aPaid)}</div>
           </div>
           <div className="gc-stat">
-            <div className="gc-stat-label">Regions Covered</div>
-            <div className="gc-stat-value">{statsLoading ? <div className="lb-skeleton" /> : Math.round(aStates).toLocaleString()}</div>
+            <div className="gc-stat-label">Countries</div>
+            <div className="gc-stat-value">{statsLoading ? <div className="lb-skeleton" /> : Math.round(aCountries).toLocaleString()}</div>
           </div>
           <div className="gc-stat">
             <div className="gc-stat-label">Avg Refund</div>

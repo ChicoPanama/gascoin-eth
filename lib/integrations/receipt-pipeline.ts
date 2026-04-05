@@ -23,9 +23,7 @@ export interface ExifCheckResult {
   hasExif: boolean;
   cameraModel: string | null;
   dateTime: string | null;
-  hasGps: boolean;
-  gpsLat: number | null;
-  gpsLon: number | null;
+  hasGps: boolean; // Used for fraud scoring only — no GPS data is ever stored or exposed
   software: string | null;
   score: number; // 0 = definitely fake, 1 = definitely real photo
   flags: string[];
@@ -37,8 +35,6 @@ export function checkExifMetadata(buf: Buffer): ExifCheckResult {
   let cameraModel: string | null = null;
   let dateTime: string | null = null;
   let hasGps = false;
-  let gpsLat: number | null = null;
-  let gpsLon: number | null = null;
   let software: string | null = null;
 
   // Check for EXIF marker (0xFFE1) in JPEG
@@ -106,7 +102,7 @@ export function checkExifMetadata(buf: Buffer): ExifCheckResult {
 
   score = Math.max(0, Math.min(1, score));
 
-  return { hasExif, cameraModel, dateTime, hasGps, gpsLat, gpsLon, software, score, flags };
+  return { hasExif, cameraModel, dateTime, hasGps, software, score, flags };
 }
 
 // ─── STEP 2: Image Dimension & Format Check ───
@@ -234,11 +230,7 @@ export function computeExactHash(buf: Buffer): string {
 // ─── STEP 4: Gemini Vision — Structured Extraction + Fraud Scoring ───
 
 export interface ReceiptExtraction {
-  // Structured fields
-  station_name: string | null;
-  station_address: string | null;
-  station_city: string | null;
-  station_state: string | null;
+  // Structured fields — privacy-first: country only, no city/state/address/station name
   station_country: string | null;
   receipt_date: string | null;
   total_amount: number | null;
@@ -267,11 +259,7 @@ export async function extractAndScoreReceipt(buf: Buffer, mimeType: string): Pro
   const prompt = `Analyze this gas station receipt image. Return ONLY valid JSON with these exact fields:
 
 {
-  "station_name": "station name or null",
-  "station_address": "street address or null",
-  "station_city": "city or null",
-  "station_state": "state/province abbreviation or null",
-  "station_country": "country code or null",
+  "station_country": "country code (US, CA, UK, etc.) or null",
   "receipt_date": "YYYY-MM-DD or null",
   "total_amount": 0.00,
   "currency": "USD",
@@ -334,10 +322,8 @@ Be strict about fraud detection:
 
     const parsed = JSON.parse(jsonMatch[0]);
     return {
-      station_name: parsed.station_name || null,
-      station_address: parsed.station_address || null,
-      station_city: parsed.station_city || null,
-      station_state: parsed.station_state || null,
+      // Privacy-first: country only
+
       station_country: parsed.station_country || null,
       receipt_date: parsed.receipt_date || null,
       total_amount: typeof parsed.total_amount === 'number' ? parsed.total_amount : null,
@@ -360,8 +346,7 @@ Be strict about fraud detection:
 
 function fallbackExtraction(): ReceiptExtraction {
   return {
-    station_name: null, station_address: null, station_city: null,
-    station_state: null, station_country: null, receipt_date: null,
+    station_country: null, receipt_date: null,
     total_amount: null, currency: 'USD', wallet_address: null,
     has_handwriting: false, has_gascoin_hashtag: false,
     is_physical_receipt: false, is_gas_station: false,

@@ -10,8 +10,7 @@ function mapClaim(c: any): WalletSubmission {
     status: c.status,
     sol_amount: 0,
     storage_path: c.claim_receipts?.[0]?.storage_path_private || null,
-    city: c.city || null,
-    state: c.state || c.country || null,
+    country: c.country || null,
     receipt_usd: c.parsed_amount ? Number(c.parsed_amount) : null,
     receipt_date: c.created_at,
     created_at: c.created_at,
@@ -38,7 +37,7 @@ export async function getOwnSubmissions(wallet: string): Promise<WalletSubmissio
     // Get claims with gate results
     const { data: claims } = await supabase
       .from('claims')
-      .select('id, wallet, status, parsed_amount, city, state, country, created_at, updated_at, decision_reason, claim_receipts(storage_path_private), gate_results(gate_name, passed, score, reason_code, created_at)')
+      .select('id, wallet, status, parsed_amount, country, created_at, updated_at, decision_reason, claim_receipts(storage_path_private), gate_results(gate_name, passed, score, reason_code, created_at)')
       .eq('wallet', wallet)
       .order('created_at', { ascending: false });
 
@@ -72,7 +71,7 @@ export async function getPublicSubmissions(wallet: string): Promise<WalletSubmis
 
     const { data: payouts } = await supabase
       .from('payouts')
-      .select('id, wallet, amount_sol, created_at, claim_id, claims(city, state, country, parsed_amount, created_at)')
+      .select('id, wallet, amount_sol, created_at, claim_id, claims(country, parsed_amount, created_at)')
       .eq('wallet', wallet)
       .eq('status', 'paid')
       .order('created_at', { ascending: false });
@@ -83,8 +82,7 @@ export async function getPublicSubmissions(wallet: string): Promise<WalletSubmis
       status: 'approved',
       sol_amount: Number(p.amount_sol || 0),
       storage_path: null,
-      city: p.claims?.city || null,
-      state: p.claims?.state || p.claims?.country || null,
+      country: p.claims?.country || null,
       receipt_usd: p.claims?.parsed_amount ? Number(p.claims.parsed_amount) : null,
       receipt_date: p.claims?.created_at || p.created_at,
       created_at: p.created_at,

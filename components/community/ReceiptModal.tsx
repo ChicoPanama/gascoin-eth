@@ -35,10 +35,7 @@ export function ReceiptModal({ receipt, onClose }: {
     } catch {}
   };
 
-  // Location: city/state or city/country for overseas
-  const location = receipt?.city && receipt?.state
-    ? `${receipt.city}, ${receipt.state}`
-    : receipt?.state || receipt?.city || 'Redacted';
+  const country = receipt?.country || 'Verified';
 
   const fullDate = receipt?.receipt_date
     ? new Date(receipt.receipt_date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
@@ -102,8 +99,8 @@ export function ReceiptModal({ receipt, onClose }: {
             )}
 
             <div className="cf-modal-row">
-              <span className="cf-modal-label">Location</span>
-              <span className="cf-modal-value">{location}</span>
+              <span className="cf-modal-label">Country</span>
+              <span className="cf-modal-value">{country}</span>
             </div>
 
             <div className="cf-modal-row">

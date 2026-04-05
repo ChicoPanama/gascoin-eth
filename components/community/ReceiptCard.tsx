@@ -10,9 +10,7 @@ export function ReceiptCard({ receipt, onClick }: {
 }) {
   const [imgError, setImgError] = useState(false);
 
-  const location = receipt.city && receipt.state
-    ? `${receipt.city}, ${receipt.state}`
-    : receipt.state || receipt.city || 'Location redacted';
+  const country = receipt.country || 'Verified';
 
   const date = receipt.receipt_date
     ? new Date(receipt.receipt_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
@@ -53,7 +51,7 @@ export function ReceiptCard({ receipt, onClick }: {
       {/* Body */}
       <div className="cf-card-body">
         <div className="cf-card-top">
-          <span className="cf-card-location">{location}</span>
+          <span className="cf-card-location">{country}</span>
           <span className="cf-card-date">{date}</span>
         </div>
 

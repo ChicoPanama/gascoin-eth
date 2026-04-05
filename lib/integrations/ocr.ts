@@ -7,9 +7,7 @@ export type OcrResult = {
   walletOnReceipt?: string;
   amountUsd?: number;
   pipeline?: PipelineResult;
-  stationCity?: string;
-  stationState?: string;
-  stationCountry?: string;
+  country?: string;
 };
 
 export async function analyzeReceipt(file: File): Promise<OcrResult> {
@@ -24,8 +22,6 @@ export async function analyzeReceipt(file: File): Promise<OcrResult> {
     walletOnReceipt: ext.wallet_address || undefined,
     amountUsd: ext.total_amount || undefined,
     pipeline,
-    stationCity: ext.station_city || undefined,
-    stationState: ext.station_state || undefined,
-    stationCountry: ext.station_country || undefined,
+    country: ext.station_country || undefined,
   };
 }
