@@ -176,6 +176,9 @@ export default function PerksPage() {
           <a href="https://jup.ag" target="_blank" rel="noopener" className="sf-btn-ghost" style={{ textDecoration: 'none' }}>
             Buy on Jupiter →
           </a>
+          <a href="https://dexscreener.com/solana/64qjoamouoznokv1ghqpun7kvwllxkdjvwkyw4plojsm" target="_blank" rel="noopener" className="sf-btn-ghost" style={{ textDecoration: 'none' }}>
+            View on DexScreener →
+          </a>
         </div>
       </div>
     </div>
