@@ -554,13 +554,8 @@ export const DOC_CATEGORIES: DocCategory[] = [
 <p>When 3 or more wallets have submissions, the top 3 are displayed in a visual podium above the table. The rank 1 wallet appears in the center and is slightly taller. If your connected wallet is in the top 3, a YOU badge appears on your podium card.</p>
 <h3><strong>Live updates</strong></h3>
 <p>The leaderboard updates in real time via Supabase Realtime. When any submission status changes in the database, the leaderboard data refreshes automatically. The LIVE indicator in the page header shows the time since last update.</p><h3>How scores are calculated</h3>
-<p>Each wallet's leaderboard position is determined by a composite score:</p>
-<table><thead><tr><th>Factor</th><th>Weight</th><th>What It Measures</th></tr></thead>
-<tbody><tr><td>Referrals</td><td>35%</td><td>Approved submissions from your referral link</td></tr>
-<tr><td>Engagement</td><td>30%</td><td>Submission streaks, featured receipts, referral chains</td></tr>
-<tr><td>GASCOIN Holdings</td><td>25%</td><td>Token balance in your wallet</td></tr>
-<tr><td>SOL Earned</td><td>10%</td><td>Total SOL from approved refunds</td></tr></tbody></table>
-<p>→ See also: Referral System — referrals are 35% of your score</p>`,
+<p>Each wallet's leaderboard position is determined by a proprietary composite score based on three factors: referral activity, platform engagement, and GASCOIN holdings. The weights are dynamic and may be adjusted. SOL earned from receipt refunds is not a factor — the leaderboard rewards ecosystem contribution, not receipt size.</p>
+<p>→ See also: Points System documentation for details on how points are earned</p>`,
         order: 26,
       },
       {
@@ -1126,25 +1121,21 @@ export const DOC_CATEGORIES: DocCategory[] = [
         category: "Help",
         description: "How tweet metrics convert to points.",
         content: `<h3>Tweet Engagement Points</h3>
-<p>Every #gascoin tweet you submit is tracked via the X API. Every 6 hours, the system fetches your tweet's real engagement metrics and awards points based on this formula:</p>
-<table>
-<thead><tr><th>Metric</th><th>Points Per Unit</th><th>Why This Weight</th></tr></thead>
-<tbody>
-<tr><td>Impressions</td><td>1 point per impression</td><td>Reach — how many people saw it</td></tr>
-<tr><td>Likes</td><td>50 points per like</td><td>Basic engagement signal</td></tr>
-<tr><td>Replies</td><td>100 points per reply</td><td>Conversation drives algorithm visibility</td></tr>
-<tr><td>Retweets</td><td>250 points per retweet</td><td>Amplification — shares your message to new audiences</td></tr>
-<tr><td>Quote Tweets</td><td>500 points per quote</td><td>Highest value — original content + amplification combined</td></tr>
-</tbody>
-</table>
+<p>Every #gascoin tweet linked to a submission is tracked via the X API. Every 6 hours, the system fetches your tweet's real engagement metrics and awards points.</p>
 
-<h3>Example Calculations</h3>
-<p><strong>Average tweet:</strong> 5,000 impressions + 50 likes + 10 retweets + 2 quotes = 5,000 + 2,500 + 2,500 + 1,000 = <strong>11,000 points</strong></p>
-<p><strong>Viral tweet:</strong> 50,000 impressions + 500 likes + 200 retweets + 50 quotes = 50,000 + 25,000 + 50,000 + 25,000 = <strong>150,000 points</strong></p>
+<h3>What Earns Points</h3>
+<p>Five engagement metrics are tracked, each weighted differently:</p>
+<ul>
+<li><strong>Impressions</strong> — how many people saw your tweet. High reach = more points.</li>
+<li><strong>Likes</strong> — basic engagement signal.</li>
+<li><strong>Replies</strong> — conversations are worth more than passive likes.</li>
+<li><strong>Retweets</strong> — amplification is heavily rewarded. Shares spread the word to new audiences.</li>
+<li><strong>Quote Tweets</strong> — the highest-value engagement. Original commentary plus amplification.</li>
+</ul>
+<p>The exact point values per metric are proprietary and may be adjusted to maintain fair scoring. In general: quality engagement (retweets, quotes, replies) is worth significantly more than passive metrics (impressions).</p>
 
 <h3>How Scoring Works</h3>
-<p>Points are awarded incrementally. Each 6-hour cycle calculates the delta since the last check. You earn points for new engagement, not retroactively for the same engagement twice. If your tweet gets 100 likes in the first cycle and 50 more in the next, you earn points for both — but only the new 50 in the second cycle.</p>
-<p>Only tweets linked to approved GASCOIN submissions are scored. Random tweets are not tracked.</p>`,
+<p>Points are awarded incrementally. Each 6-hour cycle calculates the delta since the last check. You earn points for new engagement only — not retroactively. Only tweets linked to GASCOIN submissions are scored.</p>`,
         order: 71,
       },
       {
@@ -1234,28 +1225,20 @@ export const DOC_CATEGORIES: DocCategory[] = [
         categorySlug: "help",
         category: "Help",
         description: "How the leaderboard composite score is calculated.",
-        content: `<h3>Leaderboard Composite Score</h3>
-<p>Your leaderboard rank is determined by a composite score calculated from three weighted factors:</p>
-
-<table>
-<thead><tr><th>Factor</th><th>Weight</th><th>What It Measures</th></tr></thead>
-<tbody>
-<tr><td><strong>Referral Points</strong></td><td>40%</td><td>Total points from referral conversions — measures how many new users you bring in</td></tr>
-<tr><td><strong>Engagement Points</strong></td><td>35%</td><td>Total points from tweets, submissions, streaks, and holdings — measures platform participation</td></tr>
-<tr><td><strong>GASCOIN Holdings</strong></td><td>25%</td><td>On-chain GASCOIN token balance — measures long-term commitment</td></tr>
-</tbody>
-</table>
-
-<h3>Why These Weights</h3>
-<p><strong>Referrals (40%):</strong> The platform grows when users bring in other users. Referrals are the primary growth engine, so they carry the most weight.</p>
-<p><strong>Engagement (35%):</strong> Active participation — tweeting, submitting, maintaining streaks — keeps the community alive. This rewards the behaviors that create content and visibility.</p>
-<p><strong>Holdings (25%):</strong> Holding GASCOIN tokens signals long-term alignment. Holders have skin in the game and are incentivized to see the platform succeed.</p>
+        content: `<h3>How Your Rank Is Determined</h3>
+<p>Your leaderboard position is calculated from a proprietary composite score that weighs three factors:</p>
+<ul>
+<li><strong>Referral activity</strong> — bringing new verified users into the ecosystem is heavily rewarded</li>
+<li><strong>Platform engagement</strong> — tweet performance, submission consistency, and streak maintenance all contribute</li>
+<li><strong>GASCOIN holdings</strong> — long-term holders who have skin in the game are recognized</li>
+</ul>
+<p>The exact weights are dynamic and may be adjusted to maintain healthy platform growth. All three factors matter — focusing on only one will not maximize your rank.</p>
 
 <h3>What the Leaderboard Does NOT Factor</h3>
 <p>SOL earned from receipt refunds is <strong>not</strong> a factor in the leaderboard. A user who received one large refund does not outrank a user who consistently refers new members and posts engaging tweets. The leaderboard rewards contribution to the ecosystem, not receipt size.</p>
 
-<h3>AI Audit</h3>
-<p>Every day at 6am UTC, an automated audit runs across the points system. It checks for anomalies — wallets earning unusually high points in a single day, duplicate point entries, and orphaned records. Any flagged anomalies are logged and reviewed. This ensures the integrity of the leaderboard.</p>`,
+<h3>Integrity</h3>
+<p>An automated AI audit runs daily across the points system. It monitors for anomalies, duplicate entries, and suspicious patterns. Any flagged issues are reviewed and corrected to maintain fair rankings.</p>`,
         order: 75,
       },
       {
