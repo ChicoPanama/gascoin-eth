@@ -140,120 +140,155 @@ export default async function Home() {
           </div>
         </section>
 
-        {/* VERIFICATION TECH */}
+        {/* AI-POWERED PLATFORM */}
         <section className="gc-tech">
           <div className="gc-tech-inner">
             <div className="gc-tech-header">
               <div className="gc-section-num">03 — The Technology</div>
               <h2 className="gc-tech-title">
-                <span>4-Layer</span>
-                <span className="gc-tech-title-ghost">Fraud Detection</span>
+                <span>AI-Powered</span>
+                <span className="gc-tech-title-ghost">From Upload to Payout</span>
               </h2>
               <p className="gc-tech-sub">
-                Every receipt passes through a multi-layer verification pipeline before
-                a single lamport leaves the treasury. AI vision, cryptographic hashing,
-                device forensics, and on-chain validation — running in under 8 seconds.
+                Every layer of GASCOIN runs on AI. Receipt verification, fraud detection,
+                tweet analysis, engagement scoring, and referral validation — all automated,
+                all real-time, all at a fraction of a cent per operation.
               </p>
             </div>
 
             <div className="gc-tech-pipeline">
-              {/* Layer 1 */}
-              <div className="gc-tech-layer">
-                <div className="gc-tech-layer-num">01</div>
-                <div className="gc-tech-layer-icon">
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                    <path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>
-                  </svg>
-                </div>
-                <div className="gc-tech-layer-content">
-                  <div className="gc-tech-layer-title">EXIF Forensics</div>
-                  <div className="gc-tech-layer-tag">FREE · INSTANT</div>
-                  <p className="gc-tech-layer-desc">
-                    Camera model, GPS coordinates, timestamps, editing software signatures.
-                    Real phone photos leave a forensic trail. AI images and screenshots don&apos;t.
-                  </p>
-                  <div className="gc-tech-layer-catches">
-                    <span className="gc-tech-catch">Screenshots</span>
-                    <span className="gc-tech-catch">AI Images</span>
-                    <span className="gc-tech-catch">Photoshop</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Connector */}
-              <div className="gc-tech-connector" />
-
-              {/* Layer 2 */}
-              <div className="gc-tech-layer">
-                <div className="gc-tech-layer-num">02</div>
-                <div className="gc-tech-layer-icon">
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                    <rect x="3" y="3" width="18" height="18" rx="0"/><path d="M3 9h18"/><path d="M9 3v18"/>
-                  </svg>
-                </div>
-                <div className="gc-tech-layer-content">
-                  <div className="gc-tech-layer-title">Dimensional Analysis</div>
-                  <div className="gc-tech-layer-tag">FREE · INSTANT</div>
-                  <p className="gc-tech-layer-desc">
-                    Real phone photos are 3000-5000px. AI images are 1024x1024.
-                    Screenshots match exact screen resolutions. Pixel dimensions don&apos;t lie.
-                  </p>
-                  <div className="gc-tech-layer-catches">
-                    <span className="gc-tech-catch">DALL·E</span>
-                    <span className="gc-tech-catch">Midjourney</span>
-                    <span className="gc-tech-catch">Screen Grabs</span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="gc-tech-connector" />
-
-              {/* Layer 3 */}
-              <div className="gc-tech-layer">
-                <div className="gc-tech-layer-num">03</div>
-                <div className="gc-tech-layer-icon">
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                    <path d="M4 4h16v16H4z"/><path d="M4 4l16 16"/><path d="M20 4L4 20"/>
-                  </svg>
-                </div>
-                <div className="gc-tech-layer-content">
-                  <div className="gc-tech-layer-title">Perceptual Hashing</div>
-                  <div className="gc-tech-layer-tag">FREE · LOCAL</div>
-                  <p className="gc-tech-layer-desc">
-                    dHash fingerprint computed locally. Two photos of the same receipt
-                    from different angles produce similar hashes. SHA-256 catches exact duplicates.
-                  </p>
-                  <div className="gc-tech-layer-catches">
-                    <span className="gc-tech-catch">Receipt Reuse</span>
-                    <span className="gc-tech-catch">Angle Tricks</span>
-                    <span className="gc-tech-catch">Re-uploads</span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="gc-tech-connector" />
-
-              {/* Layer 4 */}
+              {/* AI Layer 1 — Receipt Processing */}
               <div className="gc-tech-layer gc-tech-layer--ai">
-                <div className="gc-tech-layer-num">04</div>
+                <div className="gc-tech-layer-num">01</div>
                 <div className="gc-tech-layer-icon">
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
                     <circle cx="12" cy="12" r="3"/><path d="M12 2v4"/><path d="M12 18v4"/><path d="M4.93 4.93l2.83 2.83"/><path d="M16.24 16.24l2.83 2.83"/><path d="M2 12h4"/><path d="M18 12h4"/><path d="M4.93 19.07l2.83-2.83"/><path d="M16.24 7.76l2.83-2.83"/>
                   </svg>
                 </div>
                 <div className="gc-tech-layer-content">
-                  <div className="gc-tech-layer-title">AI Vision Extraction</div>
-                  <div className="gc-tech-layer-tag">GEMINI FLASH · {'<'}0.3¢</div>
+                  <div className="gc-tech-layer-title">AI Receipt Processing</div>
+                  <div className="gc-tech-layer-tag">GEMINI FLASH · {'<'}0.3¢ PER RECEIPT</div>
                   <p className="gc-tech-layer-desc">
-                    One API call extracts station name, city, date, total, and wallet address.
-                    Simultaneously scores 5 fraud signals: physical receipt, gas station,
-                    manipulation, handwriting, and wallet presence.
+                    Upload a receipt photo and AI extracts everything in one call — station name,
+                    city, date, total amount, and your wallet address. Simultaneously scores
+                    5 fraud signals: is it a physical receipt, from a real gas station, is it
+                    manipulated, does it have handwriting, and is the wallet readable.
                   </p>
                   <div className="gc-tech-layer-catches">
-                    <span className="gc-tech-catch">Fake Receipts</span>
-                    <span className="gc-tech-catch">Digital Edits</span>
-                    <span className="gc-tech-catch">Non-Gas</span>
-                    <span className="gc-tech-catch">Missing Wallet</span>
+                    <span className="gc-tech-catch">Auto-Extract</span>
+                    <span className="gc-tech-catch">OCR</span>
+                    <span className="gc-tech-catch">Fraud Score</span>
+                    <span className="gc-tech-catch">Wallet Match</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="gc-tech-connector" />
+
+              {/* AI Layer 2 — Fraud Detection */}
+              <div className="gc-tech-layer">
+                <div className="gc-tech-layer-num">02</div>
+                <div className="gc-tech-layer-icon">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                    <path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>
+                  </svg>
+                </div>
+                <div className="gc-tech-layer-content">
+                  <div className="gc-tech-layer-title">4-Layer Fraud Detection</div>
+                  <div className="gc-tech-layer-tag">FREE · INSTANT · ON-DEVICE</div>
+                  <p className="gc-tech-layer-desc">
+                    Before AI even sees the image, three free layers run instantly: EXIF forensics
+                    checks camera model, GPS, and editing software. Dimensional analysis flags
+                    AI-generated image sizes. Perceptual hashing catches receipt reuse from any angle.
+                    Zero cost. Zero latency.
+                  </p>
+                  <div className="gc-tech-layer-catches">
+                    <span className="gc-tech-catch">EXIF Forensics</span>
+                    <span className="gc-tech-catch">Dimension Check</span>
+                    <span className="gc-tech-catch">dHash</span>
+                    <span className="gc-tech-catch">SHA-256</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="gc-tech-connector" />
+
+              {/* AI Layer 3 — Tweet Verification */}
+              <div className="gc-tech-layer gc-tech-layer--ai">
+                <div className="gc-tech-layer-num">03</div>
+                <div className="gc-tech-layer-icon">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                    <path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z"/>
+                  </svg>
+                </div>
+                <div className="gc-tech-layer-content">
+                  <div className="gc-tech-layer-title">Automated Tweet Verification</div>
+                  <div className="gc-tech-layer-tag">X API V2 · 4 SEQUENTIAL GATES</div>
+                  <p className="gc-tech-layer-desc">
+                    Your #gascoin tweet is verified automatically through the X API — tweet exists,
+                    account is public, hashtag is present, posted within 48 hours. Four gates run
+                    sequentially and stop on first failure. No manual review needed.
+                  </p>
+                  <div className="gc-tech-layer-catches">
+                    <span className="gc-tech-catch">Tweet Exists</span>
+                    <span className="gc-tech-catch">Public Account</span>
+                    <span className="gc-tech-catch">#gascoin</span>
+                    <span className="gc-tech-catch">48h Window</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="gc-tech-connector" />
+
+              {/* AI Layer 4 — Engagement & Rewards */}
+              <div className="gc-tech-layer">
+                <div className="gc-tech-layer-num">04</div>
+                <div className="gc-tech-layer-icon">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                    <path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/>
+                  </svg>
+                </div>
+                <div className="gc-tech-layer-content">
+                  <div className="gc-tech-layer-title">AI Engagement Scoring</div>
+                  <div className="gc-tech-layer-tag">X API METRICS · AUTOMATED EVERY 6H</div>
+                  <p className="gc-tech-layer-desc">
+                    Your tweet&apos;s real engagement — impressions, likes, retweets, quote tweets,
+                    replies — is scored automatically every 6 hours. Points accumulate and
+                    convert to SOL. Retweets are worth 5x a like. Quote tweets are worth 10x.
+                    The algorithm rewards virality.
+                  </p>
+                  <div className="gc-tech-layer-catches">
+                    <span className="gc-tech-catch">Auto-Scoring</span>
+                    <span className="gc-tech-catch">Points → SOL</span>
+                    <span className="gc-tech-catch">Streak Bonus</span>
+                    <span className="gc-tech-catch">Rank Multiplier</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="gc-tech-connector" />
+
+              {/* AI Layer 5 — Referral Validation */}
+              <div className="gc-tech-layer gc-tech-layer--ai">
+                <div className="gc-tech-layer-num">05</div>
+                <div className="gc-tech-layer-icon">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                    <path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/>
+                  </svg>
+                </div>
+                <div className="gc-tech-layer-content">
+                  <div className="gc-tech-layer-title">Automated Referral Pipeline</div>
+                  <div className="gc-tech-layer-tag">EVERY 15 MIN · ELIGIBILITY CHECKS</div>
+                  <p className="gc-tech-layer-desc">
+                    Referral conversions are verified automatically — self-referral detection,
+                    referrer approval status, monthly cap enforcement, and rolling window limits.
+                    Legitimate referrals earn 0.005 SOL each. No manual processing.
+                  </p>
+                  <div className="gc-tech-layer-catches">
+                    <span className="gc-tech-catch">Anti-Farm</span>
+                    <span className="gc-tech-catch">Cap Enforce</span>
+                    <span className="gc-tech-catch">Auto-Verify</span>
+                    <span className="gc-tech-catch">0.005 SOL</span>
                   </div>
                 </div>
               </div>
@@ -263,24 +298,24 @@ export default async function Home() {
             <div className="gc-tech-stats">
               <div className="gc-tech-stat">
                 <div className="gc-tech-stat-value">{'<'}8s</div>
-                <div className="gc-tech-stat-label">Total Processing</div>
+                <div className="gc-tech-stat-label">Receipt to Verdict</div>
               </div>
               <div className="gc-tech-stat">
-                <div className="gc-tech-stat-value">3,300</div>
-                <div className="gc-tech-stat-label">Receipts Per Dollar</div>
+                <div className="gc-tech-stat-value">11</div>
+                <div className="gc-tech-stat-label">Automated Gates</div>
               </div>
               <div className="gc-tech-stat">
-                <div className="gc-tech-stat-value">4</div>
-                <div className="gc-tech-stat-label">Detection Layers</div>
+                <div className="gc-tech-stat-value">5</div>
+                <div className="gc-tech-stat-label">AI Systems</div>
               </div>
               <div className="gc-tech-stat">
                 <div className="gc-tech-stat-value">0</div>
-                <div className="gc-tech-stat-label">Trusted Inputs</div>
+                <div className="gc-tech-stat-label">Manual Steps</div>
               </div>
             </div>
 
             <div className="gc-tech-footer">
-              <Link href="/gates" className="gc-teaser-link">See all 10 verification gates</Link>
+              <Link href="/gates" className="gc-teaser-link">See all 11 verification gates</Link>
             </div>
           </div>
         </section>
