@@ -114,17 +114,18 @@ code, .mono {
 
 .gc-nav-cta {
   font-family: 'IBM Plex Mono', monospace;
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.1em;
-  padding: 10px 24px;
+  padding: 6px 14px;
   background: var(--fg);
   color: var(--bg);
   cursor: crosshair;
   transition: background 0.2s, color 0.2s;
   text-decoration: none;
   display: inline-block;
+  white-space: nowrap;
 }
 
 .gc-nav-cta:hover {
@@ -2890,15 +2891,16 @@ input:focus, textarea:focus, select:focus {
 /* ─── WALLET BUTTON ─── */
 .wallet-btn {
   font-family: 'IBM Plex Mono', monospace;
-  font-size: 11px;
-  letter-spacing: 0.2em;
+  font-size: 10px;
+  letter-spacing: 0.15em;
   text-transform: uppercase;
   color: #000;
   background: #fff;
   border: 1px solid #fff;
-  padding: 10px 20px;
+  padding: 6px 14px;
   cursor: crosshair;
   transition: background 0.2s, color 0.2s;
+  white-space: nowrap;
 }
 .wallet-btn:hover {
   background: transparent;
@@ -2908,7 +2910,7 @@ input:focus, textarea:focus, select:focus {
   background: transparent;
   color: rgba(255,255,255,0.6);
   border-color: rgba(255,255,255,0.2);
-  font-size: 10px;
+  font-size: 9px;
 }
 .wallet-btn--connected:hover {
   color: #fff;
