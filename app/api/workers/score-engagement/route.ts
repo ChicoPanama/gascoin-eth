@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '../../../../lib/supabase';
 import { calculateEngagementPoints } from '../../../../lib/engagement-rewards';
+import { scoreTweetQuality } from '../../../../lib/ai-points-engine';
 
 function isAuthorized(req: Request): boolean {
   const secret = (process.env.CRON_SECRET || '').trim();
@@ -82,7 +83,21 @@ export async function POST(req: Request) {
         };
 
         // Calculate points using the engagement rewards formula
-        const points = calculateEngagementPoints(metrics);
+        const rawPoints = calculateEngagementPoints(metrics);
+
+        // AI quality scoring — adjusts points based on tweet authenticity
+        const tweetText = json?.data?.text || '';
+        const qualityScore = await scoreTweetQuality({
+          tweetText,
+          impressions: metrics.impressions,
+          likes: metrics.likes,
+          retweets: metrics.retweets,
+          replies: metrics.replies,
+          followerCount: json?.includes?.users?.[0]?.public_metrics?.followers_count || 0,
+        });
+
+        // Apply quality multiplier: spam/bots get penalized, genuine content rewarded
+        const points = Math.round(rawPoints * qualityScore.multiplier);
 
         // Legacy score for backward compatibility
         const legacyScore = metrics.impressions * 0.01 + metrics.likes * 1 +
@@ -105,7 +120,7 @@ export async function POST(req: Request) {
               wallet: claim.wallet,
               source: 'tweet_engagement',
               points: pointsDelta,
-              metadata_json: { claim_id: claim.id, tweet_id: tweetId, metrics, delta: true },
+              metadata_json: { claim_id: claim.id, tweet_id: tweetId, metrics, delta: true, ai: { quality: qualityScore.quality, multiplier: qualityScore.multiplier, isSpam: qualityScore.isSpam, isBotEngagement: qualityScore.isBotEngagement } },
             });
             totalPointsAwarded += pointsDelta;
           }
@@ -121,7 +136,7 @@ export async function POST(req: Request) {
               wallet: claim.wallet,
               source: 'tweet_engagement',
               points,
-              metadata_json: { claim_id: claim.id, tweet_id: tweetId, metrics },
+              metadata_json: { claim_id: claim.id, tweet_id: tweetId, metrics, ai: { quality: qualityScore.quality, multiplier: qualityScore.multiplier, isSpam: qualityScore.isSpam, isBotEngagement: qualityScore.isBotEngagement } },
             });
             totalPointsAwarded += points;
           }

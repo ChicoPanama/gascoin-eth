@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '../../../../lib/supabase';
 import { POINTS_CONFIG } from '../../../../lib/engagement-rewards';
 import { TOKEN_TIERS, getTierForBalance } from '../../../../lib/token-tiers';
+import { detectReferralRing, calculateWalletTrust, generateAuditSummary } from '../../../../lib/ai-points-engine';
 
 function isAuthorized(req: Request): boolean {
   const secret = (process.env.CRON_SECRET || '').trim();
@@ -198,7 +199,7 @@ export async function POST(req: Request) {
       }
     }
 
-    // 4c: Any wallet earning holdings bonus without being in token cache?
+    // 4c: Orphan holdings check
     const cachedAddresses = new Set((cachedWallets || []).map((w: any) => w.wallet_address));
     const { data: holdingsEntries } = await supabase
       .from('engagement_points')
@@ -212,10 +213,112 @@ export async function POST(req: Request) {
       }
     }
 
-    // Log audit results
+    // ─── 4d: AI REFERRAL RING DETECTION ───
+    let ringsDetected = 0;
+    try {
+      const { data: allRefs } = await supabase
+        .from('referrals')
+        .select('referrer_wallet, referred_wallet, created_at')
+        .in('status', ['pending', 'verified']);
+
+      const refList = (allRefs || []).map((r: any) => ({
+        referrer: r.referrer_wallet, referred: r.referred_wallet, created_at: r.created_at,
+      }));
+
+      // Check recent referrals for rings
+      const recentRefs = refList.filter((r) => new Date(r.created_at) > new Date(Date.now() - 7 * 86400000));
+      for (const ref of recentRefs) {
+        const ring = await detectReferralRing({
+          referrerWallet: ref.referrer,
+          referredWallet: ref.referred,
+          allReferrals: refList,
+        });
+        if (ring.isSuspicious) {
+          anomalies.push(`RING_${ring.ringType.toUpperCase()}: ${ring.reason}`);
+          ringsDetected++;
+        }
+      }
+    } catch {}
+
+    // ─── 4e: AI WALLET TRUST SCORING ───
+    const trustScores: Record<string, number> = {};
+    let flaggedWallets = 0;
+    try {
+      for (const wallet of wallets.slice(0, 50)) { // Cap at 50 to stay fast
+        const { data: walletClaims } = await supabase
+          .from('claims')
+          .select('status')
+          .eq('wallet', wallet);
+
+        const { data: walletRefs } = await supabase
+          .from('referral_conversions')
+          .select('reward_status')
+          .eq('referrer_wallet', wallet);
+
+        const { data: walletAnomalies } = await supabase
+          .from('engagement_points')
+          .select('metadata_json')
+          .eq('wallet', wallet)
+          .eq('source', 'tweet_engagement');
+
+        const aiFlags = (walletAnomalies || []).filter((e: any) =>
+          (e.metadata_json as any)?.ai?.isSpam || (e.metadata_json as any)?.ai?.isBotEngagement
+        ).length;
+
+        const claims = walletClaims || [];
+        const refs = walletRefs || [];
+        const firstClaim = claims[0] as any;
+        const ageDays = firstClaim?.created_at
+          ? Math.floor((Date.now() - new Date(firstClaim.created_at).getTime()) / 86400000)
+          : 0;
+
+        const trust = calculateWalletTrust({
+          totalSubmissions: claims.length,
+          approvedSubmissions: claims.filter((c: any) => ['approved', 'paid', 'ready_for_dispatch'].includes(c.status)).length,
+          rejectedSubmissions: claims.filter((c: any) => c.status === 'rejected').length,
+          referralConversions: refs.filter((r: any) => r.reward_status === 'verified').length,
+          skippedReferrals: refs.filter((r: any) => r.reward_status === 'skipped').length,
+          accountAgeDays: ageDays,
+          anomalyCount: aiFlags,
+        });
+
+        trustScores[wallet] = trust.score;
+        if (trust.level === 'suspicious') {
+          anomalies.push(`SUSPICIOUS_WALLET: ${wallet.slice(0, 8)}... trust=${trust.score} factors=[${trust.factors.join(', ')}]`);
+          flaggedWallets++;
+        }
+      }
+    } catch {}
+
+    // ─── 4f: AI AUDIT NARRATOR ───
+    let auditSummary = '';
+    try {
+      // Get today's engagement and referral point totals
+      const { data: todayEngagement } = await supabase
+        .from('engagement_points')
+        .select('points, source')
+        .gte('created_at', `${todayKey}T00:00:00Z`);
+
+      const engPts = (todayEngagement || []).filter((e: any) => e.source === 'tweet_engagement').reduce((s: number, e: any) => s + Number(e.points), 0);
+      const refPts = (todayEngagement || []).filter((e: any) => e.source === 'referral_conversion').reduce((s: number, e: any) => s + Number(e.points), 0);
+
+      auditSummary = await generateAuditSummary({
+        date: todayKey,
+        submissionPoints: submissionPointsAwarded,
+        streakPoints: streakPointsAwarded,
+        holdingsPoints: holdingsPointsAwarded,
+        engagementPoints: engPts,
+        referralPoints: refPts,
+        totalWallets: wallets.length,
+        anomalies,
+        flaggedWallets,
+      });
+    } catch {}
+
+    // Log full audit results
     await supabase.from('audit_logs').insert({
       actor_type: 'system',
-      actor_id: 'points_worker',
+      actor_id: 'ai_points_engine',
       action: 'daily_points_audit',
       target_type: 'engagement_points',
       target_id: todayKey,
@@ -226,8 +329,11 @@ export async function POST(req: Request) {
         totalPointsAwarded: submissionPointsAwarded + streakPointsAwarded + holdingsPointsAwarded,
         walletsProcessed: wallets.length,
         holdingsWallets: (cachedWallets || []).length,
+        ringsDetected,
+        flaggedWallets,
         anomalies,
         anomalyCount: anomalies.length,
+        aiSummary: auditSummary,
       },
     });
 
@@ -238,7 +344,10 @@ export async function POST(req: Request) {
       streakPointsAwarded,
       holdingsPointsAwarded,
       totalPointsAwarded: submissionPointsAwarded + streakPointsAwarded + holdingsPointsAwarded,
+      ringsDetected,
+      flaggedWallets,
       anomalies,
+      aiSummary: auditSummary,
     });
   } catch (e: any) {
     return NextResponse.json({ error: e?.message || 'worker failed' }, { status: 500 });
