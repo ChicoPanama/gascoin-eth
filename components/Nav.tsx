@@ -13,7 +13,6 @@ export function Nav() {
     <Link href="/community">Community</Link>
     <Link href="/leaderboard">Leaderboard</Link>
     <Link href="/dashboard">Treasury</Link>
-    <Link href="/admin">Admin</Link>
     <span style={{ marginLeft: 'auto', display: 'flex', gap: 8, alignItems: 'center' }}>
       <WalletButton />
       <AuthNavButton />
