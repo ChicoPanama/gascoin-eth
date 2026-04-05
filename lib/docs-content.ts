@@ -1094,8 +1094,173 @@ export const DOC_CATEGORIES: DocCategory[] = [
         order: 69,
       },
       {
+        slug: "points-system-overview",
+        title: "Points System — Overview",
+        categorySlug: "help",
+        category: "Help",
+        description: "How the GASCOIN points system works — earning, leaderboard, and rewards.",
+        content: `<h3>SOL vs Points — The Core Distinction</h3>
+<p><strong>SOL payouts are for gas receipts only.</strong> When you submit a verified gas receipt and it passes all 11 gates, you receive SOL directly to your wallet. The amount depends on your GASCOIN token tier (Standard: 0.10 SOL, Commuter: 0.25 SOL, Road Warrior: 0.50 SOL, Fleet: 1.0 SOL).</p>
+<p><strong>Everything else earns points.</strong> Referrals, tweet engagement, submission streaks, and GASCOIN holdings all earn points. Points drive your leaderboard rank, status badges, and platform recognition. Points do not convert to SOL.</p>
+
+<h3>Why Points Matter</h3>
+<p>Your leaderboard position is determined entirely by points. The higher your point total, the higher your rank. High-ranking users get visibility on the platform — featured on the leaderboard, recognized in the community feed, and positioned as top contributors. Points are the measure of how much you contribute to the GASCOIN ecosystem beyond just submitting receipts.</p>
+
+<h3>The Five Point Sources</h3>
+<table>
+<thead><tr><th>Source</th><th>Points</th><th>When Awarded</th></tr></thead>
+<tbody>
+<tr><td><strong>Tweet Engagement</strong></td><td>Varies by metric</td><td>Every 6 hours via X API</td></tr>
+<tr><td><strong>Referral Conversions</strong></td><td>500 per conversion</td><td>When referred user gets approved</td></tr>
+<tr><td><strong>Approved Submissions</strong></td><td>1,000 per receipt</td><td>Immediately on admin approval</td></tr>
+<tr><td><strong>Streak Bonus</strong></td><td>500 per consecutive window</td><td>Daily at 6am UTC</td></tr>
+<tr><td><strong>Holdings Bonus</strong></td><td>25–750 per day by tier</td><td>Daily at 6am UTC</td></tr>
+</tbody>
+</table>`,
+        order: 70,
+      },
+      {
+        slug: "points-tweet-engagement",
+        title: "Points — Tweet Engagement",
+        categorySlug: "help",
+        category: "Help",
+        description: "How tweet metrics convert to points.",
+        content: `<h3>Tweet Engagement Points</h3>
+<p>Every #gascoin tweet you submit is tracked via the X API. Every 6 hours, the system fetches your tweet's real engagement metrics and awards points based on this formula:</p>
+<table>
+<thead><tr><th>Metric</th><th>Points Per Unit</th><th>Why This Weight</th></tr></thead>
+<tbody>
+<tr><td>Impressions</td><td>1 point per impression</td><td>Reach — how many people saw it</td></tr>
+<tr><td>Likes</td><td>50 points per like</td><td>Basic engagement signal</td></tr>
+<tr><td>Replies</td><td>100 points per reply</td><td>Conversation drives algorithm visibility</td></tr>
+<tr><td>Retweets</td><td>250 points per retweet</td><td>Amplification — shares your message to new audiences</td></tr>
+<tr><td>Quote Tweets</td><td>500 points per quote</td><td>Highest value — original content + amplification combined</td></tr>
+</tbody>
+</table>
+
+<h3>Example Calculations</h3>
+<p><strong>Average tweet:</strong> 5,000 impressions + 50 likes + 10 retweets + 2 quotes = 5,000 + 2,500 + 2,500 + 1,000 = <strong>11,000 points</strong></p>
+<p><strong>Viral tweet:</strong> 50,000 impressions + 500 likes + 200 retweets + 50 quotes = 50,000 + 25,000 + 50,000 + 25,000 = <strong>150,000 points</strong></p>
+
+<h3>How Scoring Works</h3>
+<p>Points are awarded incrementally. Each 6-hour cycle calculates the delta since the last check. You earn points for new engagement, not retroactively for the same engagement twice. If your tweet gets 100 likes in the first cycle and 50 more in the next, you earn points for both — but only the new 50 in the second cycle.</p>
+<p>Only tweets linked to approved GASCOIN submissions are scored. Random tweets are not tracked.</p>`,
+        order: 71,
+      },
+      {
+        slug: "points-referrals",
+        title: "Points — Referrals",
+        categorySlug: "help",
+        category: "Help",
+        description: "How referral conversions earn points.",
+        content: `<h3>Referral Points</h3>
+<p>When someone uses your referral link to submit a gas receipt and that receipt gets approved through all 11 gates, you earn <strong>500 points</strong>.</p>
+
+<h3>Eligibility Rules</h3>
+<ul>
+<li>You must have at least one approved submission yourself to generate a referral link</li>
+<li>Self-referrals are blocked — you cannot use your own link</li>
+<li>Maximum 20 conversions per 30-day rolling window</li>
+<li>Maximum 10,000 points per 30-day rolling window from referrals</li>
+</ul>
+
+<h3>When Referral Points Are Skipped</h3>
+<table>
+<thead><tr><th>Reason</th><th>What It Means</th></tr></thead>
+<tbody>
+<tr><td>Self-referral</td><td>You submitted using your own referral link</td></tr>
+<tr><td>Referrer not approved</td><td>You had no approved submissions when the conversion occurred</td></tr>
+<tr><td>Monthly cap reached</td><td>You hit 20 conversions in the rolling 30-day window</td></tr>
+<tr><td>Monthly points cap</td><td>You hit 10,000 referral points in the rolling 30-day window</td></tr>
+</tbody>
+</table>
+
+<p>Referral conversions are checked automatically every 15 minutes by the verification worker.</p>`,
+        order: 72,
+      },
+      {
+        slug: "points-submissions-streaks",
+        title: "Points — Submissions & Streaks",
+        categorySlug: "help",
+        category: "Help",
+        description: "Submission points and streak bonuses.",
+        content: `<h3>Submission Points</h3>
+<p>Every time a gas receipt submission is approved by the admin, you earn <strong>1,000 points</strong> immediately. These points are awarded the moment the admin clicks "Approve" — you do not need to wait for the SOL refund to arrive.</p>
+
+<h3>Streak Bonus</h3>
+<p>If you submit and get approved in consecutive 30-day windows, you earn a streak bonus. The streak rewards consistency — regular participants earn more than one-off submitters.</p>
+
+<table>
+<thead><tr><th>Consecutive Windows</th><th>Streak Bonus</th><th>Total with Submission</th></tr></thead>
+<tbody>
+<tr><td>1 window (no streak)</td><td>0 points</td><td>1,000 points</td></tr>
+<tr><td>2 consecutive</td><td>1,000 points</td><td>2,000 points</td></tr>
+<tr><td>3 consecutive</td><td>1,500 points</td><td>2,500 points</td></tr>
+<tr><td>4 consecutive</td><td>2,000 points</td><td>3,000 points</td></tr>
+<tr><td>5 consecutive (max)</td><td>2,500 points</td><td>3,500 points</td></tr>
+</tbody>
+</table>
+
+<p>A "window" is a 30-day period. If you miss a window (no approved submission in 30 days), your streak resets to zero. The streak bonus is calculated and awarded daily at 6am UTC.</p>`,
+        order: 73,
+      },
+      {
+        slug: "points-holdings",
+        title: "Points — GASCOIN Holdings",
+        categorySlug: "help",
+        category: "Help",
+        description: "How holding GASCOIN tokens earns daily points.",
+        content: `<h3>Holdings Bonus</h3>
+<p>Every day, GASCOIN token holders earn points based on their tier. The more GASCOIN you hold, the more daily points you accumulate. This rewards long-term holders and creates an incentive to acquire and hold GASCOIN beyond just the receipt refund tier benefits.</p>
+
+<table>
+<thead><tr><th>Tier</th><th>GASCOIN Required</th><th>Points Per Day</th><th>Points Per Month (30d)</th></tr></thead>
+<tbody>
+<tr><td>Standard</td><td>0</td><td>25</td><td>750</td></tr>
+<tr><td>Commuter</td><td>100,000</td><td>100</td><td>3,000</td></tr>
+<tr><td>Road Warrior</td><td>500,000</td><td>300</td><td>9,000</td></tr>
+<tr><td>Fleet</td><td>2,000,000</td><td>750</td><td>22,500</td></tr>
+</tbody>
+</table>
+
+<h3>How It Works</h3>
+<p>Your GASCOIN balance is checked on-chain and cached. Every day at 6am UTC, the daily points worker reads your cached tier and awards the corresponding points. If your tier changes (you buy or sell GASCOIN), the next day's award reflects the new tier.</p>
+<p>Holdings points compound over time. A Fleet holder who participates for 6 months accumulates 135,000 points from holdings alone — before any tweets, referrals, or submissions.</p>`,
+        order: 74,
+      },
+      {
+        slug: "points-leaderboard-formula",
+        title: "Points — Leaderboard Formula",
+        categorySlug: "help",
+        category: "Help",
+        description: "How the leaderboard composite score is calculated.",
+        content: `<h3>Leaderboard Composite Score</h3>
+<p>Your leaderboard rank is determined by a composite score calculated from three weighted factors:</p>
+
+<table>
+<thead><tr><th>Factor</th><th>Weight</th><th>What It Measures</th></tr></thead>
+<tbody>
+<tr><td><strong>Referral Points</strong></td><td>40%</td><td>Total points from referral conversions — measures how many new users you bring in</td></tr>
+<tr><td><strong>Engagement Points</strong></td><td>35%</td><td>Total points from tweets, submissions, streaks, and holdings — measures platform participation</td></tr>
+<tr><td><strong>GASCOIN Holdings</strong></td><td>25%</td><td>On-chain GASCOIN token balance — measures long-term commitment</td></tr>
+</tbody>
+</table>
+
+<h3>Why These Weights</h3>
+<p><strong>Referrals (40%):</strong> The platform grows when users bring in other users. Referrals are the primary growth engine, so they carry the most weight.</p>
+<p><strong>Engagement (35%):</strong> Active participation — tweeting, submitting, maintaining streaks — keeps the community alive. This rewards the behaviors that create content and visibility.</p>
+<p><strong>Holdings (25%):</strong> Holding GASCOIN tokens signals long-term alignment. Holders have skin in the game and are incentivized to see the platform succeed.</p>
+
+<h3>What the Leaderboard Does NOT Factor</h3>
+<p>SOL earned from receipt refunds is <strong>not</strong> a factor in the leaderboard. A user who received one large refund does not outrank a user who consistently refers new members and posts engaging tweets. The leaderboard rewards contribution to the ecosystem, not receipt size.</p>
+
+<h3>AI Audit</h3>
+<p>Every day at 6am UTC, an automated audit runs across the points system. It checks for anomalies — wallets earning unusually high points in a single day, duplicate point entries, and orphaned records. Any flagged anomalies are logged and reviewed. This ensures the integrity of the leaderboard.</p>`,
+        order: 75,
+      },
+      {
         slug: "quick-reference-card",
-        title: "11. Quick Reference Card",
+        title: "12. Quick Reference Card",
         categorySlug: "help",
         category: "Help",
         description: "",
