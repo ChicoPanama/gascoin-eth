@@ -33,11 +33,11 @@ export function ReferralTeaser() {
           <div className="gc-section-num">08 — Earn More</div>
           <h2 className="ref-teaser-title">
             <span>Refer &amp;</span>
-            <span className="ref-teaser-ghost">Earn SOL.</span>
+            <span className="ref-teaser-ghost">Earn Points.</span>
           </h2>
           <p className="ref-teaser-sub">
             Share your referral link. Every approved submission through your link
-            earns you 0.005 SOL automatically.
+            earns you points that boost your leaderboard rank and status.
           </p>
           <Link href="/referral" className="gc-teaser-link">Get Your Referral Link</Link>
         </div>
@@ -48,8 +48,8 @@ export function ReferralTeaser() {
               <div className="ref-teaser-stat-label">Total Conversions</div>
             </div>
             <div className="ref-teaser-stat">
-              <div className="ref-teaser-stat-value">{loading ? '—' : totalSol.toFixed(4)}</div>
-              <div className="ref-teaser-stat-label">SOL Paid in Referrals</div>
+              <div className="ref-teaser-stat-value">{loading ? '—' : referrers.toLocaleString()}</div>
+              <div className="ref-teaser-stat-label">Active Referrers</div>
             </div>
           </div>
           <div className="ref-teaser-active">Join {loading ? '—' : referrers} active referrers</div>

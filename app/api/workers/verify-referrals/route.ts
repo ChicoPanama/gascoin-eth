@@ -8,8 +8,8 @@ function isAuthorized(req: Request): boolean {
   return req.headers.get('authorization') === `Bearer ${secret}`;
 }
 
-// Worker: auto-verify referrals + auto-create conversion rewards
-// Referral rewards land as 'ready_for_dispatch' — admin approves to send SOL
+// Worker: auto-verify referrals + award POINTS (not SOL)
+// SOL payouts are for gas receipts ONLY
 // Runs every 15 minutes via Vercel cron
 export async function POST(req: Request) {
   if (!isAuthorized(req)) {
@@ -21,14 +21,13 @@ export async function POST(req: Request) {
     const now = new Date().toISOString();
     const thirtyDaysAgo = new Date(Date.now() - 30 * 86400000).toISOString();
 
-    // Step 1: Find pending referrals where the referred wallet has a paid payout
     const { data: pending } = await supabase
       .from('referrals')
-      .select('id, referrer_wallet, referred_wallet, referred_claim_id')
+      .select('id, referrer_wallet, referred_wallet')
       .eq('status', 'pending');
 
     let verified = 0;
-    let conversionsCreated = 0;
+    let pointsAwarded = 0;
     let skipped = 0;
 
     for (const ref of pending || []) {
@@ -42,11 +41,10 @@ export async function POST(req: Request) {
 
       if (!payout) continue;
 
-      // Mark referral as verified
       await supabase.from('referrals').update({ status: 'verified', verified_at: now }).eq('id', ref.id);
       verified++;
 
-      // Skip if conversion already exists
+      // Check if already converted
       const { data: existing } = await supabase
         .from('referral_conversions')
         .select('id')
@@ -70,35 +68,42 @@ export async function POST(req: Request) {
 
       if (!skipReason) {
         const { data: recent } = await supabase
-          .from('referral_conversions').select('reward_sol')
+          .from('referral_conversions')
+          .select('id')
           .eq('referrer_wallet', ref.referrer_wallet)
-          .in('reward_status', ['pending', 'ready_for_dispatch', 'dispatched'])
+          .in('reward_status', ['verified', 'ready_for_dispatch'])
           .gte('created_at', thirtyDaysAgo);
-        const count = (recent || []).length;
-        const sol = (recent || []).reduce((s: number, c: any) => s + Number(c.reward_sol || 0), 0);
-        if (count >= REFERRAL_CONFIG.MAX_CONVERSIONS_30D) skipReason = 'max_conversions_reached';
-        else if (sol >= REFERRAL_CONFIG.MAX_REFERRAL_REWARDS_30D_SOL) skipReason = 'max_rewards_reached';
+        if ((recent || []).length >= REFERRAL_CONFIG.MAX_CONVERSIONS_30D) {
+          skipReason = 'max_conversions_reached';
+        }
       }
 
-      // Create conversion — ready_for_dispatch (admin approves) or skipped
+      // Create conversion record — points only, no SOL
       await supabase.from('referral_conversions').insert({
         referral_code: '',
         referrer_wallet: ref.referrer_wallet,
         referred_wallet: ref.referred_wallet,
         submission_id: payout.claim_id,
-        reward_sol: skipReason ? 0 : REFERRAL_CONFIG.REWARD_PER_CONVERSION_SOL,
-        reward_status: skipReason ? 'skipped' : 'ready_for_dispatch',
+        reward_sol: 0, // No SOL for referrals
+        reward_status: skipReason ? 'skipped' : 'verified',
         skip_reason: skipReason,
       });
 
-      if (skipReason) skipped++;
-      else conversionsCreated++;
+      // Award points if eligible
+      if (!skipReason) {
+        await supabase.from('engagement_points').insert({
+          wallet: ref.referrer_wallet,
+          source: 'referral_conversion',
+          points: REFERRAL_CONFIG.POINTS_PER_CONVERSION,
+          metadata_json: { referred_wallet: ref.referred_wallet, claim_id: payout.claim_id },
+        });
+        pointsAwarded += REFERRAL_CONFIG.POINTS_PER_CONVERSION;
+      } else {
+        skipped++;
+      }
     }
 
-    const { count: readyCount } = await supabase
-      .from('referral_conversions').select('*', { count: 'exact', head: true }).eq('reward_status', 'ready_for_dispatch');
-
-    return NextResponse.json({ ok: true, verified, conversionsCreated, skipped, readyForDispatch: readyCount ?? 0 });
+    return NextResponse.json({ ok: true, verified, pointsAwarded, skipped });
   } catch (e: any) {
     return NextResponse.json({ error: e?.message || 'worker failed' }, { status: 500 });
   }

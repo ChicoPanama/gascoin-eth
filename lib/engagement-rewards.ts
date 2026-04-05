@@ -1,60 +1,44 @@
 // ═══════════════════════════════════════════
-// GASCOIN Engagement Rewards System
+// GASCOIN Points System
 //
-// Option A: Leaderboard rank multiplier on receipt refunds (always active)
-// Option C: Points-based engagement rewards (SOL payout toggled by admin)
+// SOL payouts are for gas receipts ONLY.
+// Everything else earns POINTS:
+//   - Tweet engagement (impressions, likes, RTs, quotes, replies)
+//   - Referral conversions
+//   - Submission streaks
+//   - GASCOIN holdings bonus
 //
-// Points model inspired by X creator payouts but at treasury scale.
-// Points accumulate → convert to SOL at admin-controlled rate.
-// SOL payout is OFF by default. Points still accumulate and display.
+// Points drive leaderboard rank, badges, and status.
+// Points do NOT convert to SOL.
 // ═══════════════════════════════════════════
 
-export const ENGAGEMENT_REWARDS_CONFIG = {
-  // ─── Master switches ───
-  POINTS_ENABLED: true,              // Points always accumulate
-  PAYOUT_ENABLED: false,             // SOL payout OFF until admin flips this
-  LEADERBOARD_MULTIPLIER_ENABLED: true,  // Rank-based refund multiplier always on
+export const POINTS_CONFIG = {
+  // ─── Tweet engagement points ───
+  POINTS_PER_IMPRESSION: 1,
+  POINTS_PER_LIKE: 50,
+  POINTS_PER_RETWEET: 250,
+  POINTS_PER_QUOTE_TWEET: 500,
+  POINTS_PER_REPLY: 100,
 
-  // ─── Points earning rates ───
-  // Aggressive rates — virality is the goal, make it worth chasing
-  POINTS_PER_IMPRESSION: 1,           // 1000 impressions = 1,000 points
-  POINTS_PER_LIKE: 50,               // Every like matters
-  POINTS_PER_RETWEET: 250,           // Amplification is gold — 5x a like
-  POINTS_PER_QUOTE_TWEET: 500,       // Original content + amplification — the holy grail
-  POINTS_PER_REPLY: 100,             // Conversation drives algorithm visibility
+  // ─── Referral points ───
+  POINTS_PER_REFERRAL_CONVERSION: 500,
 
-  // ─── Streak bonuses ───
-  POINTS_PER_STREAK_DAY: 500,        // Significant bonus for consistency
-  MAX_STREAK_MULTIPLIER: 5,          // Up to 5 consecutive windows = 2,500 bonus
+  // ─── Submission points ───
+  POINTS_PER_APPROVED_SUBMISSION: 1000,
 
-  // ─── Submission bonus ───
-  POINTS_PER_APPROVED_SUBMISSION: 1000, // Big reward for actually submitting
+  // ─── Streak bonus ───
+  POINTS_PER_STREAK_WINDOW: 500,    // Per consecutive 30-day submission window
+  MAX_STREAK_MULTIPLIER: 5,          // Cap at 5x
 
-  // ─── Referral bonus (on top of SOL reward) ───
-  POINTS_PER_REFERRAL_CONVERSION: 500, // Referrals compound — points + SOL
-
-  // ─── Points → SOL conversion ───
-  // Anchored: 1 SOL ≈ a tank of gas in California (~$80-100)
-  // Top engaged users should earn toward a tank through virality
-  POINTS_TO_SOL_RATE: 2500,          // 2,500 points = 0.01 SOL
-  MIN_POINTS_FOR_PAYOUT: 1000,       // Low barrier — first payout achievable fast
-  MAX_WEEKLY_PAYOUT_SOL: 0.50,       // Half a tank per week from engagement alone
-  PAYOUT_CYCLE: 'weekly' as const,   // Weekly settlement
-
-  // ─── Leaderboard rank multiplier (Option A) ───
-  // Applied to max_sol_refund at submission time
-  // Fleet base is 1.0 SOL — rank 1 gets 1.5 SOL (more than a full tank)
-  RANK_MULTIPLIERS: [
-    { minRank: 1, maxRank: 1, multiplier: 1.5 },     // #1: 1.5x (Fleet = 1.5 SOL)
-    { minRank: 2, maxRank: 5, multiplier: 1.3 },     // #2-5: 1.3x (Fleet = 1.3 SOL)
-    { minRank: 6, maxRank: 10, multiplier: 1.2 },    // #6-10: 1.2x
-    { minRank: 11, maxRank: 25, multiplier: 1.1 },   // #11-25: 1.1x
-    { minRank: 26, maxRank: 50, multiplier: 1.05 },  // #26-50: 1.05x
-  ] as const,
-  DEFAULT_MULTIPLIER: 1.0,           // Everyone else: 1x
+  // ─── GASCOIN holdings bonus ───
+  // Bonus points per scoring cycle based on tier
+  POINTS_PER_CYCLE_STANDARD: 0,
+  POINTS_PER_CYCLE_COMMUTER: 100,
+  POINTS_PER_CYCLE_ROAD_WARRIOR: 300,
+  POINTS_PER_CYCLE_FLEET: 750,
 } as const;
 
-// ─── Helper functions ───
+// ─── Points calculation ───
 
 export function calculateEngagementPoints(metrics: {
   impressions: number;
@@ -63,7 +47,7 @@ export function calculateEngagementPoints(metrics: {
   quote_tweets: number;
   replies: number;
 }): number {
-  const c = ENGAGEMENT_REWARDS_CONFIG;
+  const c = POINTS_CONFIG;
   return (
     metrics.impressions * c.POINTS_PER_IMPRESSION +
     metrics.likes * c.POINTS_PER_LIKE +
@@ -74,37 +58,11 @@ export function calculateEngagementPoints(metrics: {
 }
 
 export function calculateStreakBonus(consecutiveWindows: number): number {
-  const c = ENGAGEMENT_REWARDS_CONFIG;
-  const capped = Math.min(consecutiveWindows, c.MAX_STREAK_MULTIPLIER);
-  return capped * c.POINTS_PER_STREAK_DAY;
+  const capped = Math.min(consecutiveWindows, POINTS_CONFIG.MAX_STREAK_MULTIPLIER);
+  return capped * POINTS_CONFIG.POINTS_PER_STREAK_WINDOW;
 }
 
-export function getRankMultiplier(rank: number): number {
-  const c = ENGAGEMENT_REWARDS_CONFIG;
-  if (!c.LEADERBOARD_MULTIPLIER_ENABLED) return 1.0;
-
-  for (const tier of c.RANK_MULTIPLIERS) {
-    if (rank >= tier.minRank && rank <= tier.maxRank) {
-      return tier.multiplier;
-    }
-  }
-  return c.DEFAULT_MULTIPLIER;
-}
-
-export function pointsToSol(points: number): number {
-  const c = ENGAGEMENT_REWARDS_CONFIG;
-  if (!c.PAYOUT_ENABLED) return 0;
-  if (points < c.MIN_POINTS_FOR_PAYOUT) return 0;
-  const sol = points / c.POINTS_TO_SOL_RATE * 0.01;
-  return Math.min(sol, c.MAX_WEEKLY_PAYOUT_SOL);
-}
-
-export function getMaxRefundWithMultiplier(baseSolRefund: number, rank: number): number {
-  const multiplier = getRankMultiplier(rank);
-  return +(baseSolRefund * multiplier).toFixed(4);
-}
-
-// ─── Points breakdown for display ───
+// ─── Full breakdown ───
 
 export interface PointsBreakdown {
   impressionPoints: number;
@@ -115,9 +73,8 @@ export interface PointsBreakdown {
   submissionPoints: number;
   streakPoints: number;
   referralPoints: number;
+  holdingsPoints: number;
   totalPoints: number;
-  solValue: number;
-  payoutEnabled: boolean;
 }
 
 export function calculateFullBreakdown(params: {
@@ -129,8 +86,9 @@ export function calculateFullBreakdown(params: {
   approvedSubmissions: number;
   consecutiveWindows: number;
   referralConversions: number;
+  holdingsPointsPerCycle: number;
 }): PointsBreakdown {
-  const c = ENGAGEMENT_REWARDS_CONFIG;
+  const c = POINTS_CONFIG;
 
   const impressionPoints = params.impressions * c.POINTS_PER_IMPRESSION;
   const likePoints = params.likes * c.POINTS_PER_LIKE;
@@ -140,21 +98,14 @@ export function calculateFullBreakdown(params: {
   const submissionPoints = params.approvedSubmissions * c.POINTS_PER_APPROVED_SUBMISSION;
   const streakPoints = calculateStreakBonus(params.consecutiveWindows);
   const referralPoints = params.referralConversions * c.POINTS_PER_REFERRAL_CONVERSION;
+  const holdingsPoints = params.holdingsPointsPerCycle;
 
   const totalPoints = impressionPoints + likePoints + retweetPoints +
-    quotePoints + replyPoints + submissionPoints + streakPoints + referralPoints;
+    quotePoints + replyPoints + submissionPoints + streakPoints +
+    referralPoints + holdingsPoints;
 
   return {
-    impressionPoints,
-    likePoints,
-    retweetPoints,
-    quotePoints,
-    replyPoints,
-    submissionPoints,
-    streakPoints,
-    referralPoints,
-    totalPoints,
-    solValue: pointsToSol(totalPoints),
-    payoutEnabled: c.PAYOUT_ENABLED,
+    impressionPoints, likePoints, retweetPoints, quotePoints, replyPoints,
+    submissionPoints, streakPoints, referralPoints, holdingsPoints, totalPoints,
   };
 }

@@ -253,15 +253,15 @@ export default async function Home() {
                   <div className="gc-tech-layer-tag">X API METRICS · AUTOMATED EVERY 6H</div>
                   <p className="gc-tech-layer-desc">
                     Your tweet&apos;s real engagement — impressions, likes, retweets, quote tweets,
-                    replies — is scored automatically every 6 hours. Points accumulate and
-                    convert to SOL. Retweets are worth 5x a like. Quote tweets are worth 10x.
-                    The algorithm rewards virality.
+                    replies — is scored automatically every 6 hours. Points drive your
+                    leaderboard rank and status. Retweets are worth 5x a like. Quote tweets
+                    are worth 10x. The algorithm rewards virality.
                   </p>
                   <div className="gc-tech-layer-catches">
                     <span className="gc-tech-catch">Auto-Scoring</span>
-                    <span className="gc-tech-catch">Points → SOL</span>
+                    <span className="gc-tech-catch">Points System</span>
                     <span className="gc-tech-catch">Streak Bonus</span>
-                    <span className="gc-tech-catch">Rank Multiplier</span>
+                    <span className="gc-tech-catch">Leaderboard Rank</span>
                   </div>
                 </div>
               </div>

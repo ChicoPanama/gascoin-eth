@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '../../../../lib/supabase';
-import { calculateEngagementPoints, ENGAGEMENT_REWARDS_CONFIG } from '../../../../lib/engagement-rewards';
+import { calculateEngagementPoints } from '../../../../lib/engagement-rewards';
 
 function isAuthorized(req: Request): boolean {
   const secret = (process.env.CRON_SECRET || '').trim();
@@ -137,8 +137,7 @@ export async function POST(req: Request) {
       ok: true,
       scored,
       totalPointsAwarded,
-      pointsEnabled: ENGAGEMENT_REWARDS_CONFIG.POINTS_ENABLED,
-      payoutEnabled: ENGAGEMENT_REWARDS_CONFIG.PAYOUT_ENABLED,
+      pointsOnly: true, // SOL payouts are for receipts only
     });
   } catch (e: any) {
     return NextResponse.json({ error: e?.message || 'worker failed' }, { status: 500 });

@@ -1,0 +1,238 @@
+{
+  "schema": "whiteclaw.memory.unified.v2",
+  "generatedAt": "2026-04-05T18:49:23.042233+00:00",
+  "workspaceArchitecture": {
+    "canonicalSource": "memory/context/unified-context.json",
+    "safeWebsiteMirrors": [
+      "whiteclaws/data/memory/unified-context.json",
+      "GASCOIN/platform/public/memory-unified-context.json"
+    ],
+    "policy": {
+      "containsSecrets": false,
+      "intendedUse": "operational context retrieval for dashboards and APIs"
+    }
+  },
+  "workspaces": [
+    {
+      "name": "ANE",
+      "path": "/Users/arcadioperalta/.openclaw/workspace/ANE",
+      "exists": true,
+      "git": {
+        "isRepo": true,
+        "branch": "main",
+        "hasRemote": true,
+        "dirty": false
+      },
+      "details": {
+        "surface": {
+          "hasReadme": true,
+          "markdownCount": 3
+        }
+      },
+      "type": "research-docs"
+    },
+    {
+      "name": "whiteclaws",
+      "path": "/Users/arcadioperalta/.openclaw/workspace/whiteclaws",
+      "exists": true,
+      "git": {
+        "isRepo": true,
+        "branch": "feat/wr-burrow-mode-v1",
+        "hasRemote": true,
+        "dirty": true
+      },
+      "details": {
+        "summary": "# WhiteClaws",
+        "badgeStats": {
+          "Live": "whiteclaws.app",
+          "Programs": "457",
+          "Protocols": "640",
+          "Chains": "30+",
+          "Tests": "401",
+          "License": "MIT"
+        },
+        "package": {
+          "name": "whiteclaws",
+          "version": "0.1.0"
+        },
+        "surface": {
+          "apiRouteCount": 114,
+          "pageCount": 46,
+          "memoryContextEndpoint": "True"
+        }
+      },
+      "type": "nextjs-platform"
+    },
+    {
+      "name": "PURRFECT",
+      "path": "/Users/arcadioperalta/.openclaw/workspace/PURRFECT",
+      "exists": true,
+      "git": {
+        "isRepo": true,
+        "branch": "main",
+        "hasRemote": true,
+        "dirty": true
+      },
+      "details": {
+        "surface": {
+          "supabaseFunctionCount": 20,
+          "hasHlLiquidatorService": true
+        }
+      },
+      "type": "intel-bot-stack"
+    },
+    {
+      "name": "GASCOIN",
+      "path": "/Users/arcadioperalta/.openclaw/workspace/GASCOIN",
+      "exists": true,
+      "git": {
+        "isRepo": false
+      },
+      "details": {
+        "package": {
+          "name": "gascoin-platform",
+          "version": "0.1.0"
+        },
+        "surface": {
+          "apiRouteCount": 20,
+          "memoryContextEndpoint": "True",
+          "publicMirror": "True"
+        }
+      },
+      "type": "nextjs-campaign-platform"
+    },
+    {
+      "name": "Project Gift",
+      "path": "/Users/arcadioperalta/.openclaw/workspace/Project Gift",
+      "exists": true,
+      "git": {
+        "isRepo": false
+      },
+      "details": {
+        "surface": {
+          "pythonScriptCount": 5,
+          "hasLockedReport": true
+        }
+      },
+      "type": "onchain-reconciliation"
+    },
+    {
+      "name": "video-projects",
+      "path": "/Users/arcadioperalta/.openclaw/workspace/video-projects",
+      "exists": true,
+      "git": {
+        "isRepo": false
+      },
+      "details": {
+        "surface": {
+          "projectDirCount": 1
+        }
+      },
+      "type": "media-pipeline-output"
+    },
+    {
+      "name": "whiteclaws-backup-before-history-scrub-2026-03-01",
+      "path": "/Users/arcadioperalta/.openclaw/workspace/whiteclaws-backup-before-history-scrub-2026-03-01",
+      "exists": true,
+      "git": {
+        "isRepo": true,
+        "branch": "main",
+        "hasRemote": true,
+        "dirty": true
+      },
+      "details": {
+        "surface": {
+          "archive": true,
+          "recommendedAction": "exclude from active daily work context unless explicitly requested"
+        }
+      },
+      "type": "archive-repo"
+    }
+  ],
+  "skills": {
+    "localSkillsRoot": "/Users/arcadioperalta/.openclaw/workspace/skills",
+    "localSkillCount": 9,
+    "localSkills": [
+      "byterover",
+      "github",
+      "inspector",
+      "mcporter",
+      "mem0",
+      "model-usage",
+      "summarize",
+      "video-generation-enterprise",
+      "virality-inspector"
+    ]
+  },
+  "sources": {
+    "morningBrief": {
+      "path": "memory/context/2026-04-05-mem0-brief.md",
+      "title": "Mem0 Morning Brief \u2014 2026-04-05",
+      "excerpt": "## Priorities today - Keep Obsidian as the operating source of truth: maintain Active Command Dashboard, incident/project dossiers, and decision/runbook hygiene. - Continue AgentV investigative workflow using the prepared Dune environment (focused transfer/account/instruction query packs). - Advance risk-first verification workflows (inspector + virality-inspector patterns) for crypto/social legitimacy checks. ## Open blockers - PURRFECT rollout still needs progression beyond Phase 0/L1 shortlist into execution (L2"
+    },
+    "weeklyCandidate": {
+      "path": "memory/weekly/2026-W14-candidate.md",
+      "title": "Weekly Candidate Digest \u2014 2026-W14",
+      "excerpt": "Period reviewed: 2026-03-30 to 2026-04-05 (existing daily files: 2026-04-01, 2026-04-02, 2026-04-03, 2026-04-04, 2026-04-05) ## Key decisions - Chose a conservative **union affected-wallet baseline** for Drift recovery: deposit + IF sets merged to **5,198 wallets**. - Decided Step 1 raw reconciliation output was too broad for payout locking, then added sequential tightening filters (classification, net-flow, confidence tiers). - Selected **Strict tier** as payout-safe default: - `class=system_wallet AND hit_count>="
+    },
+    "recentDaily": [
+      {
+        "path": "memory/2026-04-05.md",
+        "title": "2026-04-05",
+        "excerpt": "- - No major updates logged yet."
+      },
+      {
+        "path": "memory/2026-04-04.md",
+        "title": "2026-04-04",
+        "excerpt": "## Session notes - Backfilled entry file to restore daily memory continuity. - Continued planning for new video project workflow based on prior montage pipeline. ## TODO - Add detailed retro summary for this date if needed."
+      },
+      {
+        "path": "memory/2026-04-03.md",
+        "title": "2026-04-03",
+        "excerpt": "## Session notes - Backfilled entry file to restore daily memory continuity. - Primary workstream: GASCOIN platform auth/wallet/admin stabilization and production validation. ## TODO - Add detailed retro summary for this date if needed."
+      },
+      {
+        "path": "memory/2026-04-02.md",
+        "title": "2026-04-02",
+        "excerpt": "## Project Gift \u2014 reconciliation and wallet lock process - Ran Step 1 full on-chain reconciliation across Drift vault set. - Full scan scope: `294/294` vaults. - Step 1 output was candidate-heavy and required tightening before payout use. ## Tightening pipeline - **Step 1B** (classification filter): filtered candidate types (system wallet / token account / program/PDA / missing-account). - **Step 1C** (net-flow filter): computed pre-hack net token flow signals by wallet. - Broad output: `newPositiveWallets=9845` (t"
+      },
+      {
+        "path": "memory/2026-04-01.md",
+        "title": "2026-04-01",
+        "excerpt": "## Drift recovery / wallet reconstruction - Completed full pre-hack reconstruction across Drift deposit markets. - Hack cutoff used: `1775059569`. - Deposit-market pass completed `63/63` symbols. - Deposit-only affected set: `4,762` unique wallets with positive pre-hack net balances. - Cross-check with IF pre-hack set (`603`) found `436` IF-only wallets not in deposit-only set. - Built conservative union set (deposit + IF): `5,198` wallets. ## Artifacts staged under Project Gift Folder: `/Users/arcadioperalta/.open"
+      },
+      {
+        "path": "memory/2026-03-29.md",
+        "title": "2026-03-29 - Session Notes",
+        "excerpt": "## Mem0 Migration Complete - Installed @mem0/cli globally (npm install -g @mem0/cli) - Configured Mem0 with API key (m0-IFXwPyxGfzCFbchNtyIMHNZoS2g3pO6ZAYMpKVwQ) - Migrated 110 ByteRover files to Mem0 (all .brv/context-tree content) - Set up daily auto-curate cron job (11 PM PST, isolated agent session) - Updated AGENTS.md: added Step 3 \"Query Mem0\" to Session Startup sequence - Saved API key to ~/.secrets/mem0_api_key - Mem0 now auto-queried on every session before answering ## HyperLiquid Liquidation Engine Deplo"
+      },
+      {
+        "path": "memory/2026-03-28.md",
+        "title": "2026-03-28",
+        "excerpt": "## Session notes - Started new GasCoin project workflow and created dedicated workspace scaffold at `GASCOIN/` with scripts/assets/output/docs structure. - Agreed on execution principle for montage: prioritize visual impact and delivery speed over overengineering. - Implemented no-API fallback docs/scripts first, then pivoted to API-enabled pipeline once keys were provided. ## API/config decisions - Saved and activated keys for Pexels, Pixabay, ElevenLabs, Stability, Runway in OpenClaw config + shell env. - Added M"
+      }
+    ]
+  },
+  "operatingModel": {
+    "morningBrief": "daily 08:00 America/Los_Angeles",
+    "dailyFileBootstrap": "daily 22:30 America/Los_Angeles",
+    "nightlyCurate": "daily 23:00 America/Los_Angeles",
+    "unifiedBuild": "daily 23:10 America/Los_Angeles",
+    "weeklyCompactor": "Sunday 22:00 America/Los_Angeles"
+  },
+  "usageContract": {
+    "taskStart": [
+      "read morning brief",
+      "run mem0 search scoped to the task",
+      "respect existing decisions and blockers"
+    ],
+    "taskEnd": [
+      "append high-signal notes to daily memory",
+      "let nightly curate persist semantic memory"
+    ]
+  },
+  "notes": [
+    "Uniform architecture across whiteclaws, PURRFECT, GASCOIN, and Project Gift.",
+    "Do not consume raw memory files directly from website routes."
+  ]
+}

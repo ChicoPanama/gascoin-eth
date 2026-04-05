@@ -67,7 +67,7 @@ export default async function ReferralsPage(props: { searchParams: Promise<{ tab
           </div>
           <div className="gc-stat">
             <div className="gc-stat-label">Reward Rate</div>
-            <div className="gc-stat-value">{REFERRAL_CONFIG.REWARD_PER_CONVERSION_SOL}</div>
+            <div className="gc-stat-value">{REFERRAL_CONFIG.POINTS_PER_CONVERSION}</div>
             <div className="gc-stat-sub">SOL per conversion</div>
           </div>
         </div>

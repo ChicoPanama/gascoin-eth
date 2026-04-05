@@ -31,11 +31,11 @@ async function fetchGascoinBalance(wallet: string): Promise<number> {
   }
 }
 
-// Composite score: 35% Referrals + 30% Engagement + 25% GASCOIN Holdings + 10% SOL Earned
+// Composite score: 40% Referrals + 35% Engagement + 25% GASCOIN Holdings
+// SOL earned is NOT a factor — points only. SOL is for receipts only.
 function computeCompositeScore(solEarned: number, gascoinHoldings: number, referrals: number, engagement: number): number {
-  // Normalize GASCOIN holdings: 1M tokens = 1.0 score unit
   const gcNorm = gascoinHoldings / 1_000_000;
-  return (referrals * 0.35) + (engagement * 0.30) + (gcNorm * 0.25) + (solEarned * 0.10);
+  return (referrals * 0.40) + (engagement * 0.35) + (gcNorm * 0.25);
 }
 
 export function useLeaderboard() {

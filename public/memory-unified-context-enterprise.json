@@ -1,0 +1,427 @@
+{
+  "schema": "whiteclaw.memory.unified.enterprise.v1",
+  "generatedAt": "2026-04-05T19:08:52.459979+00:00",
+  "openclawOps": {
+    "cron": {
+      "totalJobs": 11,
+      "enabledJobs": 11,
+      "unhealthyJobs": [],
+      "jobs": [
+        {
+          "id": "5839214d-1c70-40e2-af20-b7483d1952cc",
+          "name": "daily-mem0-curate",
+          "schedule": {
+            "expr": "0 23 * * *",
+            "kind": "cron",
+            "tz": "America/Los_Angeles"
+          },
+          "lastStatus": "ok",
+          "nextRunAtMs": 1775455200000
+        },
+        {
+          "id": "38d706c9-da3f-40d0-b5a1-d11c3485c2b1",
+          "name": "daily-memory-file-bootstrap",
+          "schedule": {
+            "kind": "cron",
+            "expr": "30 22 * * *",
+            "tz": "America/Los_Angeles"
+          },
+          "lastStatus": "ok",
+          "nextRunAtMs": 1775453400000
+        },
+        {
+          "id": "31e70675-73bb-49a6-8411-75284205683b",
+          "name": "weekly-memory-compactor-candidates",
+          "schedule": {
+            "kind": "cron",
+            "expr": "0 22 * * 0",
+            "tz": "America/Los_Angeles"
+          },
+          "lastStatus": "ok",
+          "nextRunAtMs": 1775451600000
+        },
+        {
+          "id": "3010ba77-42e4-4a29-a762-d79861712620",
+          "name": "daily-mem0-morning-brief",
+          "schedule": {
+            "kind": "cron",
+            "expr": "0 8 * * *",
+            "tz": "America/Los_Angeles"
+          },
+          "lastStatus": "ok",
+          "nextRunAtMs": 1775487600000
+        },
+        {
+          "id": "61c09223-5ac7-44a6-8f4e-88315c0d6822",
+          "name": "daily-unified-memory-build",
+          "schedule": {
+            "kind": "cron",
+            "expr": "10 23 * * *",
+            "tz": "America/Los_Angeles"
+          },
+          "lastStatus": "ok",
+          "nextRunAtMs": 1775455800000
+        },
+        {
+          "id": "0d83b535-08c3-4859-bb96-594eb0d87054",
+          "name": "daily-mem0-cli-self-heal",
+          "schedule": {
+            "kind": "cron",
+            "expr": "30 7 * * *",
+            "tz": "America/Los_Angeles"
+          },
+          "lastStatus": "ok",
+          "nextRunAtMs": 1775485800000
+        },
+        {
+          "id": "20e24ba9-ebce-4884-add8-0491530c6e4f",
+          "name": "daily-openclaw-log-rotation",
+          "schedule": {
+            "kind": "cron",
+            "expr": "0 3 * * *",
+            "tz": "America/Los_Angeles"
+          },
+          "lastStatus": "ok",
+          "nextRunAtMs": 1775469600000
+        },
+        {
+          "id": "7b3308f0-5158-4dc0-a6d7-f7f108665be6",
+          "name": "daily-memory-health-check",
+          "schedule": {
+            "kind": "cron",
+            "expr": "45 7 * * *",
+            "tz": "America/Los_Angeles"
+          },
+          "lastStatus": "ok",
+          "nextRunAtMs": 1775486700000
+        },
+        {
+          "id": "18fe62c8-ce11-4e8f-a302-41acb36e0834",
+          "name": "daily-unified-memory-enterprise-build",
+          "schedule": {
+            "kind": "cron",
+            "expr": "20 23 * * *",
+            "tz": "America/Los_Angeles"
+          },
+          "lastStatus": "ok",
+          "nextRunAtMs": 1775456400000
+        },
+        {
+          "id": "77785420-f132-4a77-af97-d19577613bab",
+          "name": "daily-memory-endpoint-smoke",
+          "schedule": {
+            "kind": "cron",
+            "expr": "30 23 * * *",
+            "tz": "America/Los_Angeles"
+          },
+          "lastStatus": "ok",
+          "nextRunAtMs": 1775457000000
+        },
+        {
+          "id": "dbc2e24c-75c1-4873-a7d3-fede7a9f30a0",
+          "name": "weekly-workspace-risk-score",
+          "schedule": {
+            "kind": "cron",
+            "expr": "30 21 * * 0",
+            "tz": "America/Los_Angeles"
+          },
+          "lastStatus": null,
+          "nextRunAtMs": 1775449800000
+        }
+      ]
+    },
+    "logs": {
+      "gatewayErrLogMb": 3.27,
+      "gatewayLogMb": 0.92
+    }
+  },
+  "deployTopology": {
+    "projects": [
+      {
+        "project": "whiteclaws",
+        "path": "/Users/arcadioperalta/.openclaw/workspace/whiteclaws",
+        "hasVercelProjectConfig": true,
+        "vercelProject": {
+          "projectId": "prj_Zw9BQVQ6m4h9drYOzMZJZ19qizmK",
+          "orgId": "team_i6eeRwnlf6O6wxI0lWHPEALj",
+          "projectName": "whiteclaws"
+        },
+        "knownAlias": "https://whiteclaws.app",
+        "git": {
+          "branch": "feat/wr-burrow-mode-v1",
+          "dirty": true,
+          "lastCommit": "184a5c2 2026-03-11 13:09:23 -0700 test/build stabilization + in-place warning hygiene"
+        }
+      },
+      {
+        "project": "GASCOIN",
+        "path": "/Users/arcadioperalta/.openclaw/workspace/GASCOIN/platform",
+        "hasVercelProjectConfig": true,
+        "vercelProject": {
+          "projectId": "prj_bCmFbQK68K0JfB0Dn01qsmeO2xqy",
+          "orgId": "team_i6eeRwnlf6O6wxI0lWHPEALj",
+          "projectName": "platform"
+        },
+        "knownAlias": "https://platform-ebon-nine.vercel.app",
+        "git": {
+          "branch": "main",
+          "dirty": true,
+          "lastCommit": "c66cfdd 2026-04-05 11:36:18 -0700 Remove Admin link from public nav \u2014 access via /admin URL directly"
+        }
+      },
+      {
+        "project": "PURRFECT",
+        "path": "/Users/arcadioperalta/.openclaw/workspace/PURRFECT",
+        "hasVercelProjectConfig": false,
+        "vercelProject": null,
+        "knownAlias": null,
+        "git": {
+          "branch": "main",
+          "dirty": true,
+          "lastCommit": "1a5bd06 2026-04-03 14:36:54 -0700 feat: professional GitHub due diligence with code legitimacy check"
+        }
+      },
+      {
+        "project": "Project Gift",
+        "path": "/Users/arcadioperalta/.openclaw/workspace/Project Gift",
+        "hasVercelProjectConfig": false,
+        "vercelProject": null,
+        "knownAlias": null,
+        "git": {
+          "branch": null,
+          "dirty": null,
+          "lastCommit": null
+        }
+      },
+      {
+        "project": "ANE",
+        "path": "/Users/arcadioperalta/.openclaw/workspace/ANE",
+        "hasVercelProjectConfig": false,
+        "vercelProject": null,
+        "knownAlias": null,
+        "git": {
+          "branch": "main",
+          "dirty": false,
+          "lastCommit": "893f58e 2026-03-02 14:57:12 +0530 Merge pull request #2 from m0at/m5-maximized"
+        }
+      },
+      {
+        "project": "video-projects",
+        "path": "/Users/arcadioperalta/.openclaw/workspace/video-projects",
+        "hasVercelProjectConfig": false,
+        "vercelProject": null,
+        "knownAlias": null,
+        "git": {
+          "branch": null,
+          "dirty": null,
+          "lastCommit": null
+        }
+      }
+    ]
+  },
+  "securitySnapshot": {
+    "secretScoping": {
+      "centralSecretDir": "/Users/arcadioperalta/.openclaw/workspace/.secrets",
+      "videoSecretFilePerm": "0o600"
+    },
+    "envExposureMap": [
+      {
+        "project": "whiteclaws",
+        "envFileCount": 7,
+        "trackedEnvFiles": [
+          ".env.example"
+        ]
+      },
+      {
+        "project": "GASCOIN",
+        "envFileCount": 4,
+        "trackedEnvFiles": [
+          ".env.example",
+          ".env.production.example",
+          ".env.test"
+        ]
+      },
+      {
+        "project": "PURRFECT",
+        "envFileCount": 1,
+        "trackedEnvFiles": [
+          ".env.example"
+        ]
+      },
+      {
+        "project": "Project Gift",
+        "envFileCount": 0,
+        "trackedEnvFiles": []
+      },
+      {
+        "project": "ANE",
+        "envFileCount": 0,
+        "trackedEnvFiles": []
+      },
+      {
+        "project": "video-projects",
+        "envFileCount": 0,
+        "trackedEnvFiles": []
+      }
+    ]
+  },
+  "dependencyGraph": {
+    "nodes": [
+      "whiteclaws",
+      "GASCOIN",
+      "PURRFECT",
+      "Project Gift",
+      "ANE",
+      "video-projects",
+      "Mem0",
+      "OpenClaw Cron",
+      "Unified Context Artifacts"
+    ],
+    "edges": [
+      {
+        "from": "OpenClaw Cron",
+        "to": "Mem0",
+        "type": "nightly-curate"
+      },
+      {
+        "from": "OpenClaw Cron",
+        "to": "Unified Context Artifacts",
+        "type": "daily-build"
+      },
+      {
+        "from": "whiteclaws",
+        "to": "Unified Context Artifacts",
+        "type": "consumer-api"
+      },
+      {
+        "from": "GASCOIN",
+        "to": "Unified Context Artifacts",
+        "type": "consumer-api"
+      },
+      {
+        "from": "video-projects",
+        "to": "Mem0",
+        "type": "context-curation"
+      },
+      {
+        "from": "Project Gift",
+        "to": "Mem0",
+        "type": "decision-memory"
+      },
+      {
+        "from": "PURRFECT",
+        "to": "Mem0",
+        "type": "ops-memory"
+      }
+    ],
+    "blastRadiusNotes": [
+      "Mem0 outage impacts semantic recall but not source files.",
+      "Unified-context build failure impacts website memory endpoints.",
+      "Cron scheduler failure breaks automated memory hygiene across projects."
+    ]
+  },
+  "workspaceRisk": {
+    "generatedAt": "2026-04-05T19:08:52.418706+00:00",
+    "schema": "whiteclaw.workspace-risk.v1",
+    "averageScore": 31.5,
+    "projects": [
+      {
+        "name": "ANE",
+        "path": "/Users/arcadioperalta/.openclaw/workspace/ANE",
+        "score": 0,
+        "tier": "low",
+        "reasons": [],
+        "signals": {
+          "envFileCount": 0,
+          "trackedEnvCount": 0,
+          "isGitRepo": true
+        }
+      },
+      {
+        "name": "whiteclaws",
+        "path": "/Users/arcadioperalta/.openclaw/workspace/whiteclaws",
+        "score": 65,
+        "tier": "high",
+        "reasons": [
+          "dirty git tree",
+          "high env-file sprawl (7)",
+          "tracked env files (1)"
+        ],
+        "signals": {
+          "envFileCount": 7,
+          "trackedEnvCount": 1,
+          "isGitRepo": true
+        }
+      },
+      {
+        "name": "PURRFECT",
+        "path": "/Users/arcadioperalta/.openclaw/workspace/PURRFECT",
+        "score": 45,
+        "tier": "medium",
+        "reasons": [
+          "dirty git tree",
+          "tracked env files (1)"
+        ],
+        "signals": {
+          "envFileCount": 1,
+          "trackedEnvCount": 1,
+          "isGitRepo": true
+        }
+      },
+      {
+        "name": "GASCOIN",
+        "path": "/Users/arcadioperalta/.openclaw/workspace/GASCOIN/platform",
+        "score": 55,
+        "tier": "high",
+        "reasons": [
+          "dirty git tree",
+          "moderate env-file count (4)",
+          "tracked env files (3)"
+        ],
+        "signals": {
+          "envFileCount": 4,
+          "trackedEnvCount": 3,
+          "isGitRepo": true
+        }
+      },
+      {
+        "name": "Project Gift",
+        "path": "/Users/arcadioperalta/.openclaw/workspace/Project Gift",
+        "score": 12,
+        "tier": "low",
+        "reasons": [
+          "not a git repo"
+        ],
+        "signals": {
+          "envFileCount": 0,
+          "trackedEnvCount": 0,
+          "isGitRepo": false
+        }
+      },
+      {
+        "name": "video-projects",
+        "path": "/Users/arcadioperalta/.openclaw/workspace/video-projects",
+        "score": 12,
+        "tier": "low",
+        "reasons": [
+          "not a git repo"
+        ],
+        "signals": {
+          "envFileCount": 0,
+          "trackedEnvCount": 0,
+          "isGitRepo": false
+        }
+      }
+    ]
+  },
+  "runtimeWorkspaces": [
+    "/Users/arcadioperalta/.openclaw/workspace",
+    "/Users/arcadioperalta/.openclaw/workspace-agentv",
+    "/Users/arcadioperalta/.openclaw/workspace-codex"
+  ],
+  "references": {
+    "baseUnifiedContext": "memory/context/unified-context.json",
+    "workspaceAudit": "reports/workspace-audit-2026-04-05.md",
+    "architectureDoc": "MEM0_UNIFORM_ARCHITECTURE.md"
+  }
+}

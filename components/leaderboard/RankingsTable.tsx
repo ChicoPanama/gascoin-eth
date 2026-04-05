@@ -51,7 +51,7 @@ export function RankingsTable({ entries, loading, connectedWallet, onRowClick }:
   return (
     <div className="lb-table-wrap">
       <div className="lb-score-legend">
-        Score = 35% Referrals + 30% Engagement + 25% GASCOIN Holdings + 10% SOL Earned
+        Score = 40% Referrals + 35% Engagement + 25% GASCOIN Holdings · Points only — SOL is for receipts
       </div>
 
       <table className="lb-table">

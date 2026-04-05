@@ -61,14 +61,14 @@ export default function ReferralPage() {
   const aUnique = useAnimVal(clickStats?.unique_clicks ?? 0);
   const aConv = useAnimVal(summary?.total_conversions ?? 0);
   const aRate = useAnimVal(clickStats?.conversion_rate_pct ?? 0);
-  const aSol = useAnimVal(summary?.total_referral_sol_earned ?? 0);
+  const aPoints = useAnimVal((summary?.total_conversions ?? 0) * REFERRAL_CONFIG.POINTS_PER_CONVERSION);
 
   // Monthly caps
   const monthConv = conversions.filter((c) => {
     const d = new Date(c.created_at);
     return d > new Date(Date.now() - 30 * 86400000) && ['dispatched', 'pending'].includes(c.reward_status);
   });
-  const monthSol = monthConv.reduce((s, c) => s + Number(c.reward_sol || 0), 0);
+  const monthPoints = monthConv.length * REFERRAL_CONFIG.POINTS_PER_CONVERSION;
 
   // Filtered conversions
   const filtered = convFilter === 'all' ? conversions : conversions.filter((c) => c.reward_status === convFilter);
@@ -89,12 +89,12 @@ export default function ReferralPage() {
             <h1 className="lb-title" style={{ lineHeight: 0.88 }}>Referral<br /><span style={{ color: 'rgba(255,255,255,0.18)' }}>Engine</span></h1>
             <p className="gt-header-body">
               Share your unique link. When someone submits a verified receipt using
-              your link and gets approved, you earn {REFERRAL_CONFIG.REWARD_PER_CONVERSION_SOL} SOL
-              directly to your wallet — automatically.
+              your link and gets approved, you earn {REFERRAL_CONFIG.POINTS_PER_CONVERSION} points
+              that boost your leaderboard rank and status.
             </p>
           </div>
           <div style={{ textAlign: 'right' }}>
-            <div style={{ fontFamily: 'Bebas Neue', fontSize: 64 }}>{REFERRAL_CONFIG.REWARD_PER_CONVERSION_SOL} SOL</div>
+            <div style={{ fontFamily: 'Bebas Neue', fontSize: 64 }}>{REFERRAL_CONFIG.POINTS_PER_CONVERSION} PTS</div>
             <div className="lb-live-label">per verified conversion</div>
           </div>
         </div>
@@ -141,8 +141,8 @@ export default function ReferralPage() {
           <div className="ref-link-rewards">
             <div className="wt-input-label" style={{ marginBottom: 24 }}>REWARD STRUCTURE</div>
             {[
-              ['Per Conversion', `${REFERRAL_CONFIG.REWARD_PER_CONVERSION_SOL} SOL`],
-              ['Monthly Cap', `${REFERRAL_CONFIG.MAX_REFERRAL_REWARDS_30D_SOL} SOL`],
+              ['Per Conversion', `${REFERRAL_CONFIG.POINTS_PER_CONVERSION} points`],
+              ['Monthly Cap', `${REFERRAL_CONFIG.MAX_POINTS_30D} points`],
               ['Monthly Limit', `${REFERRAL_CONFIG.MAX_CONVERSIONS_30D} conversions`],
               ['Attribution Window', '7 days after click'],
               ['Requires', 'Referrer must be approved'],
@@ -163,7 +163,7 @@ export default function ReferralPage() {
               { label: 'Unique Visitors', value: Math.round(aUnique).toLocaleString() },
               { label: 'Conversions', value: Math.round(aConv).toLocaleString() },
               { label: 'Conversion Rate', value: clickStats?.unique_clicks ? `${aRate.toFixed(1)}%` : '—%' },
-              { label: 'SOL Earned', value: formatSol(aSol) },
+              { label: 'Points Earned', value: Math.round(aPoints).toLocaleString() },
             ].map((c) => (
               <div key={c.label} className="gc-stat">
                 <div className="gc-stat-label">{c.label}</div>
@@ -180,13 +180,13 @@ export default function ReferralPage() {
         <div className="ref-meters">
           <div className="ref-meter">
             <div className="wt-input-label">MONTHLY SOL EARNED</div>
-            <div style={{ fontFamily: 'Bebas Neue', fontSize: 40 }}>{monthSol.toFixed(4)} SOL</div>
-            <span style={{ fontFamily: 'IBM Plex Mono', fontSize: 12, color: 'rgba(255,255,255,0.35)' }}>/ {REFERRAL_CONFIG.MAX_REFERRAL_REWARDS_30D_SOL} SOL</span>
+            <div style={{ fontFamily: 'Bebas Neue', fontSize: 40 }}>{monthPoints.toLocaleString()} PTS</div>
+            <span style={{ fontFamily: 'IBM Plex Mono', fontSize: 12, color: 'rgba(255,255,255,0.35)' }}>/ {REFERRAL_CONFIG.MAX_POINTS_30D} SOL</span>
             <div className="gt-progress-track" style={{ marginTop: 8 }}>
-              <div className="gt-progress-fill" style={{ width: `${Math.min(100, (monthSol / REFERRAL_CONFIG.MAX_REFERRAL_REWARDS_30D_SOL) * 100)}%` }} />
+              <div className="gt-progress-fill" style={{ width: `${Math.min(100, (monthPoints / REFERRAL_CONFIG.MAX_POINTS_30D) * 100)}%` }} />
             </div>
-            {monthSol >= REFERRAL_CONFIG.MAX_REFERRAL_REWARDS_30D_SOL && <div className="ref-cap-reached">MONTHLY CAP REACHED</div>}
-            {monthSol >= REFERRAL_CONFIG.MAX_REFERRAL_REWARDS_30D_SOL * 0.8 && monthSol < REFERRAL_CONFIG.MAX_REFERRAL_REWARDS_30D_SOL && <div className="ref-cap-warning">Approaching monthly limit</div>}
+            {monthPoints >= REFERRAL_CONFIG.MAX_POINTS_30D && <div className="ref-cap-reached">MONTHLY CAP REACHED</div>}
+            {monthPoints >= REFERRAL_CONFIG.MAX_POINTS_30D * 0.8 && monthPoints < REFERRAL_CONFIG.MAX_POINTS_30D && <div className="ref-cap-warning">Approaching monthly limit</div>}
           </div>
           <div className="ref-meter">
             <div className="wt-input-label">MONTHLY CONVERSIONS</div>
@@ -215,7 +215,7 @@ export default function ReferralPage() {
           {filtered.length === 0 ? (
             <div className="lb-empty" style={{ padding: '40px 0' }}>
               <p>No conversions yet.</p>
-              <p style={{ fontSize: 12 }}>Share your link to start earning. {REFERRAL_CONFIG.REWARD_PER_CONVERSION_SOL} SOL per verified approval.</p>
+              <p style={{ fontSize: 12 }}>Share your link to start earning. {REFERRAL_CONFIG.POINTS_PER_CONVERSION} points per verified approval.</p>
             </div>
           ) : (
             <>
@@ -235,7 +235,7 @@ export default function ReferralPage() {
                       onClick={() => c.reward_status === 'skipped' && setExpandedSkip(expandedSkip === c.id ? null : c.id)}>
                       <td className="lb-table-time">{timeAgo(c.created_at)}</td>
                       <td className="lb-table-wallet">{truncateWallet(c.referred_wallet)}</td>
-                      <td className="lb-table-sol">{c.reward_status === 'skipped' ? '—' : formatSol(c.reward_sol)}</td>
+                      <td className="lb-table-sol">{c.reward_status === 'skipped' ? '—' : c.reward_status === 'verified' ? `${REFERRAL_CONFIG.POINTS_PER_CONVERSION} pts` : '—'}</td>
                       <td>
                         <span className={`wt-status-badge wt-status-badge--${c.reward_status === 'dispatched' ? 'approved' : c.reward_status === 'pending' ? 'pending' : 'rejected'}`}>
                           {c.reward_status.toUpperCase()}
@@ -285,9 +285,9 @@ export default function ReferralPage() {
             <h3 style={{ fontFamily: 'Bebas Neue', fontSize: 32, marginBottom: 16 }}>Referral Rules</h3>
             <div className="ref-rules-pills">
               {[
-                `${REFERRAL_CONFIG.REWARD_PER_CONVERSION_SOL} SOL per conversion`,
+                `${REFERRAL_CONFIG.POINTS_PER_CONVERSION} points per conversion`,
                 `Max ${REFERRAL_CONFIG.MAX_CONVERSIONS_30D} conversions per 30 days`,
-                `Max ${REFERRAL_CONFIG.MAX_REFERRAL_REWARDS_30D_SOL} SOL per 30 days`,
+                `Max ${REFERRAL_CONFIG.MAX_POINTS_30D} points per 30 days`,
                 'No self-referrals',
                 'Referrer must be approved submitter',
                 'All gates must pass to count',
