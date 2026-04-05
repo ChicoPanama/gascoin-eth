@@ -104,27 +104,43 @@ export function useLeaderboard() {
         batch.forEach((w, idx) => holdingsMap.set(w, results[idx]));
       }
 
-      // Fetch referral and engagement data from Supabase
+      // Fetch points data from engagement_points table (the single source of truth)
       const refMap = new Map<string, number>();
       const engMap = new Map<string, number>();
 
       try {
-        const { data: refData } = await supabaseBrowser
-          .from('referral_counts')
-          .select('wallet, verified_referrals');
-        for (const r of refData || []) {
-          refMap.set(r.wallet, Number(r.verified_referrals || 0));
+        // Referral points from engagement_points
+        const { data: refPoints } = await supabaseBrowser
+          .from('engagement_points')
+          .select('wallet, points')
+          .eq('source', 'referral_conversion');
+        for (const r of refPoints || []) {
+          refMap.set(r.wallet, (refMap.get(r.wallet) || 0) + Number(r.points || 0));
         }
-      } catch {} // Views may not exist yet — graceful fallback
+      } catch {}
 
       try {
-        const { data: engData } = await supabaseBrowser
-          .from('engagement_totals')
-          .select('wallet, total_engagement_score');
-        for (const e of engData || []) {
-          engMap.set(e.wallet, Number(e.total_engagement_score || 0));
+        // All non-referral points = engagement (tweet + submission + streak + holdings)
+        const { data: engPoints } = await supabaseBrowser
+          .from('engagement_points')
+          .select('wallet, points, source')
+          .in('source', ['tweet_engagement', 'submission_approved', 'streak_bonus', 'holdings_bonus']);
+        for (const e of engPoints || []) {
+          engMap.set(e.wallet, (engMap.get(e.wallet) || 0) + Number(e.points || 0));
         }
-      } catch {} // Views may not exist yet — graceful fallback
+      } catch {}
+
+      // Also check legacy referral_counts view as fallback
+      try {
+        const { data: legacyRef } = await supabaseBrowser
+          .from('referral_counts')
+          .select('wallet, verified_referrals');
+        for (const r of legacyRef || []) {
+          if (!refMap.has(r.wallet)) {
+            refMap.set(r.wallet, Number(r.verified_referrals || 0) * 500); // Convert count to points
+          }
+        }
+      } catch {}
 
       // Build entries with composite score
       const raw: LeaderboardEntry[] = wallets.map((w) => {

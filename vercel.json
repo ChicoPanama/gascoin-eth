@@ -13,6 +13,10 @@
       "schedule": "0 */6 * * *"
     },
     {
+      "path": "/api/workers/award-points",
+      "schedule": "0 6 * * *"
+    },
+    {
       "path": "/api/workers/flush-receipts",
       "schedule": "0 3 * * 0"
     }

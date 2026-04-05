@@ -45,6 +45,14 @@ export async function approveSubmission(claimId: string, solAmount: number, note
     status: 'queued',
   }, { onConflict: 'claim_id' });
 
+  // Award submission points immediately on approval
+  await supabase.from('engagement_points').insert({
+    wallet: before.wallet,
+    source: 'submission_approved',
+    points: 1000,
+    metadata_json: { claim_id: claimId, approved_by: adminWallet },
+  });
+
   await logAdminAction({
     adminWallet,
     action: 'approve_submission',
