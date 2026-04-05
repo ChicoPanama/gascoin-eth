@@ -692,7 +692,7 @@ input:focus, textarea:focus, select:focus {
   border-bottom: 1px solid var(--line);
   background: #020202;
 }
-.gc-tech-inner { max-width: 900px; margin: 0 auto; }
+.gc-tech-inner { max-width: 1200px; margin: 0 auto; }
 .gc-tech-header { margin-bottom: 64px; }
 .gc-tech-title {
   font-family: 'Bebas Neue', sans-serif;
@@ -710,15 +710,15 @@ input:focus, textarea:focus, select:focus {
   font-size: 15px;
   color: rgba(255,255,255,0.55);
   line-height: 1.75;
-  max-width: 540px;
+  max-width: 560px;
 }
 
 .gc-tech-pipeline { display: flex; flex-direction: column; gap: 0; }
 
 .gc-tech-layer {
   display: flex;
-  gap: 24px;
-  padding: 32px;
+  gap: 28px;
+  padding: 36px 40px;
   border: 1px solid rgba(255,255,255,0.06);
   position: relative;
   transition: background 0.3s, border-color 0.3s;
@@ -801,23 +801,24 @@ input:focus, textarea:focus, select:focus {
 
 .gc-tech-connector {
   width: 1px;
-  height: 24px;
+  height: 20px;
   background: rgba(255,255,255,0.08);
-  margin-left: 56px;
+  margin-left: 64px;
 }
 
 .gc-tech-stats {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 1px;
-  background: rgba(255,255,255,0.06);
   margin-top: 48px;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
 }
 .gc-tech-stat {
-  background: #020202;
-  padding: 32px 24px;
+  padding: 36px 32px;
   text-align: center;
+  border-right: 1px solid var(--line);
 }
+.gc-tech-stat:last-child { border-right: none; }
 .gc-tech-stat-value {
   font-family: 'Bebas Neue', sans-serif;
   font-size: 48px;
