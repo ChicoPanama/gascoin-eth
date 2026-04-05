@@ -31,8 +31,8 @@ export const POINTS_CONFIG = {
   MAX_STREAK_MULTIPLIER: 5,          // Cap at 5x
 
   // ─── GASCOIN holdings bonus ───
-  // Bonus points per scoring cycle based on tier
-  POINTS_PER_CYCLE_STANDARD: 0,
+  // Every tier earns points per cycle — higher tier = more points
+  POINTS_PER_CYCLE_STANDARD: 25,
   POINTS_PER_CYCLE_COMMUTER: 100,
   POINTS_PER_CYCLE_ROAD_WARRIOR: 300,
   POINTS_PER_CYCLE_FLEET: 750,
