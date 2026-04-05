@@ -282,13 +282,13 @@ export default async function Home() {
                   <p className="gc-tech-layer-desc">
                     Referral conversions are verified automatically — self-referral detection,
                     referrer approval status, monthly cap enforcement, and rolling window limits.
-                    Legitimate referrals earn 0.005 SOL each. No manual processing.
+                    Legitimate referrals earn SOL rewards automatically. No manual processing.
                   </p>
                   <div className="gc-tech-layer-catches">
                     <span className="gc-tech-catch">Anti-Farm</span>
                     <span className="gc-tech-catch">Cap Enforce</span>
                     <span className="gc-tech-catch">Auto-Verify</span>
-                    <span className="gc-tech-catch">0.005 SOL</span>
+                    <span className="gc-tech-catch">SOL Rewards</span>
                   </div>
                 </div>
               </div>
