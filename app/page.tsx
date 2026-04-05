@@ -167,7 +167,7 @@ export default async function Home() {
                 </div>
                 <div className="gc-tech-layer-content">
                   <div className="gc-tech-layer-title">AI Receipt Processing</div>
-                  <div className="gc-tech-layer-tag">GEMINI FLASH · {'<'}0.3¢ PER RECEIPT</div>
+                  <div className="gc-tech-layer-tag">CLAUDE AI · {'<'}0.3¢ PER RECEIPT</div>
                   <p className="gc-tech-layer-desc">
                     Upload a receipt photo and AI extracts everything in one call — station name,
                     city, date, total amount, and your wallet address. Simultaneously scores
