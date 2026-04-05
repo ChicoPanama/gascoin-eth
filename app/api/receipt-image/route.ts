@@ -1,7 +1,18 @@
 import { NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '../../../lib/supabase';
+import { checkRateLimit } from '../../../lib/rate-limit';
+
+function clientIp(req: Request): string {
+  return req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown';
+}
 
 export async function GET(req: Request) {
+  // Rate limit: 30 image requests per minute per IP
+  const rl = await checkRateLimit(`receipt_image:${clientIp(req)}`, 30, 60);
+  if (!rl.ok) {
+    return NextResponse.json({ error: 'rate_limited' }, { status: 429 });
+  }
+
   const { searchParams } = new URL(req.url);
   const path = searchParams.get('path');
 
@@ -12,7 +23,6 @@ export async function GET(req: Request) {
   try {
     const supabase = getSupabaseAdmin();
 
-    // Verify the path belongs to an approved submission
     const { data: receipt } = await supabase
       .from('claim_receipts')
       .select('claim_id, claims(status)')

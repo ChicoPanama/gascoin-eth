@@ -2,8 +2,19 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '../../../../lib/supabase';
 import { verifyAllTweetGates } from '../../../../lib/gate-verifiers/tweet-gates';
 import { parseTweetUrl } from '../../../../lib/tweet-parser';
+import { checkRateLimit } from '../../../../lib/rate-limit';
+
+function clientIp(req: NextRequest): string {
+  return req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown';
+}
 
 export async function POST(req: NextRequest) {
+  // Rate limit: 5 verifications per minute per IP (protects X API quota)
+  const rl = await checkRateLimit(`verify_tweet:${clientIp(req)}`, 5, 60);
+  if (!rl.ok) {
+    return NextResponse.json({ error: 'rate_limited', retryAfterSec: rl.resetSec }, { status: 429 });
+  }
+
   try {
     const { tweet_url, claim_id } = await req.json();
 

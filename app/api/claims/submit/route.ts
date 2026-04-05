@@ -12,6 +12,25 @@ import { checkRateLimit } from '../../../../lib/rate-limit';
 
 const SUBMIT_WINDOW_SEC = 60;
 const SUBMIT_MAX_PER_WINDOW = 12;
+const COOLDOWN_DAYS = 30;
+
+// Check 30-day rolling cooldown — returns true if wallet is eligible
+async function checkCooldown(supabase: any, wallet: string): Promise<boolean> {
+  try {
+    const thirtyDaysAgo = new Date(Date.now() - COOLDOWN_DAYS * 86400000).toISOString();
+    const { data } = await supabase
+      .from('payouts')
+      .select('id')
+      .eq('wallet', wallet)
+      .eq('status', 'paid')
+      .gte('created_at', thirtyDaysAgo)
+      .limit(1)
+      .maybeSingle();
+    return !data; // true if no paid payout in last 30 days
+  } catch {
+    return true; // fail open — don't block on DB error
+  }
+}
 
 function clientIp(req: Request): string {
   const xff = req.headers.get('x-forwarded-for') || '';
@@ -58,6 +77,18 @@ export async function POST(req: Request){
 
   if (!(receipt instanceof File)) {
     return NextResponse.json({ ok:false, error:'receipt_required' }, { status: 400 });
+  }
+
+  // File size limit: 15MB (covers 48MP iPhone photos)
+  const MAX_FILE_SIZE = 15 * 1024 * 1024;
+  if (receipt.size > MAX_FILE_SIZE) {
+    return NextResponse.json({ ok:false, error:'file_too_large', maxMb: 15 }, { status: 400 });
+  }
+
+  // Validate file type
+  const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/heic', 'image/heif', 'image/webp', 'application/pdf'];
+  if (receipt.type && !ALLOWED_TYPES.includes(receipt.type)) {
+    return NextResponse.json({ ok:false, error:'invalid_file_type', allowed: ALLOWED_TYPES }, { status: 400 });
   }
 
   const receiptBuffer = await receipt.arrayBuffer();
@@ -121,7 +152,7 @@ export async function POST(req: Request){
     tamperScore: fraudBase.tamperScore,
     duplicateHash,
     duplicatePhash,
-    cooldownOk: true,
+    cooldownOk: await checkCooldown(supabase, wallet),
     amountUsd,
     followerCount
   });
