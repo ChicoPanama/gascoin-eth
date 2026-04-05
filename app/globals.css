@@ -2894,17 +2894,17 @@ input:focus, textarea:focus, select:focus {
   font-size: 10px;
   letter-spacing: 0.15em;
   text-transform: uppercase;
-  color: #000;
-  background: #fff;
-  border: 1px solid #fff;
+  color: rgba(255,255,255,0.5);
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.15);
   padding: 6px 14px;
   cursor: crosshair;
-  transition: background 0.2s, color 0.2s;
+  transition: all 0.2s;
   white-space: nowrap;
 }
 .wallet-btn:hover {
-  background: transparent;
   color: #fff;
+  border-color: #fff;
 }
 .wallet-btn--connected {
   background: transparent;
