@@ -3994,7 +3994,7 @@ input:focus, textarea:focus, select:focus {
     height: 52px;
   }
   .gc-nav-links { display: none; }
-  .gc-nav > div { gap: 8px; }
+  .gc-nav > div { gap: 0; }
   .gc-nav .wallet-btn,
   .gc-nav .auth-signed-in { display: none; }
   .gc-nav .btn { display: none; }
