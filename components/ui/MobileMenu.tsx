@@ -1,6 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+// @ts-ignore — react-dom types not installed but createPortal works at runtime
+import { createPortal } from 'react-dom';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
@@ -18,12 +20,14 @@ const NAV_LINKS = [
 
 export function MobileMenu() {
   const [open, setOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const pathname = usePathname();
 
+  // Portal needs to wait for client mount
+  useEffect(() => { setMounted(true); }, []);
+
   // Close menu on route change
-  useEffect(() => {
-    setOpen(false);
-  }, [pathname]);
+  useEffect(() => { setOpen(false); }, [pathname]);
 
   // Lock body scroll when open
   useEffect(() => {
@@ -46,7 +50,7 @@ export function MobileMenu() {
         <span className={`mobile-menu-bar${open ? ' mobile-menu-bar--open' : ''}`} />
       </button>
 
-      {open && (
+      {open && mounted && createPortal(
         <div className="mobile-menu-overlay" onClick={() => setOpen(false)}>
           <nav className="mobile-menu" onClick={(e) => e.stopPropagation()}>
             {NAV_LINKS.map(({ href, label }) => (
@@ -59,7 +63,8 @@ export function MobileMenu() {
               </Link>
             ))}
           </nav>
-        </div>
+        </div>,
+        document.body
       )}
     </>
   );
