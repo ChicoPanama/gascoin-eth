@@ -10,13 +10,13 @@ export function HomeNav() {
       <span className="gc-nav-brand">GASCOIN</span>
       <div className="gc-nav-links">
         <Link href="/submit">Submit</Link>
-        <Link href="/gates">Gates</Link>
-        <Link href="/wallet">Tracker</Link>
-        <Link href="/referral">Refer</Link>
-        <Link href="/perks">Perks</Link>
+        <Link href="/dashboard">Treasury</Link>
         <Link href="/community">Community</Link>
         <Link href="/leaderboard">Leaderboard</Link>
-        <Link href="/dashboard">Treasury</Link>
+        <Link href="/referral">Refer</Link>
+        <Link href="/perks">Perks</Link>
+        <Link href="/gates">Gates</Link>
+        <Link href="/wallet">Tracker</Link>
         <Link href="/docs">Docs</Link>
       </div>
       <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
