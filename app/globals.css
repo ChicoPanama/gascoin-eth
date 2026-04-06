@@ -3959,6 +3959,8 @@ input:focus, textarea:focus, select:focus {
     cursor: pointer;
     padding: 0;
     flex-shrink: 0;
+    position: relative;
+    z-index: 101;
   }
   .mobile-menu-toggle:hover {
     border-color: rgba(255,255,255,0.4);
@@ -4011,7 +4013,7 @@ input:focus, textarea:focus, select:focus {
   .mobile-menu-overlay {
     position: fixed;
     inset: 0;
-    z-index: 999;
+    z-index: 99999;
     background: rgba(0,0,0,0.7);
     backdrop-filter: blur(4px);
     -webkit-backdrop-filter: blur(4px);
@@ -4032,7 +4034,7 @@ input:focus, textarea:focus, select:focus {
     flex-direction: column;
     gap: 0;
     overflow-y: auto;
-    z-index: 1000;
+    z-index: 100000;
   }
 
   .mobile-menu-link {
