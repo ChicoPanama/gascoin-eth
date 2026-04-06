@@ -91,7 +91,7 @@ export default function AdminLoginPage() {
           <button type="button" className="sf-btn-solid" style={{ width: '100%', opacity: 0.4 }} disabled>Loading...</button>
         ) : authenticated && xHandle ? (
           <button type="button" className="sf-btn-solid" style={{ width: '100%' }} onClick={handlePrivyLogin} disabled={status === 'signing'}>
-            {status === 'signing' ? 'AUTHENTICATING...' : `AUTHENTICATE AS @${xHandle}`}
+            {status === 'signing' ? 'AUTHENTICATING...' : 'AUTHENTICATE VIA X'}
           </button>
         ) : (
           <button type="button" className="sf-btn-solid" style={{ width: '100%' }} onClick={() => login({ loginMethods: ['twitter'] })}>
