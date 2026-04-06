@@ -77,18 +77,16 @@ export function AuthNavButton() {
   const walletAddr = connected && publicKey ? truncateWallet(publicKey.toBase58()) : null;
 
   return (
-    <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+    <div className="auth-signed-in" style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
       {walletAddr && handle ? (
-        // Both connected — unified display
         <span className="auth-identity">
           <span className="auth-handle">@{handle}</span>
           <span className="auth-wallet">{walletAddr}</span>
         </span>
       ) : handle ? (
-        // Only X connected
-        <span style={{ fontSize: 12, opacity: 0.9 }}>@{handle}</span>
+        <span className="auth-handle-solo">@{handle}</span>
       ) : (
-        <span style={{ fontSize: 12, opacity: 0.9 }}>Signed in</span>
+        <span className="auth-handle-solo">Signed in</span>
       )}
       <button className="btn" type="button" onClick={logout}>Logout</button>
     </div>

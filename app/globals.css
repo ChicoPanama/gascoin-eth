@@ -2953,6 +2953,10 @@ input:focus, textarea:focus, select:focus {
   color: rgba(255,255,255,0.4);
   letter-spacing: 0.05em;
 }
+.auth-handle-solo {
+  font-size: 12px;
+  opacity: 0.9;
+}
 
 /* ─── SUBMIT FLOW ─── */
 .sf-container { max-width: 640px; margin: 0 auto; }
@@ -3983,8 +3987,24 @@ input:focus, textarea:focus, select:focus {
   .mobile-menu-bar--open::before { top: 0; transform: rotate(45deg); }
   .mobile-menu-bar--open::after { top: 0; transform: rotate(-45deg); }
 
-  /* Inner page nav: hide desktop links */
+  /* Homepage nav: brand left, hamburger right, hide everything else */
+  .gc-nav {
+    justify-content: space-between;
+    padding: 0 16px;
+    height: 52px;
+  }
+  .gc-nav-links { display: none; }
+  .gc-nav > div { gap: 8px; }
+  .gc-nav .wallet-btn,
+  .gc-nav .auth-signed-in { display: none; }
+  .gc-nav .btn { display: none; }
+
+  /* Inner page nav: brand + hamburger only */
+  .nav { flex-wrap: nowrap; overflow: hidden; gap: 0; }
   .nav-link-desktop { display: none !important; }
+  .nav .wallet-btn,
+  .nav .auth-signed-in { display: none; }
+  .nav > span > .btn { display: none; }
 
   /* Overlay */
   .mobile-menu-overlay {
@@ -4006,10 +4026,10 @@ input:focus, textarea:focus, select:focus {
     max-width: 80vw;
     background: #0a0a0a;
     border-left: 1px solid rgba(255,255,255,0.08);
-    padding: 80px 32px 32px;
+    padding: 24px 32px 32px;
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 0;
     overflow-y: auto;
     z-index: 1000;
   }
@@ -4029,16 +4049,6 @@ input:focus, textarea:focus, select:focus {
   .mobile-menu-link--active {
     color: #fff;
   }
-
-  /* Shrink wallet/auth buttons on mobile */
-  .wallet-btn {
-    font-size: 8px;
-    padding: 5px 10px;
-  }
-  .auth-identity { gap: 0; }
-  .auth-handle { font-size: 9px; }
-  .auth-wallet { font-size: 8px; }
-  .btn { font-size: 9px; padding: 5px 10px; }
 
   /* Tech pipeline catches: wrap on mobile */
   .gc-tech-layer-catches { flex-wrap: wrap; }
