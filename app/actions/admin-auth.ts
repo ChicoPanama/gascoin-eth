@@ -23,7 +23,7 @@ export async function createAdminSession(walletAddress: string, timestamp: numbe
   jar.set('gascoin_admin_session', sessionToken, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
-    sameSite: 'strict',
+    sameSite: 'lax',
     maxAge: 8 * 60 * 60,
     path: '/',
   });
@@ -77,7 +77,7 @@ export async function createAdminSessionViaPrivy(xUserId: string, xHandle: strin
   jar.set('gascoin_admin_session', sessionToken, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
-    sameSite: 'strict',
+    sameSite: 'lax',
     maxAge: 8 * 60 * 60,
     path: '/',
   });
