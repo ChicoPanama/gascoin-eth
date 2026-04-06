@@ -6,10 +6,6 @@ import {
   WalletProvider,
 } from "@solana/wallet-adapter-react";
 import { WalletAdapterNetwork, type WalletError } from "@solana/wallet-adapter-base";
-import {
-  PhantomWalletAdapter,
-  SolflareWalletAdapter,
-} from "@solana/wallet-adapter-wallets";
 import { WalletModalProvider } from "@solana/wallet-adapter-react-ui";
 import { clusterApiUrl } from "@solana/web3.js";
 import "@solana/wallet-adapter-react-ui/styles.css";
@@ -26,17 +22,13 @@ export const SolanaProvider: FC<SolanaProviderProps> = ({ children }) => {
     [network]
   );
 
-  // Explicit adapters for Phantom and Solflare.
-  // Brave and other Wallet Standard wallets are auto-detected by WalletProvider.
-  const wallets = useMemo(
-    () => [
-      new PhantomWalletAdapter(),
-      new SolflareWalletAdapter(),
-    ],
-    []
-  );
+  // Empty array — rely entirely on Wallet Standard auto-detection.
+  // Legacy adapters (PhantomWalletAdapter, SolflareWalletAdapter) conflict
+  // with Brave's built-in wallet and cause React 19 re-render loops when
+  // both fight over window.solana. Wallet Standard detects all modern
+  // wallets (Phantom, Solflare, Brave, Backpack, etc.) automatically.
+  const wallets = useMemo(() => [], []);
 
-  // Surface wallet errors instead of swallowing them silently
   const onError = useCallback((error: WalletError) => {
     console.error('[wallet]', error.name, error.message);
   }, []);
