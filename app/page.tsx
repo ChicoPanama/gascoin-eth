@@ -12,7 +12,7 @@ export default async function Home() {
   let treasurySub = 'SOL';
   let marketCap = '—';
   let volume = '—';
-  let gates = '11';
+  let gates = '10';
 
   try {
     const { getTreasuryBalances } = await import('../lib/integrations/solana');
@@ -123,7 +123,7 @@ export default async function Home() {
               <div className="gc-step-title">Submit Your Receipt</div>
               <p className="gc-step-desc">
                 Upload a photo of your gas receipt with your wallet address written
-                on it. Our system runs 11 automated verification gates against
+                on it. Our system runs 10 automated verification gates against
                 every submission.
               </p>
             </div>
@@ -167,7 +167,7 @@ export default async function Home() {
                 </div>
                 <div className="gc-tech-layer-content">
                   <div className="gc-tech-layer-title">AI Receipt Processing</div>
-                  <div className="gc-tech-layer-tag">CLAUDE AI · {'<'}0.3¢ PER RECEIPT</div>
+                  <div className="gc-tech-layer-tag">CLAUDE AI</div>
                   <p className="gc-tech-layer-desc">
                     Upload a receipt photo and AI extracts everything in one call — country,
                     date, total amount, and your wallet address. Simultaneously scores
@@ -213,7 +213,7 @@ export default async function Home() {
 
               <div className="gc-tech-connector" />
 
-              {/* AI Layer 3 — Tweet Verification */}
+              {/* AI Layer 3 — X + xAI Intelligence Pipeline */}
               <div className="gc-tech-layer gc-tech-layer--ai">
                 <div className="gc-tech-layer-num">03</div>
                 <div className="gc-tech-layer-icon">
@@ -222,45 +222,21 @@ export default async function Home() {
                   </svg>
                 </div>
                 <div className="gc-tech-layer-content">
-                  <div className="gc-tech-layer-title">Automated Tweet Verification</div>
-                  <div className="gc-tech-layer-tag">X API V2 · 4 SEQUENTIAL GATES</div>
+                  <div className="gc-tech-layer-title">X + xAI Intelligence Pipeline</div>
+                  <div className="gc-tech-layer-tag">X API V2 · xAI-POWERED SCORING · AUTOMATED</div>
                   <p className="gc-tech-layer-desc">
-                    Your #gascoin tweet is verified automatically through the X API — tweet exists,
-                    account is public, hashtag is present, posted within 48 hours. Four gates run
-                    sequentially and stop on first failure. No manual review needed.
+                    Your #gascoin tweet passes through 4 sequential verification gates via the X API —
+                    existence, public account, hashtag, 48-hour window — then enters an xAI-powered
+                    scoring engine. Real engagement is pulled automatically and scored through AI
+                    quality analysis that rewards genuine virality and suppresses bot activity.
+                    Your X handle stays synced to your wallet so you never miss points.
                   </p>
                   <div className="gc-tech-layer-catches">
-                    <span className="gc-tech-catch">Tweet Exists</span>
-                    <span className="gc-tech-catch">Public Account</span>
-                    <span className="gc-tech-catch">#gascoin</span>
-                    <span className="gc-tech-catch">48h Window</span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="gc-tech-connector" />
-
-              {/* AI Layer 4 — Engagement & Rewards */}
-              <div className="gc-tech-layer">
-                <div className="gc-tech-layer-num">04</div>
-                <div className="gc-tech-layer-icon">
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                    <path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/>
-                  </svg>
-                </div>
-                <div className="gc-tech-layer-content">
-                  <div className="gc-tech-layer-title">AI Engagement Scoring</div>
-                  <div className="gc-tech-layer-tag">X API METRICS · AUTOMATED EVERY 6H</div>
-                  <p className="gc-tech-layer-desc">
-                    Your tweet&apos;s real engagement — impressions, likes, retweets, quote tweets,
-                    replies — is scored automatically every 6 hours. Points drive your
-                    leaderboard rank and status. Retweets are worth 5x a like. Quote tweets
-                    are worth 10x. The algorithm rewards virality.
-                  </p>
-                  <div className="gc-tech-layer-catches">
-                    <span className="gc-tech-catch">Auto-Scoring</span>
+                    <span className="gc-tech-catch">X API Verification</span>
+                    <span className="gc-tech-catch">xAI Quality Scoring</span>
+                    <span className="gc-tech-catch">Bot Detection</span>
+                    <span className="gc-tech-catch">Handle Sync</span>
                     <span className="gc-tech-catch">Points System</span>
-                    <span className="gc-tech-catch">Streak Bonus</span>
                     <span className="gc-tech-catch">Leaderboard Rank</span>
                   </div>
                 </div>
@@ -268,9 +244,9 @@ export default async function Home() {
 
               <div className="gc-tech-connector" />
 
-              {/* AI Layer 5 — Referral Validation */}
+              {/* AI Layer 4 — Referral Validation */}
               <div className="gc-tech-layer gc-tech-layer--ai">
-                <div className="gc-tech-layer-num">05</div>
+                <div className="gc-tech-layer-num">04</div>
                 <div className="gc-tech-layer-icon">
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
                     <path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/>
@@ -282,13 +258,14 @@ export default async function Home() {
                   <p className="gc-tech-layer-desc">
                     Referral conversions are verified automatically — self-referral detection,
                     referrer approval status, monthly cap enforcement, and rolling window limits.
-                    Legitimate referrals earn SOL rewards automatically. No manual processing.
+                    Legitimate referrals earn points that boost your leaderboard rank and status.
+                    AI ring detection catches farming schemes. No manual processing.
                   </p>
                   <div className="gc-tech-layer-catches">
                     <span className="gc-tech-catch">Anti-Farm</span>
-                    <span className="gc-tech-catch">Cap Enforce</span>
+                    <span className="gc-tech-catch">Ring Detection</span>
                     <span className="gc-tech-catch">Auto-Verify</span>
-                    <span className="gc-tech-catch">SOL Rewards</span>
+                    <span className="gc-tech-catch">Points Reward</span>
                   </div>
                 </div>
               </div>
@@ -315,7 +292,7 @@ export default async function Home() {
             </div>
 
             <div className="gc-tech-footer">
-              <Link href="/gates" className="gc-teaser-link">See all 11 verification gates</Link>
+              <Link href="/gates" className="gc-teaser-link">See all 10 verification gates</Link>
             </div>
           </div>
         </section>

@@ -19,6 +19,7 @@ export const POINTS_CONFIG = {
   POINTS_PER_RETWEET: 250,
   POINTS_PER_QUOTE_TWEET: 500,
   POINTS_PER_REPLY: 100,
+  POINTS_PER_BOOKMARK: 150,
 
   // ─── Referral points ───
   POINTS_PER_REFERRAL_CONVERSION: 500,
@@ -46,6 +47,7 @@ export function calculateEngagementPoints(metrics: {
   retweets: number;
   quote_tweets: number;
   replies: number;
+  bookmarks: number;
 }): number {
   const c = POINTS_CONFIG;
   return (
@@ -53,7 +55,8 @@ export function calculateEngagementPoints(metrics: {
     metrics.likes * c.POINTS_PER_LIKE +
     metrics.retweets * c.POINTS_PER_RETWEET +
     metrics.quote_tweets * c.POINTS_PER_QUOTE_TWEET +
-    metrics.replies * c.POINTS_PER_REPLY
+    metrics.replies * c.POINTS_PER_REPLY +
+    metrics.bookmarks * c.POINTS_PER_BOOKMARK
   );
 }
 
@@ -70,6 +73,7 @@ export interface PointsBreakdown {
   retweetPoints: number;
   quotePoints: number;
   replyPoints: number;
+  bookmarkPoints: number;
   submissionPoints: number;
   streakPoints: number;
   referralPoints: number;
@@ -83,6 +87,7 @@ export function calculateFullBreakdown(params: {
   retweets: number;
   quote_tweets: number;
   replies: number;
+  bookmarks: number;
   approvedSubmissions: number;
   consecutiveWindows: number;
   referralConversions: number;
@@ -95,17 +100,18 @@ export function calculateFullBreakdown(params: {
   const retweetPoints = params.retweets * c.POINTS_PER_RETWEET;
   const quotePoints = params.quote_tweets * c.POINTS_PER_QUOTE_TWEET;
   const replyPoints = params.replies * c.POINTS_PER_REPLY;
+  const bookmarkPoints = params.bookmarks * c.POINTS_PER_BOOKMARK;
   const submissionPoints = params.approvedSubmissions * c.POINTS_PER_APPROVED_SUBMISSION;
   const streakPoints = calculateStreakBonus(params.consecutiveWindows);
   const referralPoints = params.referralConversions * c.POINTS_PER_REFERRAL_CONVERSION;
   const holdingsPoints = params.holdingsPointsPerCycle;
 
   const totalPoints = impressionPoints + likePoints + retweetPoints +
-    quotePoints + replyPoints + submissionPoints + streakPoints +
+    quotePoints + replyPoints + bookmarkPoints + submissionPoints + streakPoints +
     referralPoints + holdingsPoints;
 
   return {
     impressionPoints, likePoints, retweetPoints, quotePoints, replyPoints,
-    submissionPoints, streakPoints, referralPoints, holdingsPoints, totalPoints,
+    bookmarkPoints, submissionPoints, streakPoints, referralPoints, holdingsPoints, totalPoints,
   };
 }

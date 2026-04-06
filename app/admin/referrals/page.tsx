@@ -35,9 +35,7 @@ export default async function ReferralsPage(props: { searchParams: Promise<{ tab
   ]);
 
   const readyCount = (conversions || []).filter((c: any) => c.reward_status === 'ready_for_dispatch').length;
-  const totalPendingSol = (conversions || [])
-    .filter((c: any) => c.reward_status === 'ready_for_dispatch')
-    .reduce((s: number, c: any) => s + Number(c.reward_sol || 0), 0);
+  const totalPendingPoints = readyCount * REFERRAL_CONFIG.POINTS_PER_CONVERSION;
 
   // Get counts for tabs
   const { count: dispatchCount } = await supabase.from('referral_conversions').select('*', { count: 'exact', head: true }).eq('reward_status', 'ready_for_dispatch');
@@ -56,9 +54,9 @@ export default async function ReferralsPage(props: { searchParams: Promise<{ tab
             <div className="gc-stat-value" style={{ color: 'rgba(100,220,120,0.9)' }}>{dispatchCount ?? 0}</div>
           </div>
           <div className="gc-stat">
-            <div className="gc-stat-label">Pending SOL</div>
-            <div className="gc-stat-value">{totalPendingSol.toFixed(4)}</div>
-            <div className="gc-stat-sub">SOL to dispatch</div>
+            <div className="gc-stat-label">Pending Points</div>
+            <div className="gc-stat-value">{totalPendingPoints.toLocaleString()}</div>
+            <div className="gc-stat-sub">Points to award</div>
           </div>
           <div className="gc-stat">
             <div className="gc-stat-label">Treasury</div>
@@ -68,7 +66,7 @@ export default async function ReferralsPage(props: { searchParams: Promise<{ tab
           <div className="gc-stat">
             <div className="gc-stat-label">Reward Rate</div>
             <div className="gc-stat-value">{REFERRAL_CONFIG.POINTS_PER_CONVERSION}</div>
-            <div className="gc-stat-sub">SOL per conversion</div>
+            <div className="gc-stat-sub">Points per conversion</div>
           </div>
         </div>
       </div>
@@ -113,7 +111,7 @@ export default async function ReferralsPage(props: { searchParams: Promise<{ tab
               <tr key={c.id} className="lb-table-row">
                 <td className="lb-table-wallet">{truncateWallet(c.referrer_wallet)}</td>
                 <td className="lb-table-wallet">{truncateWallet(c.referred_wallet)}</td>
-                <td className="lb-table-sol">{c.reward_sol > 0 ? formatSol(c.reward_sol) : '—'}</td>
+                <td className="lb-table-sol">{REFERRAL_CONFIG.POINTS_PER_CONVERSION} PTS</td>
                 <td>
                   <span style={{ fontFamily: 'IBM Plex Mono', fontSize: 9, fontWeight: 600, padding: '3px 8px', border: `1px solid ${statusColors[c.reward_status] || 'rgba(255,255,255,0.2)'}`, color: statusColors[c.reward_status] || 'rgba(255,255,255,0.4)' }}>
                     {c.reward_status === 'ready_for_dispatch' ? 'READY' : c.reward_status.toUpperCase()}
@@ -133,7 +131,7 @@ export default async function ReferralsPage(props: { searchParams: Promise<{ tab
                         await markReferralDispatched(c.id, `MANUAL_${Date.now()}`);
                       }}>
                         <button type="submit" className="sf-btn-solid" style={{ padding: '4px 12px', fontSize: 9 }}>
-                          APPROVE {formatSol(c.reward_sol)}
+                          APPROVE {REFERRAL_CONFIG.POINTS_PER_CONVERSION} PTS
                         </button>
                       </form>
                       <form action={async () => {
@@ -158,7 +156,7 @@ export default async function ReferralsPage(props: { searchParams: Promise<{ tab
       </table>
 
       <div style={{ marginTop: 24, fontFamily: 'IBM Plex Mono', fontSize: 10, color: 'rgba(255,255,255,0.2)' }}>
-        Pipeline: Referral click → referred user approved → worker verifies eligibility → ready_for_dispatch → admin approves → SOL dispatched
+        Pipeline: Referral click → referred user approved → worker verifies eligibility → AI ring detection → points awarded
       </div>
     </div>
   );

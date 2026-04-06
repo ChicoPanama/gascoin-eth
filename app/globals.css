@@ -2934,6 +2934,26 @@ input:focus, textarea:focus, select:focus {
   cursor: not-allowed;
 }
 
+/* ─── AUTH IDENTITY ─── */
+.auth-identity {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 1px;
+  line-height: 1.2;
+}
+.auth-handle {
+  font-size: 11px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.9);
+}
+.auth-wallet {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  color: rgba(255,255,255,0.4);
+  letter-spacing: 0.05em;
+}
+
 /* ─── SUBMIT FLOW ─── */
 .sf-container { max-width: 640px; margin: 0 auto; }
 

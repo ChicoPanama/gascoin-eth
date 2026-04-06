@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { WalletButton } from './ui/WalletButton';
+import { AuthNavButton } from './AuthNavButton';
 
 export function HomeNav() {
   return (
@@ -20,7 +21,7 @@ export function HomeNav() {
       </div>
       <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
         <WalletButton />
-        <Link href="/submit" className="gc-nav-cta">Submit Receipt</Link>
+        <AuthNavButton />
       </div>
     </nav>
   );

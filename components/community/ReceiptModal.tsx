@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import type { CommunityReceipt } from '../../types/community';
+import { GATES } from '../../lib/gates';
 import { truncateWallet, formatSol } from '../../lib/formatters';
 
 export function ReceiptModal({ receipt, onClose }: {
@@ -116,8 +117,8 @@ export function ReceiptModal({ receipt, onClose }: {
             <div className="cf-modal-row">
               <span className="cf-modal-label">Gates Passed</span>
               <span className="cf-modal-value cf-modal-gates">
-                {receipt.gates_passed}/11
-                {Array.from({ length: 11 }).map((_, i) => (
+                {receipt.gates_passed}/{GATES.length}
+                {Array.from({ length: GATES.length }).map((_, i) => (
                   <span
                     key={i}
                     className={`cf-gate-dot${i < receipt.gates_passed ? ' cf-gate-dot--filled' : ''}`}

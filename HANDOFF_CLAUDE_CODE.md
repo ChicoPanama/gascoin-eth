@@ -1,6 +1,6 @@
 # GASCOIN Platform — Claude Code Handoff
 
-_Last updated: 2026-04-03 (America/Los_Angeles)_
+_Last updated: 2026-04-05 (America/Los_Angeles)_
 
 ## 1) Where the files come from (source of truth)
 
@@ -67,6 +67,18 @@ Meaning:
 - `lib/integrations/privy.ts`
 - `lib/reviewer-auth.ts`
 
+## 3b) Key files touched for X API + xAI optimization (2026-04-05)
+
+- `lib/x-api.ts` — Rewritten: base URL fixed (api.x.com), added `XPublicMetrics` type, `searchRecentTweets`, `extractMetrics`, `getUserByUsername`
+- `lib/engagement-rewards.ts` — Added `POINTS_PER_BOOKMARK: 150`, bookmarks in all calculations
+- `lib/ai-points-engine.ts` — Unchanged, but now receives bookmark data from updated workers
+- `app/api/workers/score-engagement/route.ts` — v3: removed 50-handle cap, reads bookmark_count, real wallet trust (batch-fetched), uses x-api helpers
+- `app/api/workers/sync-x-handles/route.ts` — **NEW**: detects X handle changes, updates wallet_x_links + scored_tweets, backfills x_user_id, marks stale links
+- `app/api/public/engagement/route.ts` — Upgraded: queries scored_tweets + engagement_points, returns points_by_source breakdown + tweet_metrics
+- `app/page.tsx` — Merged hero sections 03+04 into unified "X + xAI Intelligence Pipeline" section
+- `supabase/migrations/20260405_scored_tweets_bookmarks.sql` — Adds bookmarks column to scored_tweets
+- `vercel.json` — Added sync-x-handles cron (daily 3am UTC)
+
 ---
 
 ## 4) Known open items
@@ -81,10 +93,17 @@ Meaning:
    - rotate exposed/temporary tokens and normalize deploy auth to one scoped Vercel token.
 5. Optional hardening pass:
    - reduce/remove `allowHintFallback` once strict token verification is consistently stable.
+6. Run `20260405_scored_tweets_bookmarks.sql` migration on Supabase.
+7. Future X API enrichment (when ready):
+   - Post Analytics API (`GET /2/tweets/analytics`) — requires user OAuth flow for deeper metrics (link_clicks, profile_visits, detail_expands).
+   - Filtered Stream (`GET /2/tweets/search/stream`) — real-time #gascoin tweet detection; supplements (does not replace) 6h rescore cron.
+   - X Activity API — subscribe to profile update events for real-time handle change detection (alternative to daily sync worker).
 
 ---
 
 ## 5) How Claude Code should continue (recommended runbook)
+
+> **After X API optimization (2026-04-05):** Run the bookmarks migration, deploy, then verify `score-engagement` and `sync-x-handles` workers fire correctly on their cron schedules.
 
 1. Open project:
    - `/Users/arcadioperalta/.openclaw/workspace/GASCOIN/platform`
@@ -109,7 +128,20 @@ Meaning:
 
 ---
 
-## 6) Operational guardrails (keep)
+## 6) Worker schedule (vercel.json crons)
+
+| Worker | Schedule | Purpose |
+|--------|----------|---------|
+| `process-claims` | `*/5 * * * *` | Transition claims, process payout queue |
+| `verify-referrals` | `*/15 * * * *` | Auto-verify referrals, ring detection |
+| `score-engagement` | `0 */6 * * *` | Scan X for #gascoin tweets, AI score, award points |
+| `award-points` | `0 6 * * *` | Daily submission/streak/holdings points + AI audit |
+| `flush-receipts` | `0 3 * * 0` | Weekly receipt cleanup |
+| `sync-x-handles` | `0 3 * * *` | Daily handle change detection + wallet link repair |
+
+---
+
+## 7) Operational guardrails (keep)
 
 - Keep site availability first; rollback quickly if auth changes break runtime.
 - Do not reintroduce inline login buttons on pages.
@@ -118,7 +150,7 @@ Meaning:
 
 ---
 
-## 7) Suggested immediate next action
+## 8) Suggested immediate next action
 
 Set git remote + push current `main` so Claude Code handoff is repo-backed (not local-only). Example:
 

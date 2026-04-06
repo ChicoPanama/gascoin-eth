@@ -18,7 +18,7 @@ describe('User Flow: Sign in → Tweet → Engagement Points', () => {
   describe('Step 1: Engagement Point Calculation', () => {
     it('calculates points for a real tweet with moderate engagement', () => {
       const pts = calculateEngagementPoints({
-        impressions: 3000, likes: 45, retweets: 8, quote_tweets: 2, replies: 12,
+        impressions: 3000, likes: 45, retweets: 8, quote_tweets: 2, replies: 12, bookmarks: 0,
       });
       const expected = 3000 * 1 + 45 * 50 + 8 * 250 + 2 * 500 + 12 * 100;
       expect(pts).toBe(expected);
@@ -26,11 +26,11 @@ describe('User Flow: Sign in → Tweet → Engagement Points', () => {
     });
 
     it('zero engagement = zero points', () => {
-      expect(calculateEngagementPoints({ impressions: 0, likes: 0, retweets: 0, quote_tweets: 0, replies: 0 })).toBe(0);
+      expect(calculateEngagementPoints({ impressions: 0, likes: 0, retweets: 0, quote_tweets: 0, replies: 0, bookmarks: 0 })).toBe(0);
     });
 
     it('impressions alone earn points', () => {
-      const pts = calculateEngagementPoints({ impressions: 10000, likes: 0, retweets: 0, quote_tweets: 0, replies: 0 });
+      const pts = calculateEngagementPoints({ impressions: 10000, likes: 0, retweets: 0, quote_tweets: 0, replies: 0, bookmarks: 0 });
       expect(pts).toBe(10000);
     });
   });
@@ -220,7 +220,7 @@ describe('User Flow: Sign in → Tweet → Engagement Points', () => {
     it('Scenario A: New user, first tweet, modest engagement', async () => {
       // Calculate raw points
       const rawPoints = calculateEngagementPoints({
-        impressions: 1500, likes: 20, retweets: 3, quote_tweets: 0, replies: 5,
+        impressions: 1500, likes: 20, retweets: 3, quote_tweets: 0, replies: 5, bookmarks: 0,
       });
       expect(rawPoints).toBe(1500 + 1000 + 750 + 0 + 500);
       expect(rawPoints).toBe(3750);
@@ -250,7 +250,7 @@ describe('User Flow: Sign in → Tweet → Engagement Points', () => {
 
     it('Scenario B: Veteran user, viral tweet', async () => {
       const rawPoints = calculateEngagementPoints({
-        impressions: 50000, likes: 500, retweets: 150, quote_tweets: 30, replies: 80,
+        impressions: 50000, likes: 500, retweets: 150, quote_tweets: 30, replies: 80, bookmarks: 0,
       });
 
       const quality = await scoreTweetQuality({
@@ -276,7 +276,7 @@ describe('User Flow: Sign in → Tweet → Engagement Points', () => {
 
     it('Scenario C: Bot farmer gets caught', async () => {
       const rawPoints = calculateEngagementPoints({
-        impressions: 200000, likes: 50000, retweets: 20000, quote_tweets: 5000, replies: 10000,
+        impressions: 200000, likes: 50000, retweets: 20000, quote_tweets: 5000, replies: 10000, bookmarks: 0,
       });
 
       const quality = await scoreTweetQuality({

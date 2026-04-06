@@ -82,7 +82,7 @@ export default function ReferralPage() {
       {/* Zone 1 — Header */}
       <header className="lb-header">
         <div className="lb-header__meta">
-          <span className="lb-tag">— Earn SOL For Every Referral You Convert</span>
+          <span className="lb-tag">— Earn Points For Every Referral You Convert</span>
         </div>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: 24 }}>
           <div>
@@ -179,9 +179,9 @@ export default function ReferralPage() {
         {/* Zone 5 — Monthly Cap Meters */}
         <div className="ref-meters">
           <div className="ref-meter">
-            <div className="wt-input-label">MONTHLY SOL EARNED</div>
+            <div className="wt-input-label">MONTHLY POINTS EARNED</div>
             <div style={{ fontFamily: 'Bebas Neue', fontSize: 40 }}>{monthPoints.toLocaleString()} PTS</div>
-            <span style={{ fontFamily: 'IBM Plex Mono', fontSize: 12, color: 'rgba(255,255,255,0.35)' }}>/ {REFERRAL_CONFIG.MAX_POINTS_30D} SOL</span>
+            <span style={{ fontFamily: 'IBM Plex Mono', fontSize: 12, color: 'rgba(255,255,255,0.35)' }}>/ {REFERRAL_CONFIG.MAX_POINTS_30D.toLocaleString()} PTS</span>
             <div className="gt-progress-track" style={{ marginTop: 8 }}>
               <div className="gt-progress-fill" style={{ width: `${Math.min(100, (monthPoints / REFERRAL_CONFIG.MAX_POINTS_30D) * 100)}%` }} />
             </div>

@@ -26,6 +26,7 @@ function simulateUser(params: {
   tweetRetweets: number;
   tweetQuotes: number;
   tweetReplies: number;
+  tweetBookmarks: number;
   approvedSubmissions: number;
   consecutiveWindows: number;
   referralConversions: number;
@@ -44,6 +45,7 @@ function simulateUser(params: {
     retweets: params.tweetRetweets,
     quote_tweets: params.tweetQuotes,
     replies: params.tweetReplies,
+    bookmarks: params.tweetBookmarks,
     approvedSubmissions: params.approvedSubmissions,
     consecutiveWindows: params.consecutiveWindows,
     referralConversions: params.referralConversions,
@@ -67,7 +69,7 @@ describe('Journey: New Standard User (0 GASCOIN)', () => {
   it('earns submission points on first approved receipt', () => {
     const { breakdown } = simulateUser({
       tier: 0, gascoinBalance: 0,
-      tweetImpressions: 0, tweetLikes: 0, tweetRetweets: 0, tweetQuotes: 0, tweetReplies: 0,
+      tweetImpressions: 0, tweetLikes: 0, tweetRetweets: 0, tweetQuotes: 0, tweetReplies: 0, tweetBookmarks: 0,
       approvedSubmissions: 1, consecutiveWindows: 0, referralConversions: 0,
     });
     expect(breakdown.submissionPoints).toBe(1000);
@@ -78,7 +80,7 @@ describe('Journey: New Standard User (0 GASCOIN)', () => {
   it('earns engagement points from a modest tweet', () => {
     const { breakdown } = simulateUser({
       tier: 0, gascoinBalance: 0,
-      tweetImpressions: 2000, tweetLikes: 30, tweetRetweets: 5, tweetQuotes: 1, tweetReplies: 8,
+      tweetImpressions: 2000, tweetLikes: 30, tweetRetweets: 5, tweetQuotes: 1, tweetReplies: 8, tweetBookmarks: 0,
       approvedSubmissions: 1, consecutiveWindows: 0, referralConversions: 0,
     });
     expect(breakdown.impressionPoints).toBe(2000);
@@ -92,7 +94,7 @@ describe('Journey: New Standard User (0 GASCOIN)', () => {
   it('earns referral points for bringing a friend', () => {
     const { breakdown } = simulateUser({
       tier: 0, gascoinBalance: 0,
-      tweetImpressions: 0, tweetLikes: 0, tweetRetweets: 0, tweetQuotes: 0, tweetReplies: 0,
+      tweetImpressions: 0, tweetLikes: 0, tweetRetweets: 0, tweetQuotes: 0, tweetReplies: 0, tweetBookmarks: 0,
       approvedSubmissions: 1, consecutiveWindows: 0, referralConversions: 1,
     });
     expect(breakdown.referralPoints).toBe(500);
@@ -101,7 +103,7 @@ describe('Journey: New Standard User (0 GASCOIN)', () => {
   it('does NOT earn streak bonus with only 1 window', () => {
     const { breakdown } = simulateUser({
       tier: 0, gascoinBalance: 0,
-      tweetImpressions: 0, tweetLikes: 0, tweetRetweets: 0, tweetQuotes: 0, tweetReplies: 0,
+      tweetImpressions: 0, tweetLikes: 0, tweetRetweets: 0, tweetQuotes: 0, tweetReplies: 0, tweetBookmarks: 0,
       approvedSubmissions: 1, consecutiveWindows: 1, referralConversions: 0,
     });
     expect(breakdown.streakPoints).toBe(500); // 1 window = 500 (not 0, since calculateStreakBonus(1) = 500)
@@ -115,7 +117,7 @@ describe('Journey: Commuter Tier (100K GASCOIN)', () => {
   it('gets correct tier and higher holdings bonus', () => {
     const { tier, holdingsPoints } = simulateUser({
       tier: 1, gascoinBalance: 100_000,
-      tweetImpressions: 0, tweetLikes: 0, tweetRetweets: 0, tweetQuotes: 0, tweetReplies: 0,
+      tweetImpressions: 0, tweetLikes: 0, tweetRetweets: 0, tweetQuotes: 0, tweetReplies: 0, tweetBookmarks: 0,
       approvedSubmissions: 0, consecutiveWindows: 0, referralConversions: 0,
     });
     expect(tier.id).toBe(1);
@@ -134,7 +136,7 @@ describe('Journey: Commuter Tier (100K GASCOIN)', () => {
   it('accumulates well with moderate engagement', () => {
     const { breakdown } = simulateUser({
       tier: 1, gascoinBalance: 150_000,
-      tweetImpressions: 5000, tweetLikes: 80, tweetRetweets: 15, tweetQuotes: 3, tweetReplies: 20,
+      tweetImpressions: 5000, tweetLikes: 80, tweetRetweets: 15, tweetQuotes: 3, tweetReplies: 20, tweetBookmarks: 0,
       approvedSubmissions: 2, consecutiveWindows: 2, referralConversions: 3,
     });
     expect(breakdown.totalPoints).toBeGreaterThan(15000);
@@ -155,7 +157,7 @@ describe('Journey: Road Warrior (500K GASCOIN)', () => {
   it('earns 300 holdings per day', () => {
     const { holdingsPoints } = simulateUser({
       tier: 2, gascoinBalance: 750_000,
-      tweetImpressions: 0, tweetLikes: 0, tweetRetweets: 0, tweetQuotes: 0, tweetReplies: 0,
+      tweetImpressions: 0, tweetLikes: 0, tweetRetweets: 0, tweetQuotes: 0, tweetReplies: 0, tweetBookmarks: 0,
       approvedSubmissions: 0, consecutiveWindows: 0, referralConversions: 0,
     });
     expect(holdingsPoints).toBe(300);
@@ -164,7 +166,7 @@ describe('Journey: Road Warrior (500K GASCOIN)', () => {
   it('with viral tweet + streak + referrals = massive points', () => {
     const { breakdown } = simulateUser({
       tier: 2, gascoinBalance: 750_000,
-      tweetImpressions: 25000, tweetLikes: 300, tweetRetweets: 80, tweetQuotes: 20, tweetReplies: 50,
+      tweetImpressions: 25000, tweetLikes: 300, tweetRetweets: 80, tweetQuotes: 20, tweetReplies: 50, tweetBookmarks: 0,
       approvedSubmissions: 3, consecutiveWindows: 4, referralConversions: 8,
     });
     expect(breakdown.totalPoints).toBeGreaterThan(60000);
@@ -189,7 +191,7 @@ describe('Journey: Fleet Tier (2M GASCOIN)', () => {
   it('full engagement scenario — max points accumulation', () => {
     const { breakdown } = simulateUser({
       tier: 3, gascoinBalance: 5_000_000,
-      tweetImpressions: 100000, tweetLikes: 1000, tweetRetweets: 300, tweetQuotes: 50, tweetReplies: 200,
+      tweetImpressions: 100000, tweetLikes: 1000, tweetRetweets: 300, tweetQuotes: 50, tweetReplies: 200, tweetBookmarks: 0,
       approvedSubmissions: 5, consecutiveWindows: 5, referralConversions: 15,
     });
 
@@ -400,7 +402,7 @@ describe('Load Test — Point Calculations', () => {
     for (let i = 0; i < 10; i++) {
       simulateUser({
         tier: i % 4, gascoinBalance: i * 100_000,
-        tweetImpressions: 5000, tweetLikes: 50, tweetRetweets: 10, tweetQuotes: 2, tweetReplies: 5,
+        tweetImpressions: 5000, tweetLikes: 50, tweetRetweets: 10, tweetQuotes: 2, tweetReplies: 5, tweetBookmarks: 0,
         approvedSubmissions: 1, consecutiveWindows: i, referralConversions: i,
       });
     }
@@ -418,7 +420,7 @@ describe('Load Test — Point Calculations', () => {
         tweetLikes: Math.floor(Math.random() * 500),
         tweetRetweets: Math.floor(Math.random() * 100),
         tweetQuotes: Math.floor(Math.random() * 20),
-        tweetReplies: Math.floor(Math.random() * 50),
+        tweetReplies: Math.floor(Math.random() * 50), tweetBookmarks: Math.floor(Math.random() * 20),
         approvedSubmissions: Math.floor(Math.random() * 5),
         consecutiveWindows: Math.floor(Math.random() * 5),
         referralConversions: Math.floor(Math.random() * 10),
@@ -444,7 +446,7 @@ describe('Load Test — Point Calculations', () => {
         tweetLikes: Math.floor(Math.random() * 1000),
         tweetRetweets: Math.floor(Math.random() * 300),
         tweetQuotes: Math.floor(Math.random() * 50),
-        tweetReplies: Math.floor(Math.random() * 200),
+        tweetReplies: Math.floor(Math.random() * 200), tweetBookmarks: Math.floor(Math.random() * 50),
         approvedSubmissions: Math.floor(Math.random() * 10),
         consecutiveWindows: Math.floor(Math.random() * 5),
         referralConversions: Math.floor(Math.random() * 20),
@@ -505,7 +507,7 @@ describe('Load Test — Point Calculations', () => {
 describe('Cross-Tier Comparison — Same Activity, Different Tiers', () => {
   const sharedActivity = {
     tweetImpressions: 10000, tweetLikes: 100, tweetRetweets: 30,
-    tweetQuotes: 5, tweetReplies: 15, approvedSubmissions: 2,
+    tweetQuotes: 5, tweetReplies: 15, tweetBookmarks: 0, approvedSubmissions: 2,
     consecutiveWindows: 3, referralConversions: 4,
   };
 

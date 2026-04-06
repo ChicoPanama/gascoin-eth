@@ -18,6 +18,10 @@ function readXUserId(user: any): string {
   return String(tw?.subject || tw?.userId || '');
 }
 
+function truncateWallet(key: string) {
+  return `${key.slice(0, 4)}...${key.slice(-4)}`;
+}
+
 export function AuthNavButton() {
   const { ready, authenticated, login, logout, user } = usePrivy();
   const { publicKey, connected } = useWallet();
@@ -26,24 +30,41 @@ export function AuthNavButton() {
   const handle = readHandle(user as any);
   const xUserId = readXUserId(user as any);
 
+  // Reset link lock when wallet address changes (user switches wallet)
+  const lastLinkedWallet = useRef<string | null>(null);
+
   // Auto-link wallet ↔ X handle when both are connected
   useEffect(() => {
-    if (!authenticated || !connected || !publicKey || !handle || linkedRef.current) return;
+    if (!authenticated || !connected || !publicKey || !handle) return;
 
     const wallet = publicKey.toBase58();
-    linkedRef.current = true;
 
-    // Fire and forget — don't block UI
+    // Skip if already linked this exact wallet+handle combo
+    if (linkedRef.current && lastLinkedWallet.current === wallet) return;
+
+    linkedRef.current = true;
+    lastLinkedWallet.current = wallet;
+
     fetch('/api/link-x', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ wallet, x_handle: handle, x_user_id: xUserId }),
-    }).catch(() => {}); // Silent fail — link will be retried on next session
+    }).catch(() => {
+      linkedRef.current = false;
+      lastLinkedWallet.current = null;
+    });
   }, [authenticated, connected, publicKey, handle, xUserId]);
 
-  // Render nothing while loading
-  if (!ready) return null;
+  // Loading — show placeholder so button never vanishes
+  if (!ready) {
+    return (
+      <button className="btn" type="button" disabled style={{ opacity: 0.4 }}>
+        Loading...
+      </button>
+    );
+  }
 
+  // Not signed in — show sign-in button
   if (!authenticated) {
     return (
       <button className="btn" type="button" onClick={() => login({ loginMethods: ['twitter'] })}>
@@ -52,11 +73,23 @@ export function AuthNavButton() {
     );
   }
 
+  // Signed in — show unified identity
+  const walletAddr = connected && publicKey ? truncateWallet(publicKey.toBase58()) : null;
+
   return (
     <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-      <span style={{ fontSize: 12, opacity: 0.9 }}>
-        {handle ? `@${handle}` : 'Signed in'}
-      </span>
+      {walletAddr && handle ? (
+        // Both connected — unified display
+        <span className="auth-identity">
+          <span className="auth-handle">@{handle}</span>
+          <span className="auth-wallet">{walletAddr}</span>
+        </span>
+      ) : handle ? (
+        // Only X connected
+        <span style={{ fontSize: 12, opacity: 0.9 }}>@{handle}</span>
+      ) : (
+        <span style={{ fontSize: 12, opacity: 0.9 }}>Signed in</span>
+      )}
       <button className="btn" type="button" onClick={logout}>Logout</button>
     </div>
   );

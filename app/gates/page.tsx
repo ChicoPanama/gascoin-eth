@@ -49,7 +49,7 @@ export default function GatesPage() {
   const aTime = useAnimVal(avgTime);
 
   const categories: { key: GateCategoryFilter; label: string; count: number }[] = [
-    { key: 'all', label: 'ALL', count: 10 },
+    { key: 'all', label: 'ALL', count: GATES.length },
     { key: 'tweet', label: 'TWEET', count: GATE_CATEGORIES.tweet.count },
     { key: 'receipt', label: 'RECEIPT', count: GATE_CATEGORIES.receipt.count },
     { key: 'wallet', label: 'WALLET', count: GATE_CATEGORIES.wallet.count },
