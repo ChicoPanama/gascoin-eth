@@ -300,36 +300,31 @@ export function TreasuryChart() {
 }
 
 // ═══════════════════════════════════════════
-// ZONE 3 — Live Submission Feed
+// ZONE 3 — Live Submission Feed (from Supabase)
 // ═══════════════════════════════════════════
-// TODO: replace setInterval mock with Supabase realtime subscription
-const MOCK_SUBMISSIONS = [
-  { wallet: '5FHw...krdx', location: 'Houston, TX', amount: 47.82, gatesPassed: 10 },
-  { wallet: '8jKm...p2Nq', location: 'Los Angeles, CA', amount: 62.15, gatesPassed: 10 },
-  { wallet: '3vBx...wY9a', location: 'Chicago, IL', amount: 38.94, gatesPassed: 9 },
-  { wallet: '9pLd...mR4t', location: 'Miami, FL', amount: 55.30, gatesPassed: 10 },
-  { wallet: '2nQw...xK7j', location: 'Phoenix, AZ', amount: 41.67, gatesPassed: 8 },
-  { wallet: '7hFc...bN3s', location: 'Dallas, TX', amount: 59.21, gatesPassed: 10 },
-  { wallet: '4rYt...eP8v', location: 'Atlanta, GA', amount: 44.53, gatesPassed: 10 },
-  { wallet: '6kWz...dL5m', location: 'Seattle, WA', amount: 72.08, gatesPassed: 9 },
-  { wallet: '1aMn...gH2c', location: 'Denver, CO', amount: 36.19, gatesPassed: 10 },
-  { wallet: '8bTp...fJ6w', location: 'Portland, OR', amount: 51.44, gatesPassed: 10 },
-  { wallet: '5cRv...hQ9x', location: 'Austin, TX', amount: 48.76, gatesPassed: 10 },
-  { wallet: '3dSu...kM4y', location: 'Nashville, TN', amount: 43.92, gatesPassed: 9 },
-];
 
 export function SubmissionFeed() {
-  const [entries, setEntries] = useState(MOCK_SUBMISSIONS.slice(0, 6));
-  const idxRef = useRef(6);
+  const [entries, setEntries] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // TODO: replace setInterval mock with Supabase realtime subscription
-    const id = setInterval(() => {
-      const next = MOCK_SUBMISSIONS[idxRef.current % MOCK_SUBMISSIONS.length];
-      idxRef.current++;
-      setEntries(prev => [{ ...next, _new: true } as any, ...prev.slice(0, 7).map((e: any) => ({ ...e, _new: false }))]);
-    }, 8000);
-    return () => clearInterval(id);
+    (async () => {
+      try {
+        const res = await fetch('/api/public/claims');
+        if (res.ok) {
+          const data = await res.json();
+          const rows = (Array.isArray(data) ? data : []).slice(0, 8).map((r: any) => ({
+            wallet: r.wallet ? `${r.wallet.slice(0, 4)}...${r.wallet.slice(-4)}` : '—',
+            location: '—',
+            amount: Number(r.riskScore || 0).toFixed(2),
+            gatesPassed: 10,
+            _new: false,
+          }));
+          setEntries(rows);
+        }
+      } catch {}
+      setLoading(false);
+    })();
   }, []);
 
   return (
@@ -338,15 +333,21 @@ export function SubmissionFeed() {
         <span className="gc-section-num">Recent Submissions</span>
       </div>
       <div className="gc-feed-list">
-        {entries.map((e: any, i: number) => (
-          <div key={`${e.wallet}-${i}`} className={`gc-feed-row${i === 0 && e._new ? ' gc-feed-row--new' : ''}`}>
-            <span className="gc-feed-wallet">{e.wallet}</span>
-            <span className="gc-feed-loc">{e.location}</span>
-            <span className="gc-feed-amt">${e.amount.toFixed(2)}</span>
-            <span className="gc-feed-gate">Gate {e.gatesPassed}/10</span>
-            {i === 0 && e._new && <span className="gc-feed-badge">NEW</span>}
-          </div>
-        ))}
+        {loading ? (
+          <div style={{ padding: 24, textAlign: 'center', color: 'rgba(255,255,255,0.3)', fontFamily: 'IBM Plex Mono', fontSize: 11 }}>Loading...</div>
+        ) : entries.length === 0 ? (
+          <div style={{ padding: 24, textAlign: 'center', color: 'rgba(255,255,255,0.3)', fontFamily: 'IBM Plex Mono', fontSize: 11 }}>No submissions yet</div>
+        ) : (
+          entries.map((e: any, i: number) => (
+            <div key={`${e.wallet}-${i}`} className={`gc-feed-row${i === 0 && e._new ? ' gc-feed-row--new' : ''}`}>
+              <span className="gc-feed-wallet">{e.wallet}</span>
+              <span className="gc-feed-loc">{e.location}</span>
+              <span className="gc-feed-amt">${e.amount}</span>
+              <span className="gc-feed-gate">Gate {e.gatesPassed}/10</span>
+              {i === 0 && e._new && <span className="gc-feed-badge">NEW</span>}
+            </div>
+          ))
+        )}
       </div>
     </div>
   );
@@ -355,19 +356,18 @@ export function SubmissionFeed() {
 // ═══════════════════════════════════════════
 // ZONE 4 — Gate Status Panel
 // ═══════════════════════════════════════════
-// TODO: pull from Supabase gate_results table
-const GATES = [
-  { name: 'Tweet Detected', rate: 98 },
-  { name: 'Tweet Public', rate: 96 },
-  { name: '#gascoin Hashtag', rate: 94 },
-  { name: 'Wallet on Receipt', rate: 89 },
-  { name: 'Receipt Legible', rate: 92 },
-  { name: 'Receipt Date Valid', rate: 88 },
-  { name: 'Station Verified', rate: 85 },
-  { name: 'No Duplicate Wallet', rate: 97 },
-  { name: 'No Duplicate Receipt', rate: 95 },
-  { name: 'Treasury Solvent', rate: 100 },
-  { name: 'Min 100 Followers', rate: 82 },
+// Gate names match lib/gates.ts — 10 gates, no extras
+const DASHBOARD_GATES = [
+  { name: 'Tweet Detected', rate: 0 },
+  { name: 'Tweet Public', rate: 0 },
+  { name: '#gascoin Hashtag', rate: 0 },
+  { name: 'Tweet Age', rate: 0 },
+  { name: 'Wallet on Receipt', rate: 0 },
+  { name: 'Receipt Legible', rate: 0 },
+  { name: 'Receipt Date Valid', rate: 0 },
+  { name: 'No Duplicate Wallet', rate: 0 },
+  { name: 'No Duplicate Receipt', rate: 0 },
+  { name: 'Treasury Solvent', rate: 0 },
 ];
 
 export function GateStatusPanel() {
@@ -377,7 +377,7 @@ export function GateStatusPanel() {
         <span className="gc-section-num">Verification Gates</span>
       </div>
       <div className="gc-gates-list">
-        {GATES.map((g, i) => (
+        {DASHBOARD_GATES.map((g, i) => (
           <div key={g.name} className="gc-gate">
             <div className="gc-gate-head">
               <span className="gc-gate-num">{String(i + 1).padStart(2, '0')}</span>

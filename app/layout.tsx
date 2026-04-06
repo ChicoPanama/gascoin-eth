@@ -13,6 +13,21 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   title: 'GASCOIN',
   description: 'Community gas refunds on Solana. Post #gascoin, submit a receipt, get SOL back.',
+  openGraph: {
+    title: 'GASCOIN — Community Gas Refunds on Solana',
+    description: 'Post #gascoin on X, submit your gas receipt, and receive SOL directly to your wallet. 10 automated verification gates. No middlemen.',
+    siteName: 'GASCOIN',
+    type: 'website',
+    url: 'https://platform-ebon-nine.vercel.app',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'GASCOIN — Community Gas Refunds on Solana',
+    description: 'Post #gascoin on X, submit your gas receipt, and receive SOL directly to your wallet.',
+  },
+  icons: {
+    icon: '/favicon.svg',
+  },
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
