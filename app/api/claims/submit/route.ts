@@ -1,32 +1,34 @@
 import crypto from 'crypto';
 import { NextResponse } from 'next/server';
-import { evaluateClaim } from '../../../../lib/policy';
+import { evaluateClaim, COOLDOWN_DAYS } from '../../../../lib/policy';
 import { verifyTweetProof, getFollowerCount } from '../../../../lib/integrations/x';
 import { analyzeReceipt } from '../../../../lib/integrations/ocr';
 import { runFraudChecks } from '../../../../lib/integrations/fraud';
 import { hasMinimumGascoinUsd } from '../../../../lib/integrations/solana';
 import { verifyPrivySession } from '../../../../lib/integrations/privy';
+import { getUserByUsername } from '../../../../lib/x-api';
+import { scoreAccountQuality } from '../../../../lib/account-quality';
 import { getSupabaseAdmin } from '../../../../lib/supabase';
 import { hashRequestBody, resolveIdempotencyKey } from '../../../../lib/idempotency';
 import { checkRateLimit } from '../../../../lib/rate-limit';
 
 const SUBMIT_WINDOW_SEC = 60;
 const SUBMIT_MAX_PER_WINDOW = 12;
-const COOLDOWN_DAYS = 30;
 
-// Check 30-day rolling cooldown — returns true if wallet is eligible
-async function checkCooldown(supabase: any, wallet: string): Promise<boolean> {
+// Check 7-day rolling cooldown per X account — returns true if eligible
+async function checkCooldown(supabase: any, xUserId: string): Promise<boolean> {
   try {
-    const thirtyDaysAgo = new Date(Date.now() - COOLDOWN_DAYS * 86400000).toISOString();
+    const cutoff = new Date(Date.now() - COOLDOWN_DAYS * 86400000).toISOString();
+    // Check claims (not just payouts) — prevents rapid resubmission
     const { data } = await supabase
-      .from('payouts')
+      .from('claims')
       .select('id')
-      .eq('wallet', wallet)
-      .eq('status', 'paid')
-      .gte('created_at', thirtyDaysAgo)
+      .eq('user_id', xUserId)
+      .in('status', ['submitted', 'auto_review', 'ready_for_dispatch', 'needs_review', 'approved', 'paid'])
+      .gte('created_at', cutoff)
       .limit(1)
       .maybeSingle();
-    return !data; // true if no paid payout in last 30 days
+    return !data; // true if no active/paid claim in last 7 days
   } catch {
     return true; // fail open — don't block on DB error
   }
@@ -112,14 +114,16 @@ export async function POST(req: Request){
     await supabase.from('idempotency_keys').insert({ key: idemKey, scope: 'claim_submit', request_hash: reqHash, status: 'processing' });
   }
 
-  // Run tweet verification, OCR, balance check, and follower check in parallel
-  // Fraud check runs after OCR so it can reuse the pipeline data
-  const [tweet, ocr, minHold, followerCount] = await Promise.all([
+  // Run tweet verification, OCR, balance check, follower check, and account quality in parallel
+  const [tweet, ocr, minHold, followerCount, userLookup] = await Promise.all([
     verifyTweetProof(tweetUrl, `@${session.xHandle}`),
     analyzeReceipt(receipt),
     hasMinimumGascoinUsd(wallet, 1),
-    getFollowerCount(session.xHandle)
+    getFollowerCount(session.xHandle),
+    getUserByUsername(session.xHandle)
   ]);
+
+  const accountQuality = userLookup.user ? scoreAccountQuality(userLookup.user) : { score: 0, passed: false, flags: ['user_lookup_failed'] };
 
   // Pass OCR pipeline data to fraud checks to avoid redundant processing
   const fraudBase = await runFraudChecks(receiptBuffer, ocr.pipeline);
@@ -140,6 +144,18 @@ export async function POST(req: Request){
   const duplicateHash = !!dupRows?.some((r:any) => r.hash_sha256 === fraudBase.hashSha256);
   const duplicatePhash = !!dupRows?.some((r:any) => r.phash === fraudBase.pHash);
 
+  // Cooldown is per X account (user_id), not per wallet
+  // First upsert user so we have the DB user_id for cooldown check
+  const { data: userRowForCooldown } = await supabase
+    .from('users')
+    .select('id')
+    .eq('x_user_id', session.xId || `x_${session.xHandle}`)
+    .maybeSingle();
+
+  const cooldownOk = userRowForCooldown?.id
+    ? await checkCooldown(supabase, userRowForCooldown.id)
+    : true; // new user, no cooldown
+
   const result = evaluateClaim({
     xVerified: session.xVerified,
     tweetUrl,
@@ -153,9 +169,11 @@ export async function POST(req: Request){
     tamperScore: fraudBase.tamperScore,
     duplicateHash,
     duplicatePhash,
-    cooldownOk: await checkCooldown(supabase, wallet),
+    cooldownOk,
     amountUsd,
-    followerCount
+    followerCount,
+    accountQualityScore: accountQuality.score,
+    accountQualityPassed: accountQuality.passed,
   });
 
   // upsert user and wallet linkage

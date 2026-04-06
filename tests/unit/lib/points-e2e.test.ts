@@ -364,6 +364,7 @@ describe('Gate Verification → Points Integration', () => {
       aiScore: 0.1, tamperScore: 0.1,
       duplicateHash: false, duplicatePhash: false,
       cooldownOk: true, amountUsd: 50, followerCount: 200,
+      accountQualityScore: 60, accountQualityPassed: true,
     };
   }
 
@@ -386,9 +387,9 @@ describe('Gate Verification → Points Integration', () => {
     // Rejected → no points
   });
 
-  it('all 11 gates evaluate correctly for a valid submission', () => {
+  it('all 12 gates evaluate correctly for a valid submission', () => {
     const result = evaluateClaim(validClaim());
-    expect(result.gates).toHaveLength(11);
+    expect(result.gates).toHaveLength(12);
     expect(result.failed).toHaveLength(0);
   });
 });

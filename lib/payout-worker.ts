@@ -1,7 +1,11 @@
 import { hasMinimumGascoinUsd, sendSolPayout } from './integrations/solana';
+import { verifyTweetProof, getFollowerCount } from './integrations/x';
+import { getUserByUsername } from './x-api';
+import { scoreAccountQuality } from './account-quality';
 import { getSupabaseAdmin } from './supabase';
 
 const RETRY_BASE_SECONDS = 60;
+const MIN_FOLLOWERS = 100;
 
 export async function processQueuedPayout(claimId: string) {
   const supabase = getSupabaseAdmin();
@@ -19,7 +23,7 @@ export async function processQueuedPayout(claimId: string) {
   // Safety guard: only process payouts for admin-approved claims
   const { data: claim } = await supabase
     .from('claims')
-    .select('status')
+    .select('status,tweet_url,user_id')
     .eq('id', claimId)
     .single();
 
@@ -35,6 +39,63 @@ export async function processQueuedPayout(claimId: string) {
       .eq('status', 'paid')
       .maybeSingle();
     return { ok: true, txHash: existingPaid?.tx_hash || null, reused: true };
+  }
+
+  // --- Pre-payout re-verification ---
+  // Re-verify tweet is still live, public, has #gascoin, and author matches
+  if (claim?.tweet_url && claim?.user_id) {
+    const { data: user } = await supabase
+      .from('users')
+      .select('x_handle')
+      .eq('id', claim.user_id)
+      .single();
+
+    const xHandle = user?.x_handle || '';
+    const tweetCheck = await verifyTweetProof(claim.tweet_url, xHandle);
+
+    if (!tweetCheck.ok) {
+      await supabase.from('claims').update({ status: 'needs_review', updated_at: new Date().toISOString() }).eq('id', claimId);
+      await supabase.from('claim_status_events').insert({
+        claim_id: claimId, from_status: 'approved', to_status: 'needs_review',
+        actor_type: 'system', actor_id: 'payout_worker',
+        reason: `pre_payout_tweet_failed: ${tweetCheck.reason}`
+      });
+      await supabase.from('audit_logs').insert({
+        actor_type: 'system', actor_id: 'payout_worker',
+        action: 'payout_blocked_tweet_invalid',
+        target_type: 'claim', target_id: claimId,
+        payload_json: { reason: tweetCheck.reason, tweetUrl: claim.tweet_url }
+      });
+      return { ok: false, error: 'tweet_no_longer_valid', reason: tweetCheck.reason };
+    }
+
+    // Re-verify follower count
+    const handle = xHandle.replace(/^@/, '');
+    const followers = await getFollowerCount(handle);
+    if (followers >= 0 && followers < MIN_FOLLOWERS) {
+      await supabase.from('claims').update({ status: 'needs_review', updated_at: new Date().toISOString() }).eq('id', claimId);
+      await supabase.from('claim_status_events').insert({
+        claim_id: claimId, from_status: 'approved', to_status: 'needs_review',
+        actor_type: 'system', actor_id: 'payout_worker',
+        reason: `pre_payout_followers_dropped: ${followers}`
+      });
+      return { ok: false, error: 'followers_below_threshold', followers };
+    }
+
+    // Re-verify account quality
+    const userLookup = await getUserByUsername(handle);
+    if (userLookup.user) {
+      const quality = scoreAccountQuality(userLookup.user);
+      if (!quality.passed) {
+        await supabase.from('claims').update({ status: 'needs_review', updated_at: new Date().toISOString() }).eq('id', claimId);
+        await supabase.from('claim_status_events').insert({
+          claim_id: claimId, from_status: 'approved', to_status: 'needs_review',
+          actor_type: 'system', actor_id: 'payout_worker',
+          reason: `pre_payout_account_quality_failed: score=${quality.score} flags=${quality.flags.join(',')}`
+        });
+        return { ok: false, error: 'account_quality_failed', score: quality.score, flags: quality.flags };
+      }
+    }
   }
 
   const gate = await hasMinimumGascoinUsd(job.wallet, 1);

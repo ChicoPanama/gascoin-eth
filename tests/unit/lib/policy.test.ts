@@ -7,7 +7,7 @@ function validInput(overrides: Partial<ClaimInput> = {}): ClaimInput {
     tweetLive: true, connectedWallet: 'GAsWallet123', walletOnReceipt: 'GAsWallet123',
     receiptHasGascoin: true, gascoinUsdValue: 2, aiScore: 0.1, tamperScore: 0.1,
     duplicateHash: false, duplicatePhash: false, cooldownOk: true, amountUsd: 50,
-    followerCount: 200, ...overrides,
+    followerCount: 200, accountQualityScore: 60, accountQualityPassed: true, ...overrides,
   };
 }
 
@@ -129,9 +129,20 @@ describe('evaluateClaim', () => {
     expect(r.decision).toBe('rejected');
   });
 
-  it('returns exactly 11 gates', () => {
+  // Gate 12: account_quality
+  it('fails gate account_quality when score below threshold', () => {
+    const r = evaluateClaim(validInput({ accountQualityScore: 20, accountQualityPassed: false }));
+    expect(r.failed.some((g) => g.gate === 'account_quality')).toBe(true);
+  });
+
+  it('passes gate account_quality when score above threshold', () => {
+    const r = evaluateClaim(validInput({ accountQualityScore: 60, accountQualityPassed: true }));
+    expect(r.failed.some((g) => g.gate === 'account_quality')).toBe(false);
+  });
+
+  it('returns exactly 12 gates', () => {
     const r = evaluateClaim(validInput());
-    expect(r.gates).toHaveLength(11);
+    expect(r.gates).toHaveLength(12);
   });
 
   it('risk score is between 0 and 1', () => {

@@ -15,7 +15,12 @@ export type ClaimInput = {
   cooldownOk: boolean;
   amountUsd: number;
   followerCount: number;
+  accountQualityScore: number;
+  accountQualityPassed: boolean;
 };
+
+// Cooldown is now 7 days per X account (not 30 days per wallet)
+export const COOLDOWN_DAYS = 7;
 
 export function evaluateClaim(c: ClaimInput){
   const gates: GateResult[] = [];
@@ -28,8 +33,9 @@ export function evaluateClaim(c: ClaimInput){
   gates.push({ gate:'not_duplicate', passed:!c.duplicateHash && !c.duplicatePhash, reason:'Receipt duplicate detected' });
   gates.push({ gate:'ai_image_check', passed:c.aiScore<0.65, score:c.aiScore, reason:'AI probability too high' });
   gates.push({ gate:'tamper_check', passed:c.tamperScore<0.55, score:c.tamperScore, reason:'Tamper risk too high' });
-  gates.push({ gate:'cooldown', passed:c.cooldownOk, reason:'Cooldown window active' });
+  gates.push({ gate:'cooldown', passed:c.cooldownOk, reason:'You can only submit once every 7 days' });
   gates.push({ gate:'min_followers', passed:c.followerCount >= 100, score:c.followerCount, reason:'Account must have at least 100 followers' });
+  gates.push({ gate:'account_quality', passed:c.accountQualityPassed, score:c.accountQualityScore, reason:'Account does not meet quality threshold (age, activity, profile completeness)' });
 
   const failed = gates.filter(g=>!g.passed);
   const riskScore = Math.min(1, (failed.length * 0.09) + (c.aiScore*0.35) + (c.tamperScore*0.25) + (c.amountUsd>200?0.08:0));
