@@ -9,13 +9,19 @@ function isAuthorized(req: Request): boolean {
   return req.headers.get('authorization') === `Bearer ${secret}`;
 }
 
-function parseTweetId(url: string): string | null {
-  const m = url.match(/status\/(\d+)/i);
-  return m?.[1] || null;
-}
-
-// Worker: fetch tweet engagement metrics from X API, compute scores + award points
+// ═══════════════════════════════════════════
+// Engagement Worker v2
+//
+// Scans ALL #gascoin tweets from linked X accounts, not just claim-linked tweets.
+// Flow:
+// 1. Get all active wallet ↔ X handle links
+// 2. For each handle, search X API for recent #gascoin tweets
+// 3. Score each tweet (skip already-scored within 6h)
+// 4. Award points through AI verification gate
+// 5. Store scored tweets for tracking
+//
 // Runs every 6 hours via Vercel cron
+// ═══════════════════════════════════════════
 export async function POST(req: Request) {
   if (!isAuthorized(req)) {
     return NextResponse.json({ ok: false, error: 'unauthorized' }, { status: 401 });
@@ -30,113 +36,169 @@ export async function POST(req: Request) {
     const supabase = getSupabaseAdmin();
     const sixHoursAgo = new Date(Date.now() - 6 * 3600000).toISOString();
 
-    // Get approved/paid claims with tweet URLs
+    let scored = 0;
+    let totalPointsAwarded = 0;
+    let heldForReview = 0;
+    let tweetsFound = 0;
+    let handlesScanned = 0;
+
+    // ─── PHASE 1: Get all linked wallet ↔ X handle pairs ───
+    const { data: links } = await supabase
+      .from('wallet_x_links')
+      .select('wallet, x_handle, last_tweet_scan')
+      .eq('is_active', true)
+      .limit(50);
+
+    // Also get claim-linked tweets as fallback (for wallets without wallet_x_links)
     const { data: claims } = await supabase
       .from('claims')
       .select('id, wallet, tweet_url, status')
       .in('status', ['approved', 'paid', 'ready_for_dispatch'])
-      .limit(50);
+      .limit(100);
 
-    if (!claims || claims.length === 0) {
-      return NextResponse.json({ ok: true, scored: 0, pointsAwarded: 0 });
+    // Build wallet → handle map from both sources
+    const walletHandles = new Map<string, string>();
+
+    for (const link of links || []) {
+      walletHandles.set(link.wallet, link.x_handle);
     }
 
-    let scored = 0;
-    let totalPointsAwarded = 0;
-    let heldForReview = 0;
+    // Extract handles from claim tweet URLs for wallets not in links table
+    for (const claim of claims || []) {
+      if (walletHandles.has(claim.wallet)) continue;
+      const handleMatch = claim.tweet_url?.match(/x\.com\/([^/]+)\//);
+      if (handleMatch) walletHandles.set(claim.wallet, handleMatch[1]);
+    }
 
-    for (const claim of claims) {
-      const tweetId = parseTweetId(claim.tweet_url);
-      if (!tweetId) continue;
-
-      // Skip if scored recently
-      const { data: existing } = await supabase
-        .from('engagement_scores')
-        .select('id, fetched_at, score')
-        .eq('claim_id', claim.id)
-        .order('fetched_at', { ascending: false })
-        .limit(1)
-        .maybeSingle();
-
-      if (existing && existing.fetched_at > sixHoursAgo) continue;
+    // ─── PHASE 2: For each handle, search for ALL #gascoin tweets ───
+    for (const [wallet, handle] of walletHandles) {
+      handlesScanned++;
 
       try {
-        const endpoint = new URL(`https://api.x.com/2/tweets/${tweetId}`);
-        endpoint.searchParams.set('tweet.fields', 'public_metrics');
+        // Search X API for recent #gascoin tweets from this user
+        const searchUrl = new URL('https://api.x.com/2/tweets/search/recent');
+        searchUrl.searchParams.set('query', `from:${handle} #gascoin`);
+        searchUrl.searchParams.set('tweet.fields', 'created_at,public_metrics,text');
+        searchUrl.searchParams.set('user.fields', 'public_metrics');
+        searchUrl.searchParams.set('expansions', 'author_id');
+        searchUrl.searchParams.set('max_results', '10');
 
-        const res = await fetch(endpoint.toString(), {
+        const searchRes = await fetch(searchUrl.toString(), {
           headers: { authorization: `Bearer ${token}` },
           cache: 'no-store',
         });
 
-        if (!res.ok) continue;
-
-        const json = (await res.json()) as any;
-        const pm = json?.data?.public_metrics;
-        if (!pm) continue;
-
-        const metrics = {
-          impressions: Number(pm.impression_count || 0),
-          likes: Number(pm.like_count || 0),
-          retweets: Number(pm.retweet_count || 0),
-          quote_tweets: Number(pm.quote_count || 0),
-          replies: Number(pm.reply_count || 0),
-        };
-
-        // Calculate points using the engagement rewards formula
-        const rawPoints = calculateEngagementPoints(metrics);
-
-        // AI quality scoring — adjusts points based on tweet authenticity
-        const tweetText = json?.data?.text || '';
-        const qualityScore = await scoreTweetQuality({
-          tweetText,
-          impressions: metrics.impressions,
-          likes: metrics.likes,
-          retweets: metrics.retweets,
-          replies: metrics.replies,
-          followerCount: json?.includes?.users?.[0]?.public_metrics?.followers_count || 0,
-        });
-
-        // Apply quality multiplier: spam/bots get penalized, genuine content rewarded
-        const points = Math.round(rawPoints * qualityScore.multiplier);
-
-        // Legacy score for backward compatibility
-        const legacyScore = metrics.impressions * 0.01 + metrics.likes * 1 +
-          metrics.retweets * 3 + metrics.quote_tweets * 5 + metrics.replies * 2;
-
-        // Upsert legacy engagement score
-        if (existing) {
-          await supabase.from('engagement_scores').update({
-            ...metrics, score: legacyScore, fetched_at: new Date().toISOString(),
-          }).eq('id', existing.id);
-        } else {
-          await supabase.from('engagement_scores').insert({
-            wallet: claim.wallet, claim_id: claim.id, tweet_url: claim.tweet_url,
-            ...metrics, score: legacyScore,
-          });
+        if (!searchRes.ok) {
+          // Fallback: score claim-linked tweet only
+          const claimTweets = (claims || []).filter((c: any) => c.wallet === wallet);
+          for (const claim of claimTweets) {
+            await scoreSingleTweet(supabase, token, wallet, handle, claim.tweet_url, claim.id);
+            scored++;
+          }
+          continue;
         }
 
-        // Build wallet trust for verification gate
-        const walletTrust = calculateWalletTrust({
-          totalSubmissions: 1, approvedSubmissions: 1, rejectedSubmissions: 0,
-          referralConversions: 0, skippedReferrals: 0, accountAgeDays: 30, anomalyCount: 0,
-        });
+        const searchData = (await searchRes.json()) as any;
+        const tweets = searchData?.data || [];
+        const authorMetrics = searchData?.includes?.users?.[0]?.public_metrics;
+        const followerCount = authorMetrics?.followers_count || 0;
 
-        // Award points through AI verification gate
-        if (points > 0) {
-          const result = await awardVerifiedPoints(supabase, {
-            wallet: claim.wallet,
-            source: 'tweet_engagement',
-            rawPoints: points,
-            metadata: { claim_id: claim.id, tweet_id: tweetId, metrics, tweetText },
-            walletTrust,
-            tweetQuality: qualityScore,
+        tweetsFound += tweets.length;
+
+        for (const tweet of tweets) {
+          // Check if already scored recently
+          const { data: existingScored } = await supabase
+            .from('scored_tweets')
+            .select('id, last_scored_at')
+            .eq('tweet_id', tweet.id)
+            .maybeSingle();
+
+          if (existingScored && existingScored.last_scored_at > sixHoursAgo) continue;
+
+          const pm = tweet.public_metrics || {};
+          const metrics = {
+            impressions: Number(pm.impression_count || 0),
+            likes: Number(pm.like_count || 0),
+            retweets: Number(pm.retweet_count || 0),
+            quote_tweets: Number(pm.quote_count || 0),
+            replies: Number(pm.reply_count || 0),
+          };
+
+          const rawPoints = calculateEngagementPoints(metrics);
+          const tweetText = tweet.text || '';
+
+          // AI quality scoring
+          const qualityScore = await scoreTweetQuality({
+            tweetText,
+            impressions: metrics.impressions,
+            likes: metrics.likes,
+            retweets: metrics.retweets,
+            replies: metrics.replies,
+            followerCount,
           });
-          if (result.awarded) totalPointsAwarded += result.points;
-          if (result.heldForReview) heldForReview++;
+
+          const points = Math.round(rawPoints * qualityScore.multiplier);
+
+          // Upsert scored tweet record
+          await supabase.from('scored_tweets').upsert({
+            wallet,
+            x_handle: handle,
+            tweet_id: tweet.id,
+            tweet_url: `https://x.com/${handle}/status/${tweet.id}`,
+            tweet_text: tweetText.slice(0, 500),
+            posted_at: tweet.created_at,
+            ...metrics,
+            raw_points: rawPoints,
+            adjusted_points: points,
+            quality_score: qualityScore.quality,
+            quality_multiplier: qualityScore.multiplier,
+            last_scored_at: new Date().toISOString(),
+            score_count: existingScored ? (existingScored as any).score_count + 1 : 1,
+          }, { onConflict: 'tweet_id' });
+
+          // Calculate delta points (only new engagement since last score)
+          const previousPoints = existingScored ? (await supabase
+            .from('scored_tweets')
+            .select('adjusted_points')
+            .eq('tweet_id', tweet.id)
+            .maybeSingle())?.data?.adjusted_points || 0 : 0;
+
+          const deltaPoints = existingScored ? Math.max(0, points - Number(previousPoints)) : points;
+
+          if (deltaPoints > 0) {
+            // Build wallet trust
+            const walletTrust = calculateWalletTrust({
+              totalSubmissions: 1, approvedSubmissions: 1, rejectedSubmissions: 0,
+              referralConversions: 0, skippedReferrals: 0, accountAgeDays: 30, anomalyCount: 0,
+            });
+
+            // Award through AI verification gate
+            const result = await awardVerifiedPoints(supabase, {
+              wallet,
+              source: 'tweet_engagement',
+              rawPoints: deltaPoints,
+              metadata: {
+                tweet_id: tweet.id, x_handle: handle, metrics, tweetText: tweetText.slice(0, 200),
+                quality: qualityScore.quality, multiplier: qualityScore.multiplier,
+                isClaimLinked: false, isDelta: !!existingScored,
+              },
+              walletTrust,
+              tweetQuality: qualityScore,
+            });
+
+            if (result.awarded) totalPointsAwarded += result.points;
+            if (result.heldForReview) heldForReview++;
+          }
+
+          scored++;
         }
 
-        scored++;
+        // Update last scan timestamp
+        await supabase.from('wallet_x_links')
+          .update({ last_tweet_scan: new Date().toISOString() })
+          .eq('wallet', wallet)
+          .eq('x_handle', handle);
+
       } catch {
         continue;
       }
@@ -144,6 +206,8 @@ export async function POST(req: Request) {
 
     return NextResponse.json({
       ok: true,
+      handlesScanned,
+      tweetsFound,
       scored,
       totalPointsAwarded,
       heldForReview,
@@ -152,4 +216,42 @@ export async function POST(req: Request) {
   } catch (e: any) {
     return NextResponse.json({ error: e?.message || 'worker failed' }, { status: 500 });
   }
+}
+
+// Fallback: score a single claim-linked tweet by URL
+async function scoreSingleTweet(supabase: any, token: string, wallet: string, handle: string, tweetUrl: string, claimId: string) {
+  const tweetIdMatch = tweetUrl?.match(/status\/(\d+)/);
+  if (!tweetIdMatch) return;
+
+  const tweetId = tweetIdMatch[1];
+  const endpoint = new URL(`https://api.x.com/2/tweets/${tweetId}`);
+  endpoint.searchParams.set('tweet.fields', 'public_metrics,text,created_at');
+
+  try {
+    const res = await fetch(endpoint.toString(), {
+      headers: { authorization: `Bearer ${token}` },
+      cache: 'no-store',
+    });
+    if (!res.ok) return;
+
+    const json = (await res.json()) as any;
+    const pm = json?.data?.public_metrics;
+    if (!pm) return;
+
+    const metrics = {
+      impressions: Number(pm.impression_count || 0),
+      likes: Number(pm.like_count || 0),
+      retweets: Number(pm.retweet_count || 0),
+      quote_tweets: Number(pm.quote_count || 0),
+      replies: Number(pm.reply_count || 0),
+    };
+
+    // Legacy engagement_scores entry
+    await supabase.from('engagement_scores').upsert({
+      wallet, claim_id: claimId, tweet_url: tweetUrl,
+      ...metrics,
+      score: metrics.impressions * 0.01 + metrics.likes + metrics.retweets * 3 + metrics.quote_tweets * 5 + metrics.replies * 2,
+      fetched_at: new Date().toISOString(),
+    }, { onConflict: 'claim_id' });
+  } catch {}
 }
