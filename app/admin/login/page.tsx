@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { usePrivy } from '@privy-io/react-auth';
 import { WalletButton } from '../../../components/ui/WalletButton';
@@ -32,16 +32,6 @@ export default function AdminLoginPage() {
 
   const xHandle = readXHandle(user);
   const xUserId = readXUserId(user);
-
-  // DEBUG: Log Privy user object to console so we can see its structure
-  useEffect(() => {
-    if (user) {
-      console.log('[ADMIN DEBUG] Privy user object:', JSON.stringify(user, null, 2));
-      console.log('[ADMIN DEBUG] xUserId:', xUserId);
-      console.log('[ADMIN DEBUG] xHandle:', xHandle);
-      console.log('[ADMIN DEBUG] authenticated:', authenticated);
-    }
-  }, [user, xUserId, xHandle, authenticated]);
 
   // Wallet-based admin login
   const handleSign = async () => {
