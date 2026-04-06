@@ -28,7 +28,7 @@ export function useWalletHistory(walletAddress: string | null) {
             id: p.claim_id || p.id,
             sol_amount: Number(p.amount_sol || 0),
             created_at: p.created_at,
-            gates_passed: 11,
+            gates_passed: 10,
             status: p.status,
           }))
         );

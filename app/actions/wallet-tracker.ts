@@ -87,7 +87,7 @@ export async function getPublicSubmissions(wallet: string): Promise<WalletSubmis
       receipt_date: p.claims?.created_at || p.created_at,
       created_at: p.created_at,
       updated_at: p.created_at,
-      gates_passed: 11,
+      gates_passed: 10,
       rejection_reason: null,
     }));
   } catch (e) {

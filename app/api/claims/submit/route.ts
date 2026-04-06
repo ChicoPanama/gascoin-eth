@@ -73,6 +73,28 @@ export async function POST(req: Request){
   if (walletInput && walletInput !== session.wallet) {
     return NextResponse.json({ ok:false, error:'wallet_mismatch_with_session' }, { status: 400 });
   }
+
+  // SECURITY: Verify this wallet isn't registered to a different X account
+  const { data: walletOwner } = await supabase
+    .from('wallet_links')
+    .select('user_id')
+    .eq('wallet', wallet)
+    .eq('is_primary', true)
+    .not('user_id', 'is', null)
+    .maybeSingle();
+
+  if (walletOwner && walletOwner.user_id) {
+    // Check if it belongs to a different user
+    const { data: ownerUser } = await supabase
+      .from('users')
+      .select('x_user_id')
+      .eq('id', walletOwner.user_id)
+      .single();
+
+    if (ownerUser && ownerUser.x_user_id !== session.xId && ownerUser.x_user_id !== `x_${session.xHandle}`) {
+      return NextResponse.json({ ok:false, error:'wallet_registered_to_another_account' }, { status: 409 });
+    }
+  }
   const walletOnReceiptInput = String(form.get('walletOnReceipt')||'');
   const amountUsd = Number(form.get('amountUsd')||0);
   const receipt = form.get('receipt');

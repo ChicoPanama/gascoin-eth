@@ -343,7 +343,7 @@ export function SubmissionFeed() {
             <span className="gc-feed-wallet">{e.wallet}</span>
             <span className="gc-feed-loc">{e.location}</span>
             <span className="gc-feed-amt">${e.amount.toFixed(2)}</span>
-            <span className="gc-feed-gate">Gate {e.gatesPassed}/11</span>
+            <span className="gc-feed-gate">Gate {e.gatesPassed}/10</span>
             {i === 0 && e._new && <span className="gc-feed-badge">NEW</span>}
           </div>
         ))}

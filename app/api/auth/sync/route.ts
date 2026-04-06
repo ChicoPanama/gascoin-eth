@@ -54,6 +54,26 @@ export async function POST(req: Request) {
   }
 
   if (session.wallet) {
+    // SECURITY: Check if this wallet is registered to a different user
+    const { data: walletConflict } = await supabase
+      .from('wallet_links')
+      .select('user_id')
+      .eq('wallet', session.wallet)
+      .neq('user_id', userRow.id)
+      .eq('is_primary', true)
+      .maybeSingle();
+
+    if (walletConflict) {
+      return NextResponse.json({ ok: false, error: 'wallet_registered_to_another_account' }, { status: 409 });
+    }
+
+    // Deactivate any previous wallets for this user (one wallet per X account)
+    await supabase
+      .from('wallet_links')
+      .update({ is_primary: false })
+      .eq('user_id', userRow.id)
+      .neq('wallet', session.wallet);
+
     await supabase
       .from('wallet_links')
       .upsert(

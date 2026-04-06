@@ -64,7 +64,7 @@ export function ReceiptCard({ receipt, onClick }: {
         <div className="cf-card-bottom">
           <span className="cf-card-wallet">{truncateWallet(receipt.wallet)}</span>
           <span className="cf-card-gates">
-            {receipt.gates_passed}/11
+            {receipt.gates_passed}/10
             <span className="cf-gate-dot cf-gate-dot--filled">●</span>
           </span>
         </div>

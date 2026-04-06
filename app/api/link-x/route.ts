@@ -32,13 +32,38 @@ export async function POST(req: NextRequest) {
     }
 
     const handle = x_handle.replace(/^@/, '').toLowerCase();
+    const userId = x_user_id || session.xId || '';
     const supabase = getSupabaseAdmin();
+
+    // SECURITY: Check if this wallet is already registered to a DIFFERENT X account
+    if (userId) {
+      const { data: existingLink } = await supabase
+        .from('wallet_x_links')
+        .select('x_user_id')
+        .eq('wallet', wallet)
+        .eq('is_active', true)
+        .not('x_user_id', 'eq', userId)
+        .maybeSingle();
+
+      if (existingLink) {
+        return NextResponse.json({ error: 'wallet_registered_to_another_account' }, { status: 409 });
+      }
+    }
+
+    // Deactivate any previous wallets for this X account (one wallet per account)
+    if (userId) {
+      await supabase
+        .from('wallet_x_links')
+        .update({ is_active: false })
+        .eq('x_user_id', userId)
+        .neq('wallet', wallet);
+    }
 
     // Upsert the link — same wallet+handle combo is idempotent
     await supabase.from('wallet_x_links').upsert({
       wallet,
       x_handle: handle,
-      x_user_id: x_user_id || null,
+      x_user_id: userId || null,
       linked_at: new Date().toISOString(),
       is_active: true,
     }, { onConflict: 'wallet,x_handle' });

@@ -20,7 +20,7 @@ function mapPayoutToReceipt(p: any, connectedWallet: string | null): CommunityRe
     storage_path: receipt.storage_path_private || null,
     is_featured: claim.is_featured || false,
     created_at: p.created_at,
-    gates_passed: 11,
+    gates_passed: 10,
     is_redacted: receipt.is_image_redacted || false,
     is_own: p.wallet === connectedWallet,
   };
