@@ -410,6 +410,7 @@ code, .mono {
   position: fixed;
   inset: 0;
   z-index: 10000;
+  height: 100dvh;
   background: #000;
   display: flex;
   flex-direction: column;
@@ -439,7 +440,7 @@ code, .mono {
 
 .gc-intro-title {
   font-family: 'Bebas Neue', sans-serif;
-  font-size: clamp(120px, 20vw, 260px);
+  font-size: clamp(64px, 20vw, 260px);
   letter-spacing: 0.15em;
   color: var(--fg);
   position: relative;
@@ -465,9 +466,9 @@ code, .mono {
 
 .gc-intro-bar {
   position: absolute;
-  bottom: 40px;
-  left: 48px;
-  right: 48px;
+  bottom: max(20px, env(safe-area-inset-bottom, 0px) + 20px);
+  left: 24px;
+  right: 24px;
   height: 2px;
   background: rgba(255,255,255,0.08);
   z-index: 2;
