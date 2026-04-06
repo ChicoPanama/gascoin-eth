@@ -60,7 +60,11 @@ export default function AdminLoginPage() {
 
   // Privy (X login) admin login
   const handlePrivyLogin = async () => {
-    if (!xUserId || !xHandle) return;
+    if (!xUserId || !xHandle) {
+      setStatus('error');
+      setError(`Identity not found. userId=${xUserId || 'empty'}, handle=${xHandle || 'empty'}. Try logging out and back in.`);
+      return;
+    }
     setStatus('signing');
     setError('');
 
