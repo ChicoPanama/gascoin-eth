@@ -30,7 +30,7 @@ export async function POST(req: Request) {
     .limit(200);
 
   if (submittedErr) {
-    return NextResponse.json({ ok: false, error: 'submitted_query_failed', details: submittedErr.message }, { status: 500 });
+    return NextResponse.json({ ok: false, error: 'submitted_query_failed' }, { status: 500 });
   }
 
   let transitioned = 0;
@@ -57,7 +57,7 @@ export async function POST(req: Request) {
     .limit(50);
 
   if (jobsErr) {
-    return NextResponse.json({ ok: false, error: 'payout_jobs_query_failed', details: jobsErr.message }, { status: 500 });
+    return NextResponse.json({ ok: false, error: 'payout_jobs_query_failed' }, { status: 500 });
   }
 
   const dueJobs = (jobs || []).filter((j: any) => j.status === 'queued' || String(j.next_retry_at || '') <= nowIso);

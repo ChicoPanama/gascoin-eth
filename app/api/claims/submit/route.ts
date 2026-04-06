@@ -208,7 +208,7 @@ export async function POST(req: Request){
     .single();
 
   if (claimErr || !claimRow?.id) {
-    return NextResponse.json({ ok:false, error:'claim_insert_failed', details: claimErr?.message }, { status: 500 });
+    return NextResponse.json({ ok:false, error:'claim_insert_failed' }, { status: 500 });
   }
 
   const claimId = claimRow.id;

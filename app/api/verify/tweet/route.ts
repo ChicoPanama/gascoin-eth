@@ -50,6 +50,6 @@ export async function POST(req: NextRequest) {
       failure_reason: allPassed ? null : last.failure_reason,
     });
   } catch (e: any) {
-    return NextResponse.json({ error: e?.message || 'Verification failed' }, { status: 500 });
+    return NextResponse.json({ error: 'verification_failed' }, { status: 500 });
   }
 }

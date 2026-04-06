@@ -16,7 +16,7 @@ export async function GET(){
     .limit(100);
 
   if (error) {
-    return NextResponse.json({ ok: false, error: error.message }, { status: 500 });
+    return NextResponse.json({ ok: false, error: 'query_failed' }, { status: 500 });
   }
 
   const rows = (data || []).map((p: any) => ({

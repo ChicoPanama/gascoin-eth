@@ -20,7 +20,7 @@ export async function GET() {
       {
         schema: 'whiteclaw.memory.unified.v2',
         status: 'unavailable',
-        error: error instanceof Error ? error.message : 'unknown_error',
+        error: 'unavailable',
       },
       { status: 503 },
     );

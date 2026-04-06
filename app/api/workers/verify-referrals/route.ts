@@ -128,6 +128,6 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ ok: true, verified, pointsAwarded, skipped, heldForReview });
   } catch (e: any) {
-    return NextResponse.json({ error: e?.message || 'worker failed' }, { status: 500 });
+    return NextResponse.json({ error: 'worker_failed' }, { status: 500 });
   }
 }

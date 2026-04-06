@@ -75,6 +75,6 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ ok: true, flushed: deleted, errors, eligible: eligible.length });
   } catch (e: any) {
-    return NextResponse.json({ error: e?.message || 'flush failed' }, { status: 500 });
+    return NextResponse.json({ error: 'flush_failed' }, { status: 500 });
   }
 }
