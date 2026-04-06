@@ -1,7 +1,6 @@
 import type { ReactNode } from 'react';
 import Link from 'next/link';
-import { verifyAdminSession } from '../actions/admin-auth';
-import { redirect } from 'next/navigation';
+import { verifyAdminSession, destroyAdminSession } from '../actions/admin-auth';
 
 const NAV_SECTIONS = [
   { label: 'OPERATIONS', links: [
@@ -25,9 +24,6 @@ const NAV_SECTIONS = [
 export default async function AdminLayout({ children }: { children: ReactNode }) {
   const session = await verifyAdminSession();
 
-  // Allow login page without session
-  // Layout wraps all /admin/* routes — login page handles its own auth
-
   return (
     <div className="admin-layout">
       {session.valid && (
@@ -45,8 +41,12 @@ export default async function AdminLayout({ children }: { children: ReactNode })
             </div>
           ))}
           <div className="admin-sidebar-bottom">
-            <div className="admin-sidebar-wallet">{session.walletAddress?.slice(0, 4)}...{session.walletAddress?.slice(-4)}</div>
-            <Link href="/admin/login" className="admin-nav-link">Logout</Link>
+            <div className="admin-sidebar-wallet">Admin Session</div>
+            <form action={async () => { 'use server'; await destroyAdminSession(); }}>
+              <button type="submit" className="admin-nav-link" style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, font: 'inherit', color: 'inherit' }}>
+                Logout
+              </button>
+            </form>
           </div>
         </aside>
       )}

@@ -110,16 +110,16 @@ export const GATES: GateDefinition[] = [
   },
   {
     id: 8, slug: 'no-duplicate-wallet', name: 'No Duplicate Wallet', category: 'wallet',
-    description: 'Each wallet address may only have one approved submission per 30-day rolling window.',
-    what_we_check: 'Submitted wallet address is checked against all approved submissions in the last 30 days. Any match causes immediate failure.',
+    description: 'Each X account may only have one approved submission per 7-day rolling window.',
+    what_we_check: 'X account is checked against all active claims in the last 7 days. One submission per week per X account, regardless of wallet.',
     common_failures: [
-      'Submitting again before the 30-day cooldown expires',
-      'Using a wallet someone else already used',
-      'Accidentally using a hardware wallet instead of intended wallet',
+      'Submitting again before the 7-day cooldown expires',
+      'Trying a different wallet with the same X account',
+      'Submitting while a previous claim is still processing',
     ],
-    how_to_pass: 'Wait 30 days after your last approved refund before submitting again. Check your cooldown status before submitting.',
+    how_to_pass: 'Wait 7 days after your last submission before submitting again. Check your cooldown status before submitting.',
     estimated_time_seconds: 5, is_blocking: true,
-    checklist_label: 'This wallet has not received a refund in the last 30 days',
+    checklist_label: 'I have not submitted a claim in the last 7 days',
   },
   {
     id: 9, slug: 'no-duplicate-receipt', name: 'No Duplicate Receipt', category: 'receipt',

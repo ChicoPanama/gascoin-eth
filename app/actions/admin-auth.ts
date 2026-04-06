@@ -1,6 +1,7 @@
 'use server';
 
 import { cookies } from 'next/headers';
+import { redirect } from 'next/navigation';
 import { createHash } from 'crypto';
 import { isAdminWallet } from '../../lib/admin-auth';
 import { getSupabaseAdmin } from '../../lib/supabase';
@@ -132,4 +133,5 @@ export async function destroyAdminSession(): Promise<void> {
     try { const s = getSupabaseAdmin(); await s.from('admin_sessions').delete().eq('session_token', token); } catch {}
   }
   jar.delete('gascoin_admin_session');
+  redirect('/admin/login');
 }
