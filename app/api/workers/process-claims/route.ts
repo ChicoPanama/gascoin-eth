@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '../../../../lib/supabase';
 import { processQueuedPayout } from '../../../../lib/payout-worker';
+import { getTierForBalance } from '../../../../lib/token-tiers';
+import { hasMinimumGascoinUsd } from '../../../../lib/integrations/solana';
 
 function isAuthorized(req: Request): boolean {
   const secret = (process.env.CRON_SECRET || '').trim();
@@ -22,7 +24,7 @@ export async function POST(req: Request) {
 
   const nowIso = new Date().toISOString();
 
-  // Normalize newly submitted claims to explicit auto_review stage
+  // --- Phase 1: Normalize submitted → auto_review ---
   const { data: submitted, error: submittedErr } = await supabase
     .from('claims')
     .select('id,status')
@@ -47,8 +49,67 @@ export async function POST(req: Request) {
     transitioned += 1;
   }
 
-  // Process ONLY admin-created payout jobs (no auto-enqueue)
-  // Payout jobs are created exclusively by admin via approveSubmission()
+  // --- Phase 2: Auto-approve ready_for_dispatch claims ---
+  // Claims that passed all 12 gates automatically get approved and queued
+  // for the daily midnight batch payout. Payout amount set by token tier.
+  const { data: readyClaims } = await supabase
+    .from('claims')
+    .select('id,wallet,user_id')
+    .eq('status', 'ready_for_dispatch')
+    .limit(200);
+
+  let autoApproved = 0;
+  for (const claim of readyClaims || []) {
+    // Determine payout amount from user's token tier
+    const balance = await hasMinimumGascoinUsd(claim.wallet, 0);
+    const tier = getTierForBalance(balance.tokenBalance ?? 0);
+    const solAmount = tier.max_sol_refund;
+
+    // Approve the claim
+    await supabase.from('claims').update({
+      status: 'approved',
+      decision_reason: `auto_approved_tier_${tier.slug}`,
+      updated_at: nowIso,
+    }).eq('id', claim.id);
+
+    await supabase.from('claim_status_events').insert({
+      claim_id: claim.id,
+      from_status: 'ready_for_dispatch',
+      to_status: 'approved',
+      actor_type: 'system',
+      actor_id: 'claims_worker',
+      reason: `auto_approved: all gates passed, tier=${tier.name}, payout=${solAmount} SOL`,
+    });
+
+    // Create payout job for the midnight batch
+    await supabase.from('payout_jobs').upsert({
+      claim_id: claim.id,
+      wallet: claim.wallet,
+      amount_sol: solAmount,
+      status: 'queued',
+    }, { onConflict: 'claim_id' });
+
+    // Award submission points
+    await supabase.from('engagement_points').insert({
+      wallet: claim.wallet,
+      source: 'submission_approved',
+      points: 1000,
+      metadata_json: { claim_id: claim.id, approved_by: 'auto_system', tier: tier.slug },
+    });
+
+    await supabase.from('audit_logs').insert({
+      actor_type: 'system',
+      actor_id: 'claims_worker',
+      action: 'claim_auto_approved',
+      target_type: 'claim',
+      target_id: claim.id,
+      payload_json: { wallet: claim.wallet, tier: tier.name, solAmount },
+    });
+
+    autoApproved++;
+  }
+
+  // --- Phase 3: Process queued payout jobs ---
   const { data: jobs, error: jobsErr } = await supabase
     .from('payout_jobs')
     .select('id,claim_id,wallet,amount_sol,attempts,max_attempts,status,next_retry_at')
@@ -70,6 +131,7 @@ export async function POST(req: Request) {
   return NextResponse.json({
     ok: true,
     transitionedClaims: transitioned,
+    autoApprovedClaims: autoApproved,
     duePayoutJobs: dueJobs.map((j: any) => ({
       id: j.id,
       claimId: j.claim_id,

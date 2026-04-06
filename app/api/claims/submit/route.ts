@@ -8,6 +8,7 @@ import { hasMinimumGascoinUsd } from '../../../../lib/integrations/solana';
 import { verifyPrivySession } from '../../../../lib/integrations/privy';
 import { getUserByUsername } from '../../../../lib/x-api';
 import { scoreAccountQuality } from '../../../../lib/account-quality';
+import { checkAndAutoBan } from '../../../../lib/auto-ban';
 import { getSupabaseAdmin } from '../../../../lib/supabase';
 import { hashRequestBody, resolveIdempotencyKey } from '../../../../lib/idempotency';
 import { checkRateLimit } from '../../../../lib/rate-limit';
@@ -354,6 +355,19 @@ export async function POST(req: Request){
       duplicatePhash
     }
   });
+
+  // Auto-ban check: if claim was rejected, check if user should be banned
+  if (result.decision === 'rejected' && userRow?.id) {
+    const banResult = await checkAndAutoBan(userRow.id, `claim_rejected:${claimId}`);
+    if (banResult.banned) {
+      return NextResponse.json({
+        ok: false,
+        claimId,
+        error: 'account_banned',
+        reason: 'Your account has been suspended due to repeated policy violations.',
+      }, { status: 403 });
+    }
+  }
 
   const response = {
     ok:true,

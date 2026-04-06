@@ -15,7 +15,7 @@ export const TOKEN_TIERS: TokenTier[] = [
     id: 0, name: 'Standard', slug: 'standard', min_tokens: 0,
     max_sol_refund: 0.10, queue_priority: 4, badge_label: '',
     description: 'Default tier. No GASCOIN required.',
-    perks: ['Standard refund queue', 'Up to 0.10 SOL per submission', '30-day submission cooldown'],
+    perks: ['Standard refund queue', 'Up to 0.10 SOL per submission', '7-day submission cooldown'],
   },
   {
     id: 1, name: 'Commuter', slug: 'commuter', min_tokens: 100_000,
