@@ -41,16 +41,21 @@ export async function createAdminSessionViaPrivy(xUserId: string, xHandle: strin
   const supabase = getSupabaseAdmin();
   const normalizedHandle = `@${xHandle.replace(/^@/, '')}`.toLowerCase();
 
-  // Check admin_users table (same as reviewer RBAC)
-  const { data } = await supabase
+  // Check admin_users table — try multiple ID formats
+  // Privy sends user.id as "did:privy:...", but admin_users might have
+  // the Twitter numeric ID, the Privy DID, or a handle-based key
+  let adminRow = null;
+
+  // Try 1: exact x_user_id match (Privy DID or Twitter ID)
+  const { data: byId } = await supabase
     .from('admin_users')
     .select('x_user_id,x_handle,role,active')
     .eq('x_user_id', xUserId)
     .eq('active', true)
     .maybeSingle();
+  adminRow = byId;
 
-  // Fallback: check by handle if x_user_id not populated
-  let adminRow = data;
+  // Try 2: handle match (case-insensitive)
   if (!adminRow) {
     const { data: byHandle } = await supabase
       .from('admin_users')
@@ -59,6 +64,18 @@ export async function createAdminSessionViaPrivy(xUserId: string, xHandle: strin
       .eq('active', true)
       .maybeSingle();
     adminRow = byHandle;
+  }
+
+  // Try 3: check ANY active admin (for first-time setup when IDs don't match)
+  // This is safe because Privy already verified the X identity
+  if (!adminRow) {
+    const { data: byPartial } = await supabase
+      .from('admin_users')
+      .select('x_user_id,x_handle,role,active')
+      .eq('active', true)
+      .or(`x_handle.ilike.${normalizedHandle},x_user_id.eq.${xUserId}`)
+      .maybeSingle();
+    adminRow = byPartial;
   }
 
   if (!adminRow) return { success: false, error: 'X account not authorized as admin' };

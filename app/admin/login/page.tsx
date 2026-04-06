@@ -8,6 +8,8 @@ import { useGascoinWallet } from '../../../hooks/useGascoinWallet';
 import { createAdminSession, createAdminSessionViaPrivy } from '../../actions/admin-auth';
 
 function readXUserId(user: any): string {
+  // Try Privy user ID first (matches admin_users.x_user_id = "did:privy:...")
+  if (user?.id) return String(user.id);
   if (user?.twitter?.subject) return String(user.twitter.subject);
   const linked = Array.isArray(user?.linkedAccounts) ? user.linkedAccounts : [];
   const tw = linked.find((a: any) => String(a?.type || '').includes('twitter'));
@@ -45,7 +47,7 @@ export default function AdminLoginPage() {
 
       const result = await createAdminSession(publicKey.toBase58(), timestamp);
       if (result.success) {
-        router.push('/admin/submissions');
+        window.location.href = '/admin/submissions';
       } else {
         setStatus('error');
         setError(result.error || 'Wallet not authorized');
@@ -65,7 +67,8 @@ export default function AdminLoginPage() {
     try {
       const result = await createAdminSessionViaPrivy(xUserId, xHandle);
       if (result.success) {
-        router.push('/admin/submissions');
+        // Full page reload ensures cookie is picked up by Server Components
+        window.location.href = '/admin/submissions';
       } else {
         setStatus('error');
         setError(result.error || 'X account not authorized as admin');
