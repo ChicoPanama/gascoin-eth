@@ -1,20 +1,20 @@
 import { getSupabaseAdmin } from './supabase';
 
 /**
- * Auto-ban system — automatically bans users who repeatedly attempt fraud.
+ * Auto-ban system — catches sybil attackers and serial fraudsters.
  *
- * Triggers (any one = immediate ban):
- * - 3+ rejected claims in 30 days (serial bad submissions)
- * - 2+ duplicate receipt attempts (sybil/reuse attack)
- * - Wallet registered to another account attempt + prior rejection
+ * Designed to be forgiving of honest mistakes but firm on patterns:
+ * - A user who submits a bad receipt once is fine — they get rejected and can try again
+ * - A user who submits 5+ bad receipts in 30 days is farming
+ * - A user who submits 3+ duplicate receipts is running a sybil attack
+ * - A user with 10+ lifetime rejections is not making mistakes anymore
  *
- * Triggers (cumulative = auto-ban):
- * - 5+ total rejections lifetime
+ * Admins can always unban manually via the user_bans table.
  */
 
-const REJECT_THRESHOLD_30D = 3;
-const DUPLICATE_THRESHOLD = 2;
-const LIFETIME_REJECT_THRESHOLD = 5;
+const REJECT_THRESHOLD_30D = 5;      // 5 rejections in 30 days = pattern, not mistakes
+const DUPLICATE_THRESHOLD = 3;       // 3 duplicate receipt attempts = deliberate reuse
+const LIFETIME_REJECT_THRESHOLD = 10; // 10 lifetime rejections = serial bad actor
 
 export async function checkAndAutoBan(
   userId: string,
