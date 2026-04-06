@@ -2,16 +2,36 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { usePrivy } from '@privy-io/react-auth';
 import { WalletButton } from '../../../components/ui/WalletButton';
 import { useGascoinWallet } from '../../../hooks/useGascoinWallet';
-import { createAdminSession } from '../../actions/admin-auth';
+import { createAdminSession, createAdminSessionViaPrivy } from '../../actions/admin-auth';
+
+function readXUserId(user: any): string {
+  if (user?.twitter?.subject) return String(user.twitter.subject);
+  const linked = Array.isArray(user?.linkedAccounts) ? user.linkedAccounts : [];
+  const tw = linked.find((a: any) => String(a?.type || '').includes('twitter'));
+  return String(tw?.subject || tw?.userId || '');
+}
+
+function readXHandle(user: any): string {
+  if (user?.twitter?.username) return String(user.twitter.username).replace(/^@/, '');
+  const linked = Array.isArray(user?.linkedAccounts) ? user.linkedAccounts : [];
+  const tw = linked.find((a: any) => String(a?.type || '').includes('twitter'));
+  return String(tw?.username || '').replace(/^@/, '');
+}
 
 export default function AdminLoginPage() {
   const { publicKey, connected, signMessage } = useGascoinWallet();
+  const { ready, authenticated, login, user } = usePrivy();
   const [status, setStatus] = useState<'idle' | 'signing' | 'error'>('idle');
   const [error, setError] = useState('');
   const router = useRouter();
 
+  const xHandle = readXHandle(user);
+  const xUserId = readXUserId(user);
+
+  // Wallet-based admin login
   const handleSign = async () => {
     if (!publicKey || !signMessage) return;
     setStatus('signing');
@@ -28,11 +48,31 @@ export default function AdminLoginPage() {
         router.push('/admin/submissions');
       } else {
         setStatus('error');
-        setError(result.error || 'Authentication failed');
+        setError(result.error || 'Wallet not authorized');
       }
     } catch (e: any) {
       setStatus('error');
       setError(e?.message || 'Signing failed');
+    }
+  };
+
+  // Privy (X login) admin login
+  const handlePrivyLogin = async () => {
+    if (!xUserId || !xHandle) return;
+    setStatus('signing');
+    setError('');
+
+    try {
+      const result = await createAdminSessionViaPrivy(xUserId, xHandle);
+      if (result.success) {
+        router.push('/admin/submissions');
+      } else {
+        setStatus('error');
+        setError(result.error || 'X account not authorized as admin');
+      }
+    } catch (e: any) {
+      setStatus('error');
+      setError(e?.message || 'Authentication failed');
     }
   };
 
@@ -45,27 +85,43 @@ export default function AdminLoginPage() {
         </div>
         <div style={{ borderBottom: '1px solid rgba(255,255,255,0.08)', margin: '24px 0' }} />
 
+        {/* Option 1: Privy / X Login */}
+        <div className="wt-input-label" style={{ marginBottom: 12 }}>SIGN IN WITH X</div>
+        {!ready ? (
+          <button type="button" className="sf-btn-solid" style={{ width: '100%', opacity: 0.4 }} disabled>Loading...</button>
+        ) : authenticated && xHandle ? (
+          <button type="button" className="sf-btn-solid" style={{ width: '100%' }} onClick={handlePrivyLogin} disabled={status === 'signing'}>
+            {status === 'signing' ? 'AUTHENTICATING...' : `AUTHENTICATE AS @${xHandle}`}
+          </button>
+        ) : (
+          <button type="button" className="sf-btn-solid" style={{ width: '100%' }} onClick={() => login({ loginMethods: ['twitter'] })}>
+            SIGN IN WITH X
+          </button>
+        )}
+
+        <div style={{ borderBottom: '1px solid rgba(255,255,255,0.08)', margin: '24px 0', position: 'relative' }}>
+          <span style={{ position: 'absolute', top: -8, left: '50%', transform: 'translateX(-50%)', background: '#0a0a0a', padding: '0 12px', fontFamily: 'IBM Plex Mono', fontSize: 9, color: 'rgba(255,255,255,0.2)' }}>OR</span>
+        </div>
+
+        {/* Option 2: Wallet Login */}
+        <div className="wt-input-label" style={{ marginBottom: 12 }}>CONNECT AUTHORIZED WALLET</div>
         {!connected ? (
-          <>
-            <div className="wt-input-label" style={{ marginBottom: 16 }}>CONNECT AUTHORIZED WALLET</div>
-            <WalletButton />
-          </>
-        ) : status === 'error' ? (
-          <>
-            <div style={{ fontFamily: 'IBM Plex Mono', fontSize: 12, color: 'rgba(255,255,255,0.4)', marginBottom: 12 }}>
-              {error || 'ACCESS DENIED — This wallet is not authorized.'}
-            </div>
-            <WalletButton />
-          </>
+          <WalletButton />
         ) : (
           <>
             <div style={{ fontFamily: 'IBM Plex Mono', fontSize: 11, color: 'rgba(255,255,255,0.5)', marginBottom: 16 }}>
               Wallet: {publicKey?.toBase58().slice(0, 8)}...
             </div>
-            <button type="button" className="sf-btn-solid" style={{ width: '100%' }} onClick={handleSign} disabled={status === 'signing'}>
+            <button type="button" className="sf-btn-ghost" style={{ width: '100%' }} onClick={handleSign} disabled={status === 'signing'}>
               {status === 'signing' ? 'AUTHENTICATING...' : 'SIGN TO AUTHENTICATE'}
             </button>
           </>
+        )}
+
+        {status === 'error' && (
+          <div style={{ fontFamily: 'IBM Plex Mono', fontSize: 12, color: '#ff6b6b', marginTop: 16 }}>
+            {error}
+          </div>
         )}
 
         <div style={{ fontFamily: 'IBM Plex Mono', fontSize: 9, color: 'rgba(255,255,255,0.2)', marginTop: 24 }}>

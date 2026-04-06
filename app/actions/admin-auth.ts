@@ -31,6 +31,60 @@ export async function createAdminSession(walletAddress: string, timestamp: numbe
   return { success: true };
 }
 
+/**
+ * Create admin session via Privy (X login).
+ * Checks admin_users table for the X user ID — same RBAC as reviewer-auth.
+ */
+export async function createAdminSessionViaPrivy(xUserId: string, xHandle: string): Promise<{ success: boolean; error?: string }> {
+  if (!xUserId || !xHandle) return { success: false, error: 'Missing X identity' };
+
+  const supabase = getSupabaseAdmin();
+  const normalizedHandle = `@${xHandle.replace(/^@/, '')}`.toLowerCase();
+
+  // Check admin_users table (same as reviewer RBAC)
+  const { data } = await supabase
+    .from('admin_users')
+    .select('x_user_id,x_handle,role,active')
+    .eq('x_user_id', xUserId)
+    .eq('active', true)
+    .maybeSingle();
+
+  // Fallback: check by handle if x_user_id not populated
+  let adminRow = data;
+  if (!adminRow) {
+    const { data: byHandle } = await supabase
+      .from('admin_users')
+      .select('x_user_id,x_handle,role,active')
+      .ilike('x_handle', normalizedHandle)
+      .eq('active', true)
+      .maybeSingle();
+    adminRow = byHandle;
+  }
+
+  if (!adminRow) return { success: false, error: 'X account not authorized as admin' };
+
+  const secret = process.env.ADMIN_SESSION_SECRET || 'dev-secret-change-me';
+  const sessionId = `privy:${xUserId}`;
+  const sessionToken = createHash('sha256').update(`${sessionId}:${Date.now()}:${secret}`).digest('hex');
+
+  await supabase.from('admin_sessions').upsert({
+    wallet_address: sessionId,
+    session_token: sessionToken,
+    expires_at: new Date(Date.now() + 8 * 60 * 60 * 1000).toISOString(),
+  }, { onConflict: 'wallet_address' });
+
+  const jar = await cookies();
+  jar.set('gascoin_admin_session', sessionToken, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'strict',
+    maxAge: 8 * 60 * 60,
+    path: '/',
+  });
+
+  return { success: true };
+}
+
 export async function verifyAdminSession(): Promise<{ valid: boolean; walletAddress?: string }> {
   const jar = await cookies();
   const token = jar.get('gascoin_admin_session')?.value;
@@ -41,7 +95,13 @@ export async function verifyAdminSession(): Promise<{ valid: boolean; walletAddr
     const { data } = await supabase.from('admin_sessions').select('wallet_address, expires_at').eq('session_token', token).maybeSingle();
     if (!data) return { valid: false };
     if (new Date(data.expires_at) < new Date()) return { valid: false };
-    if (!isAdminWallet(data.wallet_address)) return { valid: false };
+
+    // Wallet-based sessions: check ADMIN_WALLET_ADDRESSES
+    // Privy-based sessions: check admin_users table (already verified at creation)
+    if (!data.wallet_address.startsWith('privy:') && !isAdminWallet(data.wallet_address)) {
+      return { valid: false };
+    }
+
     return { valid: true, walletAddress: data.wallet_address };
   } catch {
     return { valid: false };
