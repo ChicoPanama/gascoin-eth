@@ -1,6 +1,6 @@
 {
   "schema": "whiteclaw.memory.unified.enterprise.v1",
-  "generatedAt": "2026-04-05T19:08:52.459979+00:00",
+  "generatedAt": "2026-04-06T06:20:23.780195+00:00",
   "openclawOps": {
     "cron": {
       "totalJobs": 11,
@@ -16,7 +16,7 @@
             "tz": "America/Los_Angeles"
           },
           "lastStatus": "ok",
-          "nextRunAtMs": 1775455200000
+          "nextRunAtMs": 1775541600000
         },
         {
           "id": "38d706c9-da3f-40d0-b5a1-d11c3485c2b1",
@@ -27,7 +27,7 @@
             "tz": "America/Los_Angeles"
           },
           "lastStatus": "ok",
-          "nextRunAtMs": 1775453400000
+          "nextRunAtMs": 1775539800000
         },
         {
           "id": "31e70675-73bb-49a6-8411-75284205683b",
@@ -38,7 +38,7 @@
             "tz": "America/Los_Angeles"
           },
           "lastStatus": "ok",
-          "nextRunAtMs": 1775451600000
+          "nextRunAtMs": 1776056400000
         },
         {
           "id": "3010ba77-42e4-4a29-a762-d79861712620",
@@ -60,7 +60,7 @@
             "tz": "America/Los_Angeles"
           },
           "lastStatus": "ok",
-          "nextRunAtMs": 1775455800000
+          "nextRunAtMs": 1775542200000
         },
         {
           "id": "0d83b535-08c3-4859-bb96-594eb0d87054",
@@ -125,14 +125,14 @@
             "expr": "30 21 * * 0",
             "tz": "America/Los_Angeles"
           },
-          "lastStatus": null,
-          "nextRunAtMs": 1775449800000
+          "lastStatus": "ok",
+          "nextRunAtMs": 1776054600000
         }
       ]
     },
     "logs": {
-      "gatewayErrLogMb": 3.27,
-      "gatewayLogMb": 0.92
+      "gatewayErrLogMb": 3.34,
+      "gatewayLogMb": 0.93
     }
   },
   "deployTopology": {
@@ -166,7 +166,7 @@
         "git": {
           "branch": "main",
           "dirty": true,
-          "lastCommit": "c66cfdd 2026-04-05 11:36:18 -0700 Remove Admin link from public nav \u2014 access via /admin URL directly"
+          "lastCommit": "b4bbd9c 2026-04-05 21:14:59 -0700 Fix Playwright toHaveCount API usage in e2e homepage test"
         }
       },
       {
@@ -321,7 +321,7 @@
     ]
   },
   "workspaceRisk": {
-    "generatedAt": "2026-04-05T19:08:52.418706+00:00",
+    "generatedAt": "2026-04-06T04:30:16.186529+00:00",
     "schema": "whiteclaw.workspace-risk.v1",
     "averageScore": 31.5,
     "projects": [

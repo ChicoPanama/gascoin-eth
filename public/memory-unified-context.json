@@ -1,6 +1,6 @@
 {
   "schema": "whiteclaw.memory.unified.v2",
-  "generatedAt": "2026-04-05T18:49:23.042233+00:00",
+  "generatedAt": "2026-04-06T06:10:10.348145+00:00",
   "workspaceArchitecture": {
     "canonicalSource": "memory/context/unified-context.json",
     "safeWebsiteMirrors": [
@@ -56,7 +56,7 @@
           "version": "0.1.0"
         },
         "surface": {
-          "apiRouteCount": 114,
+          "apiRouteCount": 115,
           "pageCount": 46,
           "memoryContextEndpoint": "True"
         }
@@ -94,7 +94,7 @@
           "version": "0.1.0"
         },
         "surface": {
-          "apiRouteCount": 20,
+          "apiRouteCount": 24,
           "memoryContextEndpoint": "True",
           "publicMirror": "True"
         }
@@ -151,7 +151,7 @@
   ],
   "skills": {
     "localSkillsRoot": "/Users/arcadioperalta/.openclaw/workspace/skills",
-    "localSkillCount": 9,
+    "localSkillCount": 10,
     "localSkills": [
       "byterover",
       "github",
@@ -159,6 +159,7 @@
       "mcporter",
       "mem0",
       "model-usage",
+      "solana-launch-ops",
       "summarize",
       "video-generation-enterprise",
       "virality-inspector"
@@ -173,7 +174,7 @@
     "weeklyCandidate": {
       "path": "memory/weekly/2026-W14-candidate.md",
       "title": "Weekly Candidate Digest \u2014 2026-W14",
-      "excerpt": "Period reviewed: 2026-03-30 to 2026-04-05 (existing daily files: 2026-04-01, 2026-04-02, 2026-04-03, 2026-04-04, 2026-04-05) ## Key decisions - Chose a conservative **union affected-wallet baseline** for Drift recovery: deposit + IF sets merged to **5,198 wallets**. - Decided Step 1 raw reconciliation output was too broad for payout locking, then added sequential tightening filters (classification, net-flow, confidence tiers). - Selected **Strict tier** as payout-safe default: - `class=system_wallet AND hit_count>="
+      "excerpt": "Source window: 2026-03-30 to 2026-04-05 (existing daily files: 2026-04-01, 2026-04-02, 2026-04-03, 2026-04-04, 2026-04-05) ## Key decisions - Adopted a conservative affected-wallet union set for Project Gift by combining Drift deposit and IF pre-hack sets (`5,198` wallets). - Chose confidence-tiering for reconciliation outputs (Strict/Balanced/Broad) and recommended **Strict** for payout safety. - Locked payout execution scope to strict criteria (`class=system_wallet`, `hit_count>=3`, `net_flow_units>=100`), result"
     },
     "recentDaily": [
       {
