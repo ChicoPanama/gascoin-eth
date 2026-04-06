@@ -278,7 +278,7 @@ export default async function Home() {
                 <div className="gc-tech-stat-label">Receipt to Verdict</div>
               </div>
               <div className="gc-tech-stat">
-                <div className="gc-tech-stat-value">11</div>
+                <div className="gc-tech-stat-value">10</div>
                 <div className="gc-tech-stat-label">Automated Gates</div>
               </div>
               <div className="gc-tech-stat">

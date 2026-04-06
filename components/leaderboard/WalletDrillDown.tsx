@@ -50,7 +50,7 @@ export function WalletDrillDown({ wallet, onClose }: {
                   {new Date(h.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                 </div>
                 <div className="lb-drill-amount">{formatSol(h.sol_amount)}</div>
-                <div className="lb-drill-gates">{h.gates_passed}/11 GATES</div>
+                <div className="lb-drill-gates">{h.gates_passed}/10 GATES</div>
                 <div className="lb-drill-id">
                   GC-{new Date(h.created_at).getFullYear()}-{h.id.slice(0, 5).toUpperCase()}
                 </div>

@@ -392,7 +392,7 @@ function StepReview({ wallet, tweetUrl, handle, file, onSubmit, onBack }: {
       </div>
 
       <p className="sf-fine-print">
-        Refunds are subject to passing all 11 verification gates. Processing time varies.
+        Refunds are subject to passing all 10 verification gates. Processing time varies.
       </p>
 
       <div className="sf-nav-buttons">
