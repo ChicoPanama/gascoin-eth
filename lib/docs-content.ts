@@ -61,11 +61,11 @@ export const DOC_CATEGORIES: DocCategory[] = [
         description: "",
         content: `<h3>Understanding SOL value</h3>
 <p>All refund amounts on GASCOIN are denominated in SOL, Solana's native cryptocurrency. SOL's price fluctuates with the market. As a rough guide:</p>
-<table><thead><tr><th>Tier</th><th>Max SOL Refund</th><th>Approx. USD at $180/SOL</th></tr></thead>
-<tbody><tr><td>Standard</td><td>0.05 SOL</td><td>~$9 USD</td></tr>
-<tr><td>Commuter</td><td>0.075 SOL</td><td>~$13.50 USD</td></tr>
-<tr><td>Road Warrior</td><td>0.10 SOL</td><td>~$18 USD</td></tr>
-<tr><td>Fleet</td><td>0.20 SOL</td><td>~$36 USD</td></tr></tbody></table>
+<table><thead><tr><th>Tier</th><th>GASCOIN Required</th><th>Max SOL Refund</th><th>Approx. USD at $180/SOL</th></tr></thead>
+<tbody><tr><td>Standard</td><td>0</td><td>0.10 SOL</td><td>~$18 USD</td></tr>
+<tr><td>Commuter</td><td>100,000</td><td>0.25 SOL</td><td>~$45 USD</td></tr>
+<tr><td>Road Warrior</td><td>500,000</td><td>0.50 SOL</td><td>~$90 USD</td></tr>
+<tr><td>Fleet</td><td>2,000,000</td><td>1.0 SOL</td><td>~$180 USD</td></tr></tbody></table>
 <p>Check the current SOL price on any exchange (Coinbase, Kraken, Binance) or on the GASCOIN Treasury page before submitting. The USD values above are approximate and change daily. The SOL amounts you receive are fixed by tier.</p>\n<p>The amount of SOL you can receive per submission depends on your GASCOIN token tier. The four tiers are:</p>
 <p>SOL values above are the maximum per submission. The admin sets the actual refund amount when approving your submission, up to the maximum for your tier. The Standard tier requires zero GASCOIN — anyone with a Solana wallet can participate immediately.</p>`,
         order: 3,
@@ -548,7 +548,7 @@ export const DOC_CATEGORIES: DocCategory[] = [
 <h3><strong>The scoring formula</strong></h3>
 <p>Each wallet's leaderboard score is calculated from 4 factors:</p>
 <h3><strong>The leaderboard table</strong></h3>
-<p>The main table shows all wallets ordered by composite score. Each row shows: rank, wallet address (truncated), number of referrals, engagement score, GASCOIN holdings, SOL earned, composite score, and a View link.</p>
+<p>The main table shows all wallets ordered by composite score. Each row shows: rank, wallet address (truncated), number of referrals, engagement score, GASCOIN holdings, points earned, composite score, and a View link.</p>
 <p>Clicking View on any row opens the full submission history for that wallet in the Wallet Tracker.</p>
 <h3><strong>Top 3 Podium</strong></h3>
 <p>When 3 or more wallets have submissions, the top 3 are displayed in a visual podium above the table. The rank 1 wallet appears in the center and is slightly taller. If your connected wallet is in the top 3, a YOU badge appears on your podium card.</p>
@@ -581,7 +581,7 @@ export const DOC_CATEGORIES: DocCategory[] = [
         categorySlug: "platform",
         category: "Platform Pages",
         description: "",
-        content: `<p>The Referral Engine allows approved GASCOIN submitters to earn additional SOL by referring new users to the platform. When someone uses your referral link to submit and gets approved, you automatically receive 0.005 SOL sent to your wallet.</p>
+        content: `<p>The Referral Engine allows approved GASCOIN submitters to earn points by referring new users to the platform. When someone uses your referral link to submit and gets approved, you earn 500 points that boost your leaderboard rank and status.</p>
 <h3><strong>Who can use the referral system</strong></h3>
 <p>You must have at least one approved submission to generate a referral link and earn rewards. Users without any approved submission can see the referral page but the link generation is locked until they complete a successful submission.</p>
 <h3><strong>Your referral link</strong></h3>
@@ -594,12 +594,12 @@ export const DOC_CATEGORIES: DocCategory[] = [
 <li>They submit a gas receipt using the platform.</li>
 <li>Their submission passes all 10 verification gates and is approved.</li>
 <li>The system detects your referral code on their submission and checks eligibility.</li>
-<li>If eligible, a referral reward of 0.005 SOL is created with status 'pending'.</li>
-<li>An admin dispatches the SOL reward to your wallet. You do not need to claim it.</li>
+<li>If eligible, 500 points are awarded to your wallet through the AI verification gate.</li>
+<li>Points are credited automatically. No admin action needed for referral points.</li>
 </ul>
 <h3><strong>Referral rules and limits</strong></h3>
 <h3><strong>Referral dashboard metrics</strong></h3>
-<p>The referral page dashboard shows: Total Clicks (how many times your link has been clicked), Unique Visitors (unique devices), Conversions (approved submissions through your link), Conversion Rate (unique clicks that resulted in an approved submission), and SOL Earned (total rewards dispatched to date).</p>
+<p>The referral page dashboard shows: Total Clicks (how many times your link has been clicked), Unique Visitors (unique devices), Conversions (approved submissions through your link), Conversion Rate (unique clicks that resulted in an approved submission), and Points Earned (total referral points to date).</p>
 <h3><strong>Referral leaderboard</strong></h3>
 <p>The bottom of the referral page shows the top 10 referrers across the entire platform ranked by total conversions. This leaderboard is public — no wallet connection required to view it.</p><h3>When referral rewards are skipped</h3>
 <p>A conversion is marked "skipped" rather than "pending" when eligibility rules prevent a reward:</p>
@@ -607,7 +607,7 @@ export const DOC_CATEGORIES: DocCategory[] = [
 <tbody><tr><td>Self-referral</td><td>You submitted using your own referral link</td><td>No — permanent</td></tr>
 <tr><td>Referrer not approved</td><td>You had no approved submissions when the conversion occurred</td><td>No — permanent</td></tr>
 <tr><td>Monthly cap reached</td><td>You hit 20 conversions in the rolling 30-day window</td><td>Resets after 30 days</td></tr>
-<tr><td>Monthly SOL cap reached</td><td>You hit 0.10 SOL in referral rewards this window</td><td>Resets after 30 days</td></tr></tbody></table>
+<tr><td>Monthly points cap reached</td><td>You hit 10,000 points in referral rewards this window</td><td>Resets after 30 days</td></tr></tbody></table>
 <p>→ See also: Gates page — all 10 gates must pass for a conversion to count</p>`,
         order: 28,
       },
@@ -622,7 +622,7 @@ export const DOC_CATEGORIES: DocCategory[] = [
 <h3><strong>How tier is determined</strong></h3>
 <p>The system checks your connected wallet's GASCOIN token balance live on the Solana blockchain when you connect. The balance is also cached and refreshed every 5 minutes. If you buy more GASCOIN and want to see your updated tier immediately, click the Refresh Balance button on the Perks page.</p>
 <h3><strong>When tier is applied</strong></h3>
-<p>Your tier is snapshotted at the time of submission. If you are Commuter tier when you submit, the Commuter refund cap (0.075 SOL) applies to that submission — even if you later sell your GASCOIN before the refund is dispatched. Conversely, if you upgrade your tier after submitting but before approval, the original tier at submission time is what applies.</p>
+<p>Your tier is snapshotted at the time of submission. If you are Commuter tier when you submit, the Commuter refund cap (0.25 SOL) applies to that submission — even if you later sell your GASCOIN before the refund is dispatched. Conversely, if you upgrade your tier after submitting but before approval, the original tier at submission time is what applies.</p>
 <h3><strong>Queue priority</strong></h3>
 <p>Higher tier submissions are processed before lower tier submissions. If multiple submissions are pending in the admin queue, a Fleet tier submission will appear above a Standard tier submission. This does not affect the automated gate processing — it affects the order in which the admin reviews and approves refund amounts.</p>
 <h3><strong>Where tier badges appear</strong></h3>
@@ -712,7 +712,7 @@ export const DOC_CATEGORIES: DocCategory[] = [
         content: `<p>The Submissions page is the primary daily operations page. It shows all submissions across all statuses with filtering, searching, and action controls.</p>
 <h3><strong>Submission actions</strong></h3>
 <h3><strong>SOL amount entry</strong></h3>
-<p>When approving a submission, the admin enters the exact SOL amount to refund. The maximum is capped at the submitter's tier cap (Standard: 0.05, Commuter: 0.075, Road Warrior: 0.10, Fleet: 0.20 SOL). The system prevents entering a value above the tier cap.</p>`,
+<p>When approving a submission, the admin enters the exact SOL amount to refund. The maximum is capped at the submitter's tier cap (Standard: 0.10, Commuter: 0.25, Road Warrior: 0.50, Fleet: 1.0 SOL). The system prevents entering a value above the tier cap.</p>`,
         order: 34,
       },
       {
@@ -721,15 +721,14 @@ export const DOC_CATEGORIES: DocCategory[] = [
         categorySlug: "security",
         category: "Security & Admin",
         description: "",
-        content: `<p>The Referral Rewards page shows all pending referral conversions awaiting SOL dispatch. Rewards are dispatched manually — the admin sends SOL from the treasury wallet to the referrer's wallet externally (via Phantom or any Solana wallet tool) and then records the transaction signature in the dashboard.</p>
-<h3><strong>Dispatch process</strong></h3>
+        content: `<p>The Referral Rewards page shows all referral conversions and their point awards. Referral points are awarded automatically through the AI verification gate — no manual SOL dispatch is needed for referrals. The admin page is for monitoring and auditing referral activity.</p>
+<h3><strong>How referral points work</strong></h3>
 <ul>
-<li>Open /admin/referrals and find pending conversion rows.</li>
-<li>Note the referrer wallet address and the reward amount (0.005 SOL).</li>
-<li>Using the treasury wallet, send 0.005 SOL to the referrer wallet via any Solana wallet.</li>
-<li>Copy the transaction signature from the wallet confirmation.</li>
-<li>Return to /admin/referrals, click DISPATCH on the conversion row, paste the transaction signature, and click Confirm.</li>
-<li>The system marks the conversion as dispatched and records the TX signature permanently.</li>
+<li>Open /admin/referrals to see all referral conversions.</li>
+<li>Verified conversions show 500 points awarded to the referrer.</li>
+<li>Skipped conversions show the skip reason (self-referral, cap reached, etc.).</li>
+<li>The AI ring detector flags suspicious referral patterns (circular refs, chain farming).</li>
+<li>Points are awarded automatically by the verify-referrals worker (every 15 minutes).</li>
 </ul>`,
         order: 35,
       },
@@ -832,7 +831,7 @@ export const DOC_CATEGORIES: DocCategory[] = [
         categorySlug: "security",
         category: "Security & Admin",
         description: "",
-        content: `<p>The referral system blocks self-referrals at the database level via a SQL constraint. Referral rewards are capped at 20 conversions and 0.10 SOL per 30 days per referrer to prevent farming. The referrer must themselves have an approved submission before their referral code is valid. Referral conversion only occurs when the referred user's submission passes all 10 gates.</p>`,
+        content: `<p>The referral system blocks self-referrals at the database level via a SQL constraint. Referral rewards are capped at 20 conversions and 10,000 points per 30 days per referrer to prevent farming. The referrer must themselves have an approved submission before their referral code is valid. Referral conversion only occurs when the referred user's submission passes all 10 gates.</p>`,
         order: 55,
       },
     ],
@@ -952,7 +951,7 @@ export const DOC_CATEGORIES: DocCategory[] = [
         categorySlug: "help",
         category: "Help",
         description: "",
-        content: `<p>No. The Standard tier requires zero GASCOIN tokens. Any person with a Solana wallet can submit a gas receipt and receive up to 0.05 SOL without holding any GASCOIN. Tokens are optional and only required to access higher tiers with larger refund caps.</p>`,
+        content: `<p>No. The Standard tier requires zero GASCOIN tokens. Any person with a Solana wallet can submit a gas receipt and receive up to 0.10 SOL without holding any GASCOIN. Tokens are optional and only required to access higher tiers with larger refund caps.</p>`,
         order: 56,
       },
       {
@@ -961,7 +960,7 @@ export const DOC_CATEGORIES: DocCategory[] = [
         categorySlug: "help",
         category: "Help",
         description: "",
-        content: `<p>The exact refund amount is determined by an admin when approving your submission, up to the maximum for your tier: Standard = 0.05 SOL, Commuter = 0.075 SOL, Road Warrior = 0.10 SOL, Fleet = 0.20 SOL. Convert these to USD using the current SOL price on any exchange. At $200 SOL, the Standard tier maximum is $10 per submission.</p>`,
+        content: `<p>The exact refund amount is determined by an admin when approving your submission, up to the maximum for your tier: Standard = 0.10 SOL, Commuter = 0.25 SOL, Road Warrior = 0.50 SOL, Fleet = 1.0 SOL. Convert these to USD using the current SOL price on any exchange. At $180 SOL, the Standard tier maximum is ~$18 per submission.</p>`,
         order: 57,
       },
       {
@@ -1095,7 +1094,7 @@ export const DOC_CATEGORIES: DocCategory[] = [
         category: "Help",
         description: "How the GASCOIN points system works — earning, leaderboard, and rewards.",
         content: `<h3>SOL vs Points — The Core Distinction</h3>
-<p><strong>SOL payouts are for gas receipts only.</strong> When you submit a verified gas receipt and it passes all 11 gates, you receive SOL directly to your wallet. The amount depends on your GASCOIN token tier (Standard: 0.10 SOL, Commuter: 0.25 SOL, Road Warrior: 0.50 SOL, Fleet: 1.0 SOL).</p>
+<p><strong>SOL payouts are for gas receipts only.</strong> When you submit a verified gas receipt and it passes all 10 gates, you receive SOL directly to your wallet. The amount depends on your GASCOIN token tier (Standard: 0.10 SOL, Commuter: 0.25 SOL, Road Warrior: 0.50 SOL, Fleet: 1.0 SOL).</p>
 <p><strong>Everything else earns points.</strong> Referrals, tweet engagement, submission streaks, and GASCOIN holdings all earn points. Points drive your leaderboard rank, status badges, and platform recognition. Points do not convert to SOL.</p>
 
 <h3>Why Points Matter</h3>
@@ -1145,7 +1144,7 @@ export const DOC_CATEGORIES: DocCategory[] = [
         category: "Help",
         description: "How referral conversions earn points.",
         content: `<h3>Referral Points</h3>
-<p>When someone uses your referral link to submit a gas receipt and that receipt gets approved through all 11 gates, you earn <strong>500 points</strong>.</p>
+<p>When someone uses your referral link to submit a gas receipt and that receipt gets approved through all 10 gates, you earn <strong>500 points</strong>.</p>
 
 <h3>Eligibility Rules</h3>
 <ul>
