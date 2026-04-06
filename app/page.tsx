@@ -195,7 +195,7 @@ export default async function Home() {
                 </div>
                 <div className="gc-tech-layer-content">
                   <div className="gc-tech-layer-title">4-Layer Fraud Detection</div>
-                  <div className="gc-tech-layer-tag">FREE · INSTANT · ON-DEVICE</div>
+                  <div className="gc-tech-layer-tag">CLAUDE AI · INSTANT · ON-DEVICE</div>
                   <p className="gc-tech-layer-desc">
                     Before AI even sees the image, three free layers run instantly: EXIF forensics
                     checks camera model, timestamps, and editing software. Dimensional analysis flags
