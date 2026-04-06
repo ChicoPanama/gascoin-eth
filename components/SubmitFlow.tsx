@@ -115,10 +115,11 @@ function StepWallet({ onConnect }: {
 // ═══════════════════════════════════════════
 // STEP 2 — Verify Tweet
 // ═══════════════════════════════════════════
-function StepTweet({ onVerified, onBack, initialUrl }: {
+function StepTweet({ onVerified, onBack, initialUrl, loggedInHandle }: {
   onVerified: (url: string, handle: string) => void;
   onBack: () => void;
   initialUrl: string;
+  loggedInHandle: string;
 }) {
   const [url, setUrl] = useState(initialUrl);
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
@@ -171,6 +172,13 @@ function StepTweet({ onVerified, onBack, initialUrl }: {
       const gate2 = data.results?.find((r: any) => r.gate_id === 2);
       const gate4 = data.results?.find((r: any) => r.gate_id === 4);
       const h = gate2?.metadata?.username || value.match(/x\.com\/([^/]+)/)?.[1] || '';
+
+      // Check that tweet author matches logged-in user
+      if (loggedInHandle && h && h.toLowerCase() !== loggedInHandle.toLowerCase()) {
+        setStatus('error');
+        setErrorMsg(`This tweet is from @${h} — you are signed in as @${loggedInHandle}. You must submit your own tweet.`);
+        return;
+      }
       setHandle(h);
 
       const ageHours = gate4?.metadata?.tweet_age_hours;
@@ -546,6 +554,18 @@ function StepGates({ failGate, onReset, onResubmit }: {
 // ═══════════════════════════════════════════
 // MAIN FLOW CONTROLLER
 // ═══════════════════════════════════════════
+
+function usePrivyHandle(): string {
+  try {
+    // Dynamic import — SubmitFlow may render before Privy is ready
+    const { usePrivy } = require('@privy-io/react-auth');
+    const { user } = usePrivy();
+    return ((user as any)?.twitter?.username || '').toString().replace(/^@/, '');
+  } catch {
+    return '';
+  }
+}
+
 export function SubmitFlow() {
   const [step, setStep] = useState<Step>(1);
   const [maxStep, setMaxStep] = useState<Step>(1);
@@ -554,6 +574,7 @@ export function SubmitFlow() {
   const [handle, setHandle] = useState('');
   const [file, setFile] = useState<File | null>(null);
   const [failGate, setFailGate] = useState<number | null>(null);
+  const loggedInHandle = usePrivyHandle();
 
   const goTo = (s: Step) => {
     setStep(s);
@@ -584,6 +605,7 @@ export function SubmitFlow() {
       {step === 2 && (
         <StepTweet
           initialUrl={tweetUrl}
+          loggedInHandle={loggedInHandle}
           onVerified={(u, h) => { setTweetUrl(u); setHandle(h); goTo(3); }}
           onBack={() => setStep(1)}
         />
