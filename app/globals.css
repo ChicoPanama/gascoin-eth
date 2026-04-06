@@ -181,8 +181,11 @@ code, .mono {
 }
 
 .gc-hero h1 {
-  font-size: clamp(72px, 11vw, 130px);
-  line-height: 0.9;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 80px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  line-height: 1;
   margin-bottom: 36px;
 }
 
@@ -1024,7 +1027,7 @@ input:focus, textarea:focus, select:focus {
 }
 .admin-page-title {
   font-family: 'Bebas Neue', sans-serif;
-  font-size: 56px;
+  font-size: 80px;
   letter-spacing: 0.04em;
   text-transform: uppercase;
   margin-bottom: 48px;
@@ -2437,8 +2440,8 @@ input:focus, textarea:focus, select:focus {
 }
 .lb-title {
   font-family: 'Bebas Neue', sans-serif;
-  font-size: clamp(72px, 12vw, 140px);
-  line-height: 0.9;
+  font-size: 80px;
+  line-height: 1;
   letter-spacing: 0.04em;
   text-transform: uppercase;
   margin-bottom: 16px;
@@ -3659,7 +3662,7 @@ input:focus, textarea:focus, select:focus {
 .gc-dash-title {
   font-family: 'Bebas Neue', sans-serif;
   font-size: 80px;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
   line-height: 1;
 }
@@ -3926,6 +3929,8 @@ input:focus, textarea:focus, select:focus {
   .gc-cta-band-headline { font-size: 48px; }
 
   .gc-dash-title { font-size: 48px; }
+  .lb-title { font-size: 48px; }
+  .admin-page-title { font-size: 48px; }
   .gc-dash-split { grid-template-columns: 1fr; }
   .gc-feed-row { flex-wrap: wrap; gap: 8px; }
   .gc-teaser { padding: 60px 24px; }
@@ -3936,7 +3941,7 @@ input:focus, textarea:focus, select:focus {
 }
 
 @media (max-width: 600px) {
-  .gc-hero h1 { font-size: 48px; }
+  .gc-hero h1 { font-size: 36px; }
   .cards-4 { grid-template-columns: 1fr; }
 }
 

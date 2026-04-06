@@ -31,9 +31,7 @@ export default function PerksPage() {
         <div className="lb-header__meta">
           <span className="lb-tag">— Hold GASCOIN · Unlock Perks</span>
         </div>
-        <h1 className="lb-title" style={{ lineHeight: 0.88 }}>
-          Token<br /><span style={{ color: 'rgba(255,255,255,0.18)' }}>Perks</span>
-        </h1>
+        <h1 className="lb-title">TOKEN PERKS</h1>
         <p className="gt-header-body">
           Hold GASCOIN in your connected wallet to unlock submission priority,
           higher refund caps, and platform-wide status badges.

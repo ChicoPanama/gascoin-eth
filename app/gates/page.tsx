@@ -65,8 +65,8 @@ export default function GatesPage() {
         <div className="lb-header__meta">
           <span className="lb-tag">— 10 Verification Gates · Full System Transparency</span>
         </div>
-        <h1 className="lb-title" style={{ lineHeight: 0.88 }}>
-          Verification<br />Gates
+        <h1 className="lb-title">
+          Verification Gates
         </h1>
         <p className="gt-header-body">
           Every GASCOIN submission passes through 10 sequential verification

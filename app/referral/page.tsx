@@ -86,7 +86,7 @@ export default function ReferralPage() {
         </div>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: 24 }}>
           <div>
-            <h1 className="lb-title" style={{ lineHeight: 0.88 }}>Referral<br /><span style={{ color: 'rgba(255,255,255,0.18)' }}>Engine</span></h1>
+            <h1 className="lb-title">REFERRAL ENGINE</h1>
             <p className="gt-header-body">
               Share your unique link. When someone submits a verified receipt using
               your link and gets approved, you earn {REFERRAL_CONFIG.POINTS_PER_CONVERSION} points
