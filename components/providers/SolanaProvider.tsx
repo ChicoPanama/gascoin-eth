@@ -1,11 +1,11 @@
 "use client";
 
-import React, { FC, ReactNode, useMemo } from "react";
+import React, { FC, ReactNode, useMemo, useCallback } from "react";
 import {
   ConnectionProvider,
   WalletProvider,
 } from "@solana/wallet-adapter-react";
-import { WalletAdapterNetwork } from "@solana/wallet-adapter-base";
+import { WalletAdapterNetwork, type WalletError } from "@solana/wallet-adapter-base";
 import {
   PhantomWalletAdapter,
   SolflareWalletAdapter,
@@ -26,6 +26,8 @@ export const SolanaProvider: FC<SolanaProviderProps> = ({ children }) => {
     [network]
   );
 
+  // Explicit adapters for Phantom and Solflare.
+  // Brave and other Wallet Standard wallets are auto-detected by WalletProvider.
   const wallets = useMemo(
     () => [
       new PhantomWalletAdapter(),
@@ -34,9 +36,14 @@ export const SolanaProvider: FC<SolanaProviderProps> = ({ children }) => {
     []
   );
 
+  // Surface wallet errors instead of swallowing them silently
+  const onError = useCallback((error: WalletError) => {
+    console.error('[wallet]', error.name, error.message);
+  }, []);
+
   return (
     <ConnectionProvider endpoint={endpoint}>
-      <WalletProvider wallets={wallets} autoConnect={true}>
+      <WalletProvider wallets={wallets} onError={onError} autoConnect>
         <WalletModalProvider>{children}</WalletModalProvider>
       </WalletProvider>
     </ConnectionProvider>
