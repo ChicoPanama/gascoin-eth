@@ -3,6 +3,19 @@ node_modules/
 .env
 .env.local
 .env.*.local
+.env.production
 .vercel/
-supabase/.temp/
 .vercel
+supabase/.temp/
+
+# SECURITY: Never commit secrets, keys, or debug artifacts
+*.pem
+*.key
+*.p12
+*.pfx
+.env.production
+*.secret
+coverage/
+.turbo/
+*.tsbuildinfo
+.env*.local

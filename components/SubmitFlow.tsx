@@ -545,20 +545,8 @@ export function SubmitFlow() {
     setFailGate(null);
   };
 
-  // Exposed for test panel (dev only)
-  useEffect(() => {
-    if (process.env.NODE_ENV !== 'development') return;
-    (window as any).__sfSetStep = goTo;
-    (window as any).__sfSetWallet = setWallet;
-    (window as any).__sfSetFailGate = setFailGate;
-    (window as any).__sfReset = reset;
-    return () => {
-      delete (window as any).__sfSetStep;
-      delete (window as any).__sfSetWallet;
-      delete (window as any).__sfSetFailGate;
-      delete (window as any).__sfReset;
-    };
-  });
+  // SECURITY: Window globals removed — were exploitable even with NODE_ENV guard.
+  // Hardened 2026-04-06 — use React DevTools or proper test harness instead.
 
   return (
     <div className="sf-container">

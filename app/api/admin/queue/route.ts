@@ -1,7 +1,15 @@
 import { NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '../../../../lib/supabase';
+import { requireReviewer } from '../../../../lib/reviewer-auth';
 
-export async function GET(){
+// SECURITY: Admin queue requires reviewer/admin authentication.
+// Hardened 2026-04-06 — was previously unauthenticated (CRITICAL).
+export async function GET(req: Request){
+  const reviewer = await requireReviewer(req);
+  if (!reviewer) {
+    return NextResponse.json({ ok: false, error: 'unauthorized' }, { status: 401 });
+  }
+
   let supabase;
   try {
     supabase = getSupabaseAdmin();
@@ -17,7 +25,8 @@ export async function GET(){
     .limit(100);
 
   if (error) {
-    return NextResponse.json({ ok: false, error: error.message }, { status: 500 });
+    // SECURITY: Do not leak DB error details to client
+    return NextResponse.json({ ok: false, error: 'query_failed' }, { status: 500 });
   }
 
   const rows = (data || []).map((r: any) => ({

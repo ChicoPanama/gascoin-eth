@@ -133,7 +133,8 @@ export async function POST(req: Request){
     .limit(5);
 
   if (dupErr) {
-    return NextResponse.json({ ok:false, error:'duplicate_lookup_failed', details: dupErr.message }, { status: 500 });
+    // SECURITY: Do not leak DB error details to client
+    return NextResponse.json({ ok:false, error:'duplicate_lookup_failed' }, { status: 500 });
   }
 
   const duplicateHash = !!dupRows?.some((r:any) => r.hash_sha256 === fraudBase.hashSha256);
@@ -169,7 +170,8 @@ export async function POST(req: Request){
     .single();
 
   if (userErr || !userRow?.id) {
-    return NextResponse.json({ ok:false, error:'user_upsert_failed', details: userErr?.message }, { status: 500 });
+    // SECURITY: Do not leak DB error details to client
+    return NextResponse.json({ ok:false, error:'user_upsert_failed' }, { status: 500 });
   }
 
   const { data: banRow } = await supabase
@@ -230,7 +232,8 @@ export async function POST(req: Request){
       target_id: claimId,
       payload_json: { error: uploadErr.message }
     });
-    return NextResponse.json({ ok:false, error:'receipt_upload_failed', details: uploadErr.message, claimId }, { status: 500 });
+    // SECURITY: Do not leak storage error details to client
+    return NextResponse.json({ ok:false, error:'receipt_upload_failed', claimId }, { status: 500 });
   }
 
   const { error: receiptErr } = await supabase
@@ -266,7 +269,8 @@ export async function POST(req: Request){
     });
 
   if (receiptErr) {
-    return NextResponse.json({ ok:false, error:'receipt_insert_failed', details: receiptErr.message, claimId }, { status: 500 });
+    // SECURITY: Do not leak DB error details to client
+    return NextResponse.json({ ok:false, error:'receipt_insert_failed', claimId }, { status: 500 });
   }
 
   if (result.gates.length) {

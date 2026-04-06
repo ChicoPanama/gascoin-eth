@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '../../../../lib/supabase';
+import { isValidSolanaAddress } from '../../../../lib/validate-wallet';
 
 // GET — fetch referral count for a wallet
 export async function GET(req: Request) {
@@ -8,6 +9,11 @@ export async function GET(req: Request) {
 
   if (!wallet) {
     return NextResponse.json({ error: 'wallet param required' }, { status: 400 });
+  }
+
+  // SECURITY: Validate wallet format to prevent injection
+  if (!isValidSolanaAddress(wallet)) {
+    return NextResponse.json({ error: 'invalid_wallet_address' }, { status: 400 });
   }
 
   try {
@@ -45,6 +51,11 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'referrer_wallet and referred_wallet required' }, { status: 400 });
     }
 
+    // SECURITY: Validate both wallet addresses
+    if (!isValidSolanaAddress(referrer_wallet) || !isValidSolanaAddress(referred_wallet)) {
+      return NextResponse.json({ error: 'invalid_wallet_address' }, { status: 400 });
+    }
+
     if (referrer_wallet === referred_wallet) {
       return NextResponse.json({ error: 'cannot refer yourself' }, { status: 400 });
     }
@@ -71,7 +82,8 @@ export async function POST(req: Request) {
     if (error) throw error;
 
     return NextResponse.json({ ok: true, referral: data });
-  } catch (e: any) {
-    return NextResponse.json({ error: e?.message || 'failed to create referral' }, { status: 500 });
+  } catch {
+    // SECURITY: Do not leak error details to client
+    return NextResponse.json({ error: 'failed to create referral' }, { status: 500 });
   }
 }

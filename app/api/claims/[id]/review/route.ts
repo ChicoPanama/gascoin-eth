@@ -28,14 +28,9 @@ export async function POST(req: Request, ctx: { params: Promise<{ id: string }> 
   const action = String(body.action || '').toLowerCase() as ReviewAction;
   const reason = String(body.reason || '').trim();
   const actorId = String(body.actorId || 'admin');
-  const bodyReviewerToken = String(body.reviewerToken || '').trim();
-
-  const breakGlass = (process.env.REVIEWER_API_TOKEN || '').trim();
-  const bodyTokenAuthorized = !!breakGlass && bodyReviewerToken === breakGlass;
-
-  const reviewer = bodyTokenAuthorized
-    ? { xId: 'break_glass', role: 'admin' as const, via: 'token' as const }
-    : await requireReviewer(req);
+  // SECURITY: Break-glass token in request body removed — only accept via header.
+  // Hardened 2026-04-06 — body token was non-standard and bypassable.
+  const reviewer = await requireReviewer(req);
 
   if (!reviewer) {
     return NextResponse.json({ ok: false, error: 'unauthorized_reviewer' }, { status: 401 });
@@ -76,7 +71,8 @@ export async function POST(req: Request, ctx: { params: Promise<{ id: string }> 
     .eq('id', id);
 
   if (updErr) {
-    return NextResponse.json({ ok: false, error: 'claim_update_failed', details: updErr.message }, { status: 500 });
+    // SECURITY: Do not leak DB error details to client
+    return NextResponse.json({ ok: false, error: 'claim_update_failed' }, { status: 500 });
   }
 
   await supabase.from('claim_status_events').insert({

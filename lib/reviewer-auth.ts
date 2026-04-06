@@ -1,3 +1,4 @@
+import crypto from 'crypto';
 import { verifyPrivySession } from './integrations/privy';
 import { getSupabaseAdmin } from './supabase';
 
@@ -8,6 +9,16 @@ export type ReviewerIdentity = {
   via: 'rbac' | 'token';
 };
 
+// SECURITY: Constant-time string comparison to prevent timing attacks.
+// Hardened 2026-04-06 — was using plain === (HIGH risk).
+function timingSafeEqual(a: string, b: string): boolean {
+  if (!a || !b) return false;
+  const bufA = Buffer.from(a, 'utf8');
+  const bufB = Buffer.from(b, 'utf8');
+  if (bufA.length !== bufB.length) return false;
+  return crypto.timingSafeEqual(bufA, bufB);
+}
+
 function readBearer(req: Request): string {
   const auth = req.headers.get('authorization') || '';
   const m = auth.match(/^Bearer\s+(.+)$/i);
@@ -16,11 +27,12 @@ function readBearer(req: Request): string {
 
 export async function requireReviewer(req: Request): Promise<ReviewerIdentity | null> {
   const breakGlass = (process.env.REVIEWER_API_TOKEN || '').trim();
+  // SECURITY: Only accept break-glass token via header, not request body.
   const headerToken = String(req.headers.get('x-reviewer-token') || '').trim();
   const bearer = readBearer(req);
 
-  // break-glass token support
-  if (breakGlass && (headerToken === breakGlass || bearer === breakGlass)) {
+  // break-glass token support — timing-safe comparison
+  if (breakGlass && (timingSafeEqual(headerToken, breakGlass) || timingSafeEqual(bearer, breakGlass))) {
     return { xId: 'break_glass', xHandle: '@break_glass', role: 'admin', via: 'token' };
   }
 

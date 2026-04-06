@@ -74,7 +74,8 @@ export async function POST(req: NextRequest) {
     });
 
     return NextResponse.json({ ok: true });
-  } catch (e: any) {
-    return NextResponse.json({ error: e?.message || 'click failed' }, { status: 500 });
+  } catch {
+    // SECURITY: Do not leak error details to client
+    return NextResponse.json({ error: 'click_failed' }, { status: 500 });
   }
 }

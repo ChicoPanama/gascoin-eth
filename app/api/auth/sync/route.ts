@@ -1,26 +1,29 @@
 import { NextResponse } from 'next/server';
 import { verifyPrivySession } from '../../../../lib/integrations/privy';
 import { getSupabaseAdmin } from '../../../../lib/supabase';
+import { checkRateLimit } from '../../../../lib/rate-limit';
+
+function clientIp(req: Request): string {
+  return req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown';
+}
 
 export async function POST(req: Request) {
-  const authHeader = req.headers.get('authorization');
-  const cookieHeader = req.headers.get('cookie');
+  // SECURITY: Rate limit auth sync to prevent brute force
+  const rl = await checkRateLimit(`auth_sync:${clientIp(req)}`, 20, 60);
+  if (!rl.ok) {
+    return NextResponse.json({ ok: false, error: 'rate_limited' }, { status: 429 });
+  }
+
   const session = await verifyPrivySession(req.headers.get('authorization'), {
     xId: req.headers.get('x-privy-user-id') || '',
     xHandle: req.headers.get('x-privy-handle') || '',
     wallet: req.headers.get('x-privy-wallet') || ''
-  }, cookieHeader, { allowHintFallback: true });
+  }, req.headers.get('cookie'));
+  // SECURITY: allowHintFallback removed — unverified identities no longer accepted.
+  // Hardened 2026-04-06.
   if (!session) {
-    return NextResponse.json({
-      ok: false,
-      error: 'unauthorized',
-      diagnostics: {
-        hasAuthorizationHeader: !!authHeader,
-        hasPrivyCookie: !!(cookieHeader && /(?:^|;\s*)(privy-token|privy_access_token)=/.test(cookieHeader)),
-        hasHintUserId: !!req.headers.get('x-privy-user-id'),
-        hasHintHandle: !!req.headers.get('x-privy-handle')
-      }
-    }, { status: 401 });
+    // SECURITY: Do not leak diagnostics about auth state to client
+    return NextResponse.json({ ok: false, error: 'unauthorized' }, { status: 401 });
   }
 
   let supabase;
@@ -46,7 +49,8 @@ export async function POST(req: Request) {
     .single();
 
   if (userErr || !userRow?.id) {
-    return NextResponse.json({ ok: false, error: 'user_upsert_failed', details: userErr?.message }, { status: 500 });
+    // SECURITY: Do not leak DB error details to client
+    return NextResponse.json({ ok: false, error: 'user_upsert_failed' }, { status: 500 });
   }
 
   if (session.wallet) {

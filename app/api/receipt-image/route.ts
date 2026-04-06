@@ -20,6 +20,12 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: 'Missing path' }, { status: 400 });
   }
 
+  // SECURITY: Prevent path traversal attacks — only allow receipts/ prefix, no ..
+  // Hardened 2026-04-06.
+  if (!path.startsWith('receipts/') || path.includes('..') || path.includes('\0')) {
+    return NextResponse.json({ error: 'Invalid path' }, { status: 400 });
+  }
+
   try {
     const supabase = getSupabaseAdmin();
 

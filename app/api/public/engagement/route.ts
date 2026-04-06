@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '../../../../lib/supabase';
+import { isValidSolanaAddress } from '../../../../lib/validate-wallet';
 
 // GET — fetch complete engagement data for a wallet
 // Queries scored_tweets (per-tweet metrics) + engagement_points (all point sources)
@@ -9,6 +10,11 @@ export async function GET(req: Request) {
 
   if (!wallet) {
     return NextResponse.json({ error: 'wallet param required' }, { status: 400 });
+  }
+
+  // SECURITY: Validate wallet format
+  if (!isValidSolanaAddress(wallet)) {
+    return NextResponse.json({ error: 'invalid_wallet_address' }, { status: 400 });
   }
 
   try {
