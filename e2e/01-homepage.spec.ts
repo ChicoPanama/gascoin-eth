@@ -36,7 +36,8 @@ test.describe('Homepage', () => {
   test('HP06 — nav links present', async ({ page }) => {
     await page.goto('/');
     await page.waitForTimeout(4500);
-    await expect(page.locator('.gc-nav-links a')).toHaveCount({ minimum: 5 });
+    const count = await page.locator('.gc-nav-links a').count();
+    expect(count).toBeGreaterThanOrEqual(5);
   });
 
   test('HP07 — no horizontal overflow', async ({ page }) => {
