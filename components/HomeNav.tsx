@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { WalletButton } from './ui/WalletButton';
 import { AuthNavButton } from './AuthNavButton';
+import { MobileMenu } from './ui/MobileMenu';
 
 export function HomeNav() {
   return (
@@ -22,6 +23,7 @@ export function HomeNav() {
       <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
         <WalletButton />
         <AuthNavButton />
+        <MobileMenu />
       </div>
     </nav>
   );

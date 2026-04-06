@@ -1,0 +1,66 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+
+const NAV_LINKS = [
+  { href: '/submit', label: 'Submit' },
+  { href: '/dashboard', label: 'Treasury' },
+  { href: '/community', label: 'Community' },
+  { href: '/leaderboard', label: 'Leaderboard' },
+  { href: '/referral', label: 'Refer' },
+  { href: '/perks', label: 'Perks' },
+  { href: '/gates', label: 'Gates' },
+  { href: '/wallet', label: 'Tracker' },
+  { href: '/docs', label: 'Docs' },
+];
+
+export function MobileMenu() {
+  const [open, setOpen] = useState(false);
+  const pathname = usePathname();
+
+  // Close menu on route change
+  useEffect(() => {
+    setOpen(false);
+  }, [pathname]);
+
+  // Lock body scroll when open
+  useEffect(() => {
+    if (open) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => { document.body.style.overflow = ''; };
+  }, [open]);
+
+  return (
+    <>
+      <button
+        className="mobile-menu-toggle"
+        onClick={() => setOpen(!open)}
+        aria-label={open ? 'Close menu' : 'Open menu'}
+        aria-expanded={open}
+      >
+        <span className={`mobile-menu-bar${open ? ' mobile-menu-bar--open' : ''}`} />
+      </button>
+
+      {open && (
+        <div className="mobile-menu-overlay" onClick={() => setOpen(false)}>
+          <nav className="mobile-menu" onClick={(e) => e.stopPropagation()}>
+            {NAV_LINKS.map(({ href, label }) => (
+              <Link
+                key={href}
+                href={href}
+                className={`mobile-menu-link${pathname === href ? ' mobile-menu-link--active' : ''}`}
+              >
+                {label}
+              </Link>
+            ))}
+          </nav>
+        </div>
+      )}
+    </>
+  );
+}
