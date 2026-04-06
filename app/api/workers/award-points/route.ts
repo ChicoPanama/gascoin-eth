@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '../../../../lib/supabase';
 import { POINTS_CONFIG } from '../../../../lib/engagement-rewards';
 import { TOKEN_TIERS, getTierForBalance } from '../../../../lib/token-tiers';
-import { detectReferralRing, calculateWalletTrust, generateAuditSummary } from '../../../../lib/ai-points-engine';
+import { detectReferralRing, calculateWalletTrust, generateAuditSummary, awardVerifiedPoints } from '../../../../lib/ai-points-engine';
 
 function isAuthorized(req: Request): boolean {
   const secret = (process.env.CRON_SECRET || '').trim();
@@ -34,6 +34,7 @@ export async function POST(req: Request) {
     let submissionPointsAwarded = 0;
     let streakPointsAwarded = 0;
     let holdingsPointsAwarded = 0;
+    let heldCount = 0;
     let anomalies: string[] = [];
 
     // ─── 1. SUBMISSION POINTS ───
@@ -55,13 +56,19 @@ export async function POST(req: Request) {
 
       if (existing) continue;
 
-      await supabase.from('engagement_points').insert({
+      const subTrust = calculateWalletTrust({
+        totalSubmissions: 1, approvedSubmissions: 1, rejectedSubmissions: 0,
+        referralConversions: 0, skippedReferrals: 0, accountAgeDays: 30, anomalyCount: 0,
+      });
+      const subResult = await awardVerifiedPoints(supabase, {
         wallet: payout.wallet,
         source: 'submission_approved',
-        points: POINTS_CONFIG.POINTS_PER_APPROVED_SUBMISSION,
-        metadata_json: { claim_id: payout.claim_id, payout_id: payout.id, awarded_date: todayKey },
+        rawPoints: POINTS_CONFIG.POINTS_PER_APPROVED_SUBMISSION,
+        metadata: { claim_id: payout.claim_id, payout_id: payout.id, awarded_date: todayKey },
+        walletTrust: subTrust,
       });
-      submissionPointsAwarded += POINTS_CONFIG.POINTS_PER_APPROVED_SUBMISSION;
+      if (subResult.awarded) submissionPointsAwarded += subResult.points;
+      if (subResult.heldForReview) heldCount++;
     }
 
     // ─── 2. STREAK BONUS ───
@@ -108,15 +115,21 @@ export async function POST(req: Request) {
         }
       }
 
-      if (consecutiveWindows >= 2) { // Need at least 2 consecutive windows for streak
+      if (consecutiveWindows >= 2) {
         const streakPoints = consecutiveWindows * POINTS_CONFIG.POINTS_PER_STREAK_WINDOW;
-        await supabase.from('engagement_points').insert({
+        const streakTrust = calculateWalletTrust({
+          totalSubmissions: consecutiveWindows, approvedSubmissions: consecutiveWindows, rejectedSubmissions: 0,
+          referralConversions: 0, skippedReferrals: 0, accountAgeDays: consecutiveWindows * 30, anomalyCount: 0,
+        });
+        const streakResult = await awardVerifiedPoints(supabase, {
           wallet,
           source: 'streak_bonus',
-          points: streakPoints,
-          metadata_json: { consecutive_windows: consecutiveWindows, awarded_date: todayKey },
+          rawPoints: streakPoints,
+          metadata: { consecutive_windows: consecutiveWindows, awarded_date: todayKey },
+          walletTrust: streakTrust,
         });
-        streakPointsAwarded += streakPoints;
+        if (streakResult.awarded) streakPointsAwarded += streakResult.points;
+        if (streakResult.heldForReview) heldCount++;
       }
     }
 
@@ -148,17 +161,19 @@ export async function POST(req: Request) {
 
       if (holdingsToday) continue;
 
-      await supabase.from('engagement_points').insert({
+      const holdTrust = calculateWalletTrust({
+        totalSubmissions: 0, approvedSubmissions: 0, rejectedSubmissions: 0,
+        referralConversions: 0, skippedReferrals: 0, accountAgeDays: 30, anomalyCount: 0,
+      });
+      const holdResult = await awardVerifiedPoints(supabase, {
         wallet: cached.wallet_address,
         source: 'holdings_bonus',
-        points,
-        metadata_json: {
-          tier_id: cached.tier_id,
-          gascoin_balance: cached.gascoin_balance,
-          awarded_date: todayKey,
-        },
+        rawPoints: points,
+        metadata: { tier_id: cached.tier_id, gascoin_balance: cached.gascoin_balance, awarded_date: todayKey },
+        walletTrust: holdTrust,
       });
-      holdingsPointsAwarded += points;
+      if (holdResult.awarded) holdingsPointsAwarded += holdResult.points;
+      if (holdResult.heldForReview) heldCount++;
     }
 
     // ─── 4. AI AUDIT — Integrity Check ───

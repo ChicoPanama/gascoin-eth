@@ -267,3 +267,269 @@ Write as if briefing a CEO. No jargon. Flag risks.`;
   const response = await aiCall(prompt);
   return response || `Points audit for ${params.date}: ${params.submissionPoints + params.streakPoints + params.holdingsPoints} points awarded across ${params.totalWallets} wallets. ${params.anomalies.length} anomalies detected.`;
 }
+
+// ─── 5. PRE-AWARD VERIFICATION GATE ───
+// AI gatekeeper that runs BEFORE any points are written to the database.
+// Every point award goes through this layer first.
+// Clean → approved instantly. Suspicious → held for admin review.
+
+export interface PointVerification {
+  approved: boolean;
+  adjustedPoints: number;     // May be reduced from original
+  holdForReview: boolean;
+  reason: string;
+  trustMultiplier: number;
+  flags: string[];
+}
+
+export async function verifyPointAward(params: {
+  wallet: string;
+  source: 'tweet_engagement' | 'referral_conversion' | 'submission_approved' | 'streak_bonus' | 'holdings_bonus';
+  rawPoints: number;
+  metadata: Record<string, any>;
+  // Context for AI decision
+  walletTrust: WalletTrustScore;
+  tweetQuality?: TweetQualityScore;
+  ringDetection?: RingDetectionResult;
+  // Historical context
+  totalPointsToday: number;
+  totalPointsAllTime: number;
+}): Promise<PointVerification> {
+  const flags: string[] = [];
+  let adjustedPoints = params.rawPoints;
+  let holdForReview = false;
+
+  // ─── Layer 1: Trust multiplier (instant, no AI call) ───
+  adjustedPoints = Math.round(adjustedPoints * params.walletTrust.multiplier);
+
+  if (params.walletTrust.level === 'suspicious') {
+    flags.push('suspicious_wallet');
+    // Suspicious wallets: hold high-value awards for review
+    if (adjustedPoints > 500) {
+      holdForReview = true;
+      flags.push('high_value_suspicious');
+    }
+  }
+
+  // ─── Layer 2: Source-specific checks (instant) ───
+
+  if (params.source === 'tweet_engagement') {
+    // Apply tweet quality multiplier if available
+    if (params.tweetQuality) {
+      adjustedPoints = Math.round(adjustedPoints * params.tweetQuality.multiplier);
+      if (params.tweetQuality.isSpam) { flags.push('spam_tweet'); holdForReview = true; }
+      if (params.tweetQuality.isBotEngagement) { flags.push('bot_engagement'); holdForReview = true; }
+    }
+  }
+
+  if (params.source === 'referral_conversion') {
+    // Check ring detection results
+    if (params.ringDetection?.isSuspicious) {
+      adjustedPoints = 0;
+      holdForReview = true;
+      flags.push(`referral_ring_${params.ringDetection.ringType}`);
+    }
+  }
+
+  // ─── Layer 3: Velocity checks (instant) ───
+
+  // Daily velocity: >50K points in one day is suspicious
+  if (params.totalPointsToday + adjustedPoints > 50000) {
+    flags.push('daily_velocity_high');
+    if (params.walletTrust.level !== 'veteran') {
+      holdForReview = true;
+    }
+  }
+
+  // Single award >10K from one source: unusual, flag but don't block veterans
+  if (adjustedPoints > 10000 && params.source !== 'tweet_engagement') {
+    flags.push('large_single_award');
+  }
+
+  // ─── Layer 4: AI verification (only for flagged or high-value awards) ───
+  // Only call AI when something looks suspicious — saves cost on clean awards
+  if (flags.length > 0 || adjustedPoints > 5000) {
+    const aiVerdict = await aiVerifyAward({
+      wallet: params.wallet.slice(0, 8) + '...',
+      source: params.source,
+      rawPoints: params.rawPoints,
+      adjustedPoints,
+      flags,
+      trustLevel: params.walletTrust.level,
+      trustScore: params.walletTrust.score,
+      totalPointsToday: params.totalPointsToday,
+      totalPointsAllTime: params.totalPointsAllTime,
+      metadata: params.metadata,
+    });
+
+    if (aiVerdict.block) {
+      holdForReview = true;
+      adjustedPoints = 0;
+      flags.push('ai_blocked');
+    } else if (aiVerdict.reduce) {
+      adjustedPoints = Math.round(adjustedPoints * aiVerdict.multiplier);
+      flags.push(`ai_reduced_${(aiVerdict.multiplier * 100).toFixed(0)}pct`);
+    }
+
+    return {
+      approved: !holdForReview,
+      adjustedPoints,
+      holdForReview,
+      reason: aiVerdict.reason || flags.join(', '),
+      trustMultiplier: params.walletTrust.multiplier,
+      flags,
+    };
+  }
+
+  // Clean award — no flags, no AI call needed
+  return {
+    approved: true,
+    adjustedPoints,
+    holdForReview: false,
+    reason: 'clean',
+    trustMultiplier: params.walletTrust.multiplier,
+    flags: [],
+  };
+}
+
+// Internal AI verification call — only triggered for suspicious/high-value awards
+async function aiVerifyAward(params: {
+  wallet: string;
+  source: string;
+  rawPoints: number;
+  adjustedPoints: number;
+  flags: string[];
+  trustLevel: string;
+  trustScore: number;
+  totalPointsToday: number;
+  totalPointsAllTime: number;
+  metadata: Record<string, any>;
+}): Promise<{ block: boolean; reduce: boolean; multiplier: number; reason: string }> {
+  const prompt = `You are the GASCOIN points integrity system. Evaluate this point award and decide: approve, reduce, or block.
+
+Wallet: ${params.wallet}
+Source: ${params.source}
+Raw points: ${params.rawPoints}
+Adjusted points: ${params.adjustedPoints}
+Flags: ${params.flags.join(', ') || 'none'}
+Trust level: ${params.trustLevel} (score: ${params.trustScore}/100)
+Points earned today: ${params.totalPointsToday}
+Points all-time: ${params.totalPointsAllTime}
+
+Return ONLY valid JSON:
+{
+  "block": false,
+  "reduce": false,
+  "multiplier": 1.0,
+  "reason": "one sentence"
+}
+
+Rules:
+- Block if: referral ring detected, clear bot farming, or trust score <15
+- Reduce if: engagement looks inflated, new wallet earning too fast, or mild anomaly
+- Approve if: activity patterns look normal for this trust level`;
+
+  const response = await aiCall(prompt);
+
+  try {
+    const jsonMatch = response.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) return { block: false, reduce: false, multiplier: 1.0, reason: 'AI unavailable' };
+    const parsed = JSON.parse(jsonMatch[0]);
+    return {
+      block: !!parsed.block,
+      reduce: !!parsed.reduce,
+      multiplier: Math.max(0.1, Math.min(1.0, Number(parsed.multiplier || 1.0))),
+      reason: parsed.reason || '',
+    };
+  } catch {
+    return { block: false, reduce: false, multiplier: 1.0, reason: 'Parse error — defaulting to approve' };
+  }
+}
+
+// ─── 6. WRITE VERIFIED POINTS ───
+// Single function that all workers use to award points.
+// Replaces direct supabase.from('engagement_points').insert() calls.
+
+export async function awardVerifiedPoints(
+  supabase: any,
+  params: {
+    wallet: string;
+    source: 'tweet_engagement' | 'referral_conversion' | 'submission_approved' | 'streak_bonus' | 'holdings_bonus';
+    rawPoints: number;
+    metadata: Record<string, any>;
+    walletTrust: WalletTrustScore;
+    tweetQuality?: TweetQualityScore;
+    ringDetection?: RingDetectionResult;
+  }
+): Promise<{ awarded: boolean; points: number; heldForReview: boolean; reason: string }> {
+  // Get daily total for this wallet
+  const todayKey = new Date().toISOString().split('T')[0];
+  const { data: todayEntries } = await supabase
+    .from('engagement_points')
+    .select('points')
+    .eq('wallet', params.wallet)
+    .gte('created_at', `${todayKey}T00:00:00Z`);
+
+  const totalPointsToday = (todayEntries || []).reduce((s: number, e: any) => s + Number(e.points || 0), 0);
+
+  // Get all-time total
+  const { data: allTimeEntries } = await supabase
+    .from('engagement_points')
+    .select('points')
+    .eq('wallet', params.wallet);
+
+  const totalPointsAllTime = (allTimeEntries || []).reduce((s: number, e: any) => s + Number(e.points || 0), 0);
+
+  // Run pre-award verification
+  const verification = await verifyPointAward({
+    wallet: params.wallet,
+    source: params.source,
+    rawPoints: params.rawPoints,
+    metadata: params.metadata,
+    walletTrust: params.walletTrust,
+    tweetQuality: params.tweetQuality,
+    ringDetection: params.ringDetection,
+    totalPointsToday,
+    totalPointsAllTime,
+  });
+
+  if (verification.holdForReview) {
+    // Write to pending_points table for admin review
+    await supabase.from('engagement_points').insert({
+      wallet: params.wallet,
+      source: `pending_${params.source}`,
+      points: verification.adjustedPoints,
+      metadata_json: {
+        ...params.metadata,
+        verification,
+        original_points: params.rawPoints,
+        held_reason: verification.reason,
+        held_at: new Date().toISOString(),
+      },
+    });
+
+    return { awarded: false, points: 0, heldForReview: true, reason: verification.reason };
+  }
+
+  if (verification.adjustedPoints <= 0) {
+    return { awarded: false, points: 0, heldForReview: false, reason: verification.reason };
+  }
+
+  // Write verified points
+  await supabase.from('engagement_points').insert({
+    wallet: params.wallet,
+    source: params.source,
+    points: verification.adjustedPoints,
+    metadata_json: {
+      ...params.metadata,
+      verification: {
+        approved: true,
+        trustMultiplier: verification.trustMultiplier,
+        adjustedFrom: params.rawPoints,
+        flags: verification.flags,
+      },
+    },
+  });
+
+  return { awarded: true, points: verification.adjustedPoints, heldForReview: false, reason: 'verified' };
+}

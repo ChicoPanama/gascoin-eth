@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '../../../../lib/supabase';
 import { calculateEngagementPoints } from '../../../../lib/engagement-rewards';
-import { scoreTweetQuality } from '../../../../lib/ai-points-engine';
+import { scoreTweetQuality, calculateWalletTrust, awardVerifiedPoints } from '../../../../lib/ai-points-engine';
 
 function isAuthorized(req: Request): boolean {
   const secret = (process.env.CRON_SECRET || '').trim();
@@ -43,6 +43,7 @@ export async function POST(req: Request) {
 
     let scored = 0;
     let totalPointsAwarded = 0;
+    let heldForReview = 0;
 
     for (const claim of claims) {
       const tweetId = parseTweetId(claim.tweet_url);
@@ -103,43 +104,36 @@ export async function POST(req: Request) {
         const legacyScore = metrics.impressions * 0.01 + metrics.likes * 1 +
           metrics.retweets * 3 + metrics.quote_tweets * 5 + metrics.replies * 2;
 
-        // Upsert engagement score
+        // Upsert legacy engagement score
         if (existing) {
-          const previousScore = Number(existing.score || 0);
           await supabase.from('engagement_scores').update({
             ...metrics, score: legacyScore, fetched_at: new Date().toISOString(),
           }).eq('id', existing.id);
-
-          // Award delta points (only new engagement since last check)
-          const previousPoints = calculateEngagementPoints({
-            impressions: 0, likes: 0, retweets: 0, quote_tweets: 0, replies: 0,
-          }); // We don't have previous metrics, so award based on score delta
-          const pointsDelta = Math.max(0, points - (previousScore * 10)); // Rough conversion
-          if (pointsDelta > 0) {
-            await supabase.from('engagement_points').insert({
-              wallet: claim.wallet,
-              source: 'tweet_engagement',
-              points: pointsDelta,
-              metadata_json: { claim_id: claim.id, tweet_id: tweetId, metrics, delta: true, ai: { quality: qualityScore.quality, multiplier: qualityScore.multiplier, isSpam: qualityScore.isSpam, isBotEngagement: qualityScore.isBotEngagement } },
-            });
-            totalPointsAwarded += pointsDelta;
-          }
         } else {
           await supabase.from('engagement_scores').insert({
             wallet: claim.wallet, claim_id: claim.id, tweet_url: claim.tweet_url,
             ...metrics, score: legacyScore,
           });
+        }
 
-          // Award full points for first score
-          if (points > 0) {
-            await supabase.from('engagement_points').insert({
-              wallet: claim.wallet,
-              source: 'tweet_engagement',
-              points,
-              metadata_json: { claim_id: claim.id, tweet_id: tweetId, metrics, ai: { quality: qualityScore.quality, multiplier: qualityScore.multiplier, isSpam: qualityScore.isSpam, isBotEngagement: qualityScore.isBotEngagement } },
-            });
-            totalPointsAwarded += points;
-          }
+        // Build wallet trust for verification gate
+        const walletTrust = calculateWalletTrust({
+          totalSubmissions: 1, approvedSubmissions: 1, rejectedSubmissions: 0,
+          referralConversions: 0, skippedReferrals: 0, accountAgeDays: 30, anomalyCount: 0,
+        });
+
+        // Award points through AI verification gate
+        if (points > 0) {
+          const result = await awardVerifiedPoints(supabase, {
+            wallet: claim.wallet,
+            source: 'tweet_engagement',
+            rawPoints: points,
+            metadata: { claim_id: claim.id, tweet_id: tweetId, metrics, tweetText },
+            walletTrust,
+            tweetQuality: qualityScore,
+          });
+          if (result.awarded) totalPointsAwarded += result.points;
+          if (result.heldForReview) heldForReview++;
         }
 
         scored++;
@@ -152,7 +146,8 @@ export async function POST(req: Request) {
       ok: true,
       scored,
       totalPointsAwarded,
-      pointsOnly: true, // SOL payouts are for receipts only
+      heldForReview,
+      aiVerified: true,
     });
   } catch (e: any) {
     return NextResponse.json({ error: e?.message || 'worker failed' }, { status: 500 });

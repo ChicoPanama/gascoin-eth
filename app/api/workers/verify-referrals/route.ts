@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '../../../../lib/supabase';
 import { REFERRAL_CONFIG } from '../../../../lib/referral-config';
+import { calculateWalletTrust, detectReferralRing, awardVerifiedPoints } from '../../../../lib/ai-points-engine';
 
 function isAuthorized(req: Request): boolean {
   const secret = (process.env.CRON_SECRET || '').trim();
@@ -29,6 +30,7 @@ export async function POST(req: Request) {
     let verified = 0;
     let pointsAwarded = 0;
     let skipped = 0;
+    let heldForReview = 0;
 
     for (const ref of pending || []) {
       const { data: payout } = await supabase
@@ -89,21 +91,42 @@ export async function POST(req: Request) {
         skip_reason: skipReason,
       });
 
-      // Award points if eligible
+      // Award points through AI verification gate
       if (!skipReason) {
-        await supabase.from('engagement_points').insert({
+        // Get all referrals for ring detection
+        const { data: allRefs } = await supabase
+          .from('referrals')
+          .select('referrer_wallet, referred_wallet, created_at')
+          .in('status', ['pending', 'verified']);
+
+        const ringCheck = await detectReferralRing({
+          referrerWallet: ref.referrer_wallet,
+          referredWallet: ref.referred_wallet,
+          allReferrals: (allRefs || []).map((r: any) => ({ referrer: r.referrer_wallet, referred: r.referred_wallet, created_at: r.created_at })),
+        });
+
+        const walletTrust = calculateWalletTrust({
+          totalSubmissions: 1, approvedSubmissions: 1, rejectedSubmissions: 0,
+          referralConversions: 0, skippedReferrals: 0, accountAgeDays: 30, anomalyCount: 0,
+        });
+
+        const result = await awardVerifiedPoints(supabase, {
           wallet: ref.referrer_wallet,
           source: 'referral_conversion',
-          points: REFERRAL_CONFIG.POINTS_PER_CONVERSION,
-          metadata_json: { referred_wallet: ref.referred_wallet, claim_id: payout.claim_id },
+          rawPoints: REFERRAL_CONFIG.POINTS_PER_CONVERSION,
+          metadata: { referred_wallet: ref.referred_wallet, claim_id: payout.claim_id },
+          walletTrust,
+          ringDetection: ringCheck,
         });
-        pointsAwarded += REFERRAL_CONFIG.POINTS_PER_CONVERSION;
+
+        if (result.awarded) pointsAwarded += result.points;
+        if (result.heldForReview) heldForReview++;
       } else {
         skipped++;
       }
     }
 
-    return NextResponse.json({ ok: true, verified, pointsAwarded, skipped });
+    return NextResponse.json({ ok: true, verified, pointsAwarded, skipped, heldForReview });
   } catch (e: any) {
     return NextResponse.json({ error: e?.message || 'worker failed' }, { status: 500 });
   }
