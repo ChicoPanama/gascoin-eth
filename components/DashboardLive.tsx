@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 
 const TREASURY_WALLET = process.env.NEXT_PUBLIC_TREASURY_WALLET || 'TREASURY_WALLET_ADDRESS';
 const GASCOIN_MINT = process.env.NEXT_PUBLIC_GASCOIN_MINT || 'GASCOIN_MINT_ADDRESS';
-const RPC_URL = process.env.NEXT_PUBLIC_SOLANA_RPC || 'https://api.mainnet-beta.solana.com';
+const RPC_URL = process.env.NEXT_PUBLIC_SOLANA_RPC_URL || process.env.NEXT_PUBLIC_SOLANA_RPC || 'https://api.mainnet-beta.solana.com';
 
 // ─── RPC helpers (vanilla fetch, no SDK) ───
 async function rpcFetch(method: string, params: any[] = []): Promise<any> {
