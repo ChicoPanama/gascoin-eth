@@ -126,7 +126,10 @@ function StepTweet({ onVerified, onBack, initialUrl }: {
   const [handle, setHandle] = useState('');
   const debounceRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 
-  const validate = useCallback((value: string) => {
+  const [tweetText, setTweetText] = useState('');
+  const [tweetAge, setTweetAge] = useState('');
+
+  const validate = useCallback(async (value: string) => {
     if (!value.includes('x.com/') && !value.includes('twitter.com/')) {
       setStatus('error');
       setErrorMsg('URL format not recognized');
@@ -134,25 +137,50 @@ function StepTweet({ onVerified, onBack, initialUrl }: {
     }
     setStatus('loading');
     setErrorMsg('');
+    setTweetText('');
+    setTweetAge('');
 
-    setTimeout(() => {
-      // Mock validation — rotate through success and failures for testing
-      const rand = Math.random();
-      if (rand < 0.7 || value.includes('valid')) {
-        const h = value.match(/x\.com\/([^/]+)/)?.[1] || 'gascoinuser';
-        setHandle(h);
-        setStatus('success');
-      } else if (rand < 0.8) {
+    try {
+      const res = await fetch('/api/verify/tweet', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tweet_url: value }),
+      });
+
+      if (res.status === 429) {
         setStatus('error');
-        setErrorMsg('#gascoin not found in this tweet');
-      } else if (rand < 0.9) {
-        setStatus('error');
-        setErrorMsg('Account is private — tweet must be public');
-      } else {
-        setStatus('error');
-        setErrorMsg('Tweet is older than 48 hours');
+        setErrorMsg('Too many requests — please wait a moment');
+        return;
       }
-    }, 1500);
+
+      const data = await res.json();
+
+      if (!res.ok || data.error) {
+        setStatus('error');
+        setErrorMsg(data.error || 'Verification failed');
+        return;
+      }
+
+      if (!data.passed) {
+        setStatus('error');
+        setErrorMsg(data.failure_reason || 'Tweet did not pass verification');
+        return;
+      }
+
+      // Extract handle and metadata from gate results
+      const gate2 = data.results?.find((r: any) => r.gate_id === 2);
+      const gate4 = data.results?.find((r: any) => r.gate_id === 4);
+      const h = gate2?.metadata?.username || value.match(/x\.com\/([^/]+)/)?.[1] || '';
+      setHandle(h);
+
+      const ageHours = gate4?.metadata?.tweet_age_hours;
+      setTweetAge(ageHours != null ? `${ageHours}h ago` : 'recent');
+
+      setStatus('success');
+    } catch {
+      setStatus('error');
+      setErrorMsg('Network error — could not verify tweet');
+    }
   }, []);
 
   const handleInput = (val: string) => {
@@ -181,11 +209,8 @@ function StepTweet({ onVerified, onBack, initialUrl }: {
         <div className="sf-tweet-preview">
           <div className="sf-tweet-avatar">{handle[0]?.toUpperCase() || 'G'}</div>
           <div className="sf-tweet-body">
-            <div className="sf-tweet-meta">@{handle} · 3h ago</div>
-            <div className="sf-tweet-text">
-              Just filled up and I&apos;m getting my money back with <span className="sf-hashtag">#gascoin</span> 🔥
-            </div>
-            <div className="sf-tweet-status">✓ #gascoin detected · Public · Posted 3h ago</div>
+            <div className="sf-tweet-meta">@{handle} · {tweetAge}</div>
+            <div className="sf-tweet-status">✓ #gascoin detected · Public · Posted {tweetAge}</div>
           </div>
         </div>
       )}
