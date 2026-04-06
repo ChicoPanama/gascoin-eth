@@ -23,7 +23,7 @@ function truncateWallet(key: string) {
 }
 
 export function AuthNavButton() {
-  const { ready, authenticated, login, logout, user } = usePrivy();
+  const { ready, authenticated, login, logout, user, getAccessToken } = usePrivy();
   const { publicKey, connected } = useWallet();
   const linkedRef = useRef(false);
 
@@ -45,15 +45,27 @@ export function AuthNavButton() {
     linkedRef.current = true;
     lastLinkedWallet.current = wallet;
 
-    fetch('/api/link-x', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ wallet, x_handle: handle, x_user_id: xUserId }),
+    // Send Privy access token for server-side auth verification
+    getAccessToken().then((token) => {
+      fetch('/api/link-x', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { authorization: `Bearer ${token}` } : {}),
+          'x-privy-user-id': xUserId,
+          'x-privy-handle': handle,
+          'x-privy-wallet': wallet,
+        },
+        body: JSON.stringify({ wallet, x_handle: handle, x_user_id: xUserId }),
+      }).catch(() => {
+        linkedRef.current = false;
+        lastLinkedWallet.current = null;
+      });
     }).catch(() => {
       linkedRef.current = false;
       lastLinkedWallet.current = null;
     });
-  }, [authenticated, connected, publicKey, handle, xUserId]);
+  }, [authenticated, connected, publicKey, handle, xUserId, getAccessToken]);
 
   // Loading — show placeholder so button never vanishes
   if (!ready) {
