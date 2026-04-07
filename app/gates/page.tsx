@@ -71,7 +71,7 @@ export default function GatesPage() {
         <p className="gt-header-body">
           Every GASCOIN submission passes through 10 sequential verification
           gates before SOL is released. All gate logic is documented here in
-          full. No exceptions, no manual overrides.
+          full. Admin review may apply in edge cases.
         </p>
         <div className="lb-header__live">
           <span className="lb-pulse" />

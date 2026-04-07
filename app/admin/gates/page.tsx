@@ -89,11 +89,18 @@ export default async function GatesPage({
                 }}
               >
                 <option value="">Select gate…</option>
-                {GATES.map((g) => (
-                  <option key={g.slug} value={g.slug}>
-                    {g.id}. {g.name}
-                  </option>
-                ))}
+                <option value="x_verified">X Verified</option>
+                <option value="tweet_hashtag">Tweet Hashtag</option>
+                <option value="tweet_live">Tweet Live</option>
+                <option value="receipt_hashtag">Receipt Hashtag</option>
+                <option value="wallet_match">Wallet Match</option>
+                <option value="gascoin_min_hold">GASCOIN Min Hold</option>
+                <option value="not_duplicate">Not Duplicate</option>
+                <option value="ai_image_check">AI Image Check</option>
+                <option value="tamper_check">Tamper Check</option>
+                <option value="cooldown">Cooldown</option>
+                <option value="min_followers">Min Followers</option>
+                <option value="account_quality">Account Quality</option>
               </select>
             </div>
             <div>

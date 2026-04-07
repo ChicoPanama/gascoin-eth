@@ -158,13 +158,23 @@ function StepTweet({ onVerified, onBack, initialUrl, loggedInHandle }: {
 
       if (!res.ok || data.error) {
         setStatus('error');
-        setErrorMsg(data.error || 'Verification failed');
+        const friendly: Record<string, string> = {
+          'verification_failed': 'We couldn\'t verify this tweet. Make sure the URL is correct and the tweet is public.',
+          'Invalid tweet URL format': 'This doesn\'t look like a valid tweet URL. Copy the URL directly from X.',
+          'Missing tweet_url': 'Please paste a tweet URL above.',
+        };
+        setErrorMsg(friendly[data.error] || data.error || 'Verification failed — please try again.');
         return;
       }
 
       if (!data.passed) {
         setStatus('error');
-        setErrorMsg(data.failure_reason || 'Tweet did not pass verification');
+        const reason = data.failure_reason || '';
+        const friendly: Record<string, string> = {
+          'Tweet not found — it may have been deleted': 'This tweet doesn\'t exist or was deleted. Check the URL.',
+          '#gascoin hashtag not found in tweet': 'Your tweet must include #gascoin. Edit the tweet and try again.',
+        };
+        setErrorMsg(friendly[reason] || reason || 'Tweet did not pass verification.');
         return;
       }
 

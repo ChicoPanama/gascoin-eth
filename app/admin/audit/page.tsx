@@ -11,15 +11,11 @@ export default async function AuditPage() {
 
   const { data: logs } = await supabase
     .from('audit_logs')
-    .select('id, actor_type, actor_id, action, target_type, target_id, payload_json, ts, created_at')
-    .order('ts', { ascending: false, nullsFirst: false })
+    .select('id, actor_type, actor_id, action, target_type, target_id, payload_json, ts')
+    .order('ts', { ascending: false })
     .limit(200);
 
-  const sortedLogs = (logs ?? []).sort((a: any, b: any) => {
-    const aTime = a.ts ?? a.created_at ?? '';
-    const bTime = b.ts ?? b.created_at ?? '';
-    return bTime.localeCompare(aTime);
-  });
+  const sortedLogs = logs ?? [];
 
   return (
     <div style={{ padding: '32px 40px' }}>
@@ -57,7 +53,7 @@ export default async function AuditPage() {
               </tr>
             ) : (
               sortedLogs.map((log: any) => {
-                const timestamp = log.ts ?? log.created_at;
+                const timestamp = log.ts;
                 const payload = log.payload_json;
                 const payloadStr = payload ? JSON.stringify(payload, null, 2) : null;
 
