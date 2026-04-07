@@ -31,7 +31,7 @@ export const DOC_CATEGORIES: DocCategory[] = [
 <p>Last updated: April 2026 · Platform version: 1.0 · Document version: 1.1</p>
 </div><p>GASCOIN is a community-driven protocol on the Solana blockchain that refunds participants for real-world gasoline purchases. The protocol operates a treasury wallet funded with SOL (Solana's native cryptocurrency). Users who meet all verification requirements receive a SOL refund sent directly to their Solana wallet.</p>
 <p>The concept is straightforward: you pay for gas at a physical gas station, you prove it, and GASCOIN pays you back in SOL. The amount refunded in SOL is determined by the tier of GASCOIN tokens you hold in your wallet. The entire process is governed by 10 automated verification gates that run sequentially on every submission before any funds are released.</p><h3>Who Can Participate</h3>
-<p>GASCOIN is open to anyone worldwide who can obtain a gas station receipt and has a public X account. There is no geographic restriction. Gas stations in the United States, Canada, UK, Europe, Latin America, and anywhere else that issues paper receipts all qualify.</p>
+<p>GASCOIN is open to anyone worldwide who can obtain a gas station receipt and has a public X account with at least 100 followers. There is no geographic restriction. Gas stations in the United States, Canada, UK, Europe, Latin America, and anywhere else that issues paper receipts all qualify.</p>
 <p>The platform uses the term "gas station" but petrol stations, service stations, fuel depots, and any commercial fuel retailer that issues a paper receipt also qualify.</p>
 <p>There is no minimum purchase amount. A \$5 fuel purchase qualifies the same as a \$200 fill-up. The refund amount is set by the admin based on your tier cap — it is not proportional to how much you spent on fuel.</p>`,
         order: 1,
@@ -78,7 +78,7 @@ export const DOC_CATEGORIES: DocCategory[] = [
         description: "",
         content: `<ul>
 <li><strong>Required: </strong>A Solana wallet — Phantom, Solflare, or Backpack (all free to install)</li>
-<li><strong>Required: </strong>An X (Twitter) account set to public</li>
+<li><strong>Required: </strong>An X (Twitter) account set to public with at least 100 followers, a profile bio, and posting history</li>
 <li><strong>Required: </strong>A physical gas receipt from a real gas station purchase within the last 7 days</li>
 <li><strong>Required: </strong>A pen to write your wallet address on the receipt</li>
 <li><strong>Required: </strong>The receipt must be photographed clearly — well-lit, unblurred, full receipt visible</li>
@@ -1119,15 +1119,15 @@ export const DOC_CATEGORIES: DocCategory[] = [
 <p>Every #gascoin tweet linked to a submission is tracked via the X API. Every 6 hours, the system fetches your tweet's real engagement metrics and awards points.</p>
 
 <h3>What Earns Points</h3>
-<p>Five engagement metrics are tracked, each weighted differently:</p>
+<p>Six engagement metrics are tracked:</p>
 <ul>
-<li><strong>Impressions</strong> — how many people saw your tweet. High reach = more points.</li>
-<li><strong>Likes</strong> — basic engagement signal.</li>
-<li><strong>Replies</strong> — conversations are worth more than passive likes.</li>
-<li><strong>Retweets</strong> — amplification is heavily rewarded. Shares spread the word to new audiences.</li>
-<li><strong>Quote Tweets</strong> — the highest-value engagement. Original commentary plus amplification.</li>
+<li><strong>Impressions</strong> — 1 point each. How many people saw your tweet.</li>
+<li><strong>Likes</strong> — 50 points each. Basic engagement signal.</li>
+<li><strong>Replies</strong> — 100 points each. Conversations are valued.</li>
+<li><strong>Bookmarks</strong> — 150 points each. Saves indicate high-value content.</li>
+<li><strong>Retweets</strong> — 250 points each. Amplification is heavily rewarded.</li>
+<li><strong>Quote Tweets</strong> — 500 points each. The highest-value engagement.</li>
 </ul>
-<p>The exact point values per metric are proprietary and may be adjusted to maintain fair scoring. In general: quality engagement (retweets, quotes, replies) is worth significantly more than passive metrics (impressions).</p>
 
 <h3>How Scoring Works</h3>
 <p>Points are awarded incrementally. Each 6-hour cycle calculates the delta since the last check. You earn points for new engagement only — not retroactively. Only tweets linked to GASCOIN submissions are scored.</p>`,
