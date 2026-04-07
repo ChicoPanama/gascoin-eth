@@ -35,7 +35,7 @@ export function GateFAQ() {
   return (
     <div className="gt-faq-section">
       <div className="gt-faq-header">
-        <div className="gc-section-num">07 — Frequently Asked</div>
+        <div className="gc-section-num">08 — Frequently Asked</div>
         <h2 className="gt-faq-title">Questions</h2>
       </div>
       <div className="gt-faq-list">

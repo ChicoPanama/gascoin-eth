@@ -31,7 +31,7 @@ export function GatesTeaser() {
     <section className="gt-teaser">
       <div className="gt-teaser-inner">
         <div className="gt-teaser-left">
-          <div className="gc-section-num">06 — How We Verify</div>
+          <div className="gc-section-num">05 — How We Verify</div>
           <h2 className="gt-teaser-title">
             <span>10 Gates.</span>
             <span className="gt-teaser-ghost">0 Exceptions.</span>

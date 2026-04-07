@@ -42,6 +42,7 @@ export default async function Home() {
       <SiteReveal>
         {/* NAV */}
         <HomeNav />
+        <main id="main-content">
 
         {/* HERO */}
         <section className="gc-hero">
@@ -103,7 +104,7 @@ export default async function Home() {
         {/* HOW IT WORKS */}
         <section className="gc-section">
           <div className="gc-section-header">
-            <div className="gc-section-num">02</div>
+            <div className="gc-section-num">01</div>
             <h2 className="gc-section-title">How It Works</h2>
           </div>
           <div className="gc-steps-grid">
@@ -144,7 +145,7 @@ export default async function Home() {
         <section className="gc-tech">
           <div className="gc-tech-inner">
             <div className="gc-tech-header">
-              <div className="gc-section-num">03 — The Technology</div>
+              <div className="gc-section-num">02 — The Technology</div>
               <h2 className="gc-tech-title">
                 <span>AI-Powered</span>
                 <span className="gc-tech-title-ghost">From Upload to Payout</span>
@@ -314,7 +315,7 @@ export default async function Home() {
 
         {/* LIVE TREASURY TEASER */}
         <section className="gc-teaser">
-          <div className="gc-section-num">05</div>
+          <div className="gc-section-num">09</div>
           <h2 className="gc-section-title">Live Treasury</h2>
           <p style={{ color: 'rgba(255,255,255,0.45)', fontWeight: 300, fontSize: 15, maxWidth: 500, lineHeight: 1.75, marginTop: 16 }}>
             On-chain treasury balance updated in real time. Every refund, every
@@ -323,10 +324,18 @@ export default async function Home() {
           <Link href="/dashboard" className="gc-teaser-link">View full dashboard</Link>
         </section>
 
+        </main>
+
         {/* FOOTER */}
         <footer className="gc-footer">
           <div className="gc-footer-brand">GASCOIN</div>
-          <div className="gc-footer-copy">&copy; 2026 GASCOIN</div>
+          <div className="gc-footer-links">
+            <Link href="/docs">Docs</Link>
+            <Link href="/gates">Verification</Link>
+            <Link href="/community">Community</Link>
+            <a href="https://x.com/search?q=%23gascoin" target="_blank" rel="noopener noreferrer">X / Twitter</a>
+          </div>
+          <div className="gc-footer-copy">&copy; 2026 GASCOIN. All rights reserved.</div>
         </footer>
       </SiteReveal>
     </>

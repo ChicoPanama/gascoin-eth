@@ -28,7 +28,7 @@ export function LeaderboardTeaser() {
     <section className="lb-teaser">
       <div className="lb-teaser-inner">
         <div className="lb-teaser-left">
-          <div className="gc-section-num">04 — Top Earners</div>
+          <div className="gc-section-num">03 — Top Earners</div>
           <h2 className="lb-teaser-title">Who&apos;s Leading</h2>
           <p className="lb-teaser-sub">
             Real-time rankings of verified SOL refund earners.

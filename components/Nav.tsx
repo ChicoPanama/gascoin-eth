@@ -1,23 +1,40 @@
+'use client';
+
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { AuthNavButton } from './AuthNavButton';
 import { WalletButton } from './ui/WalletButton';
 import { MobileMenu } from './ui/MobileMenu';
 
+const NAV_LINKS = [
+  { href: '/submit', label: 'Submit' },
+  { href: '/dashboard', label: 'Treasury' },
+  { href: '/community', label: 'Community' },
+  { href: '/leaderboard', label: 'Leaderboard' },
+  { href: '/referral', label: 'Refer' },
+  { href: '/perks', label: 'Perks' },
+  { href: '/gates', label: 'Gates' },
+  { href: '/wallet', label: 'Tracker' },
+];
+
 export function Nav() {
+  const pathname = usePathname();
+
   return <nav className="nav">
     <Link href="/" className="nav-brand">GASCOIN</Link>
-    <Link href="/submit" className="nav-link-desktop">Submit</Link>
-    <Link href="/dashboard" className="nav-link-desktop">Treasury</Link>
-    <Link href="/community" className="nav-link-desktop">Community</Link>
-    <Link href="/leaderboard" className="nav-link-desktop">Leaderboard</Link>
-    <Link href="/referral" className="nav-link-desktop">Refer</Link>
-    <Link href="/perks" className="nav-link-desktop">Perks</Link>
-    <Link href="/gates" className="nav-link-desktop">Gates</Link>
-    <Link href="/wallet" className="nav-link-desktop">Tracker</Link>
+    {NAV_LINKS.map(({ href, label }) => (
+      <Link
+        key={href}
+        href={href}
+        className={`nav-link-desktop${pathname === href ? ' nav-link-active' : ''}`}
+      >
+        {label}
+      </Link>
+    ))}
     <span style={{ marginLeft: 'auto', display: 'flex', gap: 8, alignItems: 'center' }}>
       <WalletButton />
       <AuthNavButton />
-      <Link href="/docs" className="btn nav-link-desktop" style={{ fontSize: 10, padding: '6px 14px', letterSpacing: '0.1em' }}>DOCS</Link>
+      <Link href="/docs" className={`btn nav-link-desktop${pathname.startsWith('/docs') ? ' nav-link-active' : ''}`} style={{ fontSize: 10, padding: '6px 14px', letterSpacing: '0.1em' }}>DOCS</Link>
       <MobileMenu />
     </span>
   </nav>

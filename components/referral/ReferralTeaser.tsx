@@ -30,7 +30,7 @@ export function ReferralTeaser() {
     <section className="ref-teaser">
       <div className="ref-teaser-inner">
         <div className="ref-teaser-left">
-          <div className="gc-section-num">08 — Earn More</div>
+          <div className="gc-section-num">07 — Earn More</div>
           <h2 className="ref-teaser-title">
             <span>Refer &amp;</span>
             <span className="ref-teaser-ghost">Earn Points.</span>

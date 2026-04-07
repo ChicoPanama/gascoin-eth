@@ -16,7 +16,7 @@ export function WalletTrackerTeaser() {
     <section className="wt-teaser">
       <div className="wt-teaser-inner">
         <div className="wt-teaser-left">
-          <div className="gc-section-num">07 — Your Status</div>
+          <div className="gc-section-num">06 — Your Status</div>
           <h2 className="wt-teaser-title">
             <span>Track Your</span>
             <span className="wt-teaser-ghost">Submission.</span>

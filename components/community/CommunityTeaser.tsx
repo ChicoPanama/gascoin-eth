@@ -41,7 +41,7 @@ export function CommunityTeaser() {
     <section className="cf-teaser">
       <div className="cf-teaser-inner">
         <div className="cf-teaser-left">
-          <div className="gc-section-num">05 — Proof of Payout</div>
+          <div className="gc-section-num">04 — Proof of Payout</div>
           <h2 className="cf-teaser-title">
             <span>Real Receipts.</span>
             <span className="cf-teaser-ghost">Real Payouts.</span>
