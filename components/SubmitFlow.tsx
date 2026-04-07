@@ -234,6 +234,11 @@ function StepTweet({ onVerified, onBack, initialUrl, loggedInHandle }: {
       )}
 
       {status === 'error' && <div className="sf-error">{errorMsg}</div>}
+      {status === 'idle' && url.length === 0 && (
+        <div style={{ fontFamily: 'IBM Plex Mono', fontSize: 11, color: 'rgba(255,255,255,0.3)', marginTop: 8 }}>
+          Paste your tweet URL above to continue
+        </div>
+      )}
 
       <div className="sf-nav-buttons">
         <button type="button" className="sf-btn-ghost" onClick={onBack}>&larr; Back</button>

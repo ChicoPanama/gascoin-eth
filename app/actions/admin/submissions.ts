@@ -91,6 +91,10 @@ export async function overrideGate(claimId: string, gateName: string, passed: bo
   const adminWallet = await requireAdmin();
   const supabase = getSupabaseAdmin();
 
+  // Validate claim exists before accepting override
+  const { data: claim } = await supabase.from('claims').select('id').eq('id', claimId).maybeSingle();
+  if (!claim) throw new Error(`Claim ${claimId} not found`);
+
   await supabase.from('gate_results').upsert({ claim_id: claimId, gate_name: gateName, passed, reason_code: reason, score: null }, { onConflict: 'claim_id,gate_name' });
 
   await logAdminAction({ adminWallet, action: 'override_gate', targetType: 'gate_result', targetId: `${claimId}:${gateName}`, afterState: { passed, reason } });

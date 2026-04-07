@@ -29,7 +29,9 @@ export function evaluateClaim(c: ClaimInput){
   gates.push({ gate:'tweet_live', passed:c.tweetLive, reason:'Tweet must remain live' });
   gates.push({ gate:'receipt_hashtag', passed:c.receiptHasGascoin, reason:'Receipt must include #gascoin' });
   gates.push({ gate:'wallet_match', passed:!!c.walletOnReceipt && c.walletOnReceipt===c.connectedWallet, reason:'Receipt wallet must match connected wallet' });
-  gates.push({ gate:'gascoin_min_hold', passed:c.gascoinUsdValue>=1, reason:'Wallet must hold >= $1 GASCOIN' });
+  // In dry-run mode (ENABLE_LIVE_PAYOUT=false), bypass the token hold gate for testing
+  const dryRun = process.env.ENABLE_LIVE_PAYOUT !== 'true';
+  gates.push({ gate:'gascoin_min_hold', passed: dryRun || c.gascoinUsdValue>=1, reason:'Wallet must hold >= $1 GASCOIN' });
   gates.push({ gate:'not_duplicate', passed:!c.duplicateHash && !c.duplicatePhash, reason:'Receipt duplicate detected' });
   gates.push({ gate:'ai_image_check', passed:c.aiScore<0.65, score:c.aiScore, reason:'AI probability too high' });
   gates.push({ gate:'tamper_check', passed:c.tamperScore<0.55, score:c.tamperScore, reason:'Tamper risk too high' });

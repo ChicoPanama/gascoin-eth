@@ -29,9 +29,10 @@ export async function GET(req: Request) {
   const supabase = getSupabaseAdmin();
 
   // Fetch all approved claims with pending payout jobs
+  // Include decision_reason to check if admin-approved (skip re-verify for those)
   const { data: approvedClaims, error } = await supabase
     .from('claims')
-    .select('id, tweet_url, user_id, wallet, users(x_handle)')
+    .select('id, tweet_url, user_id, wallet, decision_reason, users(x_handle)')
     .eq('status', 'approved')
     .limit(200);
 
@@ -48,7 +49,13 @@ export async function GET(req: Request) {
     const handle = xHandle.replace(/^@/, '');
 
     if (!claim.tweet_url || !handle) {
-      // Can't verify without tweet/handle — skip, don't block
+      verified++;
+      continue;
+    }
+
+    // Skip re-verification for manually admin-approved claims
+    const reason = (claim as any).decision_reason || '';
+    if (reason.startsWith('admin_dispatched') || reason.startsWith('admin_')) {
       verified++;
       continue;
     }
