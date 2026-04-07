@@ -125,7 +125,7 @@ export const DOC_CATEGORIES: DocCategory[] = [
 <li>You cannot proceed past Step 1 without connecting a wallet.</li>
 <li>Only one wallet can be connected at a time.</li>
 <li>The wallet you connect is the wallet that receives your SOL refund. Make sure it is the correct wallet.</li>
-<li>If your wallet has received an approved refund in the last 30 days, you are in cooldown and cannot submit again until the 30-day period expires.</li>
+<li>Each X account can submit once every 7 days. If you have an active or recently approved submission, you must wait until the 7-day cooldown expires.</li>
 <li>The system checks for a pending submission from your wallet. If one already exists, you will see a message indicating this and cannot submit a duplicate.</li>
 </ul>`,
         order: 6,
@@ -397,24 +397,20 @@ export const DOC_CATEGORIES: DocCategory[] = [
       },
       {
         slug: "gate-8-no-duplicate-wallet",
-        title: "Gate 8 — No Duplicate Wallet",
+        title: "Gate 8 — Submission Cooldown",
         categorySlug: "verification",
         category: "Verification Gates",
         description: "",
         content: `<h3><strong>What this gate checks</strong></h3>
-<p>Gate 8 checks the GASCOIN database for any other approved submission from the same wallet address within the last 30 days. The 30-day window is rolling, not calendar-based — it is 30 days from your last approved submission date.</p>
+<p>Gate 8 checks that your X account has not submitted a claim in the last 7 days. The cooldown is tied to your X account, not your wallet — switching wallets does not reset the timer.</p>
 <h3><strong>Common failure reasons</strong></h3>
 <ul>
-<li>Submitting again before 30 days have elapsed since your last approved refund</li>
-<li>Using a wallet that was used by someone else for their submission (wallet addresses must be unique per 30-day window regardless of who submits them)</li>
-<li>Accidentally using a different wallet than intended (e.g., a hardware wallet alias)</li>
+<li>Submitting again before 7 days have passed since your last submission</li>
+<li>Having a pending or in-review submission still active</li>
 </ul>
 <h3><strong>How to ensure Gate 8 passes</strong></h3>
-<p>Wait 30 full days after your last approved refund before submitting again. Use the Wallet Tracker at /wallet to check your cooldown status before starting a new submission. The tracker shows exactly when your cooldown expires.</p><h3>Understanding the rolling 30-day window — worked example</h3>
-<p>The cooldown is not a calendar month. It is exactly 30 days from your last approval date.</p>
-<p><strong>Example:</strong> Your submission is approved on March 5th. Your next eligible submission date is April 4th (30 days later). Not April 1st. Not March 31st. Exactly 30 days from March 5th.</p>
-<p>You can check your exact cooldown expiry date at any moment by visiting the Wallet Tracker at /wallet and connecting your wallet.</p>
-<p>→ See also: Wallet Tracker to check your cooldown status</p>`,
+<p>Wait 7 days after your last submission before submitting again. Use the Wallet Tracker at /wallet to check your cooldown status.</p>
+<p><strong>Example:</strong> You submit on Monday. Your next eligible submission is the following Monday.</p>`,
         order: 19,
       },
       {
@@ -567,7 +563,7 @@ export const DOC_CATEGORIES: DocCategory[] = [
         content: `<p>The Wallet Tracker is your personal submission status dashboard. It shows your complete submission history, current gate progress for any active submission, cooldown countdown, and total earnings. It can also be used to look up any public wallet address.</p>
 <h3><strong>Two modes</strong></h3>
 <h3><strong>Cooldown countdown</strong></h3>
-<p>In Connected Mode, if your wallet is within the 30-day cooldown period following an approved submission, a countdown timer shows exactly how much time remains before you can submit again. The format is DD H MM M SS S and counts down live in real time.</p>
+<p>In Connected Mode, if your account is within the 7-day cooldown period following a submission, a countdown timer shows how much time remains before you can submit again.</p>
 <p>When the countdown reaches zero, the cooldown block automatically transitions to show Submit Receipt with a link to the submission portal.</p>
 <h3><strong>Gate progress tracker</strong></h3>
 <p>If you have a pending submission (one that has been submitted but not yet approved or rejected), the gate progress tracker appears. It shows all 10 gates with their current status updating live as each gate is processed. This is the same display as Step 5 of the submission portal but accessible at any time from /wallet.</p>
@@ -768,7 +764,7 @@ export const DOC_CATEGORIES: DocCategory[] = [
         category: "Security & Admin",
         description: "",
         content: `<p>GASCOIN uses multiple overlapping systems to prevent fraud, duplicate submissions, and gaming of the refund system.</p><h3>Using Multiple Wallets</h3>
-<p>Each Solana wallet operates independently. Each has its own 30-day cooldown, history, and tier. You could submit from different wallets on consecutive days — Gate 8 only checks the submitting wallet. However, each requires a unique receipt (Gate 9), unique tweet, and unique gas purchase.</p>`,
+<p>Each X account is limited to one submission per 7 days. Only one wallet can be linked to your X account at a time. Switching wallets does not reset the cooldown — it is tied to your X identity, not your wallet address. Each submission requires a unique receipt (Gate 9), a unique tweet, and a unique gas purchase.</p>`,
         order: 48,
       },
       {
@@ -791,11 +787,11 @@ export const DOC_CATEGORIES: DocCategory[] = [
       },
       {
         slug: "-day-wallet-cooldown-gate-8",
-        title: "7.3 30-day wallet cooldown (Gate 8)",
+        title: "7.3 7-day submission cooldown (Gate 8)",
         categorySlug: "security",
         category: "Security & Admin",
         description: "",
-        content: `<p>Each wallet address can receive only one approved refund per 30-day rolling window. This prevents a single person from submitting repeatedly using the same wallet. Using multiple wallets is technically possible but each wallet requires a unique receipt and a new tweet from a public X account.</p>`,
+        content: `<p>Each X account can submit once every 7 days. The cooldown is per X account, not per wallet — linking a different wallet does not reset the timer. This aligns with real-world gas fill-up frequency and prevents abuse.</p>`,
         order: 51,
       },
       {
@@ -905,7 +901,7 @@ export const DOC_CATEGORIES: DocCategory[] = [
         content: `<ul>
 <li>Check the Wallet Tracker at /wallet to see your exact cooldown expiry date and time</li>
 <li>You must wait until the cooldown timer reaches zero before submitting again</li>
-<li>The 30-day window runs from your last approved submission date</li>
+<li>The 7-day cooldown runs from your last submission date</li>
 </ul>`,
         order: 43,
       },
@@ -969,7 +965,7 @@ export const DOC_CATEGORIES: DocCategory[] = [
         categorySlug: "help",
         category: "Help",
         description: "",
-        content: `<p>Yes, but not more than once every 30 days per wallet. Each submission requires a unique gas receipt from within the last 7 days and a new tweet posted within 48 hours of submission. You cannot reuse a receipt or tweet from a previous submission.</p>`,
+        content: `<p>Yes — once every 7 days per X account. Each submission requires a unique gas receipt from within the last 7 days and a new tweet posted within 48 hours of submission. You cannot reuse a receipt or tweet from a previous submission.</p>`,
         order: 58,
       },
       {
