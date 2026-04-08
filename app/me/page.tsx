@@ -1,106 +1,81 @@
-import { redirect } from 'next/navigation';
-import { headers } from 'next/headers';
+'use client';
+
+import { useEffect, useState } from 'react';
+import { usePrivy } from '@privy-io/react-auth';
+import { useRouter } from 'next/navigation';
 import { Nav } from '../../components/Nav';
-import { getSupabaseAdmin } from '../../lib/supabase';
-import { verifyPrivySession } from '../../lib/integrations/privy';
-import { generateReferralCode } from '../../lib/referral-code';
 import { DashboardClient } from './DashboardClient';
 
-export const metadata = { title: 'GASCOIN — My Dashboard' };
+export default function MeDashboardPage() {
+  const { ready, authenticated, getAccessToken } = usePrivy();
+  const router = useRouter();
+  const [data, setData] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
-export default async function MeDashboardPage() {
-  const hdrs = await headers();
-  const session = await verifyPrivySession(
-    hdrs.get('authorization'),
-    undefined,
-    hdrs.get('cookie'),
-  );
-  if (!session || !session.wallet) redirect('/submit');
+  useEffect(() => {
+    if (!ready) return;
+    if (!authenticated) {
+      router.push('/submit');
+      return;
+    }
 
-  const wallet = session.wallet;
-  const xHandle = session.xHandle || null;
-  const supabase = getSupabaseAdmin();
+    (async () => {
+      try {
+        const token = await getAccessToken();
+        const res = await fetch('/api/me', {
+          headers: token ? { authorization: `Bearer ${token}` } : {},
+        });
+        if (!res.ok) {
+          if (res.status === 401) {
+            router.push('/submit');
+            return;
+          }
+          throw new Error('Failed to load dashboard');
+        }
+        setData(await res.json());
+      } catch (e: any) {
+        setError(e.message || 'Something went wrong');
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, [ready, authenticated, getAccessToken, router]);
 
-  const [claimsRes, payoutsRes, clicksRes, conversionsRes] = await Promise.all([
-    // Claims with related receipts + gate results
-    supabase
-      .from('claims')
-      .select(`
-        id, status, created_at, parsed_amount, country, city, state,
-        tweet_url, wallet,
-        claim_receipts ( storage_path_private, is_image_redacted ),
-        gate_results ( gate, passed, reason, score, created_at )
-      `)
-      .eq('wallet', wallet)
-      .order('created_at', { ascending: false })
-      .limit(25),
+  if (!ready || loading) {
+    return (
+      <div className="container">
+        <Nav />
+        <div style={{ padding: '120px 0', textAlign: 'center', fontFamily: 'IBM Plex Mono', fontSize: 13, color: 'rgba(255,255,255,0.3)' }}>
+          Loading dashboard...
+        </div>
+      </div>
+    );
+  }
 
-    // Payouts
-    supabase
-      .from('payouts')
-      .select('id, amount_sol, status, tx_hash, created_at, claim_id')
-      .eq('wallet', wallet)
-      .order('created_at', { ascending: false })
-      .limit(25),
+  if (error) {
+    return (
+      <div className="container">
+        <Nav />
+        <div style={{ padding: '120px 0', textAlign: 'center', fontFamily: 'IBM Plex Mono', fontSize: 13, color: 'rgba(255,100,100,0.8)' }}>
+          {error}
+        </div>
+      </div>
+    );
+  }
 
-    // Referral clicks (total + unique)
-    supabase
-      .from('referral_clicks')
-      .select('id, click_fingerprint')
-      .eq('referrer_wallet', wallet),
-
-    // Referral conversions
-    supabase
-      .from('referral_conversions')
-      .select('id, reward_status')
-      .eq('referrer_wallet', wallet),
-  ]);
-
-  const claims = claimsRes.data ?? [];
-  const payouts = payoutsRes.data ?? [];
-
-  // Compute referral stats
-  const clicks = clicksRes.data ?? [];
-  const conversions = conversionsRes.data ?? [];
-  const referralCode = generateReferralCode(wallet);
-  const totalClicks = clicks.length;
-  const uniqueClicks = new Set(clicks.map((c: any) => c.click_fingerprint)).size;
-  const totalConversions = conversions.filter(
-    (c: any) => c.reward_status === 'dispatched' || c.reward_status === 'pending',
-  ).length;
-
-  // Compute stats
-  const totalEarned = payouts
-    .filter((p: any) => p.status === 'paid')
-    .reduce((s: number, p: any) => s + Number(p.amount_sol ?? 0), 0);
-
-  const approved = claims.filter(
-    (c: any) => c.status === 'approved' || c.status === 'paid',
-  ).length;
-  const pending = claims.filter(
-    (c: any) =>
-      c.status === 'submitted' ||
-      c.status === 'auto_review' ||
-      c.status === 'needs_manual_review' ||
-      c.status === 'ready_for_dispatch',
-  ).length;
-  const rejected = claims.filter((c: any) => c.status === 'rejected').length;
+  if (!data) return null;
 
   return (
     <div className="container">
       <Nav />
       <DashboardClient
-        wallet={wallet}
-        xHandle={xHandle}
-        claims={claims}
-        payouts={payouts}
-        referral={{
-          code: referralCode,
-          clicks: totalClicks,
-          uniqueClicks,
-          conversions: totalConversions,
-        }}
-        stats={{ totalEarned, approved, pending, rejected }}
+        wallet={data.wallet}
+        xHandle={data.xHandle}
+        claims={data.claims}
+        payouts={data.payouts}
+        referral={data.referral}
+        stats={data.stats}
       />
     </div>
   );
