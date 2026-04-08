@@ -42,7 +42,7 @@ export function ReferralTeaser() {
           <Link href="/referral" className="gc-teaser-link">Get Your Referral Link</Link>
         </div>
         <div className="ref-teaser-right">
-          <div className="ref-teaser-stats">
+          <div className="ref-teaser-stats glass-card" style={{ padding: 24 }}>
             <div className="ref-teaser-stat">
               <div className="ref-teaser-stat-value">{loading ? '—' : totalConv.toLocaleString()}</div>
               <div className="ref-teaser-stat-label">Total Conversions</div>

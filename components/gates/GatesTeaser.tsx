@@ -42,7 +42,7 @@ export function GatesTeaser() {
           </p>
           <Link href="/gates" className="gc-teaser-link">See all 10 gates</Link>
         </div>
-        <div className="gt-teaser-right">
+        <div className="gt-teaser-right glass-card" style={{ padding: 24 }}>
           <div className="gt-teaser-list">
             {GATES.map((g) => {
               const rate = rates.get(g.id);

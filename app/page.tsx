@@ -80,7 +80,7 @@ export default async function Home() {
         </section>
 
         {/* STATS */}
-        <section className="gc-stats">
+        <section className="gc-stats glass-card">
           <div className="gc-stats-grid">
             <div className="gc-stat">
               <div className="gc-stat-label">Treasury Balance</div>
@@ -337,7 +337,7 @@ export default async function Home() {
 
         {/* LIVE TREASURY TEASER */}
         <ScrollReveal delay={0.08}>
-          <section className="gc-teaser">
+          <section className="gc-teaser glass-card glass-card--glow" style={{ padding: '48px' }}>
             <div className="gc-section-num">09</div>
             <h2 className="gc-section-title">Live Treasury</h2>
             <p style={{ color: 'rgba(255,255,255,0.45)', fontWeight: 300, fontSize: 15, maxWidth: 500, lineHeight: 1.75, marginTop: 16 }}>

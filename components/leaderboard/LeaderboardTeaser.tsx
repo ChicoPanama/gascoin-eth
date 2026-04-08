@@ -34,7 +34,7 @@ export function LeaderboardTeaser() {
             Real-time rankings of verified SOL refund earners.
           </p>
         </div>
-        <div className="lb-teaser-right">
+        <div className="lb-teaser-right glass-card" style={{ padding: 24 }}>
           <table className="lb-mini-table">
             <tbody>
               {loading

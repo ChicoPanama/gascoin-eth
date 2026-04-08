@@ -62,7 +62,7 @@ export function CommunityTeaser() {
                   </div>
                 ))
               : items.map((item, i) => (
-                  <div key={i} className="cf-teaser-card">
+                  <div key={i} className="cf-teaser-card glass-card">
                     <div className="cf-teaser-card-loc">
                       {item.country || 'Verified'}
                     </div>
