@@ -6,6 +6,8 @@ import { CommunityTeaser } from '../components/community/CommunityTeaser';
 import { GatesTeaser } from '../components/gates/GatesTeaser';
 import { WalletTrackerTeaser } from '../components/wallet-tracker/WalletTrackerTeaser';
 import { ReferralTeaser } from '../components/referral/ReferralTeaser';
+import { HeroStagger, HeroItem } from '../components/ui/HeroStagger';
+import { ScrollReveal } from '../components/ui/ScrollReveal';
 
 export default async function Home() {
   let treasuryUsd = '—';
@@ -48,22 +50,32 @@ export default async function Home() {
         <section className="gc-hero">
           <div className="gc-hero-ghost">G</div>
           <div className="gc-hero-content">
-            <div className="gc-section-label">— Solana · On-Chain Gas Refunds</div>
-            <h1>
-              <span className="line">Post.</span>
-              <span className="line">Submit.</span>
-              <span className="line-ghost">Get Paid Back.</span>
-            </h1>
-            <p className="gc-hero-body">
-              Gas prices are crushing everyday people. GASCOIN is a community-funded
-              movement on Solana that gives real money back for real gas purchases.
-              Post proof on X, submit your receipt, and receive SOL directly to your
-              wallet. No middlemen. No delays. Just people helping people.
-            </p>
-            <div className="gc-hero-buttons">
-              <Link href="/submit" className="gc-btn-solid">Submit Receipt</Link>
-              <Link href="/community" className="gc-btn-ghost">View Community</Link>
-            </div>
+            <HeroStagger>
+              <HeroItem>
+                <div className="gc-section-label">— Solana · On-Chain Gas Refunds</div>
+              </HeroItem>
+              <HeroItem>
+                <h1>
+                  <span className="line">Post.</span>
+                  <span className="line">Submit.</span>
+                  <span className="line-ghost">Get Paid Back.</span>
+                </h1>
+              </HeroItem>
+              <HeroItem>
+                <p className="gc-hero-body">
+                  Gas prices are crushing everyday people. GASCOIN is a community-funded
+                  movement on Solana that gives real money back for real gas purchases.
+                  Post proof on X, submit your receipt, and receive SOL directly to your
+                  wallet. No middlemen. No delays. Just people helping people.
+                </p>
+              </HeroItem>
+              <HeroItem>
+                <div className="gc-hero-buttons">
+                  <Link href="/submit" className="gc-btn-solid">Submit Receipt</Link>
+                  <Link href="/community" className="gc-btn-ghost">View Community</Link>
+                </div>
+              </HeroItem>
+            </HeroStagger>
           </div>
         </section>
 
@@ -299,30 +311,42 @@ export default async function Home() {
         </section>
 
         {/* LEADERBOARD TEASER */}
-        <LeaderboardTeaser />
+        <ScrollReveal>
+          <LeaderboardTeaser />
+        </ScrollReveal>
 
         {/* GATES TEASER */}
-        <GatesTeaser />
+        <ScrollReveal delay={0.08}>
+          <GatesTeaser />
+        </ScrollReveal>
 
         {/* WALLET TRACKER TEASER */}
-        <WalletTrackerTeaser />
+        <ScrollReveal delay={0.08}>
+          <WalletTrackerTeaser />
+        </ScrollReveal>
 
         {/* REFERRAL TEASER */}
-        <ReferralTeaser />
+        <ScrollReveal delay={0.08}>
+          <ReferralTeaser />
+        </ScrollReveal>
 
         {/* COMMUNITY TEASER */}
-        <CommunityTeaser />
+        <ScrollReveal delay={0.08}>
+          <CommunityTeaser />
+        </ScrollReveal>
 
         {/* LIVE TREASURY TEASER */}
-        <section className="gc-teaser">
-          <div className="gc-section-num">09</div>
-          <h2 className="gc-section-title">Live Treasury</h2>
-          <p style={{ color: 'rgba(255,255,255,0.45)', fontWeight: 300, fontSize: 15, maxWidth: 500, lineHeight: 1.75, marginTop: 16 }}>
-            On-chain treasury balance updated in real time. Every refund, every
-            transaction — fully transparent.
-          </p>
-          <Link href="/dashboard" className="gc-teaser-link">View full dashboard</Link>
-        </section>
+        <ScrollReveal delay={0.08}>
+          <section className="gc-teaser">
+            <div className="gc-section-num">09</div>
+            <h2 className="gc-section-title">Live Treasury</h2>
+            <p style={{ color: 'rgba(255,255,255,0.45)', fontWeight: 300, fontSize: 15, maxWidth: 500, lineHeight: 1.75, marginTop: 16 }}>
+              On-chain treasury balance updated in real time. Every refund, every
+              transaction — fully transparent.
+            </p>
+            <Link href="/dashboard" className="gc-teaser-link">View full dashboard</Link>
+          </section>
+        </ScrollReveal>
 
         </main>
 

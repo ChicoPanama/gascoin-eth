@@ -4,13 +4,19 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --bg: #000000;
+  --bg: #080810;
   --fg: #ffffff;
-  --muted: rgba(255,255,255,0.4);
-  --muted-deep: rgba(255,255,255,0.25);
+  --muted: rgba(255,255,255,0.6);
+  --muted-deep: rgba(255,255,255,0.4);
   --line: rgba(255,255,255,0.08);
-  --card: rgba(255,255,255,0.06);
-  --card-hover: #111111;
+  --card: rgba(255,255,255,0.04);
+  --card-hover: rgba(255,255,255,0.07);
+  --accent: #14F195;
+  --accent-purple: #9945FF;
+  --accent-glow: rgba(20, 241, 149, 0.4);
+  --card-border: rgba(255,255,255,0.08);
+  --card-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
+  --card-highlight: 0 1px 0 0 rgba(255, 255, 255, 0.06) inset;
 }
 
 html {
@@ -64,10 +70,10 @@ code, .mono {
   align-items: center;
   height: 60px;
   padding: 0 48px;
-  border-bottom: 1px solid var(--line);
-  background: rgba(0,0,0,0.8);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(153, 69, 255, 0.15);
+  background: rgba(8, 8, 16, 0.85);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
 }
 
 .gc-nav-brand {
@@ -99,18 +105,20 @@ code, .mono {
 .gc-nav-links a::after {
   content: '';
   position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  height: 1px;
-  background: var(--fg);
-  transform: scaleX(0);
-  transform-origin: left;
+  bottom: -2px;
+  left: 50%;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--accent);
+  transform: translateX(-50%) scale(0);
   transition: transform 0.3s ease;
 }
 
 .gc-nav-links a:hover { color: var(--fg); }
-.gc-nav-links a:hover::after { transform: scaleX(1); }
+.gc-nav-links a:hover::after { transform: translateX(-50%) scale(1); }
+.gc-nav-links a.gc-nav-active::after { transform: translateX(-50%) scale(1); }
+.gc-nav-links a.gc-nav-active { color: var(--fg); }
 
 .gc-nav-cta {
   font-family: 'IBM Plex Mono', monospace;
@@ -143,12 +151,22 @@ code, .mono {
 /* ─── HERO ─── */
 .gc-hero {
   position: relative;
-  padding: 100px 48px;
+  padding: 72px 48px;
   min-height: 90vh;
   display: flex;
   align-items: center;
   overflow: hidden;
   border-bottom: 1px solid var(--line);
+}
+.gc-hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 60% 50% at 80% 110%, rgba(20, 241, 149, 0.06) 0%, transparent 70%),
+    radial-gradient(ellipse 40% 40% at 20% 90%, rgba(153, 69, 255, 0.04) 0%, transparent 60%);
+  pointer-events: none;
+  z-index: 0;
 }
 
 .gc-hero-ghost {
@@ -215,19 +233,29 @@ code, .mono {
   text-transform: uppercase;
   letter-spacing: 0.1em;
   padding: 14px 32px;
-  background: var(--fg);
-  color: var(--bg);
+  background: linear-gradient(135deg, #14F195, #00FFA3);
+  color: #080810;
   cursor: crosshair;
-  transition: background 0.2s, color 0.2s;
+  transition: all 0.25s;
   text-decoration: none;
   display: inline-flex;
   align-items: center;
+  position: relative;
+  overflow: hidden;
+  border: none;
 }
+.gc-btn-solid::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+  transform: translateX(-100%);
+  transition: transform 0.5s;
+}
+.gc-btn-solid:hover::before { transform: translateX(100%); }
 
 .gc-btn-solid:hover {
-  background: var(--bg);
-  color: var(--fg);
-  outline: 1px solid var(--fg);
+  box-shadow: 0 0 24px rgba(20, 241, 149, 0.3);
 }
 
 .gc-btn-ghost {
@@ -245,7 +273,7 @@ code, .mono {
   cursor: crosshair;
 }
 
-.gc-btn-ghost:hover { color: var(--fg); }
+.gc-btn-ghost:hover { color: var(--accent); }
 
 .gc-btn-ghost::after {
   content: '\2192';
@@ -288,6 +316,7 @@ code, .mono {
   letter-spacing: 0.02em;
   line-height: 1;
   margin-bottom: 6px;
+  color: var(--accent);
 }
 
 .gc-stat-sub {
@@ -626,7 +655,7 @@ code, .mono {
   letter-spacing: 0.04em;
   border: 1px solid var(--line);
 }
-.badge-approved, .badge-paid { border-color: #22c55e; color: #22c55e; }
+.badge-approved, .badge-paid { border-color: var(--accent); color: var(--accent); }
 .badge-pending, .badge-submitted, .badge-auto_review, .badge-needs_manual_review { border-color: #f59e0b; color: #f59e0b; }
 .badge-rejected, .badge-failed { border-color: #ff4d4d; color: #ff4d4d; }
 .badge-queued { border-color: #7b93db; color: #7b93db; }
@@ -706,7 +735,7 @@ input:focus, textarea:focus, select:focus {
   transition: color 0.15s;
 }
 .nav a:hover { color: var(--fg); }
-.nav a.nav-link-active { color: #fff; border-bottom: 1px solid rgba(255,255,255,0.5); }
+.nav a.nav-link-active { color: #fff; border-bottom: 2px solid var(--accent); }
 
 .skip-nav {
   position: absolute;
@@ -816,7 +845,7 @@ input:focus, textarea:focus, select:focus {
   font-family: 'IBM Plex Mono', monospace;
   font-size: 10px;
   letter-spacing: 0.15em;
-  color: rgba(255,255,255,0.3);
+  color: var(--accent-purple);
   margin-bottom: 10px;
 }
 .gc-tech-layer-desc {
@@ -2490,7 +2519,7 @@ input:focus, textarea:focus, select:focus {
 .lb-pulse {
   width: 8px;
   height: 8px;
-  background: var(--fg);
+  background: var(--accent);
   border-radius: 50%;
   animation: lbPulse 1.5s infinite;
 }
@@ -2956,8 +2985,8 @@ input:focus, textarea:focus, select:focus {
   justify-content: center;
 }
 .wallet-btn:hover {
-  color: #fff;
-  border-color: #fff;
+  color: var(--accent);
+  border-color: var(--accent);
 }
 .wallet-btn--connected {
   background: transparent;
@@ -3735,7 +3764,7 @@ input:focus, textarea:focus, select:focus {
   display: inline-block;
   width: 6px;
   height: 6px;
-  background: var(--fg);
+  background: var(--accent);
   border-radius: 50%;
   margin-left: 8px;
   vertical-align: middle;
@@ -4097,4 +4126,34 @@ input:focus, textarea:focus, select:focus {
   /* Tech pipeline catches: wrap on mobile */
   .gc-tech-layer-catches { flex-wrap: wrap; }
   .gc-tech-catch { font-size: 8px; padding: 3px 8px; }
+}
+
+/* ═══════════════════════════════════════════
+   GLASS CARD — Solana-native panel treatment
+   ═══════════════════════════════════════════ */
+.glass-card {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: var(--card-shadow), var(--card-highlight);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  transition: background 0.25s, box-shadow 0.25s;
+}
+.glass-card:hover {
+  background: rgba(255, 255, 255, 0.07);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), 0 1px 0 0 rgba(255, 255, 255, 0.10) inset;
+}
+.glass-card--glow {
+  box-shadow: var(--card-shadow), var(--card-highlight), 0 0 32px rgba(20, 241, 149, 0.12);
+}
+.glass-card--glow:hover {
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), 0 1px 0 0 rgba(255, 255, 255, 0.10) inset, 0 0 48px rgba(20, 241, 149, 0.18);
+}
+
+/* ═══════════════════════════════════════════
+   FOCUS — Solana Green accessible ring
+   ═══════════════════════════════════════════ */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
