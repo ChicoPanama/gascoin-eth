@@ -1,9 +1,43 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { supabaseBrowser } from '../../lib/supabase-client';
 import { DEMO_REFERRAL } from '../../lib/demo-data';
+
+function useAnimVal(target: number, dur = 1200) {
+  const [v, setV] = useState(0);
+  const raf = useRef(0);
+  useEffect(() => {
+    if (target <= 0) { setV(target); return; }
+    const start = performance.now();
+    const tick = (now: number) => {
+      const t = Math.min((now - start) / dur, 1);
+      setV(target * (1 - Math.pow(1 - t, 3)));
+      if (t < 1) raf.current = requestAnimationFrame(tick);
+    };
+    raf.current = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf.current);
+  }, [target, dur]);
+  return v;
+}
+
+function ReferralStats({ loading, totalConv, referrers }: { loading: boolean; totalConv: number; referrers: number }) {
+  const aConv = useAnimVal(totalConv);
+  const aRef = useAnimVal(referrers);
+  return (
+    <div className="ref-teaser-stats glass-card" style={{ padding: 24 }}>
+      <div className="ref-teaser-stat">
+        <div className="ref-teaser-stat-value">{loading ? '—' : Math.round(aConv).toLocaleString()}</div>
+        <div className="ref-teaser-stat-label">Total Conversions</div>
+      </div>
+      <div className="ref-teaser-stat">
+        <div className="ref-teaser-stat-value">{loading ? '—' : Math.round(aRef).toLocaleString()}</div>
+        <div className="ref-teaser-stat-label">Active Referrers</div>
+      </div>
+    </div>
+  );
+}
 
 export function ReferralTeaser() {
   const [totalConv, setTotalConv] = useState(0);
@@ -46,16 +80,7 @@ export function ReferralTeaser() {
           <Link href="/referral" className="gc-teaser-link">Get Your Referral Link</Link>
         </div>
         <div className="ref-teaser-right">
-          <div className="ref-teaser-stats glass-card" style={{ padding: 24 }}>
-            <div className="ref-teaser-stat">
-              <div className="ref-teaser-stat-value">{loading ? '—' : totalConv.toLocaleString()}</div>
-              <div className="ref-teaser-stat-label">Total Conversions</div>
-            </div>
-            <div className="ref-teaser-stat">
-              <div className="ref-teaser-stat-value">{loading ? '—' : referrers.toLocaleString()}</div>
-              <div className="ref-teaser-stat-label">Active Referrers</div>
-            </div>
-          </div>
+          <ReferralStats loading={loading} totalConv={totalConv} referrers={referrers} />
           <div className="ref-teaser-active">Join {loading ? '—' : referrers} active referrers</div>
         </div>
       </div>

@@ -72,7 +72,7 @@ export function CommunityTeaser() {
                 ))
             }
           </div>
-          <div className="cf-teaser-live">Live · updating</div>
+          <div className="cf-teaser-live">Simulated · pre-launch</div>
         </div>
       </div>
     </section>
