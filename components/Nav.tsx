@@ -15,6 +15,7 @@ const NAV_LINKS = [
   { href: '/perks', label: 'Perks' },
   { href: '/gates', label: 'Gates' },
   { href: '/wallet', label: 'Tracker' },
+  { href: '/me', label: 'Me' },
 ];
 
 export function Nav() {
