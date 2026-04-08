@@ -18,6 +18,7 @@ export function HomeNav() {
         <Link href="/perks">Perks</Link>
         <Link href="/gates">Gates</Link>
         <Link href="/wallet">Tracker</Link>
+        <Link href="/me">Me</Link>
         <Link href="/docs">Docs</Link>
       </div>
       <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
