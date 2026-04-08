@@ -1,7 +1,7 @@
 import { Connection, PublicKey } from '@solana/web3.js';
 
 const GASCOIN_MINT = process.env.NEXT_PUBLIC_GASCOIN_MINT_ADDRESS || process.env.GASCOIN_MINT || '';
-const RPC_URL = process.env.NEXT_PUBLIC_SOLANA_RPC_URL || process.env.SOLANA_RPC_URL || 'https://api.mainnet-beta.solana.com';
+const RPC_URL = process.env.SOLANA_RPC_URL || process.env.NEXT_PUBLIC_SOLANA_RPC_URL || 'https://api.mainnet-beta.solana.com';
 
 export interface TokenBalanceResult {
   balance: number;

@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import { supabaseBrowser } from "../lib/supabase-client";
 import type { LeaderboardEntry, LeaderboardStats } from "../types/leaderboard";
 
-const RPC_URL = process.env.NEXT_PUBLIC_SOLANA_RPC_URL || 'https://api.mainnet-beta.solana.com';
+const RPC_URL = '/api/rpc';
 const GASCOIN_MINT = process.env.NEXT_PUBLIC_GASCOIN_MINT || '';
 
 // Fetch GASCOIN token balance for a wallet via JSON-RPC

@@ -19,7 +19,7 @@ export const SolanaProvider: FC<SolanaProviderProps> = ({ children }) => {
   const network = WalletAdapterNetwork.Mainnet;
 
   const endpoint = useMemo(
-    () => process.env.NEXT_PUBLIC_SOLANA_RPC_URL ?? clusterApiUrl(network),
+    () => typeof window !== 'undefined' ? `${window.location.origin}/api/rpc` : clusterApiUrl(network),
     [network]
   );
 
