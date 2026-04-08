@@ -1,11 +1,14 @@
 'use client';
 
 import Link from 'next/link';
+import { usePrivy } from '@privy-io/react-auth';
 import { WalletButton } from './ui/WalletButton';
 import { AuthNavButton } from './AuthNavButton';
 import { MobileMenu } from './ui/MobileMenu';
 
 export function HomeNav() {
+  const { authenticated } = usePrivy();
+
   return (
     <nav className="gc-nav">
       <span className="gc-nav-brand">GASCOIN</span>
@@ -18,7 +21,7 @@ export function HomeNav() {
         <Link href="/perks">Perks</Link>
         <Link href="/gates">Gates</Link>
         <Link href="/wallet">Tracker</Link>
-        <Link href="/me">Me</Link>
+        {authenticated && <Link href="/me">Me</Link>}
         <Link href="/docs">Docs</Link>
       </div>
       <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>

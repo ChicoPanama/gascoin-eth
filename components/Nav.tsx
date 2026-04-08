@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { usePrivy } from '@privy-io/react-auth';
 import { AuthNavButton } from './AuthNavButton';
 import { WalletButton } from './ui/WalletButton';
 import { MobileMenu } from './ui/MobileMenu';
@@ -15,11 +16,11 @@ const NAV_LINKS = [
   { href: '/perks', label: 'Perks' },
   { href: '/gates', label: 'Gates' },
   { href: '/wallet', label: 'Tracker' },
-  { href: '/me', label: 'Me' },
 ];
 
 export function Nav() {
   const pathname = usePathname();
+  const { authenticated } = usePrivy();
 
   return <nav className="nav">
     <Link href="/" className="nav-brand">GASCOIN</Link>
@@ -32,6 +33,14 @@ export function Nav() {
         {label}
       </Link>
     ))}
+    {authenticated && (
+      <Link
+        href="/me"
+        className={`nav-link-desktop${pathname === '/me' ? ' nav-link-active' : ''}`}
+      >
+        Me
+      </Link>
+    )}
     <span style={{ marginLeft: 'auto', display: 'flex', gap: 8, alignItems: 'center' }}>
       <WalletButton />
       <AuthNavButton />
