@@ -4222,3 +4222,173 @@ input:focus, textarea:focus, select:focus {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
 }
+
+/* ═══════════════════════════════════════════
+   CINEMATIC LANDING PAGE
+   ═══════════════════════════════════════════ */
+.cinematic {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: var(--bg);
+}
+
+/* Drifting background glow */
+.cinematic-glow {
+  position: absolute;
+  inset: -50%;
+  width: 200%;
+  height: 200%;
+  background:
+    radial-gradient(ellipse 35% 30% at 60% 55%, rgba(20, 241, 149, 0.07) 0%, transparent 60%),
+    radial-gradient(ellipse 30% 25% at 40% 50%, rgba(153, 69, 255, 0.05) 0%, transparent 50%);
+  animation: heroGlow 12s ease-in-out infinite alternate;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Main title */
+.cinematic-title {
+  position: relative;
+  z-index: 2;
+  font-family: var(--font-display);
+  font-size: clamp(60px, 14vw, 180px);
+  letter-spacing: 0.45em;
+  text-transform: uppercase;
+  line-height: 1;
+  color: var(--fg);
+  text-indent: 0.45em; /* balance letter-spacing on last char */
+  text-shadow:
+    0 0 40px rgba(20, 241, 149, 0.3),
+    0 0 80px rgba(20, 241, 149, 0.15),
+    0 0 120px rgba(153, 69, 255, 0.1);
+  animation: titleGlow 4s ease-in-out infinite alternate;
+  margin-bottom: var(--spacing-48);
+}
+
+@keyframes titleGlow {
+  0% {
+    text-shadow:
+      0 0 40px rgba(20, 241, 149, 0.2),
+      0 0 80px rgba(20, 241, 149, 0.1),
+      0 0 120px rgba(153, 69, 255, 0.06);
+  }
+  100% {
+    text-shadow:
+      0 0 60px rgba(20, 241, 149, 0.4),
+      0 0 100px rgba(20, 241, 149, 0.2),
+      0 0 160px rgba(153, 69, 255, 0.12);
+  }
+}
+
+/* Orbit container */
+.cinematic-orbit {
+  position: absolute;
+  z-index: 1;
+  width: clamp(280px, 50vw, 600px);
+  height: clamp(280px, 50vw, 600px);
+}
+
+/* Individual orbiting word */
+.cinematic-word {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  font-family: var(--font-mono);
+  font-size: clamp(10px, 1.2vw, 14px);
+  font-weight: 600;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--muted);
+  transform-origin: 0 0;
+  animation: orbit 18s linear infinite;
+  white-space: nowrap;
+}
+
+@keyframes orbit {
+  from {
+    transform: rotate(0deg) translateX(clamp(140px, 25vw, 300px)) rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg) translateX(clamp(140px, 25vw, 300px)) rotate(-360deg);
+  }
+}
+
+/* CTA Button */
+.cinematic-enter {
+  position: relative;
+  z-index: 2;
+  font-family: var(--font-mono);
+  font-size: clamp(11px, 1.2vw, 14px);
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  text-decoration: none;
+  padding: 18px 48px;
+  background: linear-gradient(135deg, #14F195, #00FFA3);
+  color: var(--bg);
+  border: none;
+  cursor: crosshair;
+  transition: all var(--duration-normal) var(--ease-out-expo);
+  overflow: hidden;
+  margin-bottom: var(--spacing-32);
+}
+.cinematic-enter::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+  transform: translateX(-100%);
+  transition: transform 0.6s;
+}
+.cinematic-enter:hover::before { transform: translateX(100%); }
+.cinematic-enter:hover {
+  box-shadow: 0 0 40px rgba(20, 241, 149, 0.4);
+  transform: scale(1.02);
+}
+.cinematic-enter:active {
+  transform: scale(0.97);
+  transition-duration: var(--duration-fast);
+}
+
+/* Tagline */
+.cinematic-tagline {
+  position: relative;
+  z-index: 2;
+  font-family: var(--font-mono);
+  font-size: var(--text-label);
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--muted-deep);
+}
+
+/* Mobile: static word positions */
+@media (max-width: 768px) {
+  .cinematic-orbit {
+    width: 260px;
+    height: 260px;
+  }
+  .cinematic-word {
+    font-size: 9px;
+  }
+  .cinematic-enter {
+    padding: 16px 36px;
+  }
+}
+
+/* Reduced motion: no orbit, no glow pulse */
+@media (prefers-reduced-motion: reduce) {
+  .cinematic-word {
+    animation: none;
+  }
+  .cinematic-title {
+    animation: none;
+  }
+  .cinematic-glow {
+    animation: none;
+  }
+}
