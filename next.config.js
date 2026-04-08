@@ -73,7 +73,6 @@ const nextConfig = {
   async redirects() {
     return [
       // Clean URL redirects
-      { source: '/home', destination: '/', permanent: true },
       { source: '/gate/:num', destination: '/gates', permanent: false },
       { source: '/track', destination: '/wallet', permanent: false },
       { source: '/refer', destination: '/referral', permanent: false },
