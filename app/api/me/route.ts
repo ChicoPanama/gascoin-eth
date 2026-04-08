@@ -14,24 +14,17 @@ export async function GET(req: Request) {
   let wallet = session.wallet || '';
   const supabase = getSupabaseAdmin();
 
-  // If no wallet from Privy session, try to look it up from wallet_links via x_handle
+  // If no wallet from Privy session, look it up from wallet_x_links
   if (!wallet) {
-    const { data: user } = await supabase
-      .from('users')
-      .select('id')
-      .eq('x_handle', xHandle)
+    const handle = xHandle.replace(/^@/, '').toLowerCase();
+    const { data: link } = await supabase
+      .from('wallet_x_links')
+      .select('wallet')
+      .eq('x_handle', handle)
+      .eq('is_active', true)
       .maybeSingle();
 
-    if (user) {
-      const { data: link } = await supabase
-        .from('wallet_links')
-        .select('wallet')
-        .eq('user_id', user.id)
-        .eq('is_primary', true)
-        .maybeSingle();
-
-      wallet = link?.wallet || '';
-    }
+    wallet = link?.wallet || '';
   }
 
   // Even without a wallet, show the dashboard (empty state)

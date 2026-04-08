@@ -1,8 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import Link from 'next/link';
-import './dashboard.css';
 
 // ── Types ──
 interface GateResult {
@@ -107,17 +106,21 @@ export function DashboardClient({ wallet, xHandle, claims, payouts, referral, st
   const [expandedClaim, setExpandedClaim] = useState<string | null>(null);
   const [tab, setTab] = useState<'all' | 'approved' | 'pending' | 'rejected'>('all');
 
+  const isApproved = (s: string) => s === 'approved' || s === 'paid' || s === 'ready_for_dispatch';
+  const isPending = (s: string) => s === 'submitted' || s === 'auto_review' || s === 'needs_manual_review';
+  const isRejected = (s: string) => s === 'rejected';
+
+  const counts = useMemo(() => ({
+    approved: claims.filter((c) => isApproved(c.status)).length,
+    pending: claims.filter((c) => isPending(c.status)).length,
+    rejected: claims.filter((c) => isRejected(c.status)).length,
+  }), [claims]);
+
   const filtered = claims.filter((c) => {
     if (tab === 'all') return true;
-    if (tab === 'approved')
-      return c.status === 'approved' || c.status === 'paid' || c.status === 'ready_for_dispatch';
-    if (tab === 'pending')
-      return (
-        c.status === 'submitted' ||
-        c.status === 'auto_review' ||
-        c.status === 'needs_manual_review'
-      );
-    if (tab === 'rejected') return c.status === 'rejected';
+    if (tab === 'approved') return isApproved(c.status);
+    if (tab === 'pending') return isPending(c.status);
+    if (tab === 'rejected') return isRejected(c.status);
     return true;
   });
 
@@ -138,7 +141,7 @@ export function DashboardClient({ wallet, xHandle, claims, payouts, referral, st
         <h1 className="ud-title">MY GASCOIN</h1>
         <div className="ud-header__identity">
           {xHandle && <span className="ud-handle">@{xHandle}</span>}
-          <span className="ud-wallet">{truncate(wallet, 6)}</span>
+          {wallet && <span className="ud-wallet">{truncate(wallet, 6)}</span>}
         </div>
       </header>
 
@@ -171,9 +174,9 @@ export function DashboardClient({ wallet, xHandle, claims, payouts, referral, st
       {/* ── Quick Actions ── */}
       <section className="ud-actions">
         <Link href="/submit" className="gc-btn-solid">Submit Receipt</Link>
-        <Link href="/referral" className="gc-btn-ghost">Share Referral Link →</Link>
-        <Link href="/wallet" className="gc-btn-ghost">Wallet Tracker →</Link>
-        <Link href="/perks" className="gc-btn-ghost">View Perks →</Link>
+        <Link href="/referral" className="gc-btn-ghost">Share Referral Link</Link>
+        <Link href="/wallet" className="gc-btn-ghost">Wallet Tracker</Link>
+        <Link href="/perks" className="gc-btn-ghost">View Perks</Link>
       </section>
 
       {/* ── Submission History ── */}
@@ -181,16 +184,19 @@ export function DashboardClient({ wallet, xHandle, claims, payouts, referral, st
         <div className="ud-section__header">
           <h2 className="ud-section__title">Submission History</h2>
           <div className="ud-tabs">
-            {(['all', 'approved', 'pending', 'rejected'] as const).map((t) => (
-              <button
-                key={t}
-                className={`ud-tab ${tab === t ? 'ud-tab--active' : ''}`}
-                onClick={() => setTab(t)}
-                type="button"
-              >
-                {t === 'all' ? `ALL (${claims.length})` : t.toUpperCase()}
-              </button>
-            ))}
+            {(['all', 'approved', 'pending', 'rejected'] as const).map((t) => {
+              const count = t === 'all' ? claims.length : counts[t];
+              return (
+                <button
+                  key={t}
+                  className={`ud-tab ${tab === t ? 'ud-tab--active' : ''}`}
+                  onClick={() => setTab(t)}
+                  type="button"
+                >
+                  {t.toUpperCase()} ({count})
+                </button>
+              );
+            })}
           </div>
         </div>
 
@@ -358,7 +364,7 @@ export function DashboardClient({ wallet, xHandle, claims, payouts, referral, st
       <section className="ud-section">
         <div className="ud-section__header">
           <h2 className="ud-section__title">Referral Program</h2>
-          <Link href="/referral" className="gc-btn-ghost">Manage →</Link>
+          <Link href="/referral" className="gc-btn-ghost">Manage</Link>
         </div>
         {referral.conversions > 0 || referral.clicks > 0 ? (
           <div className="gc-stats">
@@ -380,8 +386,8 @@ export function DashboardClient({ wallet, xHandle, claims, payouts, referral, st
           </div>
         ) : (
           <div className="ud-empty">
-            <p>Submit and get approved to unlock your referral link.</p>
-            <Link href="/referral" className="gc-btn-ghost">Learn More →</Link>
+            <p>Get 1 approved submission to unlock your referral link.</p>
+            <Link href="/referral" className="gc-btn-ghost">Learn More</Link>
           </div>
         )}
       </section>
