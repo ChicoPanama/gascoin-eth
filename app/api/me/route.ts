@@ -128,23 +128,27 @@ export async function GET(req: Request) {
     const submissionIds = networkConversions.map((c: any) => c.submission_id).filter(Boolean);
     const referredWallets = new Set(networkConversions.map((c: any) => c.referred_wallet));
 
-    // Get claims for referred submissions
-    const { data: networkClaims } = await supabase
-      .from('claims')
-      .select('id, parsed_amount')
-      .in('id', submissionIds);
+    let networkUsdSaved = 0;
+    let networkSolSaved = 0;
 
-    // Get payouts for referred submissions
-    const { data: networkPayouts } = await supabase
-      .from('payouts')
-      .select('amount_sol, claim_id')
-      .in('claim_id', submissionIds)
-      .eq('status', 'paid');
+    if (submissionIds.length > 0) {
+      const [networkClaimsRes, networkPayoutsRes] = await Promise.all([
+        supabase
+          .from('claims')
+          .select('id, parsed_amount')
+          .in('id', submissionIds),
+        supabase
+          .from('payouts')
+          .select('amount_sol, claim_id')
+          .in('claim_id', submissionIds)
+          .eq('status', 'paid'),
+      ]);
 
-    const networkUsdSaved = (networkClaims ?? [])
-      .reduce((s: number, c: any) => s + Number(c.parsed_amount ?? 0), 0);
-    const networkSolSaved = (networkPayouts ?? [])
-      .reduce((s: number, p: any) => s + Number(p.amount_sol ?? 0), 0);
+      networkUsdSaved = (networkClaimsRes.data ?? [])
+        .reduce((s: number, c: any) => s + Number(c.parsed_amount ?? 0), 0);
+      networkSolSaved = (networkPayoutsRes.data ?? [])
+        .reduce((s: number, p: any) => s + Number(p.amount_sol ?? 0), 0);
+    }
 
     networkImpact = {
       referredUsers: referredWallets.size,

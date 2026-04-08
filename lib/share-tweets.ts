@@ -1,6 +1,7 @@
-const BASE_URL = typeof window !== 'undefined'
-  ? window.location.origin
-  : process.env.NEXT_PUBLIC_BASE_URL || 'https://platform-ebon-nine.vercel.app';
+function getBaseUrl(): string {
+  if (typeof window !== 'undefined') return window.location.origin;
+  return process.env.NEXT_PUBLIC_BASE_URL || 'https://platform-ebon-nine.vercel.app';
+}
 
 export function composeDashboardTweet(params: {
   networkUsd: number;
@@ -21,7 +22,7 @@ export function composePostApprovalTweet(params: {
 }
 
 export function buildReferralUrl(referralCode: string): string {
-  return `${BASE_URL}/submit?ref=${referralCode}`;
+  return `${getBaseUrl()}/submit?ref=${referralCode}`;
 }
 
 export function buildTwitterIntentUrl(text: string): string {

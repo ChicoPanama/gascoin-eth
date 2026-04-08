@@ -621,9 +621,12 @@ export function SubmitFlow() {
       <ProgressBar step={step} maxStep={maxStep} />
 
       {step === 1 && (
-        <StepWallet onConnect={(w) => {
+        <StepWallet onConnect={async (w) => {
           setWallet(w);
-          generateReferralCodeClient(w).then(setReferralCode).catch(() => {});
+          try {
+            const code = await generateReferralCodeClient(w);
+            setReferralCode(code);
+          } catch {}
           goTo(2);
         }} />
       )}
