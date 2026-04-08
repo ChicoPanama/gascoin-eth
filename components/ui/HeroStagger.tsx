@@ -33,7 +33,11 @@ export function HeroStagger({ children }: { children: ReactNode }) {
 
 export function HeroItem({ children, className = '' }: { children: ReactNode; className?: string }) {
   return (
-    <motion.div variants={item} className={className}>
+    <motion.div
+      variants={item}
+      className={className}
+      whileTap={{ scale: 0.97 }}
+    >
       {children}
     </motion.div>
   );

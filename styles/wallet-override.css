@@ -3,12 +3,12 @@
   background: #080810 !important;
   border: 1px solid rgba(255,255,255,0.12) !important;
   border-radius: 0 !important;
-  font-family: 'IBM Plex Mono', monospace !important;
+  font-family: var(--font-mono) !important;
   padding: 40px !important;
 }
 
 .wallet-adapter-modal-title {
-  font-family: 'Bebas Neue', cursive !important;
+  font-family: var(--font-display) !important;
   font-size: 32px !important;
   letter-spacing: 0.1em !important;
   color: #fff !important;
@@ -34,7 +34,7 @@
 .wallet-adapter-button {
   background: transparent !important;
   border-radius: 0 !important;
-  font-family: 'IBM Plex Mono', monospace !important;
+  font-family: var(--font-mono) !important;
   font-size: 13px !important;
   color: #fff !important;
   letter-spacing: 0.05em !important;

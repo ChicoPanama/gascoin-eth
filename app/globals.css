@@ -1,23 +1,8 @@
 @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap');
+@import './tokens.css';
 
 /* ─── RESET ─── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-:root {
-  --bg: #080810;
-  --fg: #ffffff;
-  --muted: rgba(255,255,255,0.6);
-  --muted-deep: rgba(255,255,255,0.4);
-  --line: rgba(255,255,255,0.08);
-  --card: rgba(255,255,255,0.04);
-  --card-hover: rgba(255,255,255,0.07);
-  --accent: #14F195;
-  --accent-purple: #9945FF;
-  --accent-glow: rgba(20, 241, 149, 0.4);
-  --card-border: rgba(255,255,255,0.08);
-  --card-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
-  --card-highlight: 0 1px 0 0 rgba(255, 255, 255, 0.06) inset;
-}
 
 html {
   cursor: crosshair;
@@ -28,8 +13,9 @@ html {
 body {
   background: var(--bg);
   color: var(--fg);
-  font-family: 'IBM Plex Sans', sans-serif;
+  font-family: var(--font-body);
   font-weight: 300;
+  font-size: var(--text-body);
   line-height: 1.75;
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
@@ -50,15 +36,15 @@ body::before {
 a { color: var(--fg); text-decoration: none; }
 
 h1, h2, h3, h4 {
-  font-family: 'Bebas Neue', sans-serif;
+  font-family: var(--font-display);
   font-weight: 400;
   letter-spacing: 0.04em;
   text-transform: uppercase;
 }
 
 code, .mono {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 12px;
+  font-family: var(--font-mono);
+  font-size: var(--text-small);
 }
 
 /* ─── NAVIGATION ─── */
@@ -77,7 +63,7 @@ code, .mono {
 }
 
 .gc-nav-brand {
-  font-family: 'Bebas Neue', sans-serif;
+  font-family: var(--font-display);
   font-size: 22px;
   letter-spacing: 0.15em;
   color: var(--fg);
@@ -91,7 +77,7 @@ code, .mono {
 }
 
 .gc-nav-links a {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 10px;
   font-weight: 500;
   text-transform: uppercase;
@@ -121,7 +107,7 @@ code, .mono {
 .gc-nav-links a.gc-nav-active { color: var(--fg); }
 
 .gc-nav-cta {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 10px;
   font-weight: 600;
   text-transform: uppercase;
@@ -173,7 +159,7 @@ code, .mono {
   position: absolute;
   top: -80px;
   right: -40px;
-  font-family: 'Bebas Neue', sans-serif;
+  font-family: var(--font-display);
   font-size: 600px;
   line-height: 1;
   color: rgba(255,255,255,0.018);
@@ -189,7 +175,7 @@ code, .mono {
 }
 
 .gc-section-label {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 11px;
   font-weight: 500;
   text-transform: uppercase;
@@ -199,7 +185,7 @@ code, .mono {
 }
 
 .gc-hero h1 {
-  font-family: 'Bebas Neue', sans-serif;
+  font-family: var(--font-display);
   font-size: 80px;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -211,7 +197,7 @@ code, .mono {
 .gc-hero h1 .line-ghost { display: block; color: rgba(255,255,255,0.15); }
 
 .gc-hero-body {
-  font-family: 'IBM Plex Sans', sans-serif;
+  font-family: var(--font-body);
   font-weight: 300;
   font-size: 15px;
   line-height: 1.75;
@@ -227,7 +213,7 @@ code, .mono {
 }
 
 .gc-btn-solid {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 11px;
   font-weight: 600;
   text-transform: uppercase;
@@ -259,7 +245,7 @@ code, .mono {
 }
 
 .gc-btn-ghost {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 11px;
   font-weight: 500;
   text-transform: uppercase;
@@ -301,7 +287,7 @@ code, .mono {
 .gc-stat:last-child { border-right: none; }
 
 .gc-stat-label {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 10px;
   font-weight: 500;
   text-transform: uppercase;
@@ -311,8 +297,8 @@ code, .mono {
 }
 
 .gc-stat-value {
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: 56px;
+  font-family: var(--font-display);
+  font-size: var(--text-stat);
   letter-spacing: 0.02em;
   line-height: 1;
   margin-bottom: 6px;
@@ -320,7 +306,7 @@ code, .mono {
 }
 
 .gc-stat-sub {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 11px;
   color: var(--muted-deep);
 }
@@ -336,7 +322,7 @@ code, .mono {
 }
 
 .gc-section-num {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 10px;
   font-weight: 500;
   text-transform: uppercase;
@@ -346,7 +332,7 @@ code, .mono {
 }
 
 .gc-section-title {
-  font-family: 'Bebas Neue', sans-serif;
+  font-family: var(--font-display);
   font-size: 52px;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -373,7 +359,7 @@ code, .mono {
   position: absolute;
   bottom: -10px;
   right: 16px;
-  font-family: 'Bebas Neue', sans-serif;
+  font-family: var(--font-display);
   font-size: 100px;
   line-height: 1;
   color: rgba(255,255,255,0.035);
@@ -382,7 +368,7 @@ code, .mono {
 }
 
 .gc-step-index {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 10px;
   font-weight: 500;
   text-transform: uppercase;
@@ -396,7 +382,7 @@ code, .mono {
 }
 
 .gc-step-title {
-  font-family: 'IBM Plex Sans', sans-serif;
+  font-family: var(--font-body);
   font-weight: 500;
   font-size: 20px;
   margin-bottom: 12px;
@@ -405,7 +391,7 @@ code, .mono {
 }
 
 .gc-step-desc {
-  font-family: 'IBM Plex Sans', sans-serif;
+  font-family: var(--font-body);
   font-weight: 300;
   font-size: 14px;
   line-height: 1.75;
@@ -425,7 +411,7 @@ code, .mono {
 }
 
 .gc-footer-brand {
-  font-family: 'Bebas Neue', sans-serif;
+  font-family: var(--font-display);
   font-size: 24px;
   letter-spacing: 0.15em;
   text-transform: uppercase;
@@ -440,7 +426,7 @@ code, .mono {
 }
 
 .gc-footer-links a {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 11px;
   color: rgba(255,255,255,0.35);
   text-decoration: none;
@@ -452,7 +438,7 @@ code, .mono {
 .gc-footer-links a:hover { color: rgba(255,255,255,0.7); }
 
 .gc-footer-copy {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 10px;
   color: rgba(255,255,255,0.2);
 }
@@ -491,7 +477,7 @@ code, .mono {
 }
 
 .gc-intro-title {
-  font-family: 'Bebas Neue', sans-serif;
+  font-family: var(--font-display);
   font-size: clamp(64px, 20vw, 260px);
   letter-spacing: 0.15em;
   color: var(--fg);
@@ -503,7 +489,7 @@ code, .mono {
 }
 
 .gc-intro-subtitle {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 11px;
   letter-spacing: 0.3em;
   text-transform: uppercase;
@@ -592,7 +578,7 @@ code, .mono {
 
 /* ─── EXISTING COMPONENT COMPAT ─── */
 .btn {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 11px;
   font-weight: 600;
   text-transform: uppercase;
@@ -627,7 +613,7 @@ code, .mono {
 .table th {
   text-align: left;
   padding: 10px 12px;
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 10px;
   font-weight: 600;
   text-transform: uppercase;
@@ -648,7 +634,7 @@ code, .mono {
 .badge {
   display: inline-block;
   padding: 3px 10px;
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 10px;
   font-weight: 600;
   text-transform: uppercase;
@@ -663,7 +649,7 @@ code, .mono {
 /* Forms */
 label {
   display: block;
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 11px;
   font-weight: 500;
   text-transform: uppercase;
@@ -677,7 +663,7 @@ input, textarea, select {
   color: var(--fg);
   border: 1px solid var(--line);
   padding: 12px 14px;
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 14px;
   transition: border-color 0.2s;
 }
@@ -698,14 +684,14 @@ input:focus, textarea:focus, select:focus {
 }
 .card:hover { border-color: rgba(255,255,255,0.15); }
 .k {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   color: var(--muted);
   font-size: 10px;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.1em;
 }
-.v { font-family: 'Bebas Neue', sans-serif; font-size: 28px; margin-top: 6px; }
+.v { font-family: var(--font-display); font-size: 28px; margin-top: 6px; }
 
 /* Nav compat for sub-pages */
 .nav {
@@ -717,7 +703,7 @@ input:focus, textarea:focus, select:focus {
   padding-bottom: 16px;
 }
 .nav-brand {
-  font-family: 'Bebas Neue', sans-serif;
+  font-family: var(--font-display);
   font-weight: 400;
   font-size: 20px;
   letter-spacing: 0.15em;
@@ -725,7 +711,7 @@ input:focus, textarea:focus, select:focus {
   margin-right: 24px;
 }
 .nav a {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   color: var(--muted);
   font-size: 11px;
   font-weight: 500;
@@ -745,7 +731,7 @@ input:focus, textarea:focus, select:focus {
   background: #fff;
   color: #000;
   padding: 8px 16px;
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 12px;
   text-decoration: none;
   border-radius: 4px;
@@ -771,7 +757,7 @@ input:focus, textarea:focus, select:focus {
 .gc-tech-inner { max-width: 1200px; margin: 0 auto; }
 .gc-tech-header { margin-bottom: 64px; }
 .gc-tech-title {
-  font-family: 'Bebas Neue', sans-serif;
+  font-family: var(--font-display);
   font-size: clamp(48px, 8vw, 80px);
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -781,7 +767,7 @@ input:focus, textarea:focus, select:focus {
 .gc-tech-title span { display: block; }
 .gc-tech-title-ghost { color: rgba(255,255,255,0.12); }
 .gc-tech-sub {
-  font-family: 'IBM Plex Sans', sans-serif;
+  font-family: var(--font-body);
   font-weight: 300;
   font-size: 15px;
   color: rgba(255,255,255,0.55);
@@ -813,7 +799,7 @@ input:focus, textarea:focus, select:focus {
 }
 
 .gc-tech-layer-num {
-  font-family: 'Bebas Neue', sans-serif;
+  font-family: var(--font-display);
   font-size: 48px;
   color: rgba(255,255,255,0.06);
   line-height: 1;
@@ -836,20 +822,20 @@ input:focus, textarea:focus, select:focus {
 .gc-tech-layer-content { flex: 1; min-width: 0; }
 
 .gc-tech-layer-title {
-  font-family: 'IBM Plex Sans', sans-serif;
+  font-family: var(--font-body);
   font-weight: 500;
   font-size: 18px;
   margin-bottom: 4px;
 }
 .gc-tech-layer-tag {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 10px;
   letter-spacing: 0.15em;
   color: var(--accent-purple);
   margin-bottom: 10px;
 }
 .gc-tech-layer-desc {
-  font-family: 'IBM Plex Sans', sans-serif;
+  font-family: var(--font-body);
   font-weight: 300;
   font-size: 14px;
   color: rgba(255,255,255,0.5);
@@ -862,7 +848,7 @@ input:focus, textarea:focus, select:focus {
   gap: 6px;
 }
 .gc-tech-catch {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 9px;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -896,14 +882,14 @@ input:focus, textarea:focus, select:focus {
 }
 .gc-tech-stat:last-child { border-right: none; }
 .gc-tech-stat-value {
-  font-family: 'Bebas Neue', sans-serif;
+  font-family: var(--font-display);
   font-size: 48px;
   letter-spacing: 0.02em;
   line-height: 1;
   margin-bottom: 8px;
 }
 .gc-tech-stat-label {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 10px;
   letter-spacing: 0.2em;
   text-transform: uppercase;
@@ -932,12 +918,12 @@ input:focus, textarea:focus, select:focus {
 }
 .docs-sidebar-header { padding: 20px 20px 16px; border-bottom: 1px solid rgba(255,255,255,0.06); }
 .docs-logo-link { display: flex; align-items: center; gap: 8px; text-decoration: none; }
-.docs-logo-text { font-family: 'Bebas Neue', sans-serif; font-size: 20px; letter-spacing: 0.1em; color: #fff; }
-.docs-logo-badge { font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: 0.15em; color: rgba(255,255,255,0.4); border: 1px solid rgba(255,255,255,0.15); padding: 2px 6px; }
+.docs-logo-text { font-family: var(--font-display); font-size: 20px; letter-spacing: 0.1em; color: #fff; }
+.docs-logo-badge { font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.15em; color: rgba(255,255,255,0.4); border: 1px solid rgba(255,255,255,0.15); padding: 2px 6px; }
 .docs-search { padding: 12px 16px; border-bottom: 1px solid rgba(255,255,255,0.06); position: relative; }
 .docs-search-input {
   width: 100%; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1);
-  color: #fff; font-family: 'IBM Plex Mono', monospace; font-size: 12px; padding: 7px 10px; outline: none;
+  color: #fff; font-family: var(--font-mono); font-size: 12px; padding: 7px 10px; outline: none;
 }
 .docs-search-input::placeholder { color: rgba(255,255,255,0.2); }
 .docs-search-input:focus { border-color: rgba(255,255,255,0.3); }
@@ -949,71 +935,71 @@ input:focus, textarea:focus, select:focus {
 .docs-nav-cat { margin-bottom: 4px; }
 .docs-cat-toggle {
   width: 100%; display: flex; align-items: center; justify-content: space-between; padding: 7px 16px;
-  font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase;
+  font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase;
   color: rgba(255,255,255,0.35); background: transparent; border: none; cursor: pointer; text-align: left;
 }
 .docs-cat-toggle:hover { color: rgba(255,255,255,0.6); }
 .docs-cat-links { display: flex; flex-direction: column; margin-bottom: 4px; }
 .docs-nav-link {
-  font-family: 'IBM Plex Sans', sans-serif; font-size: 13px; color: rgba(255,255,255,0.45);
+  font-family: var(--font-body); font-size: 13px; color: rgba(255,255,255,0.45);
   text-decoration: none; padding: 6px 16px 6px 24px; border-left: 2px solid transparent;
   transition: all 0.15s; line-height: 1.35;
 }
 .docs-nav-link:hover { color: rgba(255,255,255,0.8); background: rgba(255,255,255,0.03); }
 .docs-nav-link--active { color: #fff !important; border-left-color: #fff !important; background: rgba(255,255,255,0.05) !important; }
 .docs-sidebar-footer { padding: 16px; border-top: 1px solid rgba(255,255,255,0.06); display: flex; flex-direction: column; gap: 8px; }
-.docs-footer-link { font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: rgba(255,255,255,0.3); text-decoration: none; letter-spacing: 0.05em; }
+.docs-footer-link { font-family: var(--font-mono); font-size: 10px; color: rgba(255,255,255,0.3); text-decoration: none; letter-spacing: 0.05em; }
 .docs-footer-link:hover { color: #fff; }
 
 .docs-main { flex: 1; min-width: 0; overflow-y: auto; height: 100vh; position: sticky; top: 0; }
 .doc-page-layout { display: flex; max-width: 1100px; margin: 0 auto; padding: 0 40px; gap: 48px; }
 .doc-article { flex: 1; min-width: 0; padding: 48px 0 80px; }
 
-.doc-breadcrumb { display: flex; align-items: center; gap: 8px; margin-bottom: 24px; font-family: 'IBM Plex Mono', monospace; font-size: 11px; }
+.doc-breadcrumb { display: flex; align-items: center; gap: 8px; margin-bottom: 24px; font-family: var(--font-mono); font-size: 11px; }
 .doc-breadcrumb-link { color: rgba(255,255,255,0.35); text-decoration: none; }
 .doc-breadcrumb-link:hover { color: rgba(255,255,255,0.7); }
 .doc-breadcrumb-sep { color: rgba(255,255,255,0.15); }
 .doc-breadcrumb-current { color: rgba(255,255,255,0.6); }
 
 .doc-page-header { margin-bottom: 40px; padding-bottom: 32px; border-bottom: 1px solid rgba(255,255,255,0.08); }
-.doc-page-title { font-family: 'Bebas Neue', sans-serif; font-size: clamp(36px, 5vw, 56px); line-height: 1; color: #fff; margin-bottom: 12px; letter-spacing: 0.02em; }
-.doc-page-desc { font-family: 'IBM Plex Sans', sans-serif; font-size: 15px; color: rgba(255,255,255,0.5); line-height: 1.6; margin: 0 0 16px; }
+.doc-page-title { font-family: var(--font-display); font-size: clamp(36px, 5vw, 56px); line-height: 1; color: #fff; margin-bottom: 12px; letter-spacing: 0.02em; }
+.doc-page-desc { font-family: var(--font-body); font-size: 15px; color: rgba(255,255,255,0.5); line-height: 1.6; margin: 0 0 16px; }
 .doc-copy-link {
-  font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.12em;
+  font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.12em;
   color: rgba(255,255,255,0.4); background: transparent; border: 1px solid rgba(255,255,255,0.12);
   padding: 5px 12px; cursor: crosshair; transition: all 0.15s;
 }
 .doc-copy-link:hover { color: #fff; border-color: rgba(255,255,255,0.4); }
 
 .doc-content h3 {
-  font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.18em;
+  font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.18em;
   text-transform: uppercase; color: rgba(255,255,255,0.5); margin: 28px 0 10px;
 }
 .doc-content p {
-  font-family: 'IBM Plex Sans', sans-serif; font-size: 15px; line-height: 1.8;
+  font-family: var(--font-body); font-size: 15px; line-height: 1.8;
   color: rgba(255,255,255,0.72); margin: 0 0 16px;
 }
 .doc-content ul, .doc-content ol { margin: 8px 0 20px 20px; padding: 0; }
 .doc-content li {
-  font-family: 'IBM Plex Sans', sans-serif; font-size: 15px; line-height: 1.7;
+  font-family: var(--font-body); font-size: 15px; line-height: 1.7;
   color: rgba(255,255,255,0.72); margin-bottom: 6px;
 }
 .doc-content strong { color: #fff; font-weight: 500; }
 .doc-content table { width: 100%; border-collapse: collapse; margin: 20px 0 28px; font-size: 13px; }
 .doc-content thead tr { background: rgba(255,255,255,0.06); border-bottom: 1px solid rgba(255,255,255,0.1); }
-.doc-content th { padding: 10px 14px; text-align: left; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(255,255,255,0.4); }
-.doc-content td { padding: 10px 14px; font-family: 'IBM Plex Sans', sans-serif; color: rgba(255,255,255,0.68); border-bottom: 1px solid rgba(255,255,255,0.05); line-height: 1.55; vertical-align: top; }
+.doc-content th { padding: 10px 14px; text-align: left; font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(255,255,255,0.4); }
+.doc-content td { padding: 10px 14px; font-family: var(--font-body); color: rgba(255,255,255,0.68); border-bottom: 1px solid rgba(255,255,255,0.05); line-height: 1.55; vertical-align: top; }
 
 .doc-page-nav { display: flex; justify-content: space-between; gap: 16px; margin-top: 64px; padding-top: 32px; border-top: 1px solid rgba(255,255,255,0.08); }
 .doc-nav-btn { display: flex; flex-direction: column; gap: 4px; text-decoration: none; padding: 16px 20px; border: 1px solid rgba(255,255,255,0.1); flex: 1; max-width: 280px; transition: border-color 0.2s, background 0.2s; }
 .doc-nav-btn:hover { border-color: rgba(255,255,255,0.3); background: rgba(255,255,255,0.03); }
 .doc-nav-next { align-items: flex-end; text-align: right; }
-.doc-nav-dir { font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.12em; color: rgba(255,255,255,0.3); text-transform: uppercase; }
-.doc-nav-title { font-family: 'IBM Plex Sans', sans-serif; font-size: 14px; color: rgba(255,255,255,0.7); font-weight: 500; line-height: 1.3; }
+.doc-nav-dir { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.12em; color: rgba(255,255,255,0.3); text-transform: uppercase; }
+.doc-nav-title { font-family: var(--font-body); font-size: 14px; color: rgba(255,255,255,0.7); font-weight: 500; line-height: 1.3; }
 
 .doc-toc { width: 180px; flex-shrink: 0; position: sticky; top: 48px; height: fit-content; padding-top: 48px; display: flex; flex-direction: column; gap: 2px; }
-.doc-toc-label { font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: 0.2em; color: rgba(255,255,255,0.25); text-transform: uppercase; margin-bottom: 10px; }
-.doc-toc-item { font-family: 'IBM Plex Sans', sans-serif; font-size: 12px; color: rgba(255,255,255,0.35); text-decoration: none; padding: 4px 0 4px 10px; border-left: 1px solid transparent; line-height: 1.4; transition: all 0.15s; }
+.doc-toc-label { font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.2em; color: rgba(255,255,255,0.25); text-transform: uppercase; margin-bottom: 10px; }
+.doc-toc-item { font-family: var(--font-body); font-size: 12px; color: rgba(255,255,255,0.35); text-decoration: none; padding: 4px 0 4px 10px; border-left: 1px solid transparent; line-height: 1.4; transition: all 0.15s; }
 .doc-toc-item:hover { color: rgba(255,255,255,0.7); }
 .doc-toc-item--active { color: #fff !important; border-left-color: rgba(255,255,255,0.5) !important; }
 
@@ -1028,7 +1014,7 @@ input:focus, textarea:focus, select:focus {
 
 /* ─── TIER BADGE ─── */
 .tier-badge {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 9px;
   font-weight: 700;
   letter-spacing: 0.08em;
@@ -1054,13 +1040,13 @@ input:focus, textarea:focus, select:focus {
   z-index: 50;
 }
 .admin-sidebar-top { padding: 0 20px 20px; border-bottom: 1px solid rgba(255,255,255,0.06); margin-bottom: 16px; }
-.admin-sidebar-label { font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: rgba(255,255,255,0.3); letter-spacing: 0.3em; margin-bottom: 4px; }
-.admin-sidebar-brand { font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: 0.15em; }
+.admin-sidebar-label { font-family: var(--font-mono); font-size: 10px; color: rgba(255,255,255,0.3); letter-spacing: 0.3em; margin-bottom: 4px; }
+.admin-sidebar-brand { font-family: var(--font-display); font-size: 22px; letter-spacing: 0.15em; }
 .admin-nav-section { padding: 0 8px; margin-bottom: 16px; }
-.admin-nav-section-label { font-family: 'IBM Plex Mono', monospace; font-size: 9px; color: rgba(255,255,255,0.25); letter-spacing: 0.25em; text-transform: uppercase; padding: 8px 12px; }
+.admin-nav-section-label { font-family: var(--font-mono); font-size: 9px; color: rgba(255,255,255,0.25); letter-spacing: 0.25em; text-transform: uppercase; padding: 8px 12px; }
 .admin-nav-link {
   display: block;
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 11px;
   color: rgba(255,255,255,0.4);
   padding: 10px 16px;
@@ -1071,7 +1057,7 @@ input:focus, textarea:focus, select:focus {
 }
 .admin-nav-link:hover { color: rgba(255,255,255,0.6); }
 .admin-sidebar-bottom { margin-top: auto; padding: 16px 20px; border-top: 1px solid rgba(255,255,255,0.06); }
-.admin-sidebar-wallet { font-family: 'IBM Plex Mono', monospace; font-size: 9px; color: rgba(255,255,255,0.3); margin-bottom: 8px; }
+.admin-sidebar-wallet { font-family: var(--font-mono); font-size: 9px; color: rgba(255,255,255,0.3); margin-bottom: 8px; }
 .admin-main { margin-left: 240px; padding: 48px; flex: 1; min-width: 0; }
 .admin-main--full { flex: 1; padding: 0; }
 .admin-login { display: flex; align-items: center; justify-content: center; min-height: 100vh; }
@@ -1083,7 +1069,7 @@ input:focus, textarea:focus, select:focus {
 }
 .admin-login-header { display: flex; align-items: baseline; gap: 4px; }
 .admin-page-header {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 10px;
   color: rgba(255,255,255,0.3);
   letter-spacing: 0.2em;
@@ -1091,7 +1077,7 @@ input:focus, textarea:focus, select:focus {
   margin-bottom: 8px;
 }
 .admin-page-title {
-  font-family: 'Bebas Neue', sans-serif;
+  font-family: var(--font-display);
   font-size: 80px;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -1109,7 +1095,7 @@ input:focus, textarea:focus, select:focus {
   margin: 24px 0;
 }
 .ref-gate-label {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 11px;
   color: rgba(255,255,255,0.35);
   letter-spacing: 0.25em;
@@ -1141,14 +1127,14 @@ input:focus, textarea:focus, select:focus {
   padding: 16px 20px;
 }
 .ref-link-url {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 13px;
   word-break: break-all;
   flex: 1;
 }
 .ref-link-actions { display: flex; gap: 8px; flex-shrink: 0; }
 .ref-copy-btn {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 10px;
   font-weight: 600;
   letter-spacing: 0.08em;
@@ -1168,20 +1154,20 @@ input:focus, textarea:focus, select:focus {
   border-bottom: 1px solid var(--line);
 }
 .ref-reward-label {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 10px;
   color: var(--muted);
   text-transform: uppercase;
   letter-spacing: 0.1em;
 }
 .ref-reward-value {
-  font-family: 'IBM Plex Sans', sans-serif;
+  font-family: var(--font-body);
   font-weight: 500;
   font-size: 13px;
 }
 
 .ref-rank-badge {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 12px;
   color: var(--muted);
   padding: 12px 0;
@@ -1200,14 +1186,14 @@ input:focus, textarea:focus, select:focus {
   padding: 32px;
 }
 .ref-cap-reached {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 10px;
   color: var(--fg);
   letter-spacing: 0.15em;
   margin-top: 8px;
 }
 .ref-cap-warning {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 10px;
   color: rgba(255,255,255,0.6);
   margin-top: 8px;
@@ -1219,7 +1205,7 @@ input:focus, textarea:focus, select:focus {
   gap: 8px;
 }
 .ref-rule-pill {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 10px;
   border: 1px solid rgba(255,255,255,0.12);
   padding: 8px 16px;
@@ -1240,7 +1226,7 @@ input:focus, textarea:focus, select:focus {
   align-items: start;
 }
 .ref-teaser-title {
-  font-family: 'Bebas Neue', sans-serif;
+  font-family: var(--font-display);
   font-size: 64px;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -1250,7 +1236,7 @@ input:focus, textarea:focus, select:focus {
 .ref-teaser-title span { display: block; }
 .ref-teaser-ghost { color: rgba(255,255,255,0.18); }
 .ref-teaser-sub {
-  font-family: 'IBM Plex Sans', sans-serif;
+  font-family: var(--font-body);
   font-weight: 300;
   font-size: 15px;
   color: var(--muted);
@@ -1270,20 +1256,20 @@ input:focus, textarea:focus, select:focus {
   text-align: center;
 }
 .ref-teaser-stat-value {
-  font-family: 'Bebas Neue', sans-serif;
+  font-family: var(--font-display);
   font-size: 56px;
   line-height: 1;
   margin-bottom: 8px;
 }
 .ref-teaser-stat-label {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 10px;
   color: var(--muted);
   letter-spacing: 0.15em;
   text-transform: uppercase;
 }
 .ref-teaser-active {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 11px;
   color: var(--muted-deep);
 }
@@ -1310,12 +1296,12 @@ input:focus, textarea:focus, select:focus {
   display: flex;
   align-items: center;
   padding: 0 24px;
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 11px;
   color: rgba(255,255,255,0.2);
 }
 .wt-input-label {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 10px;
   color: var(--muted);
   letter-spacing: 0.25em;
@@ -1323,7 +1309,7 @@ input:focus, textarea:focus, select:focus {
   margin-bottom: 16px;
 }
 .wt-input-hint {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 10px;
   color: var(--muted-deep);
   margin-top: 12px;
@@ -1337,7 +1323,7 @@ input:focus, textarea:focus, select:focus {
   background: var(--bg);
   color: var(--fg);
   border: 1px solid rgba(255,255,255,0.15);
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 13px;
 }
 .wt-lookup-input:focus { outline: none; border-color: var(--fg); }
@@ -1364,7 +1350,7 @@ input:focus, textarea:focus, select:focus {
 .wt-connected-left { display: flex; align-items: center; gap: 12px; }
 .wt-connected-right { display: flex; align-items: center; gap: 16px; }
 .wt-badge-connected {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 9px;
   font-weight: 700;
   letter-spacing: 0.08em;
@@ -1373,7 +1359,7 @@ input:focus, textarea:focus, select:focus {
   color: var(--bg);
 }
 .wt-badge-lookup {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 9px;
   font-weight: 700;
   letter-spacing: 0.08em;
@@ -1382,16 +1368,16 @@ input:focus, textarea:focus, select:focus {
   color: var(--fg);
 }
 .wt-connected-addr {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 13px;
 }
 .wt-connected-bal {
-  font-family: 'Bebas Neue', sans-serif;
+  font-family: var(--font-display);
   font-size: 24px;
   letter-spacing: 0.02em;
 }
 .wt-disconnect, .wt-approved-only {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 10px;
   color: var(--muted);
   background: none;
@@ -1424,12 +1410,12 @@ input:focus, textarea:focus, select:focus {
 }
 .wt-eligible-dot { color: var(--fg); font-size: 8px; }
 .wt-eligible-text {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 12px;
   color: rgba(255,255,255,0.6);
 }
 .wt-cooldown-label {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 10px;
   color: var(--muted);
   letter-spacing: 0.3em;
@@ -1444,36 +1430,36 @@ input:focus, textarea:focus, select:focus {
 }
 .wt-cooldown-unit { text-align: center; }
 .wt-cooldown-num {
-  font-family: 'Bebas Neue', sans-serif;
+  font-family: var(--font-display);
   font-size: 56px;
   line-height: 1;
 }
 .wt-cooldown-unit-label {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 10px;
   color: var(--muted);
 }
 .wt-cooldown-sep {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 20px;
   color: rgba(255,255,255,0.2);
   margin: 0 4px;
   align-self: center;
 }
 .wt-cooldown-date {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 12px;
   color: var(--muted);
 }
 .wt-cooldown-why-label {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 10px;
   color: var(--muted);
   letter-spacing: 0.15em;
   margin-bottom: 8px;
 }
 .wt-cooldown-why {
-  font-family: 'IBM Plex Sans', sans-serif;
+  font-family: var(--font-body);
   font-weight: 300;
   font-size: 13px;
   color: rgba(255,255,255,0.5);
@@ -1494,19 +1480,19 @@ input:focus, textarea:focus, select:focus {
   margin-bottom: 24px;
 }
 .wt-gate-title {
-  font-family: 'Bebas Neue', sans-serif;
+  font-family: var(--font-display);
   font-size: 40px;
   letter-spacing: 0.04em;
   text-transform: uppercase;
 }
 .wt-gate-id {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 11px;
   color: var(--muted);
   display: block;
 }
 .wt-gate-ago {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 10px;
   color: var(--muted-deep);
   display: block;
@@ -1516,7 +1502,7 @@ input:focus, textarea:focus, select:focus {
   display: flex;
   align-items: center;
   gap: 12px;
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 10px;
   color: var(--muted);
   margin-bottom: 16px;
@@ -1527,7 +1513,7 @@ input:focus, textarea:focus, select:focus {
   color: var(--muted);
   padding: 4px 8px;
   cursor: crosshair;
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 10px;
 }
 .wt-gate-selector button:disabled { opacity: 0.3; }
@@ -1556,12 +1542,12 @@ input:focus, textarea:focus, select:focus {
 .wt-gate-icon--pending { color: rgba(255,255,255,0.2); }
 .wt-gate-icon--skipped { color: rgba(255,255,255,0.15); }
 .wt-gate-num {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 10px;
   color: rgba(255,255,255,0.3);
 }
 .wt-gate-name {
-  font-family: 'IBM Plex Sans', sans-serif;
+  font-family: var(--font-body);
   font-weight: 500;
   font-size: 14px;
 }
@@ -1573,14 +1559,14 @@ input:focus, textarea:focus, select:focus {
   margin-bottom: 4px;
 }
 .wt-gate-failure-label {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 9px;
   color: rgba(255,255,255,0.3);
   letter-spacing: 0.2em;
   margin-bottom: 4px;
 }
 .wt-gate-failure-text {
-  font-family: 'IBM Plex Sans', sans-serif;
+  font-family: var(--font-body);
   font-weight: 300;
   font-size: 13px;
   color: rgba(255,255,255,0.6);
@@ -1596,7 +1582,7 @@ input:focus, textarea:focus, select:focus {
   transition: width 0.5s ease;
 }
 .wt-gate-progress-label {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 12px;
   color: var(--muted);
   margin-top: 8px;
@@ -1611,12 +1597,12 @@ input:focus, textarea:focus, select:focus {
   margin-bottom: 16px;
 }
 .wt-history-count {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 11px;
   color: var(--muted);
 }
 .wt-status-badge {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 9px;
   font-weight: 600;
   letter-spacing: 0.08em;
@@ -1635,7 +1621,7 @@ input:focus, textarea:focus, select:focus {
   position: relative;
 }
 .wt-idle-ghost {
-  font-family: 'Bebas Neue', sans-serif;
+  font-family: var(--font-display);
   font-size: 300px;
   color: rgba(255,255,255,0.02);
   position: absolute;
@@ -1646,7 +1632,7 @@ input:focus, textarea:focus, select:focus {
   line-height: 1;
 }
 .wt-idle-title {
-  font-family: 'Bebas Neue', sans-serif;
+  font-family: var(--font-display);
   font-size: 48px;
   color: rgba(255,255,255,0.2);
   letter-spacing: 0.04em;
@@ -1654,7 +1640,7 @@ input:focus, textarea:focus, select:focus {
   position: relative;
 }
 .wt-idle-body {
-  font-family: 'IBM Plex Sans', sans-serif;
+  font-family: var(--font-body);
   font-weight: 300;
   font-size: 14px;
   color: rgba(255,255,255,0.35);
@@ -1679,7 +1665,7 @@ input:focus, textarea:focus, select:focus {
   align-items: start;
 }
 .wt-teaser-title {
-  font-family: 'Bebas Neue', sans-serif;
+  font-family: var(--font-display);
   font-size: 64px;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -1689,7 +1675,7 @@ input:focus, textarea:focus, select:focus {
 .wt-teaser-title span { display: block; }
 .wt-teaser-ghost { color: rgba(255,255,255,0.18); }
 .wt-teaser-sub {
-  font-family: 'IBM Plex Sans', sans-serif;
+  font-family: var(--font-body);
   font-weight: 300;
   font-size: 15px;
   color: var(--muted);
@@ -1703,14 +1689,14 @@ input:focus, textarea:focus, select:focus {
   gap: 12px;
   padding: 8px 0;
   border-bottom: 1px solid var(--line);
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 12px;
   color: var(--muted);
 }
 .wt-teaser-gate--passed { color: var(--fg); }
 .wt-teaser-gate--processing { color: var(--fg); }
 .wt-teaser-processing {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 10px;
   color: var(--muted-deep);
   margin-top: 12px;
@@ -1718,7 +1704,7 @@ input:focus, textarea:focus, select:focus {
 
 /* ─── GATES ─── */
 .gt-header-body {
-  font-family: 'IBM Plex Sans', sans-serif;
+  font-family: var(--font-body);
   font-weight: 300;
   font-size: 15px;
   color: rgba(255,255,255,0.65);
@@ -1748,14 +1734,14 @@ input:focus, textarea:focus, select:focus {
   margin-bottom: 12px;
 }
 .gt-card-gate {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 10px;
   color: var(--muted);
   letter-spacing: 0.2em;
 }
 .gt-card-top-right { display: flex; gap: 8px; align-items: center; }
 .gt-card-category {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 9px;
   letter-spacing: 0.1em;
   color: var(--muted);
@@ -1763,7 +1749,7 @@ input:focus, textarea:focus, select:focus {
   padding: 4px 10px;
 }
 .gt-card-nonblock {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 9px;
   letter-spacing: 0.08em;
   color: var(--muted);
@@ -1771,18 +1757,18 @@ input:focus, textarea:focus, select:focus {
   padding: 4px 10px;
 }
 .gt-card-name {
-  font-family: 'IBM Plex Sans', sans-serif;
+  font-family: var(--font-body);
   font-weight: 500;
   font-size: 18px;
   margin-bottom: 16px;
 }
 .gt-card-rate {
-  font-family: 'Bebas Neue', sans-serif;
+  font-family: var(--font-display);
   font-size: clamp(40px, 6vw, 60px);
   line-height: 1;
 }
 .gt-card-rate-label {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 10px;
   color: var(--muted);
   letter-spacing: 0.2em;
@@ -1805,13 +1791,13 @@ input:focus, textarea:focus, select:focus {
 .gt-card-stats {
   display: flex;
   gap: 8px;
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 11px;
   color: var(--muted);
   margin-bottom: 12px;
 }
 .gt-card-desc {
-  font-family: 'IBM Plex Sans', sans-serif;
+  font-family: var(--font-body);
   font-weight: 300;
   font-size: 13px;
   color: rgba(255,255,255,0.55);
@@ -1819,13 +1805,13 @@ input:focus, textarea:focus, select:focus {
   margin-bottom: 12px;
 }
 .gt-card-failure {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 10px;
   color: rgba(255,255,255,0.3);
   margin-bottom: 16px;
 }
 .gt-card-expand {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 10px;
   color: rgba(255,255,255,0.35);
   background: none;
@@ -1856,7 +1842,7 @@ input:focus, textarea:focus, select:focus {
   gap: 48px;
 }
 .gt-detail-heading {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 10px;
   color: var(--muted);
   letter-spacing: 0.25em;
@@ -1864,7 +1850,7 @@ input:focus, textarea:focus, select:focus {
   margin-bottom: 16px;
 }
 .gt-detail-body {
-  font-family: 'IBM Plex Sans', sans-serif;
+  font-family: var(--font-body);
   font-weight: 300;
   font-size: 14px;
   color: rgba(255,255,255,0.7);
@@ -1872,7 +1858,7 @@ input:focus, textarea:focus, select:focus {
 }
 .gt-detail-failures { display: flex; flex-direction: column; gap: 8px; }
 .gt-detail-failure-item {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 12px;
   color: rgba(255,255,255,0.5);
   line-height: 1.8;
@@ -1884,7 +1870,7 @@ input:focus, textarea:focus, select:focus {
   margin-left: 16px;
 }
 .gt-detail-time {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 11px;
   color: var(--muted);
   margin-top: 16px;
@@ -1897,14 +1883,14 @@ input:focus, textarea:focus, select:focus {
   margin: 32px 0;
 }
 .gt-checklist-title {
-  font-family: 'Bebas Neue', sans-serif;
+  font-family: var(--font-display);
   font-size: 40px;
   letter-spacing: 0.04em;
   text-transform: uppercase;
   margin-bottom: 8px;
 }
 .gt-checklist-sub {
-  font-family: 'IBM Plex Sans', sans-serif;
+  font-family: var(--font-body);
   font-weight: 300;
   font-size: 14px;
   color: var(--muted);
@@ -1921,13 +1907,13 @@ input:focus, textarea:focus, select:focus {
   user-select: none;
 }
 .gt-check-label {
-  font-family: 'IBM Plex Sans', sans-serif;
+  font-family: var(--font-body);
   font-weight: 500;
   font-size: 14px;
   flex: 1;
 }
 .gt-check-ref {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 11px;
   color: var(--muted);
 }
@@ -1939,7 +1925,7 @@ input:focus, textarea:focus, select:focus {
 }
 .gt-checklist-progress { flex: 1; }
 .gt-checklist-count {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 12px;
   margin-bottom: 8px;
   display: block;
@@ -1959,7 +1945,7 @@ input:focus, textarea:focus, select:focus {
   gap: 16px;
 }
 .gt-reset {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 10px;
   color: var(--muted);
   background: none;
@@ -1973,7 +1959,7 @@ input:focus, textarea:focus, select:focus {
 /* FAQ */
 .gt-faq-section { margin: 64px 0; }
 .gt-faq-title {
-  font-family: 'Bebas Neue', sans-serif;
+  font-family: var(--font-display);
   font-size: 48px;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -1987,7 +1973,7 @@ input:focus, textarea:focus, select:focus {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-family: 'IBM Plex Sans', sans-serif;
+  font-family: var(--font-body);
   font-weight: 500;
   font-size: 15px;
   color: var(--fg);
@@ -1998,14 +1984,14 @@ input:focus, textarea:focus, select:focus {
   text-align: left;
 }
 .gt-faq-toggle {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 18px;
   color: var(--muted);
   flex-shrink: 0;
   margin-left: 16px;
 }
 .gt-faq-answer {
-  font-family: 'IBM Plex Sans', sans-serif;
+  font-family: var(--font-body);
   font-weight: 300;
   font-size: 14px;
   color: rgba(255,255,255,0.6);
@@ -2029,7 +2015,7 @@ input:focus, textarea:focus, select:focus {
   align-items: start;
 }
 .gt-teaser-title {
-  font-family: 'Bebas Neue', sans-serif;
+  font-family: var(--font-display);
   font-size: 64px;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -2039,7 +2025,7 @@ input:focus, textarea:focus, select:focus {
 .gt-teaser-title span { display: block; }
 .gt-teaser-ghost { color: rgba(255,255,255,0.18); }
 .gt-teaser-sub {
-  font-family: 'IBM Plex Sans', sans-serif;
+  font-family: var(--font-body);
   font-weight: 300;
   font-size: 15px;
   color: var(--muted);
@@ -2055,19 +2041,19 @@ input:focus, textarea:focus, select:focus {
   border-bottom: 1px solid var(--line);
 }
 .gt-teaser-num {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 10px;
   color: var(--muted-deep);
   min-width: 20px;
 }
 .gt-teaser-name {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 12px;
   color: var(--muted);
   flex: 1;
 }
 .gt-teaser-rate {
-  font-family: 'Bebas Neue', sans-serif;
+  font-family: var(--font-display);
   font-size: 16px;
 }
 .gt-teaser-overall-track {
@@ -2092,7 +2078,7 @@ input:focus, textarea:focus, select:focus {
 }
 .cf-filters { display: flex; gap: 8px; }
 .cf-filter-tab {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 10px;
   text-transform: uppercase;
   letter-spacing: 0.15em;
@@ -2111,7 +2097,7 @@ input:focus, textarea:focus, select:focus {
 }
 .cf-sort-wrap { position: relative; }
 .cf-sort-btn {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 10px;
   text-transform: uppercase;
   letter-spacing: 0.1em;
@@ -2134,7 +2120,7 @@ input:focus, textarea:focus, select:focus {
   display: block;
   width: 100%;
   text-align: left;
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 10px;
   letter-spacing: 0.1em;
   color: var(--muted);
@@ -2148,7 +2134,7 @@ input:focus, textarea:focus, select:focus {
 .cf-sort-option--active { color: var(--fg); }
 
 .cf-new-bar {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 12px;
   color: var(--fg);
   background: var(--bg);
@@ -2182,7 +2168,7 @@ input:focus, textarea:focus, select:focus {
 .cf-badge {
   position: absolute;
   z-index: 2;
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 9px;
   font-weight: 700;
   letter-spacing: 0.08em;
@@ -2221,7 +2207,7 @@ input:focus, textarea:focus, select:focus {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 11px;
   letter-spacing: 0.15em;
   color: var(--fg);
@@ -2237,7 +2223,7 @@ input:focus, textarea:focus, select:focus {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 11px;
   color: rgba(255,255,255,0.2);
   background: rgba(255,255,255,0.03);
@@ -2250,23 +2236,23 @@ input:focus, textarea:focus, select:focus {
   margin-bottom: 8px;
 }
 .cf-card-location {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 11px;
   color: rgba(255,255,255,0.5);
 }
 .cf-card-date {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 10px;
   color: rgba(255,255,255,0.3);
 }
 .cf-card-sol {
-  font-family: 'Bebas Neue', sans-serif;
+  font-family: var(--font-display);
   font-size: 36px;
   letter-spacing: 0.02em;
   margin-bottom: 4px;
 }
 .cf-card-usd {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 11px;
   color: rgba(255,255,255,0.35);
   margin-bottom: 12px;
@@ -2277,12 +2263,12 @@ input:focus, textarea:focus, select:focus {
   align-items: center;
 }
 .cf-card-wallet {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 10px;
   color: rgba(255,255,255,0.3);
 }
 .cf-card-gates {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 10px;
   color: rgba(255,255,255,0.3);
   display: flex;
@@ -2297,7 +2283,7 @@ input:focus, textarea:focus, select:focus {
   padding: 40px 0;
 }
 .cf-end-label {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 10px;
   color: var(--muted-deep);
 }
@@ -2338,13 +2324,13 @@ input:focus, textarea:focus, select:focus {
   border-bottom: 1px solid var(--line);
 }
 .cf-modal-title {
-  font-family: 'Bebas Neue', sans-serif;
+  font-family: var(--font-display);
   font-size: 28px;
   letter-spacing: 0.04em;
   text-transform: uppercase;
 }
 .cf-modal-close {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 16px;
   color: var(--muted);
   background: none;
@@ -2369,14 +2355,14 @@ input:focus, textarea:focus, select:focus {
   background: var(--bg);
 }
 .cf-modal-image-note {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 9px;
   color: var(--muted-deep);
   margin-top: 8px;
 }
 .cf-modal-details { padding: 24px 32px; }
 .cf-modal-section-label {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 10px;
   color: var(--muted);
   letter-spacing: 0.25em;
@@ -2391,21 +2377,21 @@ input:focus, textarea:focus, select:focus {
   border-bottom: 1px solid rgba(255,255,255,0.06);
 }
 .cf-modal-label {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 10px;
   text-transform: uppercase;
   letter-spacing: 0.15em;
   color: var(--muted);
 }
 .cf-modal-value {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 13px;
   text-align: right;
   display: flex;
   align-items: center;
 }
 .cf-modal-value-sol {
-  font-family: 'Bebas Neue', sans-serif;
+  font-family: var(--font-display);
   font-size: 28px;
   letter-spacing: 0.02em;
 }
@@ -2438,7 +2424,7 @@ input:focus, textarea:focus, select:focus {
   align-items: start;
 }
 .cf-teaser-title {
-  font-family: 'Bebas Neue', sans-serif;
+  font-family: var(--font-display);
   font-size: 72px;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -2448,7 +2434,7 @@ input:focus, textarea:focus, select:focus {
 .cf-teaser-title span { display: block; }
 .cf-teaser-ghost { color: rgba(255,255,255,0.2); }
 .cf-teaser-sub {
-  font-family: 'IBM Plex Sans', sans-serif;
+  font-family: var(--font-body);
   font-weight: 300;
   font-size: 15px;
   color: var(--muted);
@@ -2466,24 +2452,24 @@ input:focus, textarea:focus, select:focus {
   padding: 20px;
 }
 .cf-teaser-card-loc {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 10px;
   color: var(--muted);
   margin-bottom: 4px;
 }
 .cf-teaser-card-sol {
-  font-family: 'Bebas Neue', sans-serif;
+  font-family: var(--font-display);
   font-size: 24px;
   letter-spacing: 0.02em;
   margin-bottom: 4px;
 }
 .cf-teaser-card-date {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 10px;
   color: var(--muted-deep);
 }
 .cf-teaser-live {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 10px;
   color: var(--muted-deep);
   margin-top: 12px;
@@ -2497,14 +2483,14 @@ input:focus, textarea:focus, select:focus {
 }
 .lb-header__meta { margin-bottom: 16px; }
 .lb-tag {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 11px;
   color: var(--muted);
   letter-spacing: 0.3em;
   text-transform: uppercase;
 }
 .lb-title {
-  font-family: 'Bebas Neue', sans-serif;
+  font-family: var(--font-display);
   font-size: 80px;
   line-height: 1;
   letter-spacing: 0.04em;
@@ -2528,7 +2514,7 @@ input:focus, textarea:focus, select:focus {
   50% { transform: scale(1.5); opacity: 0; }
 }
 .lb-live-label {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 10px;
   color: var(--muted);
   letter-spacing: 0.2em;
@@ -2587,7 +2573,7 @@ input:focus, textarea:focus, select:focus {
   position: absolute;
   top: 8px;
   right: 8px;
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 9px;
   font-weight: 700;
   letter-spacing: 0.08em;
@@ -2601,24 +2587,24 @@ input:focus, textarea:focus, select:focus {
   vertical-align: middle;
 }
 .lb-podium-rank {
-  font-family: 'Bebas Neue', sans-serif;
+  font-family: var(--font-display);
   font-size: 48px;
   letter-spacing: 0.02em;
   margin-bottom: 8px;
 }
 .lb-podium-wallet {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 13px;
   margin-bottom: 12px;
 }
 .lb-podium-sol {
-  font-family: 'Bebas Neue', sans-serif;
+  font-family: var(--font-display);
   font-size: 36px;
   letter-spacing: 0.02em;
   margin-bottom: 8px;
 }
 .lb-podium-claims {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 11px;
   color: var(--muted);
 }
@@ -2631,7 +2617,7 @@ input:focus, textarea:focus, select:focus {
   border-collapse: collapse;
 }
 .lb-table thead th {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 10px;
   color: rgba(255,255,255,0.3);
   letter-spacing: 0.25em;
@@ -2654,48 +2640,48 @@ input:focus, textarea:focus, select:focus {
 .lb-table-row--skeleton td { padding: 16px; }
 
 .lb-table-rank {
-  font-family: 'Bebas Neue', sans-serif;
+  font-family: var(--font-display);
   font-size: 20px;
   color: var(--muted);
   padding: 14px 16px;
   width: 60px;
 }
 .lb-table-wallet {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 13px;
   padding: 14px 16px;
 }
 .lb-table-sol {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 13px;
   padding: 14px 16px;
 }
 .lb-table-claims {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 13px;
   color: var(--muted);
   padding: 14px 16px;
 }
 .lb-table-time {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 11px;
   color: var(--muted);
   padding: 14px 16px;
 }
 .lb-table-gc, .lb-table-ref, .lb-table-eng {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 12px;
   color: var(--muted);
   padding: 14px 16px;
 }
 .lb-table-score {
-  font-family: 'Bebas Neue', sans-serif;
+  font-family: var(--font-display);
   font-size: 18px;
   padding: 14px 16px;
   color: var(--fg);
 }
 .lb-score-legend {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 10px;
   color: var(--muted-deep);
   letter-spacing: 0.05em;
@@ -2715,14 +2701,14 @@ input:focus, textarea:focus, select:focus {
 }
 .lb-podium-primary-item { text-align: center; padding: 0 16px; }
 .lb-podium-primary-value {
-  font-family: 'Bebas Neue', sans-serif;
+  font-family: var(--font-display);
   font-size: 32px;
   display: block;
   line-height: 1;
   margin-bottom: 4px;
 }
 .lb-podium-primary-label {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 9px;
   text-transform: uppercase;
   letter-spacing: 0.2em;
@@ -2734,13 +2720,13 @@ input:focus, textarea:focus, select:focus {
   background: var(--line);
 }
 .lb-podium-secondary {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 11px;
   color: var(--muted);
   margin-bottom: 4px;
 }
 .lb-podium-score {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 10px;
   color: var(--muted-deep);
   margin-top: 8px;
@@ -2753,13 +2739,13 @@ input:focus, textarea:focus, select:focus {
   margin-left: 4px;
 }
 .lb-podium-holdings {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 11px;
   color: var(--muted);
   margin-bottom: 4px;
 }
 .lb-podium-meta {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 10px;
   color: var(--muted-deep);
   margin-top: 8px;
@@ -2767,7 +2753,7 @@ input:focus, textarea:focus, select:focus {
 .lb-podium-meta-item { cursor: help; }
 .lb-podium-meta-sep { margin: 0 6px; }
 .lb-table-action {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 10px;
   color: rgba(255,255,255,0.4);
   padding: 14px 16px;
@@ -2783,7 +2769,7 @@ input:focus, textarea:focus, select:focus {
   border-top: 1px solid var(--line);
 }
 .lb-pagination-info {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 11px;
   color: var(--muted);
 }
@@ -2793,7 +2779,7 @@ input:focus, textarea:focus, select:focus {
   padding: 80px 24px;
 }
 .lb-empty p {
-  font-family: 'IBM Plex Sans', sans-serif;
+  font-family: var(--font-body);
   font-weight: 300;
   font-size: 16px;
   color: var(--muted);
@@ -2833,21 +2819,21 @@ input:focus, textarea:focus, select:focus {
   border-bottom: 1px solid var(--line);
 }
 .lb-drill-title {
-  font-family: 'Bebas Neue', sans-serif;
+  font-family: var(--font-display);
   font-size: 32px;
   letter-spacing: 0.04em;
   text-transform: uppercase;
   margin-bottom: 8px;
 }
 .lb-drill-addr {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 11px;
   color: var(--muted);
   word-break: break-all;
   margin-bottom: 12px;
 }
 .lb-drill-copy {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 10px;
   text-transform: uppercase;
   letter-spacing: 0.1em;
@@ -2860,7 +2846,7 @@ input:focus, textarea:focus, select:focus {
 }
 .lb-drill-copy:hover { border-color: var(--fg); color: var(--fg); }
 .lb-drill-close {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 16px;
   color: var(--muted);
   background: none;
@@ -2874,7 +2860,7 @@ input:focus, textarea:focus, select:focus {
   padding: 24px 32px;
 }
 .lb-drill-loading, .lb-drill-empty {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 12px;
   color: var(--muted);
   padding: 32px 0;
@@ -2885,25 +2871,25 @@ input:focus, textarea:focus, select:focus {
   border-bottom: 1px solid rgba(255,255,255,0.06);
 }
 .lb-drill-date {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 11px;
   color: var(--muted);
   margin-bottom: 4px;
 }
 .lb-drill-amount {
-  font-family: 'Bebas Neue', sans-serif;
+  font-family: var(--font-display);
   font-size: 28px;
   letter-spacing: 0.02em;
   margin-bottom: 4px;
 }
 .lb-drill-gates {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 10px;
   color: var(--muted);
   letter-spacing: 0.1em;
 }
 .lb-drill-id {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 9px;
   color: var(--muted-deep);
   margin-top: 4px;
@@ -2916,7 +2902,7 @@ input:focus, textarea:focus, select:focus {
   align-items: center;
 }
 .lb-drill-total {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 12px;
 }
 
@@ -2935,7 +2921,7 @@ input:focus, textarea:focus, select:focus {
   align-items: start;
 }
 .lb-teaser-title {
-  font-family: 'Bebas Neue', sans-serif;
+  font-family: var(--font-display);
   font-size: 64px;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -2943,7 +2929,7 @@ input:focus, textarea:focus, select:focus {
   margin-bottom: 16px;
 }
 .lb-teaser-sub {
-  font-family: 'IBM Plex Sans', sans-serif;
+  font-family: var(--font-body);
   font-weight: 300;
   font-size: 15px;
   color: var(--muted);
@@ -2954,7 +2940,7 @@ input:focus, textarea:focus, select:focus {
   border-collapse: collapse;
 }
 .lb-mini-table td {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 12px;
   padding: 8px 12px;
   border-bottom: 1px solid var(--line);
@@ -2965,7 +2951,7 @@ input:focus, textarea:focus, select:focus {
 
 /* ─── WALLET BUTTON ─── */
 .wallet-btn {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 10px;
   font-weight: 600;
   letter-spacing: 0.1em;
@@ -3017,7 +3003,7 @@ input:focus, textarea:focus, select:focus {
   color: rgba(255,255,255,0.9);
 }
 .auth-wallet {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 9px;
   color: rgba(255,255,255,0.4);
   letter-spacing: 0.05em;
@@ -3058,7 +3044,7 @@ input:focus, textarea:focus, select:focus {
   border: 1px solid rgba(255,255,255,0.2);
   background: transparent;
   color: rgba(255,255,255,0.3);
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 12px;
   display: flex;
   align-items: center;
@@ -3101,7 +3087,7 @@ input:focus, textarea:focus, select:focus {
 }
 
 .sf-headline {
-  font-family: 'Bebas Neue', sans-serif;
+  font-family: var(--font-display);
   font-size: 64px;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -3110,7 +3096,7 @@ input:focus, textarea:focus, select:focus {
 }
 
 .sf-sub {
-  font-family: 'IBM Plex Sans', sans-serif;
+  font-family: var(--font-body);
   font-weight: 300;
   font-size: 15px;
   color: rgba(255,255,255,0.5);
@@ -3120,7 +3106,7 @@ input:focus, textarea:focus, select:focus {
 }
 
 .sf-sub-id {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 11px;
   color: var(--muted);
   margin-bottom: 32px;
@@ -3138,7 +3124,7 @@ input:focus, textarea:focus, select:focus {
   border: 1px solid rgba(255,255,255,0.15);
   background: transparent;
   color: var(--fg);
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 13px;
   cursor: crosshair;
   transition: border-color 0.2s, background 0.2s;
@@ -3180,12 +3166,12 @@ input:focus, textarea:focus, select:focus {
 }
 
 .sf-connected-addr {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 14px;
 }
 
 .sf-connected-label {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 11px;
   color: var(--muted);
   margin-left: auto;
@@ -3194,7 +3180,7 @@ input:focus, textarea:focus, select:focus {
 }
 
 .sf-error {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 11px;
   color: var(--fg);
   background: rgba(255,255,255,0.06);
@@ -3210,7 +3196,7 @@ input:focus, textarea:focus, select:focus {
   background: var(--bg);
   color: var(--fg);
   border: 1px solid rgba(255,255,255,0.15);
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 13px;
   transition: border-color 0.2s;
   margin-bottom: 16px;
@@ -3246,7 +3232,7 @@ input:focus, textarea:focus, select:focus {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-family: 'Bebas Neue', sans-serif;
+  font-family: var(--font-display);
   font-size: 18px;
   flex-shrink: 0;
 }
@@ -3254,14 +3240,14 @@ input:focus, textarea:focus, select:focus {
 .sf-tweet-body { flex: 1; }
 
 .sf-tweet-meta {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 11px;
   color: var(--muted);
   margin-bottom: 6px;
 }
 
 .sf-tweet-text {
-  font-family: 'IBM Plex Sans', sans-serif;
+  font-family: var(--font-body);
   font-weight: 300;
   font-size: 14px;
   line-height: 1.6;
@@ -3277,7 +3263,7 @@ input:focus, textarea:focus, select:focus {
 }
 
 .sf-tweet-status {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 11px;
   color: var(--muted);
 }
@@ -3308,7 +3294,7 @@ input:focus, textarea:focus, select:focus {
   flex-direction: column;
   align-items: center;
   gap: 12px;
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 12px;
   color: rgba(255,255,255,0.3);
 }
@@ -3330,19 +3316,19 @@ input:focus, textarea:focus, select:focus {
 .sf-upload-info { flex: 1; }
 
 .sf-upload-name {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 13px;
   margin-bottom: 4px;
 }
 
 .sf-upload-size {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 11px;
   color: var(--muted);
 }
 
 .sf-upload-remove {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 11px;
   color: var(--muted);
   background: none;
@@ -3356,7 +3342,7 @@ input:focus, textarea:focus, select:focus {
 .sf-upload-remove:hover { color: var(--fg); }
 
 .sf-upload-formats {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 10px;
   color: var(--muted-deep);
   margin-bottom: 24px;
@@ -3371,7 +3357,7 @@ input:focus, textarea:focus, select:focus {
   gap: 12px;
   padding: 10px 0;
   cursor: crosshair;
-  font-family: 'IBM Plex Sans', sans-serif;
+  font-family: var(--font-body);
   font-weight: 300;
   font-size: 14px;
   color: rgba(255,255,255,0.6);
@@ -3414,7 +3400,7 @@ input:focus, textarea:focus, select:focus {
 .sf-review-row:last-child { border-bottom: none; }
 
 .sf-review-label {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 0.15em;
@@ -3422,13 +3408,13 @@ input:focus, textarea:focus, select:focus {
 }
 
 .sf-review-value {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 13px;
   text-align: right;
 }
 
 .sf-fine-print {
-  font-family: 'IBM Plex Sans', sans-serif;
+  font-family: var(--font-body);
   font-weight: 300;
   font-size: 12px;
   color: var(--muted);
@@ -3454,14 +3440,14 @@ input:focus, textarea:focus, select:focus {
 .sf-gate-row--failed .sf-gate-name { color: rgba(255,255,255,0.3); }
 
 .sf-gate-num {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 10px;
   color: var(--muted-deep);
   min-width: 20px;
 }
 
 .sf-gate-name {
-  font-family: 'IBM Plex Sans', sans-serif;
+  font-family: var(--font-body);
   font-weight: 500;
   font-size: 15px;
   flex: 1;
@@ -3486,7 +3472,7 @@ input:focus, textarea:focus, select:focus {
 .sf-result { margin-top: 24px; }
 
 .sf-result-text {
-  font-family: 'IBM Plex Sans', sans-serif;
+  font-family: var(--font-body);
   font-weight: 300;
   font-size: 15px;
   color: var(--muted);
@@ -3494,7 +3480,7 @@ input:focus, textarea:focus, select:focus {
 }
 
 .sf-fail-reason {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 12px;
   padding: 12px 16px;
   background: rgba(255,255,255,0.04);
@@ -3503,7 +3489,7 @@ input:focus, textarea:focus, select:focus {
 }
 
 .sf-fix-details {
-  font-family: 'IBM Plex Sans', sans-serif;
+  font-family: var(--font-body);
   font-weight: 300;
   font-size: 13px;
   color: var(--muted);
@@ -3521,7 +3507,7 @@ input:focus, textarea:focus, select:focus {
 }
 
 .sf-btn-solid {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 11px;
   font-weight: 600;
   text-transform: uppercase;
@@ -3563,7 +3549,7 @@ input:focus, textarea:focus, select:focus {
 }
 
 .sf-btn-ghost {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 11px;
   font-weight: 500;
   text-transform: uppercase;
@@ -3604,7 +3590,7 @@ input:focus, textarea:focus, select:focus {
 }
 
 .gc-cta-band-headline {
-  font-family: 'Bebas Neue', sans-serif;
+  font-family: var(--font-display);
   font-size: 72px;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -3623,7 +3609,7 @@ input:focus, textarea:focus, select:focus {
   border: 1px solid var(--line);
   padding: 20px;
   z-index: 9000;
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
 }
 
 .sf-test-header {
@@ -3651,7 +3637,7 @@ input:focus, textarea:focus, select:focus {
 .sf-test-run-all {
   width: 100%;
   padding: 10px;
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 11px;
   font-weight: 600;
   text-transform: uppercase;
@@ -3666,7 +3652,7 @@ input:focus, textarea:focus, select:focus {
 .sf-test-run-all:disabled { opacity: 0.4; }
 
 .sf-test-summary {
-  font-family: 'Bebas Neue', sans-serif;
+  font-family: var(--font-display);
   font-size: 28px;
   margin-bottom: 16px;
 }
@@ -3708,7 +3694,7 @@ input:focus, textarea:focus, select:focus {
 .sf-test-badge--fail { background: var(--bg); color: var(--fg); border: 1px solid var(--fg); }
 
 .sf-test-run-one {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 9px;
   padding: 2px 6px;
   background: none;
@@ -3725,7 +3711,7 @@ input:focus, textarea:focus, select:focus {
 }
 
 .gc-dash-title {
-  font-family: 'Bebas Neue', sans-serif;
+  font-family: var(--font-display);
   font-size: 80px;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -3798,7 +3784,7 @@ input:focus, textarea:focus, select:focus {
   gap: 16px;
   padding: 12px 0;
   border-bottom: 1px solid var(--line);
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 12px;
   transition: background 0.2s;
 }
@@ -3839,7 +3825,7 @@ input:focus, textarea:focus, select:focus {
 }
 
 .gc-feed-badge {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.08em;
@@ -3863,7 +3849,7 @@ input:focus, textarea:focus, select:focus {
 }
 
 .gc-gate-num {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 10px;
   color: var(--muted-deep);
   letter-spacing: 0.15em;
@@ -3871,14 +3857,14 @@ input:focus, textarea:focus, select:focus {
 }
 
 .gc-gate-name {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 11px;
   color: var(--muted);
   flex: 1;
 }
 
 .gc-gate-pct {
-  font-family: 'Bebas Neue', sans-serif;
+  font-family: var(--font-display);
   font-size: 18px;
   letter-spacing: 0.02em;
 }
@@ -3905,7 +3891,7 @@ input:focus, textarea:focus, select:focus {
   align-items: center;
   gap: 8px;
   margin-top: 32px;
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 11px;
   font-weight: 500;
   text-transform: uppercase;
@@ -4108,7 +4094,7 @@ input:focus, textarea:focus, select:focus {
   }
 
   .mobile-menu-link {
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: var(--font-mono);
     font-size: 13px;
     font-weight: 500;
     text-transform: uppercase;
@@ -4129,25 +4115,58 @@ input:focus, textarea:focus, select:focus {
 }
 
 /* ═══════════════════════════════════════════
-   GLASS CARD — Solana-native panel treatment
+   GLASS CARD 2.0 — Solana-native panel
    ═══════════════════════════════════════════ */
 .glass-card {
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: var(--card-shadow), var(--card-highlight);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  transition: background 0.25s, box-shadow 0.25s;
+  position: relative;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow), var(--glass-highlight);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  transition: background var(--duration-normal) var(--ease-out-expo),
+              box-shadow var(--duration-normal) var(--ease-out-expo),
+              transform var(--duration-fast) var(--ease-out-expo);
+}
+/* Inner highlight gradient — subtle top-edge shine */
+.glass-card::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent);
+  pointer-events: none;
 }
 .glass-card:hover {
-  background: rgba(255, 255, 255, 0.07);
+  background: var(--card-hover);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), 0 1px 0 0 rgba(255, 255, 255, 0.10) inset;
+  transform: translateY(-1px);
+}
+.glass-card:active {
+  transform: scale(0.97);
+  transition-duration: var(--duration-fast);
 }
 .glass-card--glow {
-  box-shadow: var(--card-shadow), var(--card-highlight), 0 0 32px rgba(20, 241, 149, 0.12);
+  box-shadow: var(--glass-shadow), var(--glass-highlight), 0 0 32px var(--accent-glow-soft);
+}
+.glass-card--glow::after {
+  background: linear-gradient(90deg, transparent, rgba(20, 241, 149, 0.12), transparent);
 }
 .glass-card--glow:hover {
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), 0 1px 0 0 rgba(255, 255, 255, 0.10) inset, 0 0 48px rgba(20, 241, 149, 0.18);
+}
+
+/* ═══════════════════════════════════════════
+   BUTTON MICRO-INTERACTIONS
+   ═══════════════════════════════════════════ */
+.gc-btn-solid:active,
+.gc-btn-ghost:active,
+.btn:active,
+.wallet-btn:active {
+  transform: scale(0.97);
+  transition-duration: var(--duration-fast);
 }
 
 /* ═══════════════════════════════════════════
