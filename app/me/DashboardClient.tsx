@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
+import { ViralShareCard } from '../../components/shared/ViralShareCard';
 
 // ── Types ──
 interface GateResult {
@@ -49,6 +50,14 @@ interface Stats {
   rejected: number;
 }
 
+interface NetworkImpact {
+  referredUsers: number;
+  networkSolSaved: number;
+  networkUsdSaved: number;
+  combinedSol: number;
+  combinedUsd: number;
+}
+
 interface Props {
   wallet: string;
   xHandle: string | null;
@@ -56,6 +65,7 @@ interface Props {
   payouts: Payout[];
   referral: Referral;
   stats: Stats;
+  networkImpact: NetworkImpact;
 }
 
 // ── Helpers ──
@@ -102,7 +112,7 @@ function truncate(s: string, n = 8) {
 }
 
 // ── Component ──
-export function DashboardClient({ wallet, xHandle, claims, payouts, referral, stats }: Props) {
+export function DashboardClient({ wallet, xHandle, claims, payouts, referral, stats, networkImpact }: Props) {
   const [expandedClaim, setExpandedClaim] = useState<string | null>(null);
   const [tab, setTab] = useState<'all' | 'approved' | 'pending' | 'rejected'>('all');
 
@@ -358,6 +368,15 @@ export function DashboardClient({ wallet, xHandle, claims, payouts, referral, st
             ))}
           </div>
         </section>
+      )}
+
+      {/* ── Network Impact ── */}
+      {referral.code && (
+        <ViralShareCard
+          variant="dashboard"
+          networkImpact={networkImpact}
+          referralCode={referral.code}
+        />
       )}
 
       {/* ── Referral Summary ── */}

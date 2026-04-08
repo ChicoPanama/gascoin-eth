@@ -1,0 +1,205 @@
+/* ═══════════════════════════════════════════
+   Viral Share Card — vsc- prefix
+   ═══════════════════════════════════════════ */
+
+/* ── Dashboard variant ── */
+.vsc-dashboard {
+  padding: 48px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.vsc-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 32px;
+}
+
+.vsc-title {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.25em;
+  color: var(--muted);
+  margin: 0;
+}
+
+.vsc-share-bar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 24px 0 0;
+}
+
+.vsc-tweet-preview {
+  flex: 1;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  color: var(--muted-deep);
+  line-height: 1.5;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.vsc-share-btn {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  padding: 10px 24px;
+  background: var(--fg);
+  color: var(--bg);
+  border: none;
+  cursor: crosshair;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+
+.vsc-share-btn:hover {
+  background: transparent;
+  color: var(--fg);
+  outline: 1px solid var(--fg);
+}
+
+/* ── Milestone teaser ── */
+.vsc-milestone {
+  padding: 16px 0 0;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  color: var(--muted);
+  letter-spacing: 0.05em;
+}
+
+.vsc-milestone strong {
+  color: var(--fg);
+}
+
+/* ── Empty state ── */
+.vsc-empty {
+  padding: 48px 0;
+  text-align: center;
+}
+
+.vsc-empty__code {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 48px;
+  letter-spacing: 0.08em;
+  color: var(--fg);
+  margin: 0 0 8px;
+}
+
+.vsc-empty__label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  margin-bottom: 24px;
+}
+
+.vsc-empty__actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+}
+
+.vsc-copy-btn {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  padding: 10px 24px;
+  background: transparent;
+  color: var(--muted);
+  border: 1px solid var(--line);
+  cursor: crosshair;
+  transition: all 0.15s;
+}
+
+.vsc-copy-btn:hover {
+  color: var(--fg);
+  border-color: var(--muted);
+}
+
+/* ── Post-approval variant ── */
+.vsc-post-approval {
+  margin-top: 24px;
+  padding: 32px;
+  border: 1px solid var(--line);
+  background: var(--card);
+  animation: vsc-slideIn 0.5s ease both;
+  animation-delay: 1.5s;
+  opacity: 0;
+}
+
+@keyframes vsc-slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.vsc-post__headline {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.25em;
+  color: var(--muted);
+  margin: 0 0 8px;
+}
+
+.vsc-post__text {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 13px;
+  color: var(--fg);
+  margin: 0 0 24px;
+}
+
+.vsc-post__actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.vsc-post__link {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  color: var(--muted);
+  text-decoration: none;
+  letter-spacing: 0.05em;
+}
+
+.vsc-post__link:hover {
+  color: var(--fg);
+}
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+  .vsc-share-bar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .vsc-tweet-preview {
+    white-space: normal;
+  }
+  .vsc-empty__actions {
+    flex-direction: column;
+  }
+  .vsc-post-approval {
+    padding: 24px;
+  }
+  .vsc-post__actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}

@@ -98,6 +98,7 @@ export default function MeDashboardPage() {
           payouts={data.payouts}
           referral={data.referral}
           stats={data.stats}
+          networkImpact={data.networkImpact}
         />
       </main>
     </div>

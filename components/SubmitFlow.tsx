@@ -1,6 +1,8 @@
 'use client';
 
 import { useState, useRef, useEffect, useCallback } from 'react';
+import { generateReferralCodeClient } from '../lib/referral-code-client';
+import { ViralShareCard } from './shared/ViralShareCard';
 
 // ─── Types ───
 type Step = 1 | 2 | 3 | 4 | 5;
@@ -461,10 +463,11 @@ function StepReview({ wallet, tweetUrl, handle, file, onSubmit, onBack }: {
 // ═══════════════════════════════════════════
 // STEP 5 — Gate Progress
 // ═══════════════════════════════════════════
-function StepGates({ failGate, onReset, onResubmit }: {
+function StepGates({ failGate, onReset, onResubmit, referralCode }: {
   failGate: number | null;
   onReset: () => void;
   onResubmit: () => void;
+  referralCode: string;
 }) {
   const [gates, setGates] = useState<Gate[]>(
     GATE_NAMES.map((name) => ({ name, status: 'pending' }))
@@ -533,6 +536,9 @@ function StepGates({ failGate, onReset, onResubmit }: {
       {done && (
         <div className="sf-result">
           <p className="sf-result-text">SOL refund will be dispatched within 24–48 hours</p>
+          {referralCode && (
+            <ViralShareCard variant="post-approval" referralCode={referralCode} />
+          )}
           <div className="sf-nav-buttons">
             <button type="button" className="sf-btn-ghost" onClick={onReset}>Submit another &rarr;</button>
           </div>
@@ -589,6 +595,7 @@ export function SubmitFlow() {
   const [handle, setHandle] = useState('');
   const [file, setFile] = useState<File | null>(null);
   const [failGate, setFailGate] = useState<number | null>(null);
+  const [referralCode, setReferralCode] = useState('');
   const loggedInHandle = usePrivyHandle();
 
   const goTo = (s: Step) => {
@@ -614,7 +621,11 @@ export function SubmitFlow() {
       <ProgressBar step={step} maxStep={maxStep} />
 
       {step === 1 && (
-        <StepWallet onConnect={(w) => { setWallet(w); goTo(2); }} />
+        <StepWallet onConnect={(w) => {
+          setWallet(w);
+          generateReferralCodeClient(w).then(setReferralCode).catch(() => {});
+          goTo(2);
+        }} />
       )}
 
       {step === 2 && (
@@ -650,6 +661,7 @@ export function SubmitFlow() {
           failGate={failGate}
           onReset={reset}
           onResubmit={() => { setFile(null); goTo(3); }}
+          referralCode={referralCode}
         />
       )}
     </div>

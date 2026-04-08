@@ -27,6 +27,14 @@ export async function GET(req: Request) {
     wallet = link?.wallet || '';
   }
 
+  const emptyNetworkImpact = {
+    referredUsers: 0,
+    networkSolSaved: 0,
+    networkUsdSaved: 0,
+    combinedSol: 0,
+    combinedUsd: 0,
+  };
+
   // Even without a wallet, show the dashboard (empty state)
   if (!wallet) {
     return NextResponse.json({
@@ -36,10 +44,13 @@ export async function GET(req: Request) {
       payouts: [],
       referral: { code: '', clicks: 0, uniqueClicks: 0, conversions: 0 },
       stats: { totalEarned: 0, approved: 0, pending: 0, rejected: 0 },
+      networkImpact: emptyNetworkImpact,
     });
   }
 
-  const [claimsRes, payoutsRes, clicksRes, conversionsRes] = await Promise.all([
+  const referralCode = generateReferralCode(wallet);
+
+  const [claimsRes, payoutsRes, clicksRes, conversionsRes, networkConversionsRes] = await Promise.all([
     supabase
       .from('claims')
       .select(`
@@ -68,6 +79,13 @@ export async function GET(req: Request) {
       .from('referral_conversions')
       .select('id, reward_status')
       .eq('referrer_wallet', wallet),
+
+    // Network impact: get dispatched conversions with submission details
+    supabase
+      .from('referral_conversions')
+      .select('submission_id, referred_wallet')
+      .eq('referrer_wallet', wallet)
+      .eq('reward_status', 'dispatched'),
   ]);
 
   const claims = claimsRes.data ?? [];
@@ -75,7 +93,6 @@ export async function GET(req: Request) {
 
   const clicks = clicksRes.data ?? [];
   const conversions = conversionsRes.data ?? [];
-  const referralCode = generateReferralCode(wallet);
   const totalClicks = clicks.length;
   const uniqueClicks = new Set(clicks.map((c: any) => c.click_fingerprint)).size;
   const totalConversions = conversions.filter(
@@ -98,6 +115,46 @@ export async function GET(req: Request) {
   ).length;
   const rejected = claims.filter((c: any) => c.status === 'rejected').length;
 
+  // Personal USD total from own claims
+  const personalUsd = claims
+    .filter((c: any) => c.status === 'approved' || c.status === 'paid')
+    .reduce((s: number, c: any) => s + Number(c.parsed_amount ?? 0), 0);
+
+  // Compute network impact from dispatched referral conversions
+  let networkImpact = emptyNetworkImpact;
+  const networkConversions = networkConversionsRes.data ?? [];
+
+  if (networkConversions.length > 0) {
+    const submissionIds = networkConversions.map((c: any) => c.submission_id).filter(Boolean);
+    const referredWallets = new Set(networkConversions.map((c: any) => c.referred_wallet));
+
+    // Get claims for referred submissions
+    const { data: networkClaims } = await supabase
+      .from('claims')
+      .select('id, parsed_amount')
+      .in('id', submissionIds);
+
+    // Get payouts for referred submissions
+    const { data: networkPayouts } = await supabase
+      .from('payouts')
+      .select('amount_sol, claim_id')
+      .in('claim_id', submissionIds)
+      .eq('status', 'paid');
+
+    const networkUsdSaved = (networkClaims ?? [])
+      .reduce((s: number, c: any) => s + Number(c.parsed_amount ?? 0), 0);
+    const networkSolSaved = (networkPayouts ?? [])
+      .reduce((s: number, p: any) => s + Number(p.amount_sol ?? 0), 0);
+
+    networkImpact = {
+      referredUsers: referredWallets.size,
+      networkSolSaved,
+      networkUsdSaved,
+      combinedSol: totalEarned + networkSolSaved,
+      combinedUsd: personalUsd + networkUsdSaved,
+    };
+  }
+
   return NextResponse.json({
     wallet,
     xHandle,
@@ -110,5 +167,6 @@ export async function GET(req: Request) {
       conversions: totalConversions,
     },
     stats: { totalEarned, approved, pending, rejected },
+    networkImpact,
   });
 }
