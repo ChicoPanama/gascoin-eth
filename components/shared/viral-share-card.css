@@ -16,7 +16,7 @@
 }
 
 .vsc-title {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 11px;
   font-weight: 600;
   text-transform: uppercase;
@@ -34,7 +34,7 @@
 
 .vsc-tweet-preview {
   flex: 1;
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 11px;
   color: var(--muted-deep);
   line-height: 1.5;
@@ -44,7 +44,7 @@
 }
 
 .vsc-share-btn {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 10px;
   font-weight: 600;
   text-transform: uppercase;
@@ -67,7 +67,7 @@
 /* ── Milestone teaser ── */
 .vsc-milestone {
   padding: 16px 0 0;
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 11px;
   color: var(--muted);
   letter-spacing: 0.05em;
@@ -84,7 +84,7 @@
 }
 
 .vsc-empty__code {
-  font-family: 'Bebas Neue', sans-serif;
+  font-family: var(--font-display);
   font-size: 48px;
   letter-spacing: 0.08em;
   color: var(--fg);
@@ -92,7 +92,7 @@
 }
 
 .vsc-empty__label {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 11px;
   color: var(--muted);
   text-transform: uppercase;
@@ -108,7 +108,7 @@
 }
 
 .vsc-copy-btn {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 10px;
   font-weight: 500;
   text-transform: uppercase;
@@ -149,7 +149,7 @@
 }
 
 .vsc-post__headline {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 11px;
   font-weight: 600;
   text-transform: uppercase;
@@ -159,7 +159,7 @@
 }
 
 .vsc-post__text {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 13px;
   color: var(--fg);
   margin: 0 0 24px;
@@ -172,7 +172,7 @@
 }
 
 .vsc-post__link {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 11px;
   color: var(--muted);
   text-decoration: none;

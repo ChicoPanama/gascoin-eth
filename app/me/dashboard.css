@@ -20,7 +20,7 @@
   margin-bottom: 16px;
 }
 .ud-title {
-  font-family: 'Bebas Neue', sans-serif;
+  font-family: var(--font-display);
   font-size: 80px;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -33,13 +33,13 @@
   gap: 16px;
 }
 .ud-handle {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 13px;
   color: var(--fg);
   letter-spacing: 0.05em;
 }
 .ud-wallet {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 12px;
   color: var(--muted);
   letter-spacing: 0.05em;
@@ -66,7 +66,7 @@
   margin-bottom: 32px;
 }
 .ud-section__title {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 11px;
   font-weight: 600;
   text-transform: uppercase;
@@ -81,7 +81,7 @@
   gap: 4px;
 }
 .ud-tab {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 10px;
   font-weight: 500;
   text-transform: uppercase;
@@ -109,7 +109,7 @@
   text-align: center;
 }
 .ud-empty p {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 13px;
   color: var(--muted);
   margin-bottom: 24px;
@@ -148,13 +148,13 @@
   gap: 12px;
 }
 .ud-claim__id {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 12px;
   color: var(--fg);
   letter-spacing: 0.05em;
 }
 .ud-claim__time {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 11px;
   color: var(--muted-deep);
 }
@@ -165,7 +165,7 @@
   justify-content: center;
 }
 .ud-claim__gates {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 11px;
   color: var(--muted);
 }
@@ -176,7 +176,7 @@
   justify-content: flex-end;
 }
 .ud-claim__sol {
-  font-family: 'Bebas Neue', sans-serif;
+  font-family: var(--font-display);
   font-size: 20px;
   letter-spacing: 0.02em;
 }
@@ -202,7 +202,7 @@
   margin-bottom: 24px;
 }
 .ud-gates__title {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 10px;
   font-weight: 500;
   text-transform: uppercase;
@@ -223,14 +223,14 @@
   gap: 8px;
   padding: 10px 14px;
   background: var(--bg);
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 11px;
 }
 .ud-gate--pass {
-  color: rgba(100, 255, 160, 0.9);
+  color: var(--accent);
 }
 .ud-gate--fail {
-  color: rgba(255, 100, 100, 0.8);
+  color: var(--status-fail);
 }
 .ud-gate__icon {
   font-size: 10px;
@@ -264,19 +264,19 @@
   border-bottom: none;
 }
 .ud-meta__label {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 10px;
   text-transform: uppercase;
   letter-spacing: 0.2em;
   color: var(--muted);
 }
 .ud-meta__value {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 12px;
   color: var(--fg);
 }
 .ud-meta__link {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 11px;
   color: var(--fg);
   text-decoration: none;
@@ -288,7 +288,7 @@
 
 /* ── Badges ── */
 .ud-badge {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 9px;
   font-weight: 600;
   text-transform: uppercase;
@@ -297,16 +297,16 @@
   border: 1px solid;
 }
 .ud-badge--pass {
-  color: rgba(100, 255, 160, 0.9);
-  border-color: rgba(100, 255, 160, 0.3);
+  color: var(--accent);
+  border-color: rgba(20, 241, 149, 0.3);
 }
 .ud-badge--pending {
-  color: rgba(255, 220, 100, 0.9);
-  border-color: rgba(255, 220, 100, 0.3);
+  color: var(--status-pending);
+  border-color: rgba(245, 158, 11, 0.3);
 }
 .ud-badge--fail {
-  color: rgba(255, 100, 100, 0.8);
-  border-color: rgba(255, 100, 100, 0.3);
+  color: var(--status-fail);
+  border-color: rgba(239, 68, 68, 0.3);
 }
 
 /* ── Payout History ── */
@@ -318,7 +318,7 @@
   grid-template-columns: 1fr 1fr 1fr 1fr;
   padding: 12px 16px;
   background: var(--card);
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 10px;
   font-weight: 500;
   text-transform: uppercase;
@@ -331,14 +331,14 @@
   align-items: center;
   padding: 14px 16px;
   border-top: 1px solid var(--line);
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 12px;
 }
 .ud-payouts__date {
   color: var(--muted);
 }
 .ud-payouts__amount {
-  font-family: 'Bebas Neue', sans-serif;
+  font-family: var(--font-display);
   font-size: 18px;
   letter-spacing: 0.02em;
 }
