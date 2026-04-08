@@ -2,12 +2,7 @@ import { NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '../../../../lib/supabase';
 import { REFERRAL_CONFIG } from '../../../../lib/referral-config';
 import { calculateWalletTrust, detectReferralRing, awardVerifiedPoints } from '../../../../lib/ai-points-engine';
-
-function isAuthorized(req: Request): boolean {
-  const secret = (process.env.CRON_SECRET || '').trim();
-  if (!secret) return false;
-  return req.headers.get('authorization') === `Bearer ${secret}`;
-}
+import { isAuthorizedCron as isAuthorized } from '../../../../lib/cron-auth';
 
 // Worker: auto-verify referrals + award POINTS (not SOL)
 // SOL payouts are for gas receipts ONLY

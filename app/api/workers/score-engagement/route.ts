@@ -4,12 +4,7 @@ import { calculateEngagementPoints } from '../../../../lib/engagement-rewards';
 import { scoreTweetQuality, calculateWalletTrust, awardVerifiedPoints } from '../../../../lib/ai-points-engine';
 import { searchRecentTweets, extractMetrics, getUserByUsername } from '../../../../lib/x-api';
 import type { XTweet } from '../../../../lib/x-api';
-
-function isAuthorized(req: Request): boolean {
-  const secret = (process.env.CRON_SECRET || '').trim();
-  if (!secret) return false;
-  return req.headers.get('authorization') === `Bearer ${secret}`;
-}
+import { isAuthorizedCron as isAuthorized } from '../../../../lib/cron-auth';
 
 // ═══════════════════════════════════════════
 // Engagement Worker v3

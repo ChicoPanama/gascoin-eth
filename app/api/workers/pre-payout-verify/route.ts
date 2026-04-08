@@ -4,13 +4,9 @@ import { verifyTweetProof, getFollowerCount } from '../../../../lib/integrations
 import { getUserByUsername } from '../../../../lib/x-api';
 import { scoreAccountQuality } from '../../../../lib/account-quality';
 
-const MIN_FOLLOWERS = 100;
+import { isAuthorizedCron as isAuthorized } from '../../../../lib/cron-auth';
 
-function isAuthorized(req: Request): boolean {
-  const secret = (process.env.CRON_SECRET || '').trim();
-  if (!secret) return false;
-  return req.headers.get('authorization') === `Bearer ${secret}`;
-}
+const MIN_FOLLOWERS = 100;
 
 /**
  * Pre-payout verification sweep — runs at 23:55 UTC daily.

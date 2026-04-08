@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '../../../../lib/supabase';
 import { requireReviewer } from '../../../../lib/reviewer-auth';
+import { checkRateLimit } from '../../../../lib/rate-limit';
 
 // SECURITY: Admin queue requires reviewer/admin authentication.
 // Hardened 2026-04-06 — was previously unauthenticated (CRITICAL).
@@ -8,6 +9,12 @@ export async function GET(req: Request){
   const reviewer = await requireReviewer(req);
   if (!reviewer) {
     return NextResponse.json({ ok: false, error: 'unauthorized' }, { status: 401 });
+  }
+
+  // SECURITY: Rate limit per reviewer to prevent abuse
+  const rl = await checkRateLimit(`admin_queue:${reviewer.xId}`, 30, 60);
+  if (!rl.ok) {
+    return NextResponse.json({ ok: false, error: 'rate_limited' }, { status: 429 });
   }
 
   let supabase;

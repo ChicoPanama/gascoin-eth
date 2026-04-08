@@ -3,13 +3,7 @@ import { getSupabaseAdmin } from '../../../../lib/supabase';
 import { processQueuedPayout } from '../../../../lib/payout-worker';
 import { getTierForBalance } from '../../../../lib/token-tiers';
 import { hasMinimumGascoinUsd } from '../../../../lib/integrations/solana';
-
-function isAuthorized(req: Request): boolean {
-  const secret = (process.env.CRON_SECRET || '').trim();
-  if (!secret) return false;
-  const auth = req.headers.get('authorization') || '';
-  return auth === `Bearer ${secret}`;
-}
+import { isAuthorizedCron as isAuthorized } from '../../../../lib/cron-auth';
 
 export async function POST(req: Request) {
   if (!isAuthorized(req)) {

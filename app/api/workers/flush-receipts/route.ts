@@ -1,11 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '../../../../lib/supabase';
-
-function isAuthorized(req: Request): boolean {
-  const secret = (process.env.CRON_SECRET || '').trim();
-  if (!secret) return false;
-  return req.headers.get('authorization') === `Bearer ${secret}`;
-}
+import { isAuthorizedCron as isAuthorized } from '../../../../lib/cron-auth';
 
 // Worker: auto-flush receipt images older than 90 days from paid/rejected claims
 // Deletes from Supabase Storage, nullifies storage_path_private in DB

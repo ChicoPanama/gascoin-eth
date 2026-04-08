@@ -37,6 +37,20 @@ const nextConfig = {
             key: 'Permissions-Policy',
             value: 'camera=(), microphone=(), geolocation=()',
           },
+          {
+            key: 'Content-Security-Policy',
+            value: [
+              "default-src 'self'",
+              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://auth.privy.io https://*.privy.io",
+              "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+              "font-src 'self' https://fonts.gstatic.com data:",
+              "img-src 'self' https: data: blob:",
+              "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://auth.privy.io https://*.privy.io https://api.mainnet-beta.solana.com",
+              "frame-src https://auth.privy.io https://*.privy.io",
+              "object-src 'none'",
+              "base-uri 'self'",
+            ].join('; '),
+          },
         ],
       },
       {
@@ -66,6 +80,7 @@ const nextConfig = {
     ];
   },
 
+  productionBrowserSourceMaps: false,
   poweredByHeader: false,
 
   webpack: (config) => {

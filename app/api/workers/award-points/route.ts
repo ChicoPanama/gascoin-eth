@@ -3,12 +3,7 @@ import { getSupabaseAdmin } from '../../../../lib/supabase';
 import { POINTS_CONFIG } from '../../../../lib/engagement-rewards';
 import { TOKEN_TIERS, getTierForBalance } from '../../../../lib/token-tiers';
 import { detectReferralRing, calculateWalletTrust, generateAuditSummary, awardVerifiedPoints } from '../../../../lib/ai-points-engine';
-
-function isAuthorized(req: Request): boolean {
-  const secret = (process.env.CRON_SECRET || '').trim();
-  if (!secret) return false;
-  return req.headers.get('authorization') === `Bearer ${secret}`;
-}
+import { isAuthorizedCron as isAuthorized } from '../../../../lib/cron-auth';
 
 // ═══════════════════════════════════════════
 // Daily Points Worker

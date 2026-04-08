@@ -97,7 +97,11 @@ export async function POST(req: Request){
     }
   }
   const walletOnReceiptInput = String(form.get('walletOnReceipt')||'');
-  const amountUsd = Number(form.get('amountUsd')||0);
+  const amountUsdRaw = Number(form.get('amountUsd') || 0);
+  if (isNaN(amountUsdRaw) || !isFinite(amountUsdRaw) || amountUsdRaw < 0 || amountUsdRaw > 10000) {
+    return NextResponse.json({ ok: false, error: 'invalid_amount' }, { status: 400 });
+  }
+  const amountUsd = amountUsdRaw;
   const receipt = form.get('receipt');
 
   if (!(receipt instanceof File)) {

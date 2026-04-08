@@ -133,9 +133,15 @@ function StepTweet({ onVerified, onBack, initialUrl, loggedInHandle }: {
   const [tweetAge, setTweetAge] = useState('');
 
   const validate = useCallback(async (value: string) => {
-    if (!value.includes('x.com/') && !value.includes('twitter.com/')) {
+    try {
+      const parsed = new URL(value);
+      const host = parsed.hostname.replace(/^www\./, '');
+      if (!['x.com', 'twitter.com'].includes(host) || !parsed.pathname.match(/^\/\w+\/status\/\d+/)) {
+        throw new Error();
+      }
+    } catch {
       setStatus('error');
-      setErrorMsg('URL format not recognized');
+      setErrorMsg('Enter a valid X/Twitter status URL');
       return;
     }
     setStatus('loading');

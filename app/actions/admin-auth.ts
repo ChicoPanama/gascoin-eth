@@ -2,7 +2,7 @@
 
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
-import { createHash } from 'crypto';
+import { randomBytes } from 'crypto';
 import { isAdminWallet } from '../../lib/admin-auth';
 import { getSupabaseAdmin } from '../../lib/supabase';
 
@@ -10,8 +10,8 @@ export async function createAdminSession(walletAddress: string, timestamp: numbe
   if (!isAdminWallet(walletAddress)) return { success: false, error: 'Wallet not authorized' };
   if (Math.abs(Date.now() - timestamp) > 300000) return { success: false, error: 'Challenge expired' };
 
-  const secret = process.env.ADMIN_SESSION_SECRET || 'dev-secret-change-me';
-  const sessionToken = createHash('sha256').update(`${walletAddress}:${timestamp}:${secret}`).digest('hex');
+  // SECURITY: Use cryptographically random token instead of deterministic hash
+  const sessionToken = randomBytes(32).toString('hex');
 
   const supabase = getSupabaseAdmin();
   await supabase.from('admin_sessions').upsert({
@@ -81,9 +81,9 @@ export async function createAdminSessionViaPrivy(xUserId: string, xHandle: strin
 
   if (!adminRow) return { success: false, error: 'X account not authorized as admin' };
 
-  const secret = process.env.ADMIN_SESSION_SECRET || 'dev-secret-change-me';
   const sessionId = `privy:${xUserId}`;
-  const sessionToken = createHash('sha256').update(`${sessionId}:${Date.now()}:${secret}`).digest('hex');
+  // SECURITY: Use cryptographically random token instead of deterministic hash
+  const sessionToken = randomBytes(32).toString('hex');
 
   await supabase.from('admin_sessions').upsert({
     wallet_address: sessionId,
