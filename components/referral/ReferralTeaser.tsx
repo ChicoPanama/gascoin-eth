@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { supabaseBrowser } from '../../lib/supabase-client';
+import { DEMO_REFERRAL } from '../../lib/demo-data';
 
 export function ReferralTeaser() {
   const [totalConv, setTotalConv] = useState(0);
@@ -16,10 +17,13 @@ export function ReferralTeaser() {
         const { data } = await supabaseBrowser
           .from('referral_summary_view')
           .select('referrer_wallet, total_conversions, total_referral_sol_earned');
-        if (data) {
+        if (data && data.length > 0) {
           setTotalConv(data.reduce((s: number, r: any) => s + Number(r.total_conversions || 0), 0));
           setTotalSol(data.reduce((s: number, r: any) => s + Number(r.total_referral_sol_earned || 0), 0));
           setReferrers(data.length);
+        } else {
+          setTotalConv(DEMO_REFERRAL.totalConversions);
+          setReferrers(DEMO_REFERRAL.activeReferrers);
         }
       } catch {}
       setLoading(false);

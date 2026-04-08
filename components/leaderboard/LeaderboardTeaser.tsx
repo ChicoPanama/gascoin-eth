@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import { supabaseBrowser } from '../../lib/supabase-client';
 import { truncateWallet, formatSol, formatRank } from '../../lib/formatters';
 import type { LeaderboardEntry } from '../../types/leaderboard';
+import { DEMO_LEADERBOARD } from '../../lib/demo-data';
 
 export function LeaderboardTeaser() {
   const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
@@ -18,7 +19,8 @@ export function LeaderboardTeaser() {
           .select('*')
           .order('rank', { ascending: true })
           .limit(5);
-        setEntries(data ?? []);
+        const rows = data ?? [];
+        setEntries(rows.length > 0 ? rows : DEMO_LEADERBOARD as any);
       } catch {}
       setLoading(false);
     })();

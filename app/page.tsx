@@ -8,6 +8,7 @@ import { WalletTrackerTeaser } from '../components/wallet-tracker/WalletTrackerT
 import { ReferralTeaser } from '../components/referral/ReferralTeaser';
 import { HeroStagger, HeroItem } from '../components/ui/HeroStagger';
 import { ScrollReveal } from '../components/ui/ScrollReveal';
+import { DEMO_TREASURY_DISPLAY, fallback } from '../lib/demo-data';
 
 export default async function Home() {
   let treasuryUsd = '—';
@@ -35,7 +36,12 @@ export default async function Home() {
     if (vol > 0) volume = vol >= 1_000_000 ? `$${(vol / 1_000_000).toFixed(1)}M` : vol >= 1_000 ? `$${(vol / 1_000).toFixed(0)}K` : `$${vol.toLocaleString()}`;
   } catch {}
 
-  // Gate count is static — reflects the number of verification steps in lib/policy.ts
+  // Demo data fallback — yields to real data when treasury/market are live
+  treasuryUsd = fallback(treasuryUsd, DEMO_TREASURY_DISPLAY.treasuryUsd);
+  treasurySub = fallback(treasurySub === 'SOL' ? '—' : treasurySub, DEMO_TREASURY_DISPLAY.treasurySub);
+  marketCap = fallback(marketCap, DEMO_TREASURY_DISPLAY.marketCap);
+  volume = fallback(volume, DEMO_TREASURY_DISPLAY.volume);
+  const isDemo = treasuryUsd === DEMO_TREASURY_DISPLAY.treasuryUsd;
 
   return (
     <>
@@ -103,6 +109,11 @@ export default async function Home() {
               <div className="gc-stat-sub">Verification Steps</div>
             </div>
           </div>
+          {isDemo && (
+            <div style={{ padding: '12px 48px', textAlign: 'center', fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.2em', textTransform: 'uppercase' as const, color: 'var(--muted-deep)' }}>
+              Pre-Launch · Demo Data · Real Payouts Coming Soon
+            </div>
+          )}
         </section>
 
         {/* CTA BAND */}

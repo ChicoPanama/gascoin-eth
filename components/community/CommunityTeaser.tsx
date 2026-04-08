@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { supabaseBrowser } from '../../lib/supabase-client';
 import { formatSol } from '../../lib/formatters';
+import { DEMO_COMMUNITY } from '../../lib/demo-data';
 
 interface MiniReceipt {
   country: string | null;
@@ -25,13 +26,12 @@ export function CommunityTeaser() {
           .order('created_at', { ascending: false })
           .limit(4);
 
-        setItems(
-          (data || []).map((p: any) => ({
-            country: p.claims?.country || null,
-            sol: Number(p.amount_sol || 0),
-            date: new Date(p.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-          }))
-        );
+        const rows = (data || []).map((p: any) => ({
+          country: p.claims?.country || null,
+          sol: Number(p.amount_sol || 0),
+          date: new Date(p.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+        }));
+        setItems(rows.length > 0 ? rows : DEMO_COMMUNITY);
       } catch {}
       setLoading(false);
     })();

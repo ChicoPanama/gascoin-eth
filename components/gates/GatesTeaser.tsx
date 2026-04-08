@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { supabaseBrowser } from '../../lib/supabase-client';
 import { GATES } from '../../lib/gates';
+import { DEMO_GATE_RATES } from '../../lib/demo-data';
 
 export function GatesTeaser() {
   const [rates, setRates] = useState<Map<number, number>>(new Map());
@@ -17,8 +18,10 @@ export function GatesTeaser() {
           .select('gate_id, pass_rate_pct');
         const map = new Map<number, number>();
         for (const r of data || []) map.set(r.gate_id, Number(r.pass_rate_pct || 0));
-        setRates(map);
-      } catch {}
+        setRates(map.size > 0 ? map : DEMO_GATE_RATES);
+      } catch {
+        setRates(DEMO_GATE_RATES);
+      }
       setLoading(false);
     })();
   }, []);

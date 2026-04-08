@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { DEMO_CHART_DATA, DEMO_STATS } from '../lib/demo-data';
 
 const TREASURY_WALLET = process.env.NEXT_PUBLIC_TREASURY_WALLET || 'TREASURY_WALLET_ADDRESS';
 const GASCOIN_MINT = process.env.NEXT_PUBLIC_GASCOIN_MINT || 'GASCOIN_MINT_ADDRESS';
@@ -142,21 +143,12 @@ export function LiveStatsBar({ refundsToday, totalPaid, queueDepth }: {
 // ZONE 2 — Treasury Chart (Canvas API)
 // ═══════════════════════════════════════════
 // TODO: replace with Supabase query for treasury_snapshots over 7 days
-const MOCK_CHART_DATA = [
-  { day: 'Mon', sol: 42.5 },
-  { day: 'Tue', sol: 41.8 },
-  { day: 'Wed', sol: 44.2 },
-  { day: 'Thu', sol: 43.1 },
-  { day: 'Fri', sol: 45.9 },
-  { day: 'Sat', sol: 44.7 },
-  { day: 'Sun', sol: 46.3 },
-];
 
 export function TreasuryChart() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [hover, setHover] = useState<{ x: number; idx: number } | null>(null);
-  const data = MOCK_CHART_DATA;
+  const data = DEMO_CHART_DATA;
 
   const draw = useCallback((hoverState: typeof hover) => {
     const canvas = canvasRef.current;
