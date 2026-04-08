@@ -1,5 +1,4 @@
 import Link from 'next/link';
-import { CinematicIntro, SiteReveal } from '../components/CinematicIntro';
 import { HomeNav } from '../components/HomeNav';
 import { LeaderboardTeaser } from '../components/leaderboard/LeaderboardTeaser';
 import { CommunityTeaser } from '../components/community/CommunityTeaser';
@@ -45,9 +44,6 @@ export default async function Home() {
 
   return (
     <>
-      <CinematicIntro />
-
-      <SiteReveal>
         {/* NAV */}
         <HomeNav />
         <main id="main-content">
@@ -372,7 +368,6 @@ export default async function Home() {
           </div>
           <div className="gc-footer-copy">&copy; 2026 GASCOIN. All rights reserved.</div>
         </footer>
-      </SiteReveal>
     </>
   );
 }
