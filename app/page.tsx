@@ -1,7 +1,3 @@
-'use client';
-
-import Link from 'next/link';
-
 const ORBIT_WORDS = ['SOLANA', 'X', 'CLAUDE', 'METEORA'];
 
 export default function LandingPage() {
@@ -28,10 +24,10 @@ export default function LandingPage() {
       {/* Center title */}
       <h1 className="cinematic-title">GASCOIN</h1>
 
-      {/* CTA */}
-      <Link href="/home" className="cinematic-enter">
+      {/* CTA — plain <a> to avoid client-side router issues */}
+      <a href="/home" className="cinematic-enter">
         Enter the Movement
-      </Link>
+      </a>
 
       {/* Tagline */}
       <p className="cinematic-tagline">
