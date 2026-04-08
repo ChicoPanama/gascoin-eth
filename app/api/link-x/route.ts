@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'unauthorized' }, { status: 401 });
     }
 
-    const { wallet, x_handle, x_user_id } = await req.json();
+    const { wallet, x_handle, x_user_id, profile_image_url } = await req.json();
 
     if (!wallet || !x_handle) {
       return NextResponse.json({ error: 'wallet and x_handle required' }, { status: 400 });
@@ -64,6 +64,7 @@ export async function POST(req: NextRequest) {
       wallet,
       x_handle: handle,
       x_user_id: userId || null,
+      profile_image_url: typeof profile_image_url === 'string' ? profile_image_url : null,
       linked_at: new Date().toISOString(),
       is_active: true,
     }, { onConflict: 'wallet,x_handle' });

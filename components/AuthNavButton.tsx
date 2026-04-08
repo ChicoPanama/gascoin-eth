@@ -22,6 +22,13 @@ function truncateWallet(key: string) {
   return `${key.slice(0, 4)}...${key.slice(-4)}`;
 }
 
+function readProfilePicture(user: any): string {
+  if (user?.twitter?.profilePictureUrl) return String(user.twitter.profilePictureUrl);
+  const linked = Array.isArray(user?.linkedAccounts) ? user.linkedAccounts : [];
+  const tw = linked.find((a: any) => String(a?.type || '').includes('twitter'));
+  return String(tw?.profilePictureUrl || tw?.profile_picture_url || '');
+}
+
 export function AuthNavButton() {
   const { ready, authenticated, login, logout, user, getAccessToken } = usePrivy();
   const { publicKey, connected } = useWallet();
@@ -56,7 +63,7 @@ export function AuthNavButton() {
           'x-privy-handle': handle,
           'x-privy-wallet': wallet,
         },
-        body: JSON.stringify({ wallet, x_handle: handle, x_user_id: xUserId }),
+        body: JSON.stringify({ wallet, x_handle: handle, x_user_id: xUserId, profile_image_url: readProfilePicture(user) }),
       }).catch(() => {
         linkedRef.current = false;
         lastLinkedWallet.current = null;

@@ -63,9 +63,10 @@ export function useLeaderboard() {
           total_sol_earned: d.total_sol_earned,
           rank: d.rank,
           gascoin_holdings: 0,
-          composite_score: d.total_sol_earned * 100,
+          composite_score: d.composite_score ?? d.total_sol_earned * 100,
           referral_count: 0,
           engagement_score: 0,
+          x_handle: d.x_handle,
         })) as LeaderboardEntry[]);
         setStats({
           total_earners: 10, total_sol_paid: 4821.5, total_approved: 36,
@@ -176,6 +177,22 @@ export function useLeaderboard() {
       // Sort by composite score descending, assign ranks
       raw.sort((a, b) => b.composite_score - a.composite_score);
       raw.forEach((e, i) => { e.rank = i + 1; });
+
+      // Fetch X handles + PFPs from wallet_x_links
+      try {
+        const { data: xLinks } = await supabaseBrowser
+          .from('wallet_x_links')
+          .select('wallet, x_handle, profile_image_url')
+          .eq('is_active', true)
+          .in('wallet', wallets);
+        for (const link of xLinks || []) {
+          const entry = raw.find((e) => e.wallet_address === link.wallet);
+          if (entry) {
+            entry.x_handle = link.x_handle || undefined;
+            entry.profile_image_url = link.profile_image_url || undefined;
+          }
+        }
+      } catch {}
 
       const totalGc = Array.from(holdingsMap.values()).reduce((s, v) => s + v, 0);
       const totalRefs = Array.from(refMap.values()).reduce((s, v) => s + v, 0);

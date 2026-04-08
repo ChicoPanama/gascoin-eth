@@ -3,26 +3,30 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import type { LeaderboardEntry } from '../../types/leaderboard';
-import { truncateWallet, formatSol, formatRank } from '../../lib/formatters';
+import { truncateWallet, formatRank } from '../../lib/formatters';
 
 const PAGE_SIZE = 25;
 
-function SkeletonRows() {
+function UserCell({ entry, isYou }: { entry: LeaderboardEntry; isYou: boolean }) {
+  const display = entry.x_handle ? (
+    <a
+      href={`https://x.com/${entry.x_handle}`}
+      target="_blank"
+      rel="noopener noreferrer"
+      style={{ color: 'var(--fg)', textDecoration: 'none' }}
+      onClick={(e) => e.stopPropagation()}
+    >
+      @{entry.x_handle} <span style={{ fontSize: 9, opacity: 0.4 }}>↗</span>
+    </a>
+  ) : (
+    truncateWallet(entry.wallet_address)
+  );
+
   return (
-    <>
-      {Array.from({ length: 10 }).map((_, i) => (
-        <tr key={i} className="lb-table-row lb-table-row--skeleton">
-          <td><div className="lb-shimmer" style={{ width: 32 }} /></td>
-          <td><div className="lb-shimmer" style={{ width: 90 }} /></td>
-          <td><div className="lb-shimmer" style={{ width: 50 }} /></td>
-          <td><div className="lb-shimmer" style={{ width: 50 }} /></td>
-          <td><div className="lb-shimmer" style={{ width: 70 }} /></td>
-          <td><div className="lb-shimmer" style={{ width: 60 }} /></td>
-          <td><div className="lb-shimmer" style={{ width: 44 }} /></td>
-          <td><div className="lb-shimmer" style={{ width: 36 }} /></td>
-        </tr>
-      ))}
-    </>
+    <td className="lb-table-wallet">
+      {display}
+      {isYou && <span className="lb-you-badge lb-you-badge--inline">YOU</span>}
+    </td>
   );
 }
 
@@ -50,26 +54,18 @@ export function RankingsTable({ entries, loading, connectedWallet, onRowClick }:
 
   return (
     <div className="lb-table-wrap">
-      <div className="lb-score-legend">
-        Ranked by referrals, engagement, and GASCOIN holdings · SOL payouts are for receipts only
-      </div>
-
       <table className="lb-table">
         <thead>
           <tr>
             <th>Rank</th>
-            <th>Wallet</th>
-            <th>Refs <span className="lb-weight">35%</span></th>
-            <th>Eng <span className="lb-weight">30%</span></th>
-            <th>GASCOIN <span className="lb-weight">25%</span></th>
-            <th>SOL <span className="lb-weight">10%</span></th>
-            <th>Score</th>
+            <th>User</th>
+            <th>Points</th>
             <th></th>
           </tr>
         </thead>
         <tbody>
           {loading ? (
-            <tr><td colSpan={8} style={{ textAlign: 'center', padding: 48, fontFamily: 'IBM Plex Mono', fontSize: 12, color: 'rgba(255,255,255,0.3)' }}>Loading rankings...</td></tr>
+            <tr><td colSpan={4} style={{ textAlign: 'center', padding: 48, fontFamily: 'var(--font-mono)', fontSize: 12, color: 'rgba(255,255,255,0.3)' }}>Loading rankings...</td></tr>
           ) : (
             paged.map((e) => {
               const isYou = connectedWallet === e.wallet_address;
@@ -80,17 +76,8 @@ export function RankingsTable({ entries, loading, connectedWallet, onRowClick }:
                   onClick={() => onRowClick(e.wallet_address)}
                 >
                   <td className="lb-table-rank">{formatRank(e.rank)}</td>
-                  <td className="lb-table-wallet">
-                    {truncateWallet(e.wallet_address)}
-                    {isYou && <span className="lb-you-badge lb-you-badge--inline">YOU</span>}
-                  </td>
-                  <td className="lb-table-ref">{e.referral_count || '—'}</td>
-                  <td className="lb-table-eng">{e.engagement_score || '—'}</td>
-                  <td className="lb-table-gc">
-                    {e.gascoin_holdings > 0 ? Math.round(e.gascoin_holdings).toLocaleString() : '—'}
-                  </td>
-                  <td className="lb-table-sol">{formatSol(e.total_sol_earned)}</td>
-                  <td className="lb-table-score">{e.composite_score.toFixed(2)}</td>
+                  <UserCell entry={e} isYou={isYou} />
+                  <td className="lb-table-score">{Math.round(e.composite_score).toLocaleString()}</td>
                   <td className="lb-table-action">VIEW →</td>
                 </tr>
               );

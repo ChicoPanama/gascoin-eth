@@ -4,14 +4,13 @@ export interface LeaderboardEntry {
   total_sol_earned: number;
   last_submission_at: string;
   rank: number;
-  // GASCOIN holdings — on-chain lookup
   gascoin_holdings: number;
-  // Composite score used for ranking
   composite_score: number;
-  // Referrals (skeleton — not yet implemented)
   referral_count: number;
-  // Tweet engagement (skeleton — not yet implemented)
   engagement_score: number;
+  // X identity (from wallet_x_links)
+  x_handle?: string;
+  profile_image_url?: string;
 }
 
 export interface LeaderboardStats {

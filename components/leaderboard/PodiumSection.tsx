@@ -1,7 +1,54 @@
 'use client';
 
 import type { LeaderboardEntry } from '../../types/leaderboard';
-import { truncateWallet, formatSol, formatRank } from '../../lib/formatters';
+import { truncateWallet, formatRank } from '../../lib/formatters';
+
+function UserAvatar({ entry, size = 48 }: { entry: LeaderboardEntry; size?: number }) {
+  if (entry.profile_image_url) {
+    return (
+      <img
+        src={entry.profile_image_url}
+        alt={entry.x_handle ? `@${entry.x_handle}` : 'User'}
+        width={size}
+        height={size}
+        style={{ borderRadius: '50%', objectFit: 'cover', border: '2px solid var(--glass-border)' }}
+      />
+    );
+  }
+  // Gradient circle fallback — deterministic color from wallet
+  const hash = entry.wallet_address.split('').reduce((a, c) => a + c.charCodeAt(0), 0);
+  const hue1 = hash % 360;
+  const hue2 = (hash * 7) % 360;
+  return (
+    <div
+      style={{
+        width: size,
+        height: size,
+        borderRadius: '50%',
+        background: `linear-gradient(135deg, hsl(${hue1}, 60%, 45%), hsl(${hue2}, 50%, 35%))`,
+        border: '2px solid var(--glass-border)',
+        flexShrink: 0,
+      }}
+    />
+  );
+}
+
+function UserIdentity({ entry }: { entry: LeaderboardEntry }) {
+  if (entry.x_handle) {
+    return (
+      <a
+        href={`https://x.com/${entry.x_handle}`}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="lb-podium-wallet"
+        style={{ color: 'var(--fg)', textDecoration: 'none' }}
+      >
+        @{entry.x_handle} <span style={{ fontSize: 10, opacity: 0.4 }}>↗</span>
+      </a>
+    );
+  }
+  return <div className="lb-podium-wallet">{truncateWallet(entry.wallet_address)}</div>;
+}
 
 export function PodiumSection({ entries, connectedWallet }: {
   entries: LeaderboardEntry[];
@@ -24,31 +71,13 @@ export function PodiumSection({ entries, connectedWallet }: {
           >
             {isYou && <span className="lb-you-badge">YOU</span>}
             <div className="lb-podium-rank">{formatRank(e.rank)}</div>
-            <div className="lb-podium-wallet">{truncateWallet(e.wallet_address)}</div>
-
-            {/* Primary stats — what drives rank */}
-            <div className="lb-podium-primary">
-              <div className="lb-podium-primary-item">
-                <span className="lb-podium-primary-value">{e.referral_count}</span>
-                <span className="lb-podium-primary-label">Referrals</span>
-              </div>
-              <div className="lb-podium-primary-sep" />
-              <div className="lb-podium-primary-item">
-                <span className="lb-podium-primary-value">{e.engagement_score}</span>
-                <span className="lb-podium-primary-label">Engagement</span>
-              </div>
+            <div style={{ margin: '12px 0' }}>
+              <UserAvatar entry={e} size={i === 1 ? 56 : 44} />
             </div>
-
-            {/* Secondary stats */}
-            <div className="lb-podium-secondary">
-              {e.gascoin_holdings > 0
-                ? `${Math.round(e.gascoin_holdings).toLocaleString()} GASCOIN`
-                : '— GASCOIN'}
+            <UserIdentity entry={e} />
+            <div className="lb-podium-score" style={{ marginTop: 16 }}>
+              {Math.round(e.composite_score).toLocaleString()} Points
             </div>
-            <div className="lb-podium-secondary">{formatSol(e.total_sol_earned)}</div>
-
-            {/* Score */}
-            <div className="lb-podium-score">Score {e.composite_score.toFixed(2)}</div>
           </div>
         );
       })}
