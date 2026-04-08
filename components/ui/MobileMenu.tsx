@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { usePrivy } from '@privy-io/react-auth';
 
 const NAV_LINKS = [
   { href: '/submit', label: 'Submit' },
@@ -22,6 +23,7 @@ export function MobileMenu() {
   const [open, setOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const pathname = usePathname();
+  const { authenticated } = usePrivy();
 
   // Portal needs to wait for client mount
   useEffect(() => { setMounted(true); }, []);
@@ -62,6 +64,14 @@ export function MobileMenu() {
                 {label}
               </Link>
             ))}
+            {authenticated && (
+              <Link
+                href="/me"
+                className={`mobile-menu-link${pathname === '/me' ? ' mobile-menu-link--active' : ''}`}
+              >
+                Me
+              </Link>
+            )}
           </nav>
         </div>,
         document.body

@@ -6,13 +6,45 @@ import { generateReferralCode } from '../../../lib/referral-code';
 export async function GET(req: Request) {
   const auth = req.headers.get('authorization');
   const session = await verifyPrivySession(auth, undefined, req.headers.get('cookie'));
-  if (!session || !session.wallet) {
+  if (!session || !session.xHandle) {
     return NextResponse.json({ error: 'unauthorized' }, { status: 401 });
   }
 
-  const wallet = session.wallet;
-  const xHandle = session.xHandle || null;
+  const xHandle = session.xHandle;
+  let wallet = session.wallet || '';
   const supabase = getSupabaseAdmin();
+
+  // If no wallet from Privy session, try to look it up from wallet_links via x_handle
+  if (!wallet) {
+    const { data: user } = await supabase
+      .from('users')
+      .select('id')
+      .eq('x_handle', xHandle)
+      .maybeSingle();
+
+    if (user) {
+      const { data: link } = await supabase
+        .from('wallet_links')
+        .select('wallet')
+        .eq('user_id', user.id)
+        .eq('is_primary', true)
+        .maybeSingle();
+
+      wallet = link?.wallet || '';
+    }
+  }
+
+  // Even without a wallet, show the dashboard (empty state)
+  if (!wallet) {
+    return NextResponse.json({
+      wallet: '',
+      xHandle,
+      claims: [],
+      payouts: [],
+      referral: { code: '', clicks: 0, uniqueClicks: 0, conversions: 0 },
+      stats: { totalEarned: 0, approved: 0, pending: 0, rejected: 0 },
+    });
+  }
 
   const [claimsRes, payoutsRes, clicksRes, conversionsRes] = await Promise.all([
     supabase
