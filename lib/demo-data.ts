@@ -79,6 +79,28 @@ export const DEMO_REFERRAL = {
   activeReferrers: 142,
 };
 
+// ── Community Stats ──
+export const DEMO_COMMUNITY_STATS = {
+  total_approved: 1247,
+  total_sol_paid: 4821.5,
+  unique_countries: 23,
+  avg_refund_sol: 0.38,
+};
+
+// ── Gate Stats (for full /gates page) ──
+export const DEMO_GATE_STATS = [
+  { gate_id: 1, total_processed: 2847, total_passed: 2789, pass_rate_pct: 98, avg_duration_ms: 120 },
+  { gate_id: 2, total_processed: 2789, total_passed: 2706, pass_rate_pct: 97, avg_duration_ms: 85 },
+  { gate_id: 3, total_processed: 2706, total_passed: 2598, pass_rate_pct: 96, avg_duration_ms: 90 },
+  { gate_id: 4, total_processed: 2598, total_passed: 2390, pass_rate_pct: 92, avg_duration_ms: 110 },
+  { gate_id: 5, total_processed: 2390, total_passed: 2271, pass_rate_pct: 95, avg_duration_ms: 340 },
+  { gate_id: 6, total_processed: 2271, total_passed: 1998, pass_rate_pct: 88, avg_duration_ms: 2100 },
+  { gate_id: 7, total_processed: 1998, total_passed: 1878, pass_rate_pct: 94, avg_duration_ms: 180 },
+  { gate_id: 8, total_processed: 1878, total_passed: 1822, pass_rate_pct: 97, avg_duration_ms: 60 },
+  { gate_id: 9, total_processed: 1822, total_passed: 1749, pass_rate_pct: 96, avg_duration_ms: 75 },
+  { gate_id: 10, total_processed: 1749, total_passed: 1732, pass_rate_pct: 99, avg_duration_ms: 40 },
+];
+
 // ── Helper ──
 export function fallback<T>(real: T | null | undefined, demo: T): T {
   if (real === null || real === undefined) return demo;

@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import { supabaseBrowser } from "../lib/supabase-client";
 import { GATES } from "../lib/gates";
 import type { GateWithStats, GateStats, GateFailureReason } from "../types/gates";
+import { DEMO_GATE_STATS } from "../lib/demo-data";
 
 export function useGateStats() {
   const [gates, setGates] = useState<GateWithStats[]>(
@@ -23,9 +24,11 @@ export function useGateStats() {
           .order("occurrence_count", { ascending: false }),
       ]);
 
-      // Views may not exist yet — graceful fallback
+      // Views may not exist yet — use demo data as fallback
+      const rawStats = statsRes.data ?? [];
+      const statsSource = rawStats.length > 0 ? rawStats : DEMO_GATE_STATS;
       const statsMap = new Map<number, GateStats>(
-        (statsRes.data ?? []).map((s: any) => [s.gate_id, s])
+        statsSource.map((s: any) => [s.gate_id, s])
       );
 
       const failuresMap = new Map<number, GateFailureReason[]>();

@@ -96,14 +96,23 @@ export function LiveStatsBar({ refundsToday, totalPaid, queueDepth }: {
     return () => { active = false; clearInterval(id); };
   }, []);
 
-  const animBal = useAnimatedValue(solBalance >= 0 ? solBalance : 0);
-  const animGc = useAnimatedValue(gcBalance >= 0 ? gcBalance : 0);
-  const animRefunds = useAnimatedValue(refundsToday);
-  const animPaid = useAnimatedValue(totalPaid);
-  const animQueue = useAnimatedValue(queueDepth);
+  // Demo fallback when RPC is offline and real data is empty
+  const useDemoTreasury = solBalance < 0 && !online;
+  const displayBal = useDemoTreasury ? DEMO_STATS.totalPaid : (solBalance >= 0 ? solBalance : 0);
+  const displayGc = gcBalance >= 0 ? gcBalance : (useDemoTreasury ? 8_500_000 : 0);
+  const displayRefunds = refundsToday > 0 ? refundsToday : DEMO_STATS.refundsToday;
+  const displayPaid = totalPaid > 0 ? totalPaid : DEMO_STATS.totalPaid;
+  const displayQueue = queueDepth > 0 ? queueDepth : DEMO_STATS.queueDepth;
+  const isDemo = useDemoTreasury || (refundsToday === 0 && totalPaid === 0);
+
+  const animBal = useAnimatedValue(displayBal);
+  const animGc = useAnimatedValue(displayGc);
+  const animRefunds = useAnimatedValue(displayRefunds);
+  const animPaid = useAnimatedValue(displayPaid);
+  const animQueue = useAnimatedValue(displayQueue);
 
   return (
-    <div className="gc-stats">
+    <div className="gc-stats glass-card">
       <div className="gc-stats-grid">
         <div className="gc-stat">
           <div className="gc-stat-label">
@@ -111,12 +120,12 @@ export function LiveStatsBar({ refundsToday, totalPaid, queueDepth }: {
             <span className="gc-pulse" />
           </div>
           <div className="gc-stat-value">
-            {solBalance >= 0 ? `${animBal.toFixed(2)}` : '—'}
+            {animBal.toFixed(2)}
           </div>
           <div className="gc-stat-sub">
-            {online
-              ? `SOL · Live${gcBalance >= 0 ? ` · ${Math.round(animGc).toLocaleString()} GASCOIN` : ''}`
-              : 'SOL · (offline)'}
+            {isDemo
+              ? `SOL · Simulated${displayGc > 0 ? ` · ${Math.round(animGc).toLocaleString()} GASCOIN` : ''}`
+              : `SOL · Live${gcBalance >= 0 ? ` · ${Math.round(animGc).toLocaleString()} GASCOIN` : ''}`}
           </div>
         </div>
         <div className="gc-stat">
@@ -135,6 +144,11 @@ export function LiveStatsBar({ refundsToday, totalPaid, queueDepth }: {
           <div className="gc-stat-sub">Pending Verification</div>
         </div>
       </div>
+      {isDemo && (
+        <div style={{ padding: '8px 48px 12px', textAlign: 'center', fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.2em', textTransform: 'uppercase' as const, color: 'var(--muted-deep)' }}>
+          Pre-Launch · Demo Data
+        </div>
+      )}
     </div>
   );
 }
