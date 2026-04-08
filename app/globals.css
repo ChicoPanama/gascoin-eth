@@ -4291,6 +4291,7 @@ input:focus, textarea:focus, select:focus {
   z-index: 1;
   width: clamp(280px, 50vw, 600px);
   height: clamp(280px, 50vw, 600px);
+  pointer-events: none;
 }
 
 /* Individual orbiting word */
