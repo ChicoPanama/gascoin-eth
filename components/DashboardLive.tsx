@@ -64,6 +64,14 @@ function QueueIcon() {
   );
 }
 
+function GascoinTokenIcon() {
+  return (
+    <span className="gc-mini-icon" aria-hidden>
+      <img src="/logo/gascoin-g.jpg" alt="" loading="lazy" decoding="async" />
+    </span>
+  );
+}
+
 function PanelCheckIcon() {
   return (
     <span className="gc-verify-mini" aria-hidden>
@@ -151,14 +159,12 @@ export function LiveStatsBar({ refundsToday, totalPaid, queueDepth }: {
             {isDemo
               ? (
                 <>
-                  <span className="gc-inline-token"><UsdcIcon />USDC</span> View · Simulated
-                  {displayGc > 0 ? ` · ${Math.round(animGc).toLocaleString()} GASCOIN` : ''}
+                  <span className="gc-inline-token"><UsdcIcon />USDC</span> + <span className="gc-inline-token"><GascoinTokenIcon />GASCOIN</span> · Simulated
                 </>
               )
               : (
                 <>
-                  <span className="gc-inline-token"><UsdcIcon />USDC</span> View · Live
-                  {displayGc > 0 ? ` · ${Math.round(animGc).toLocaleString()} GASCOIN` : ''}
+                  <span className="gc-inline-token"><UsdcIcon />USDC</span> + <span className="gc-inline-token"><GascoinTokenIcon />GASCOIN</span> · Live
                 </>
               )}
           </div>
