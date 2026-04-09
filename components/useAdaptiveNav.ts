@@ -16,6 +16,11 @@ export function useAdaptiveNav(): AdaptiveNavResult {
   const linksRef = useRef<HTMLElement | null>(null);
   const actionsRef = useRef<HTMLElement | null>(null);
   const [compact, setCompact] = useState(false);
+  const compactRef = useRef(false);
+  const expandedWidthsRef = useRef({ brand: 0, links: 0, actions: 0 });
+
+  const BUFFER = 48;
+  const RELEASE_HYSTERESIS = 120;
 
   const measure = useCallback(() => {
     const nav = navRef.current;
@@ -27,18 +32,45 @@ export function useAdaptiveNav(): AdaptiveNavResult {
 
     // Keep canonical mobile behavior first.
     if (window.innerWidth <= 900) {
+      compactRef.current = true;
       setCompact(true);
       return;
     }
 
     const navWidth = nav.clientWidth;
-    const required =
-      brand.getBoundingClientRect().width +
-      links.getBoundingClientRect().width +
-      actions.getBoundingClientRect().width +
-      48; // buffer for gaps/borders/rounding
+    const measuredBrand = brand.getBoundingClientRect().width;
+    const measuredLinks = links.getBoundingClientRect().width;
+    const measuredActions = actions.getBoundingClientRect().width;
 
-    setCompact(required > navWidth);
+    // Capture full (expanded) widths only when nav is currently expanded.
+    if (!compactRef.current) {
+      expandedWidthsRef.current = {
+        brand: measuredBrand,
+        links: measuredLinks,
+        actions: measuredActions,
+      };
+    }
+
+    const cached = expandedWidthsRef.current;
+    const requiredExpanded =
+      (cached.brand || measuredBrand) +
+      (cached.links || measuredLinks) +
+      (cached.actions || measuredActions) +
+      BUFFER;
+
+    if (compactRef.current) {
+      // Only expand when we have comfortable extra room to avoid oscillation.
+      if (navWidth >= requiredExpanded + RELEASE_HYSTERESIS) {
+        compactRef.current = false;
+        setCompact(false);
+      }
+      return;
+    }
+
+    if (navWidth < requiredExpanded) {
+      compactRef.current = true;
+      setCompact(true);
+    }
   }, []);
 
   useEffect(() => {
