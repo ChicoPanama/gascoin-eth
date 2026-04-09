@@ -192,8 +192,16 @@ export default function HowItWorksPage() {
     <div className="container">
       <Nav />
 
-      <header className="hiw-header">
-        <h1>How It Works</h1>
+      <header className="lb-header hiw-header">
+        <div className="lb-header__meta">
+          <span className="lb-tag">— Step-by-Step Guide · From Zero to Refund</span>
+        </div>
+        <h1 className="lb-title lb-title--iconed">
+          <span className="lb-title-icon-wrap" aria-hidden>
+            <img src="/icons/how-it-works-pump.jpg" alt="" className="lb-title-icon" />
+          </span>
+          HOW IT WORKS
+        </h1>
         <p className="hiw-subtitle">
           A complete guide from zero to getting paid back for gas.
           No crypto experience needed.
