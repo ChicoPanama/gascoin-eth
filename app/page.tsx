@@ -243,12 +243,7 @@ export default async function Home() {
                   <img src="/icons/xai-icon.jpg" alt="xAI" className="gc-tech-layer-icon-img" />
                 </div>
                 <div className="gc-tech-layer-content">
-                  <div className="gc-tech-layer-title gc-tech-layer-title--iconed">
-                    <span className="gc-tech-layer-title-icon" aria-hidden>
-                      <img src="/icons/xai-icon.jpg" alt="" />
-                    </span>
-                    X + xAI Intelligence Pipeline
-                  </div>
+                  <div className="gc-tech-layer-title">X + xAI Intelligence Pipeline</div>
                   <div className="gc-tech-layer-tag">X API V2 · xAI-POWERED SCORING · AUTOMATED</div>
                   <p className="gc-tech-layer-desc">
                     Your #gascoin tweet passes through 4 sequential verification gates via the X API —
