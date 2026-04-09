@@ -42,22 +42,25 @@ function formatUsd(value: number): string {
 function UsdcIcon() {
   return (
     <span className="gc-mini-icon" aria-hidden>
-      <svg viewBox="0 0 24 24" fill="none">
-        <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="1.6" />
-        <path d="M9 8.8c.6-.5 1.6-.8 2.7-.8 1.8 0 3 .8 3 2.1 0 1.2-.9 1.8-2.7 2.2l-1 .2c-1 .2-1.4.5-1.4 1 0 .6.7 1 1.9 1 1 0 1.9-.3 2.6-.8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-        <path d="M12 6.7v10.6" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" opacity=".9" />
-      </svg>
+      <img
+        src="https://coin-images.coingecko.com/coins/images/6319/large/usdc.png?1696506694"
+        alt=""
+        loading="lazy"
+        decoding="async"
+      />
     </span>
   );
 }
 
-function GascoinIcon() {
+function SolIcon() {
   return (
     <span className="gc-mini-icon" aria-hidden>
-      <svg viewBox="0 0 24 24" fill="none">
-        <rect x="3.5" y="3.5" width="17" height="17" rx="4" stroke="currentColor" strokeWidth="1.6" />
-        <path d="M15.2 12h-2.8v2.8h3.8c-.9 1.2-2.3 1.9-4.1 1.9-2.8 0-4.8-2-4.8-4.8 0-2.8 2-4.8 4.8-4.8 1.4 0 2.6.5 3.6 1.5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
-      </svg>
+      <img
+        src="https://coin-images.coingecko.com/coins/images/4128/large/solana.png?1718769756"
+        alt=""
+        loading="lazy"
+        decoding="async"
+      />
     </span>
   );
 }
@@ -163,7 +166,7 @@ export function LiveStatsBar({ refundsToday, totalPaid, queueDepth }: {
           <div className="gc-stat-sub">USD (USDC) All-Time</div>
         </div>
         <div className="gc-stat">
-          <div className="gc-stat-label"><span className="gc-stat-label-icons"><GascoinIcon /><PanelCheckIcon /></span>Queue Depth</div>
+          <div className="gc-stat-label"><span className="gc-stat-label-icons"><SolIcon /><PanelCheckIcon /></span>Queue Depth</div>
           <div className="gc-stat-value">{Math.round(animQueue)}</div>
           <div className="gc-stat-sub">Pending Verification</div>
         </div>
