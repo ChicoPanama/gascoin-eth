@@ -580,7 +580,10 @@ code, .mono {
 
 .hiw-link-icon {
   flex-shrink: 0;
-  border-radius: 2px;
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+  border-radius: 3px;
 }
 
 .hiw-link-arrow {

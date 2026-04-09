@@ -12,8 +12,8 @@ type Step = {
   links?: StepLink[];
 };
 
-function favicon(domain: string) {
-  return `https://www.google.com/s2/favicons?domain=${domain}&sz=32`;
+function brand(name: string) {
+  return `/icons/brands/${name}.svg`;
 }
 
 const STEPS: Step[] = [
@@ -33,9 +33,9 @@ const STEPS: Step[] = [
       'Your wallet address is a long string of letters and numbers — like a bank account number. It\'s safe to share.',
     ],
     links: [
-      { name: 'Phantom', url: 'https://phantom.app', icon: favicon('phantom.app') },
-      { name: 'iOS App', url: 'https://apps.apple.com/app/phantom-crypto-wallet/id1598432977', icon: favicon('apple.com') },
-      { name: 'Android App', url: 'https://play.google.com/store/apps/details?id=app.phantom', icon: favicon('play.google.com') },
+      { name: 'Phantom', url: 'https://phantom.app', icon: brand('phantom') },
+      { name: 'iOS App', url: 'https://apps.apple.com/app/phantom-crypto-wallet/id1598432977', icon: brand('apple') },
+      { name: 'Android App', url: 'https://play.google.com/store/apps/details?id=app.phantom', icon: brand('google-play') },
     ],
   },
   {
@@ -48,7 +48,7 @@ const STEPS: Step[] = [
       'Private accounts don\'t work. The system needs to see your tweet publicly.',
     ],
     links: [
-      { name: 'X.com', url: 'https://x.com', icon: favicon('x.com') },
+      { name: 'X.com', url: 'https://x.com', icon: brand('x') },
     ],
   },
   {
@@ -58,15 +58,17 @@ const STEPS: Step[] = [
     bullets: [
       'SOL is the currency of Solana — you need it to buy GASCOIN tokens and pay tiny transaction fees.',
       'You can buy SOL directly inside Phantom with a debit card — easiest option for beginners.',
-      'Or buy SOL on an exchange (Coinbase, Binance, Bybit) and send it to your Phantom wallet address.',
+      'Or buy SOL on an exchange and send it to your Phantom wallet address.',
       'Moonpay also lets you buy SOL with a card and send it straight to your wallet.',
     ],
     links: [
-      { name: 'Phantom Buy', url: 'https://phantom.app', icon: favicon('phantom.app') },
-      { name: 'Coinbase', url: 'https://www.coinbase.com', icon: favicon('coinbase.com') },
-      { name: 'Binance', url: 'https://www.binance.com', icon: favicon('binance.com') },
-      { name: 'Bybit', url: 'https://www.bybit.com', icon: favicon('bybit.com') },
-      { name: 'Moonpay', url: 'https://www.moonpay.com', icon: favicon('moonpay.com') },
+      { name: 'Phantom Buy', url: 'https://phantom.app', icon: brand('phantom') },
+      { name: 'Coinbase', url: 'https://www.coinbase.com', icon: brand('coinbase') },
+      { name: 'Binance', url: 'https://www.binance.com', icon: brand('binance') },
+      { name: 'Bybit', url: 'https://www.bybit.com', icon: brand('bybit') },
+      { name: 'OKX', url: 'https://www.okx.com', icon: brand('okx') },
+      { name: 'Bitget', url: 'https://www.bitget.com', icon: brand('bitget') },
+      { name: 'Moonpay', url: 'https://www.moonpay.com', icon: brand('moonpay') },
     ],
   },
   {
@@ -79,9 +81,9 @@ const STEPS: Step[] = [
       'Holding more GASCOIN unlocks higher tiers with bigger refunds — up to 1.0 SOL per fill-up.',
     ],
     links: [
-      { name: 'Jupiter', url: 'https://jup.ag', icon: favicon('jup.ag') },
-      { name: 'Raydium', url: 'https://raydium.io', icon: favicon('raydium.io') },
-      { name: 'Meteora', url: 'https://meteora.ag', icon: favicon('meteora.ag') },
+      { name: 'Jupiter', url: 'https://jup.ag', icon: brand('jupiter') },
+      { name: 'Raydium', url: 'https://raydium.io', icon: brand('raydium') },
+      { name: 'Meteora', url: 'https://meteora.ag', icon: brand('meteora') },
     ],
   },
   {
@@ -114,7 +116,7 @@ const STEPS: Step[] = [
       'Copy the URL of your tweet — you\'ll paste it in the next step.',
     ],
     links: [
-      { name: 'Post on X', url: 'https://x.com/compose/post', icon: favicon('x.com') },
+      { name: 'Post on X', url: 'https://x.com/compose/post', icon: brand('x') },
     ],
   },
   {
@@ -130,7 +132,7 @@ const STEPS: Step[] = [
       'Check the 3 confirmation boxes and hit Submit.',
     ],
     links: [
-      { name: 'Submit Receipt', url: '/submit', icon: favicon('gascoin.com') },
+      { name: 'Submit Receipt', url: '/submit', icon: brand('gascoin') },
     ],
   },
   {
@@ -143,7 +145,7 @@ const STEPS: Step[] = [
       'You can track your submission status on the Tracker page.',
     ],
     links: [
-      { name: 'Track Status', url: '/wallet', icon: favicon('gascoin.com') },
+      { name: 'Track Status', url: '/wallet', icon: brand('gascoin') },
     ],
   },
   {
@@ -157,11 +159,13 @@ const STEPS: Step[] = [
       'You can submit again after 7 days with a new receipt.',
     ],
     links: [
-      { name: 'Coinbase', url: 'https://www.coinbase.com', icon: favicon('coinbase.com') },
-      { name: 'Binance', url: 'https://www.binance.com', icon: favicon('binance.com') },
-      { name: 'Bybit', url: 'https://www.bybit.com', icon: favicon('bybit.com') },
-      { name: 'Kraken', url: 'https://www.kraken.com', icon: favicon('kraken.com') },
-      { name: 'Moonpay', url: 'https://www.moonpay.com', icon: favicon('moonpay.com') },
+      { name: 'Coinbase', url: 'https://www.coinbase.com', icon: brand('coinbase') },
+      { name: 'Binance', url: 'https://www.binance.com', icon: brand('binance') },
+      { name: 'Bybit', url: 'https://www.bybit.com', icon: brand('bybit') },
+      { name: 'OKX', url: 'https://www.okx.com', icon: brand('okx') },
+      { name: 'Bitget', url: 'https://www.bitget.com', icon: brand('bitget') },
+      { name: 'Kraken', url: 'https://www.kraken.com', icon: brand('kraken') },
+      { name: 'Moonpay', url: 'https://www.moonpay.com', icon: brand('moonpay') },
     ],
   },
 ];
@@ -177,7 +181,7 @@ function StepLinks({ links }: { links: StepLink[] }) {
           : { href: link.url };
         return (
           <Tag key={link.name} className="hiw-link" {...(props as any)}>
-            <img src={link.icon} alt="" width={16} height={16} className="hiw-link-icon" />
+            <img src={link.icon} alt="" width={20} height={20} className="hiw-link-icon" />
             <span>{link.name}</span>
             {isExternal && <span className="hiw-link-arrow" aria-hidden>↗</span>}
           </Tag>
