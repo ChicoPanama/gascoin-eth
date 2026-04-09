@@ -3,6 +3,7 @@ import '../styles/wallet-override.css';
 import type { ReactNode } from 'react';
 import type { Metadata, Viewport } from 'next';
 import { Providers } from './providers';
+import { GlobalFooter } from '../components/GlobalFooter';
 
 export const viewport: Viewport = {
   width: 'device-width',
@@ -45,6 +46,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <a href="#main-content" className="skip-nav">Skip to content</a>
         <Providers>
           {children}
+          <GlobalFooter />
         </Providers>
       </body>
     </html>
