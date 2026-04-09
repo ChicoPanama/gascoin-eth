@@ -2767,6 +2767,30 @@ input:focus, textarea:focus, select:focus {
   text-transform: uppercase;
   margin-bottom: 16px;
 }
+
+.lb-title--iconed {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.lb-title-icon-wrap {
+  width: 56px;
+  height: 56px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,0.24);
+}
+
+.lb-title-icon {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
 .lb-header__live {
   display: flex;
   align-items: center;
@@ -4291,6 +4315,8 @@ input:focus, textarea:focus, select:focus {
   .gc-dash-title { font-size: 48px; gap: 10px; }
   .gc-dash-title-icon-wrap { width: 40px; height: 40px; border-radius: 8px; }
   .lb-title { font-size: 48px; }
+  .lb-title--iconed { gap: 10px; }
+  .lb-title-icon-wrap { width: 40px; height: 40px; border-radius: 8px; }
   .admin-page-title { font-size: 48px; }
   .gc-dash-split { grid-template-columns: 1fr; }
   .gc-feed-row { flex-wrap: wrap; gap: 8px; }
