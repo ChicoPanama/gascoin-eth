@@ -134,7 +134,7 @@ const STEPS: Step[] = [
       'Check the 3 confirmation boxes and hit Submit.',
     ],
     links: [
-      { name: 'Submit Receipt', url: '/submit', icon: brand('gascoin') },
+      { name: 'Submit Receipt', url: '/submit', icon: '/logo/gascoin-g.jpg' },
     ],
   },
   {
@@ -147,7 +147,7 @@ const STEPS: Step[] = [
       'You can track your submission status on the Tracker page.',
     ],
     links: [
-      { name: 'Track Status', url: '/wallet', icon: brand('gascoin') },
+      { name: 'Track Status', url: '/wallet', icon: '/logo/gascoin-g.jpg' },
     ],
   },
   {
