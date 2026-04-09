@@ -1070,8 +1070,10 @@ input:focus, textarea:focus, select:focus {
 .gc-tech-layer-icon-img {
   width: 24px;
   height: 24px;
-  object-fit: contain;
+  object-fit: cover;
   border-radius: 4px;
+  border: 0;
+  background: transparent;
   display: block;
 }
 
@@ -1102,7 +1104,8 @@ input:focus, textarea:focus, select:focus {
   height: 16px;
   border-radius: 4px;
   overflow: hidden;
-  border: 1px solid rgba(255,255,255,0.24);
+  border: 0;
+  background: transparent;
   display: inline-flex;
   align-items: center;
   justify-content: center;
