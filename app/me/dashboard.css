@@ -298,7 +298,7 @@
 }
 .ud-badge--pass {
   color: var(--accent);
-  border-color: rgba(20, 241, 149, 0.3);
+  border-color: rgba(255, 255, 255, 0.2);
 }
 .ud-badge--pending {
   color: var(--status-pending);

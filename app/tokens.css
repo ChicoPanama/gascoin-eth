@@ -4,34 +4,34 @@
    ═══════════════════════════════════════════ */
 
 :root {
-  /* ── Colors ── */
-  --bg: #080810;
-  --fg: #ffffff;
-  --muted: rgba(255,255,255,0.6);
-  --muted-deep: rgba(255,255,255,0.4);
-  --muted-decorative: rgba(255,255,255,0.25);
-  --line: rgba(255,255,255,0.08);
-  --card: rgba(255,255,255,0.04);
-  --card-hover: rgba(255,255,255,0.07);
+  /* ── Colors (X Black & White) ── */
+  --bg: #000000;
+  --fg: #E7E9EA;
+  --muted: #71767B;
+  --muted-deep: #536471;
+  --muted-decorative: #2F3336;
+  --line: #2F3336;
+  --card: #16181C;
+  --card-hover: #1D1F23;
 
-  /* ── Solana Brand ── */
-  --accent: #14F195;
-  --accent-purple: #9945FF;
-  --accent-glow: rgba(20, 241, 149, 0.4);
-  --accent-glow-soft: rgba(20, 241, 149, 0.12);
-  --accent-purple-glow: rgba(153, 69, 255, 0.15);
+  /* ── Accent (monochrome) ── */
+  --accent: #FFFFFF;
+  --accent-purple: #71767B;
+  --accent-glow: rgba(255, 255, 255, 0.4);
+  --accent-glow-soft: rgba(255, 255, 255, 0.12);
+  --accent-purple-glow: rgba(255, 255, 255, 0.08);
 
   /* ── Glass System ── */
-  --glass-bg: rgba(255, 255, 255, 0.04);
-  --glass-border: rgba(255, 255, 255, 0.08);
-  --glass-highlight: 0 1px 0 0 rgba(255, 255, 255, 0.06) inset;
-  --glass-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
+  --glass-bg: rgba(255, 255, 255, 0.03);
+  --glass-border: #2F3336;
+  --glass-highlight: 0 1px 0 0 rgba(255, 255, 255, 0.04) inset;
+  --glass-shadow: 0 4px 24px rgba(0, 0, 0, 0.6);
   --glass-blur: 16px;
 
   /* ── Status ── */
-  --status-pass: #14F195;
-  --status-fail: #EF4444;
-  --status-pending: #F59E0B;
+  --status-pass: #FFFFFF;
+  --status-fail: #F4212E;
+  --status-pending: #FFD400;
 
   /* ── Spacing Scale ── */
   --spacing-4: 4px;
