@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { DEMO_CHART_DATA, DEMO_STATS } from '../lib/demo-data';
+import { DEMO_CHART_DATA, DEMO_GATE_RATES, DEMO_STATS } from '../lib/demo-data';
 
 const TREASURY_WALLET = process.env.NEXT_PUBLIC_TREASURY_WALLET || 'TREASURY_WALLET_ADDRESS';
 const GASCOIN_MINT = process.env.NEXT_PUBLIC_GASCOIN_MINT || 'GASCOIN_MINT_ADDRESS';
@@ -162,7 +162,27 @@ export function TreasuryChart() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [hover, setHover] = useState<{ x: number; idx: number } | null>(null);
-  const data = DEMO_CHART_DATA;
+  const [chartData, setChartData] = useState<{ day: string; sol: number }[]>(DEMO_CHART_DATA);
+
+  useEffect(() => {
+    let active = true;
+    const load = async () => {
+      try {
+        const res = await fetch('/api/public/treasury/history', { cache: 'no-store' });
+        if (!res.ok) return;
+        const rows = await res.json();
+        if (!active) return;
+        if (Array.isArray(rows) && rows.length >= 2) {
+          setChartData(rows.map((r: any) => ({ day: String(r.day || ''), sol: Number(r.sol || 0) })));
+        }
+      } catch {
+        // keep demo fallback
+      }
+    };
+    load();
+    const id = setInterval(load, 30000);
+    return () => { active = false; clearInterval(id); };
+  }, []);
 
   const draw = useCallback((hoverState: typeof hover) => {
     const canvas = canvasRef.current;
@@ -184,12 +204,12 @@ export function TreasuryChart() {
 
     ctx.clearRect(0, 0, w, h);
 
-    const vals = data.map(d => d.sol);
+    const vals = chartData.map(d => d.sol);
     const min = Math.floor(Math.min(...vals) - 2);
     const max = Math.ceil(Math.max(...vals) + 2);
     const range = max - min;
 
-    const toX = (i: number) => pad.left + (i / (data.length - 1)) * plotW;
+    const toX = (i: number) => pad.left + (i / Math.max(1, chartData.length - 1)) * plotW;
     const toY = (v: number) => pad.top + plotH - ((v - min) / range) * plotH;
 
     // Y tick marks
@@ -212,7 +232,7 @@ export function TreasuryChart() {
     // X labels
     ctx.textAlign = 'center';
     ctx.fillStyle = 'rgba(255,255,255,0.3)';
-    data.forEach((d, i) => {
+    chartData.forEach((d, i) => {
       ctx.fillText(d.day, toX(i), h - pad.bottom + 24);
     });
 
@@ -221,7 +241,7 @@ export function TreasuryChart() {
     ctx.lineWidth = 1;
     ctx.lineJoin = 'round';
     ctx.beginPath();
-    data.forEach((d, i) => {
+    chartData.forEach((d, i) => {
       const x = toX(i);
       const y = toY(d.sol);
       if (i === 0) ctx.moveTo(x, y);
@@ -230,7 +250,7 @@ export function TreasuryChart() {
     ctx.stroke();
 
     // Dots
-    data.forEach((d, i) => {
+    chartData.forEach((d, i) => {
       ctx.beginPath();
       ctx.arc(toX(i), toY(d.sol), 2.5, 0, Math.PI * 2);
       ctx.fillStyle = '#fff';
@@ -238,8 +258,8 @@ export function TreasuryChart() {
     });
 
     // Hover crosshair + tooltip
-    if (hoverState && hoverState.idx >= 0 && hoverState.idx < data.length) {
-      const d = data[hoverState.idx];
+    if (hoverState && hoverState.idx >= 0 && hoverState.idx < chartData.length) {
+      const d = chartData[hoverState.idx];
       const x = toX(hoverState.idx);
       const y = toY(d.sol);
 
@@ -269,7 +289,7 @@ export function TreasuryChart() {
       ctx.fillStyle = '#fff';
       ctx.fill();
     }
-  }, [data]);
+  }, [chartData]);
 
   useEffect(() => { draw(hover); }, [draw, hover]);
 
@@ -287,8 +307,8 @@ export function TreasuryChart() {
     const pad = { left: 60, right: 20 };
     const plotW = rect.width - pad.left - pad.right;
     const rel = (mx - pad.left) / plotW;
-    const idx = Math.round(rel * (data.length - 1));
-    if (idx >= 0 && idx < data.length) {
+    const idx = Math.round(rel * (chartData.length - 1));
+    if (idx >= 0 && idx < chartData.length) {
       setHover({ x: mx, idx });
     }
   };
@@ -320,9 +340,9 @@ export function SubmissionFeed() {
         if (res.ok) {
           const data = await res.json();
           const rows = (Array.isArray(data) ? data : []).slice(0, 8).map((r: any) => ({
-            wallet: r.wallet ? `${r.wallet.slice(0, 4)}...${r.wallet.slice(-4)}` : '—',
-            location: '—',
-            amount: Number(r.riskScore || 0).toFixed(2),
+            wallet: r.xHandle || '@unknown',
+            location: r.status || 'queued',
+            amount: Number(r.amountSol || 0).toFixed(2),
             gatesPassed: 10,
             _new: false,
           }));
@@ -377,24 +397,51 @@ const DASHBOARD_GATES = [
 ];
 
 export function GateStatusPanel() {
+  const [rates, setRates] = useState<Record<string, number>>({});
+
+  useEffect(() => {
+    let active = true;
+    const load = async () => {
+      try {
+        const res = await fetch('/api/public/gates', { cache: 'no-store' });
+        if (!res.ok) return;
+        const rows = await res.json();
+        if (!active || !Array.isArray(rows)) return;
+        const map: Record<string, number> = {};
+        for (const r of rows) {
+          map[String(r.name || '')] = Number(r.rate || 0);
+        }
+        setRates(map);
+      } catch {
+        // keep fallback rates
+      }
+    };
+    load();
+    const id = setInterval(load, 30000);
+    return () => { active = false; clearInterval(id); };
+  }, []);
+
   return (
     <div className="gc-gates">
       <div className="gc-feed-header">
         <span className="gc-section-num">Verification Gates</span>
       </div>
       <div className="gc-gates-list">
-        {DASHBOARD_GATES.map((g, i) => (
+        {DASHBOARD_GATES.map((g, i) => {
+          const fallbackRate = DEMO_GATE_RATES.get(i + 1) || 0;
+          const rate = rates[g.name] ?? fallbackRate;
+          return (
           <div key={g.name} className="gc-gate">
             <div className="gc-gate-head">
               <span className="gc-gate-num">{String(i + 1).padStart(2, '0')}</span>
               <span className="gc-gate-name">{g.name}</span>
-              <span className="gc-gate-pct">{g.rate}%</span>
+              <span className="gc-gate-pct">{rate}%</span>
             </div>
             <div className="gc-gate-track">
-              <div className="gc-gate-fill" style={{ width: `${g.rate}%` }} />
+              <div className="gc-gate-fill" style={{ width: `${rate}%` }} />
             </div>
           </div>
-        ))}
+        )})}
       </div>
     </div>
   );
