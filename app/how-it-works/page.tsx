@@ -1,51 +1,92 @@
 import Link from 'next/link';
 import { Nav } from '../../components/Nav';
 
-const STEPS = [
+type StepLink = { name: string; url: string; icon: string };
+type Step = {
+  number: number;
+  title: string;
+  time?: string;
+  subtitle?: string;
+  body?: string;
+  bullets: string[];
+  links?: StepLink[];
+};
+
+function favicon(domain: string) {
+  return `https://www.google.com/s2/favicons?domain=${domain}&sz=32`;
+}
+
+const STEPS: Step[] = [
   {
     number: 0,
     title: 'What is GASCOIN?',
-    body: `You buy gas at any gas station. You post proof on X. You get real money sent to your digital wallet. No catch. No middlemen. Funded by the GASCOIN community treasury on Solana.`,
+    body: 'You buy gas at any gas station. You post proof on X. You get real money sent to your digital wallet. No catch. No middlemen. Funded by the GASCOIN community treasury on Solana.',
     bullets: [],
   },
   {
     number: 1,
     title: 'Set Up a Solana Wallet',
     time: '5 min',
-    body: null,
     bullets: [
       'Download Phantom wallet — it\'s a free app for your phone or browser. Think of it like Venmo, but for crypto.',
       'Create your wallet. It gives you a "seed phrase" (12 words). Write these down on paper and keep them safe. Never share them with anyone.',
       'Your wallet address is a long string of letters and numbers — like a bank account number. It\'s safe to share.',
+    ],
+    links: [
+      { name: 'Phantom', url: 'https://phantom.app', icon: favicon('phantom.app') },
+      { name: 'iOS App', url: 'https://apps.apple.com/app/phantom-crypto-wallet/id1598432977', icon: favicon('apple.com') },
+      { name: 'Android App', url: 'https://play.google.com/store/apps/details?id=app.phantom', icon: favicon('play.google.com') },
     ],
   },
   {
     number: 2,
     title: 'Set Up X (Twitter)',
     time: '2 min',
-    body: null,
     bullets: [
       'You need a public X account with at least 100 followers.',
       'Your profile needs a bio and some posting history — brand new or empty accounts won\'t pass verification.',
       'Private accounts don\'t work. The system needs to see your tweet publicly.',
     ],
+    links: [
+      { name: 'X.com', url: 'https://x.com', icon: favicon('x.com') },
+    ],
   },
   {
     number: 3,
-    title: 'Get GASCOIN Tokens',
+    title: 'Get SOL',
     time: '5 min',
-    body: null,
     bullets: [
-      'You need to hold at least $1 worth of GASCOIN tokens in your Phantom wallet before you can submit.',
-      'First, buy SOL (the currency of Solana). You can buy it directly in Phantom with a debit card, or through Coinbase / Moonpay.',
-      'Then swap some SOL for GASCOIN on a Solana exchange like Jupiter or Raydium — just search for the GASCOIN token.',
-      'Holding more GASCOIN unlocks higher tiers with bigger refunds — up to 1.0 SOL per fill-up.',
+      'SOL is the currency of Solana — you need it to buy GASCOIN tokens and pay tiny transaction fees.',
+      'You can buy SOL directly inside Phantom with a debit card — easiest option for beginners.',
+      'Or buy SOL on an exchange (Coinbase, Binance, Bybit) and send it to your Phantom wallet address.',
+      'Moonpay also lets you buy SOL with a card and send it straight to your wallet.',
+    ],
+    links: [
+      { name: 'Phantom Buy', url: 'https://phantom.app', icon: favicon('phantom.app') },
+      { name: 'Coinbase', url: 'https://www.coinbase.com', icon: favicon('coinbase.com') },
+      { name: 'Binance', url: 'https://www.binance.com', icon: favicon('binance.com') },
+      { name: 'Bybit', url: 'https://www.bybit.com', icon: favicon('bybit.com') },
+      { name: 'Moonpay', url: 'https://www.moonpay.com', icon: favicon('moonpay.com') },
     ],
   },
   {
     number: 4,
+    title: 'Get GASCOIN Tokens',
+    time: '3 min',
+    bullets: [
+      'You need to hold at least $1 worth of GASCOIN tokens in your Phantom wallet before you can submit.',
+      'Swap some SOL for GASCOIN on a Solana DEX — search for the GASCOIN token.',
+      'Holding more GASCOIN unlocks higher tiers with bigger refunds — up to 1.0 SOL per fill-up.',
+    ],
+    links: [
+      { name: 'Jupiter', url: 'https://jup.ag', icon: favicon('jup.ag') },
+      { name: 'Raydium', url: 'https://raydium.io', icon: favicon('raydium.io') },
+      { name: 'Meteora', url: 'https://meteora.ag', icon: favicon('meteora.ag') },
+    ],
+  },
+  {
+    number: 5,
     title: 'Buy Gas',
-    body: null,
     bullets: [
       'Fill up at any gas station — anywhere in the world.',
       'Ask for a paper receipt. Digital receipts, email receipts, and app receipts are not accepted.',
@@ -53,10 +94,9 @@ const STEPS = [
     ],
   },
   {
-    number: 5,
+    number: 6,
     title: 'Write on Your Receipt',
     time: '30 sec',
-    body: null,
     bullets: [
       'Open Phantom and find your wallet address (tap your address to copy it).',
       'Write the LAST 4 characters of your wallet address on the receipt with a black pen.',
@@ -65,21 +105,22 @@ const STEPS = [
     ],
   },
   {
-    number: 6,
+    number: 7,
     title: 'Post on X',
     time: '1 min',
-    body: null,
     bullets: [
       'Post a tweet on X. Say whatever you want — just include the hashtag #gascoin somewhere in the tweet.',
       'Keep the tweet up. If you delete it, your submission will fail verification.',
       'Copy the URL of your tweet — you\'ll paste it in the next step.',
     ],
+    links: [
+      { name: 'Post on X', url: 'https://x.com/compose/post', icon: favicon('x.com') },
+    ],
   },
   {
-    number: 7,
+    number: 8,
     title: 'Submit on GASCOIN',
     time: '3 min',
-    body: null,
     bullets: [
       'Go to the Submit page on GASCOIN.',
       'Click "Connect Wallet" and connect your Phantom wallet.',
@@ -88,31 +129,63 @@ const STEPS = [
       'Upload a clear photo of your receipt (with the last 4 wallet characters visible).',
       'Check the 3 confirmation boxes and hit Submit.',
     ],
+    links: [
+      { name: 'Submit Receipt', url: '/submit', icon: favicon('gascoin.com') },
+    ],
   },
   {
-    number: 8,
+    number: 9,
     title: 'Wait for Verification',
-    body: null,
     bullets: [
       'The system automatically runs 10 verification checks on your submission. This takes 2-5 minutes.',
       'If all checks pass, an admin reviews your submission and approves it.',
       'SOL is sent directly to your Phantom wallet within 24-48 hours.',
       'You can track your submission status on the Tracker page.',
     ],
+    links: [
+      { name: 'Track Status', url: '/wallet', icon: favicon('gascoin.com') },
+    ],
   },
   {
-    number: 9,
+    number: 10,
     title: 'Cash Out',
     subtitle: 'Optional',
-    body: null,
     bullets: [
       'Your SOL is already in your Phantom wallet — you can hold it, spend it, or convert it to dollars.',
-      'To convert to USD: send your SOL to an exchange like Coinbase or Kraken and sell it.',
-      'Or use an on-ramp like Moonpay to send it directly to your bank account.',
+      'Send SOL to an exchange and sell it for USD, EUR, or your local currency.',
+      'Or use Moonpay to send it directly to your bank account.',
       'You can submit again after 7 days with a new receipt.',
+    ],
+    links: [
+      { name: 'Coinbase', url: 'https://www.coinbase.com', icon: favicon('coinbase.com') },
+      { name: 'Binance', url: 'https://www.binance.com', icon: favicon('binance.com') },
+      { name: 'Bybit', url: 'https://www.bybit.com', icon: favicon('bybit.com') },
+      { name: 'Kraken', url: 'https://www.kraken.com', icon: favicon('kraken.com') },
+      { name: 'Moonpay', url: 'https://www.moonpay.com', icon: favicon('moonpay.com') },
     ],
   },
 ];
+
+function StepLinks({ links }: { links: StepLink[] }) {
+  return (
+    <div className="hiw-links">
+      {links.map((link) => {
+        const isExternal = link.url.startsWith('http');
+        const Tag = isExternal ? 'a' : Link;
+        const props = isExternal
+          ? { href: link.url, target: '_blank', rel: 'noopener noreferrer' }
+          : { href: link.url };
+        return (
+          <Tag key={link.name} className="hiw-link" {...(props as any)}>
+            <img src={link.icon} alt="" width={16} height={16} className="hiw-link-icon" />
+            <span>{link.name}</span>
+            {isExternal && <span className="hiw-link-arrow" aria-hidden>↗</span>}
+          </Tag>
+        );
+      })}
+    </div>
+  );
+}
 
 export default function HowItWorksPage() {
   return (
@@ -145,6 +218,7 @@ export default function HowItWorksPage() {
                   ))}
                 </ul>
               )}
+              {step.links && step.links.length > 0 && <StepLinks links={step.links} />}
             </div>
           </div>
         ))}
