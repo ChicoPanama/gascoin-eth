@@ -188,9 +188,7 @@ export default async function Home() {
               <div className="gc-tech-layer gc-tech-layer--ai">
                 <div className="gc-tech-layer-num">01</div>
                 <div className="gc-tech-layer-icon">
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                    <circle cx="12" cy="12" r="3"/><path d="M12 2v4"/><path d="M12 18v4"/><path d="M4.93 4.93l2.83 2.83"/><path d="M16.24 16.24l2.83 2.83"/><path d="M2 12h4"/><path d="M18 12h4"/><path d="M4.93 19.07l2.83-2.83"/><path d="M16.24 7.76l2.83-2.83"/>
-                  </svg>
+                  <img src="/icons/grok-icon.jpg" alt="Grok" className="gc-tech-layer-icon-img" />
                 </div>
                 <div className="gc-tech-layer-content">
                   <div className="gc-tech-layer-title">AI Receipt Processing</div>
@@ -221,9 +219,7 @@ export default async function Home() {
               <div className="gc-tech-layer">
                 <div className="gc-tech-layer-num">02</div>
                 <div className="gc-tech-layer-icon">
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                    <path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>
-                  </svg>
+                  <img src="/icons/grok-icon.jpg" alt="Grok" className="gc-tech-layer-icon-img" />
                 </div>
                 <div className="gc-tech-layer-content">
                   <div className="gc-tech-layer-title">4-Layer Fraud Detection</div>
