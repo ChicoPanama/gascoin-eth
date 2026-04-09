@@ -23,8 +23,11 @@ export function Nav() {
   const { authenticated } = usePrivy();
 
   return <nav className="nav">
-    <Link href="/" className="nav-brand">GASCOIN</Link>
-    {NAV_LINKS.map(({ href, label }) => (
+    <Link href="/" className="nav-brand-wrap" aria-label="GASCOIN home">
+      <img src="/logo/gascoin-g.jpg" alt="" className="nav-logo-icon" aria-hidden />
+      <span className="nav-brand">GASCOIN</span>
+    </Link>
+    {NAV_LINKS.map(({ href, label }) => ( 
       <Link
         key={href}
         href={href}

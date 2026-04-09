@@ -11,7 +11,10 @@ export function HomeNav() {
 
   return (
     <nav className="gc-nav">
-      <span className="gc-nav-brand">GASCOIN</span>
+      <Link href="/" className="gc-nav-brand-wrap" aria-label="GASCOIN home">
+        <img src="/logo/gascoin-g.jpg" alt="" className="gc-nav-logo-icon" aria-hidden />
+        <span className="gc-nav-brand">GASCOIN</span>
+      </Link>
       <div className="gc-nav-links">
         <Link href="/submit">Submit</Link>
         <Link href="/dashboard">Treasury</Link>

@@ -62,6 +62,20 @@ code, .mono {
   -webkit-backdrop-filter: blur(24px);
 }
 
+.gc-nav-brand-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.gc-nav-logo-icon {
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  object-fit: cover;
+  border: 1px solid rgba(255,255,255,0.2);
+}
+
 .gc-nav-brand {
   font-family: var(--font-display);
   font-size: 22px;
@@ -186,9 +200,9 @@ code, .mono {
 
 .gc-hero-logo-float {
   position: absolute;
-  right: clamp(70px, 10vw, 180px);
+  left: 72%;
   top: 47%;
-  transform: translateY(-50%);
+  transform: translate(-50%, -50%);
   z-index: 2;
   width: clamp(210px, 27vw, 400px);
   aspect-ratio: 1 / 1;
@@ -203,7 +217,7 @@ code, .mono {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: 52% 50%;
+  object-position: 50% 50%;
   border-radius: 30px;
   opacity: 1;
 }
@@ -780,13 +794,28 @@ input:focus, textarea:focus, select:focus {
   border-bottom: 1px solid var(--line);
   padding-bottom: 16px;
 }
+.nav-brand-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-right: 24px;
+  padding-left: 0 !important;
+}
+
+.nav-logo-icon {
+  width: 22px;
+  height: 22px;
+  border-radius: 5px;
+  object-fit: cover;
+  border: 1px solid rgba(255,255,255,0.2);
+}
+
 .nav-brand {
   font-family: var(--font-display);
   font-weight: 400;
   font-size: 20px;
   letter-spacing: 0.15em;
   color: var(--fg);
-  margin-right: 24px;
 }
 .nav a {
   font-family: var(--font-mono);
@@ -4028,6 +4057,7 @@ input:focus, textarea:focus, select:focus {
     position: relative;
     top: auto;
     right: auto;
+    left: auto;
     transform: none;
     width: min(62vw, 280px);
     margin: 0 auto 24px;
