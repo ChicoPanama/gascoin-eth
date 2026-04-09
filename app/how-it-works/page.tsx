@@ -107,6 +107,9 @@ const STEPS: Step[] = [
       'Write them big and clear — the system uses a camera to read them automatically.',
       'Example: if your wallet ends in "cR3P", write cR3P on the receipt.',
     ],
+    links: [
+      { name: 'Open Phantom', url: 'https://phantom.app/ul/browse', icon: brand('phantom') },
+    ],
   },
   {
     number: 7,
