@@ -4361,7 +4361,24 @@ input:focus, textarea:focus, select:focus {
   .gt-teaser-title { font-size: 48px; }
 
   .cf-grid { grid-template-columns: 1fr; }
-  .cf-controls { flex-direction: column; gap: 12px; align-items: flex-start; }
+  .cf-controls { flex-direction: column; gap: 12px; align-items: stretch; }
+  .cf-filters { width: 100%; }
+  .cf-filter-tab {
+    flex: 1 1 0;
+    min-height: 40px;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-align: center;
+    padding: 10px 12px;
+  }
+  .cf-sort-wrap { width: 100%; }
+  .cf-sort-btn {
+    width: 100%;
+    min-height: 40px;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-align: left;
+  }
   .cf-modal-body { grid-template-columns: 1fr; }
   .cf-modal-image { border-right: none; border-bottom: 1px solid var(--line); }
   .cf-teaser { padding: 60px 24px; }
@@ -4377,6 +4394,29 @@ input:focus, textarea:focus, select:focus {
   .lb-table-gc, .lb-table-ref, .lb-table-eng, .lb-table-score { display: none; }
   .lb-table thead th:nth-child(4), .lb-table thead th:nth-child(5),
   .lb-table thead th:nth-child(6), .lb-table thead th:nth-child(7) { display: none; }
+  .lb-table { table-layout: fixed; }
+  .lb-table thead th {
+    font-size: 9px;
+    letter-spacing: 0.14em;
+    padding: 10px 8px;
+  }
+  .lb-table-rank {
+    width: 48px;
+    font-size: 17px;
+    padding: 12px 8px;
+  }
+  .lb-table-wallet,
+  .lb-table-sol,
+  .lb-table-claims,
+  .lb-table-time {
+    padding: 12px 8px;
+    font-size: 12px;
+  }
+  .lb-table-wallet {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
   .lb-score-legend { display: none; }
 
   .sf-headline { font-size: 40px; }
@@ -4399,7 +4439,7 @@ input:focus, textarea:focus, select:focus {
 
   .cards-4 { grid-template-columns: 1fr 1fr; }
   .cards-3 { grid-template-columns: 1fr; }
-  .container { padding: 24px; }
+  .container { padding: 22px; }
 }
 
 @media (max-width: 600px) {
@@ -4423,8 +4463,38 @@ input:focus, textarea:focus, select:focus {
     letter-spacing: 0.02em;
   }
 
+  .gc-footer {
+    padding: 20px 16px;
+    gap: 10px;
+  }
+
+  .gc-footer-brand {
+    font-size: 22px;
+  }
+
+  .gc-footer-links {
+    gap: 14px;
+  }
+
+  .gc-footer-links a {
+    font-size: 11px;
+    color: rgba(255,255,255,0.5);
+    letter-spacing: 0.08em;
+  }
+
+  .gc-footer-copy {
+    font-size: 10px;
+    color: rgba(255,255,255,0.34);
+  }
+
+  .cf-filter-tab,
+  .cf-sort-btn {
+    min-height: 42px;
+  }
+
   .gc-hero h1 { font-size: 36px; }
   .cards-4 { grid-template-columns: 1fr; }
+  .container { padding: 18px; }
 }
 
 /* ═══════════════════════════════════════════

@@ -384,7 +384,35 @@
   .ud-actions {
     flex-wrap: wrap;
   }
+  .ud-tab {
+    min-height: 38px;
+    font-size: 11px;
+    padding: 9px 12px;
+  }
   .ud-gates__grid {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 600px) {
+  .ud-title {
+    font-size: 40px;
+  }
+
+  .ud-tabs {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .ud-tab {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .ud-payouts__header,
+  .ud-payouts__row {
+    gap: 8px;
   }
 }
