@@ -68,6 +68,8 @@ const STEPS: Step[] = [
       { name: 'Bybit', url: 'https://www.bybit.com', icon: brand('bybit') },
       { name: 'OKX', url: 'https://www.okx.com', icon: brand('okx') },
       { name: 'Bitget', url: 'https://www.bitget.com', icon: brand('bitget') },
+      { name: 'Gate.io', url: 'https://www.gate.io', icon: brand('gate') },
+      { name: 'MEXC', url: 'https://www.mexc.com', icon: brand('mexc') },
       { name: 'Moonpay', url: 'https://www.moonpay.com', icon: brand('moonpay') },
     ],
   },
