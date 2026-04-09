@@ -220,7 +220,7 @@ code, .mono {
   z-index: 0;
   will-change: transform;
   transform: translateZ(0);
-  animation: heroGlow 12s ease-in-out infinite alternate;
+  animation: heroGlow 12s ease-in-out 1.5s infinite alternate;
 }
 @keyframes heroGlow {
   0% { transform: translate(0%, 0%) rotate(0deg); }
@@ -278,23 +278,25 @@ code, .mono {
   bottom: 12px;
   width: 40%;
   height: 16px;
-  transform: translateX(-50%);
+  transform: translateX(-50%) translateZ(0);
   border-radius: 999px;
   background: radial-gradient(ellipse at center, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.06) 70%, transparent 100%);
   filter: blur(2px);
-  animation: gcGShadowPulse 3.6s ease-in-out infinite;
+  animation: gcGShadowPulse 3.6s ease-in-out 1.5s infinite;
   pointer-events: none;
+  will-change: transform, opacity;
 }
 
 .gc-hero-logo-g-layer {
   position: absolute;
   inset: 0;
-  animation: gcGFloat 3.6s ease-in-out infinite;
+  animation: gcGFloat 3.6s ease-in-out 1.5s infinite;
   will-change: transform;
 }
 
 .gc-hero-logo-image--g {
   transform: translateZ(0);
+  isolation: isolate;
   mix-blend-mode: multiply;
 }
 
@@ -358,7 +360,7 @@ code, .mono {
     0 0 72px rgba(255, 255, 255, 0.52),
     0 0 128px rgba(255, 255, 255, 0.34),
     0 0 180px rgba(255, 255, 255, 0.22);
-  animation: gcHeroGlowPulse 2.8s ease-in-out infinite;
+  animation: gcHeroGlowPulse 4s ease-in-out 1.5s infinite;
 }
 
 .gc-hero-glow::after {
@@ -368,12 +370,13 @@ code, .mono {
   top: 54%;
   width: 125%;
   height: 0.9em;
-  transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%) translateZ(0);
   border-radius: 999px;
-  background: radial-gradient(ellipse at center, rgba(255,255,255,0.5) 0%, rgba(255,255,255,0.16) 52%, rgba(255,255,255,0) 78%);
+  background: radial-gradient(ellipse at center, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0.12) 52%, rgba(255,255,255,0) 78%);
   filter: blur(14px);
   pointer-events: none;
   z-index: -1;
+  will-change: opacity;
 }
 
 @keyframes gcHeroGlowPulse {
@@ -381,15 +384,13 @@ code, .mono {
     text-shadow:
       0 0 34px rgba(255, 255, 255, 0.66),
       0 0 66px rgba(255, 255, 255, 0.46),
-      0 0 120px rgba(255, 255, 255, 0.28),
-      0 0 170px rgba(255, 255, 255, 0.18);
+      0 0 120px rgba(255, 255, 255, 0.28);
   }
   50% {
     text-shadow:
-      0 0 44px rgba(255, 255, 255, 0.88),
-      0 0 88px rgba(255, 255, 255, 0.62),
-      0 0 148px rgba(255, 255, 255, 0.42),
-      0 0 210px rgba(255, 255, 255, 0.28);
+      0 0 42px rgba(255, 255, 255, 0.82),
+      0 0 80px rgba(255, 255, 255, 0.56),
+      0 0 140px rgba(255, 255, 255, 0.36);
   }
 }
 
@@ -5117,7 +5118,7 @@ input:focus, textarea:focus, select:focus {
   background:
     radial-gradient(ellipse 35% 30% at 60% 55%, rgba(255, 255, 255, 0.05) 0%, transparent 60%),
     radial-gradient(ellipse 30% 25% at 40% 50%, rgba(255, 255, 255, 0.03) 0%, transparent 50%);
-  animation: heroGlow 12s ease-in-out infinite alternate;
+  animation: heroGlow 12s ease-in-out 1.5s infinite alternate;
   pointer-events: none;
   z-index: 0;
 }
