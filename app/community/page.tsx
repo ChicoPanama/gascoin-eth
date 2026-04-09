@@ -139,7 +139,12 @@ export default function CommunityPage() {
         <div className="lb-header__meta">
           <span className="lb-tag">— Verified Gas Receipts · Proof of Payout</span>
         </div>
-        <h1 className="lb-title">COMMUNITY</h1>
+        <h1 className="lb-title lb-title--iconed">
+          <span className="lb-title-icon-wrap" aria-hidden>
+            <img src="/icons/community-runner.jpg" alt="" className="lb-title-icon" />
+          </span>
+          COMMUNITY
+        </h1>
         <div className="lb-header__live">
           <span className="lb-pulse" />
           <span className="lb-live-label">LIVE FEED</span>
