@@ -222,38 +222,51 @@ code, .mono {
   opacity: 1;
 }
 
+.gc-hero-logo-shadow {
+  position: absolute;
+  left: 50%;
+  bottom: 12px;
+  width: 40%;
+  height: 16px;
+  transform: translateX(-50%);
+  border-radius: 999px;
+  background: radial-gradient(ellipse at center, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.06) 70%, transparent 100%);
+  filter: blur(2px);
+  animation: gcGShadowPulse 3.6s ease-in-out infinite;
+  pointer-events: none;
+}
+
 .gc-hero-logo-g-layer {
   position: absolute;
   inset: 0;
-  clip-path: inset(33% 0 0 0);
   animation: gcGFloat 3.6s ease-in-out infinite;
-  will-change: transform, filter;
+  will-change: transform;
 }
 
 .gc-hero-logo-image--g {
   transform: translateZ(0);
+  mix-blend-mode: multiply;
 }
 
 @keyframes gcGFloat {
+  0%, 100% { transform: translateY(-10px); }
+  50% { transform: translateY(8px); }
+}
+
+@keyframes gcGShadowPulse {
   0%, 100% {
-    transform: translateY(0px);
-    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.16));
+    opacity: 0.28;
+    transform: translateX(-50%) scaleX(0.86);
   }
   50% {
-    transform: translateY(-14px);
-    filter: drop-shadow(0 10px 12px rgba(0, 0, 0, 0.28));
+    opacity: 0.52;
+    transform: translateX(-50%) scaleX(1.08);
   }
 }
 
 @keyframes gcLogoFloatMobile {
-  0%, 100% {
-    transform: translateY(0px);
-    filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.14));
-  }
-  50% {
-    transform: translateY(-8px);
-    filter: drop-shadow(0 8px 10px rgba(0, 0, 0, 0.24));
-  }
+  0%, 100% { transform: translateY(-6px); }
+  50% { transform: translateY(5px); }
 }
 
 .gc-section-label {
