@@ -1175,12 +1175,15 @@ input:focus, textarea:focus, select:focus {
   color: var(--fg);
 }
 .nav a {
+  display: inline-flex;
+  align-items: center;
   font-family: var(--font-mono);
   color: var(--muted);
   font-size: 12px;
   font-weight: 500;
   text-transform: uppercase;
   letter-spacing: 0.08em;
+  white-space: nowrap;
   padding: 6px 12px;
   transition: color 0.15s;
 }
@@ -1189,6 +1192,7 @@ input:focus, textarea:focus, select:focus {
   display: inline-flex;
   align-items: center;
   gap: 6px;
+  white-space: nowrap;
 }
 
 .nav-link-icon {
