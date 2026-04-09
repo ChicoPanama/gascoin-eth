@@ -9,7 +9,6 @@ import { FeedControls } from '../../components/community/FeedControls';
 import { useCommunityFeed } from '../../hooks/useCommunityFeed';
 import { useCommunityStats } from '../../hooks/useCommunityStats';
 import { useGascoinWallet } from '../../hooks/useGascoinWallet';
-import { formatSol } from '../../lib/formatters';
 import type { CommunityReceipt, FeedFilter, FeedSort } from '../../types/community';
 
 // Animated counter
@@ -30,6 +29,56 @@ function useAnimVal(target: number, dur = 1200) {
   return v;
 }
 
+function formatUsd(value: number): string {
+  return value.toLocaleString('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+}
+
+function StatIconReceipts() {
+  return (
+    <span className="gc-mini-icon" aria-hidden>
+      <svg viewBox="0 0 24 24" fill="none">
+        <path d="M7 5h10v14l-2-1.5-2 1.5-2-1.5-2 1.5-2-1.5V5z" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" />
+        <path d="M9 9h6M9 12h6" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+      </svg>
+    </span>
+  );
+}
+
+function StatIconUsd() {
+  return (
+    <span className="gc-mini-icon" aria-hidden>
+      <img src="https://coin-images.coingecko.com/coins/images/6319/large/usdc.png?1696506694" alt="" loading="lazy" decoding="async" />
+    </span>
+  );
+}
+
+function StatIconCountries() {
+  return (
+    <span className="gc-mini-icon" aria-hidden>
+      <svg viewBox="0 0 24 24" fill="none">
+        <circle cx="12" cy="12" r="8" stroke="currentColor" strokeWidth="1.6" />
+        <path d="M4 12h16M12 4a12 12 0 0 1 0 16M12 4a12 12 0 0 0 0 16" stroke="currentColor" strokeWidth="1.2" />
+      </svg>
+    </span>
+  );
+}
+
+function StatIconAvg() {
+  return (
+    <span className="gc-mini-icon" aria-hidden>
+      <svg viewBox="0 0 24 24" fill="none">
+        <path d="M5 16l4-4 3 2 6-6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M5 19h14" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+      </svg>
+    </span>
+  );
+}
+
 export default function CommunityPage() {
   const { publicKey } = useGascoinWallet();
   const connectedWallet = publicKey?.toBase58() ?? null;
@@ -40,6 +89,24 @@ export default function CommunityPage() {
   const { receipts, loading, loadingMore, error, hasMore, newCount, loadMore, flushNewReceipts } =
     useCommunityFeed(connectedWallet, filter, sort);
   const { stats, loading: statsLoading } = useCommunityStats();
+  const [solUsdPrice, setSolUsdPrice] = useState(170);
+
+  useEffect(() => {
+    let active = true;
+    const pullPrice = async () => {
+      try {
+        const res = await fetch('/api/public/market', { cache: 'no-store' });
+        if (!res.ok) return;
+        const m = await res.json();
+        if (!active) return;
+        const p = Number(m?.solPriceUsd || 0);
+        if (p > 0) setSolUsdPrice(p);
+      } catch {}
+    };
+    pullPrice();
+    const id = setInterval(pullPrice, 30000);
+    return () => { active = false; clearInterval(id); };
+  }, []);
 
   // Intersection observer for infinite scroll
   const sentinelRef = useRef<HTMLDivElement>(null);
@@ -51,9 +118,9 @@ export default function CommunityPage() {
   }, [loadMore]);
 
   const aApproved = useAnimVal(stats?.total_approved ?? 0);
-  const aPaid = useAnimVal(stats?.total_sol_paid ?? 0);
+  const aPaidUsd = useAnimVal((stats?.total_sol_paid ?? 0) * solUsdPrice);
   const aCountries = useAnimVal(stats?.unique_countries ?? 0);
-  const aAvg = useAnimVal(stats?.avg_refund_sol ?? 0);
+  const aAvgUsd = useAnimVal((stats?.avg_refund_sol ?? 0) * solUsdPrice);
 
   const handleConnectWallet = () => {
     // Trigger Solana wallet modal
@@ -83,20 +150,22 @@ export default function CommunityPage() {
       <div className="gc-stats">
         <div className="gc-stats-grid">
           <div className="gc-stat">
-            <div className="gc-stat-label">Verified Receipts</div>
+            <div className="gc-stat-label"><span className="gc-stat-label-icons"><StatIconReceipts /></span>Verified Receipts</div>
             <div className="gc-stat-value">{statsLoading ? <div className="lb-skeleton" /> : Math.round(aApproved).toLocaleString()}</div>
           </div>
           <div className="gc-stat">
-            <div className="gc-stat-label">Total SOL Paid</div>
-            <div className="gc-stat-value">{statsLoading ? <div className="lb-skeleton" /> : formatSol(aPaid)}</div>
+            <div className="gc-stat-label"><span className="gc-stat-label-icons"><StatIconUsd /></span>Total Paid Out</div>
+            <div className="gc-stat-value">{statsLoading ? <div className="lb-skeleton" /> : formatUsd(aPaidUsd)}</div>
+            <div className="gc-stat-sub"><span className="gc-inline-token"><StatIconUsd />USDC</span></div>
           </div>
           <div className="gc-stat">
-            <div className="gc-stat-label">Countries</div>
+            <div className="gc-stat-label"><span className="gc-stat-label-icons"><StatIconCountries /></span>Countries</div>
             <div className="gc-stat-value">{statsLoading ? <div className="lb-skeleton" /> : Math.round(aCountries).toLocaleString()}</div>
           </div>
           <div className="gc-stat">
-            <div className="gc-stat-label">Avg Refund</div>
-            <div className="gc-stat-value">{statsLoading ? <div className="lb-skeleton" /> : formatSol(aAvg)}</div>
+            <div className="gc-stat-label"><span className="gc-stat-label-icons"><StatIconAvg /></span>Avg Refund</div>
+            <div className="gc-stat-value">{statsLoading ? <div className="lb-skeleton" /> : formatUsd(aAvgUsd)}</div>
+            <div className="gc-stat-sub"><span className="gc-inline-token"><StatIconUsd />USDC</span></div>
           </div>
         </div>
       </div>
