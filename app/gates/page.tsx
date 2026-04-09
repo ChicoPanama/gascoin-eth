@@ -65,7 +65,10 @@ export default function GatesPage() {
         <div className="lb-header__meta">
           <span className="lb-tag">— 10 Verification Gates · Full System Transparency</span>
         </div>
-        <h1 className="lb-title">
+        <h1 className="lb-title lb-title--iconed">
+          <span className="lb-title-icon-wrap" aria-hidden>
+            <img src="/icons/gates-bridge.jpg" alt="" className="lb-title-icon" />
+          </span>
           Verification Gates
         </h1>
         <p className="gt-header-body">
