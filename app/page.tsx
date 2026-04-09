@@ -194,7 +194,7 @@ export default async function Home() {
                 </div>
                 <div className="gc-tech-layer-content">
                   <div className="gc-tech-layer-title">AI Receipt Processing</div>
-                  <div className="gc-tech-layer-tag">CLAUDE AI</div>
+                  <div className="gc-tech-layer-tag">GROK AI</div>
                   <p className="gc-tech-layer-desc">
                     Upload a receipt photo and AI extracts everything in one call — country,
                     date, total amount, and your wallet address. Simultaneously scores
@@ -222,7 +222,7 @@ export default async function Home() {
                 </div>
                 <div className="gc-tech-layer-content">
                   <div className="gc-tech-layer-title">4-Layer Fraud Detection</div>
-                  <div className="gc-tech-layer-tag">CLAUDE AI · INSTANT · ON-DEVICE</div>
+                  <div className="gc-tech-layer-tag">GROK AI · INSTANT · ON-DEVICE</div>
                   <p className="gc-tech-layer-desc">
                     Before AI even sees the image, three free layers run instantly: EXIF forensics
                     checks camera model, timestamps, and editing software. Dimensional analysis flags
