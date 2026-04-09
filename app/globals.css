@@ -200,7 +200,7 @@ code, .mono {
 
 .gc-hero-logo-float {
   position: absolute;
-  left: 66%;
+  left: 58%;
   top: 47%;
   transform: translate(-50%, -50%);
   z-index: 2;
@@ -225,13 +225,13 @@ code, .mono {
 .gc-hero-logo-g-layer {
   position: absolute;
   inset: 0;
+  clip-path: inset(33% 0 0 0);
   animation: gcGFloat 3.6s ease-in-out infinite;
   will-change: transform, filter;
 }
 
 .gc-hero-logo-image--g {
   transform: translateZ(0);
-  mix-blend-mode: multiply;
 }
 
 @keyframes gcGFloat {
