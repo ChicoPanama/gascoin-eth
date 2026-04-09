@@ -1218,6 +1218,12 @@ input:focus, textarea:focus, select:focus {
   border-bottom: 1px solid var(--line);
   padding-bottom: 16px;
 }
+
+.nav-links-desktop {
+  display: flex;
+  align-items: center;
+  gap: 0;
+}
 .nav-brand-wrap {
   display: inline-flex;
   align-items: center;
@@ -4802,6 +4808,113 @@ input:focus, textarea:focus, select:focus {
    MOBILE MENU — hidden on desktop
    ═══════════════════════════════════════════ */
 .mobile-menu-toggle { display: none; }
+
+/* Adaptive compact mode (can trigger above 900px when space is tight) */
+.gc-nav--compact {
+  justify-content: space-between;
+  padding: 0 16px;
+  height: 52px;
+}
+
+.gc-nav--compact .gc-nav-links { display: none !important; }
+.gc-nav--compact > div { gap: 0 !important; }
+.gc-nav--compact .wallet-btn,
+.gc-nav--compact .auth-signed-in,
+.gc-nav--compact .btn { display: none !important; }
+
+.nav--compact { flex-wrap: nowrap; overflow: hidden; gap: 0; }
+.nav--compact .nav-link-desktop { display: none !important; }
+.nav--compact .wallet-btn,
+.nav--compact .auth-signed-in { display: none !important; }
+.nav--compact > span > .btn { display: none !important; }
+
+.gc-nav--compact .mobile-menu-toggle,
+.nav--compact .mobile-menu-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background: none;
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 4px;
+  cursor: pointer;
+  padding: 0;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 101;
+}
+
+.gc-nav--compact .mobile-menu-toggle:hover,
+.nav--compact .mobile-menu-toggle:hover {
+  border-color: rgba(255,255,255,0.4);
+}
+
+/* Keep menu visuals available outside narrow media query when compact mode triggers */
+.mobile-menu-bar,
+.mobile-menu-bar::before,
+.mobile-menu-bar::after {
+  display: block;
+  width: 16px;
+  height: 1.5px;
+  background: rgba(255,255,255,0.7);
+  transition: transform 0.2s, opacity 0.2s;
+  position: relative;
+}
+.mobile-menu-bar::before,
+.mobile-menu-bar::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  width: 16px;
+}
+.mobile-menu-bar::before { top: -5px; }
+.mobile-menu-bar::after { top: 5px; }
+.mobile-menu-bar--open { background: transparent; }
+.mobile-menu-bar--open::before { top: 0; transform: rotate(45deg); }
+.mobile-menu-bar--open::after { top: 0; transform: rotate(-45deg); }
+
+.mobile-menu-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  background: rgba(0,0,0,0.7);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+.mobile-menu {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 280px;
+  max-width: 80vw;
+  background: #0a0a0a;
+  border-left: 1px solid rgba(255,255,255,0.08);
+  padding: 24px 32px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  overflow-y: auto;
+  z-index: 100000;
+}
+
+.mobile-menu-link {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: rgba(255,255,255,0.5);
+  padding: 14px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  transition: color 0.15s;
+}
+.mobile-menu-link:hover,
+.mobile-menu-link--active {
+  color: #fff;
+}
 
 @media (max-width: 900px) {
   /* Show hamburger, hide desktop nav links */
