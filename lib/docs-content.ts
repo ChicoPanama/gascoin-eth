@@ -47,7 +47,7 @@ export const DOC_CATEGORIES: DocCategory[] = [
 <li>You fill up your gas tank at any gas station.</li>
 <li>Before or after filling up, you write the last 4 characters of your Solana wallet address on the receipt in pen.</li>
 <li>You post a tweet on X (formerly Twitter) containing the hashtag #gascoin.</li>
-<li>You visit platform-ebon-nine.vercel.app and click Submit.</li>
+<li>You visit gascoin.com and click Submit.</li>
 <li>You connect your Solana wallet, paste your tweet URL, and upload a photo of your receipt.</li>
 <li>The system automatically runs 10 verification checks on your submission.</li>
 <li>If all 10 checks pass, SOL is sent directly to your wallet within 24-48 hours.</li>
@@ -402,14 +402,14 @@ export const DOC_CATEGORIES: DocCategory[] = [
         category: "Verification Gates",
         description: "",
         content: `<h3><strong>What this gate checks</strong></h3>
-<p>Gate 8 checks that your X account has not submitted a claim in the last 7 days. The cooldown is tied to your X account, not your wallet — switching wallets does not reset the timer.</p>
+<p>Gate 8 checks that your X account has not submitted a claim within the cooldown period for your tier. Standard and Commuter tiers have a 7-day cooldown, Road Warrior 3.5 days, and Fleet 1.75 days. The cooldown is tied to your X account, not your wallet.</p>
 <h3><strong>Common failure reasons</strong></h3>
 <ul>
 <li>Submitting again before 7 days have passed since your last submission</li>
 <li>Having a pending or in-review submission still active</li>
 </ul>
 <h3><strong>How to ensure Gate 8 passes</strong></h3>
-<p>Wait 7 days after your last submission before submitting again. Use the Wallet Tracker at /wallet to check your cooldown status.</p>
+<p>Wait for your tier-specific cooldown to expire before submitting again. Use the Wallet Tracker at /wallet to check your cooldown status.</p>
 <p><strong>Example:</strong> You submit on Monday. Your next eligible submission is the following Monday.</p>`,
         order: 19,
       },
@@ -451,6 +451,137 @@ export const DOC_CATEGORIES: DocCategory[] = [
 </ul>
 <p>Typical Gate 10 queue resolution time: 24-72 hours. The treasury balance is publicly visible on the Treasury page at /dashboard so you can monitor it yourself.</p>`,
         order: 21,
+      },
+    ],
+  },
+  {
+    slug: "technology",
+    label: "Technology",
+    sections: [
+      {
+        slug: "technology-overview",
+        title: "Technology Overview",
+        categorySlug: "technology",
+        category: "Technology",
+        description: "",
+        content: `<p>GASCOIN is built on a multi-layer AI verification stack that makes gaming the protocol computationally impractical. Every submission passes through 10 automated gates, 4 AI fraud modules, and real-time social signal analysis — all before a single lamport leaves the treasury.</p>
+<p>The intelligence layer is powered by <strong>Grok</strong> (xAI) and the <strong>X API v2</strong>, giving GASCOIN direct access to the world's most advanced AI reasoning engine and the richest social graph on the internet. This is not a static rule-based system. It learns, adapts, and evolves with every submission.</p>
+<h3>Why This Matters</h3>
+<p>Most refund and reward platforms rely on simple form validation — upload a photo, check a box, get paid. These systems are trivially exploitable with AI-generated receipts, stock photos, or bot accounts. GASCOIN takes a fundamentally different approach: every submission is interrogated across multiple independent verification dimensions simultaneously. Passing one check means nothing if another fails. The system is designed so that the cost of fabricating a valid submission exceeds the value of the refund.</p>`,
+        order: 22,
+      },
+      {
+        slug: "grok-ai-engine",
+        title: "Grok AI Engine",
+        categorySlug: "technology",
+        category: "Technology",
+        description: "",
+        content: `<p>Grok — built by xAI — is the reasoning engine behind GASCOIN's fraud detection and quality scoring. It powers four critical systems:</p>
+<h3>Receipt Analysis</h3>
+<p>Every uploaded receipt passes through Grok-powered OCR that extracts structured data: total amount, date, station name, and handwritten wallet characters. Unlike traditional OCR, Grok understands context — it can distinguish a gas station receipt from a restaurant bill, detect inconsistencies between printed and handwritten text, and flag anomalies that suggest digital manipulation.</p>
+<h3>AI Image Detection</h3>
+<p>Grok evaluates every receipt image for signs of AI generation or digital manipulation. The system produces an AI probability score (0-1 scale). Submissions scoring above 0.65 are automatically rejected. This catches AI-generated receipts, Photoshopped images, and digitally altered documents.</p>
+<h3>Tamper Scoring</h3>
+<p>A separate tamper analysis examines EXIF metadata, image dimensions, compression artifacts, and pixel-level inconsistencies. The tamper score (0-1 scale) catches receipts that have been cropped, spliced, or edited after the original photo was taken. Threshold: 0.55.</p>
+<h3>Adaptive Learning</h3>
+<p>Unlike static rule-based fraud systems, Grok continuously processes submission patterns across the entire platform. New fraud vectors are identified and countered without manual rule updates. The system gets smarter with every submission — legitimate or fraudulent.</p>`,
+        order: 23,
+      },
+      {
+        slug: "x-api-v2-integration",
+        title: "X API v2 Integration",
+        categorySlug: "technology",
+        category: "Technology",
+        description: "",
+        content: `<p>GASCOIN connects directly to the X (Twitter) platform via the official X API v2. Every submission triggers real-time verification of the submitter's social identity and tweet authenticity.</p>
+<h3>What We Verify</h3>
+<ul>
+<li><strong>Tweet existence</strong> — The submitted URL points to a real, accessible tweet</li>
+<li><strong>Public visibility</strong> — The author's account is set to public (not protected)</li>
+<li><strong>Hashtag presence</strong> — The tweet body contains #gascoin</li>
+<li><strong>Tweet age</strong> — Posted within 48 hours of submission</li>
+<li><strong>Author identity</strong> — The tweet author matches the connected X account</li>
+<li><strong>Follower count</strong> — Minimum 100 followers (filters bot accounts)</li>
+<li><strong>Account quality</strong> — Age, activity history, profile completeness, and engagement patterns</li>
+</ul>
+<h3>Why X Integration Matters</h3>
+<p>X is the only social platform with both a verified identity layer and a public API powerful enough for real-time fraud detection. By requiring every submission to include a live tweet, GASCOIN creates a public, timestamped proof-of-intent that is extremely difficult to fake at scale. Bot networks fail the follower and account quality checks. Fake accounts fail the activity history check. Private accounts are rejected outright.</p>`,
+        order: 24,
+      },
+      {
+        slug: "xai-powered-scoring",
+        title: "xAI-Powered Scoring",
+        categorySlug: "technology",
+        category: "Technology",
+        description: "",
+        content: `<p>The engagement and quality scoring system uses xAI intelligence to evaluate every participant across four parallel AI modules:</p>
+<h3>1. Tweet Quality Scorer</h3>
+<p>Analyzes tweet content, engagement metrics (impressions, likes, retweets, quotes, replies), and audience quality. High-quality tweets that drive genuine engagement earn more points. Low-effort or spam-like tweets are scored accordingly.</p>
+<h3>2. Referral Ring Detector</h3>
+<p>Graph analysis that maps referral relationships and identifies circular referral patterns, mutual-referral schemes, and coordinated sign-up networks. Detected rings are flagged and excluded from referral rewards.</p>
+<h3>3. Wallet Trust Calculator</h3>
+<p>Reputation scoring based on submission history, approval rate, tier consistency, and on-chain behavior. Wallets with a strong track record earn higher trust scores, which influence queue priority and review speed.</p>
+<h3>4. Pre-Award Verification Gate</h3>
+<p>Before any points are awarded, a multi-layer verification gate runs: trust multiplier check, source-specific validation, velocity analysis, and AI verification for flagged or high-value awards. This prevents point farming and manipulation.</p>`,
+        order: 25,
+      },
+      {
+        slug: "4-layer-fraud-detection",
+        title: "4-Layer Fraud Detection",
+        categorySlug: "technology",
+        category: "Technology",
+        description: "",
+        content: `<p>GASCOIN's anti-fraud system operates in four independent layers. Each layer catches a different class of attack. All four must pass for a submission to be approved.</p>
+<h3>Layer 1 — Gate-Based Sequential Verification</h3>
+<p>10 automated gates run in sequence. Each gate checks a specific requirement: tweet validity, receipt authenticity, wallet matching, cooldown compliance, and more. Any single gate failure blocks the entire submission. There is no partial pass.</p>
+<h3>Layer 2 — AI Image Analysis (Grok)</h3>
+<p>Grok-powered analysis evaluates every receipt image for AI generation, digital manipulation, and tampering. Two independent scores (AI probability and tamper score) must both fall below their thresholds. This layer catches sophisticated image forgeries that pass visual inspection.</p>
+<h3>Layer 3 — Perceptual Hashing</h3>
+<p>Every receipt image is converted to a perceptual hash — a digital fingerprint that is resistant to cropping, rotation, brightness changes, and minor edits. This hash is compared against every previously submitted receipt in the system. Even heavily modified versions of the same receipt are detected and rejected.</p>
+<h3>Layer 4 — Social Signal Analysis</h3>
+<p>The submitter's X account is evaluated for authenticity signals: follower count, account age, posting history, engagement patterns, and network quality. xAI-powered scoring identifies bot accounts, purchased followers, and coordinated networks. This layer makes it economically infeasible to create fake accounts at scale.</p>`,
+        order: 26,
+      },
+      {
+        slug: "on-chain-verification",
+        title: "On-Chain Verification",
+        categorySlug: "technology",
+        category: "Technology",
+        description: "",
+        content: `<p>Every financial operation in GASCOIN happens on the Solana blockchain — fully transparent and publicly auditable.</p>
+<h3>Treasury Transparency</h3>
+<p>The GASCOIN treasury wallet is a standard Solana wallet. Its balance is queried via RPC before every payout. If the treasury cannot cover a refund, the submission is queued (not rejected) until funds are available. The treasury balance is publicly visible on the Dashboard page.</p>
+<h3>Token Holdings Verification</h3>
+<p>Your GASCOIN token balance is checked twice: once at submission time (to determine your tier and cooldown) and again immediately before SOL is dispatched (to ensure you still hold tokens). If you sell your GASCOIN between submission and payout, the payout is blocked.</p>
+<h3>Immutable Audit Trail</h3>
+<p>Every admin action — approvals, rejections, gate overrides, payout dispatches — is permanently recorded in the audit log. No admin action can be taken silently. The audit trail cannot be modified or deleted.</p>
+<h3>Solana Transaction Receipts</h3>
+<p>Every SOL payout generates a Solana transaction hash that can be independently verified on any Solana block explorer. The transaction proves exactly when the payment was made, how much was sent, and to which wallet.</p>`,
+        order: 27,
+      },
+      {
+        slug: "why-it-cant-be-gamed",
+        title: "Why It Can't Be Gamed",
+        categorySlug: "technology",
+        category: "Technology",
+        description: "",
+        content: `<p>GASCOIN is designed so that the cost of fabricating a valid submission always exceeds the value of the refund. Here's why:</p>
+<ul>
+<li><strong>Physical receipt required</strong> — You need a real paper receipt from a real gas station. Digital, email, and app receipts are rejected. AI-generated receipt images are caught by Grok's image analysis.</li>
+<li><strong>Handwritten wallet ID</strong> — The last 4 characters of your wallet must be physically written on the receipt in pen. This ties the receipt to a specific wallet at a specific moment in time.</li>
+<li><strong>Live tweet verification</strong> — Your tweet must exist, be public, contain #gascoin, and be posted within 48 hours. Deleting the tweet after submission fails re-verification at payout time.</li>
+<li><strong>AI image analysis</strong> — Grok scores every receipt for AI generation probability and digital tampering. Two independent scores must both pass.</li>
+<li><strong>Perceptual hashing</strong> — Every receipt is fingerprinted and compared against all previous submissions. The same receipt cannot be submitted twice, even if edited.</li>
+<li><strong>Social graph scoring</strong> — Your X account must have 100+ real followers, posting history, and pass account quality checks. Bot accounts and purchased followers are detected.</li>
+<li><strong>Referral ring detection</strong> — AI graph analysis identifies and blocks circular referral schemes.</li>
+<li><strong>Tier-based cooldowns</strong> — Submission frequency is capped by tier. Even Fleet (the highest tier) is limited to 4 per week.</li>
+<li><strong>Dual token check</strong> — Token balance is verified at submission AND before payout. Dumping tokens after submission blocks the refund.</li>
+<li><strong>Pre-payout re-verification</strong> — Before every SOL dispatch, the system re-checks: tweet still live, follower count still valid, account quality still passing, token balance still held.</li>
+<li><strong>Admin review layer</strong> — Every submission is reviewed by a human admin before funds are released. The admin has full visibility into all gate results, AI scores, and fraud signals.</li>
+<li><strong>Immutable audit log</strong> — Every action on the platform is permanently recorded. Nothing can be done silently.</li>
+</ul>
+<p>To successfully game GASCOIN, an attacker would need to: physically obtain a gas receipt, write a wallet ID on it by hand, photograph it convincingly enough to fool Grok's AI analysis, maintain a legitimate X account with real followers and activity, post a public tweet, hold GASCOIN tokens, and pass admin review. The cost of doing this at scale makes it economically irrational.</p>`,
+        order: 28,
       },
     ],
   },
@@ -582,7 +713,7 @@ export const DOC_CATEGORIES: DocCategory[] = [
 <h3><strong>Who can use the referral system</strong></h3>
 <p>You must have at least one approved submission to generate a referral link and earn rewards. Users without any approved submission can see the referral page but the link generation is locked until they complete a successful submission.</p>
 <h3><strong>Your referral link</strong></h3>
-<p>Your referral link is unique to your wallet address and is deterministically generated — it never changes. The format is: https://platform-ebon-nine.vercel.app/submit?ref=XXXXXXXX where XXXXXXXX is your 8-character referral code.</p>
+<p>Your referral link is unique to your wallet address and is deterministically generated — it never changes. The format is: https://gascoin.com/submit?ref=XXXXXXXX where XXXXXXXX is your 8-character referral code.</p>
 <p>Share this link anywhere: X, Telegram, Discord, text message, or any other platform where people might be interested in getting their gas money back.</p>
 <h3><strong>How a referral conversion works</strong></h3>
 <ul>
@@ -765,7 +896,7 @@ export const DOC_CATEGORIES: DocCategory[] = [
         category: "Security & Admin",
         description: "",
         content: `<p>GASCOIN uses multiple overlapping systems to prevent fraud, duplicate submissions, and gaming of the refund system.</p><h3>Using Multiple Wallets</h3>
-<p>Each X account is limited to one submission per 7 days. Only one wallet can be linked to your X account at a time. Switching wallets does not reset the cooldown — it is tied to your X identity, not your wallet address. Each submission requires a unique receipt (Gate 9), a unique tweet, and a unique gas purchase.</p>`,
+<p>Submission frequency depends on your tier: Standard and Commuter can submit once per week, Road Warrior twice, and Fleet four times. Only one wallet can be linked to your X account at a time. Switching wallets does not reset the cooldown — it is tied to your X identity, not your wallet address. Each submission requires a unique receipt (Gate 9), a unique tweet, and a unique gas purchase.</p>`,
         order: 48,
       },
       {
@@ -1244,7 +1375,7 @@ export const DOC_CATEGORIES: DocCategory[] = [
         category: "Help",
         description: "",
         content: `<p>GASCOIN Protocol Documentation — Version 1.0</p>
-<p>platform-ebon-nine.vercel.app  |  Solana Mainnet  |  All rights reserved</p>`,
+<p>gascoin.com  |  Solana Mainnet  |  All rights reserved</p>`,
         order: 69,
       },
     ],
