@@ -30,7 +30,8 @@ export const DOC_CATEGORIES: DocCategory[] = [
 <p>This documentation describes the GASCOIN platform as designed and intended. Some features may be in the process of being deployed. If you notice a difference between this document and the live platform, the live platform takes precedence. This document will be updated as the platform rolls out.</p>
 <p>Last updated: April 2026 · Platform version: 1.0 · Document version: 1.1</p>
 </div><p>GASCOIN is a community-driven protocol on the Solana blockchain that refunds participants for real-world gasoline purchases. The protocol operates a treasury wallet funded with SOL (Solana's native cryptocurrency). Users who meet all verification requirements receive a SOL refund sent directly to their Solana wallet.</p>
-<p>The concept is straightforward: you pay for gas at a physical gas station, you prove it, and GASCOIN pays you back in SOL. The amount refunded in SOL is determined by the tier of GASCOIN tokens you hold in your wallet. The entire process is governed by 10 automated verification gates that run sequentially on every submission before any funds are released.</p><h3>Who Can Participate</h3>
+<p>The concept is straightforward: you pay for gas at a physical gas station, you prove it, and GASCOIN pays you back in SOL. The amount refunded in SOL is determined by the tier of GASCOIN tokens you hold in your wallet. The entire process is governed by 10 automated verification gates that run sequentially on every submission before any funds are released.</p>
+<p>The verification and intelligence stack is fully integrated with X + Grok for social signal checks, fraud-resistance scoring, and automation across the pipeline.</p><h3>Who Can Participate</h3>
 <p>GASCOIN is open to anyone worldwide who can obtain a gas station receipt and has a public X account with at least 100 followers. There is no geographic restriction. Gas stations in the United States, Canada, UK, Europe, Latin America, and anywhere else that issues paper receipts all qualify.</p>
 <p>The platform uses the term "gas station" but petrol stations, service stations, fuel depots, and any commercial fuel retailer that issues a paper receipt also qualify.</p>
 <p>There is no minimum purchase amount. A \$5 fuel purchase qualifies the same as a \$200 fill-up. The refund amount is set by the admin based on your tier cap — it is not proportional to how much you spent on fuel.</p>`,
@@ -478,6 +479,7 @@ export const DOC_CATEGORIES: DocCategory[] = [
 <ul>
 <li>Navigation bar with links to all platform pages and a CONNECT WALLET button</li>
 <li>Hero section with the GASCOIN value proposition: POST. SUBMIT. GET PAID BACK.</li>
+<li>AI technology pipeline showing full integration with X + Grok across verification flows</li>
 <li>Live statistics strip: Treasury SOL balance, Market Cap, 24h Volume, Verification Gates count</li>
 <li>How It Works section: 3-step visual summary of the submission process</li>
 <li>Live treasury teaser section with real-time SOL balance</li>
