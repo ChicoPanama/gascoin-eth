@@ -44,7 +44,12 @@ export default async function Dashboard() {
       <Nav />
 
       <div className="gc-dash-header">
-        <h1 className="gc-dash-title">TREASURY</h1>
+        <h1 className="gc-dash-title">
+          <span className="gc-dash-title-icon-wrap" aria-hidden>
+            <img src="/icons/treasury-chest.jpg" alt="" className="gc-dash-title-icon" />
+          </span>
+          TREASURY
+        </h1>
       </div>
 
       {/* Zone 1 — Stats */}
