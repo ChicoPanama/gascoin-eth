@@ -61,7 +61,7 @@ export default async function Home() {
                   <span className="line">Get GAS.</span>
                   <span className="line">Post.</span>
                   <span className="line">Submit.</span>
-                  <span className="line">Get Paid Back.</span>
+                  <span className="line">Get PAID BACK.</span>
                 </h1>
               </HeroItem>
               <HeroItem>
