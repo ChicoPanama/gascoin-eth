@@ -6,16 +6,16 @@ import { motion } from 'framer-motion';
 const container = {
   hidden: {},
   show: {
-    transition: { staggerChildren: 0.12, delayChildren: 0.1 },
+    transition: { staggerChildren: 0.22, delayChildren: 0.3 },
   },
 };
 
 const item = {
-  hidden: { opacity: 0, y: 24 },
+  hidden: { opacity: 0, y: 40 },
   show: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.7, ease: [0.16, 1, 0.3, 1] as const },
+    transition: { duration: 1.0, ease: [0.16, 1, 0.3, 1] as const },
   },
 };
 
@@ -36,7 +36,7 @@ export function HeroItem({ children, className = '' }: { children: ReactNode; cl
     <motion.div
       variants={item}
       className={className}
-      whileTap={{ scale: 0.97 }}
+      style={{ willChange: 'opacity, transform' }}
     >
       {children}
     </motion.div>
