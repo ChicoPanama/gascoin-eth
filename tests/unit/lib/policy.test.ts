@@ -5,7 +5,7 @@ function validInput(overrides: Partial<ClaimInput> = {}): ClaimInput {
   return {
     xVerified: true, tweetUrl: 'https://x.com/user/status/123', tweetHasGascoin: true,
     tweetLive: true, connectedWallet: 'GAsWallet123', walletOnReceipt: 'GAsWallet123',
-    receiptHasGascoin: true, gascoinUsdValue: 2, aiScore: 0.1, tamperScore: 0.1,
+    receiptHasGascoin: true, gascoinTokenBalance: 100, aiScore: 0.1, tamperScore: 0.1,
     duplicateHash: false, duplicatePhash: false, cooldownOk: true, amountUsd: 50,
     followerCount: 200, accountQualityScore: 60, accountQualityPassed: true, ...overrides,
   };
@@ -62,13 +62,18 @@ describe('evaluateClaim', () => {
   // Gate 6: gascoin_min_hold
   // In dry-run mode (ENABLE_LIVE_PAYOUT !== 'true'), this gate always passes
   it('passes gate gascoin_min_hold in dry-run mode regardless of balance', () => {
-    const r = evaluateClaim(validInput({ gascoinUsdValue: 0.5 }));
-    // Dry-run bypasses the check — gate passes even below $1
+    const r = evaluateClaim(validInput({ gascoinTokenBalance: 0 }));
+    // Dry-run bypasses the check — gate passes even with 0 tokens
     expect(r.failed.some((g) => g.gate === 'gascoin_min_hold')).toBe(false);
   });
 
-  it('passes gate gascoin_min_hold at exactly $1', () => {
-    const r = evaluateClaim(validInput({ gascoinUsdValue: 1 }));
+  it('passes gate gascoin_min_hold with 1 token', () => {
+    const r = evaluateClaim(validInput({ gascoinTokenBalance: 1 }));
+    expect(r.failed.some((g) => g.gate === 'gascoin_min_hold')).toBe(false);
+  });
+
+  it('passes gate gascoin_min_hold with many tokens', () => {
+    const r = evaluateClaim(validInput({ gascoinTokenBalance: 10_000_000 }));
     expect(r.failed.some((g) => g.gate === 'gascoin_min_hold')).toBe(false);
   });
 

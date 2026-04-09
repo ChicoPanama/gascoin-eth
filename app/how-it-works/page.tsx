@@ -78,7 +78,7 @@ const STEPS: Step[] = [
     title: 'Get GASCOIN Tokens',
     time: '3 min',
     bullets: [
-      'You need to hold at least $1 worth of GASCOIN tokens in your Phantom wallet before you can submit.',
+      'You need to hold at least 1 GASCOIN token in your Phantom wallet before you can submit.',
       'Swap some SOL for GASCOIN on a Solana DEX — search for the GASCOIN token.',
       'Holding more GASCOIN unlocks higher tiers with bigger refunds — up to 1.0 SOL per fill-up.',
     ],

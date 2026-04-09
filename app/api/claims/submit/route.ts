@@ -1,10 +1,11 @@
 import crypto from 'crypto';
 import { NextResponse } from 'next/server';
-import { evaluateClaim, COOLDOWN_DAYS } from '../../../../lib/policy';
+import { evaluateClaim } from '../../../../lib/policy';
+import { getTierForBalance } from '../../../../lib/token-tiers';
 import { verifyTweetProof, getFollowerCount } from '../../../../lib/integrations/x';
 import { analyzeReceipt } from '../../../../lib/integrations/ocr';
 import { runFraudChecks } from '../../../../lib/integrations/fraud';
-import { hasMinimumGascoinUsd } from '../../../../lib/integrations/solana';
+import { hasMinimumGascoin } from '../../../../lib/integrations/solana';
 import { verifyPrivySession } from '../../../../lib/integrations/privy';
 import { getUserByUsername } from '../../../../lib/x-api';
 import { scoreAccountQuality } from '../../../../lib/account-quality';
@@ -16,10 +17,10 @@ import { checkRateLimit } from '../../../../lib/rate-limit';
 const SUBMIT_WINDOW_SEC = 60;
 const SUBMIT_MAX_PER_WINDOW = 12;
 
-// Check 7-day rolling cooldown per X account — returns true if eligible
-async function checkCooldown(supabase: any, xUserId: string): Promise<boolean> {
+// Check rolling cooldown per X account — returns true if eligible
+async function checkCooldown(supabase: any, xUserId: string, cooldownDays: number): Promise<boolean> {
   try {
-    const cutoff = new Date(Date.now() - COOLDOWN_DAYS * 86400000).toISOString();
+    const cutoff = new Date(Date.now() - cooldownDays * 86400000).toISOString();
     // Check claims (not just payouts) — prevents rapid resubmission
     const { data } = await supabase
       .from('claims')
@@ -29,7 +30,7 @@ async function checkCooldown(supabase: any, xUserId: string): Promise<boolean> {
       .gte('created_at', cutoff)
       .limit(1)
       .maybeSingle();
-    return !data; // true if no active/paid claim in last 7 days
+    return !data;
   } catch {
     return true; // fail open — don't block on DB error
   }
@@ -145,7 +146,7 @@ export async function POST(req: Request){
   const [tweet, ocr, minHold, followerCount, userLookup] = await Promise.all([
     verifyTweetProof(tweetUrl, `@${session.xHandle}`),
     analyzeReceipt(receipt),
-    hasMinimumGascoinUsd(wallet, 1),
+    hasMinimumGascoin(wallet, 1),
     getFollowerCount(session.xHandle),
     getUserByUsername(session.xHandle)
   ]);
@@ -171,8 +172,10 @@ export async function POST(req: Request){
   const duplicateHash = !!dupRows?.some((r:any) => r.hash_sha256 === fraudBase.hashSha256);
   const duplicatePhash = !!dupRows?.some((r:any) => r.phash === fraudBase.pHash);
 
-  // Cooldown is per X account (user_id), not per wallet
-  // First upsert user so we have the DB user_id for cooldown check
+  // Determine tier from token balance for tier-based cooldown
+  const userTier = getTierForBalance(minHold.tokenBalance ?? 0);
+
+  // Cooldown is per X account (user_id), not per wallet — duration depends on tier
   const { data: userRowForCooldown } = await supabase
     .from('users')
     .select('id')
@@ -180,7 +183,7 @@ export async function POST(req: Request){
     .maybeSingle();
 
   const cooldownOk = userRowForCooldown?.id
-    ? await checkCooldown(supabase, userRowForCooldown.id)
+    ? await checkCooldown(supabase, userRowForCooldown.id, userTier.cooldown_days)
     : true; // new user, no cooldown
 
   const result = evaluateClaim({
@@ -191,7 +194,7 @@ export async function POST(req: Request){
     connectedWallet: wallet,
     walletOnReceipt,
     receiptHasGascoin: !!ocr.receiptHasGascoin,
-    gascoinUsdValue: minHold.usdValue,
+    gascoinTokenBalance: minHold.tokenBalance ?? 0,
     aiScore: fraudBase.aiScore,
     tamperScore: fraudBase.tamperScore,
     duplicateHash,
@@ -383,8 +386,8 @@ export async function POST(req: Request){
     extracted: {
       ocrConfidence: ocr.confidence,
       parsedWallet: ocr.walletOnReceipt,
-      minGascoinUsdValue: minHold.usdValue,
       tokenBalance: minHold.tokenBalance,
+      tierSlug: userTier.slug,
       hashSha256: fraudBase.hashSha256,
       pHash: fraudBase.pHash
     }

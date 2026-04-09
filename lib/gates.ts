@@ -109,17 +109,17 @@ export const GATES: GateDefinition[] = [
     checklist_label: 'My gas purchase was made within the last 7 days',
   },
   {
-    id: 8, slug: 'no-duplicate-wallet', name: 'No Duplicate Wallet', category: 'wallet',
-    description: 'Each X account may only have one approved submission per 7-day rolling window.',
-    what_we_check: 'X account is checked against all active claims in the last 7 days. One submission per week per X account, regardless of wallet.',
+    id: 8, slug: 'no-duplicate-wallet', name: 'Submission Cooldown', category: 'wallet',
+    description: 'Each X account has a tier-based cooldown between submissions. Standard/Commuter: 7 days (1/week). Road Warrior: 3.5 days (2/week). Fleet: 1.75 days (4/week).',
+    what_we_check: 'X account is checked against all active claims within the cooldown window for your tier. Cooldown is per X account, regardless of wallet.',
     common_failures: [
-      'Submitting again before the 7-day cooldown expires',
+      'Submitting again before the cooldown expires for your tier',
       'Trying a different wallet with the same X account',
       'Submitting while a previous claim is still processing',
     ],
-    how_to_pass: 'Wait 7 days after your last submission before submitting again. Check your cooldown status before submitting.',
+    how_to_pass: 'Wait for your tier-specific cooldown to expire. Check your cooldown status on the Tracker page before submitting.',
     estimated_time_seconds: 5, is_blocking: true,
-    checklist_label: 'I have not submitted a claim in the last 7 days',
+    checklist_label: 'My cooldown has expired since my last submission',
   },
   {
     id: 9, slug: 'no-duplicate-receipt', name: 'No Duplicate Receipt', category: 'receipt',

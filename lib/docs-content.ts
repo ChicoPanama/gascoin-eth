@@ -68,7 +68,7 @@ export const DOC_CATEGORIES: DocCategory[] = [
 <tr><td>Road Warrior</td><td>500,000</td><td>0.50 SOL</td><td>~$90 USD</td></tr>
 <tr><td>Fleet</td><td>2,000,000</td><td>1.0 SOL</td><td>~$180 USD</td></tr></tbody></table>
 <p>Check the current SOL price on any exchange (Coinbase, Kraken, Binance) or on the GASCOIN Treasury page before submitting. The USD values above are approximate and change daily. The SOL amounts you receive are fixed by tier.</p>\n<p>The amount of SOL you can receive per submission depends on your GASCOIN token tier. The four tiers are:</p>
-<p>SOL values above are the maximum per submission. The admin sets the actual refund amount when approving your submission, up to the maximum for your tier. The Standard tier requires zero GASCOIN — anyone with a Solana wallet can participate immediately.</p>`,
+<p>SOL values above are the maximum per submission. The admin sets the actual refund amount when approving your submission, up to the maximum for your tier. The Standard tier requires just 1 GASCOIN token. Higher tiers unlock more submissions per week: Road Warrior gets 2/week, Fleet gets 4/week.</p>`,
         order: 3,
       },
       {
@@ -126,7 +126,7 @@ export const DOC_CATEGORIES: DocCategory[] = [
 <li>You cannot proceed past Step 1 without connecting a wallet.</li>
 <li>Only one wallet can be connected at a time.</li>
 <li>The wallet you connect is the wallet that receives your SOL refund. Make sure it is the correct wallet.</li>
-<li>Each X account can submit once every 7 days. If you have an active or recently approved submission, you must wait until the 7-day cooldown expires.</li>
+<li>Submission frequency depends on your tier: Standard and Commuter can submit once per week, Road Warrior twice per week, and Fleet four times per week. If you have an active or recently approved submission, you must wait until the cooldown expires.</li>
 <li>The system checks for a pending submission from your wallet. If one already exists, you will see a message indicating this and cannot submit a duplicate.</li>
 </ul>`,
         order: 6,
@@ -564,7 +564,7 @@ export const DOC_CATEGORIES: DocCategory[] = [
         content: `<p>The Wallet Tracker is your personal submission status dashboard. It shows your complete submission history, current gate progress for any active submission, cooldown countdown, and total earnings. It can also be used to look up any public wallet address.</p>
 <h3><strong>Two modes</strong></h3>
 <h3><strong>Cooldown countdown</strong></h3>
-<p>In Connected Mode, if your account is within the 7-day cooldown period following a submission, a countdown timer shows how much time remains before you can submit again.</p>
+<p>In Connected Mode, if your account is within the cooldown period following a submission, a countdown timer shows how much time remains before you can submit again. Cooldown duration depends on your tier.</p>
 <p>When the countdown reaches zero, the cooldown block automatically transitions to show Submit Receipt with a link to the submission portal.</p>
 <h3><strong>Gate progress tracker</strong></h3>
 <p>If you have a pending submission (one that has been submitted but not yet approved or rejected), the gate progress tracker appears. It shows all 10 gates with their current status updating live as each gate is processed. This is the same display as Step 5 of the submission portal but accessible at any time from /wallet.</p>
@@ -788,11 +788,11 @@ export const DOC_CATEGORIES: DocCategory[] = [
       },
       {
         slug: "-day-wallet-cooldown-gate-8",
-        title: "7.3 7-day submission cooldown (Gate 8)",
+        title: "7.3 Tier-based submission cooldown (Gate 8)",
         categorySlug: "security",
         category: "Security & Admin",
         description: "",
-        content: `<p>Each X account can submit once every 7 days. The cooldown is per X account, not per wallet — linking a different wallet does not reset the timer. This aligns with real-world gas fill-up frequency and prevents abuse.</p>`,
+        content: `<p>Submission cooldown is per X account (not per wallet) and varies by tier: Standard and Commuter have a 7-day cooldown (1/week), Road Warrior has a 3.5-day cooldown (2/week), and Fleet has a 1.75-day cooldown (4/week). Linking a different wallet does not reset the timer.</p>`,
         order: 51,
       },
       {
@@ -902,7 +902,7 @@ export const DOC_CATEGORIES: DocCategory[] = [
         content: `<ul>
 <li>Check the Wallet Tracker at /wallet to see your exact cooldown expiry date and time</li>
 <li>You must wait until the cooldown timer reaches zero before submitting again</li>
-<li>The 7-day cooldown runs from your last submission date</li>
+<li>The cooldown runs from your last submission date — duration depends on your tier</li>
 </ul>`,
         order: 43,
       },
@@ -948,7 +948,7 @@ export const DOC_CATEGORIES: DocCategory[] = [
         categorySlug: "help",
         category: "Help",
         description: "",
-        content: `<p>No. The Standard tier requires zero GASCOIN tokens. Any person with a Solana wallet can submit a gas receipt and receive up to 0.10 SOL without holding any GASCOIN. Tokens are optional and only required to access higher tiers with larger refund caps.</p>`,
+        content: `<p>The Standard tier requires just 1 GASCOIN token — a minimal buy-in to participate. Higher tiers (Commuter at 100K, Road Warrior at 5M, Fleet at 10M) unlock larger refunds and more submissions per week.</p>`,
         order: 56,
       },
       {
@@ -966,7 +966,7 @@ export const DOC_CATEGORIES: DocCategory[] = [
         categorySlug: "help",
         category: "Help",
         description: "",
-        content: `<p>Yes — once every 7 days per X account. Each submission requires a unique gas receipt from within the last 7 days and a new tweet posted within 48 hours of submission. You cannot reuse a receipt or tweet from a previous submission.</p>`,
+        content: `<p>Yes — submission frequency depends on your tier. Standard and Commuter can submit once per week, Road Warrior twice per week, and Fleet four times per week. Each submission requires a unique gas receipt from within the last 7 days and a new tweet posted within 48 hours. You cannot reuse a receipt or tweet from a previous submission.</p>`,
         order: 58,
       },
       {

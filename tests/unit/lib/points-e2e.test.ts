@@ -147,16 +147,16 @@ describe('Journey: Commuter Tier (100K GASCOIN)', () => {
 // ═══════════════════════════════════════════
 // JOURNEY 3: Road Warrior Tier
 // ═══════════════════════════════════════════
-describe('Journey: Road Warrior (500K GASCOIN)', () => {
+describe('Journey: Road Warrior (5M GASCOIN)', () => {
   it('gets correct tier', () => {
-    const tier = getTierForBalance(500_000);
+    const tier = getTierForBalance(5_000_000);
     expect(tier.id).toBe(2);
     expect(tier.max_sol_refund).toBe(0.50);
   });
 
   it('earns 300 holdings per day', () => {
     const { holdingsPoints } = simulateUser({
-      tier: 2, gascoinBalance: 750_000,
+      tier: 2, gascoinBalance: 7_500_000,
       tweetImpressions: 0, tweetLikes: 0, tweetRetweets: 0, tweetQuotes: 0, tweetReplies: 0, tweetBookmarks: 0,
       approvedSubmissions: 0, consecutiveWindows: 0, referralConversions: 0,
     });
@@ -165,7 +165,7 @@ describe('Journey: Road Warrior (500K GASCOIN)', () => {
 
   it('with viral tweet + streak + referrals = massive points', () => {
     const { breakdown } = simulateUser({
-      tier: 2, gascoinBalance: 750_000,
+      tier: 2, gascoinBalance: 7_500_000,
       tweetImpressions: 25000, tweetLikes: 300, tweetRetweets: 80, tweetQuotes: 20, tweetReplies: 50, tweetBookmarks: 0,
       approvedSubmissions: 3, consecutiveWindows: 4, referralConversions: 8,
     });
@@ -176,9 +176,9 @@ describe('Journey: Road Warrior (500K GASCOIN)', () => {
 // ═══════════════════════════════════════════
 // JOURNEY 4: Fleet Tier (Top Holder)
 // ═══════════════════════════════════════════
-describe('Journey: Fleet Tier (2M GASCOIN)', () => {
+describe('Journey: Fleet Tier (10M GASCOIN)', () => {
   it('gets 1.0 SOL max refund', () => {
-    const tier = getTierForBalance(2_000_000);
+    const tier = getTierForBalance(10_000_000);
     expect(tier.id).toBe(3);
     expect(tier.max_sol_refund).toBe(1.0);
   });
@@ -190,7 +190,7 @@ describe('Journey: Fleet Tier (2M GASCOIN)', () => {
 
   it('full engagement scenario — max points accumulation', () => {
     const { breakdown } = simulateUser({
-      tier: 3, gascoinBalance: 5_000_000,
+      tier: 3, gascoinBalance: 15_000_000,
       tweetImpressions: 100000, tweetLikes: 1000, tweetRetweets: 300, tweetQuotes: 50, tweetReplies: 200, tweetBookmarks: 0,
       approvedSubmissions: 5, consecutiveWindows: 5, referralConversions: 15,
     });
@@ -360,7 +360,7 @@ describe('Gate Verification → Points Integration', () => {
       xVerified: true, tweetUrl: 'https://x.com/user/status/123',
       tweetHasGascoin: true, tweetLive: true,
       connectedWallet: 'GAsWallet123', walletOnReceipt: 'GAsWallet123',
-      receiptHasGascoin: true, gascoinUsdValue: 2,
+      receiptHasGascoin: true, gascoinTokenBalance: 100,
       aiScore: 0.1, tamperScore: 0.1,
       duplicateHash: false, duplicatePhash: false,
       cooldownOk: true, amountUsd: 50, followerCount: 200,
@@ -513,8 +513,8 @@ describe('Cross-Tier Comparison — Same Activity, Different Tiers', () => {
   };
 
   it('Fleet earns more than Road Warrior from same activity', () => {
-    const fleet = simulateUser({ ...sharedActivity, tier: 3, gascoinBalance: 2_000_000 });
-    const rw = simulateUser({ ...sharedActivity, tier: 2, gascoinBalance: 500_000 });
+    const fleet = simulateUser({ ...sharedActivity, tier: 3, gascoinBalance: 10_000_000 });
+    const rw = simulateUser({ ...sharedActivity, tier: 2, gascoinBalance: 5_000_000 });
     expect(fleet.breakdown.totalPoints).toBeGreaterThan(rw.breakdown.totalPoints);
     expect(fleet.breakdown.holdingsPoints).toBe(750);
     expect(rw.breakdown.holdingsPoints).toBe(300);
@@ -527,7 +527,7 @@ describe('Cross-Tier Comparison — Same Activity, Different Tiers', () => {
   });
 
   it('only difference between tiers is holdings bonus', () => {
-    const fleet = simulateUser({ ...sharedActivity, tier: 3, gascoinBalance: 2_000_000 });
+    const fleet = simulateUser({ ...sharedActivity, tier: 3, gascoinBalance: 10_000_000 });
     const standard = simulateUser({ ...sharedActivity, tier: 0, gascoinBalance: 0 });
     const diff = fleet.breakdown.totalPoints - standard.breakdown.totalPoints;
     expect(diff).toBe(750 - 25); // Fleet holdings - Standard holdings

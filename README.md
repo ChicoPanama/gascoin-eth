@@ -13,7 +13,8 @@ Implements the 6 requested modules:
 - Tweet must include `#gascoin` and remain live
 - Receipt must contain `#gascoin`
 - Last 4 characters of wallet must be written on receipt and match connected wallet
-- Wallet must hold >= $1 GASCOIN at submit + pre-payout
+- Wallet must hold >= 1 GASCOIN token at submit + pre-payout
+- Tier-based cooldowns: Standard/Commuter 7d, Road Warrior 3.5d, Fleet 1.75d
 
 ## Run
 ```bash

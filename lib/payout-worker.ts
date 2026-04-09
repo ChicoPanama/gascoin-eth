@@ -1,4 +1,4 @@
-import { hasMinimumGascoinUsd, sendSolPayout } from './integrations/solana';
+import { hasMinimumGascoin, sendSolPayout } from './integrations/solana';
 import { verifyTweetProof, getFollowerCount } from './integrations/x';
 import { getUserByUsername } from './x-api';
 import { scoreAccountQuality } from './account-quality';
@@ -98,7 +98,7 @@ export async function processQueuedPayout(claimId: string) {
     }
   }
 
-  const gate = await hasMinimumGascoinUsd(job.wallet, 1);
+  const gate = await hasMinimumGascoin(job.wallet, 1);
   if (!gate.ok) {
     await supabase.from('payout_jobs').update({
       status: 'blocked',
@@ -112,10 +112,10 @@ export async function processQueuedPayout(claimId: string) {
       action: 'payout_blocked_min_gascoin',
       target_type: 'claim',
       target_id: claimId,
-      payload_json: { wallet: job.wallet, usdValue: gate.usdValue, amountSol: job.amount_sol }
+      payload_json: { wallet: job.wallet, tokenBalance: gate.tokenBalance, amountSol: job.amount_sol }
     });
 
-    return { ok: false, error: 'min_gascoin_not_met', usdValue: gate.usdValue };
+    return { ok: false, error: 'min_gascoin_not_met', tokenBalance: gate.tokenBalance };
   }
 
   const sent = await sendSolPayout(job.wallet, Number(job.amount_sol));

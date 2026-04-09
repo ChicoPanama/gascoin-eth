@@ -30,6 +30,12 @@ export async function getWalletGascoinBalance(wallet: string): Promise<number> {
   }
 }
 
+export async function hasMinimumGascoin(wallet: string, minTokens = 1): Promise<{ ok: boolean; tokenBalance: number }> {
+  const tokenBalance = await getWalletGascoinBalance(wallet);
+  return { ok: tokenBalance >= minTokens, tokenBalance };
+}
+
+/** @deprecated Use hasMinimumGascoin instead */
 export async function hasMinimumGascoinUsd(wallet: string, minUsd = 1): Promise<{ ok: boolean; usdValue: number; tokenBalance: number }> {
   const tokenBalance = await getWalletGascoinBalance(wallet);
   const usdValue = await getGascoinUsdValue(tokenBalance);
