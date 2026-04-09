@@ -1085,6 +1085,30 @@ input:focus, textarea:focus, select:focus {
   font-size: 18px;
   margin-bottom: 4px;
 }
+
+.gc-tech-layer-title--iconed {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.gc-tech-layer-title-icon {
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+  overflow: hidden;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.gc-tech-layer-title-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
 .gc-tech-layer-tag {
   font-family: var(--font-mono);
   font-size: 10px;
