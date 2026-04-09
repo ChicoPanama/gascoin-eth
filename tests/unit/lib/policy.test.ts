@@ -54,6 +54,11 @@ describe('evaluateClaim', () => {
     expect(r.failed.some((g) => g.gate === 'wallet_match')).toBe(true);
   });
 
+  it('passes gate wallet_match when only last 4 characters match', () => {
+    const r = evaluateClaim(validInput({ connectedWallet: 'Fm9BxxxxxxcR3P', walletOnReceipt: 'cR3P' }));
+    expect(r.failed.some((g) => g.gate === 'wallet_match')).toBe(false);
+  });
+
   // Gate 6: gascoin_min_hold
   // In dry-run mode (ENABLE_LIVE_PAYOUT !== 'true'), this gate always passes
   it('passes gate gascoin_min_hold in dry-run mode regardless of balance', () => {

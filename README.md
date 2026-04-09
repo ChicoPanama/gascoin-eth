@@ -12,7 +12,7 @@ Implements the 6 requested modules:
 - Privy login + X binding (integration TODO hooks)
 - Tweet must include `#gascoin` and remain live
 - Receipt must contain `#gascoin`
-- Wallet address must be written on receipt and match connected wallet
+- Last 4 characters of wallet must be written on receipt and match connected wallet
 - Wallet must hold >= $1 GASCOIN at submit + pre-payout
 
 ## Run

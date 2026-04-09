@@ -45,7 +45,7 @@ export const DOC_CATEGORIES: DocCategory[] = [
         description: "",
         content: `<ul>
 <li>You fill up your gas tank at any gas station.</li>
-<li>Before or after filling up, you write your Solana wallet address on the receipt in pen.</li>
+<li>Before or after filling up, you write the last 4 characters of your Solana wallet address on the receipt in pen.</li>
 <li>You post a tweet on X (formerly Twitter) containing the hashtag #gascoin.</li>
 <li>You visit platform-ebon-nine.vercel.app and click Submit.</li>
 <li>You connect your Solana wallet, paste your tweet URL, and upload a photo of your receipt.</li>
@@ -81,7 +81,7 @@ export const DOC_CATEGORIES: DocCategory[] = [
 <li><strong>Required: </strong>A Solana wallet — Phantom, Solflare, or Backpack (all free to install)</li>
 <li><strong>Required: </strong>An X (Twitter) account set to public with at least 100 followers, a profile bio, and posting history</li>
 <li><strong>Required: </strong>A physical gas receipt from a real gas station purchase within the last 7 days</li>
-<li><strong>Required: </strong>A pen to write your wallet address on the receipt</li>
+<li><strong>Required: </strong>A pen to write the last 4 characters of your wallet on the receipt</li>
 <li><strong>Required: </strong>The receipt must be photographed clearly — well-lit, unblurred, full receipt visible</li>
 <li><strong>Optional: </strong>GASCOIN tokens — only needed to access Commuter, Road Warrior, or Fleet tiers</li>
 </ul>`,
@@ -160,14 +160,14 @@ export const DOC_CATEGORIES: DocCategory[] = [
         categorySlug: "submitting",
         category: "Submitting",
         description: "",
-        content: `<p>Step 3 requires you to upload a photo of your gas receipt. This is the physical paper receipt from a real gas station. The receipt must have your Solana wallet address written on it in pen.</p>
-<p>IMPORTANT: You must write your Solana wallet address on the physical receipt BEFORE photographing it. The address must be clearly legible in the photo. This is a required element — submissions without a readable wallet address on the receipt will fail Gate 5 and be rejected.</p>
+        content: `<p>Step 3 requires you to upload a photo of your gas receipt. This is the physical paper receipt from a real gas station. The receipt must have the last 4 characters of your Solana wallet address written on it in pen.</p>
+<p>IMPORTANT: You must write the last 4 characters of your wallet address on the physical receipt BEFORE photographing it. They must be clearly legible in the photo. This is a required element — submissions without readable wallet characters on the receipt will fail Gate 5 and be rejected.</p>
 <h3><strong>How to prepare your receipt</strong></h3>
 <ul>
 <li>Obtain the paper receipt from the gas station at the time of purchase, or retrieve a saved receipt from within the last 7 days.</li>
-<li>Using a black pen, write your full Solana wallet address clearly on the receipt. Write it large enough to be readable in a photograph. Your wallet address is 44 characters long and consists of numbers and letters.</li>
+<li>Using a black pen, write the last 4 characters of your Solana wallet address clearly on the receipt. Write them large enough to be readable in a photograph. You can find your last 4 in your wallet app or on the GASCOIN submit page.</li>
 <li>Place the receipt flat on a bright surface. Do not crumple, fold, or obscure any part of the receipt.</li>
-<li>Photograph the receipt using your phone camera in good lighting. The entire receipt must be visible. The total amount, date, and your written wallet address must all be clearly readable.</li>
+<li>Photograph the receipt using your phone camera in good lighting. The entire receipt must be visible. The total amount, date, and your written wallet characters must all be clearly readable.</li>
 <li>Transfer the photo to the device you are using to submit (if you took the photo on your phone and are submitting on desktop, AirDrop or email the photo to yourself).</li>
 </ul>
 <h3><strong>How to upload the receipt</strong></h3>
@@ -181,16 +181,16 @@ export const DOC_CATEGORIES: DocCategory[] = [
 <ul>
 <li>My receipt shows the total amount clearly</li>
 <li>The receipt date is visible</li>
-<li>My wallet address is written on the receipt</li>
+<li>The last 4 characters of my wallet are written on the receipt</li>
 </ul>
 <p>All 3 checkboxes must be checked. The Next button remains disabled until all 3 are checked. This is by design — you are certifying that your upload meets the requirements before submitting.</p><h3>Physical receipts only</h3>
-<p>GASCOIN requires a photograph of a physical paper receipt from the gas station. Digital receipts — including email receipts, in-app receipts, SMS receipts, and PDF receipts — cannot be accepted because the verification system requires you to write your Solana wallet address directly on the receipt in pen before photographing it.</p>
+<p>GASCOIN requires a photograph of a physical paper receipt from the gas station. Digital receipts — including email receipts, in-app receipts, SMS receipts, and PDF receipts — cannot be accepted because the verification system requires you to write the last 4 characters of your wallet directly on the receipt in pen before photographing it.</p>
 <p>If your gas station does not offer paper receipts, ask the attendant for a printed copy at the time of purchase.</p>
 <h3>Receipt photography — do's and don'ts</h3>
 <p>Gate 5 (Wallet on Receipt) is the most commonly failed gate. Follow these rules exactly:</p>
 <p><strong>DO:</strong></p>
 <ul>
-<li>Write the wallet address on the BACK of the receipt if the front is too small</li>
+<li>Write the last 4 characters on the BACK of the receipt if the front is too small</li>
 <li>Use a black ballpoint pen — felt tip and pencil both fail OCR</li>
 <li>Write each character at least 3-4mm tall</li>
 <li>Lay the receipt flat on a white or light-coloured surface</li>
@@ -205,9 +205,8 @@ export const DOC_CATEGORIES: DocCategory[] = [
 <li>Crumple, fold, or tear the receipt before photographing</li>
 <li>Take the photo at an angle — keystoning distorts text</li>
 <li>Use flash directly — causes glare on thermal receipt paper</li>
-<li>Submit if ANY character of the address is unclear — retake the photo</li>
+<li>Submit if ANY character is unclear — retake the photo</li>
 </ul>
-<p>Your wallet address is 44 characters long. On a narrow thermal receipt, you may need to write it across two lines. That is fine.</p>
 <h3>Your receipt image privacy</h3>
 <p>Receipt photos are stored in the GASCOIN secure storage system. If your submission is approved, your receipt image may appear on the Community Feed with your gas station location (city and state/country only) and refund amount visible. The admin team reviews every approved receipt and redacts any sensitive information. You can prevent your receipt from appearing on the community feed by contacting the admin team after approval. Receipt images are never sold or shared with third parties.</p>
 <p>→ See also: Gate 5 (Wallet on Receipt), Gate 6 (Receipt Legible)</p>`,
@@ -342,19 +341,19 @@ export const DOC_CATEGORIES: DocCategory[] = [
         category: "Verification Gates",
         description: "",
         content: `<h3><strong>What this gate checks</strong></h3>
-<p>Gate 5 uses optical character recognition (OCR) to scan your receipt photo for a Solana wallet address. The system searches for a string matching Solana address format (32-44 base58 characters) and then compares the extracted address against the wallet you connected in Step 1. Both must match exactly.</p>
+<p>Gate 5 uses optical character recognition (OCR) to scan your receipt photo for the last 4 characters of your Solana wallet address. The system extracts handwritten characters and compares them against the last 4 characters of the wallet you connected in Step 1. They must match.</p>
 <h3><strong>Common failure reasons</strong></h3>
 <ul>
-<li>Wallet address written too small to be read by OCR</li>
-<li>Address written in pencil or light ink — low contrast against receipt paper</li>
+<li>Characters written too small to be read by OCR</li>
+<li>Characters written in pencil or light ink — low contrast against receipt paper</li>
 <li>Photo taken at an angle that distorts the handwritten text</li>
-<li>Wallet address written on a separate piece of paper held next to the receipt — must be written directly on the receipt</li>
-<li>Wrong wallet address written — different from the wallet connected in Step 1</li>
-<li>Address partially obscured by a fold or crease in the receipt</li>
+<li>Characters written on a separate piece of paper held next to the receipt — must be written directly on the receipt</li>
+<li>Wrong characters written — do not match the last 4 of the wallet connected in Step 1</li>
+<li>Characters partially obscured by a fold or crease in the receipt</li>
 </ul>
 <h3><strong>How to ensure Gate 5 passes</strong></h3>
-<p>Write your full wallet address in black pen directly on the receipt. Use clear, printed characters. Write large — at least 3-4mm tall. Double-check every character before photographing. Take the photo from directly above, not at an angle.</p>
-<p>IMPORTANT: This is the most commonly failed gate. Before submitting, zoom in on your receipt photo on your phone and verify the wallet address is fully readable. If you cannot read it clearly, retake the photo.</p>`,
+<p>Write the last 4 characters of your wallet address in black pen directly on the receipt. Use clear, printed characters. Write large — at least 3-4mm tall. Double-check before photographing. Take the photo from directly above, not at an angle.</p>
+<p>IMPORTANT: This is the most commonly failed gate. Before submitting, zoom in on your receipt photo on your phone and verify the characters are fully readable. If you cannot read them clearly, retake the photo.</p>`,
         order: 16,
       },
       {
@@ -811,7 +810,7 @@ export const DOC_CATEGORIES: DocCategory[] = [
         categorySlug: "security",
         category: "Security & Admin",
         description: "",
-        content: `<p>Requiring the Solana wallet address to be physically written on the paper receipt and visible in the photograph is a high-friction anti-fraud measure. It is difficult to fabricate a convincing receipt with a handwritten wallet address, and it ties the refund irrevocably to a specific wallet that was known at the time of the gas purchase.</p>`,
+        content: `<p>Requiring the last 4 characters of a Solana wallet address to be physically written on the paper receipt and visible in the photograph is a low-friction anti-fraud measure. It ties the receipt to a specific wallet that was known at the time of the gas purchase while keeping the process simple for users.</p>`,
         order: 53,
       },
       {
@@ -873,11 +872,11 @@ export const DOC_CATEGORIES: DocCategory[] = [
         category: "Help",
         description: "",
         content: `<ul>
-<li>This is the most common failure — your wallet address was not readable by OCR</li>
+<li>This is the most common failure — the last 4 characters of your wallet were not readable by OCR</li>
 <li>You need a new receipt — the old one has now been logged and cannot be reused</li>
-<li>On the new receipt, write your wallet address larger, in darker ink, in clear printed characters</li>
+<li>On the new receipt, write the last 4 characters of your wallet larger, in darker ink, in clear printed characters</li>
 <li>Take the photo from directly above (not at an angle), in bright light</li>
-<li>Before submitting, zoom in on the photo on your phone and verify every character of the address is readable</li>
+<li>Before submitting, zoom in on the photo on your phone and verify the characters are readable</li>
 </ul>`,
         order: 41,
       },
@@ -1008,11 +1007,11 @@ export const DOC_CATEGORIES: DocCategory[] = [
       },
       {
         slug: "where-do-i-write-my-wallet-address-on-the-receipt",
-        title: "Where do I write my wallet address on the receipt?",
+        title: "Where do I write my wallet characters on the receipt?",
         categorySlug: "help",
         category: "Help",
         description: "",
-        content: `<p>Anywhere on the receipt that is clearly visible in a photograph is acceptable. Common choices: on the back of the receipt, below the total amount, or in any blank margin space. Use a black pen. Write in clear printed characters. Write large enough that the address is legible in a photo from 20-30cm away. Your wallet address is 44 characters long — you may need to use the full back of the receipt.</p>`,
+        content: `<p>Write the last 4 characters of your wallet address anywhere on the receipt that is clearly visible in a photograph. Common choices: on the back of the receipt, below the total amount, or in any blank margin space. Use a black pen. Write in clear printed characters. Write large enough that they are legible in a photo from 20-30cm away. It's only 4 characters — quick and easy.</p>`,
         order: 63,
       },
       {

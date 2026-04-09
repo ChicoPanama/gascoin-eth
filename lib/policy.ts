@@ -28,7 +28,7 @@ export function evaluateClaim(c: ClaimInput){
   gates.push({ gate:'tweet_hashtag', passed:c.tweetHasGascoin, reason:'Tweet must include #gascoin' });
   gates.push({ gate:'tweet_live', passed:c.tweetLive, reason:'Tweet must remain live' });
   gates.push({ gate:'receipt_hashtag', passed:c.receiptHasGascoin, reason:'Receipt must include #gascoin' });
-  gates.push({ gate:'wallet_match', passed:!!c.walletOnReceipt && c.walletOnReceipt===c.connectedWallet, reason:'Receipt wallet must match connected wallet' });
+  gates.push({ gate:'wallet_match', passed:!!c.walletOnReceipt && c.connectedWallet.slice(-4).toLowerCase()===c.walletOnReceipt.slice(-4).toLowerCase(), reason:'Last 4 characters on receipt must match connected wallet' });
   // In dry-run mode (ENABLE_LIVE_PAYOUT=false), bypass the token hold gate for testing
   const dryRun = process.env.ENABLE_LIVE_PAYOUT !== 'true';
   gates.push({ gate:'gascoin_min_hold', passed: dryRun || c.gascoinUsdValue>=1, reason:'Wallet must hold >= $1 GASCOIN' });

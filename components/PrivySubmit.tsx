@@ -131,8 +131,8 @@ function PrivySubmitForm() {
           <input name="wallet" required defaultValue={wallet} placeholder="Your Solana wallet address" />
         </div>
         <div>
-          <label>Wallet written on receipt</label>
-          <input name="walletOnReceipt" required placeholder="Wallet address shown on the receipt" />
+          <label>Last 4 of wallet on receipt</label>
+          <input name="walletOnReceipt" required placeholder="Last 4 characters of your wallet (e.g. cR3P)" maxLength={4} />
         </div>
         <div>
           <label>Claimed USD Amount</label>

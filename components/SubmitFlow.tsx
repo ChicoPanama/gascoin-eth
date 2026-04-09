@@ -337,7 +337,7 @@ function StepReceipt({ onNext, onBack, initialFile }: {
   return (
     <div className="sf-step">
       <h2 className="sf-headline">Upload Your Receipt</h2>
-      <p className="sf-sub">Photo must clearly show the total amount, date, and your wallet address written on the receipt.</p>
+      <p className="sf-sub">Photo must clearly show the total amount, date, and the last 4 characters of your wallet written on the receipt.</p>
 
       <div
         className={`sf-upload${file ? ' sf-upload--has-file' : ''}`}
@@ -382,7 +382,7 @@ function StepReceipt({ onNext, onBack, initialFile }: {
         {[
           'Receipt shows total amount clearly',
           'Receipt date is visible',
-          'My wallet address is written on the receipt',
+          'The last 4 characters of my wallet are written on the receipt',
         ].map((label, i) => (
           <label key={i} className="sf-check-row" onClick={() => toggleCheck(i)}>
             <span className={`sf-checkbox${checks[i] ? ' sf-checkbox--checked' : ''}`}>
