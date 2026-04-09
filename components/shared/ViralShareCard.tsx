@@ -33,6 +33,14 @@ type Props = DashboardProps | PostApprovalProps;
 
 const RECRUITER_THRESHOLD = 5;
 
+function UsdcIcon() {
+  return (
+    <span className="gc-mini-icon" aria-hidden>
+      <img src="https://coin-images.coingecko.com/coins/images/6319/large/usdc.png?1696506694" alt="" loading="lazy" decoding="async" />
+    </span>
+  );
+}
+
 export function ViralShareCard(props: Props) {
   const [copied, setCopied] = useState(false);
 
@@ -125,12 +133,12 @@ export function ViralShareCard(props: Props) {
           <div className="gc-stat">
             <div className="gc-stat-label">Gas Saved</div>
             <div className="gc-stat-value">${Math.round(networkImpact.networkUsdSaved)}</div>
-            <div className="gc-stat-sub">USD by your network</div>
+            <div className="gc-stat-sub"><span className="gc-inline-token"><UsdcIcon />USDC</span> by your network</div>
           </div>
           <div className="gc-stat">
-            <div className="gc-stat-label">Combined SOL</div>
-            <div className="gc-stat-value">{networkImpact.combinedSol.toFixed(4)}</div>
-            <div className="gc-stat-sub">you + referrals</div>
+            <div className="gc-stat-label">Combined Value</div>
+            <div className="gc-stat-value">${Math.round(networkImpact.combinedUsd).toLocaleString()}</div>
+            <div className="gc-stat-sub"><span className="gc-inline-token"><UsdcIcon />USDC</span> you + referrals</div>
           </div>
         </div>
       </div>

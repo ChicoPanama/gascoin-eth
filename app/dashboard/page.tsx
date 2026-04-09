@@ -71,7 +71,7 @@ export default async function Dashboard() {
 
       {/* Zone 2 — Chart */}
       <div className="gc-dash-section">
-        <div className="gc-section-num">7-Day Treasury Balance</div>
+        <div className="gc-section-num">7-Day Treasury Value (USDC)</div>
         <TreasuryChart />
       </div>
 

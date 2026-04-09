@@ -204,6 +204,7 @@ export function TreasuryChart() {
   const containerRef = useRef<HTMLDivElement>(null);
   const [hover, setHover] = useState<{ x: number; idx: number } | null>(null);
   const [chartData, setChartData] = useState<{ day: string; sol: number }[]>(DEMO_CHART_DATA);
+  const [solUsdPrice, setSolUsdPrice] = useState(170);
 
   useEffect(() => {
     let active = true;
@@ -222,6 +223,25 @@ export function TreasuryChart() {
     };
     load();
     const id = setInterval(load, 30000);
+    return () => { active = false; clearInterval(id); };
+  }, []);
+
+  useEffect(() => {
+    let active = true;
+    const pullPrice = async () => {
+      try {
+        const res = await fetch('/api/public/market', { cache: 'no-store' });
+        if (!res.ok) return;
+        const m = await res.json();
+        if (!active) return;
+        const p = Number(m?.solPriceUsd || 0);
+        if (p > 0) setSolUsdPrice(p);
+      } catch {
+        // keep fallback
+      }
+    };
+    pullPrice();
+    const id = setInterval(pullPrice, 30000);
     return () => { active = false; clearInterval(id); };
   }, []);
 
@@ -245,7 +265,8 @@ export function TreasuryChart() {
 
     ctx.clearRect(0, 0, w, h);
 
-    const vals = chartData.map(d => d.sol);
+    const usdData = chartData.map(d => ({ day: d.day, usd: d.sol * solUsdPrice }));
+    const vals = usdData.map(d => d.usd);
     const min = Math.floor(Math.min(...vals) - 2);
     const max = Math.ceil(Math.max(...vals) + 2);
     const range = max - min;
@@ -267,13 +288,13 @@ export function TreasuryChart() {
       ctx.moveTo(pad.left, y);
       ctx.lineTo(pad.left + 6, y);
       ctx.stroke();
-      ctx.fillText(v.toFixed(1), pad.left - 8, y + 4);
+      ctx.fillText(`$${Math.round(v).toLocaleString()}`, pad.left - 8, y + 4);
     }
 
     // X labels
     ctx.textAlign = 'center';
     ctx.fillStyle = 'rgba(255,255,255,0.3)';
-    chartData.forEach((d, i) => {
+    usdData.forEach((d, i) => {
       ctx.fillText(d.day, toX(i), h - pad.bottom + 24);
     });
 
@@ -282,27 +303,27 @@ export function TreasuryChart() {
     ctx.lineWidth = 1;
     ctx.lineJoin = 'round';
     ctx.beginPath();
-    chartData.forEach((d, i) => {
+    usdData.forEach((d, i) => {
       const x = toX(i);
-      const y = toY(d.sol);
+      const y = toY(d.usd);
       if (i === 0) ctx.moveTo(x, y);
       else ctx.lineTo(x, y);
     });
     ctx.stroke();
 
     // Dots
-    chartData.forEach((d, i) => {
+    usdData.forEach((d, i) => {
       ctx.beginPath();
-      ctx.arc(toX(i), toY(d.sol), 2.5, 0, Math.PI * 2);
+      ctx.arc(toX(i), toY(d.usd), 2.5, 0, Math.PI * 2);
       ctx.fillStyle = '#fff';
       ctx.fill();
     });
 
     // Hover crosshair + tooltip
     if (hoverState && hoverState.idx >= 0 && hoverState.idx < chartData.length) {
-      const d = chartData[hoverState.idx];
+      const d = usdData[hoverState.idx];
       const x = toX(hoverState.idx);
-      const y = toY(d.sol);
+      const y = toY(d.usd);
 
       ctx.strokeStyle = 'rgba(255,255,255,0.2)';
       ctx.lineWidth = 1;
@@ -314,7 +335,7 @@ export function TreasuryChart() {
       ctx.setLineDash([]);
 
       // Tooltip bg
-      const label = `${d.day} · ${d.sol.toFixed(2)} SOL`;
+      const label = `${d.day} · ${formatUsd(d.usd)}`;
       ctx.font = '11px "IBM Plex Mono", monospace';
       const tw = ctx.measureText(label).width + 16;
       const tx = Math.min(x - tw / 2, w - tw - 4);
@@ -330,7 +351,7 @@ export function TreasuryChart() {
       ctx.fillStyle = '#fff';
       ctx.fill();
     }
-  }, [chartData]);
+  }, [chartData, solUsdPrice]);
 
   useEffect(() => { draw(hover); }, [draw, hover]);
 

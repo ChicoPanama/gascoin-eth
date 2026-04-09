@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import Link from 'next/link';
 import { ViralShareCard } from '../../components/shared/ViralShareCard';
 
@@ -111,10 +111,47 @@ function truncate(s: string, n = 8) {
   return `${s.slice(0, n)}...${s.slice(-n)}`;
 }
 
+function formatUsd(v: number) {
+  return v.toLocaleString('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+}
+
+function UsdcIcon() {
+  return (
+    <span className="gc-mini-icon" aria-hidden>
+      <img src="https://coin-images.coingecko.com/coins/images/6319/large/usdc.png?1696506694" alt="" loading="lazy" decoding="async" />
+    </span>
+  );
+}
+
 // ── Component ──
 export function DashboardClient({ wallet, xHandle, claims, payouts, referral, stats, networkImpact }: Props) {
   const [expandedClaim, setExpandedClaim] = useState<string | null>(null);
   const [tab, setTab] = useState<'all' | 'approved' | 'pending' | 'rejected'>('all');
+  const [solUsdPrice, setSolUsdPrice] = useState(170);
+
+  useEffect(() => {
+    let active = true;
+    const pullPrice = async () => {
+      try {
+        const res = await fetch('/api/public/market', { cache: 'no-store' });
+        if (!res.ok) return;
+        const m = await res.json();
+        if (!active) return;
+        const p = Number(m?.solPriceUsd || 0);
+        if (p > 0) setSolUsdPrice(p);
+      } catch {
+        // keep fallback
+      }
+    };
+    pullPrice();
+    const id = setInterval(pullPrice, 30000);
+    return () => { active = false; clearInterval(id); };
+  }, []);
 
   const isApproved = (s: string) => s === 'approved' || s === 'paid' || s === 'ready_for_dispatch';
   const isPending = (s: string) => s === 'submitted' || s === 'auto_review' || s === 'needs_manual_review';
@@ -160,8 +197,8 @@ export function DashboardClient({ wallet, xHandle, claims, payouts, referral, st
         <div className="gc-stats-grid">
           <div className="gc-stat">
             <div className="gc-stat-label">Total Earned</div>
-            <div className="gc-stat-value">{stats.totalEarned.toFixed(4)}</div>
-            <div className="gc-stat-sub">SOL</div>
+            <div className="gc-stat-value">{formatUsd(stats.totalEarned * solUsdPrice)}</div>
+            <div className="gc-stat-sub"><span className="gc-inline-token"><UsdcIcon />USDC</span></div>
           </div>
           <div className="gc-stat">
             <div className="gc-stat-label">Approved</div>
@@ -241,7 +278,7 @@ export function DashboardClient({ wallet, xHandle, claims, payouts, referral, st
                     <div className="ud-claim__right">
                       {payout && (
                         <span className="ud-claim__sol">
-                          {payout.amount_sol.toFixed(4)} SOL
+                          {formatUsd(payout.amount_sol * solUsdPrice)} <span className="gc-inline-token"><UsdcIcon />USDC</span>
                         </span>
                       )}
                       <span className="ud-claim__expand">
@@ -349,7 +386,7 @@ export function DashboardClient({ wallet, xHandle, claims, payouts, referral, st
             {payouts.map((p) => (
               <div key={p.id} className="ud-payouts__row">
                 <span className="ud-payouts__date">{timeAgo(p.created_at)}</span>
-                <span className="ud-payouts__amount">{p.amount_sol.toFixed(4)} SOL</span>
+                <span className="ud-payouts__amount">{formatUsd(p.amount_sol * solUsdPrice)} <span className="gc-inline-token"><UsdcIcon />USDC</span></span>
                 <span>{statusBadge(p.status)}</span>
                 <span className="ud-payouts__tx">
                   {p.tx_hash ? (
