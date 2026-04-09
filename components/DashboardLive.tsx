@@ -141,7 +141,6 @@ export function LiveStatsBar({ refundsToday, totalPaid, queueDepth }: {
       <div className="gc-stats-grid">
         <div className="gc-stat">
           <div className="gc-stat-label">
-            <span className="gc-stat-label-icons"><UsdcIcon /></span>
             Treasury Balance
             <span className="gc-pulse" />
           </div>
@@ -170,12 +169,12 @@ export function LiveStatsBar({ refundsToday, totalPaid, queueDepth }: {
           <div className="gc-stat-sub">Last 24h</div>
         </div>
         <div className="gc-stat">
-          <div className="gc-stat-label"><span className="gc-stat-label-icons"><UsdcIcon /></span>Total Paid Out</div>
+          <div className="gc-stat-label">Total Paid Out</div>
           <div className="gc-stat-value">{formatUsd(animPaidUsd)}</div>
           <div className="gc-stat-sub"><span className="gc-inline-token"><UsdcIcon />USDC</span> All-Time</div>
         </div>
         <div className="gc-stat">
-          <div className="gc-stat-label"><span className="gc-stat-label-icons"><QueueIcon /><PanelCheckIcon /></span>Queue Depth</div>
+          <div className="gc-stat-label"><span className="gc-stat-label-icons"><QueueIcon /></span>Queue Depth</div>
           <div className="gc-stat-value">{Math.round(animQueue)}</div>
           <div className="gc-stat-sub">Pending Verification</div>
         </div>
