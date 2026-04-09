@@ -4232,6 +4232,10 @@ input:focus, textarea:focus, select:focus {
 
 /* ─── RESPONSIVE ─── */
 @media (max-width: 900px) {
+  .lb-header {
+    padding: 48px 0 32px;
+  }
+
   .gc-nav { padding: 0 24px; }
   .gc-nav-links { display: none; }
 
@@ -4333,6 +4337,26 @@ input:focus, textarea:focus, select:focus {
 }
 
 @media (max-width: 600px) {
+  .lb-header {
+    padding: 36px 0 24px;
+  }
+
+  .lb-tag {
+    font-size: 10px;
+    letter-spacing: 0.22em;
+  }
+
+  .lb-title {
+    font-size: 40px;
+    letter-spacing: 0.03em;
+    line-height: 0.98;
+  }
+
+  .wt-title-singleline {
+    font-size: clamp(32px, 10.5vw, 40px);
+    letter-spacing: 0.02em;
+  }
+
   .gc-hero h1 { font-size: 36px; }
   .cards-4 { grid-template-columns: 1fr; }
 }
