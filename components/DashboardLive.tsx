@@ -52,15 +52,14 @@ function UsdcIcon() {
   );
 }
 
-function SolIcon() {
+function QueueIcon() {
   return (
     <span className="gc-mini-icon" aria-hidden>
-      <img
-        src="https://coin-images.coingecko.com/coins/images/4128/large/solana.png?1718769756"
-        alt=""
-        loading="lazy"
-        decoding="async"
-      />
+      <svg viewBox="0 0 24 24" fill="none">
+        <rect x="4" y="6" width="12" height="2" rx="1" fill="currentColor" />
+        <rect x="4" y="11" width="16" height="2" rx="1" fill="currentColor" />
+        <rect x="4" y="16" width="10" height="2" rx="1" fill="currentColor" />
+      </svg>
     </span>
   );
 }
@@ -166,7 +165,7 @@ export function LiveStatsBar({ refundsToday, totalPaid, queueDepth }: {
           <div className="gc-stat-sub">USD (USDC) All-Time</div>
         </div>
         <div className="gc-stat">
-          <div className="gc-stat-label"><span className="gc-stat-label-icons"><SolIcon /><PanelCheckIcon /></span>Queue Depth</div>
+          <div className="gc-stat-label"><span className="gc-stat-label-icons"><QueueIcon /><PanelCheckIcon /></span>Queue Depth</div>
           <div className="gc-stat-value">{Math.round(animQueue)}</div>
           <div className="gc-stat-sub">Pending Verification</div>
         </div>
