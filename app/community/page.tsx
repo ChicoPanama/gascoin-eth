@@ -89,24 +89,6 @@ export default function CommunityPage() {
   const { receipts, loading, loadingMore, error, hasMore, newCount, loadMore, flushNewReceipts } =
     useCommunityFeed(connectedWallet, filter, sort);
   const { stats, loading: statsLoading } = useCommunityStats();
-  const [solUsdPrice, setSolUsdPrice] = useState(170);
-
-  useEffect(() => {
-    let active = true;
-    const pullPrice = async () => {
-      try {
-        const res = await fetch('/api/public/market', { cache: 'no-store' });
-        if (!res.ok) return;
-        const m = await res.json();
-        if (!active) return;
-        const p = Number(m?.solPriceUsd || 0);
-        if (p > 0) setSolUsdPrice(p);
-      } catch {}
-    };
-    pullPrice();
-    const id = setInterval(pullPrice, 30000);
-    return () => { active = false; clearInterval(id); };
-  }, []);
 
   // Intersection observer for infinite scroll
   const sentinelRef = useRef<HTMLDivElement>(null);
@@ -118,9 +100,9 @@ export default function CommunityPage() {
   }, [loadMore]);
 
   const aApproved = useAnimVal(stats?.total_approved ?? 0);
-  const aPaidUsd = useAnimVal((stats?.total_sol_paid ?? 0) * solUsdPrice);
+  const aPaidUsd = useAnimVal(stats?.total_usdc_paid ?? 0);
   const aCountries = useAnimVal(stats?.unique_countries ?? 0);
-  const aAvgUsd = useAnimVal((stats?.avg_refund_sol ?? 0) * solUsdPrice);
+  const aAvgUsd = useAnimVal(stats?.avg_refund_usdc ?? 0);
 
   const handleConnectWallet = () => {
     // Trigger Solana wallet modal

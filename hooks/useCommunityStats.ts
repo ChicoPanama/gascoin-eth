@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { supabaseBrowser } from "../lib/supabase-client";
 import type { CommunityStats } from "../types/community";
 import { DEMO_COMMUNITY_STATS } from "../lib/demo-data";
 
@@ -12,28 +11,26 @@ export function useCommunityStats() {
   useEffect(() => {
     (async () => {
       try {
-        const { data, error } = await supabaseBrowser
-          .from('payouts')
-          .select('amount_sol, wallet, claims(country)')
-          .eq('status', 'paid');
+        const res = await fetch('/api/public/community/stats', { cache: 'no-store' });
+        if (!res.ok) throw new Error('stats_fetch_failed');
+        const realStats = await res.json();
 
-        if (error) throw error;
-
-        const total = (data || []).reduce((s: number, r: any) => s + Number(r.amount_sol || 0), 0);
-        const countries = new Set(
-          (data || []).map((r: any) => r.claims?.country).filter(Boolean)
-        );
-
-        const realStats = {
-          total_approved: (data || []).length,
-          total_sol_paid: total,
-          unique_countries: countries.size,
-          avg_refund_sol: (data || []).length > 0 ? total / (data || []).length : 0,
-        };
-        setStats(realStats.total_approved > 0 ? realStats : DEMO_COMMUNITY_STATS);
+        setStats(realStats.total_approved > 0
+          ? realStats
+          : {
+              ...DEMO_COMMUNITY_STATS,
+              total_usdc_paid: DEMO_COMMUNITY_STATS.total_sol_paid * 170,
+              avg_refund_usdc: DEMO_COMMUNITY_STATS.avg_refund_sol * 170,
+              sol_price_usd: 170,
+            });
       } catch (err) {
         console.error('Stats fetch error:', err);
-        setStats(DEMO_COMMUNITY_STATS);
+        setStats({
+          ...DEMO_COMMUNITY_STATS,
+          total_usdc_paid: DEMO_COMMUNITY_STATS.total_sol_paid * 170,
+          avg_refund_usdc: DEMO_COMMUNITY_STATS.avg_refund_sol * 170,
+          sol_price_usd: 170,
+        });
       } finally {
         setLoading(false);
       }
