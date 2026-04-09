@@ -308,10 +308,46 @@ code, .mono {
 .gc-hero h1 .line:nth-child(4) { top: -6px; }    /* "Get PAID BACK." — push up */
 
 .gc-hero-glow {
+  position: relative;
+  display: inline-block;
   text-shadow:
-    0 0 30px rgba(255, 255, 255, 0.5),
-    0 0 60px rgba(255, 255, 255, 0.3),
-    0 0 100px rgba(255, 255, 255, 0.15);
+    0 0 36px rgba(255, 255, 255, 0.72),
+    0 0 72px rgba(255, 255, 255, 0.52),
+    0 0 128px rgba(255, 255, 255, 0.34),
+    0 0 180px rgba(255, 255, 255, 0.22);
+  animation: gcHeroGlowPulse 2.8s ease-in-out infinite;
+}
+
+.gc-hero-glow::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 54%;
+  width: 125%;
+  height: 0.9em;
+  transform: translate(-50%, -50%);
+  border-radius: 999px;
+  background: radial-gradient(ellipse at center, rgba(255,255,255,0.5) 0%, rgba(255,255,255,0.16) 52%, rgba(255,255,255,0) 78%);
+  filter: blur(14px);
+  pointer-events: none;
+  z-index: -1;
+}
+
+@keyframes gcHeroGlowPulse {
+  0%, 100% {
+    text-shadow:
+      0 0 34px rgba(255, 255, 255, 0.66),
+      0 0 66px rgba(255, 255, 255, 0.46),
+      0 0 120px rgba(255, 255, 255, 0.28),
+      0 0 170px rgba(255, 255, 255, 0.18);
+  }
+  50% {
+    text-shadow:
+      0 0 44px rgba(255, 255, 255, 0.88),
+      0 0 88px rgba(255, 255, 255, 0.62),
+      0 0 148px rgba(255, 255, 255, 0.42),
+      0 0 210px rgba(255, 255, 255, 0.28);
+  }
 }
 
 .gc-hero-body {
@@ -4567,7 +4603,8 @@ input:focus, textarea:focus, select:focus {
   .gc-hero-logo-float,
   .gc-hero-logo-g-layer,
   .gc-hero-logo-image,
-  .gc-hero-logo-image--g {
+  .gc-hero-logo-image--g,
+  .gc-hero-glow {
     animation: none;
     transform: none;
   }
