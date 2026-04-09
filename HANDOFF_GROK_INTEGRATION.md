@@ -1,4 +1,4 @@
-# GASCOIN Platform — Claude Code Handoff
+# GASCOIN Platform — Grok Integration Handoff
 
 _Last updated: 2026-04-06 (America/Los_Angeles)_
 
@@ -49,7 +49,7 @@ Identical on homepage (`HomeNav`) and all inner pages (`Nav`).
 
 ### Hero page (app/page.tsx)
 - 4 tech pipeline sections: AI Receipt Processing → 4-Layer Fraud Detection → X + xAI Intelligence Pipeline → Automated Referral Pipeline
-- Tags: `CLAUDE AI`, `CLAUDE AI · INSTANT · ON-DEVICE`, `X API V2 · xAI-POWERED SCORING · AUTOMATED`
+- Tags: `INTEGRATED WITH GROK`, `INTEGRATED WITH GROK`, `X API V2 · xAI-POWERED SCORING · AUTOMATED`
 - No algorithm scoring weights exposed to users
 - Gate count: 10 (matches `lib/gates.ts`)
 - Referrals earn points, not SOL (everywhere)
@@ -130,7 +130,7 @@ Identical on homepage (`HomeNav`) and all inner pages (`Nav`).
 
 ---
 
-## 5) How Claude Code should continue (recommended runbook)
+## 5) How Grok integration should continue (recommended runbook)
 
 > **After latest changes (2026-04-06):** Run the bookmarks migration, deploy, verify `score-engagement` and `sync-x-handles` workers fire on cron, confirm nav order renders correctly on all pages.
 
