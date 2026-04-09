@@ -92,9 +92,7 @@ export function WalletTrackerClient({ initialLookupAddress }: { initialLookupAdd
         <div className="lb-header__meta">
           <span className="lb-tag">— Personal Submission Status · Live Gate Tracking</span>
         </div>
-        <h1 className="lb-title" style={{ lineHeight: 0.88 }}>
-          Wallet<br /><span style={{ color: 'rgba(255,255,255,0.18)' }}>Tracker</span>
-        </h1>
+        <h1 className="lb-title wt-title-singleline">WALLET TRACKER</h1>
         <p className="gt-header-body">
           Connect your wallet or paste any Solana address to see submission status,
           gate progress, payout history, and cooldown status in real time.

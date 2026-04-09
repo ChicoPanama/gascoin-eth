@@ -2768,6 +2768,11 @@ input:focus, textarea:focus, select:focus {
   margin-bottom: 16px;
 }
 
+.wt-title-singleline {
+  white-space: nowrap;
+  line-height: 1;
+}
+
 .lb-title--iconed {
   display: inline-flex;
   align-items: center;
