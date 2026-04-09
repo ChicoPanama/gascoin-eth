@@ -510,6 +510,19 @@ code, .mono {
   color: var(--muted);
 }
 
+.gc-inline-token {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-right: 4px;
+  color: rgba(255,255,255,0.92);
+}
+
+.gc-stat-sub .gc-inline-token .gc-mini-icon {
+  width: 12px;
+  height: 12px;
+}
+
 /* ─── HOW IT WORKS ─── */
 .gc-section {
   padding: 100px 48px;
