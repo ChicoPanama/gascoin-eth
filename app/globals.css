@@ -301,11 +301,17 @@ code, .mono {
   margin-bottom: 36px;
 }
 
-.gc-hero h1 .line { display: block; color: #fff; position: relative; }
-.gc-hero h1 .line:nth-child(1) { top: -6px; }   /* "Get GAS." — push up */
-.gc-hero h1 .line:nth-child(2) { top: 6px; }     /* "Post." — push down */
-.gc-hero h1 .line:nth-child(3) { top: 6px; }     /* "Submit." — push down */
-.gc-hero h1 .line:nth-child(4) { top: -6px; }    /* "Get PAID BACK." — push up */
+.gc-hero h1 .line {
+  display: block;
+  color: #fff;
+  position: relative;
+  top: 0;
+  line-height: 0.98;
+}
+
+.gc-hero h1 .line + .line {
+  margin-top: 0.08em;
+}
 
 .gc-hero-glow {
   position: relative;
