@@ -44,7 +44,7 @@ export default async function Dashboard() {
       <Nav />
 
       <div className="gc-dash-header">
-        <h1 className="gc-dash-title">TREASURY // LIVE</h1>
+        <h1 className="gc-dash-title">TREASURY</h1>
       </div>
 
       {/* Zone 1 — Stats */}
