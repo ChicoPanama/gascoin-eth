@@ -3,49 +3,73 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { DEMO_CHART_DATA, DEMO_GATE_RATES, DEMO_STATS } from '../lib/demo-data';
 
-const TREASURY_WALLET = process.env.NEXT_PUBLIC_TREASURY_WALLET || 'TREASURY_WALLET_ADDRESS';
-const GASCOIN_MINT = process.env.NEXT_PUBLIC_GASCOIN_MINT || 'GASCOIN_MINT_ADDRESS';
-const RPC_URL = '/api/rpc';
+type TreasurySummary = {
+  live: boolean;
+  solBalance: number;
+  solUsd: number;
+  gascoinBalance: number;
+  gascoinUsd: number;
+  totalUsd: number;
+};
 
-// ─── RPC helpers (vanilla fetch, no SDK) ───
-async function rpcFetch(method: string, params: any[] = []): Promise<any> {
-  const res = await fetch(RPC_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ jsonrpc: '2.0', id: 1, method, params }),
+async function fetchTreasurySummary(): Promise<TreasurySummary | null> {
+  try {
+    const res = await fetch('/api/public/treasury', { cache: 'no-store' });
+    if (!res.ok) return null;
+    const json = await res.json();
+    return {
+      live: Boolean(json?.live),
+      solBalance: Number(json?.solBalance || 0),
+      solUsd: Number(json?.solUsd || 0),
+      gascoinBalance: Number(json?.gascoinBalance || 0),
+      gascoinUsd: Number(json?.gascoinUsd || 0),
+      totalUsd: Number(json?.totalUsd || 0),
+    };
+  } catch {
+    return null;
+  }
+}
+
+function formatUsd(value: number): string {
+  return value.toLocaleString('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
   });
-  if (!res.ok) throw new Error(`RPC ${res.status}`);
-  const json = await res.json();
-  if (json.error) throw new Error(json.error.message);
-  return json.result;
 }
 
-async function fetchSolBalance(): Promise<number> {
-  try {
-    const r = await rpcFetch('getBalance', [TREASURY_WALLET]);
-    return (r?.value ?? 0) / 1e9;
-  } catch (e) {
-    console.error('Treasury SOL RPC error:', e);
-    return -1;
-  }
+function UsdcIcon() {
+  return (
+    <span className="gc-mini-icon" aria-hidden>
+      <svg viewBox="0 0 24 24" fill="none">
+        <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="1.6" />
+        <path d="M9 8.8c.6-.5 1.6-.8 2.7-.8 1.8 0 3 .8 3 2.1 0 1.2-.9 1.8-2.7 2.2l-1 .2c-1 .2-1.4.5-1.4 1 0 .6.7 1 1.9 1 1 0 1.9-.3 2.6-.8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+        <path d="M12 6.7v10.6" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" opacity=".9" />
+      </svg>
+    </span>
+  );
 }
 
-async function fetchGascoinBalance(): Promise<number> {
-  try {
-    const r = await rpcFetch('getTokenAccountsByOwner', [
-      TREASURY_WALLET,
-      { mint: GASCOIN_MINT },
-      { encoding: 'jsonParsed' }
-    ]);
-    let total = 0;
-    for (const acc of r?.value || []) {
-      total += Number(acc?.account?.data?.parsed?.info?.tokenAmount?.uiAmount || 0);
-    }
-    return total;
-  } catch (e) {
-    console.error('Treasury GASCOIN RPC error:', e);
-    return -1;
-  }
+function GascoinIcon() {
+  return (
+    <span className="gc-mini-icon" aria-hidden>
+      <svg viewBox="0 0 24 24" fill="none">
+        <rect x="3.5" y="3.5" width="17" height="17" rx="4" stroke="currentColor" strokeWidth="1.6" />
+        <path d="M15.2 12h-2.8v2.8h3.8c-.9 1.2-2.3 1.9-4.1 1.9-2.8 0-4.8-2-4.8-4.8 0-2.8 2-4.8 4.8-4.8 1.4 0 2.6.5 3.6 1.5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+    </span>
+  );
+}
+
+function PanelCheckIcon() {
+  return (
+    <span className="gc-verify-mini" aria-hidden>
+      <svg viewBox="0 0 20 20" fill="none">
+        <path d="M5.5 10.2l2.5 2.6 6.5-6.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+    </span>
+  );
 }
 
 // ─── Eased counter hook ───
@@ -78,37 +102,36 @@ export function LiveStatsBar({ refundsToday, totalPaid, queueDepth }: {
   totalPaid: number;
   queueDepth: number;
 }) {
-  const [solBalance, setSolBalance] = useState(-1);
-  const [gcBalance, setGcBalance] = useState(-1);
-  const [online, setOnline] = useState(true);
+  const [treasury, setTreasury] = useState<TreasurySummary | null>(null);
 
   useEffect(() => {
     let active = true;
     const poll = async () => {
-      const [sol, gc] = await Promise.all([fetchSolBalance(), fetchGascoinBalance()]);
+      const summary = await fetchTreasurySummary();
       if (!active) return;
-      if (sol >= 0) { setSolBalance(sol); setOnline(true); }
-      else { setOnline(false); }
-      if (gc >= 0) setGcBalance(gc);
+      if (summary) setTreasury(summary);
     };
     poll();
     const id = setInterval(poll, 30000);
     return () => { active = false; clearInterval(id); };
   }, []);
 
-  // Demo fallback when RPC is offline and real data is empty
-  const useDemoTreasury = solBalance < 0 && !online;
-  const displayBal = useDemoTreasury ? DEMO_STATS.totalPaid : (solBalance >= 0 ? solBalance : 0);
-  const displayGc = gcBalance >= 0 ? gcBalance : (useDemoTreasury ? 8_500_000 : 0);
+  // Demo fallback until live treasury data exists
+  const useDemoTreasury = !treasury || !treasury.live || treasury.totalUsd <= 0;
+  const displayBalUsd = useDemoTreasury ? 2_180_000 : treasury.totalUsd;
+  const displayGc = useDemoTreasury ? 8_500_000 : treasury.gascoinBalance;
+  const solPrice = treasury && treasury.solBalance > 0 ? treasury.solUsd / treasury.solBalance : 0;
   const displayRefunds = refundsToday > 0 ? refundsToday : DEMO_STATS.refundsToday;
-  const displayPaid = totalPaid > 0 ? totalPaid : DEMO_STATS.totalPaid;
+  const displayPaidUsd = totalPaid > 0 && solPrice > 0
+    ? totalPaid * solPrice
+    : (DEMO_STATS.totalPaid * 170);
   const displayQueue = queueDepth > 0 ? queueDepth : DEMO_STATS.queueDepth;
   const isDemo = useDemoTreasury || (refundsToday === 0 && totalPaid === 0);
 
-  const animBal = useAnimatedValue(displayBal);
+  const animBalUsd = useAnimatedValue(displayBalUsd);
   const animGc = useAnimatedValue(displayGc);
   const animRefunds = useAnimatedValue(displayRefunds);
-  const animPaid = useAnimatedValue(displayPaid);
+  const animPaidUsd = useAnimatedValue(displayPaidUsd);
   const animQueue = useAnimatedValue(displayQueue);
 
   return (
@@ -116,30 +139,31 @@ export function LiveStatsBar({ refundsToday, totalPaid, queueDepth }: {
       <div className="gc-stats-grid">
         <div className="gc-stat">
           <div className="gc-stat-label">
+            <span className="gc-stat-label-icons"><UsdcIcon /><PanelCheckIcon /></span>
             Treasury Balance
             <span className="gc-pulse" />
           </div>
           <div className="gc-stat-value">
-            {animBal.toFixed(2)}
+            {formatUsd(animBalUsd)}
           </div>
           <div className="gc-stat-sub">
             {isDemo
-              ? `SOL · Simulated${displayGc > 0 ? ` · ${Math.round(animGc).toLocaleString()} GASCOIN` : ''}`
-              : `SOL · Live${gcBalance >= 0 ? ` · ${Math.round(animGc).toLocaleString()} GASCOIN` : ''}`}
+              ? `USDC View · Simulated${displayGc > 0 ? ` · ${Math.round(animGc).toLocaleString()} GASCOIN` : ''}`
+              : `USDC View · Live${displayGc > 0 ? ` · ${Math.round(animGc).toLocaleString()} GASCOIN` : ''}`}
           </div>
         </div>
         <div className="gc-stat">
-          <div className="gc-stat-label">Refunds Today</div>
+          <div className="gc-stat-label"><span className="gc-stat-label-icons"><PanelCheckIcon /></span>Refunds Today</div>
           <div className="gc-stat-value">{Math.round(animRefunds)}</div>
           <div className="gc-stat-sub">Last 24h</div>
         </div>
         <div className="gc-stat">
-          <div className="gc-stat-label">Total Paid Out</div>
-          <div className="gc-stat-value">{animPaid.toFixed(2)}</div>
-          <div className="gc-stat-sub">SOL All-Time</div>
+          <div className="gc-stat-label"><span className="gc-stat-label-icons"><UsdcIcon /><PanelCheckIcon /></span>Total Paid Out</div>
+          <div className="gc-stat-value">{formatUsd(animPaidUsd)}</div>
+          <div className="gc-stat-sub">USD (USDC) All-Time</div>
         </div>
         <div className="gc-stat">
-          <div className="gc-stat-label">Queue Depth</div>
+          <div className="gc-stat-label"><span className="gc-stat-label-icons"><GascoinIcon /><PanelCheckIcon /></span>Queue Depth</div>
           <div className="gc-stat-value">{Math.round(animQueue)}</div>
           <div className="gc-stat-sub">Pending Verification</div>
         </div>
