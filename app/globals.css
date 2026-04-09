@@ -429,6 +429,148 @@ code, .mono {
 
 .gc-btn-ghost:hover::after { transform: translateX(4px); }
 
+/* ─── HOW IT WORKS ─── */
+.hiw-header {
+  padding: 64px 0 32px;
+}
+
+.hiw-header h1 {
+  font-family: var(--font-display);
+  font-size: var(--text-h2);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--fg);
+  margin-bottom: 12px;
+}
+
+.hiw-subtitle {
+  font-family: var(--font-body);
+  font-size: var(--text-body);
+  color: var(--muted);
+  max-width: 480px;
+  line-height: 1.6;
+}
+
+.hiw-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding-bottom: 64px;
+}
+
+.hiw-step {
+  display: flex;
+  gap: 32px;
+  padding: 32px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.hiw-step:first-child {
+  border-top: 1px solid var(--line);
+}
+
+.hiw-step-number {
+  font-family: var(--font-display);
+  font-size: 72px;
+  line-height: 1;
+  color: rgba(255, 255, 255, 0.08);
+  min-width: 80px;
+  text-align: right;
+  padding-top: 4px;
+  user-select: none;
+}
+
+.hiw-step-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.hiw-step-content h2 {
+  font-family: var(--font-display);
+  font-size: var(--text-h3);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--fg);
+  margin-bottom: 12px;
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.hiw-step-time {
+  font-family: var(--font-mono);
+  font-size: var(--text-small);
+  color: var(--muted);
+  letter-spacing: 0.05em;
+  text-transform: none;
+}
+
+.hiw-step-badge {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--muted);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  border: 1px solid var(--line);
+  padding: 2px 8px;
+}
+
+.hiw-step-body {
+  font-family: var(--font-body);
+  font-size: var(--text-body);
+  color: var(--muted);
+  line-height: 1.7;
+  max-width: 600px;
+}
+
+.hiw-step-content ul {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.hiw-step-content li {
+  font-family: var(--font-body);
+  font-size: var(--text-body);
+  color: var(--muted);
+  line-height: 1.6;
+  padding-left: 20px;
+  position: relative;
+  max-width: 600px;
+}
+
+.hiw-step-content li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 10px;
+  width: 6px;
+  height: 6px;
+  border: 1px solid var(--muted-decorative);
+  border-radius: 50%;
+}
+
+.hiw-cta {
+  display: flex;
+  gap: 16px;
+  padding: 0 0 80px;
+}
+
+@media (max-width: 600px) {
+  .hiw-step {
+    flex-direction: column;
+    gap: 8px;
+  }
+  .hiw-step-number {
+    font-size: 48px;
+    min-width: auto;
+    text-align: left;
+  }
+}
+
 /* ─── STATS STRIP ─── */
 .gc-stats {
   border-bottom: 1px solid var(--line);

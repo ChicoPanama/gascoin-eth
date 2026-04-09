@@ -7,6 +7,7 @@ import { AuthNavButton } from './AuthNavButton';
 import { MobileMenu } from './ui/MobileMenu';
 
 const NAV_LINKS = [
+  { href: '/how-it-works', label: 'How It Works', icon: '?' },
   { href: '/submit', label: 'Submit', icon: '◇' },
   { href: '/dashboard', label: 'Treasury', icon: '▣' },
   { href: '/community', label: 'Community', icon: '◎' },

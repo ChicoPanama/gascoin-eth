@@ -8,6 +8,7 @@ import { usePathname } from 'next/navigation';
 import { usePrivy } from '@privy-io/react-auth';
 
 const NAV_LINKS = [
+  { href: '/how-it-works', label: 'How It Works' },
   { href: '/submit', label: 'Submit' },
   { href: '/dashboard', label: 'Treasury' },
   { href: '/community', label: 'Community' },
