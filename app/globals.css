@@ -203,8 +203,14 @@ code, .mono {
   margin-bottom: 36px;
 }
 
-.gc-hero h1 .line { display: block; }
-.gc-hero h1 .line-ghost { display: block; color: rgba(255,255,255,0.15); }
+.gc-hero h1 .line { display: block; color: #fff; }
+
+.gc-hero-glow {
+  text-shadow:
+    0 0 30px rgba(255, 255, 255, 0.4),
+    0 0 60px rgba(255, 255, 255, 0.2),
+    0 0 100px rgba(255, 255, 255, 0.1);
+}
 
 .gc-hero-body {
   font-family: var(--font-body);
@@ -4266,7 +4272,7 @@ input:focus, textarea:focus, select:focus {
     0 0 40px rgba(20, 241, 149, 0.3),
     0 0 80px rgba(20, 241, 149, 0.15),
     0 0 120px rgba(153, 69, 255, 0.1);
-  animation: titleGlow 4s ease-in-out infinite alternate;
+  animation: titleGlow 3s ease-in-out infinite alternate, titleFloat 5s ease-in-out infinite;
   margin-bottom: var(--spacing-48);
 }
 
@@ -4285,12 +4291,31 @@ input:focus, textarea:focus, select:focus {
   }
 }
 
+@keyframes titleFloat {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-6px); }
+}
+
 /* Orbit container */
 .cinematic-orbit {
   position: absolute;
   z-index: 1;
-  width: clamp(280px, 50vw, 600px);
-  height: clamp(280px, 50vw, 600px);
+  width: clamp(280px, 52vw, 640px);
+  height: clamp(280px, 52vw, 640px);
+  pointer-events: none;
+}
+
+/* Rotating ring so motion is obvious */
+.cinematic::after {
+  content: '';
+  position: absolute;
+  width: clamp(260px, 48vw, 580px);
+  height: clamp(260px, 48vw, 580px);
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: inset 0 0 40px rgba(20, 241, 149, 0.08), 0 0 40px rgba(153, 69, 255, 0.08);
+  animation: ringSpin 10s linear infinite;
+  z-index: 1;
   pointer-events: none;
 }
 
@@ -4300,23 +4325,29 @@ input:focus, textarea:focus, select:focus {
   top: 50%;
   left: 50%;
   font-family: var(--font-mono);
-  font-size: clamp(10px, 1.2vw, 14px);
-  font-weight: 600;
-  letter-spacing: 0.3em;
+  font-size: clamp(11px, 1.4vw, 15px);
+  font-weight: 700;
+  letter-spacing: 0.28em;
   text-transform: uppercase;
-  color: var(--muted);
+  color: rgba(255,255,255,0.72);
   transform-origin: 0 0;
-  animation: orbit 18s linear infinite;
+  animation: orbit 8s linear infinite;
   white-space: nowrap;
+  text-shadow: 0 0 12px rgba(20, 241, 149, 0.25);
 }
 
 @keyframes orbit {
   from {
-    transform: rotate(0deg) translateX(clamp(140px, 25vw, 300px)) rotate(0deg);
+    transform: rotate(0deg) translateX(clamp(150px, 26vw, 320px)) rotate(0deg);
   }
   to {
-    transform: rotate(360deg) translateX(clamp(140px, 25vw, 300px)) rotate(-360deg);
+    transform: rotate(360deg) translateX(clamp(150px, 26vw, 320px)) rotate(-360deg);
   }
+}
+
+@keyframes ringSpin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 
 /* CTA Button */
