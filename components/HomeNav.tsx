@@ -6,6 +6,17 @@ import { WalletButton } from './ui/WalletButton';
 import { AuthNavButton } from './AuthNavButton';
 import { MobileMenu } from './ui/MobileMenu';
 
+const NAV_LINKS = [
+  { href: '/submit', label: 'Submit', icon: '◇' },
+  { href: '/dashboard', label: 'Treasury', icon: '▣' },
+  { href: '/community', label: 'Community', icon: '◎' },
+  { href: '/leaderboard', label: 'Leaderboard', icon: '▲' },
+  { href: '/referral', label: 'Refer', icon: '↗' },
+  { href: '/perks', label: 'Perks', icon: '✦' },
+  { href: '/gates', label: 'Gates', icon: '◈' },
+  { href: '/wallet', label: 'Tracker', icon: '⌁' },
+];
+
 export function HomeNav() {
   const { authenticated } = usePrivy();
 
@@ -16,16 +27,28 @@ export function HomeNav() {
         <span className="gc-nav-brand">GASCOIN</span>
       </Link>
       <div className="gc-nav-links">
-        <Link href="/submit">Submit</Link>
-        <Link href="/dashboard">Treasury</Link>
-        <Link href="/community">Community</Link>
-        <Link href="/leaderboard">Leaderboard</Link>
-        <Link href="/referral">Refer</Link>
-        <Link href="/perks">Perks</Link>
-        <Link href="/gates">Gates</Link>
-        <Link href="/wallet">Tracker</Link>
-        {authenticated && <Link href="/me">Me</Link>}
-        <Link href="/docs">Docs</Link>
+        {NAV_LINKS.map(({ href, label, icon }) => (
+          <Link key={href} href={href}>
+            <span className="gc-nav-link-inner">
+              <span className="gc-nav-link-icon" aria-hidden>{icon}</span>
+              <span>{label}</span>
+            </span>
+          </Link>
+        ))}
+        {authenticated && (
+          <Link href="/me">
+            <span className="gc-nav-link-inner">
+              <span className="gc-nav-link-icon" aria-hidden>◉</span>
+              <span>Me</span>
+            </span>
+          </Link>
+        )}
+        <Link href="/docs">
+          <span className="gc-nav-link-inner">
+            <span className="gc-nav-link-icon" aria-hidden>⧉</span>
+            <span>Docs</span>
+          </span>
+        </Link>
       </div>
       <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
         <WalletButton />

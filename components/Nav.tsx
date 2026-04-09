@@ -8,14 +8,14 @@ import { WalletButton } from './ui/WalletButton';
 import { MobileMenu } from './ui/MobileMenu';
 
 const NAV_LINKS = [
-  { href: '/submit', label: 'Submit' },
-  { href: '/dashboard', label: 'Treasury' },
-  { href: '/community', label: 'Community' },
-  { href: '/leaderboard', label: 'Leaderboard' },
-  { href: '/referral', label: 'Refer' },
-  { href: '/perks', label: 'Perks' },
-  { href: '/gates', label: 'Gates' },
-  { href: '/wallet', label: 'Tracker' },
+  { href: '/submit', label: 'Submit', icon: '◇' },
+  { href: '/dashboard', label: 'Treasury', icon: '▣' },
+  { href: '/community', label: 'Community', icon: '◎' },
+  { href: '/leaderboard', label: 'Leaderboard', icon: '▲' },
+  { href: '/referral', label: 'Refer', icon: '↗' },
+  { href: '/perks', label: 'Perks', icon: '✦' },
+  { href: '/gates', label: 'Gates', icon: '◈' },
+  { href: '/wallet', label: 'Tracker', icon: '⌁' },
 ];
 
 export function Nav() {
@@ -27,13 +27,16 @@ export function Nav() {
       <img src="/logo/gascoin-g.jpg" alt="" className="nav-logo-icon" aria-hidden />
       <span className="nav-brand">GASCOIN</span>
     </Link>
-    {NAV_LINKS.map(({ href, label }) => ( 
+    {NAV_LINKS.map(({ href, label, icon }) => (
       <Link
         key={href}
         href={href}
         className={`nav-link-desktop${pathname === href ? ' nav-link-active' : ''}`}
       >
-        {label}
+        <span className="nav-link-inner">
+          <span className="nav-link-icon" aria-hidden>{icon}</span>
+          <span>{label}</span>
+        </span>
       </Link>
     ))}
     {authenticated && (
@@ -41,13 +44,21 @@ export function Nav() {
         href="/me"
         className={`nav-link-desktop${pathname === '/me' ? ' nav-link-active' : ''}`}
       >
-        Me
+        <span className="nav-link-inner">
+          <span className="nav-link-icon" aria-hidden>◉</span>
+          <span>Me</span>
+        </span>
       </Link>
     )}
     <span style={{ marginLeft: 'auto', display: 'flex', gap: 8, alignItems: 'center' }}>
       <WalletButton />
       <AuthNavButton />
-      <Link href="/docs" className={`btn nav-link-desktop${pathname.startsWith('/docs') ? ' nav-link-active' : ''}`} style={{ fontSize: 10, padding: '6px 14px', letterSpacing: '0.1em' }}>DOCS</Link>
+      <Link href="/docs" className={`btn nav-link-desktop${pathname.startsWith('/docs') ? ' nav-link-active' : ''}`} style={{ fontSize: 10, padding: '6px 14px', letterSpacing: '0.1em' }}>
+        <span className="nav-link-inner">
+          <span className="nav-link-icon" aria-hidden>⧉</span>
+          <span>DOCS</span>
+        </span>
+      </Link>
       <MobileMenu />
     </span>
   </nav>

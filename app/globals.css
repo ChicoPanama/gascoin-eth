@@ -102,6 +102,19 @@ code, .mono {
   transition: color 0.3s;
 }
 
+.gc-nav-link-inner {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.gc-nav-link-icon {
+  font-size: 11px;
+  color: rgba(255,255,255,0.66);
+  letter-spacing: 0;
+  transform: translateY(-0.5px);
+}
+
 .gc-nav-links a::after {
   content: '';
   position: absolute;
@@ -839,6 +852,19 @@ input:focus, textarea:focus, select:focus {
   letter-spacing: 0.1em;
   padding: 6px 12px;
   transition: color 0.15s;
+}
+
+.nav-link-inner {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.nav-link-icon {
+  font-size: 11px;
+  color: rgba(255,255,255,0.65);
+  letter-spacing: 0;
+  transform: translateY(-0.5px);
 }
 .nav a:hover { color: var(--fg); }
 .nav a.nav-link-active { color: #fff; border-bottom: 2px solid var(--accent); }
