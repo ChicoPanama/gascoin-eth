@@ -7,8 +7,8 @@
   /* ── Colors (X Black & White) ── */
   --bg: #000000;
   --fg: #E7E9EA;
-  --muted: #71767B;
-  --muted-deep: #536471;
+  --muted: #A0A8B1;
+  --muted-deep: #8E98A3;
   --muted-decorative: #2F3336;
   --line: #2F3336;
   --card: #16181C;
@@ -52,9 +52,9 @@
   --text-hero: clamp(48px, 6vw + 16px, 80px);
   --text-h2: clamp(36px, 4vw + 12px, 64px);
   --text-h3: clamp(24px, 2vw + 12px, 40px);
-  --text-body: clamp(14px, 0.5vw + 12px, 16px);
-  --text-small: clamp(12px, 0.3vw + 10px, 14px);
-  --text-label: clamp(9px, 0.2vw + 8px, 11px);
+  --text-body: clamp(16px, 0.6vw + 13px, 18px);
+  --text-small: clamp(13px, 0.35vw + 11px, 15px);
+  --text-label: clamp(10px, 0.25vw + 9px, 12px);
   --text-stat: clamp(40px, 4vw + 16px, 56px);
 
   /* ── Transitions ── */
