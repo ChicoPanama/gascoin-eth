@@ -80,7 +80,7 @@ const STEPS: Step[] = [
     bullets: [
       'You need to hold at least 1 GASCOIN token in your Phantom wallet before you can submit.',
       'Swap some SOL for GASCOIN on a Solana DEX — search for the GASCOIN token.',
-      'Holding more GASCOIN unlocks higher tiers with bigger refunds — up to 1.0 SOL per fill-up.',
+      'Holding more GASCOIN unlocks higher tiers with bigger refund caps and faster queue priority.',
     ],
     links: [
       { name: 'Jupiter', url: 'https://jup.ag', icon: brand('jupiter') },

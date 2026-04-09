@@ -120,8 +120,8 @@ export default function PerksPage() {
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
                 <div>
-                  <div style={{ fontFamily: 'IBM Plex Mono', fontSize: 10, color: 'rgba(255,255,255,0.3)' }}>Max Refund</div>
-                  <div style={{ fontFamily: 'IBM Plex Sans', fontWeight: 500, fontSize: 13 }}>{t.max_sol_refund} SOL</div>
+                  <div style={{ fontFamily: 'IBM Plex Mono', fontSize: 10, color: 'rgba(255,255,255,0.3)' }}>Refund Cap</div>
+                  <div style={{ fontFamily: 'IBM Plex Sans', fontWeight: 500, fontSize: 13 }}>Tier-based</div>
                 </div>
                 <div>
                   <div style={{ fontFamily: 'IBM Plex Mono', fontSize: 10, color: 'rgba(255,255,255,0.3)' }}>Queue</div>

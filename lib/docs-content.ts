@@ -60,15 +60,14 @@ export const DOC_CATEGORIES: DocCategory[] = [
         categorySlug: "overview",
         category: "Overview",
         description: "",
-        content: `<h3>Understanding SOL value</h3>
-<p>All refund amounts on GASCOIN are denominated in SOL, Solana's native cryptocurrency. SOL's price fluctuates with the market. As a rough guide:</p>
-<table><thead><tr><th>Tier</th><th>GASCOIN Required</th><th>Max SOL Refund</th><th>Approx. USD at $180/SOL</th></tr></thead>
-<tbody><tr><td>Standard</td><td>0</td><td>0.10 SOL</td><td>~$18 USD</td></tr>
-<tr><td>Commuter</td><td>100,000</td><td>0.25 SOL</td><td>~$45 USD</td></tr>
-<tr><td>Road Warrior</td><td>500,000</td><td>0.50 SOL</td><td>~$90 USD</td></tr>
-<tr><td>Fleet</td><td>2,000,000</td><td>1.0 SOL</td><td>~$180 USD</td></tr></tbody></table>
-<p>Check the current SOL price on any exchange (Coinbase, Kraken, Binance) or on the GASCOIN Treasury page before submitting. The USD values above are approximate and change daily. The SOL amounts you receive are fixed by tier.</p>\n<p>The amount of SOL you can receive per submission depends on your GASCOIN token tier. The four tiers are:</p>
-<p>SOL values above are the maximum per submission. The admin sets the actual refund amount when approving your submission, up to the maximum for your tier. The Standard tier requires just 1 GASCOIN token. Higher tiers unlock more submissions per week: Road Warrior gets 2/week, Fleet gets 4/week.</p>`,
+        content: `<h3>Understanding refund value</h3>
+<p>Refunds are paid in SOL, and SOL market price moves daily. GASCOIN therefore does not publish fixed USD equivalents in docs.</p>
+<table><thead><tr><th>Tier</th><th>GASCOIN Required</th><th>Refund Policy</th><th>Submission Frequency</th></tr></thead>
+<tbody><tr><td>Standard</td><td>1</td><td>Tier-based cap set at review time</td><td>1 / week</td></tr>
+<tr><td>Commuter</td><td>100,000</td><td>Higher cap than Standard</td><td>1 / week</td></tr>
+<tr><td>Road Warrior</td><td>5,000,000</td><td>Higher cap than Commuter</td><td>2 / week</td></tr>
+<tr><td>Fleet</td><td>10,000,000</td><td>Highest cap</td><td>4 / week</td></tr></tbody></table>
+<p>The admin sets the final refund amount at approval time within your tier limits. Your tier is snapshotted when you submit.</p>`,
         order: 3,
       },
       {
@@ -750,7 +749,7 @@ export const DOC_CATEGORIES: DocCategory[] = [
 <h3><strong>How tier is determined</strong></h3>
 <p>The system checks your connected wallet's GASCOIN token balance live on the Solana blockchain when you connect. The balance is also cached and refreshed every 5 minutes. If you buy more GASCOIN and want to see your updated tier immediately, click the Refresh Balance button on the Perks page.</p>
 <h3><strong>When tier is applied</strong></h3>
-<p>Your tier is snapshotted at the time of submission. If you are Commuter tier when you submit, the Commuter refund cap (0.25 SOL) applies to that submission — even if you later sell your GASCOIN before the refund is dispatched. Conversely, if you upgrade your tier after submitting but before approval, the original tier at submission time is what applies.</p>
+<p>Your tier is snapshotted at the time of submission. The refund cap associated with that tier applies to that submission — even if your holdings later change before dispatch. If you upgrade after submitting, the original tier at submission time still applies.</p>
 <h3><strong>Queue priority</strong></h3>
 <p>Higher tier submissions are processed before lower tier submissions. If multiple submissions are pending in the admin queue, a Fleet tier submission will appear above a Standard tier submission. This does not affect the automated gate processing — it affects the order in which the admin reviews and approves refund amounts.</p>
 <h3><strong>Where tier badges appear</strong></h3>
@@ -840,7 +839,7 @@ export const DOC_CATEGORIES: DocCategory[] = [
         content: `<p>The Submissions page is the primary daily operations page. It shows all submissions across all statuses with filtering, searching, and action controls.</p>
 <h3><strong>Submission actions</strong></h3>
 <h3><strong>SOL amount entry</strong></h3>
-<p>When approving a submission, the admin enters the exact SOL amount to refund. The maximum is capped at the submitter's tier cap (Standard: 0.10, Commuter: 0.25, Road Warrior: 0.50, Fleet: 1.0 SOL). The system prevents entering a value above the tier cap.</p>`,
+<p>When approving a submission, the admin enters the exact SOL amount to refund. The maximum is capped by the submitter's tier policy, and the system prevents entering a value above that cap.</p>`,
         order: 34,
       },
       {
@@ -1088,7 +1087,7 @@ export const DOC_CATEGORIES: DocCategory[] = [
         categorySlug: "help",
         category: "Help",
         description: "",
-        content: `<p>The exact refund amount is determined by an admin when approving your submission, up to the maximum for your tier: Standard = 0.10 SOL, Commuter = 0.25 SOL, Road Warrior = 0.50 SOL, Fleet = 1.0 SOL. Convert these to USD using the current SOL price on any exchange. At $180 SOL, the Standard tier maximum is ~$18 per submission.</p>`,
+        content: `<p>The exact refund amount is determined by an admin at approval time within your current tier policy. Because SOL price changes daily, GASCOIN does not publish fixed USD-equivalent refund numbers in docs.</p>`,
         order: 57,
       },
       {
@@ -1222,7 +1221,7 @@ export const DOC_CATEGORIES: DocCategory[] = [
         category: "Help",
         description: "How the GASCOIN points system works — earning, leaderboard, and rewards.",
         content: `<h3>SOL vs Points — The Core Distinction</h3>
-<p><strong>SOL payouts are for gas receipts only.</strong> When you submit a verified gas receipt and it passes all 10 gates, you receive SOL directly to your wallet. The amount depends on your GASCOIN token tier (Standard: 0.10 SOL, Commuter: 0.25 SOL, Road Warrior: 0.50 SOL, Fleet: 1.0 SOL).</p>
+<p><strong>SOL payouts are for gas receipts only.</strong> When you submit a verified gas receipt and it passes all 10 gates, you receive SOL directly to your wallet. The amount depends on your GASCOIN token tier policy at submission time.</p>
 <p><strong>Everything else earns points.</strong> Referrals, tweet engagement, submission streaks, and GASCOIN holdings all earn points. Points drive your leaderboard rank, status badges, and platform recognition. Points do not convert to SOL.</p>
 
 <h3>Why Points Matter</h3>
