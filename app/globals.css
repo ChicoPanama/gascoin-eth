@@ -56,7 +56,7 @@ code, .mono {
   align-items: center;
   height: 60px;
   padding: 0 48px;
-  border-bottom: 1px solid rgba(153, 69, 255, 0.15);
+  border-bottom: 1px solid var(--line);
   background: rgba(8, 8, 16, 0.85);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
@@ -781,7 +781,7 @@ input:focus, textarea:focus, select:focus {
   margin-bottom: 20px;
 }
 .gc-tech-title span { display: block; }
-.gc-tech-title-ghost { color: rgba(153, 69, 255, 0.18); }
+.gc-tech-title-ghost { color: rgba(255, 255, 255, 0.1); }
 .gc-tech-sub {
   font-family: var(--font-body);
   font-weight: 300;
@@ -854,7 +854,7 @@ input:focus, textarea:focus, select:focus {
   font-family: var(--font-mono);
   font-size: 10px;
   letter-spacing: 0.15em;
-  color: var(--accent-purple);
+  color: var(--muted-deep);
   margin-bottom: 10px;
 }
 .gc-tech-layer-desc {
