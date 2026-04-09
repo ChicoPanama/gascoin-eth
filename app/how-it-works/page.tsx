@@ -170,9 +170,9 @@ const STEPS: Step[] = [
   },
 ];
 
-function StepLinks({ links }: { links: StepLink[] }) {
+function StepIcons({ links }: { links: StepLink[] }) {
   return (
-    <div className="hiw-links">
+    <div className="hiw-icons">
       {links.map((link) => {
         const isExternal = link.url.startsWith('http');
         const Tag = isExternal ? 'a' : Link;
@@ -180,10 +180,11 @@ function StepLinks({ links }: { links: StepLink[] }) {
           ? { href: link.url, target: '_blank', rel: 'noopener noreferrer' }
           : { href: link.url };
         return (
-          <Tag key={link.name} className="hiw-link" {...(props as any)}>
-            <img src={link.icon} alt="" width={20} height={20} className="hiw-link-icon" />
-            <span>{link.name}</span>
-            {isExternal && <span className="hiw-link-arrow" aria-hidden>↗</span>}
+          <Tag key={link.name} className="hiw-icon-cell" {...(props as any)} title={link.name}>
+            <span className="hiw-icon-circle">
+              <img src={link.icon} alt={link.name} className="hiw-icon-img" />
+            </span>
+            <span className="hiw-icon-label">{link.name}</span>
           </Tag>
         );
       })}
@@ -230,8 +231,8 @@ export default function HowItWorksPage() {
                   ))}
                 </ul>
               )}
-              {step.links && step.links.length > 0 && <StepLinks links={step.links} />}
             </div>
+            {step.links && step.links.length > 0 && <StepIcons links={step.links} />}
           </div>
         ))}
       </div>

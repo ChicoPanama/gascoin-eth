@@ -1,4 +1,20 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none">
-  <path d="M16 4c-6.6 0-12 5.4-12 12s5.4 12 12 12 12-5.4 12-12S22.6 4 16 4z" fill="#5741D9"/>
-  <path d="M16 9c-1.2 0-2.2.6-2.8 1.5L11 14l-2.5 1.5c-.3.2-.5.5-.5.9v2.2c0 .4.2.7.5.9L11 21l2.2 2c.6.5 1.4.5 2 0L20.5 18c.3-.2.5-.6.5-1v-2c0-.4-.2-.8-.5-1L16 9z" fill="#fff"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 36 36" width="32" height="32" fill="none">
+  <g clip-path="url(#clip0)">
+    <g clip-path="url(#clip1)">
+      <rect width="36" height="36" fill="#7132F5"/>
+      <rect width="36" height="36" fill="url(#p1)" fill-opacity="0.64"/>
+      <rect width="36" height="36" fill="url(#p2)" fill-opacity="0.4"/>
+      <path fill-rule="evenodd" clip-rule="evenodd" d="M7.945 19.443v4.353c0 .802.641 1.451 1.43 1.451.789 0 1.433-.649 1.433-1.451v-4.353c0-.803.638-1.453 1.431-1.453.79 0 1.43.65 1.43 1.453v4.353c0 .802.642 1.451 1.431 1.451.792 0 1.433-.649 1.433-1.451v-4.353c0-.803.64-1.453 1.43-1.453.793 0 1.434.65 1.434 1.453v4.353c0 .802.641 1.451 1.429 1.451.79 0 1.43-.649 1.43-1.451v-4.353c0-.803.641-1.453 1.434-1.453.79 0 1.43.65 1.43 1.453v4.353c0 .802.642 1.451 1.432 1.451.79 0 1.43-.649 1.43-1.451v-4.353c0-5.612-4.487-10.162-10.02-10.162-5.534 0-10.019 4.55-10.019 10.162Z" fill="white"/>
+    </g>
+  </g>
+  <defs>
+    <linearGradient id="p1" x1="15.283" y1="29.557" x2="0" y2="0" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F4AAFF" stop-opacity="0"/><stop offset="1" stop-color="#F000FB" stop-opacity="0.4"/>
+    </linearGradient>
+    <linearGradient id="p2" x1="13.135" y1="20.382" x2="0" y2="-1.724" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F7D2FE" stop-opacity="0"/><stop offset="1" stop-color="#F7D2FE"/>
+    </linearGradient>
+    <clipPath id="clip0"><rect width="36" height="36" fill="white"/></clipPath>
+    <clipPath id="clip1"><rect width="36" height="36" fill="white"/></clipPath>
+  </defs>
 </svg>
