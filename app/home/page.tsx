@@ -57,11 +57,11 @@ export default async function Home() {
                 <div className="gc-section-label">— Solana · On-Chain Gas Refunds</div>
               </HeroItem>
               <HeroItem>
-                <h1 className="gc-hero-glow">
-                  <span className="line">Get GAS.</span>
+                <h1>
+                  <span className="line">Get <span className="gc-hero-glow">GAS</span>.</span>
                   <span className="line">Post.</span>
                   <span className="line">Submit.</span>
-                  <span className="line">Get PAID BACK.</span>
+                  <span className="line">Get <span className="gc-hero-glow">PAID BACK</span>.</span>
                 </h1>
               </HeroItem>
               <HeroItem>
