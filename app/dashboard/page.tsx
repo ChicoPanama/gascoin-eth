@@ -43,14 +43,24 @@ export default async function Dashboard() {
     <div className="container">
       <Nav />
 
-      <div className="gc-dash-header">
-        <h1 className="gc-dash-title">
-          <span className="gc-dash-title-icon-wrap" aria-hidden>
-            <img src="/icons/treasury-chest.jpg" alt="" className="gc-dash-title-icon" />
+      <header className="lb-header">
+        <div className="lb-header__meta">
+          <span className="lb-tag">— Live Treasury Transparency · Real-Time Payout Health</span>
+        </div>
+        <h1 className="lb-title lb-title--iconed">
+          <span className="lb-title-icon-wrap" aria-hidden>
+            <img src="/icons/treasury-chest.jpg" alt="" className="lb-title-icon" />
           </span>
           TREASURY
         </h1>
-      </div>
+        <p className="gt-header-body">
+          Track treasury balances, payout throughput, queue pressure, and verification pipeline status in one live control surface.
+        </p>
+        <div className="lb-header__live">
+          <span className="lb-pulse" />
+          <span className="lb-live-label">LIVE TREASURY FEED</span>
+        </div>
+      </header>
 
       {/* Zone 1 — Stats */}
       <LiveStatsBar
