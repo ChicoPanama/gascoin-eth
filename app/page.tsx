@@ -9,9 +9,24 @@ import { HeroStagger, HeroItem } from '../components/ui/HeroStagger';
 import { ScrollReveal } from '../components/ui/ScrollReveal';
 import { DEMO_TREASURY_DISPLAY, fallback } from '../lib/demo-data';
 
+function UsdcIcon() {
+  return (
+    <span className="gc-mini-icon" aria-hidden>
+      <img src="https://coin-images.coingecko.com/coins/images/6319/large/usdc.png?1696506694" alt="" loading="lazy" decoding="async" />
+    </span>
+  );
+}
+
+function GascoinTokenIcon() {
+  return (
+    <span className="gc-mini-icon gc-mini-icon--gascoin" aria-hidden>
+      <img src="/logo/gascoin-g.jpg" alt="" loading="lazy" decoding="async" />
+    </span>
+  );
+}
+
 export default async function Home() {
   let treasuryUsd = '—';
-  let treasurySub = 'SOL';
   let marketCap = '—';
   let volume = '—';
   let gates = '10';
@@ -22,7 +37,6 @@ export default async function Home() {
     if (t.solBalance > 0 || t.gascoinBalance > 0) {
       const total = t.solUsd + t.gascoinUsd;
       treasuryUsd = total >= 1_000_000 ? `$${(total / 1_000_000).toFixed(1)}M` : `$${Math.round(total).toLocaleString()}`;
-      treasurySub = `${t.solBalance.toFixed(2)} SOL`;
     }
   } catch {}
 
@@ -37,7 +51,6 @@ export default async function Home() {
 
   // Demo data fallback — yields to real data when treasury/market are live
   treasuryUsd = fallback(treasuryUsd, DEMO_TREASURY_DISPLAY.treasuryUsd);
-  treasurySub = fallback(treasurySub === 'SOL' ? '—' : treasurySub, DEMO_TREASURY_DISPLAY.treasurySub);
   marketCap = fallback(marketCap, DEMO_TREASURY_DISPLAY.marketCap);
   volume = fallback(volume, DEMO_TREASURY_DISPLAY.volume);
   const isDemo = treasuryUsd === DEMO_TREASURY_DISPLAY.treasuryUsd;
@@ -92,9 +105,14 @@ export default async function Home() {
         <section className="gc-stats glass-card">
           <div className="gc-stats-grid">
             <div className="gc-stat">
-              <div className="gc-stat-label">Treasury Balance</div>
+              <div className="gc-stat-label">
+                Treasury Balance
+                <span className="gc-pulse" />
+              </div>
               <div className="gc-stat-value">{treasuryUsd}</div>
-              <div className="gc-stat-sub">{treasurySub}</div>
+              <div className="gc-stat-sub">
+                <span className="gc-inline-token"><UsdcIcon />USDC</span> + <span className="gc-inline-token"><GascoinTokenIcon />GASCOIN</span> · {isDemo ? 'Simulated' : 'Live'}
+              </div>
             </div>
             <div className="gc-stat">
               <div className="gc-stat-label">Market Cap</div>
