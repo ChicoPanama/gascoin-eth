@@ -69,7 +69,7 @@ export default function GatesPage() {
           <span className="lb-title-icon-wrap" aria-hidden>
             <img src="/icons/gates-bridge.jpg" alt="" className="lb-title-icon" />
           </span>
-          Verification Gates
+          GATES
         </h1>
         <p className="gt-header-body">
           Every GASCOIN submission passes through 10 sequential verification
