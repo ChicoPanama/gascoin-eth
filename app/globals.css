@@ -180,8 +180,66 @@ code, .mono {
 
 .gc-hero-content {
   position: relative;
-  z-index: 1;
+  z-index: 2;
   max-width: 800px;
+}
+
+.gc-hero-logo-float {
+  position: absolute;
+  right: clamp(18px, 6.5vw, 120px);
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
+  width: clamp(220px, 30vw, 440px);
+  aspect-ratio: 1 / 1;
+  border-radius: 30px;
+  overflow: hidden;
+  background: #fff;
+  border: 1px solid rgba(255,255,255,0.18);
+  box-shadow: 0 0 0 1px rgba(20,241,149,0.25) inset, 0 28px 60px rgba(0,0,0,0.55), 0 0 40px rgba(20,241,149,0.2);
+}
+
+.gc-hero-logo-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  border-radius: 30px;
+  opacity: 1;
+}
+
+.gc-hero-logo-g-layer {
+  position: absolute;
+  inset: 0;
+  animation: gcGFloat 3.6s ease-in-out infinite;
+  will-change: transform, filter;
+}
+
+.gc-hero-logo-image--g {
+  transform: translateZ(0);
+  mix-blend-mode: multiply;
+}
+
+@keyframes gcGFloat {
+  0%, 100% {
+    transform: translateY(0px);
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.16));
+  }
+  50% {
+    transform: translateY(-14px);
+    filter: drop-shadow(0 10px 12px rgba(0, 0, 0, 0.28));
+  }
+}
+
+@keyframes gcLogoFloatMobile {
+  0%, 100% {
+    transform: translateY(0px);
+    filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.14));
+  }
+  50% {
+    transform: translateY(-8px);
+    filter: drop-shadow(0 8px 10px rgba(0, 0, 0, 0.24));
+  }
 }
 
 .gc-section-label {
@@ -3966,6 +4024,16 @@ input:focus, textarea:focus, select:focus {
 
   .gc-hero { padding: 60px 24px; min-height: auto; }
   .gc-hero-ghost { font-size: 300px; right: -20px; top: -40px; }
+  .gc-hero-logo-float {
+    position: relative;
+    top: auto;
+    right: auto;
+    transform: none;
+    width: min(62vw, 280px);
+    margin: 0 auto 24px;
+  }
+  .gc-hero-logo-g-layer { animation: gcLogoFloatMobile 4s ease-in-out infinite; }
+  .gc-hero-logo-image--g { transform: translateZ(0); }
 
   .gc-stats-grid { grid-template-columns: 1fr; }
   .gc-stat { border-right: none; border-bottom: 1px solid var(--line); padding: 28px 24px; }
@@ -4426,5 +4494,12 @@ input:focus, textarea:focus, select:focus {
   }
   .cinematic-glow {
     animation: none;
+  }
+  .gc-hero-logo-float,
+  .gc-hero-logo-g-layer,
+  .gc-hero-logo-image,
+  .gc-hero-logo-image--g {
+    animation: none;
+    transform: none;
   }
 }

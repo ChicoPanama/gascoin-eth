@@ -51,6 +51,11 @@ export default async function Home() {
         {/* HERO */}
         <section className="gc-hero">
           <div className="gc-hero-ghost">G</div>
+          <div className="gc-hero-logo-float" aria-hidden>
+            <div className="gc-hero-logo-g-layer">
+              <img src="/logo/gascoin-g.jpg" alt="" className="gc-hero-logo-image gc-hero-logo-image--g" />
+            </div>
+          </div>
           <div className="gc-hero-content">
             <HeroStagger>
               <HeroItem>
