@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '../../../lib/supabase';
 import { verifyPrivySession } from '../../../lib/integrations/privy';
 import { generateReferralCode } from '../../../lib/referral-code';
+import { getMarketSnapshot } from '../../../lib/integrations/pricing';
 
 export async function GET(req: Request) {
   const auth = req.headers.get('authorization');
@@ -13,6 +14,8 @@ export async function GET(req: Request) {
   const xHandle = session.xHandle;
   let wallet = session.wallet || '';
   const supabase = getSupabaseAdmin();
+  const market = await getMarketSnapshot().catch(() => ({ solPriceUsd: 170 } as any));
+  const solPriceUsd = Number(market?.solPriceUsd || 170);
 
   // If no wallet from Privy session, look it up from wallet_x_links
   if (!wallet) {
@@ -43,7 +46,8 @@ export async function GET(req: Request) {
       claims: [],
       payouts: [],
       referral: { code: '', clicks: 0, uniqueClicks: 0, conversions: 0 },
-      stats: { totalEarned: 0, approved: 0, pending: 0, rejected: 0 },
+      stats: { totalEarned: 0, totalEarnedUsdc: 0, approved: 0, pending: 0, rejected: 0 },
+      pricing: { solPriceUsd },
       networkImpact: emptyNetworkImpact,
     });
   }
@@ -90,6 +94,10 @@ export async function GET(req: Request) {
 
   const claims = claimsRes.data ?? [];
   const payouts = payoutsRes.data ?? [];
+  const payoutsWithUsd = payouts.map((p: any) => ({
+    ...p,
+    amount_usdc: Number(p.amount_sol || 0) * solPriceUsd,
+  }));
 
   const clicks = clicksRes.data ?? [];
   const conversions = conversionsRes.data ?? [];
@@ -163,14 +171,15 @@ export async function GET(req: Request) {
     wallet,
     xHandle,
     claims,
-    payouts,
+    payouts: payoutsWithUsd,
     referral: {
       code: referralCode,
       clicks: totalClicks,
       uniqueClicks,
       conversions: totalConversions,
     },
-    stats: { totalEarned, approved, pending, rejected },
+    stats: { totalEarned, totalEarnedUsdc: totalEarned * solPriceUsd, approved, pending, rejected },
+    pricing: { solPriceUsd },
     networkImpact,
   });
 }

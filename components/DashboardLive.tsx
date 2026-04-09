@@ -203,7 +203,9 @@ export function TreasuryChart() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [hover, setHover] = useState<{ x: number; idx: number } | null>(null);
-  const [chartData, setChartData] = useState<{ day: string; sol: number }[]>(DEMO_CHART_DATA);
+  const [chartData, setChartData] = useState<{ day: string; usdc: number }[]>(
+    DEMO_CHART_DATA.map((d) => ({ day: d.day, usdc: d.sol * 170 }))
+  );
   const [solUsdPrice, setSolUsdPrice] = useState(170);
 
   useEffect(() => {
@@ -215,7 +217,14 @@ export function TreasuryChart() {
         const rows = await res.json();
         if (!active) return;
         if (Array.isArray(rows) && rows.length >= 2) {
-          setChartData(rows.map((r: any) => ({ day: String(r.day || ''), sol: Number(r.sol || 0) })));
+          setChartData(rows.map((r: any) => {
+            const usdc = Number(r.usdc || 0);
+            const sol = Number(r.sol || 0);
+            return {
+              day: String(r.day || ''),
+              usdc: usdc > 0 ? usdc : sol * solUsdPrice,
+            };
+          }));
         }
       } catch {
         // keep demo fallback
@@ -265,8 +274,7 @@ export function TreasuryChart() {
 
     ctx.clearRect(0, 0, w, h);
 
-    const usdData = chartData.map(d => ({ day: d.day, usd: d.sol * solUsdPrice }));
-    const vals = usdData.map(d => d.usd);
+    const vals = chartData.map(d => d.usdc);
     const min = Math.floor(Math.min(...vals) - 2);
     const max = Math.ceil(Math.max(...vals) + 2);
     const range = max - min;
@@ -294,7 +302,7 @@ export function TreasuryChart() {
     // X labels
     ctx.textAlign = 'center';
     ctx.fillStyle = 'rgba(255,255,255,0.3)';
-    usdData.forEach((d, i) => {
+    chartData.forEach((d, i) => {
       ctx.fillText(d.day, toX(i), h - pad.bottom + 24);
     });
 
@@ -303,27 +311,27 @@ export function TreasuryChart() {
     ctx.lineWidth = 1;
     ctx.lineJoin = 'round';
     ctx.beginPath();
-    usdData.forEach((d, i) => {
+    chartData.forEach((d, i) => {
       const x = toX(i);
-      const y = toY(d.usd);
+      const y = toY(d.usdc);
       if (i === 0) ctx.moveTo(x, y);
       else ctx.lineTo(x, y);
     });
     ctx.stroke();
 
     // Dots
-    usdData.forEach((d, i) => {
+    chartData.forEach((d, i) => {
       ctx.beginPath();
-      ctx.arc(toX(i), toY(d.usd), 2.5, 0, Math.PI * 2);
+      ctx.arc(toX(i), toY(d.usdc), 2.5, 0, Math.PI * 2);
       ctx.fillStyle = '#fff';
       ctx.fill();
     });
 
     // Hover crosshair + tooltip
     if (hoverState && hoverState.idx >= 0 && hoverState.idx < chartData.length) {
-      const d = usdData[hoverState.idx];
+      const d = chartData[hoverState.idx];
       const x = toX(hoverState.idx);
-      const y = toY(d.usd);
+      const y = toY(d.usdc);
 
       ctx.strokeStyle = 'rgba(255,255,255,0.2)';
       ctx.lineWidth = 1;
@@ -335,7 +343,7 @@ export function TreasuryChart() {
       ctx.setLineDash([]);
 
       // Tooltip bg
-      const label = `${d.day} · ${formatUsd(d.usd)}`;
+      const label = `${d.day} · ${formatUsd(d.usdc)}`;
       ctx.font = '11px "IBM Plex Mono", monospace';
       const tw = ctx.measureText(label).width + 16;
       const tx = Math.min(x - tw / 2, w - tw - 4);

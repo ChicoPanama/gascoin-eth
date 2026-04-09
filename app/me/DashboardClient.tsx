@@ -30,6 +30,7 @@ interface Claim {
 interface Payout {
   id: string;
   amount_sol: number;
+  amount_usdc?: number;
   status: string;
   tx_hash: string | null;
   created_at: string;
@@ -66,6 +67,7 @@ interface Props {
   referral: Referral;
   stats: Stats;
   networkImpact: NetworkImpact;
+  pricing?: { solPriceUsd?: number };
 }
 
 // ── Helpers ──
@@ -129,10 +131,10 @@ function UsdcIcon() {
 }
 
 // ── Component ──
-export function DashboardClient({ wallet, xHandle, claims, payouts, referral, stats, networkImpact }: Props) {
+export function DashboardClient({ wallet, xHandle, claims, payouts, referral, stats, networkImpact, pricing }: Props) {
   const [expandedClaim, setExpandedClaim] = useState<string | null>(null);
   const [tab, setTab] = useState<'all' | 'approved' | 'pending' | 'rejected'>('all');
-  const [solUsdPrice, setSolUsdPrice] = useState(170);
+  const [solUsdPrice, setSolUsdPrice] = useState(Number(pricing?.solPriceUsd || 170));
 
   useEffect(() => {
     let active = true;
@@ -197,7 +199,7 @@ export function DashboardClient({ wallet, xHandle, claims, payouts, referral, st
         <div className="gc-stats-grid">
           <div className="gc-stat">
             <div className="gc-stat-label">Total Earned</div>
-            <div className="gc-stat-value">{formatUsd(stats.totalEarned * solUsdPrice)}</div>
+            <div className="gc-stat-value">{formatUsd((stats as any).totalEarnedUsdc ?? (stats.totalEarned * solUsdPrice))}</div>
             <div className="gc-stat-sub"><span className="gc-inline-token"><UsdcIcon />USDC</span></div>
           </div>
           <div className="gc-stat">
@@ -278,7 +280,7 @@ export function DashboardClient({ wallet, xHandle, claims, payouts, referral, st
                     <div className="ud-claim__right">
                       {payout && (
                         <span className="ud-claim__sol">
-                          {formatUsd(payout.amount_sol * solUsdPrice)} <span className="gc-inline-token"><UsdcIcon />USDC</span>
+                          {formatUsd((payout.amount_usdc ?? (payout.amount_sol * solUsdPrice)))} <span className="gc-inline-token"><UsdcIcon />USDC</span>
                         </span>
                       )}
                       <span className="ud-claim__expand">
@@ -386,7 +388,7 @@ export function DashboardClient({ wallet, xHandle, claims, payouts, referral, st
             {payouts.map((p) => (
               <div key={p.id} className="ud-payouts__row">
                 <span className="ud-payouts__date">{timeAgo(p.created_at)}</span>
-                <span className="ud-payouts__amount">{formatUsd(p.amount_sol * solUsdPrice)} <span className="gc-inline-token"><UsdcIcon />USDC</span></span>
+                <span className="ud-payouts__amount">{formatUsd((p.amount_usdc ?? (p.amount_sol * solUsdPrice)))} <span className="gc-inline-token"><UsdcIcon />USDC</span></span>
                 <span>{statusBadge(p.status)}</span>
                 <span className="ud-payouts__tx">
                   {p.tx_hash ? (

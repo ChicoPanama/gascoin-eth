@@ -15,7 +15,7 @@ export async function GET() {
 
   const { data, error } = await supabase
     .from('treasury_snapshots')
-    .select('sol_balance,ts')
+    .select('sol_balance,usd_value,ts')
     .gte('ts', since)
     .order('ts', { ascending: true })
     .limit(400);
@@ -23,7 +23,7 @@ export async function GET() {
   if (error || !data) return NextResponse.json([]);
 
   // Downsample to ~7 points (daily nearest-latest snapshot)
-  const byDay = new Map<string, { day: string; sol: number; ts: string }>();
+  const byDay = new Map<string, { day: string; sol: number; usdc: number; ts: string }>();
   for (const row of data as any[]) {
     const ts = row.ts as string;
     const d = new Date(ts);
@@ -31,6 +31,7 @@ export async function GET() {
     byDay.set(key, {
       day: d.toLocaleDateString('en-US', { weekday: 'short' }),
       sol: Number(row.sol_balance || 0),
+      usdc: Number(row.usd_value || 0),
       ts,
     });
   }

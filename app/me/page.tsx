@@ -99,6 +99,7 @@ export default function MeDashboardPage() {
           referral={data.referral}
           stats={data.stats}
           networkImpact={data.networkImpact}
+          pricing={data.pricing}
         />
       </main>
     </div>
