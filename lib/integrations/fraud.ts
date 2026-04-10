@@ -13,13 +13,74 @@ export type FraudSignals = {
   duplicatePhash: boolean;
   hashSha256: string;
   pHash: string;
-  // New pipeline signals
   authenticityScore: number;
   fraudRisk: string;
   exifScore: number;
   dimensionScore: number;
   flags: string[];
+  crossValidation: CrossValidationResult | null;
 };
+
+export type CrossValidationResult = {
+  fraudRiskLevel: 'low' | 'medium' | 'high';
+  confidence: number;
+  reasoning: string;
+  concerns: string[];
+};
+
+async function aiFraudAnalysis(signals: {
+  aiScore: number;
+  tamperScore: number;
+  exifScore: number;
+  dimensionScore: number;
+  flags: string[];
+  ocrConfidence?: number;
+  isPhysicalReceipt?: boolean;
+  isDigitallyManipulated?: boolean;
+  country?: string;
+}): Promise<CrossValidationResult> {
+  const apiKey = process.env.OPENROUTER_API_KEY || '';
+  const model = process.env.RECEIPT_FRAUD_MODEL || 'google/gemini-2.0-flash-001';
+  if (!apiKey) return { fraudRiskLevel: 'medium', confidence: 0.5, reasoning: 'AI fraud analysis unavailable — no API key', concerns: ['no_api_key'] };
+
+  try {
+    const prompt = `You are a fraud analyst for a gas receipt refund protocol. Analyze these signals and determine the fraud risk level.
+
+SIGNALS:
+- AI generation score: ${signals.aiScore.toFixed(3)} (0=real, 1=AI-generated, threshold: 0.65)
+- Tamper score: ${signals.tamperScore.toFixed(3)} (0=clean, 1=tampered, threshold: 0.55)
+- EXIF metadata score: ${signals.exifScore.toFixed(2)} (1=real camera EXIF present, 0=stripped/missing)
+- Image dimension score: ${signals.dimensionScore.toFixed(2)} (1=real photo dimensions, 0=suspicious AI dimensions)
+- OCR confidence: ${signals.ocrConfidence?.toFixed(2) ?? 'unknown'}
+- Is physical receipt: ${signals.isPhysicalReceipt ?? 'unknown'}
+- Digitally manipulated: ${signals.isDigitallyManipulated ?? 'unknown'}
+- Country: ${signals.country ?? 'unknown'}
+- Flags: ${signals.flags.length > 0 ? signals.flags.join(', ') : 'none'}
+
+Respond ONLY with valid JSON:
+{"fraudRiskLevel":"low|medium|high","confidence":0.0-1.0,"reasoning":"one sentence","concerns":["list","of","specific","concerns"]}`;
+
+    const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
+      body: JSON.stringify({ model, messages: [{ role: 'user', content: prompt }], temperature: 0.1, max_tokens: 200 }),
+      cache: 'no-store',
+    });
+
+    if (!res.ok) return { fraudRiskLevel: 'medium', confidence: 0.5, reasoning: 'AI fraud analysis API error', concerns: ['api_error'] };
+    const json = await res.json() as any;
+    const text = json?.choices?.[0]?.message?.content || '';
+    const parsed = JSON.parse(text.replace(/```json\n?|\n?```/g, '').trim());
+    return {
+      fraudRiskLevel: parsed.fraudRiskLevel || 'medium',
+      confidence: Number(parsed.confidence) || 0.5,
+      reasoning: String(parsed.reasoning || ''),
+      concerns: Array.isArray(parsed.concerns) ? parsed.concerns : [],
+    };
+  } catch {
+    return { fraudRiskLevel: 'medium', confidence: 0.5, reasoning: 'AI fraud analysis failed to parse', concerns: ['parse_error'] };
+  }
+}
 
 export async function runFraudChecks(raw: ArrayBuffer, pipeline?: PipelineResult): Promise<FraudSignals> {
   const buf = Buffer.from(raw);
@@ -58,6 +119,28 @@ export async function runFraudChecks(raw: ArrayBuffer, pipeline?: PipelineResult
   const fraudRisk = pipeline?.fraudRisk ?? (authenticityScore > 0.6 ? 'low' : authenticityScore > 0.4 ? 'medium' : 'high');
   const flags = [...(exif.flags || []), ...(dims.flags || []), ...(pipeline?.flags || [])];
 
+  // Run AI cross-validation for non-trivial cases
+  let crossValidation: CrossValidationResult | null = null;
+  if (aiScore > 0.3 || tamperScore > 0.3 || flags.length > 2) {
+    crossValidation = await aiFraudAnalysis({
+      aiScore,
+      tamperScore,
+      exifScore: exif.score,
+      dimensionScore: dims.score,
+      flags,
+      ocrConfidence: pipeline?.extraction?.confidence,
+      isPhysicalReceipt: pipeline?.extraction?.is_physical_receipt,
+      isDigitallyManipulated: pipeline?.extraction?.is_digitally_manipulated,
+      country: pipeline?.extraction?.station_country ?? undefined,
+    });
+
+    // AI cross-validation can elevate risk if it detects something heuristics missed
+    if (crossValidation.fraudRiskLevel === 'high' && crossValidation.confidence > 0.7) {
+      aiScore = Math.max(aiScore, 0.6);
+      tamperScore = Math.max(tamperScore, 0.5);
+    }
+  }
+
   return {
     aiScore,
     tamperScore,
@@ -66,9 +149,10 @@ export async function runFraudChecks(raw: ArrayBuffer, pipeline?: PipelineResult
     hashSha256: exactHash,
     pHash,
     authenticityScore,
-    fraudRisk,
+    fraudRisk: crossValidation?.fraudRiskLevel ?? fraudRisk,
     exifScore: exif.score,
     dimensionScore: dims.score,
     flags,
+    crossValidation,
   };
 }
