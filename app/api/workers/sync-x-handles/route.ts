@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '../../../../lib/supabase';
 import { getUserByUsername } from '../../../../lib/x-api';
 import { isAuthorizedCron as isAuthorized } from '../../../../lib/cron-auth';
+import { persistHandleChange } from '../../../../lib/metrics-snapshot';
 
 // ══════════════���════════════════════════════
 // Handle Sync Worker
@@ -89,6 +90,10 @@ export async function POST(req: Request) {
               .eq('x_handle', link.x_handle);
 
             changes.push({ wallet: link.wallet, old_handle: link.x_handle, new_handle: currentHandle });
+
+            // Persist handle change history for audit trail
+            persistHandleChange(supabase, null as any, link.x_user_id, link.x_handle, currentHandle).catch(() => {});
+
             updated++;
           }
 

@@ -5,6 +5,9 @@ import { getUserByUsername } from '../../../../lib/x-api';
 import { scoreAccountQuality } from '../../../../lib/account-quality';
 
 import { isAuthorizedCron as isAuthorized } from '../../../../lib/cron-auth';
+import { persistMetricsSnapshot } from '../../../../lib/metrics-snapshot';
+import { hasMinimumGascoin } from '../../../../lib/integrations/solana';
+import { getTierForBalance } from '../../../../lib/token-tiers';
 
 const MIN_FOLLOWERS = 100;
 
@@ -85,6 +88,21 @@ export async function GET(req: Request) {
         continue;
       }
     }
+
+    // Snapshot metrics at payout verification time (non-blocking)
+    const balCheck = await hasMinimumGascoin(claim.wallet, 0);
+    const tier = getTierForBalance(balCheck.tokenBalance ?? 0);
+    persistMetricsSnapshot(supabase, {
+      userId: claim.user_id,
+      wallet: claim.wallet,
+      xHandle: handle,
+      xUser: userLookup?.user ?? null,
+      accountQualityScore: userLookup?.user ? scoreAccountQuality(userLookup.user).score : undefined,
+      accountQualityPassed: userLookup?.user ? scoreAccountQuality(userLookup.user).passed : undefined,
+      gascoinBalance: balCheck.tokenBalance ?? 0,
+      tierId: tier.id,
+      source: 'payout_verify',
+    }).catch(() => {});
 
     verified++;
   }

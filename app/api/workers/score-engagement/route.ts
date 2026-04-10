@@ -147,9 +147,14 @@ export async function POST(req: Request) {
           if (scoreResult.heldForReview) heldForReview++;
         }
 
-        // Update last scan timestamp
+        // Update last scan timestamp + persist X profile data
+        const linkUpdate: Record<string, any> = { last_tweet_scan: new Date().toISOString() };
+        if (authorUser) {
+          if ((authorUser as any).location) linkUpdate.x_location = (authorUser as any).location;
+          if ((authorUser as any).description) linkUpdate.bio = (authorUser as any).description;
+        }
         await supabase.from('wallet_x_links')
-          .update({ last_tweet_scan: new Date().toISOString() })
+          .update(linkUpdate)
           .eq('wallet', wallet)
           .eq('x_handle', handle);
 

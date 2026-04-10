@@ -13,6 +13,8 @@ import { checkAndAutoBan } from '../../../../lib/auto-ban';
 import { getSupabaseAdmin } from '../../../../lib/supabase';
 import { hashRequestBody, resolveIdempotencyKey } from '../../../../lib/idempotency';
 import { checkRateLimit } from '../../../../lib/rate-limit';
+import { persistMetricsSnapshot } from '../../../../lib/metrics-snapshot';
+import { bustBalanceCache } from '../../../../lib/integrations/solana';
 
 const SUBMIT_WINDOW_SEC = 60;
 const SUBMIT_MAX_PER_WINDOW = 12;
@@ -43,6 +45,7 @@ function clientIp(req: Request): string {
 
 export async function POST(req: Request){
   const ip = clientIp(req);
+  const ipCountry = req.headers.get('x-vercel-ip-country') || req.headers.get('cf-ipcountry') || null;
   const rl = await checkRateLimit(`submit:${ip}`, SUBMIT_MAX_PER_WINDOW, SUBMIT_WINDOW_SEC);
   if (!rl.ok) {
     return NextResponse.json({ ok:false, error:'rate_limited', mode: rl.mode, retryAfterSec: rl.resetSec }, { status: 429 });
@@ -250,7 +253,8 @@ export async function POST(req: Request){
       parsed_amount: ocr.amountUsd ?? amountUsd,
       claim_currency: 'USD',
       risk_score: result.riskScore,
-      decision_reason: result.failed.map(f => f.gate).join(',') || 'auto_approved'
+      decision_reason: result.failed.map(f => f.gate).join(',') || 'auto_approved',
+      ip_country: ipCountry
     })
     .select('id,status')
     .single();
@@ -362,6 +366,25 @@ export async function POST(req: Request){
       duplicatePhash
     }
   });
+
+  // Snapshot metrics for historical tracking (non-blocking)
+  if (userRow?.id) {
+    persistMetricsSnapshot(supabase, {
+      userId: userRow.id,
+      wallet,
+      xHandle: session.xHandle,
+      xUser: userLookup.user ?? null,
+      accountQualityScore: accountQuality.score,
+      accountQualityPassed: accountQuality.passed,
+      gascoinBalance: minHold.tokenBalance ?? 0,
+      tierId: userTier.id,
+      ipCountry: ipCountry ?? undefined,
+      source: 'submission',
+    }).catch(() => {});
+  }
+
+  // Bust balance cache so next lookup gets fresh data
+  bustBalanceCache(wallet).catch(() => {});
 
   // Auto-ban check: if claim was rejected, check if user should be banned
   if (result.decision === 'rejected' && userRow?.id) {

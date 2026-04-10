@@ -215,6 +215,9 @@ alter table if exists payout_jobs enable row level security;
 alter table if exists idempotency_keys enable row level security;
 alter table if exists admin_users enable row level security;
 
+alter table if exists user_metrics_history enable row level security;
+alter table if exists x_handle_history enable row level security;
+
 -- No permissive row policies are created here intentionally.
 -- Service-role access is used by backend APIs.
 
