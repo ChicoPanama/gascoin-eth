@@ -92,7 +92,9 @@ async function verifyViaOEmbed(tweetUrl: string, expectedHandle: string): Promis
   };
 }
 
-export async function getFollowerCount(handle: string): Promise<number> {
+import { cacheGetOrFetch } from '../cache';
+
+async function fetchFollowerCount(handle: string): Promise<number> {
   const token = process.env.X_BEARER_TOKEN;
   if (!token) return -1;
 
@@ -111,6 +113,11 @@ export async function getFollowerCount(handle: string): Promise<number> {
   } catch {
     return -1;
   }
+}
+
+export async function getFollowerCount(handle: string): Promise<number> {
+  const username = handle.replace(/^@/, '').toLowerCase();
+  return cacheGetOrFetch(`xfollowers:${username}`, () => fetchFollowerCount(handle), 900);
 }
 
 export async function verifyTweetProof(tweetUrl: string, expectedHandle: string): Promise<TweetProofResult> {

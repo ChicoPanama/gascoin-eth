@@ -37,15 +37,15 @@ async function fetchSolPrice(): Promise<number> {
   }
 }
 
-export async function getMarketSnapshot(): Promise<MarketSnapshot> {
+import { cacheGetOrFetch } from '../cache';
+
+async function fetchMarketSnapshot(): Promise<MarketSnapshot> {
   const ds = await fromDexScreener();
   if (ds && ds.gascoinPriceUsd > 0) {
-    // Supplement with live SOL price if DexScreener didn't provide it
     if (!ds.solPriceUsd) ds.solPriceUsd = await fetchSolPrice();
     return ds;
   }
 
-  // No DexScreener data — fetch at least the live SOL price
   const solPrice = await fetchSolPrice();
 
   return {
@@ -55,6 +55,10 @@ export async function getMarketSnapshot(): Promise<MarketSnapshot> {
     solPriceUsd: solPrice,
     source: solPrice > 0 ? 'coingecko' : 'unavailable'
   };
+}
+
+export async function getMarketSnapshot(): Promise<MarketSnapshot> {
+  return cacheGetOrFetch('price:market', fetchMarketSnapshot, 120);
 }
 
 export async function getGascoinUsdValue(balanceTokens: number): Promise<number> {

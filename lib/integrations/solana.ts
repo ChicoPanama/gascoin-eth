@@ -1,6 +1,7 @@
 import { Connection, Keypair, PublicKey, SystemProgram, Transaction, LAMPORTS_PER_SOL } from '@solana/web3.js';
 import bs58 from 'bs58';
 import { getGascoinUsdValue } from './pricing';
+import { cacheGetOrFetch, cacheDel } from '../cache';
 
 function getRpcUrl() {
   return process.env.SOLANA_RPC_URL || (process.env.HELIUS_API_KEY ? `https://mainnet.helius-rpc.com/?api-key=${process.env.HELIUS_API_KEY}` : 'https://api.mainnet-beta.solana.com');
@@ -10,7 +11,7 @@ function connection() {
   return new Connection(getRpcUrl(), 'confirmed');
 }
 
-export async function getWalletGascoinBalance(wallet: string): Promise<number> {
+async function fetchWalletGascoinBalance(wallet: string): Promise<number> {
   const mint = process.env.GASCOIN_MINT;
   if (!mint) return 0;
 
@@ -30,6 +31,16 @@ export async function getWalletGascoinBalance(wallet: string): Promise<number> {
   }
 }
 
+export async function getWalletGascoinBalance(wallet: string): Promise<number> {
+  return cacheGetOrFetch(`bal:${wallet}`, () => fetchWalletGascoinBalance(wallet), 300);
+}
+
+/** Bust the balance cache for a wallet (call after submission or payout). */
+export async function bustBalanceCache(wallet: string): Promise<void> {
+  await cacheDel(`bal:${wallet}`);
+  await cacheDel(`tier:${wallet}`);
+}
+
 export async function hasMinimumGascoin(wallet: string, minTokens = 1): Promise<{ ok: boolean; tokenBalance: number }> {
   const tokenBalance = await getWalletGascoinBalance(wallet);
   return { ok: tokenBalance >= minTokens, tokenBalance };
@@ -42,7 +53,7 @@ export async function hasMinimumGascoinUsd(wallet: string, minUsd = 1): Promise<
   return { ok: usdValue >= minUsd, usdValue, tokenBalance };
 }
 
-export async function getTreasuryBalances(): Promise<{
+async function fetchTreasuryBalances(): Promise<{
   solBalance: number;
   solUsd: number;
   gascoinBalance: number;
@@ -57,7 +68,7 @@ export async function getTreasuryBalances(): Promise<{
 
     const [lamports, gascoinBalance, { getMarketSnapshot }] = await Promise.all([
       conn.getBalance(pubkey),
-      getWalletGascoinBalance(wallet),
+      fetchWalletGascoinBalance(wallet),
       import('./pricing')
     ]);
 
@@ -70,6 +81,14 @@ export async function getTreasuryBalances(): Promise<{
   } catch {
     return { solBalance: 0, solUsd: 0, gascoinBalance: 0, gascoinUsd: 0 };
   }
+}
+
+export async function getTreasuryBalances() {
+  return cacheGetOrFetch('treasury:balance', fetchTreasuryBalances, 60);
+}
+
+export async function bustTreasuryCache(): Promise<void> {
+  await cacheDel('treasury:balance');
 }
 
 export async function sendSolPayout(wallet: string, amountSol: number): Promise<{ ok: boolean; txHash?: string; error?: string }> {

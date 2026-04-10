@@ -1,3 +1,5 @@
+import { cacheGetOrFetch } from './cache';
+
 const X_API_BASE = 'https://api.x.com/2';
 
 function getBearer() {
@@ -87,13 +89,17 @@ export async function getUser(userId: string): Promise<{ user?: XUser; error?: s
   return { user: data.data };
 }
 
-export async function getUserByUsername(username: string): Promise<{ user?: XUser; error?: string }> {
-  const handle = username.replace(/^@/, '');
-  const res = await xFetch(`/users/by/username/${handle}`, { 'user.fields': 'protected,username,public_metrics,created_at,description,profile_image_url,verified' });
+async function fetchUserByUsername(handle: string): Promise<{ user?: XUser; error?: string }> {
+  const res = await xFetch(`/users/by/username/${handle}`, { 'user.fields': 'protected,username,public_metrics,created_at,description,profile_image_url,verified,location' });
   if (res.status === 404) return { error: 'user_not_found' };
   if (!res.ok) { const err = await res.json().catch(() => ({})); return { error: (err as any)?.detail || `API ${res.status}` }; }
   const data = await res.json();
   return { user: data.data };
+}
+
+export async function getUserByUsername(username: string): Promise<{ user?: XUser; error?: string }> {
+  const handle = username.replace(/^@/, '').toLowerCase();
+  return cacheGetOrFetch(`xuser:${handle}`, () => fetchUserByUsername(handle), 900);
 }
 
 // ─── Search ───
