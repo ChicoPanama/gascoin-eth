@@ -6,32 +6,32 @@ import type { DocSection } from '../../lib/docs-content';
 
 const CATEGORY_GUIDE: Record<string, { bestFor: string; action: string }> = {
   Overview: {
-    bestFor: 'First-time users and investors building baseline understanding.',
-    action: 'Start with this page, then continue through User Flow.',
+    bestFor: 'New users learning what GASCOIN is and how it works',
+    action: 'Read this first, then move to the Submission steps',
   },
   Submitting: {
-    bestFor: 'Users preparing a live claim submission.',
-    action: 'Follow steps in order and do not reuse receipts/tweets.',
+    bestFor: 'Users ready to submit a gas receipt for a refund',
+    action: 'Follow the steps in order — do not skip ahead',
   },
   'Verification Gates': {
-    bestFor: 'Users diagnosing failures and operators validating policy behavior.',
-    action: 'Find first failed gate, remediate that gate, then resubmit.',
+    bestFor: 'Understanding why a submission passed or failed',
+    action: 'Find the failed gate, fix the issue, then resubmit',
   },
   Technology: {
-    bestFor: 'Technical reviewers, builders, and due-diligence readers.',
-    action: 'Use diagrams + flow maps to trace state transitions end-to-end.',
+    bestFor: 'Technical readers and anyone doing due diligence',
+    action: 'Understand the AI and fraud prevention behind GASCOIN',
   },
   'Platform Pages': {
-    bestFor: 'Users exploring product surfaces and UI responsibilities.',
-    action: 'Use this as a page-by-page navigation reference.',
+    bestFor: 'Learning what each page on the platform does',
+    action: 'Use this as a reference when navigating the site',
   },
   'Security & Admin': {
-    bestFor: 'Admins, auditors, and risk-focused stakeholders.',
-    action: 'Validate controls, override boundaries, and audit trail expectations.',
+    bestFor: 'Understanding security measures and admin controls',
+    action: 'Review how submissions are verified and protected',
   },
   Help: {
-    bestFor: 'Users troubleshooting blocked or unclear submission outcomes.',
-    action: 'Run self-service checks first, then contact support with submission ID.',
+    bestFor: 'Troubleshooting a blocked or failed submission',
+    action: 'Check the common fixes here before reaching out for support',
   },
 };
 

@@ -567,7 +567,22 @@ export const DOC_CATEGORIES: DocCategory[] = [
         category: "Technology",
         description: "",
         content: `<p>This map is the complete technical path from user action to treasury payout. Use this as the single reference for engineering reviews, incident analysis, and onboarding technical stakeholders.</p>
-<p><img src="/docs/diagrams/end-to-end-architecture-map.svg" alt="GASCOIN end-to-end architecture map" style="max-width:1080px;border:1px solid rgba(255,255,255,0.12)" /></p>
+<pre class="doc-ascii">
+  USER SUBMITS                    VERIFICATION                         PAYOUT
+  ─────────────                   ────────────                         ──────
+
+  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐
+  │ Wallet + X   │→ │ Session/Auth │→ │ X API + OCR  │→ │ AI / Fraud   │
+  │ + Receipt    │  │ Rate limit   │  │ Extract data │  │ Score + Hash │
+  └──────────────┘  └──────────────┘  └──────────────┘  └──────┬───────┘
+                                                               │
+                    ┌──────────────┐  ┌──────────────┐  ┌──────▼───────┐
+                    │   PAYOUT     │← │ Queue/Retry  │← │ Gate Engine  │
+                    │ SOL → Wallet │  │ (Gate 10)    │  │ Gates 1-9    │
+                    └──────────────┘  └──────────────┘  └──────────────┘
+
+                    Every action logged → Immutable Audit Trail
+</pre>
 <h3>Read this map in 4 passes</h3>
 <ol>
 <li>Input/identity validation</li>
@@ -618,7 +633,22 @@ All states/events -> Persistence + Audit Log (immutable trail)
 <li>Policy: sequential gates and state transitions</li>
 <li>Execution: approval, payout queueing, retries, audit logging</li>
 </ul>
-<p><img src="/docs/diagrams/ai-system-overview.svg" alt="GASCOIN AI system overview flow diagram" style="max-width:980px;border:1px solid rgba(255,255,255,0.12)" /></p>
+<pre class="doc-ascii">
+  SIMPLE PATH (for users)              TECHNICAL PATH (for builders)
+  ─────────────────────────            ──────────────────────────────
+
+  Submit wallet + tweet + receipt      Form payload → normalize → idempotency key
+          │                                    │
+          ▼                                    ▼
+  AI checks social proof + receipt     X API validation + OCR + metadata extraction
+          │                                    │
+          ▼                                    ▼
+  Gate engine: pass or fail            AI score + tamper score + pHash + account quality
+          │                                    │
+          ▼                                    ▼
+  Approved → SOL sent to wallet        Sequential gates → state transition → audit log
+  Rejected → see which gate failed     Payout queue → retry loop → SOL dispatch
+</pre>
 <h3>ASCII quick map (GitHub-style)</h3>
 <pre style="font-family:ui-monospace, SFMono-Regular, Menlo, monospace; font-size:12px; line-height:1.45; color:rgba(255,255,255,0.78); background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.12); padding:12px; overflow:auto">
 Inputs(wallet,tweet,receipt)
@@ -644,7 +674,22 @@ Inputs(wallet,tweet,receipt)
 <li>Perceptual hash generation for duplicate detection</li>
 <li>Gate outputs into policy decision engine</li>
 </ol>
-<p><img src="/docs/diagrams/receipt-intelligence-pipeline.svg" alt="Receipt intelligence processing pipeline diagram" style="width:100%;max-width:980px;border:1px solid rgba(255,255,255,0.12);border-radius:10px" /></p>`,
+<pre class="doc-ascii">
+  RECEIPT INTELLIGENCE PIPELINE
+  ─────────────────────────────
+
+  ┌────────────┐   ┌────────────┐   ┌────────────┐   ┌────────────┐   ┌────────────┐
+  │  UPLOAD    │ → │  OCR PARSE │ → │  IMAGE     │ → │  DUPLICATE │ → │  GATE      │
+  │  INTAKE    │   │            │   │  INTEGRITY │   │  CHECK     │   │  INPUTS    │
+  │            │   │  Extract:  │   │            │   │            │   │            │
+  │  File type │   │  · Date    │   │  AI score  │   │  SHA-256   │   │  All scores│
+  │  File size │   │  · Amount  │   │  Tamper    │   │  pHash     │   │  ready for │
+  │  Format OK │   │  · Station │   │  score     │   │  compare   │   │  policy    │
+  │            │   │  · Wallet  │   │            │   │  vs all    │   │  engine    │
+  └────────────┘   └────────────┘   └────────────┘   └────────────┘   └────────────┘
+
+  Outputs saved: OCR confidence · AI/tamper scores · duplicate flags · receipt metadata
+</pre>`,
         order: 27,
       },
       {
@@ -660,7 +705,31 @@ Inputs(wallet,tweet,receipt)
 <li>Retries are automated and logged</li>
 <li>Admin review remains auditable</li>
 </ul>
-<p><img src="/docs/diagrams/gate-decision-retry-paths.svg" alt="Gate decision and retry paths diagram" style="width:100%;max-width:980px;border:1px solid rgba(255,255,255,0.12);border-radius:10px" /></p>`,
+<pre class="doc-ascii">
+  GATE DECISION FLOW
+  ──────────────────
+
+  Submission
+      │
+      ▼
+  ┌─────────────────────────┐
+  │  GATES 1-9 (blocking)   │──── Any gate fails ────→ REJECTED
+  │  Tweet · Receipt · AI   │                          (see which gate)
+  │  Wallet · Cooldown      │
+  └────────────┬────────────┘
+               │ All pass
+               ▼
+  ┌─────────────────────────┐
+  │  GATE 10 (non-blocking) │──── Treasury low ──→ QUEUED
+  │  Treasury balance check │                       │
+  └────────────┬────────────┘                  Auto-retry
+               │ Treasury OK                   every 6 hours
+               ▼                                    │
+          APPROVED                                  ▼
+               │                              Treasury OK?
+               ▼                              Yes → APPROVED
+           SOL PAYOUT                         No  → stay in queue
+</pre>`,
         order: 28,
       },
       {
