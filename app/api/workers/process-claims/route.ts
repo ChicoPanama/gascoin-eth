@@ -4,6 +4,7 @@ import { processQueuedPayout } from '../../../../lib/payout-worker';
 import { getTierForBalance } from '../../../../lib/token-tiers';
 import { hasMinimumGascoin, bustTreasuryCache, getTreasuryBalances } from '../../../../lib/integrations/solana';
 import { snapshotTreasury } from '../../../../lib/data-intelligence';
+import { reviewClaim } from '../../../../lib/integrations/claude';
 import { isAuthorizedCron as isAuthorized } from '../../../../lib/cron-auth';
 
 export async function POST(req: Request) {
@@ -49,7 +50,7 @@ export async function POST(req: Request) {
   // for the daily midnight batch payout. Payout amount set by token tier.
   const { data: readyClaims } = await supabase
     .from('claims')
-    .select('id,wallet,user_id')
+    .select('id,wallet,user_id,risk_score,ip_country,users(x_handle)')
     .eq('status', 'ready_for_dispatch')
     .limit(200);
 
@@ -76,6 +77,75 @@ export async function POST(req: Request) {
       reason: `auto_approved: all gates passed, tier=${tier.name}, payout=${solAmount} SOL`,
     });
 
+    // ─── CLAUDE OVERSIGHT GATE ───
+    // Claude reviews the full claim package before payout job creation.
+    // Fetch gate results + fraud signals for Claude's review context.
+    const { data: gateRows } = await supabase
+      .from('gate_results')
+      .select('gate_name, passed, score, reason_code')
+      .eq('claim_id', claim.id);
+
+    const { data: receiptMeta } = await supabase
+      .from('claim_receipts')
+      .select('ai_score, tamper_score, metadata_json')
+      .eq('claim_id', claim.id)
+      .maybeSingle();
+
+    const { data: prevClaims } = await supabase
+      .from('claims')
+      .select('status')
+      .eq('wallet', claim.wallet);
+
+    const claudeVerdict = await reviewClaim({
+      claimId: claim.id,
+      wallet: claim.wallet,
+      xHandle: (claim as any).users?.x_handle || '',
+      tier: tier.slug,
+      amountSol: solAmount,
+      gateResults: (gateRows || []).map((g: any) => ({ gate: g.gate_name, passed: g.passed, score: g.score, reason: g.reason_code })),
+      riskScore: claim.risk_score ?? 0,
+      aiScore: receiptMeta?.ai_score ?? 0,
+      tamperScore: receiptMeta?.tamper_score ?? 0,
+      fraudRisk: receiptMeta?.metadata_json?.fraudRisk ?? 'unknown',
+      crossValidation: receiptMeta?.metadata_json?.crossValidation ?? null,
+      ipCountry: (claim as any).ip_country,
+      ocrCountry: receiptMeta?.metadata_json?.country ?? null,
+      previousSubmissions: (prevClaims || []).length,
+      previousApprovals: (prevClaims || []).filter((c: any) => ['approved', 'paid'].includes(c.status)).length,
+      previousRejections: (prevClaims || []).filter((c: any) => c.status === 'rejected').length,
+    });
+
+    // Log Claude's verdict to audit trail
+    await supabase.from('audit_logs').insert({
+      actor_type: 'system',
+      actor_id: 'claude_oversight',
+      action: `claude_${claudeVerdict.verdict}`,
+      target_type: 'claim',
+      target_id: claim.id,
+      payload_json: { verdict: claudeVerdict.verdict, confidence: claudeVerdict.confidence, narrative: claudeVerdict.narrative, concerns: claudeVerdict.concerns },
+    });
+
+    // If Claude flags or rejects, revert to needs_review — skip payout
+    if (claudeVerdict.verdict === 'flag' || claudeVerdict.verdict === 'reject') {
+      await supabase.from('claims').update({
+        status: 'needs_review',
+        decision_reason: `claude_${claudeVerdict.verdict}: ${claudeVerdict.narrative}`,
+        updated_at: nowIso,
+      }).eq('id', claim.id);
+
+      await supabase.from('claim_status_events').insert({
+        claim_id: claim.id,
+        from_status: 'approved',
+        to_status: 'needs_review',
+        actor_type: 'system',
+        actor_id: 'claude_oversight',
+        reason: claudeVerdict.narrative,
+      });
+
+      continue; // Skip payout job creation
+    }
+    // ─── END CLAUDE OVERSIGHT ───
+
     // Create payout job for the midnight batch
     await supabase.from('payout_jobs').upsert({
       claim_id: claim.id,
@@ -89,7 +159,7 @@ export async function POST(req: Request) {
       wallet: claim.wallet,
       source: 'submission_approved',
       points: 1000,
-      metadata_json: { claim_id: claim.id, approved_by: 'auto_system', tier: tier.slug },
+      metadata_json: { claim_id: claim.id, approved_by: 'auto_system_claude_approved', tier: tier.slug },
     });
 
     await supabase.from('audit_logs').insert({
@@ -98,7 +168,7 @@ export async function POST(req: Request) {
       action: 'claim_auto_approved',
       target_type: 'claim',
       target_id: claim.id,
-      payload_json: { wallet: claim.wallet, tier: tier.name, solAmount },
+      payload_json: { wallet: claim.wallet, tier: tier.name, solAmount, claude_verdict: claudeVerdict.verdict },
     });
 
     autoApproved++;
