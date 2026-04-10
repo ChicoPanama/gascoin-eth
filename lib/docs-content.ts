@@ -27,23 +27,27 @@ export const DOC_CATEGORIES: DocCategory[] = [
         category: "Overview",
         description: "",
         content: `<h3>What this is</h3>
-<p>GASCOIN is a Solana protocol that refunds verified real-world fuel purchases in SOL.</p>
+<p>GASCOIN is a Solana (a fast, low-cost cryptocurrency network) protocol that refunds verified real-world fuel purchases in SOL.</p>
 <p>All claims pass through a deterministic 10-gate pipeline before payout is released.</p>
+<pre class="doc-ascii">
+  BUY GAS ──→ WRITE LAST 4 ──→ TWEET #GASCOIN ──→ SUBMIT ──→ 10 GATES ──→ SOL REFUND
+  (any station)  (on receipt)     (public post)     (upload)   (auto-verify)  (to wallet)
+</pre>
 
 <h3>How it works</h3>
 <ul>
-<li>User submits wallet, tweet URL, and physical receipt proof.</li>
-<li>System validates identity/social context and receipt quality.</li>
-<li>Gate engine evaluates sequential pass/fail state.</li>
-<li>Approved claims move to payout execution and audit logging.</li>
+<li>User submits wallet, tweet URL, and physical receipt proof</li>
+<li>System validates identity/social context and receipt quality</li>
+<li>Gate engine evaluates sequential pass/fail state</li>
+<li>Approved claims move to payout execution and audit logging</li>
 </ul>
 
 <h3>Participation requirements</h3>
 <ul>
-<li>Public X account meeting follower/activity policy.</li>
-<li>Physical gas receipt within policy date window.</li>
-<li>Connected Solana wallet for payout destination.</li>
-<li>Required wallet characters written on receipt.</li>
+<li>Public X account meeting follower/activity policy</li>
+<li>Physical gas receipt within policy date window</li>
+<li>Connected Solana wallet for payout destination</li>
+<li>Required wallet characters written on receipt</li>
 </ul>
 
 <h3>Operator note</h3>
@@ -57,13 +61,13 @@ export const DOC_CATEGORIES: DocCategory[] = [
         category: "Overview",
         description: "",
         content: `<ul>
-<li>You fill up your gas tank at any gas station.</li>
-<li>Before or after filling up, you write the last 4 characters of your Solana wallet address on the receipt in pen.</li>
-<li>You post a tweet on X (formerly Twitter) containing the hashtag #gascoin.</li>
-<li>You visit gascoin.com and click Submit.</li>
-<li>You connect your Solana wallet, paste your tweet URL, and upload a photo of your receipt.</li>
-<li>The system automatically runs 10 verification checks on your submission.</li>
-<li>If all 10 checks pass, SOL is sent directly to your wallet within 24-48 hours.</li>
+<li>You fill up your gas tank at any gas station</li>
+<li>Before or after filling up, you write the last 4 characters of your Solana wallet address on the receipt in pen</li>
+<li>You post a tweet on X (formerly Twitter) containing the hashtag #gascoin</li>
+<li>You visit gascoin.com and click Submit</li>
+<li>You connect your Solana wallet, paste your tweet URL, and upload a photo of your receipt</li>
+<li>The system automatically runs 10 verification checks on your submission</li>
+<li>If all 10 checks pass, SOL is sent directly to your wallet within 24-48 hours</li>
 </ul>`,
         order: 2,
       },
@@ -113,21 +117,28 @@ export const DOC_CATEGORIES: DocCategory[] = [
         description: "",
         content: `<h3>What this is</h3>
 <p>This is the canonical five-step submission workflow used for every claim.</p>
+<pre class="doc-ascii">
+  ┌──────────┐   ┌──────────┐   ┌──────────┐   ┌──────────┐   ┌──────────┐
+  │ STEP 1   │──→│ STEP 2   │──→│ STEP 3   │──→│ STEP 4   │──→│ STEP 5   │
+  │ Connect  │   │ Tweet    │   │ Receipt  │   │ Review   │   │ Gates    │
+  │ Wallet   │   │ Verify   │   │ Upload   │   │ Confirm  │   │ Progress │
+  └──────────┘   └──────────┘   └──────────┘   └──────────┘   └──────────┘
+</pre>
 
 <h3>How it works</h3>
 <ol>
-<li><strong>Connect wallet</strong> — establish payout address and tier context.</li>
-<li><strong>Verify tweet</strong> — validate social proof and timing requirements.</li>
-<li><strong>Upload receipt</strong> — provide legible physical receipt evidence.</li>
-<li><strong>Review and submit</strong> — confirm payload before finalization.</li>
-<li><strong>Track gate progress</strong> — monitor pass/fail and queue states.</li>
+<li><strong>Connect wallet</strong> — establish payout address and tier context</li>
+<li><strong>Verify tweet</strong> — validate social proof and timing requirements</li>
+<li><strong>Upload receipt</strong> — provide legible physical receipt evidence</li>
+<li><strong>Review and submit</strong> — confirm payload before finalization</li>
+<li><strong>Track gate progress</strong> — monitor pass/fail and queue states</li>
 </ol>
 
 <h3>Common failure patterns</h3>
 <ul>
-<li>Reused receipts or stale tweets from older attempts.</li>
-<li>Unreadable wallet characters on receipt images.</li>
-<li>Cooldown not expired for tier/account policy.</li>
+<li>Reused receipts or stale tweets from older attempts</li>
+<li>Unreadable wallet characters on receipt images</li>
+<li>Cooldown not expired for tier/account policy</li>
 </ul>
 
 <h3>Operator note</h3>
@@ -141,24 +152,24 @@ export const DOC_CATEGORIES: DocCategory[] = [
         category: "Submitting",
         description: "",
         content: `<p>The first step is connecting your Solana wallet. This tells the system which wallet address to send your SOL refund to and which address to check for GASCOIN token balance.</p>
-<h3><strong>How to connect your wallet</strong></h3>
-<ul>
-<li>Click the Connect Wallet button on Step 1.</li>
-<li>A wallet selection modal appears showing three options: Phantom, Solflare, and Backpack.</li>
-<li>Click the wallet you have installed. Your browser will open a popup from that wallet extension.</li>
-<li>Approve the connection in the wallet popup. You are not authorizing any transaction — just a read-only connection.</li>
-<li>Once connected, your wallet address appears in truncated form (e.g., GAs...xK92) and Step 1 is marked complete.</li>
-<li>The system automatically checks your GASCOIN token balance and displays your tier (Standard, Commuter, Road Warrior, or Fleet).</li>
-</ul>
-<h3><strong>What happens if your wallet is not installed</strong></h3>
+<h3>How to connect your wallet</h3>
+<ol>
+<li>Click the Connect Wallet button on Step 1</li>
+<li>A wallet selection modal appears showing three options: Phantom, Solflare, and Backpack</li>
+<li>Click the wallet you have installed. Your browser will open a popup from that wallet extension</li>
+<li>Approve the connection in the wallet popup. You are not authorizing any transaction — just a read-only connection</li>
+<li>Once connected, your wallet address appears in truncated form (e.g., GAs...xK92) and Step 1 is marked complete</li>
+<li>The system automatically checks your GASCOIN token balance and displays your tier (Standard, Commuter, Road Warrior, or Fleet)</li>
+</ol>
+<h3>What happens if your wallet is not installed</h3>
 <p>If you click Phantom but do not have Phantom installed, your browser will redirect to the Phantom website where you can install it as a browser extension. After installing, return to the GASCOIN submit page and connect. The same applies to Solflare and Backpack.</p>
-<h3><strong>Important notes about wallet connection</strong></h3>
+<h3>Important notes about wallet connection</h3>
 <ul>
-<li>You cannot proceed past Step 1 without connecting a wallet.</li>
-<li>Only one wallet can be connected at a time.</li>
-<li>The wallet you connect is the wallet that receives your SOL refund. Make sure it is the correct wallet.</li>
-<li>Submission frequency depends on your tier: Standard and Commuter can submit once per week, Road Warrior twice per week, and Fleet four times per week. If you have an active or recently approved submission, you must wait until the cooldown expires.</li>
-<li>The system checks for a pending submission from your wallet. If one already exists, you will see a message indicating this and cannot submit a duplicate.</li>
+<li>You cannot proceed past Step 1 without connecting a wallet</li>
+<li>Only one wallet can be connected at a time</li>
+<li>The wallet you connect is the wallet that receives your SOL refund. Make sure it is the correct wallet</li>
+<li>Submission frequency depends on your tier: Standard and Commuter can submit once per week, Road Warrior twice per week, and Fleet four times per week. If you have an active or recently approved submission, you must wait until the cooldown expires</li>
+<li>The system checks for a pending submission from your wallet. If one already exists, you will see a message indicating this and cannot submit a duplicate</li>
 </ul>`,
         order: 6,
       },
@@ -169,18 +180,18 @@ export const DOC_CATEGORIES: DocCategory[] = [
         category: "Submitting",
         description: "",
         content: `<p>Step 2 requires you to post a tweet on X (Twitter) containing the hashtag #gascoin and paste the URL of that tweet into the submission portal. The system automatically checks the tweet against 4 verification criteria.</p>
-<h3><strong>How to post your tweet</strong></h3>
-<ul>
-<li>Open X (Twitter) in a new tab.</li>
-<li>Make sure your account is set to public. Private accounts cannot be verified.</li>
-<li>Compose a new tweet. The tweet must contain the text #gascoin anywhere in the body. Any other content is acceptable.</li>
-<li>Post the tweet.</li>
+<h3>How to post your tweet</h3>
+<ol>
+<li>Open X (Twitter) in a new tab</li>
+<li>Make sure your account is set to public. Private accounts cannot be verified</li>
+<li>Compose a new tweet. The tweet must contain the text #gascoin anywhere in the body. Any other content is acceptable</li>
+<li>Post the tweet</li>
 <li>Click the Share button on your tweet and copy the tweet URL. The URL format is: https://x.com/yourhandle/status/1234567890123456789</li>
-<li>Return to the GASCOIN submit page and paste this URL into the tweet URL input field.</li>
-</ul>
-<h3><strong>What the system checks automatically</strong></h3>
+<li>Return to the GASCOIN submit page and paste this URL into the tweet URL input field</li>
+</ol>
+<h3>What the system checks automatically</h3>
 <p>After you paste the tweet URL and wait approximately 2-8 seconds, the system runs 4 checks automatically:</p>
-<h3><strong>What you see after verification</strong></h3>
+<h3>What you see after verification</h3>
 <p>If all 4 tweet checks pass, a preview card appears below the input showing your handle, how long ago the tweet was posted, and confirmation that #gascoin was detected. Step 2 advances automatically.</p>
 <p>If any check fails, a specific error message appears telling you exactly which check failed and why. You must fix the issue and paste the URL again. You do not need to start over from Step 1.</p>`,
         order: 7,
@@ -192,23 +203,23 @@ export const DOC_CATEGORIES: DocCategory[] = [
         category: "Submitting",
         description: "",
         content: `<p>Step 3 requires you to upload a photo of your gas receipt. This is the physical paper receipt from a real gas station. The receipt must have the last 4 characters of your Solana wallet address written on it in pen.</p>
-<p>IMPORTANT: You must write the last 4 characters of your wallet address on the physical receipt BEFORE photographing it. They must be clearly legible in the photo. This is a required element — submissions without readable wallet characters on the receipt will fail Gate 5 and be rejected.</p>
-<h3><strong>How to prepare your receipt</strong></h3>
+<div class="doc-callout doc-callout--warn"><p>IMPORTANT: You must write the last 4 characters of your wallet address on the physical receipt BEFORE photographing it. They must be clearly legible in the photo. This is a required element — submissions without readable wallet characters on the receipt will fail Gate 5 and be rejected.</p></div>
+<h3>How to prepare your receipt</h3>
+<ol>
+<li>Obtain the paper receipt from the gas station at the time of purchase, or retrieve a saved receipt from within the last 7 days</li>
+<li>Using a black pen, write the last 4 characters of your Solana wallet address clearly on the receipt. Write them large enough to be readable in a photograph. You can find your last 4 in your wallet app or on the GASCOIN submit page</li>
+<li>Place the receipt flat on a bright surface. Do not crumple, fold, or obscure any part of the receipt</li>
+<li>Photograph the receipt using your phone camera in good lighting. The entire receipt must be visible. The total amount, date, and your written wallet characters must all be clearly readable</li>
+<li>Transfer the photo to the device you are using to submit (if you took the photo on your phone and are submitting on desktop, AirDrop or email the photo to yourself)</li>
+</ol>
+<h3>How to upload the receipt</h3>
 <ul>
-<li>Obtain the paper receipt from the gas station at the time of purchase, or retrieve a saved receipt from within the last 7 days.</li>
-<li>Using a black pen, write the last 4 characters of your Solana wallet address clearly on the receipt. Write them large enough to be readable in a photograph. You can find your last 4 in your wallet app or on the GASCOIN submit page.</li>
-<li>Place the receipt flat on a bright surface. Do not crumple, fold, or obscure any part of the receipt.</li>
-<li>Photograph the receipt using your phone camera in good lighting. The entire receipt must be visible. The total amount, date, and your written wallet characters must all be clearly readable.</li>
-<li>Transfer the photo to the device you are using to submit (if you took the photo on your phone and are submitting on desktop, AirDrop or email the photo to yourself).</li>
+<li>On Step 3, click the upload area or drag and drop your receipt photo onto it</li>
+<li>Accepted file formats: JPG, PNG, HEIC, PDF. Maximum file size: 10MB</li>
+<li>After uploading, a thumbnail preview of your receipt appears. Verify it is the correct file</li>
+<li>Below the upload area are 3 checkboxes you must manually check before proceeding. These are self-certification statements</li>
 </ul>
-<h3><strong>How to upload the receipt</strong></h3>
-<ul>
-<li>On Step 3, click the upload area or drag and drop your receipt photo onto it.</li>
-<li>Accepted file formats: JPG, PNG, HEIC, PDF. Maximum file size: 10MB.</li>
-<li>After uploading, a thumbnail preview of your receipt appears. Verify it is the correct file.</li>
-<li>Below the upload area are 3 checkboxes you must manually check before proceeding. These are self-certification statements.</li>
-</ul>
-<h3><strong>The 3 required checkboxes</strong></h3>
+<h3>The 3 required checkboxes</h3>
 <ul>
 <li>My receipt shows the total amount clearly</li>
 <li>The receipt date is visible</li>
@@ -222,7 +233,7 @@ export const DOC_CATEGORIES: DocCategory[] = [
 <p><strong>DO:</strong></p>
 <ul>
 <li>Write the last 4 characters on the BACK of the receipt if the front is too small</li>
-<li>Use a black ballpoint pen — felt tip and pencil both fail OCR</li>
+<li>Use a black ballpoint pen — felt tip and pencil both fail OCR (optical character recognition)</li>
 <li>Write each character at least 3-4mm tall</li>
 <li>Lay the receipt flat on a white or light-coloured surface</li>
 <li>Photograph from directly overhead — not at an angle</li>
@@ -250,9 +261,9 @@ export const DOC_CATEGORIES: DocCategory[] = [
         category: "Submitting",
         description: "",
         content: `<p>Step 4 shows a complete summary of your submission before it is sent. Review every field carefully before clicking Submit. Once submitted, the information cannot be changed.</p>
-<h3><strong>What the review screen shows</strong></h3>
+<h3>What the review screen shows</h3>
 <p>If any information appears incorrect at Step 4, use the Back button to return to the relevant step and correct it. Do not click Submit if anything is wrong.</p>
-<h3><strong>Clicking Submit</strong></h3>
+<h3>Clicking Submit</h3>
 <p>Clicking Submit sends your submission to the GASCOIN system. The Submit button shows a loading animation for approximately 2 seconds while the submission is created. After this, you are automatically advanced to Step 5.</p>`,
         order: 9,
       },
@@ -263,16 +274,16 @@ export const DOC_CATEGORIES: DocCategory[] = [
         category: "Submitting",
         description: "",
         content: `<p>Step 5 is the verification monitoring screen. It shows your submission progressing through all 10 verification gates in real time. This is the system automatically checking every aspect of your submission.</p>
-<h3><strong>Reading the gate progress screen</strong></h3>
+<h3>Reading the gate progress screen</h3>
 <p>Each of the 10 gates is listed vertically. Each gate shows a status icon:</p>
-<h3><strong>How long verification takes</strong></h3>
+<h3>How long verification takes</h3>
 <p>Most gates complete in under 10 seconds. Gate 5 (Wallet on Receipt) involves OCR image processing and can take up to 45 seconds. The entire verification process typically completes within 2-5 minutes for a passing submission.</p>
-<h3><strong>If all 10 gates pass</strong></h3>
+<h3>If all 10 gates pass</h3>
 <p>The screen displays SUBMISSION APPROVED. Your SOL refund will be dispatched to your wallet within 24-48 hours. You can track your submission status at any time using the Wallet Tracker page at /wallet.</p>
-<h3><strong>If a gate fails</strong></h3>
+<h3>If a gate fails</h3>
 <p>The screen displays SUBMISSION INCOMPLETE. The failed gate is highlighted and a specific failure reason is shown explaining exactly what went wrong. Gates that come after the failed gate show the dash icon — they were not run because a previous gate blocked progress.</p>
 <p>After a failure, you can resubmit. Different gates have different resubmission requirements — see the Gates section of this document for details on each gate and how to fix failures.</p>
-<h3><strong>Gate 10 — Special Case (Non-Blocking)</strong></h3>
+<h3>Gate 10 — Special Case (Non-Blocking)</h3>
 <p>Gate 10 (Treasury Solvent) is the only non-blocking gate. If Gate 10 fails, your submission is not rejected. Instead, it is placed in a priority queue and automatically retried every 6 hours until the treasury has enough SOL to cover your refund. You do not need to resubmit if Gate 10 fails.</p>`,
         order: 10,
       },
@@ -293,15 +304,15 @@ export const DOC_CATEGORIES: DocCategory[] = [
 
 <h3>How gate execution works</h3>
 <ul>
-<li><strong>Gates 1–9:</strong> blocking checks. First failure stops progression.</li>
-<li><strong>Gate 10:</strong> non-blocking treasury solvency check with queue/retry behavior.</li>
+<li><strong>Gates 1–9:</strong> blocking checks. First failure stops progression</li>
+<li><strong>Gate 10:</strong> non-blocking treasury solvency check with queue/retry behavior</li>
 </ul>
 
 <h3>How to use this page</h3>
 <ol>
-<li>Identify the first failed gate in Wallet Tracker.</li>
-<li>Apply remediation for that specific gate only.</li>
-<li>Resubmit with fresh inputs when required.</li>
+<li>Identify the first failed gate in Wallet Tracker</li>
+<li>Apply remediation for that specific gate only</li>
+<li>Resubmit with fresh inputs when required</li>
 </ol>
 
 <h3>Operator note</h3>
@@ -314,16 +325,16 @@ export const DOC_CATEGORIES: DocCategory[] = [
         categorySlug: "verification",
         category: "Verification Gates",
         description: "",
-        content: `<h3><strong>What this gate checks</strong></h3>
+        content: `<h3>What this gate checks</h3>
 <p>Gate 1 verifies that the URL you submitted points to a real, accessible tweet on X. The system fetches the tweet directly using the X API v2 and confirms that the tweet ID exists and the account is not suspended.</p>
-<h3><strong>Common failure reasons</strong></h3>
+<h3>Common failure reasons</h3>
 <ul>
 <li>The tweet URL was pasted incorrectly — characters missing from the end</li>
 <li>The tweet was deleted after submission was initiated</li>
 <li>The X account was suspended after the tweet was posted</li>
 <li>The URL is from a different platform (not x.com or twitter.com)</li>
 </ul>
-<h3><strong>How to ensure Gate 1 passes</strong></h3>
+<h3>How to ensure Gate 1 passes</h3>
 <p>Use the X share button to copy the tweet URL — never type it manually. Verify the tweet is still live before submitting. Do not delete your tweet during the submission process.</p>`,
         order: 12,
       },
@@ -333,15 +344,15 @@ export const DOC_CATEGORIES: DocCategory[] = [
         categorySlug: "verification",
         category: "Verification Gates",
         description: "",
-        content: `<h3><strong>What this gate checks</strong></h3>
+        content: `<h3>What this gate checks</h3>
 <p>Gate 2 verifies that the X account that posted the tweet is set to fully public visibility at the time of verification. Private accounts cannot be read by the system regardless of the tweet content.</p>
-<h3><strong>Common failure reasons</strong></h3>
+<h3>Common failure reasons</h3>
 <ul>
 <li>Account was switched to private after posting the tweet</li>
 <li>Account is in a temporary read-only state</li>
 <li>Account visibility was set to followers-only</li>
 </ul>
-<h3><strong>How to ensure Gate 2 passes</strong></h3>
+<h3>How to ensure Gate 2 passes</h3>
 <p>Set your X account to public before posting and keep it public until your refund is confirmed. Do not change privacy settings during the submission and verification period.</p>`,
         order: 13,
       },
@@ -351,15 +362,15 @@ export const DOC_CATEGORIES: DocCategory[] = [
         categorySlug: "verification",
         category: "Verification Gates",
         description: "",
-        content: `<h3><strong>What this gate checks</strong></h3>
+        content: `<h3>What this gate checks</h3>
 <p>Gate 3 verifies that the tweet body contains the exact hashtag #gascoin. The check is case-insensitive, so #GASCOIN and #Gascoin also pass. The hashtag must be a standalone word in the tweet — not embedded in a URL or concatenated with another word.</p>
-<h3><strong>Common failure reasons</strong></h3>
+<h3>Common failure reasons</h3>
 <ul>
 <li>Hashtag misspelled: #gas_coin, #gasCoin (with capital C), #gasc0in</li>
 <li>#gascoin appears only in a reply to the tweet, not in the original tweet body</li>
 <li>The hashtag is embedded inside a URL</li>
 </ul>
-<h3><strong>How to ensure Gate 3 passes</strong></h3>
+<h3>How to ensure Gate 3 passes</h3>
 <p>Type #gascoin as a standalone word in your tweet before posting. Any capitalization variation is accepted. Do not use underscores or spaces within the hashtag.</p>`,
         order: 14,
       },
@@ -369,15 +380,15 @@ export const DOC_CATEGORIES: DocCategory[] = [
         categorySlug: "verification",
         category: "Verification Gates",
         description: "",
-        content: `<h3><strong>What this gate checks</strong></h3>
+        content: `<h3>What this gate checks</h3>
 <p>Gate 4 verifies that the tweet was posted within 48 hours before your submission time. The system compares the tweet's timestamp from the X API against the submission timestamp. The difference must be less than 172,800 seconds (48 hours).</p>
-<h3><strong>Common failure reasons</strong></h3>
+<h3>Common failure reasons</h3>
 <ul>
 <li>Tweet was posted more than 48 hours before submission</li>
 <li>Reusing a tweet from a previous submission attempt</li>
 <li>Time zone confusion — the system uses UTC for all timestamps</li>
 </ul>
-<h3><strong>How to ensure Gate 4 passes</strong></h3>
+<h3>How to ensure Gate 4 passes</h3>
 <p>Post your #gascoin tweet and submit your receipt in the same session. Do not save tweet URLs for later use. The moment you post, the 48-hour window begins.</p>`,
         order: 15,
       },
@@ -387,9 +398,9 @@ export const DOC_CATEGORIES: DocCategory[] = [
         categorySlug: "verification",
         category: "Verification Gates",
         description: "",
-        content: `<h3><strong>What this gate checks</strong></h3>
+        content: `<h3>What this gate checks</h3>
 <p>Gate 5 uses optical character recognition (OCR) to scan your receipt photo for the last 4 characters of your Solana wallet address. The system extracts handwritten characters and compares them against the last 4 characters of the wallet you connected in Step 1. They must match.</p>
-<h3><strong>Common failure reasons</strong></h3>
+<h3>Common failure reasons</h3>
 <ul>
 <li>Characters written too small to be read by OCR</li>
 <li>Characters written in pencil or light ink — low contrast against receipt paper</li>
@@ -398,9 +409,9 @@ export const DOC_CATEGORIES: DocCategory[] = [
 <li>Wrong characters written — do not match the last 4 of the wallet connected in Step 1</li>
 <li>Characters partially obscured by a fold or crease in the receipt</li>
 </ul>
-<h3><strong>How to ensure Gate 5 passes</strong></h3>
+<h3>How to ensure Gate 5 passes</h3>
 <p>Write the last 4 characters of your wallet address in black pen directly on the receipt. Use clear, printed characters. Write large — at least 3-4mm tall. Double-check before photographing. Take the photo from directly above, not at an angle.</p>
-<p>IMPORTANT: This is the most commonly failed gate. Before submitting, zoom in on your receipt photo on your phone and verify the characters are fully readable. If you cannot read them clearly, retake the photo.</p>`,
+<div class="doc-callout doc-callout--warn"><p>IMPORTANT: This is the most commonly failed gate. Before submitting, zoom in on your receipt photo on your phone and verify the characters are fully readable. If you cannot read them clearly, retake the photo.</p></div>`,
         order: 16,
       },
       {
@@ -409,9 +420,9 @@ export const DOC_CATEGORIES: DocCategory[] = [
         categorySlug: "verification",
         category: "Verification Gates",
         description: "",
-        content: `<h3><strong>What this gate checks</strong></h3>
+        content: `<h3>What this gate checks</h3>
 <p>Gate 6 verifies that the overall receipt image is clear enough for automated reading. The system checks image resolution, blur level, and whether key receipt fields (total amount, date) are detectable. A corrupted or damaged image file also fails this gate.</p>
-<h3><strong>Common failure reasons</strong></h3>
+<h3>Common failure reasons</h3>
 <ul>
 <li>Photo taken in low light — dark, grainy image</li>
 <li>Camera too far from the receipt — text is too small to read</li>
@@ -419,7 +430,7 @@ export const DOC_CATEGORIES: DocCategory[] = [
 <li>HEIC file from iPhone not processed correctly — try converting to JPG</li>
 <li>File is corrupted or partially uploaded</li>
 </ul>
-<h3><strong>How to ensure Gate 6 passes</strong></h3>
+<h3>How to ensure Gate 6 passes</h3>
 <p>Photograph the receipt flat on a bright surface with good overhead lighting. Fill the frame with the receipt. Ensure the total amount and date are clearly visible before uploading. Check the preview in Step 3 — if it looks blurry to you, it will fail the gate.</p>`,
         order: 17,
       },
@@ -429,16 +440,16 @@ export const DOC_CATEGORIES: DocCategory[] = [
         categorySlug: "verification",
         category: "Verification Gates",
         description: "",
-        content: `<h3><strong>What this gate checks</strong></h3>
+        content: `<h3>What this gate checks</h3>
 <p>Gate 7 uses OCR to extract the purchase date from the receipt and compares it against the submission date. The gas purchase must have occurred within 7 days before submission. Future-dated receipts automatically fail. Receipts with no readable date also fail.</p>
-<h3><strong>Common failure reasons</strong></h3>
+<h3>Common failure reasons</h3>
 <ul>
 <li>Receipt is older than 7 days</li>
 <li>Receipt date field is missing, torn off, or illegible</li>
 <li>Date format is ambiguous and cannot be parsed (e.g., partially faded thermal print)</li>
 <li>Reusing a receipt from a previous failed submission</li>
 </ul>
-<h3><strong>How to ensure Gate 7 passes</strong></h3>
+<h3>How to ensure Gate 7 passes</h3>
 <p>Use a receipt from a gas purchase within the last 7 days. Ensure the date is clearly printed and fully visible. Do not fold or tear the portion of the receipt showing the date.</p>`,
         order: 18,
       },
@@ -448,16 +459,22 @@ export const DOC_CATEGORIES: DocCategory[] = [
         categorySlug: "verification",
         category: "Verification Gates",
         description: "",
-        content: `<h3><strong>What this gate checks</strong></h3>
+        content: `<h3>What this gate checks</h3>
 <p>Gate 8 checks that your X account has not submitted a claim within the cooldown period for your tier. Standard and Commuter tiers have a 7-day cooldown, Road Warrior 3.5 days, and Fleet 1.75 days. The cooldown is tied to your X account, not your wallet.</p>
-<h3><strong>Common failure reasons</strong></h3>
+<h3>Common failure reasons</h3>
 <ul>
 <li>Submitting again before 7 days have passed since your last submission</li>
 <li>Having a pending or in-review submission still active</li>
 </ul>
-<h3><strong>How to ensure Gate 8 passes</strong></h3>
+<h3>How to ensure Gate 8 passes</h3>
 <p>Wait for your tier-specific cooldown to expire before submitting again. Use the Wallet Tracker at /wallet to check your cooldown status.</p>
-<p><strong>Example:</strong> You submit on Monday. Your next eligible submission is the following Monday.</p>`,
+<p><strong>Example:</strong> You submit on Monday. Your next eligible submission is the following Monday.</p>
+<pre class="doc-ascii">
+  STANDARD / COMMUTER          ROAD WARRIOR               FLEET
+  ├─ 7 day cooldown            ├─ 3.5 day cooldown        ├─ 1.75 day cooldown
+  ├─ 1 submission / week       ├─ 2 submissions / week    ├─ 4 submissions / week
+  └─ [Submit]───7d───[Ready]   └─ [Submit]──3.5d──[Ready] └─ [Submit]──42h──[Ready]
+</pre>`,
         order: 19,
       },
       {
@@ -466,15 +483,15 @@ export const DOC_CATEGORIES: DocCategory[] = [
         categorySlug: "verification",
         category: "Verification Gates",
         description: "",
-        content: `<h3><strong>What this gate checks</strong></h3>
+        content: `<h3>What this gate checks</h3>
 <p>Gate 9 generates a perceptual image hash of your uploaded receipt photo and compares it against all previously submitted receipts in the system. If the hash similarity score exceeds a threshold, the receipt is considered a duplicate and the submission fails. This applies regardless of the wallet address — the same physical receipt cannot be submitted twice even from different wallets.</p>
-<h3><strong>Common failure reasons</strong></h3>
+<h3>Common failure reasons</h3>
 <ul>
 <li>Submitting the same receipt a second time after a previous failed submission</li>
 <li>Two different users submitting photos of the same physical receipt</li>
 <li>Submitting a photo of a photo of a receipt (the hash will still match)</li>
 </ul>
-<h3><strong>How to ensure Gate 9 passes</strong></h3>
+<h3>How to ensure Gate 9 passes</h3>
 <p>Each submission requires a unique, original gas receipt that has never been submitted to GASCOIN before. Never resubmit a receipt — even if your previous submission failed on a different gate. Get a new receipt from a new gas purchase.</p>`,
         order: 20,
       },
@@ -484,11 +501,11 @@ export const DOC_CATEGORIES: DocCategory[] = [
         categorySlug: "verification",
         category: "Verification Gates",
         description: "",
-        content: `<h3><strong>What this gate checks</strong></h3>
+        content: `<h3>What this gate checks</h3>
 <p>Gate 10 queries the GASCOIN treasury wallet on the Solana blockchain via RPC and verifies that the current SOL balance is sufficient to cover your refund amount plus estimated transaction fees. This check happens immediately before the SOL is dispatched.</p>
-<h3><strong>What happens if Gate 10 fails</strong></h3>
+<h3>What happens if Gate 10 fails</h3>
 <p>Unlike Gates 1-9, Gate 10 failure does NOT reject your submission. Instead, your submission enters a priority queue. The system automatically retries Gate 10 every 6 hours. When the treasury is replenished and has sufficient balance, your submission automatically moves to approved and SOL is dispatched to your wallet. You do not need to resubmit or take any action.</p>
-<h3><strong>How long does a Gate 10 queue take</strong></h3>
+<h3>How long does a Gate 10 queue take</h3>
 <p>This depends entirely on when the treasury is next replenished. The treasury admin monitors the treasury balance and adds SOL as needed. Most Gate 10 queue situations resolve within 48-72 hours.</p><h3>What to expect while in Gate 10 queue</h3>
 <p>When your submission enters the Gate 10 queue, three things happen automatically:</p>
 <ul>
@@ -513,6 +530,19 @@ export const DOC_CATEGORIES: DocCategory[] = [
         description: "",
         content: `<h3>What this is</h3>
 <p>An architecture summary of the AI-assisted verification and payout system.</p>
+<pre class="doc-ascii">
+  ┌─────────────────────────────────────────────────────────────────┐
+  │                    GASCOIN VERIFICATION STACK                   │
+  ├─────────────────────────────────────────────────────────────────┤
+  │  GROK AI ENGINE          X API v2            SOLANA BLOCKCHAIN  │
+  │  ├─ Receipt OCR          ├─ Tweet verify     ├─ Token balance   │
+  │  ├─ AI detection         ├─ Account quality  ├─ Treasury check  │
+  │  ├─ Tamper scoring       ├─ Follower count   ├─ SOL dispatch    │
+  │  └─ Adaptive learning    └─ Social graph     └─ Audit trail     │
+  ├─────────────────────────────────────────────────────────────────┤
+  │              xAI SCORING · FRAUD DETECTION · PAYOUT             │
+  └─────────────────────────────────────────────────────────────────┘
+</pre>
 
 <h3>Core components</h3>
 <ul>
@@ -568,9 +598,9 @@ All states/events -> Persistence + Audit Log (immutable trail)
         content: `<p>This page gives two views of GASCOIN AI operations: a plain-English path for newcomers, and a systems path for technical operators.</p>
 <h3>Model contract (clear boundaries)</h3>
 <ul>
-<li><strong>Deterministic policy layer:</strong> gates, thresholds, cooldown, queue rules, and payout state transitions.</li>
-<li><strong>Model-assisted layer (Grok/xAI + OCR):</strong> text extraction, tamper likelihood, AI-likelihood, and quality scoring.</li>
-<li><strong>Safety principle:</strong> model outputs inform decisions; deterministic policy enforces final pass/fail paths.</li>
+<li><strong>Deterministic policy layer:</strong> gates, thresholds, cooldown, queue rules, and payout state transitions</li>
+<li><strong>Model-assisted layer (Grok/xAI + OCR):</strong> text extraction, tamper likelihood, AI-likelihood, and quality scoring</li>
+<li><strong>Safety principle:</strong> model outputs inform decisions; deterministic policy enforces final pass/fail paths</li>
 </ul>
 <h3>Newcomer Path (Simple)</h3>
 <ul>
@@ -640,7 +670,7 @@ Inputs(wallet,tweet,receipt)
         category: "Technology",
         description: "",
         content: `<p>Grok — built by xAI — is the reasoning engine behind GASCOIN's fraud detection and quality scoring. It powers four critical systems.</p>
-<p><strong>Important:</strong> Grok does not directly release funds. Treasury release and final state transitions are controlled by deterministic policy and gate execution logic.</p>
+<div class="doc-callout doc-callout--warn"><p><strong>Important:</strong> Grok does not directly release funds. Treasury release and final state transitions are controlled by deterministic policy and gate execution logic.</p></div>
 <h3>Receipt Analysis</h3>
 <p>Every uploaded receipt passes through Grok-powered OCR that extracts structured data: total amount, date, station name, and handwritten wallet characters. Unlike traditional OCR, Grok understands context — it can distinguish a gas station receipt from a restaurant bill, detect inconsistencies between printed and handwritten text, and flag anomalies that suggest digital manipulation.</p>
 <h3>AI Image Detection</h3>
@@ -696,6 +726,15 @@ Inputs(wallet,tweet,receipt)
         category: "Technology",
         description: "",
         content: `<p>GASCOIN's anti-fraud system operates in four independent layers. Each layer catches a different class of attack. All four must pass for a submission to be approved.</p>
+<pre class="doc-ascii">
+  LAYER 1   Gate-Based Verification     10 sequential checks, any failure = reject
+  ─────────────────────────────────────────────────────────────────────────────────
+  LAYER 2   AI Image Analysis (Grok)    AI generation score + tamper detection
+  ─────────────────────────────────────────────────────────────────────────────────
+  LAYER 3   Perceptual Hashing          Duplicate receipt fingerprinting
+  ─────────────────────────────────────────────────────────────────────────────────
+  LAYER 4   Social Signal Analysis      X account quality + network scoring
+</pre>
 <h3>Layer 1 — Gate-Based Sequential Verification</h3>
 <p>10 automated gates run in sequence. Each gate checks a specific requirement: tweet validity, receipt authenticity, wallet matching, cooldown compliance, and more. Any single gate failure blocks the entire submission. There is no partial pass.</p>
 <h3>Layer 2 — AI Image Analysis (Grok)</h3>
@@ -731,18 +770,18 @@ Inputs(wallet,tweet,receipt)
         description: "",
         content: `<p>GASCOIN is designed so that the cost of fabricating a valid submission always exceeds the value of the refund. Here's why:</p>
 <ul>
-<li><strong>Physical receipt required</strong> — You need a real paper receipt from a real gas station. Digital, email, and app receipts are rejected. AI-generated receipt images are caught by Grok's image analysis.</li>
-<li><strong>Handwritten wallet ID</strong> — The last 4 characters of your wallet must be physically written on the receipt in pen. This ties the receipt to a specific wallet at a specific moment in time.</li>
-<li><strong>Live tweet verification</strong> — Your tweet must exist, be public, contain #gascoin, and be posted within 48 hours. Deleting the tweet after submission fails re-verification at payout time.</li>
-<li><strong>AI image analysis</strong> — Grok scores every receipt for AI generation probability and digital tampering. Two independent scores must both pass.</li>
-<li><strong>Perceptual hashing</strong> — Every receipt is fingerprinted and compared against all previous submissions. The same receipt cannot be submitted twice, even if edited.</li>
-<li><strong>Social graph scoring</strong> — Your X account must have 100+ real followers, posting history, and pass account quality checks. Bot accounts and purchased followers are detected.</li>
-<li><strong>Referral ring detection</strong> — AI graph analysis identifies and blocks circular referral schemes.</li>
-<li><strong>Tier-based cooldowns</strong> — Submission frequency is capped by tier. Even Fleet (the highest tier) is limited to 4 per week.</li>
-<li><strong>Dual token check</strong> — Token balance is verified at submission AND before payout. Dumping tokens after submission blocks the refund.</li>
-<li><strong>Pre-payout re-verification</strong> — Before every SOL dispatch, the system re-checks: tweet still live, follower count still valid, account quality still passing, token balance still held.</li>
-<li><strong>Admin review layer</strong> — Every submission is reviewed by a human admin before funds are released. The admin has full visibility into all gate results, AI scores, and fraud signals.</li>
-<li><strong>Immutable audit log</strong> — Every action on the platform is permanently recorded. Nothing can be done silently.</li>
+<li><strong>Physical receipt required</strong> — You need a real paper receipt from a real gas station. Digital, email, and app receipts are rejected. AI-generated receipt images are caught by Grok's image analysis</li>
+<li><strong>Handwritten wallet ID</strong> — The last 4 characters of your wallet must be physically written on the receipt in pen. This ties the receipt to a specific wallet at a specific moment in time</li>
+<li><strong>Live tweet verification</strong> — Your tweet must exist, be public, contain #gascoin, and be posted within 48 hours. Deleting the tweet after submission fails re-verification at payout time</li>
+<li><strong>AI image analysis</strong> — Grok scores every receipt for AI generation probability and digital tampering. Two independent scores must both pass</li>
+<li><strong>Perceptual hashing</strong> — Every receipt is fingerprinted and compared against all previous submissions. The same receipt cannot be submitted twice, even if edited</li>
+<li><strong>Social graph scoring</strong> — Your X account must have 100+ real followers, posting history, and pass account quality checks. Bot accounts and purchased followers are detected</li>
+<li><strong>Referral ring detection</strong> — AI graph analysis identifies and blocks circular referral schemes</li>
+<li><strong>Tier-based cooldowns</strong> — Submission frequency is capped by tier. Even Fleet (the highest tier) is limited to 4 per week</li>
+<li><strong>Dual token check</strong> — Token balance is verified at submission AND before payout. Dumping tokens after submission blocks the refund</li>
+<li><strong>Pre-payout re-verification</strong> — Before every SOL dispatch, the system re-checks: tweet still live, follower count still valid, account quality still passing, token balance still held</li>
+<li><strong>Admin review layer</strong> — Every submission is reviewed by a human admin before funds are released. The admin has full visibility into all gate results, AI scores, and fraud signals</li>
+<li><strong>Immutable audit log</strong> — Every action on the platform is permanently recorded. Nothing can be done silently</li>
 </ul>
 <p>To successfully game GASCOIN, an attacker would need to: physically obtain a gas receipt, write a wallet ID on it by hand, photograph it convincingly enough to fool Grok's AI analysis, maintain a legitimate X account with real followers and activity, post a public tweet, hold GASCOIN tokens, and pass admin review. The cost of doing this at scale makes it economically irrational.</p>`,
         order: 34,
@@ -770,7 +809,7 @@ Inputs(wallet,tweet,receipt)
         category: "Platform Pages",
         description: "",
         content: `<p>The homepage is the primary entry point for new visitors. It introduces the GASCOIN concept and directs users to submit their first receipt.</p>
-<h3><strong>What the homepage shows</strong></h3>
+<h3>What the homepage shows</h3>
 <ul>
 <li>Navigation bar with links to all platform pages and a CONNECT WALLET button</li>
 <li>Hero section with the GASCOIN value proposition: POST. SUBMIT. GET PAID BACK.</li>
@@ -783,7 +822,7 @@ Inputs(wallet,tweet,receipt)
 <li>Wallet Tracker teaser with a static gate progress illustration</li>
 <li>Referral engine teaser with platform-wide conversion statistics</li>
 </ul>
-<h3><strong>The treasury statistics strip</strong></h3>
+<h3>The treasury statistics strip</h3>
 <p>The four stat cards in the statistics strip show:</p>
 <p>If Treasury Balance shows '--', it means the RPC call has not yet returned or has failed. This is not a permanent state — wait a moment and the balance will populate. It does not mean the treasury is empty.</p>`,
         order: 23,
@@ -812,7 +851,7 @@ Inputs(wallet,tweet,receipt)
         category: "Platform Pages",
         description: "",
         content: `<p>The Community page is the public proof-of-payout wall. Every approved gas receipt submission that passes all 10 gates appears as a card on this page. It exists to demonstrate that the platform works and real people receive real refunds.</p>
-<h3><strong>What each receipt card shows</strong></h3>
+<h3>What each receipt card shows</h3>
 <ul>
 <li>Location: the city and state where the gas was purchased (e.g., Austin, TX)</li>
 <li>SOL Refund Amount: the exact SOL sent to the submitter</li>
@@ -822,12 +861,13 @@ Inputs(wallet,tweet,receipt)
 <li>Gates: 10/10 indicating all verification gates passed</li>
 <li>Receipt Image: a photo of the actual gas receipt (may be redacted if sensitive info detected)</li>
 </ul>
-<h3><strong>Filters and sorting</strong></h3>
-<h3><strong>Receipt detail modal</strong></h3>
+<h3>Filters and sorting</h3>
+<p>Filter the feed by country, date range, or featured status. Sort results by newest first or highest refund amount. Filters and sort options combine so you can narrow down to exactly the receipts you want to see.</p>
+<h3>Receipt detail modal</h3>
 <p>Clicking any receipt card opens a full detail view showing the complete receipt image, all submission details (wallet, SOL amount, receipt total, gas station location, receipt date, gates passed, submission ID), and a copy button for the wallet address.</p>
-<h3><strong>Live updates</strong></h3>
+<h3>Live updates</h3>
 <p>The community feed updates in real time. When a new submission is approved, a notification bar appears at the top of the feed: '↑ X new receipts — click to load.' Clicking this bar adds the new receipts to the top of the grid without requiring a page refresh.</p>
-<h3><strong>Privacy</strong></h3>
+<h3>Privacy</h3>
 <p>Sensitive personal information is never displayed. Gas station names are shown as city and state only — never a specific address. Wallet addresses are truncated. Receipt images are reviewed by the admin team and redacted if credit card numbers, phone numbers, or full names are visible.</p>`,
         order: 25,
       },
@@ -838,14 +878,15 @@ Inputs(wallet,tweet,receipt)
         category: "Platform Pages",
         description: "",
         content: `<p>The leaderboard ranks all wallets that have earned SOL through GASCOIN by a composite score. It is public and visible to anyone — no wallet connection required to view it.</p>
-<h3><strong>The scoring formula</strong></h3>
+<h3>The scoring formula</h3>
+<p>The composite score is built from engagement points, referral points, holdings points, and submission streaks. The weights assigned to each factor are dynamic and may be adjusted over time to maintain healthy ecosystem growth.</p>
 <p>Each wallet's leaderboard score is calculated from 4 factors:</p>
-<h3><strong>The leaderboard table</strong></h3>
+<h3>The leaderboard table</h3>
 <p>The main table shows all wallets ordered by composite score. Each row shows: rank, wallet address (truncated), number of referrals, engagement score, GASCOIN holdings, points earned, composite score, and a View link.</p>
 <p>Clicking View on any row opens the full submission history for that wallet in the Wallet Tracker.</p>
-<h3><strong>Top 3 Podium</strong></h3>
+<h3>Top 3 Podium</h3>
 <p>When 3 or more wallets have submissions, the top 3 are displayed in a visual podium above the table. The rank 1 wallet appears in the center and is slightly taller. If your connected wallet is in the top 3, a YOU badge appears on your podium card.</p>
-<h3><strong>Live updates</strong></h3>
+<h3>Live updates</h3>
 <p>The leaderboard updates in real time via Supabase Realtime. When any submission status changes in the database, the leaderboard data refreshes automatically. The LIVE indicator in the page header shows the time since last update.</p><h3>How scores are calculated</h3>
 <p>Each wallet's leaderboard position is determined by a proprietary composite score based on three factors: referral activity, platform engagement, and GASCOIN holdings. The weights are dynamic and may be adjusted. SOL earned from receipt refunds is not a factor — the leaderboard rewards ecosystem contribution, not receipt size.</p>
 <p>→ See also: Points System documentation for details on how points are earned</p>`,
@@ -858,13 +899,14 @@ Inputs(wallet,tweet,receipt)
         category: "Platform Pages",
         description: "",
         content: `<p>The Wallet Tracker is your personal submission status dashboard. It shows your complete submission history, current gate progress for any active submission, cooldown countdown, and total earnings. It can also be used to look up any public wallet address.</p>
-<h3><strong>Two modes</strong></h3>
-<h3><strong>Cooldown countdown</strong></h3>
+<h3>Two modes</h3>
+<p>Connected Mode shows your own submissions, cooldown timer, and earnings when your wallet is connected. Lookup Mode lets you search any wallet address to view its public submission history and gate results.</p>
+<h3>Cooldown countdown</h3>
 <p>In Connected Mode, if your account is within the cooldown period following a submission, a countdown timer shows how much time remains before you can submit again. Cooldown duration depends on your tier.</p>
 <p>When the countdown reaches zero, the cooldown block automatically transitions to show Submit Receipt with a link to the submission portal.</p>
-<h3><strong>Gate progress tracker</strong></h3>
+<h3>Gate progress tracker</h3>
 <p>If you have a pending submission (one that has been submitted but not yet approved or rejected), the gate progress tracker appears. It shows all 10 gates with their current status updating live as each gate is processed. This is the same display as Step 5 of the submission portal but accessible at any time from /wallet.</p>
-<h3><strong>URL deep linking</strong></h3>
+<h3>URL deep linking</h3>
 <p>The Wallet Tracker supports URL parameters. Visiting /wallet?address=SOLANA_ADDRESS_HERE automatically loads that address in Lookup Mode without requiring the user to paste the address. This link format is used by the leaderboard View buttons.</p>`,
         order: 27,
       },
@@ -875,25 +917,25 @@ Inputs(wallet,tweet,receipt)
         category: "Platform Pages",
         description: "",
         content: `<p>The Referral Engine allows approved GASCOIN submitters to earn points by referring new users to the platform. When someone uses your referral link to submit and gets approved, you earn 500 points that boost your leaderboard rank and status.</p>
-<h3><strong>Who can use the referral system</strong></h3>
+<h3>Who can use the referral system</h3>
 <p>You must have at least one approved submission to generate a referral link and earn rewards. Users without any approved submission can see the referral page but the link generation is locked until they complete a successful submission.</p>
-<h3><strong>Your referral link</strong></h3>
+<h3>Your referral link</h3>
 <p>Your referral link is unique to your wallet address and is deterministically generated — it never changes. The format is: https://gascoin.com/submit?ref=XXXXXXXX where XXXXXXXX is your 8-character referral code.</p>
 <p>Share this link anywhere: X, Telegram, Discord, text message, or any other platform where people might be interested in getting their gas money back.</p>
-<h3><strong>How a referral conversion works</strong></h3>
-<ul>
-<li>Someone clicks your referral link.</li>
-<li>Their browser stores your referral code for 7 days (the attribution window).</li>
-<li>They submit a gas receipt using the platform.</li>
-<li>Their submission passes all 10 verification gates and is approved.</li>
-<li>The system detects your referral code on their submission and checks eligibility.</li>
-<li>If eligible, 500 points are awarded to your wallet through the AI verification gate.</li>
-<li>Points are credited automatically. No admin action needed for referral points.</li>
-</ul>
-<h3><strong>Referral rules and limits</strong></h3>
-<h3><strong>Referral dashboard metrics</strong></h3>
+<h3>How a referral conversion works</h3>
+<ol>
+<li>Someone clicks your referral link</li>
+<li>Their browser stores your referral code for 7 days (the attribution window)</li>
+<li>They submit a gas receipt using the platform</li>
+<li>Their submission passes all 10 verification gates and is approved</li>
+<li>The system detects your referral code on their submission and checks eligibility</li>
+<li>If eligible, 500 points are awarded to your wallet through the AI verification gate</li>
+<li>Points are credited automatically. No admin action needed for referral points</li>
+</ol>
+<h3>Referral rules and limits</h3>
+<h3>Referral dashboard metrics</h3>
 <p>The referral page dashboard shows: Total Clicks (how many times your link has been clicked), Unique Visitors (unique devices), Conversions (approved submissions through your link), Conversion Rate (unique clicks that resulted in an approved submission), and Points Earned (total referral points to date).</p>
-<h3><strong>Referral leaderboard</strong></h3>
+<h3>Referral leaderboard</h3>
 <p>The bottom of the referral page shows the top 10 referrers across the entire platform ranked by total conversions. This leaderboard is public — no wallet connection required to view it.</p><h3>When referral rewards are skipped</h3>
 <p>A conversion is marked "skipped" rather than "pending" when eligibility rules prevent a reward:</p>
 <table><thead><tr><th>Skip Reason</th><th>What It Means</th><th>Reversible?</th></tr></thead>
@@ -911,14 +953,15 @@ Inputs(wallet,tweet,receipt)
         category: "Platform Pages",
         description: "",
         content: `<p>The Perks page explains the GASCOIN token tier system. Holding GASCOIN tokens in your connected wallet unlocks higher refund caps, priority queue processing, and exclusive badges visible across the platform.</p>
-<h3><strong>The four tiers</strong></h3>
-<h3><strong>How tier is determined</strong></h3>
-<p>The system checks your connected wallet's GASCOIN token balance live on the Solana blockchain when you connect. The balance is also cached and refreshed every 5 minutes. If you buy more GASCOIN and want to see your updated tier immediately, click the Refresh Balance button on the Perks page.</p>
-<h3><strong>When tier is applied</strong></h3>
+<h3>The four tiers</h3>
+<p>Standard (1 token), Commuter (100K tokens), Road Warrior (5M tokens), and Fleet (10M tokens). Higher tiers unlock bigger refund caps and faster submission frequency.</p>
+<h3>How tier is determined</h3>
+<p>Your tier is determined by the GASCOIN token balance in your connected wallet at the time of submission. Balance is checked on-chain via a Solana blockchain query. The system checks your connected wallet's GASCOIN token balance live on the Solana blockchain when you connect. The balance is also cached and refreshed every 5 minutes. If you buy more GASCOIN and want to see your updated tier immediately, click the Refresh Balance button on the Perks page.</p>
+<h3>When tier is applied</h3>
 <p>Your tier is snapshotted at the time of submission. The refund cap associated with that tier applies to that submission — even if your holdings later change before dispatch. If you upgrade after submitting, the original tier at submission time still applies.</p>
-<h3><strong>Queue priority</strong></h3>
+<h3>Queue priority</h3>
 <p>Higher tier submissions are processed before lower tier submissions. If multiple submissions are pending in the admin queue, a Fleet tier submission will appear above a Standard tier submission. This does not affect the automated gate processing — it affects the order in which the admin reviews and approves refund amounts.</p>
-<h3><strong>Where tier badges appear</strong></h3>
+<h3>Where tier badges appear</h3>
 <p>Once you have an approved submission, your tier badge appears on your leaderboard row, on your receipt cards in the community feed, and in the wallet tracker.</p><h3>How to acquire GASCOIN tokens</h3>
 <p>GASCOIN tokens are available on Solana decentralised exchanges:</p>
 <ul>
@@ -937,8 +980,9 @@ Inputs(wallet,tweet,receipt)
         category: "Platform Pages",
         description: "",
         content: `<p>The Treasury/Dashboard page shows the financial health of the GASCOIN platform. It is publicly viewable and designed to provide full transparency about the treasury's ability to pay refunds.</p>
-<h3><strong>What the dashboard shows</strong></h3>
-<h3><strong>How to interpret the treasury balance</strong></h3>
+<h3>What the dashboard shows</h3>
+<p>The dashboard displays the live treasury SOL balance, total submissions processed, total SOL disbursed to date, gate pass rates across all submissions, and a recent activity feed showing the latest approvals and payouts.</p>
+<h3>How to interpret the treasury balance</h3>
 <p>The treasury balance is the amount of SOL currently available to pay refunds. A healthy treasury will comfortably exceed the sum of all pending refund amounts. If the treasury balance drops below 1 SOL, the admin dashboard displays a LOW TREASURY warning and new approvals may be paused.</p>`,
         order: 30,
       },
@@ -949,7 +993,7 @@ Inputs(wallet,tweet,receipt)
         category: "Platform Pages",
         description: "",
         content: `<p>The Gates page is the full public documentation of GASCOIN's 10 verification gates. It is the reference page for understanding exactly what the system checks before approving a submission.</p>
-<h3><strong>Sections on the Gates page</strong></h3>
+<h3>Sections on the Gates page</h3>
 <ul>
 <li>Live system statistics: total submissions processed, overall pass rate, average processing time, most frequently failed gate</li>
 <li>Category filters: view gates by category (ALL, TWEET, RECEIPT, WALLET, TREASURY)</li>
@@ -957,10 +1001,10 @@ Inputs(wallet,tweet,receipt)
 <li>Gate cards: all 10 gates with live pass rate statistics, descriptions, and expandable detail panels</li>
 <li>FAQ section: 6 common questions with detailed answers</li>
 </ul>
-<h3><strong>The pre-flight checklist</strong></h3>
+<h3>The pre-flight checklist</h3>
 <p>The pre-flight checklist is the most important self-service tool on the platform. Before submitting, visit /gates and check all 10 boxes. The checklist saves your progress in your browser — if you navigate away and return, your checked boxes are preserved. When all 10 are checked, a Submit Receipt button appears that takes you directly to the submission portal.</p>
 <p>The 10 pre-flight checks correspond directly to the 10 verification gates. Completing the checklist means you have self-verified that your tweet, receipt, and wallet meet all requirements before the automated system checks them.</p>
-<h3><strong>Gate detail panels</strong></h3>
+<h3>Gate detail panels</h3>
 <p>Clicking VIEW FULL DETAILS on any gate card opens an expanded panel showing three columns: What We Check (the exact system logic), Common Failures (real occurrence data from the database), and How To Pass (step-by-step guidance). Only one gate detail panel can be open at a time.</p>`,
         order: 31,
       },
@@ -988,9 +1032,9 @@ Inputs(wallet,tweet,receipt)
         description: "",
         content: `<p>Admin access uses a 3-layer security system:</p>
 <ul>
-<li>Wallet allowlist: only specific wallet addresses are permitted. The list is configured in the server environment — not in the database.</li>
-<li>Signed challenge: after connecting an allowed wallet, the admin must sign a cryptographic challenge message with their wallet's private key. This proves ownership of the wallet without revealing any private key.</li>
-<li>Server session: after signing, a session cookie is issued valid for 8 hours. Every admin page and every admin action verifies the session server-side before executing.</li>
+<li>Wallet allowlist: only specific wallet addresses are permitted. The list is configured in the server environment — not in the database</li>
+<li>Signed challenge: after connecting an allowed wallet, the admin must sign a cryptographic challenge message with their wallet's private key. This proves ownership of the wallet without revealing any private key</li>
+<li>Server session: after signing, a session cookie is issued valid for 8 hours. Every admin page and every admin action verifies the session server-side before executing</li>
 </ul>
 <p>Admin sessions expire after 8 hours. After expiry, the admin must re-authenticate. A live countdown in the admin sidebar shows remaining session time.</p>
 <p>Every admin action — approvals, rejections, gate overrides, reward dispatches — is permanently recorded in the audit log with the admin wallet address, timestamp, action type, and a before/after snapshot of the changed data.</p>`,
@@ -1003,8 +1047,8 @@ Inputs(wallet,tweet,receipt)
         category: "Security & Admin",
         description: "",
         content: `<p>The Submissions page is the primary daily operations page. It shows all submissions across all statuses with filtering, searching, and action controls.</p>
-<h3><strong>Submission actions</strong></h3>
-<h3><strong>SOL amount entry</strong></h3>
+<h3>Submission actions</h3>
+<h3>SOL amount entry</h3>
 <p>When approving a submission, the admin enters the exact SOL amount to refund. The maximum is capped by the submitter's tier policy, and the system prevents entering a value above that cap.</p>`,
         order: 34,
       },
@@ -1015,13 +1059,13 @@ Inputs(wallet,tweet,receipt)
         category: "Security & Admin",
         description: "",
         content: `<p>The Referral Rewards page shows all referral conversions and their point awards. Referral points are awarded automatically through the AI verification gate — no manual SOL dispatch is needed for referrals. The admin page is for monitoring and auditing referral activity.</p>
-<h3><strong>How referral points work</strong></h3>
+<h3>How referral points work</h3>
 <ul>
-<li>Open /admin/referrals to see all referral conversions.</li>
-<li>Verified conversions show 500 points awarded to the referrer.</li>
-<li>Skipped conversions show the skip reason (self-referral, cap reached, etc.).</li>
-<li>The AI ring detector flags suspicious referral patterns (circular refs, chain farming).</li>
-<li>Points are awarded automatically by the verify-referrals worker (every 15 minutes).</li>
+<li>Open /admin/referrals to see all referral conversions</li>
+<li>Verified conversions show 500 points awarded to the referrer</li>
+<li>Skipped conversions show the skip reason (self-referral, cap reached, etc.)</li>
+<li>The AI ring detector flags suspicious referral patterns (circular refs, chain farming)</li>
+<li>Points are awarded automatically by the verify-referrals worker (every 15 minutes)</li>
 </ul>`,
         order: 35,
       },
@@ -1041,7 +1085,7 @@ Inputs(wallet,tweet,receipt)
         category: "Security & Admin",
         description: "",
         content: `<p>Gate Overrides allows an admin to manually pass or fail any individual gate on any submission. This is an emergency tool used when a gate fails due to a system error rather than a user error — for example, if the X API was temporarily down and Gate 1 failed on a legitimate submission.</p>
-<p>IMPORTANT: Gate overrides are irreversible and permanently logged in the audit log with the admin wallet address. Every override will be visible in perpetuity. Use only when clearly necessary.</p>`,
+<div class="doc-callout doc-callout--warn"><p>IMPORTANT: Gate overrides are irreversible and permanently logged in the audit log with the admin wallet address. Every override will be visible in perpetuity. Use only when clearly necessary.</p></div>`,
         order: 37,
       },
       {
@@ -1065,11 +1109,11 @@ Inputs(wallet,tweet,receipt)
 
 <h3>Control families</h3>
 <ul>
-<li><strong>Identity controls:</strong> account visibility and ownership checks.</li>
-<li><strong>Artifact controls:</strong> OCR integrity and duplicate fingerprinting.</li>
-<li><strong>Rate controls:</strong> cooldown and replay resistance.</li>
-<li><strong>Execution controls:</strong> treasury solvency and payout gating.</li>
-<li><strong>Governance controls:</strong> immutable audit logs and override accountability.</li>
+<li><strong>Identity controls:</strong> account visibility and ownership checks</li>
+<li><strong>Artifact controls:</strong> OCR integrity and duplicate fingerprinting</li>
+<li><strong>Rate controls:</strong> cooldown and replay resistance</li>
+<li><strong>Execution controls:</strong> treasury solvency and payout gating</li>
+<li><strong>Governance controls:</strong> immutable audit logs and override accountability</li>
 </ul>
 
 <h3>Risk posture</h3>
@@ -1164,11 +1208,11 @@ Inputs(wallet,tweet,receipt)
 
 <h3>Quick checks (in order)</h3>
 <ol>
-<li><strong>Wallet:</strong> extension installed, unlocked, and connected.</li>
-<li><strong>Tweet:</strong> account public, <code>#gascoin</code> present, tweet live.</li>
-<li><strong>Receipt:</strong> physical, legible, in policy date range, wallet marks visible.</li>
-<li><strong>Cooldown:</strong> verify timer in <a href="/wallet">/wallet</a>.</li>
-<li><strong>Treasury queue:</strong> Gate 10 retries are automatic.</li>
+<li><strong>Wallet:</strong> extension installed, unlocked, and connected</li>
+<li><strong>Tweet:</strong> account public, <code>#gascoin</code> present, tweet live</li>
+<li><strong>Receipt:</strong> physical, legible, in policy date range, wallet marks visible</li>
+<li><strong>Cooldown:</strong> verify timer in <a href="/wallet">/wallet</a></li>
+<li><strong>Treasury queue:</strong> Gate 10 retries are automatic</li>
 </ol>
 
 <h3>Best self-service pages</h3>
@@ -1426,9 +1470,9 @@ Inputs(wallet,tweet,receipt)
 
 <h3>Before contacting support</h3>
 <ul>
-<li>Check <strong>/wallet</strong> for status and failure signals.</li>
-<li>Review <strong>/gates</strong> for gate-specific remediation steps.</li>
-<li>Confirm issue details in the Help pages.</li>
+<li>Check <strong>/wallet</strong> for status and failure signals</li>
+<li>Review <strong>/gates</strong> for gate-specific remediation steps</li>
+<li>Confirm issue details in the Help pages</li>
 </ul>
 
 <h3>Include these details</h3>
@@ -1440,7 +1484,7 @@ Inputs(wallet,tweet,receipt)
 </ul>
 
 <h3>Support channel</h3>
-<p><strong>TODO:</strong> set official Discord/Telegram/Email endpoint.</p>
+<p>For support, reach out on X by tagging @gascoin or sending a direct message.</p>
 
 <h3>Operator note</h3>
 <p>Submissions cannot be edited after final submit. Corrections require new compliant input or admin intervention when appropriate.</p>`,
@@ -1457,8 +1501,8 @@ Inputs(wallet,tweet,receipt)
 
 <h3>Core distinction</h3>
 <ul>
-<li><strong>SOL payouts:</strong> only for approved gas receipt claims.</li>
-<li><strong>Points:</strong> earned from engagement, referrals, streaks, and holdings.</li>
+<li><strong>SOL payouts:</strong> only for approved gas receipt claims</li>
+<li><strong>Points:</strong> earned from engagement, referrals, streaks, and holdings</li>
 </ul>
 
 <h3>Why points matter</h3>
@@ -1489,12 +1533,12 @@ Inputs(wallet,tweet,receipt)
 <h3>What Earns Points</h3>
 <p>Six engagement metrics are tracked:</p>
 <ul>
-<li><strong>Impressions</strong> — 1 point each. How many people saw your tweet.</li>
-<li><strong>Likes</strong> — 50 points each. Basic engagement signal.</li>
-<li><strong>Replies</strong> — 100 points each. Conversations are valued.</li>
-<li><strong>Bookmarks</strong> — 150 points each. Saves indicate high-value content.</li>
-<li><strong>Retweets</strong> — 250 points each. Amplification is heavily rewarded.</li>
-<li><strong>Quote Tweets</strong> — 500 points each. The highest-value engagement.</li>
+<li><strong>Impressions</strong> — 1 point each. How many people saw your tweet</li>
+<li><strong>Likes</strong> — 50 points each. Basic engagement signal</li>
+<li><strong>Replies</strong> — 100 points each. Conversations are valued</li>
+<li><strong>Bookmarks</strong> — 150 points each. Saves indicate high-value content</li>
+<li><strong>Retweets</strong> — 250 points each. Amplification is heavily rewarded</li>
+<li><strong>Quote Tweets</strong> — 500 points each. The highest-value engagement</li>
 </ul>
 
 <h3>How Scoring Works</h3>
