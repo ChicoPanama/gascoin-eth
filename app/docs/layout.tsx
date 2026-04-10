@@ -24,7 +24,7 @@ export default function DocsLayout({ children }: { children: React.ReactNode }) 
   const filtered = DOC_CATEGORIES.map((cat) => ({
     ...cat,
     sections: cat.sections.filter((s) =>
-      !search || s.title.toLowerCase().includes(search.toLowerCase())
+      !s.navHidden && (!search || s.title.toLowerCase().includes(search.toLowerCase()))
     ),
   })).filter((cat) => cat.sections.length > 0);
 

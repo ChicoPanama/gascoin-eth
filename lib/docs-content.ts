@@ -6,6 +6,7 @@ export interface DocSection {
   description: string;
   content: string;
   order: number;
+  navHidden?: boolean;
 }
 
 export interface DocCategory {
@@ -596,6 +597,7 @@ export const DOC_CATEGORIES: DocCategory[] = [
         description: "",
         content: `<p>The GASCOIN platform has 10 public-facing pages accessible from the navigation bar. This section documents every page, what it shows, and how to use it.</p>`,
         order: 22,
+        navHidden: true,
       },
       {
         slug: "homepage",
@@ -906,6 +908,7 @@ export const DOC_CATEGORIES: DocCategory[] = [
         description: "",
         content: `<p>The 10-gate sequential system is the primary fraud prevention mechanism. No submission can receive a refund without passing all 10 automated checks. Gates 1-9 are fully automated with no human input. Gate 10 is a final treasury solvency check. No gate can be individually disabled by a user.</p>`,
         order: 49,
+        navHidden: true,
       },
       {
         slug: "perceptual-hashing-gate-9",
@@ -924,6 +927,7 @@ export const DOC_CATEGORIES: DocCategory[] = [
         description: "",
         content: `<p>Submission cooldown is per X account (not per wallet) and varies by tier: Standard and Commuter have a 7-day cooldown (1/week), Road Warrior has a 3.5-day cooldown (2/week), and Fleet has a 1.75-day cooldown (4/week). Linking a different wallet does not reset the timer.</p>`,
         order: 51,
+        navHidden: true,
       },
       {
         slug: "receipt-date-validation-gate-7",
@@ -933,6 +937,7 @@ export const DOC_CATEGORIES: DocCategory[] = [
         description: "",
         content: `<p>Receipts older than 7 days are rejected. This prevents the use of stockpiled receipts and ensures refunds correspond to recent, real-world gas purchases.</p>`,
         order: 52,
+        navHidden: true,
       },
       {
         slug: "wallet-address-on-receipt-gate-5",
@@ -942,6 +947,7 @@ export const DOC_CATEGORIES: DocCategory[] = [
         description: "",
         content: `<p>Requiring the last 4 characters of a Solana wallet address to be physically written on the paper receipt and visible in the photograph is a low-friction anti-fraud measure. It ties the receipt to a specific wallet that was known at the time of the gas purchase while keeping the process simple for users.</p>`,
         order: 53,
+        navHidden: true,
       },
       {
         slug: "admin-audit-trail",
@@ -951,6 +957,7 @@ export const DOC_CATEGORIES: DocCategory[] = [
         description: "",
         content: `<p>Every admin action is permanently recorded and cannot be deleted. Gate overrides, approvals, rejections, and reward dispatches all create immutable audit log entries. This ensures no admin action can be taken silently and all platform decisions are accountable.</p>`,
         order: 54,
+        navHidden: true,
       },
       {
         slug: "referral-fraud-prevention",
@@ -967,6 +974,52 @@ export const DOC_CATEGORIES: DocCategory[] = [
     slug: "help",
     label: "Help",
     sections: [
+      {
+        slug: "start-here-common-issues",
+        title: "Start Here — Common Issues & Fast Fixes",
+        categorySlug: "help",
+        category: "Help",
+        description: "Quick triage guide for wallet, tweet, receipt, cooldown, and payout issues.",
+        content: `<h3>Use this page first</h3>
+<p>If something failed, start here before opening a support ticket. Most failures are solved with one of the checks below.</p>
+
+<h3>1) Wallet connection issues</h3>
+<ul>
+<li>Install/update Phantom, Solflare, or Backpack.</li>
+<li>Reload the page and reconnect wallet.</li>
+<li>Make sure browser extensions are enabled for gascoin.com.</li>
+<li>If needed, test in another browser profile.</li>
+</ul>
+
+<h3>2) Tweet verification issues</h3>
+<ul>
+<li>Account must be public.</li>
+<li>Tweet must include <code>#gascoin</code>.</li>
+<li>Tweet must remain live during verification and payout checks.</li>
+</ul>
+
+<h3>3) Receipt verification issues</h3>
+<ul>
+<li>Use a physical paper receipt (not digital/email/app).</li>
+<li>Write last 4 wallet characters clearly in dark pen.</li>
+<li>Take a straight, well-lit photo with all text visible.</li>
+<li>Receipt date must be within 7 days.</li>
+</ul>
+
+<h3>4) Cooldown / repeat submission</h3>
+<p>Check <strong>/wallet</strong> for your exact timer. You can only submit again when cooldown reaches zero.</p>
+
+<h3>5) Treasury queue / delayed payout</h3>
+<p>If treasury is temporarily short at payout time, the submission stays queued and retries automatically. No resubmission needed.</p>
+
+<h3>Best self-service pages</h3>
+<ul>
+<li><strong>/wallet</strong> — status, gate progress, cooldown, tx links</li>
+<li><strong>/gates</strong> — full gate requirements and failure patterns</li>
+<li><strong>/how-it-works</strong> — full end-to-end flow</li>
+</ul>`,
+        order: 38,
+      },
       {
         slug: "my-wallet-wont-connect",
         title: "My wallet won't connect",
@@ -994,6 +1047,7 @@ export const DOC_CATEGORIES: DocCategory[] = [
 <li>Do not switch to private account at any point during the submission process</li>
 </ul>`,
         order: 40,
+        navHidden: true,
       },
       {
         slug: "my-receipt-failed-gate-5-wallet-not-found-on-recei",
@@ -1022,6 +1076,7 @@ export const DOC_CATEGORIES: DocCategory[] = [
 <li>Ensure the date on your receipt is clearly printed and not faded</li>
 </ul>`,
         order: 42,
+        navHidden: true,
       },
       {
         slug: "gate-8-says-im-in-cooldown",
@@ -1035,6 +1090,7 @@ export const DOC_CATEGORIES: DocCategory[] = [
 <li>The cooldown runs from your last submission date — duration depends on your tier</li>
 </ul>`,
         order: 43,
+        navHidden: true,
       },
       {
         slug: "my-submission-is-stuck-on-gate-5-for-a-long-time",
@@ -1044,6 +1100,7 @@ export const DOC_CATEGORIES: DocCategory[] = [
         description: "",
         content: `<p>Gate 5 OCR processing can take up to 45 seconds under normal conditions. If more than 2 minutes have elapsed with Gate 5 still showing the spinning icon, this may indicate a processing backlog. Wait 5 minutes and check the Wallet Tracker — if the status has not updated, contact the admin team.</p>`,
         order: 44,
+        navHidden: true,
       },
       {
         slug: "gate-10-failed-where-is-my-sol",
@@ -1062,6 +1119,7 @@ export const DOC_CATEGORIES: DocCategory[] = [
         description: "",
         content: `<p>The community feed is live data from the database. If no receipts appear, it means no submissions have been approved yet for the current filter. Try switching the filter from MINE to ALL. If ALL shows no receipts, the platform is newly launched and no submissions have been approved yet.</p>`,
         order: 46,
+        navHidden: true,
       },
       {
         slug: "the-treasury-balance-shows",
@@ -1071,6 +1129,7 @@ export const DOC_CATEGORIES: DocCategory[] = [
         description: "",
         content: `<p>The '--' indicator means the live Solana RPC call has not yet returned data. This typically resolves within 5-10 seconds of page load. If it persists for more than 30 seconds, the RPC endpoint may be temporarily unavailable. Refresh the page to retry.</p>`,
         order: 47,
+        navHidden: true,
       },
       {
         slug: "do-i-need-gascoin-tokens-to-participate",
@@ -1080,6 +1139,7 @@ export const DOC_CATEGORIES: DocCategory[] = [
         description: "",
         content: `<p>The Standard tier requires just 1 GASCOIN token — a minimal buy-in to participate. Higher tiers (Commuter at 100K, Road Warrior at 5M, Fleet at 10M) unlock larger refunds and more submissions per week.</p>`,
         order: 56,
+        navHidden: true,
       },
       {
         slug: "how-much-money-will-i-get-back",
@@ -1089,6 +1149,7 @@ export const DOC_CATEGORIES: DocCategory[] = [
         description: "",
         content: `<p>The exact refund amount is determined by an admin at approval time within your current tier policy. Because SOL price changes daily, GASCOIN does not publish fixed USD-equivalent refund numbers in docs.</p>`,
         order: 57,
+        navHidden: true,
       },
       {
         slug: "can-i-submit-more-than-once",
@@ -1107,6 +1168,7 @@ export const DOC_CATEGORIES: DocCategory[] = [
         description: "",
         content: `<p>No. Any gas station that provides a paper receipt is accepted. The receipt must show the total amount and the date clearly. The station name and address are recorded for community feed display purposes but do not affect verification.</p>`,
         order: 59,
+        navHidden: true,
       },
       {
         slug: "what-if-i-do-not-have-a-twitterx-account",
@@ -1116,6 +1178,7 @@ export const DOC_CATEGORIES: DocCategory[] = [
         description: "",
         content: `<p>An active X (Twitter) account is currently required for submission. Gate 3 and Gate 4 both depend on tweet verification via the X API. There is no alternative verification path for users without X accounts at this time.</p>`,
         order: 60,
+        navHidden: true,
       },
       {
         slug: "what-is-a-solana-wallet-and-how-do-i-get-one",
@@ -1134,6 +1197,7 @@ export const DOC_CATEGORIES: DocCategory[] = [
         description: "",
         content: `<p>SOL is a real cryptocurrency traded on major exchanges. The SOL you receive in a refund is real and can be converted to USD through any cryptocurrency exchange (Coinbase, Kraken, Binance, etc.). GASCOIN tokens are also real tradeable tokens on the Solana blockchain. Their value fluctuates based on market conditions.</p>`,
         order: 62,
+        navHidden: true,
       },
       {
         slug: "where-do-i-write-my-wallet-address-on-the-receipt",
@@ -1333,10 +1397,10 @@ export const DOC_CATEGORIES: DocCategory[] = [
 <table>
 <thead><tr><th>Tier</th><th>GASCOIN Required</th><th>Points Per Day</th><th>Points Per Month (30d)</th></tr></thead>
 <tbody>
-<tr><td>Standard</td><td>0</td><td>25</td><td>750</td></tr>
+<tr><td>Standard</td><td>1</td><td>25</td><td>750</td></tr>
 <tr><td>Commuter</td><td>100,000</td><td>100</td><td>3,000</td></tr>
-<tr><td>Road Warrior</td><td>500,000</td><td>300</td><td>9,000</td></tr>
-<tr><td>Fleet</td><td>2,000,000</td><td>750</td><td>22,500</td></tr>
+<tr><td>Road Warrior</td><td>5,000,000</td><td>300</td><td>9,000</td></tr>
+<tr><td>Fleet</td><td>10,000,000</td><td>750</td><td>22,500</td></tr>
 </tbody>
 </table>
 
@@ -1376,6 +1440,7 @@ export const DOC_CATEGORIES: DocCategory[] = [
         content: `<p>GASCOIN Protocol Documentation — Version 1.0</p>
 <p>gascoin.com  |  Solana Mainnet  |  All rights reserved</p>`,
         order: 69,
+        navHidden: true,
       },
     ],
   },
