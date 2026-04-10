@@ -2,7 +2,8 @@ import { NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '../../../../lib/supabase';
 import { processQueuedPayout } from '../../../../lib/payout-worker';
 import { getTierForBalance } from '../../../../lib/token-tiers';
-import { hasMinimumGascoin, bustTreasuryCache } from '../../../../lib/integrations/solana';
+import { hasMinimumGascoin, bustTreasuryCache, getTreasuryBalances } from '../../../../lib/integrations/solana';
+import { snapshotTreasury } from '../../../../lib/data-intelligence';
 import { isAuthorizedCron as isAuthorized } from '../../../../lib/cron-auth';
 
 export async function POST(req: Request) {
@@ -122,9 +123,10 @@ export async function POST(req: Request) {
     results.push({ claimId: j.claim_id, ...res });
   }
 
-  // Bust treasury cache after payouts so dashboard shows fresh balance
+  // Bust treasury cache + snapshot balance after payouts
   if (results.some((r: any) => r.ok)) {
     bustTreasuryCache().catch(() => {});
+    getTreasuryBalances().then((bal) => snapshotTreasury(supabase, bal)).catch(() => {});
   }
 
   return NextResponse.json({

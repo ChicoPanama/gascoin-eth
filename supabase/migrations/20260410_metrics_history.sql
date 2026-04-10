@@ -44,6 +44,7 @@ ALTER TABLE x_handle_history ENABLE ROW LEVEL SECURITY;
 -- 3. Add ip_country to claims table
 ALTER TABLE claims ADD COLUMN IF NOT EXISTS ip_country text;
 
--- 4. Add x_location and bio to wallet_x_links
+-- 4. Add x_location, bio, and quality trending to wallet_x_links
 ALTER TABLE wallet_x_links ADD COLUMN IF NOT EXISTS x_location text;
 ALTER TABLE wallet_x_links ADD COLUMN IF NOT EXISTS bio text;
+ALTER TABLE wallet_x_links ADD COLUMN IF NOT EXISTS avg_quality_score numeric;

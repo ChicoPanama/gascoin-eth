@@ -5,6 +5,7 @@ import { scoreTweetQuality, calculateWalletTrust, awardVerifiedPoints } from '..
 import { searchRecentTweets, extractMetrics, getUserByUsername } from '../../../../lib/x-api';
 import type { XTweet } from '../../../../lib/x-api';
 import { isAuthorizedCron as isAuthorized } from '../../../../lib/cron-auth';
+import { updateQualityTrend } from '../../../../lib/data-intelligence';
 
 // ═══════════════════════════════════════════
 // Engagement Worker v3
@@ -157,6 +158,11 @@ export async function POST(req: Request) {
           .update(linkUpdate)
           .eq('wallet', wallet)
           .eq('x_handle', handle);
+
+        // Update rolling quality trend for this wallet (non-blocking)
+        if (result.tweets.length > 0) {
+          updateQualityTrend(supabase, wallet, result.tweets[0]?.public_metrics ? 0.5 : 0).catch(() => {});
+        }
 
       } catch {
         continue;

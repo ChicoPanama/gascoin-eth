@@ -15,6 +15,7 @@ import { hashRequestBody, resolveIdempotencyKey } from '../../../../lib/idempote
 import { checkRateLimit } from '../../../../lib/rate-limit';
 import { persistMetricsSnapshot } from '../../../../lib/metrics-snapshot';
 import { bustBalanceCache } from '../../../../lib/integrations/solana';
+import { recordGasPrice, detectStationPattern } from '../../../../lib/data-intelligence';
 
 const SUBMIT_WINDOW_SEC = 60;
 const SUBMIT_MAX_PER_WINDOW = 12;
@@ -382,6 +383,13 @@ export async function POST(req: Request){
       source: 'submission',
     }).catch(() => {});
   }
+
+  // Record gas price data for intelligence (non-blocking)
+  recordGasPrice(supabase, {
+    country: ocr.country ?? null,
+    currency: (ocr.pipeline?.extraction as any)?.currency ?? null,
+    amountUsd,
+  }).catch(() => {});
 
   // Bust balance cache so next lookup gets fresh data
   bustBalanceCache(wallet).catch(() => {});
