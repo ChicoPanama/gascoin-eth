@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '../../../../lib/supabase';
 import { processQueuedPayout } from '../../../../lib/payout-worker';
 import { getTierForBalance } from '../../../../lib/token-tiers';
-import { hasMinimumGascoinUsd } from '../../../../lib/integrations/solana';
+import { hasMinimumGascoin, bustTreasuryCache } from '../../../../lib/integrations/solana';
 import { isAuthorizedCron as isAuthorized } from '../../../../lib/cron-auth';
 
 export async function POST(req: Request) {
@@ -55,7 +55,7 @@ export async function POST(req: Request) {
   let autoApproved = 0;
   for (const claim of readyClaims || []) {
     // Determine payout amount from user's token tier
-    const balance = await hasMinimumGascoinUsd(claim.wallet, 0);
+    const balance = await hasMinimumGascoin(claim.wallet, 0);
     const tier = getTierForBalance(balance.tokenBalance ?? 0);
     const solAmount = tier.max_sol_refund;
 
@@ -120,6 +120,11 @@ export async function POST(req: Request) {
   for (const j of dueJobs) {
     const res = await processQueuedPayout(j.claim_id);
     results.push({ claimId: j.claim_id, ...res });
+  }
+
+  // Bust treasury cache after payouts so dashboard shows fresh balance
+  if (results.some((r: any) => r.ok)) {
+    bustTreasuryCache().catch(() => {});
   }
 
   return NextResponse.json({

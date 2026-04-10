@@ -27,16 +27,15 @@ export async function POST(req: Request) {
     let skipped = 0;
     let heldForReview = 0;
 
-    for (const ref of pending || []) {
-      const { data: payout } = await supabase
-        .from('payouts')
-        .select('id, claim_id')
-        .eq('wallet', ref.referred_wallet)
-        .eq('status', 'paid')
-        .limit(1)
-        .maybeSingle();
+    // Batch: pre-fetch all paid payouts for referred wallets in one query
+    const referredWallets = [...new Set((pending || []).map((r: any) => r.referred_wallet))];
+    const { data: paidPayouts } = referredWallets.length > 0
+      ? await supabase.from('payouts').select('wallet').eq('status', 'paid').in('wallet', referredWallets)
+      : { data: [] };
+    const paidWalletSet = new Set((paidPayouts || []).map((p: any) => p.wallet));
 
-      if (!payout) continue;
+    for (const ref of pending || []) {
+      if (!paidWalletSet.has(ref.referred_wallet)) continue;
 
       await supabase.from('referrals').update({ status: 'verified', verified_at: now }).eq('id', ref.id);
       verified++;
@@ -80,7 +79,7 @@ export async function POST(req: Request) {
         referral_code: '',
         referrer_wallet: ref.referrer_wallet,
         referred_wallet: ref.referred_wallet,
-        submission_id: payout.claim_id,
+        submission_id: ref.id,
         reward_sol: 0, // No SOL for referrals
         reward_status: skipReason ? 'skipped' : 'verified',
         skip_reason: skipReason,
@@ -109,7 +108,7 @@ export async function POST(req: Request) {
           wallet: ref.referrer_wallet,
           source: 'referral_conversion',
           rawPoints: REFERRAL_CONFIG.POINTS_PER_CONVERSION,
-          metadata: { referred_wallet: ref.referred_wallet, claim_id: payout.claim_id },
+          metadata: { referred_wallet: ref.referred_wallet, referral_id: ref.id },
           walletTrust,
           ringDetection: ringCheck,
         });
