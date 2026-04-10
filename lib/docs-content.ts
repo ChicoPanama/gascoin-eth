@@ -22,25 +22,35 @@ export const DOC_CATEGORIES: DocCategory[] = [
     sections: [
       {
         slug: "what-is-gascoin",
-        title: "1. What Is GASCOIN",
+        title: "What Is GASCOIN",
         categorySlug: "overview",
         category: "Overview",
         description: "",
         content: `<div style="border:1px solid rgba(255,255,255,0.15);padding:16px 20px;margin-bottom:24px;background:rgba(255,255,255,0.03)">
-<p><strong>Document status — read before proceeding</strong></p>
-<p>This documentation describes the GASCOIN platform as designed and intended. Some features may be in the process of being deployed. If you notice a difference between this document and the live platform, the live platform takes precedence. This document will be updated as the platform rolls out.</p>
-<p>Last updated: April 2026 · Platform version: 1.0 · Document version: 1.1</p>
-</div><p>GASCOIN is a community-driven protocol on the Solana blockchain that refunds participants for real-world gasoline purchases. The protocol operates a treasury wallet funded with SOL (Solana's native cryptocurrency). Users who meet all verification requirements receive a SOL refund sent directly to their Solana wallet.</p>
-<p>The concept is straightforward: you pay for gas at a physical gas station, you prove it, and GASCOIN pays you back in SOL. The amount refunded in SOL is determined by the tier of GASCOIN tokens you hold in your wallet. The entire process is governed by 10 automated verification gates that run sequentially on every submission before any funds are released.</p>
-<p>The verification and intelligence stack is fully integrated with X + Grok for social signal checks, fraud-resistance scoring, and automation across the pipeline.</p><h3>Who Can Participate</h3>
-<p>GASCOIN is open to anyone worldwide who can obtain a gas station receipt and has a public X account with at least 100 followers. There is no geographic restriction. Gas stations in the United States, Canada, UK, Europe, Latin America, and anywhere else that issues paper receipts all qualify.</p>
-<p>The platform uses the term "gas station" but petrol stations, service stations, fuel depots, and any commercial fuel retailer that issues a paper receipt also qualify.</p>
-<p>There is no minimum purchase amount. A \$5 fuel purchase qualifies the same as a \$200 fill-up. The refund amount is set by the admin based on your tier cap — it is not proportional to how much you spent on fuel.</p>`,
+<p><strong>Document status</strong></p>
+<p>This doc set describes intended platform behavior. If docs and production differ, production behavior is authoritative.</p>
+<p>Last updated: April 2026 · Platform version: 1.0</p>
+</div>
+<div style="border:1px solid rgba(110,168,254,0.35);padding:14px 18px;margin-bottom:24px;background:rgba(28,47,79,0.32)">
+<p><strong>Choose your path</strong></p>
+<p><a href="/docs/core-concept-in-plain-english">New to GASCOIN → Plain-English flow</a></p>
+<p><a href="/docs/end-to-end-architecture-map">Technical reader → End-to-end architecture map</a></p>
+</div>
+<p>GASCOIN is a Solana protocol that refunds verified real-world fuel purchases in SOL.</p>
+<p>Submission eligibility is determined by a 10-gate verification pipeline plus policy checks. Payout amount follows the user tier policy at review time.</p>
+<h3>Participation baseline</h3>
+<ul>
+<li>Public X account (minimum follower policy applies)</li>
+<li>Physical gas receipt within policy window</li>
+<li>Solana wallet connected at submission</li>
+<li>Receipt annotated with wallet characters as required</li>
+</ul>
+<p>There is no fixed USD refund schedule in docs because SOL market price changes continuously.</p>`,
         order: 1,
       },
       {
         slug: "core-concept-in-plain-english",
-        title: "1.1 Core Concept in Plain English",
+        title: "Core Concept in Plain English",
         categorySlug: "overview",
         category: "Overview",
         description: "",
@@ -57,7 +67,7 @@ export const DOC_CATEGORIES: DocCategory[] = [
       },
       {
         slug: "what-you-receive",
-        title: "1.2 What You Receive",
+        title: "What You Receive",
         categorySlug: "overview",
         category: "Overview",
         description: "",
@@ -73,7 +83,7 @@ export const DOC_CATEGORIES: DocCategory[] = [
       },
       {
         slug: "what-you-need-before-starting",
-        title: "1.3 What You Need Before Starting",
+        title: "What You Need Before Starting",
         categorySlug: "overview",
         category: "Overview",
         description: "",
@@ -95,12 +105,20 @@ export const DOC_CATEGORIES: DocCategory[] = [
     sections: [
       {
         slug: "the-submission-process-complete-step-by-step-guide",
-        title: "2. The Submission Process — Complete Step-by-Step Guide",
+        title: "Submission Process",
         categorySlug: "submitting",
         category: "Submitting",
         description: "",
-        content: `<p>Every refund claim on GASCOIN is called a submission. A submission takes you through 5 steps. You must complete all 5 steps in order. You cannot skip a step. Your progress is saved within the session — if you navigate away and return, you will start from Step 1 again.</p>
-<p>Access the submission portal by clicking Submit in the navigation bar or visiting /submit directly.</p>`,
+        content: `<p>Every claim moves through the same 5-step workflow. Treat this page as the operational checklist.</p>
+<ol>
+<li><strong>Connect wallet</strong> — establish payout destination and tier context.</li>
+<li><strong>Verify tweet</strong> — confirm social proof and timing.</li>
+<li><strong>Upload receipt</strong> — provide a legible physical receipt with required annotations.</li>
+<li><strong>Review and submit</strong> — confirm data before finalizing.</li>
+<li><strong>Monitor gate progress</strong> — track pass/fail outcomes and queue state.</li>
+</ol>
+<p>Primary rule: each attempt requires a fresh, valid receipt and compliant tweet context.</p>
+<p>Open the flow at <a href="/submit">/submit</a>.</p>`,
         order: 5,
       },
       {
@@ -253,12 +271,22 @@ export const DOC_CATEGORIES: DocCategory[] = [
     sections: [
       {
         slug: "the-10-verification-gates-complete-reference",
-        title: "3. The 10 Verification Gates — Complete Reference",
+        title: "10 Verification Gates Reference",
         categorySlug: "verification",
         category: "Verification Gates",
         description: "",
-        content: `<p>Every GASCOIN submission must pass 10 sequential verification gates before SOL is released. Gates are checked in order from 1 to 10. If a gate fails, all subsequent gates are skipped and the submission is marked incomplete. Gate 10 is the only exception — it is non-blocking, meaning a failure queues the submission rather than rejecting it.</p>
-<p>Gate logic is immutable and cannot be manually adjusted by users. Administrators can manually override individual gates in exceptional circumstances, but every override is permanently logged.</p>`,
+        content: `<p>All claims pass through 10 sequential gates.</p>
+<ul>
+<li><strong>Gates 1-9:</strong> blocking controls (any fail stops progression).</li>
+<li><strong>Gate 10:</strong> treasury solvency control (non-blocking queue path).</li>
+</ul>
+<p>Gate decisions are policy-driven and auditable. Administrative overrides are exceptional and logged.</p>
+<h3>How to use this reference</h3>
+<ol>
+<li>Identify the first failed gate.</li>
+<li>Apply the remediation guidance for that gate only.</li>
+<li>Resubmit with fresh compliant inputs where required.</li>
+</ol>`,
         order: 11,
       },
       {
@@ -464,11 +492,92 @@ export const DOC_CATEGORIES: DocCategory[] = [
         categorySlug: "technology",
         category: "Technology",
         description: "",
-        content: `<p>GASCOIN is built on a multi-layer AI verification stack that makes gaming the protocol computationally impractical. Every submission passes through 10 automated gates, 4 AI fraud modules, and real-time social signal analysis — all before a single lamport leaves the treasury.</p>
-<p>The intelligence layer is powered by <strong>Grok</strong> (xAI) and the <strong>X API v2</strong>, giving GASCOIN direct access to the world's most advanced AI reasoning engine and the richest social graph on the internet. This is not a static rule-based system. It learns, adapts, and evolves with every submission.</p>
-<h3>Why This Matters</h3>
-<p>Most refund and reward platforms rely on simple form validation — upload a photo, check a box, get paid. These systems are trivially exploitable with AI-generated receipts, stock photos, or bot accounts. GASCOIN takes a fundamentally different approach: every submission is interrogated across multiple independent verification dimensions simultaneously. Passing one check means nothing if another fails. The system is designed so that the cost of fabricating a valid submission exceeds the value of the refund.</p>`,
+        content: `<p>GASCOIN uses an AI-assisted, policy-enforced verification stack to make fraud economically unattractive.</p>
+<ul>
+<li>Signal ingestion from wallet, receipt, and X context</li>
+<li>Receipt intelligence (OCR + integrity + duplicate checks)</li>
+<li>Sequential gate policy engine</li>
+<li>Queue/retry orchestration for treasury constraints</li>
+<li>Immutable audit trail for operator actions</li>
+</ul>
+<p>Start here for architecture orientation, then continue to the dedicated flow diagrams.</p>`,
         order: 22,
+      },
+      {
+        slug: "end-to-end-architecture-map",
+        title: "End-to-End Architecture Map",
+        categorySlug: "technology",
+        category: "Technology",
+        description: "",
+        content: `<p>This map is the complete technical path from user action to treasury payout. Use this as the single reference for engineering reviews, incident analysis, and onboarding technical stakeholders.</p>
+<p><img src="/docs/diagrams/end-to-end-architecture-map.svg" alt="GASCOIN end-to-end architecture map" style="width:100%;max-width:1080px;border:1px solid rgba(255,255,255,0.12);border-radius:10px" /></p>
+<h3>Read this map in 4 passes</h3>
+<ol>
+<li>Input/identity validation</li>
+<li>Receipt intelligence and fraud scoring</li>
+<li>Gate-state transitions and policy outputs</li>
+<li>Payout dispatch, retries, and audit logs</li>
+</ol>`,
+        order: 23,
+      },
+      {
+        slug: "ai-system-overview",
+        title: "AI System Overview (Flow Paths)",
+        categorySlug: "technology",
+        category: "Technology",
+        description: "",
+        content: `<p>This page gives two views of GASCOIN AI operations: a plain-English path for newcomers, and a systems path for technical operators.</p>
+<h3>Newcomer Path (Simple)</h3>
+<ul>
+<li>Submit wallet + tweet + receipt</li>
+<li>AI checks social proof and receipt authenticity</li>
+<li>Gate engine evaluates pass/fail sequence</li>
+<li>If approved, payout worker dispatches SOL</li>
+<li>If treasury is short, claim enters automatic retry queue</li>
+</ul>
+<h3>Technical Path (Detailed)</h3>
+<ul>
+<li>Ingestion: form payload normalization + idempotency</li>
+<li>Signal extraction: X API validation + OCR + metadata extraction</li>
+<li>Scoring: AI probability, tamper score, duplicate fingerprints, account quality</li>
+<li>Policy: sequential gates and state transitions</li>
+<li>Execution: approval, payout queueing, retries, audit logging</li>
+</ul>
+<p><img src="/docs/diagrams/ai-system-overview.svg" alt="GASCOIN AI system overview flow diagram" style="width:100%;max-width:980px;border:1px solid rgba(255,255,255,0.12);border-radius:10px" /></p>`,
+        order: 26,
+      },
+      {
+        slug: "receipt-intelligence-pipeline",
+        title: "Receipt Intelligence Pipeline",
+        categorySlug: "technology",
+        category: "Technology",
+        description: "",
+        content: `<p>The receipt pipeline combines deterministic parsing and model-assisted scoring. This gives explainability plus adaptive fraud resistance.</p>
+<ol>
+<li>Upload intake and file-type checks</li>
+<li>OCR extraction (date, amount, station, wallet chars)</li>
+<li>Image integrity analysis (tamper/AI likelihood)</li>
+<li>Perceptual hash generation for duplicate detection</li>
+<li>Gate outputs into policy decision engine</li>
+</ol>
+<p><img src="/docs/diagrams/receipt-intelligence-pipeline.svg" alt="Receipt intelligence processing pipeline diagram" style="width:100%;max-width:980px;border:1px solid rgba(255,255,255,0.12);border-radius:10px" /></p>`,
+        order: 27,
+      },
+      {
+        slug: "gate-decision-and-retry-paths",
+        title: "Gate Decision and Retry Paths",
+        categorySlug: "technology",
+        category: "Technology",
+        description: "",
+        content: `<p>This flow shows exactly how a submission moves through gate checks, rejection paths, and the non-blocking Gate 10 treasury queue.</p>
+<ul>
+<li>Gates 1-9 are blocking</li>
+<li>Gate 10 is non-blocking and queue-based</li>
+<li>Retries are automated and logged</li>
+<li>Admin review remains auditable</li>
+</ul>
+<p><img src="/docs/diagrams/gate-decision-retry-paths.svg" alt="Gate decision and retry paths diagram" style="width:100%;max-width:980px;border:1px solid rgba(255,255,255,0.12);border-radius:10px" /></p>`,
+        order: 28,
       },
       {
         slug: "grok-ai-engine",
@@ -485,7 +594,7 @@ export const DOC_CATEGORIES: DocCategory[] = [
 <p>A separate tamper analysis examines EXIF metadata, image dimensions, compression artifacts, and pixel-level inconsistencies. The tamper score (0-1 scale) catches receipts that have been cropped, spliced, or edited after the original photo was taken. Threshold: 0.55.</p>
 <h3>Adaptive Learning</h3>
 <p>Unlike static rule-based fraud systems, Grok continuously processes submission patterns across the entire platform. New fraud vectors are identified and countered without manual rule updates. The system gets smarter with every submission — legitimate or fraudulent.</p>`,
-        order: 23,
+        order: 29,
       },
       {
         slug: "x-api-v2-integration",
@@ -506,7 +615,7 @@ export const DOC_CATEGORIES: DocCategory[] = [
 </ul>
 <h3>Why X Integration Matters</h3>
 <p>X is the only social platform with both a verified identity layer and a public API powerful enough for real-time fraud detection. By requiring every submission to include a live tweet, GASCOIN creates a public, timestamped proof-of-intent that is extremely difficult to fake at scale. Bot networks fail the follower and account quality checks. Fake accounts fail the activity history check. Private accounts are rejected outright.</p>`,
-        order: 24,
+        order: 30,
       },
       {
         slug: "xai-powered-scoring",
@@ -523,7 +632,7 @@ export const DOC_CATEGORIES: DocCategory[] = [
 <p>Reputation scoring based on submission history, approval rate, tier consistency, and on-chain behavior. Wallets with a strong track record earn higher trust scores, which influence queue priority and review speed.</p>
 <h3>4. Pre-Award Verification Gate</h3>
 <p>Before any points are awarded, a multi-layer verification gate runs: trust multiplier check, source-specific validation, velocity analysis, and AI verification for flagged or high-value awards. This prevents point farming and manipulation.</p>`,
-        order: 25,
+        order: 31,
       },
       {
         slug: "4-layer-fraud-detection",
@@ -540,7 +649,7 @@ export const DOC_CATEGORIES: DocCategory[] = [
 <p>Every receipt image is converted to a perceptual hash — a digital fingerprint that is resistant to cropping, rotation, brightness changes, and minor edits. This hash is compared against every previously submitted receipt in the system. Even heavily modified versions of the same receipt are detected and rejected.</p>
 <h3>Layer 4 — Social Signal Analysis</h3>
 <p>The submitter's X account is evaluated for authenticity signals: follower count, account age, posting history, engagement patterns, and network quality. xAI-powered scoring identifies bot accounts, purchased followers, and coordinated networks. This layer makes it economically infeasible to create fake accounts at scale.</p>`,
-        order: 26,
+        order: 32,
       },
       {
         slug: "on-chain-verification",
@@ -557,7 +666,7 @@ export const DOC_CATEGORIES: DocCategory[] = [
 <p>Every admin action — approvals, rejections, gate overrides, payout dispatches — is permanently recorded in the audit log. No admin action can be taken silently. The audit trail cannot be modified or deleted.</p>
 <h3>Solana Transaction Receipts</h3>
 <p>Every SOL payout generates a Solana transaction hash that can be independently verified on any Solana block explorer. The transaction proves exactly when the payment was made, how much was sent, and to which wallet.</p>`,
-        order: 27,
+        order: 33,
       },
       {
         slug: "why-it-cant-be-gamed",
@@ -581,7 +690,7 @@ export const DOC_CATEGORIES: DocCategory[] = [
 <li><strong>Immutable audit log</strong> — Every action on the platform is permanently recorded. Nothing can be done silently.</li>
 </ul>
 <p>To successfully game GASCOIN, an attacker would need to: physically obtain a gas receipt, write a wallet ID on it by hand, photograph it convincingly enough to fool Grok's AI analysis, maintain a legitimate X account with real followers and activity, post a public tweet, hold GASCOIN tokens, and pass admin review. The cost of doing this at scale makes it economically irrational.</p>`,
-        order: 28,
+        order: 34,
       },
     ],
   },
@@ -591,7 +700,7 @@ export const DOC_CATEGORIES: DocCategory[] = [
     sections: [
       {
         slug: "platform-pages-complete-reference",
-        title: "4. Platform Pages — Complete Reference",
+        title: "Platform Pages Reference",
         categorySlug: "platform",
         category: "Platform Pages",
         description: "",
@@ -601,7 +710,7 @@ export const DOC_CATEGORIES: DocCategory[] = [
       },
       {
         slug: "homepage",
-        title: "4.1 Homepage (/)",
+        title: "Homepage",
         categorySlug: "platform",
         category: "Platform Pages",
         description: "",
@@ -626,7 +735,7 @@ export const DOC_CATEGORIES: DocCategory[] = [
       },
       {
         slug: "submit-page-submit",
-        title: "4.2 Submit Page (/submit)",
+        title: "Submit Page",
         categorySlug: "platform",
         category: "Platform Pages",
         description: "",
@@ -643,7 +752,7 @@ export const DOC_CATEGORIES: DocCategory[] = [
       },
       {
         slug: "community-feed-community",
-        title: "4.3 Community Feed (/community)",
+        title: "Community Feed",
         categorySlug: "platform",
         category: "Platform Pages",
         description: "",
@@ -669,7 +778,7 @@ export const DOC_CATEGORIES: DocCategory[] = [
       },
       {
         slug: "leaderboard-leaderboard",
-        title: "4.4 Leaderboard (/leaderboard)",
+        title: "Leaderboard",
         categorySlug: "platform",
         category: "Platform Pages",
         description: "",
@@ -689,7 +798,7 @@ export const DOC_CATEGORIES: DocCategory[] = [
       },
       {
         slug: "wallet-tracker-wallet",
-        title: "4.5 Wallet Tracker (/wallet)",
+        title: "Wallet Tracker",
         categorySlug: "platform",
         category: "Platform Pages",
         description: "",
@@ -706,7 +815,7 @@ export const DOC_CATEGORIES: DocCategory[] = [
       },
       {
         slug: "referral-engine-referral",
-        title: "4.6 Referral Engine (/referral)",
+        title: "Referral Engine",
         categorySlug: "platform",
         category: "Platform Pages",
         description: "",
@@ -742,7 +851,7 @@ export const DOC_CATEGORIES: DocCategory[] = [
       },
       {
         slug: "token-perks-perks",
-        title: "4.7 Token Perks (/perks)",
+        title: "Token Perks",
         categorySlug: "platform",
         category: "Platform Pages",
         description: "",
@@ -768,7 +877,7 @@ export const DOC_CATEGORIES: DocCategory[] = [
       },
       {
         slug: "treasury-dashboard-dashboard",
-        title: "4.8 Treasury / Dashboard (/dashboard)",
+        title: "Treasury / Dashboard",
         categorySlug: "platform",
         category: "Platform Pages",
         description: "",
@@ -780,7 +889,7 @@ export const DOC_CATEGORIES: DocCategory[] = [
       },
       {
         slug: "gates-page-gates",
-        title: "4.9 Gates Page (/gates)",
+        title: "Gates Page",
         categorySlug: "platform",
         category: "Platform Pages",
         description: "",
@@ -808,7 +917,7 @@ export const DOC_CATEGORIES: DocCategory[] = [
     sections: [
       {
         slug: "admin-dashboard-admin",
-        title: "5. Admin Dashboard (/admin)",
+        title: "Admin Dashboard",
         categorySlug: "security",
         category: "Security & Admin",
         description: "",
@@ -818,7 +927,7 @@ export const DOC_CATEGORIES: DocCategory[] = [
       },
       {
         slug: "admin-authentication",
-        title: "5.1 Admin Authentication",
+        title: "Admin Authentication",
         categorySlug: "security",
         category: "Security & Admin",
         description: "",
@@ -834,7 +943,7 @@ export const DOC_CATEGORIES: DocCategory[] = [
       },
       {
         slug: "submissions-management",
-        title: "5.2 Submissions Management",
+        title: "Submissions Management",
         categorySlug: "security",
         category: "Security & Admin",
         description: "",
@@ -846,7 +955,7 @@ export const DOC_CATEGORIES: DocCategory[] = [
       },
       {
         slug: "referral-rewards-management",
-        title: "5.3 Referral Rewards Management",
+        title: "Referral Rewards Management",
         categorySlug: "security",
         category: "Security & Admin",
         description: "",
@@ -863,7 +972,7 @@ export const DOC_CATEGORIES: DocCategory[] = [
       },
       {
         slug: "receipt-review-moderation",
-        title: "5.4 Receipt Review (Moderation)",
+        title: "Receipt Review (Moderation)",
         categorySlug: "security",
         category: "Security & Admin",
         description: "",
@@ -872,7 +981,7 @@ export const DOC_CATEGORIES: DocCategory[] = [
       },
       {
         slug: "gate-overrides",
-        title: "5.5 Gate Overrides",
+        title: "Gate Overrides",
         categorySlug: "security",
         category: "Security & Admin",
         description: "",
@@ -882,7 +991,7 @@ export const DOC_CATEGORIES: DocCategory[] = [
       },
       {
         slug: "audit-log",
-        title: "5.6 Audit Log",
+        title: "Audit Log",
         categorySlug: "security",
         category: "Security & Admin",
         description: "",
@@ -892,17 +1001,25 @@ export const DOC_CATEGORIES: DocCategory[] = [
       },
       {
         slug: "security-and-anti-fraud-measures",
-        title: "7. Security and Anti-Fraud Measures",
+        title: "Security and Anti-Fraud Measures",
         categorySlug: "security",
         category: "Security & Admin",
         description: "",
-        content: `<p>GASCOIN uses multiple overlapping systems to prevent fraud, duplicate submissions, and gaming of the refund system.</p><h3>Using Multiple Wallets</h3>
-<p>Submission frequency depends on your tier: Standard and Commuter can submit once per week, Road Warrior twice, and Fleet four times. Only one wallet can be linked to your X account at a time. Switching wallets does not reset the cooldown — it is tied to your X identity, not your wallet address. Each submission requires a unique receipt (Gate 9), a unique tweet, and a unique gas purchase.</p>`,
+        content: `<p>Security is multi-layered by design. No single signal is trusted in isolation.</p>
+<h3>Control families</h3>
+<ul>
+<li><strong>Identity controls:</strong> public-account and submission ownership checks.</li>
+<li><strong>Artifact controls:</strong> receipt OCR integrity and duplicate fingerprinting.</li>
+<li><strong>Rate controls:</strong> tier-based cooldown and replay prevention.</li>
+<li><strong>Execution controls:</strong> treasury solvency gate and controlled payout workers.</li>
+<li><strong>Governance controls:</strong> auditable admin actions and override logging.</li>
+</ul>
+<p>Result: attacks must satisfy multiple independent constraints simultaneously, increasing attacker cost and reducing exploit scalability.</p>`,
         order: 48,
       },
       {
         slug: "gate-based-verification",
-        title: "7.1 Gate-based verification",
+        title: "Gate-based verification",
         categorySlug: "security",
         category: "Security & Admin",
         description: "",
@@ -912,7 +1029,7 @@ export const DOC_CATEGORIES: DocCategory[] = [
       },
       {
         slug: "perceptual-hashing-gate-9",
-        title: "7.2 Perceptual hashing (Gate 9)",
+        title: "Perceptual hashing (Gate 9)",
         categorySlug: "security",
         category: "Security & Admin",
         description: "",
@@ -921,7 +1038,7 @@ export const DOC_CATEGORIES: DocCategory[] = [
       },
       {
         slug: "-day-wallet-cooldown-gate-8",
-        title: "7.3 Tier-based submission cooldown (Gate 8)",
+        title: "Tier-based submission cooldown (Gate 8)",
         categorySlug: "security",
         category: "Security & Admin",
         description: "",
@@ -931,7 +1048,7 @@ export const DOC_CATEGORIES: DocCategory[] = [
       },
       {
         slug: "receipt-date-validation-gate-7",
-        title: "7.4 Receipt date validation (Gate 7)",
+        title: "Receipt date validation (Gate 7)",
         categorySlug: "security",
         category: "Security & Admin",
         description: "",
@@ -941,7 +1058,7 @@ export const DOC_CATEGORIES: DocCategory[] = [
       },
       {
         slug: "wallet-address-on-receipt-gate-5",
-        title: "7.5 Wallet address on receipt (Gate 5)",
+        title: "Wallet address on receipt (Gate 5)",
         categorySlug: "security",
         category: "Security & Admin",
         description: "",
@@ -951,7 +1068,7 @@ export const DOC_CATEGORIES: DocCategory[] = [
       },
       {
         slug: "admin-audit-trail",
-        title: "7.6 Admin audit trail",
+        title: "Admin audit trail",
         categorySlug: "security",
         category: "Security & Admin",
         description: "",
@@ -961,7 +1078,7 @@ export const DOC_CATEGORIES: DocCategory[] = [
       },
       {
         slug: "referral-fraud-prevention",
-        title: "7.7 Referral fraud prevention",
+        title: "Referral fraud prevention",
         categorySlug: "security",
         category: "Security & Admin",
         description: "",
@@ -980,44 +1097,16 @@ export const DOC_CATEGORIES: DocCategory[] = [
         categorySlug: "help",
         category: "Help",
         description: "Quick triage guide for wallet, tweet, receipt, cooldown, and payout issues.",
-        content: `<h3>Use this page first</h3>
-<p>If something failed, start here before opening a support ticket. Most failures are solved with one of the checks below.</p>
-
-<h3>1) Wallet connection issues</h3>
-<ul>
-<li>Install/update Phantom, Solflare, or Backpack.</li>
-<li>Reload the page and reconnect wallet.</li>
-<li>Make sure browser extensions are enabled for gascoin.com.</li>
-<li>If needed, test in another browser profile.</li>
-</ul>
-
-<h3>2) Tweet verification issues</h3>
-<ul>
-<li>Account must be public.</li>
-<li>Tweet must include <code>#gascoin</code>.</li>
-<li>Tweet must remain live during verification and payout checks.</li>
-</ul>
-
-<h3>3) Receipt verification issues</h3>
-<ul>
-<li>Use a physical paper receipt (not digital/email/app).</li>
-<li>Write last 4 wallet characters clearly in dark pen.</li>
-<li>Take a straight, well-lit photo with all text visible.</li>
-<li>Receipt date must be within 7 days.</li>
-</ul>
-
-<h3>4) Cooldown / repeat submission</h3>
-<p>Check <strong>/wallet</strong> for your exact timer. You can only submit again when cooldown reaches zero.</p>
-
-<h3>5) Treasury queue / delayed payout</h3>
-<p>If treasury is temporarily short at payout time, the submission stays queued and retries automatically. No resubmission needed.</p>
-
-<h3>Best self-service pages</h3>
-<ul>
-<li><strong>/wallet</strong> — status, gate progress, cooldown, tx links</li>
-<li><strong>/gates</strong> — full gate requirements and failure patterns</li>
-<li><strong>/how-it-works</strong> — full end-to-end flow</li>
-</ul>`,
+        content: `<h3>Fast triage</h3>
+<p>Use this checklist before opening support:</p>
+<ol>
+<li><strong>Wallet:</strong> extension installed, connected, and unlocked.</li>
+<li><strong>Tweet:</strong> account public, hashtag present, tweet still live.</li>
+<li><strong>Receipt:</strong> physical, legible, dated within policy window, required wallet marks visible.</li>
+<li><strong>Cooldown:</strong> verify timer in <a href="/wallet">/wallet</a>.</li>
+<li><strong>Treasury queue:</strong> if Gate 10 queued, retries are automatic.</li>
+</ol>
+<p>Best self-service pages: <a href="/wallet">/wallet</a>, <a href="/gates">/gates</a>, and <a href="/how-it-works">/how-it-works</a>.</p>`,
         order: 38,
       },
       {
@@ -1255,27 +1344,24 @@ export const DOC_CATEGORIES: DocCategory[] = [
       },
       {
         slug: "support-and-contact",
-        title: "10. Support and Contact",
+        title: "Support and Contact",
         categorySlug: "help",
         category: "Help",
         description: "Getting help with submissions and contacting the team.",
-        content: `<h3>Getting help with a submission</h3>
-<p>If you have a question about a specific submission, check these self-service resources first:</p>
+        content: `<h3>Support workflow</h3>
+<p>Before contacting support, collect:</p>
 <ul>
-<li><strong>Wallet Tracker (/wallet)</strong> — shows your submission status, gate results, and failure reasons</li>
-<li><strong>Gates page (/gates)</strong> — explains every verification gate and how to fix failures</li>
-<li><strong>FAQ (this section)</strong> — covers the most common questions</li>
+<li>Submission ID (from Wallet Tracker)</li>
+<li>Connected wallet (truncated is fine)</li>
+<li>Failed gate or status message</li>
 </ul>
-<h3>Contacting the team</h3>
-<p>TODO: Add your support channel here — Discord / Telegram / Email</p>
-<p>When contacting support, include your:</p>
+<p>Primary diagnostics:</p>
 <ul>
-<li>Submission ID (shown in Wallet Tracker as GC-YYYY-XXXXX)</li>
-<li>Wallet address (truncated is fine)</li>
-<li>Description of the issue</li>
+<li><strong>/wallet</strong> for claim status, cooldown, and transaction data</li>
+<li><strong>/gates</strong> for pass/fail criteria and remediations</li>
+<li><strong>Help section</strong> for known issue playbooks</li>
 </ul>
-<h3>Urgent submissions</h3>
-<p>If you submitted with an error (wrong tweet URL, wrong wallet) before gates have started processing, contact the team immediately with your submission ID. After verification begins, submissions cannot be modified.</p>`,
+<p>Contact channel: <strong>TODO — set official Discord/Telegram/Email endpoint</strong>.</p>`,
         order: 69,
       },
       {
@@ -1433,7 +1519,7 @@ export const DOC_CATEGORIES: DocCategory[] = [
       },
       {
         slug: "quick-reference-card",
-        title: "12. Quick Reference Card",
+        title: "Quick Reference Card",
         categorySlug: "help",
         category: "Help",
         description: "",

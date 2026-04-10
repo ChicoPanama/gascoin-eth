@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="900" viewBox="0 0 1400 900" fill="none">
+  <rect width="1400" height="900" fill="#0B0D12"/>
+  <text x="60" y="68" fill="#EAF2FF" font-family="Inter, Arial" font-size="36" font-weight="700">GASCOIN End-to-End Architecture Map</text>
+  <text x="60" y="100" fill="#9FB3D9" font-family="Inter, Arial" font-size="18">From user submission to payout dispatch and audit trail</text>
+
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L9,3 z" fill="#6EA8FE"/>
+    </marker>
+  </defs>
+
+  <g font-family="Inter, Arial" font-size="15" fill="#EAF2FF">
+    <rect x="70" y="170" width="240" height="110" rx="12" fill="#132238" stroke="#2A4A73"/>
+    <text x="110" y="208">Client Submit Flow</text>
+    <text x="95" y="234" fill="#A8C1E8">Wallet + X + Receipt input</text>
+    <text x="95" y="258" fill="#A8C1E8">Idempotent request keying</text>
+
+    <rect x="360" y="170" width="240" height="110" rx="12" fill="#132238" stroke="#2A4A73"/>
+    <text x="417" y="208">Session/Auth</text>
+    <text x="385" y="234" fill="#A8C1E8">Privy session + wallet link</text>
+    <text x="385" y="258" fill="#A8C1E8">Rate limit + anti-abuse</text>
+
+    <rect x="650" y="170" width="260" height="110" rx="12" fill="#132238" stroke="#2A4A73"/>
+    <text x="700" y="208">Signal Extraction</text>
+    <text x="675" y="234" fill="#A8C1E8">X API tweet checks + OCR</text>
+    <text x="675" y="258" fill="#A8C1E8">Wallet/date/amount parse</text>
+
+    <rect x="960" y="170" width="300" height="110" rx="12" fill="#132238" stroke="#2A4A73"/>
+    <text x="1028" y="208">AI/Fraud Layer</text>
+    <text x="990" y="234" fill="#A8C1E8">AI-likelihood, tamper, pHash dupes</text>
+    <text x="990" y="258" fill="#A8C1E8">Account quality + cooldown checks</text>
+
+    <rect x="960" y="340" width="300" height="120" rx="12" fill="#133126" stroke="#2F7A58"/>
+    <text x="1028" y="380">Gate Engine</text>
+    <text x="990" y="406" fill="#AEE8C5">Sequential gates 1-9 (blocking)</text>
+    <text x="990" y="430" fill="#AEE8C5">Gate 10 treasury check (queueable)</text>
+
+    <rect x="960" y="530" width="300" height="110" rx="12" fill="#2A2D12" stroke="#7A7A2F"/>
+    <text x="1035" y="568">Queue / Retry</text>
+    <text x="990" y="594" fill="#E4E4A8">Auto-retry for treasury insolvency</text>
+    <text x="990" y="618" fill="#E4E4A8">Periodic worker execution</text>
+
+    <rect x="960" y="690" width="300" height="110" rx="12" fill="#133126" stroke="#2F7A58"/>
+    <text x="1043" y="728">Payout</text>
+    <text x="990" y="754" fill="#AEE8C5">SOL transfer + tx confirmation</text>
+    <text x="990" y="778" fill="#AEE8C5">Claim status finalization</text>
+
+    <rect x="360" y="530" width="500" height="270" rx="12" fill="#1B1E2C" stroke="#3A4470"/>
+    <text x="390" y="566">Data Plane / Persistence</text>
+    <text x="390" y="596" fill="#A8C1E8">• claims, gate_results, claim_status_events</text>
+    <text x="390" y="624" fill="#A8C1E8">• receipt fingerprints (sha256 + pHash)</text>
+    <text x="390" y="652" fill="#A8C1E8">• payout_jobs + retry metadata</text>
+    <text x="390" y="680" fill="#A8C1E8">• engagement/referral side effects</text>
+    <text x="390" y="708" fill="#A8C1E8">• audit_logs for every privileged/system action</text>
+    <text x="390" y="748" fill="#D8E3FB">Operators/Reviewers use Admin surfaces on top of this state graph.</text>
+  </g>
+
+  <line x1="310" y1="225" x2="360" y2="225" stroke="#6EA8FE" stroke-width="3" marker-end="url(#arrow)"/>
+  <line x1="600" y1="225" x2="650" y2="225" stroke="#6EA8FE" stroke-width="3" marker-end="url(#arrow)"/>
+  <line x1="910" y1="225" x2="960" y2="225" stroke="#6EA8FE" stroke-width="3" marker-end="url(#arrow)"/>
+  <line x1="1110" y1="280" x2="1110" y2="340" stroke="#49D18B" stroke-width="3" marker-end="url(#arrow)"/>
+  <line x1="1110" y1="460" x2="1110" y2="530" stroke="#D6D66E" stroke-width="3" marker-end="url(#arrow)"/>
+  <line x1="1110" y1="640" x2="1110" y2="690" stroke="#49D18B" stroke-width="3" marker-end="url(#arrow)"/>
+
+  <line x1="960" y1="400" x2="860" y2="590" stroke="#6EA8FE" stroke-width="2" marker-end="url(#arrow)"/>
+  <line x1="960" y1="580" x2="860" y2="640" stroke="#6EA8FE" stroke-width="2" marker-end="url(#arrow)"/>
+  <line x1="960" y1="740" x2="860" y2="700" stroke="#6EA8FE" stroke-width="2" marker-end="url(#arrow)"/>
+</svg>
