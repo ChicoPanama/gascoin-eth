@@ -26,26 +26,28 @@ export const DOC_CATEGORIES: DocCategory[] = [
         categorySlug: "overview",
         category: "Overview",
         description: "",
-        content: `<div style="border:1px solid rgba(255,255,255,0.15);padding:16px 20px;margin-bottom:24px;background:rgba(255,255,255,0.03)">
-<p><strong>Document status</strong></p>
-<p>This doc set describes intended platform behavior. If docs and production differ, production behavior is authoritative.</p>
-<p>Last updated: April 2026 · Platform version: 1.0</p>
-</div>
-<div style="border:1px solid rgba(110,168,254,0.35);padding:14px 18px;margin-bottom:24px;background:rgba(28,47,79,0.32)">
-<p><strong>Choose your path</strong></p>
-<p><a href="/docs/core-concept-in-plain-english">New to GASCOIN → Plain-English flow</a></p>
-<p><a href="/docs/end-to-end-architecture-map">Technical reader → End-to-end architecture map</a></p>
-</div>
+        content: `<h3>What this is</h3>
 <p>GASCOIN is a Solana protocol that refunds verified real-world fuel purchases in SOL.</p>
-<p>Submission eligibility is determined by a 10-gate verification pipeline plus policy checks. Payout amount follows the user tier policy at review time.</p>
-<h3>Participation baseline</h3>
+<p>All claims pass through a deterministic 10-gate pipeline before payout is released.</p>
+
+<h3>How it works</h3>
 <ul>
-<li>Public X account (minimum follower policy applies)</li>
-<li>Physical gas receipt within policy window</li>
-<li>Solana wallet connected at submission</li>
-<li>Receipt annotated with wallet characters as required</li>
+<li>User submits wallet, tweet URL, and physical receipt proof.</li>
+<li>System validates identity/social context and receipt quality.</li>
+<li>Gate engine evaluates sequential pass/fail state.</li>
+<li>Approved claims move to payout execution and audit logging.</li>
 </ul>
-<p>There is no fixed USD refund schedule in docs because SOL market price changes continuously.</p>`,
+
+<h3>Participation requirements</h3>
+<ul>
+<li>Public X account meeting follower/activity policy.</li>
+<li>Physical gas receipt within policy date window.</li>
+<li>Connected Solana wallet for payout destination.</li>
+<li>Required wallet characters written on receipt.</li>
+</ul>
+
+<h3>Operator note</h3>
+<p>If docs and live behavior diverge, production behavior is authoritative. This documentation is continuously revised.</p>`,
         order: 1,
       },
       {
@@ -109,16 +111,27 @@ export const DOC_CATEGORIES: DocCategory[] = [
         categorySlug: "submitting",
         category: "Submitting",
         description: "",
-        content: `<p>Every claim moves through the same 5-step workflow. Treat this page as the operational checklist.</p>
+        content: `<h3>What this is</h3>
+<p>This is the canonical five-step submission workflow used for every claim.</p>
+
+<h3>How it works</h3>
 <ol>
-<li><strong>Connect wallet</strong> — establish payout destination and tier context.</li>
-<li><strong>Verify tweet</strong> — confirm social proof and timing.</li>
-<li><strong>Upload receipt</strong> — provide a legible physical receipt with required annotations.</li>
-<li><strong>Review and submit</strong> — confirm data before finalizing.</li>
-<li><strong>Monitor gate progress</strong> — track pass/fail outcomes and queue state.</li>
+<li><strong>Connect wallet</strong> — establish payout address and tier context.</li>
+<li><strong>Verify tweet</strong> — validate social proof and timing requirements.</li>
+<li><strong>Upload receipt</strong> — provide legible physical receipt evidence.</li>
+<li><strong>Review and submit</strong> — confirm payload before finalization.</li>
+<li><strong>Track gate progress</strong> — monitor pass/fail and queue states.</li>
 </ol>
-<p>Primary rule: each attempt requires a fresh, valid receipt and compliant tweet context.</p>
-<p>Open the flow at <a href="/submit">/submit</a>.</p>`,
+
+<h3>Common failure patterns</h3>
+<ul>
+<li>Reused receipts or stale tweets from older attempts.</li>
+<li>Unreadable wallet characters on receipt images.</li>
+<li>Cooldown not expired for tier/account policy.</li>
+</ul>
+
+<h3>Operator note</h3>
+<p>Use a new compliant receipt and valid tweet context for each attempt. Start at <a href="/submit">/submit</a>.</p>`,
         order: 5,
       },
       {
@@ -275,18 +288,24 @@ export const DOC_CATEGORIES: DocCategory[] = [
         categorySlug: "verification",
         category: "Verification Gates",
         description: "",
-        content: `<p>All claims pass through 10 sequential gates.</p>
+        content: `<h3>What this is</h3>
+<p>The policy reference for all ten gates used in claim validation.</p>
+
+<h3>How gate execution works</h3>
 <ul>
-<li><strong>Gates 1-9:</strong> blocking controls (any fail stops progression).</li>
-<li><strong>Gate 10:</strong> treasury solvency control (non-blocking queue path).</li>
+<li><strong>Gates 1–9:</strong> blocking checks. First failure stops progression.</li>
+<li><strong>Gate 10:</strong> non-blocking treasury solvency check with queue/retry behavior.</li>
 </ul>
-<p>Gate decisions are policy-driven and auditable. Administrative overrides are exceptional and logged.</p>
-<h3>How to use this reference</h3>
+
+<h3>How to use this page</h3>
 <ol>
-<li>Identify the first failed gate.</li>
-<li>Apply the remediation guidance for that gate only.</li>
-<li>Resubmit with fresh compliant inputs where required.</li>
-</ol>`,
+<li>Identify the first failed gate in Wallet Tracker.</li>
+<li>Apply remediation for that specific gate only.</li>
+<li>Resubmit with fresh inputs when required.</li>
+</ol>
+
+<h3>Operator note</h3>
+<p>Overrides are exceptional and auditable. Gate policy is deterministic at runtime.</p>`,
         order: 11,
       },
       {
@@ -492,15 +511,23 @@ export const DOC_CATEGORIES: DocCategory[] = [
         categorySlug: "technology",
         category: "Technology",
         description: "",
-        content: `<p>GASCOIN uses an AI-assisted, policy-enforced verification stack to make fraud economically unattractive.</p>
+        content: `<h3>What this is</h3>
+<p>An architecture summary of the AI-assisted verification and payout system.</p>
+
+<h3>Core components</h3>
 <ul>
-<li>Signal ingestion from wallet, receipt, and X context</li>
-<li>Receipt intelligence (OCR + integrity + duplicate checks)</li>
-<li>Sequential gate policy engine</li>
+<li>Signal ingestion (wallet, X, receipt payloads)</li>
+<li>Receipt intelligence (OCR, integrity, duplicate checks)</li>
+<li>Deterministic gate/policy engine</li>
 <li>Queue/retry orchestration for treasury constraints</li>
-<li>Immutable audit trail for operator actions</li>
+<li>Immutable audit and reviewer observability</li>
 </ul>
-<p>Start here for architecture orientation, then continue to the dedicated flow diagrams.</p>`,
+
+<h3>Why this matters</h3>
+<p>The stack combines model-assisted scoring with deterministic policy enforcement to reduce abuse without losing traceability.</p>
+
+<h3>Operator note</h3>
+<p>Use the architecture and flow-map pages for deep incident and implementation review.</p>`,
         order: 22,
       },
       {
@@ -510,14 +537,26 @@ export const DOC_CATEGORIES: DocCategory[] = [
         category: "Technology",
         description: "",
         content: `<p>This map is the complete technical path from user action to treasury payout. Use this as the single reference for engineering reviews, incident analysis, and onboarding technical stakeholders.</p>
-<p><img src="/docs/diagrams/end-to-end-architecture-map.svg" alt="GASCOIN end-to-end architecture map" style="width:100%;max-width:1080px;border:1px solid rgba(255,255,255,0.12);border-radius:10px" /></p>
+<p><img src="/docs/diagrams/end-to-end-architecture-map.svg" alt="GASCOIN end-to-end architecture map" style="max-width:1080px;border:1px solid rgba(255,255,255,0.12)" /></p>
 <h3>Read this map in 4 passes</h3>
 <ol>
 <li>Input/identity validation</li>
 <li>Receipt intelligence and fraud scoring</li>
 <li>Gate-state transitions and policy outputs</li>
 <li>Payout dispatch, retries, and audit logs</li>
-</ol>`,
+</ol>
+<h3>ASCII quick map (GitHub-style)</h3>
+<pre style="font-family:ui-monospace, SFMono-Regular, Menlo, monospace; font-size:12px; line-height:1.45; color:rgba(255,255,255,0.78); background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.12); padding:12px; overflow:auto">
+Client Submit -> Session/Auth -> Signal Extraction -> AI/Fraud -> Gate Engine
+                                                           |
+                                                           v
+                                                   Queue/Retry (Gate 10)
+                                                           |
+                                                           v
+                                                        Payout
+
+All states/events -> Persistence + Audit Log (immutable trail)
+</pre>`,
         order: 23,
       },
       {
@@ -527,6 +566,12 @@ export const DOC_CATEGORIES: DocCategory[] = [
         category: "Technology",
         description: "",
         content: `<p>This page gives two views of GASCOIN AI operations: a plain-English path for newcomers, and a systems path for technical operators.</p>
+<h3>Model contract (clear boundaries)</h3>
+<ul>
+<li><strong>Deterministic policy layer:</strong> gates, thresholds, cooldown, queue rules, and payout state transitions.</li>
+<li><strong>Model-assisted layer (Grok/xAI + OCR):</strong> text extraction, tamper likelihood, AI-likelihood, and quality scoring.</li>
+<li><strong>Safety principle:</strong> model outputs inform decisions; deterministic policy enforces final pass/fail paths.</li>
+</ul>
 <h3>Newcomer Path (Simple)</h3>
 <ul>
 <li>Submit wallet + tweet + receipt</li>
@@ -543,7 +588,16 @@ export const DOC_CATEGORIES: DocCategory[] = [
 <li>Policy: sequential gates and state transitions</li>
 <li>Execution: approval, payout queueing, retries, audit logging</li>
 </ul>
-<p><img src="/docs/diagrams/ai-system-overview.svg" alt="GASCOIN AI system overview flow diagram" style="width:100%;max-width:980px;border:1px solid rgba(255,255,255,0.12);border-radius:10px" /></p>`,
+<p><img src="/docs/diagrams/ai-system-overview.svg" alt="GASCOIN AI system overview flow diagram" style="max-width:980px;border:1px solid rgba(255,255,255,0.12)" /></p>
+<h3>ASCII quick map (GitHub-style)</h3>
+<pre style="font-family:ui-monospace, SFMono-Regular, Menlo, monospace; font-size:12px; line-height:1.45; color:rgba(255,255,255,0.78); background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.12); padding:12px; overflow:auto">
+Inputs(wallet,tweet,receipt)
+    -> Extract(X API + OCR)
+    -> Score(AI-likelihood,tamper,pHash,account)
+    -> Policy(gates 1..10)
+    -> Execute(approve/reject/queue)
+    -> Audit(log every privileged/system action)
+</pre>`,
         order: 26,
       },
       {
@@ -585,7 +639,8 @@ export const DOC_CATEGORIES: DocCategory[] = [
         categorySlug: "technology",
         category: "Technology",
         description: "",
-        content: `<p>Grok — built by xAI — is the reasoning engine behind GASCOIN's fraud detection and quality scoring. It powers four critical systems:</p>
+        content: `<p>Grok — built by xAI — is the reasoning engine behind GASCOIN's fraud detection and quality scoring. It powers four critical systems.</p>
+<p><strong>Important:</strong> Grok does not directly release funds. Treasury release and final state transitions are controlled by deterministic policy and gate execution logic.</p>
 <h3>Receipt Analysis</h3>
 <p>Every uploaded receipt passes through Grok-powered OCR that extracts structured data: total amount, date, station name, and handwritten wallet characters. Unlike traditional OCR, Grok understands context — it can distinguish a gas station receipt from a restaurant bill, detect inconsistencies between printed and handwritten text, and flag anomalies that suggest digital manipulation.</p>
 <h3>AI Image Detection</h3>
@@ -1005,16 +1060,23 @@ export const DOC_CATEGORIES: DocCategory[] = [
         categorySlug: "security",
         category: "Security & Admin",
         description: "",
-        content: `<p>Security is multi-layered by design. No single signal is trusted in isolation.</p>
+        content: `<h3>What this is</h3>
+<p>A control-plane summary of anti-fraud, abuse prevention, and admin governance safeguards.</p>
+
 <h3>Control families</h3>
 <ul>
-<li><strong>Identity controls:</strong> public-account and submission ownership checks.</li>
-<li><strong>Artifact controls:</strong> receipt OCR integrity and duplicate fingerprinting.</li>
-<li><strong>Rate controls:</strong> tier-based cooldown and replay prevention.</li>
-<li><strong>Execution controls:</strong> treasury solvency gate and controlled payout workers.</li>
-<li><strong>Governance controls:</strong> auditable admin actions and override logging.</li>
+<li><strong>Identity controls:</strong> account visibility and ownership checks.</li>
+<li><strong>Artifact controls:</strong> OCR integrity and duplicate fingerprinting.</li>
+<li><strong>Rate controls:</strong> cooldown and replay resistance.</li>
+<li><strong>Execution controls:</strong> treasury solvency and payout gating.</li>
+<li><strong>Governance controls:</strong> immutable audit logs and override accountability.</li>
 </ul>
-<p>Result: attacks must satisfy multiple independent constraints simultaneously, increasing attacker cost and reducing exploit scalability.</p>`,
+
+<h3>Risk posture</h3>
+<p>No single signal can approve payout alone; release paths require multi-stage policy success.</p>
+
+<h3>Operator note</h3>
+<p>Use this page as the security baseline, then inspect gate-level docs for implementation detail.</p>`,
         order: 48,
       },
       {
@@ -1097,16 +1159,27 @@ export const DOC_CATEGORIES: DocCategory[] = [
         categorySlug: "help",
         category: "Help",
         description: "Quick triage guide for wallet, tweet, receipt, cooldown, and payout issues.",
-        content: `<h3>Fast triage</h3>
-<p>Use this checklist before opening support:</p>
+        content: `<h3>What this is</h3>
+<p>Fast triage checklist for the most common user-facing submission failures.</p>
+
+<h3>Quick checks (in order)</h3>
 <ol>
-<li><strong>Wallet:</strong> extension installed, connected, and unlocked.</li>
-<li><strong>Tweet:</strong> account public, hashtag present, tweet still live.</li>
-<li><strong>Receipt:</strong> physical, legible, dated within policy window, required wallet marks visible.</li>
+<li><strong>Wallet:</strong> extension installed, unlocked, and connected.</li>
+<li><strong>Tweet:</strong> account public, <code>#gascoin</code> present, tweet live.</li>
+<li><strong>Receipt:</strong> physical, legible, in policy date range, wallet marks visible.</li>
 <li><strong>Cooldown:</strong> verify timer in <a href="/wallet">/wallet</a>.</li>
-<li><strong>Treasury queue:</strong> if Gate 10 queued, retries are automatic.</li>
+<li><strong>Treasury queue:</strong> Gate 10 retries are automatic.</li>
 </ol>
-<p>Best self-service pages: <a href="/wallet">/wallet</a>, <a href="/gates">/gates</a>, and <a href="/how-it-works">/how-it-works</a>.</p>`,
+
+<h3>Best self-service pages</h3>
+<ul>
+<li><a href="/wallet">/wallet</a> — status, cooldown, transaction links</li>
+<li><a href="/gates">/gates</a> — gate criteria and remediations</li>
+<li><a href="/how-it-works">/how-it-works</a> — complete product flow</li>
+</ul>
+
+<h3>Operator note</h3>
+<p>If unresolved after these checks, contact support with submission ID and failed gate state.</p>`,
         order: 38,
       },
       {
@@ -1348,20 +1421,29 @@ export const DOC_CATEGORIES: DocCategory[] = [
         categorySlug: "help",
         category: "Help",
         description: "Getting help with submissions and contacting the team.",
-        content: `<h3>Support workflow</h3>
-<p>Before contacting support, collect:</p>
+        content: `<h3>What this is</h3>
+<p>Support intake guidance and required context for faster issue resolution.</p>
+
+<h3>Before contacting support</h3>
 <ul>
-<li>Submission ID (from Wallet Tracker)</li>
-<li>Connected wallet (truncated is fine)</li>
-<li>Failed gate or status message</li>
+<li>Check <strong>/wallet</strong> for status and failure signals.</li>
+<li>Review <strong>/gates</strong> for gate-specific remediation steps.</li>
+<li>Confirm issue details in the Help pages.</li>
 </ul>
-<p>Primary diagnostics:</p>
+
+<h3>Include these details</h3>
 <ul>
-<li><strong>/wallet</strong> for claim status, cooldown, and transaction data</li>
-<li><strong>/gates</strong> for pass/fail criteria and remediations</li>
-<li><strong>Help section</strong> for known issue playbooks</li>
+<li>Submission ID</li>
+<li>Connected wallet (truncated)</li>
+<li>Observed status or failed gate</li>
+<li>Short problem description</li>
 </ul>
-<p>Contact channel: <strong>TODO — set official Discord/Telegram/Email endpoint</strong>.</p>`,
+
+<h3>Support channel</h3>
+<p><strong>TODO:</strong> set official Discord/Telegram/Email endpoint.</p>
+
+<h3>Operator note</h3>
+<p>Submissions cannot be edited after final submit. Corrections require new compliant input or admin intervention when appropriate.</p>`,
         order: 69,
       },
       {
@@ -1370,24 +1452,29 @@ export const DOC_CATEGORIES: DocCategory[] = [
         categorySlug: "help",
         category: "Help",
         description: "How the GASCOIN points system works — earning, leaderboard, and rewards.",
-        content: `<h3>SOL vs Points — The Core Distinction</h3>
-<p><strong>SOL payouts are for gas receipts only.</strong> When you submit a verified gas receipt and it passes all 10 gates, you receive SOL directly to your wallet. The amount depends on your GASCOIN token tier policy at submission time.</p>
-<p><strong>Everything else earns points.</strong> Referrals, tweet engagement, submission streaks, and GASCOIN holdings all earn points. Points drive your leaderboard rank, status badges, and platform recognition. Points do not convert to SOL.</p>
+        content: `<h3>What this is</h3>
+<p>A concise reference for how the points system operates relative to SOL payouts.</p>
 
-<h3>Why Points Matter</h3>
-<p>Your leaderboard position is determined entirely by points. The higher your point total, the higher your rank. High-ranking users get visibility on the platform — featured on the leaderboard, recognized in the community feed, and positioned as top contributors. Points are the measure of how much you contribute to the GASCOIN ecosystem beyond just submitting receipts.</p>
+<h3>Core distinction</h3>
+<ul>
+<li><strong>SOL payouts:</strong> only for approved gas receipt claims.</li>
+<li><strong>Points:</strong> earned from engagement, referrals, streaks, and holdings.</li>
+</ul>
 
-<h3>The Five Point Sources</h3>
-<table>
-<thead><tr><th>Source</th><th>Points</th><th>When Awarded</th></tr></thead>
-<tbody>
-<tr><td><strong>Tweet Engagement</strong></td><td>Varies by metric</td><td>Every 6 hours via X API</td></tr>
-<tr><td><strong>Referral Conversions</strong></td><td>500 per conversion</td><td>When referred user gets approved</td></tr>
-<tr><td><strong>Approved Submissions</strong></td><td>1,000 per receipt</td><td>Immediately on admin approval</td></tr>
-<tr><td><strong>Streak Bonus</strong></td><td>500 per consecutive window</td><td>Daily at 6am UTC</td></tr>
-<tr><td><strong>Holdings Bonus</strong></td><td>25–750 per day by tier</td><td>Daily at 6am UTC</td></tr>
-</tbody>
-</table>`,
+<h3>Why points matter</h3>
+<p>Points determine leaderboard rank, visibility, and ecosystem contribution standing. Points are not a direct SOL conversion path.</p>
+
+<h3>Primary sources</h3>
+<ul>
+<li>Tweet engagement</li>
+<li>Referral conversions</li>
+<li>Approved submissions</li>
+<li>Streak bonuses</li>
+<li>Holdings bonuses</li>
+</ul>
+
+<h3>Operator note</h3>
+<p>Awarding is policy-scoped and fraud-checked; high-risk patterns are filtered before recognition.</p>`,
         order: 70,
       },
       {

@@ -55,7 +55,7 @@ export default function DocsLayout({ children }: { children: React.ReactNode }) 
   const pathname = usePathname();
   const currentSlug = pathname.split('/docs/')[1] ?? '';
   const [search, setSearch] = useState('');
-  const [showAll, setShowAll] = useState(false);
+  const [showAll, setShowAll] = useState(true);
   const [openCats, setOpenCats] = useState<Record<string, boolean>>(
     Object.fromEntries(DOC_CATEGORIES.map((c) => [c.slug, false]))
   );
@@ -103,7 +103,7 @@ export default function DocsLayout({ children }: { children: React.ReactNode }) 
         {!searching && (
           <div className="docs-search" style={{ paddingTop: 0 }}>
             <button className="docs-footer-link" onClick={() => setShowAll((v) => !v)} style={{ width: '100%', textAlign: 'left' }}>
-              {showAll ? 'Show curated docs' : 'Show all docs'}
+              {showAll ? 'Show curated docs' : 'Show full docs'}
             </button>
           </div>
         )}

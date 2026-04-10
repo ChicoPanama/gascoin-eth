@@ -4,6 +4,37 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import type { DocSection } from '../../lib/docs-content';
 
+const CATEGORY_GUIDE: Record<string, { bestFor: string; action: string }> = {
+  Overview: {
+    bestFor: 'First-time users and investors building baseline understanding.',
+    action: 'Start with this page, then continue through User Flow.',
+  },
+  Submitting: {
+    bestFor: 'Users preparing a live claim submission.',
+    action: 'Follow steps in order and do not reuse receipts/tweets.',
+  },
+  'Verification Gates': {
+    bestFor: 'Users diagnosing failures and operators validating policy behavior.',
+    action: 'Find first failed gate, remediate that gate, then resubmit.',
+  },
+  Technology: {
+    bestFor: 'Technical reviewers, builders, and due-diligence readers.',
+    action: 'Use diagrams + flow maps to trace state transitions end-to-end.',
+  },
+  'Platform Pages': {
+    bestFor: 'Users exploring product surfaces and UI responsibilities.',
+    action: 'Use this as a page-by-page navigation reference.',
+  },
+  'Security & Admin': {
+    bestFor: 'Admins, auditors, and risk-focused stakeholders.',
+    action: 'Validate controls, override boundaries, and audit trail expectations.',
+  },
+  Help: {
+    bestFor: 'Users troubleshooting blocked or unclear submission outcomes.',
+    action: 'Run self-service checks first, then contact support with submission ID.',
+  },
+};
+
 export function DocPageClient({ section, prev, next }: {
   section: DocSection;
   prev: DocSection | null;
@@ -12,6 +43,19 @@ export function DocPageClient({ section, prev, next }: {
   const [copied, setCopied] = useState(false);
   const [headings, setHeadings] = useState<{ id: string; text: string; level: number }[]>([]);
   const [activeId, setActiveId] = useState('');
+
+  const plainText = section.content
+    .replace(/<[^>]*>/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+  const wordCount = plainText ? plainText.split(' ').length : 0;
+  const readMinutes = Math.max(1, Math.ceil(wordCount / 220));
+  const summarySentenceRaw = plainText.split('. ')[0]?.trim() || 'Reference guidance for this section';
+  const summarySentence = summarySentenceRaw.replace(/[.!?]+$/, '');
+  const guide = CATEGORY_GUIDE[section.category] ?? {
+    bestFor: 'General readers.',
+    action: 'Use this section as a reference and continue through linked pages.',
+  };
 
   useEffect(() => {
     const container = document.getElementById('doc-content');
@@ -58,6 +102,28 @@ export function DocPageClient({ section, prev, next }: {
           {section.description && <p className="doc-page-desc">{section.description}</p>}
           <button className="doc-copy-link" onClick={copyLink}>{copied ? '✓ COPIED' : 'COPY LINK'}</button>
         </div>
+
+        <section className="doc-quick-card" aria-label="Quick guide">
+          <div className="doc-quick-title">QUICK GUIDE</div>
+          <div className="doc-quick-grid">
+            <div>
+              <div className="doc-quick-label">Purpose</div>
+              <p>{summarySentence}.</p>
+            </div>
+            <div>
+              <div className="doc-quick-label">Best for</div>
+              <p>{guide.bestFor}</p>
+            </div>
+            <div>
+              <div className="doc-quick-label">Read time</div>
+              <p>{readMinutes} min</p>
+            </div>
+            <div>
+              <div className="doc-quick-label">Next action</div>
+              <p>{guide.action}</p>
+            </div>
+          </div>
+        </section>
 
         {/* Content */}
         <div id="doc-content" className="doc-content" dangerouslySetInnerHTML={{ __html: section.content }} />
