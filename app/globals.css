@@ -4864,7 +4864,14 @@ button.docs-footer-link {
   .wt-teaser-title { font-size: 48px; }
 
   .gt-cards-grid { grid-template-columns: 1fr; }
-  .gt-detail-cols { grid-template-columns: 1fr; gap: 24px; }
+  .gt-detail-cols { grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+  .gt-detail { padding: 16px 12px; }
+  .gt-detail-heading { font-size: 9px; margin-bottom: 6px; }
+  .gt-detail-body { font-size: 11px; line-height: 1.5; }
+  .gt-detail-failure-item { font-size: 10px; line-height: 1.5; }
+  .gt-detail-failures { gap: 4px; }
+  .gt-detail-seen { font-size: 9px; margin-left: 10px; }
+  .gt-detail-time { font-size: 9px; margin-top: 8px; }
   .gt-checklist-section { padding: 24px; }
   .gt-checklist-footer { flex-direction: column; align-items: flex-start; }
   .gt-teaser { padding: 60px 24px; }
