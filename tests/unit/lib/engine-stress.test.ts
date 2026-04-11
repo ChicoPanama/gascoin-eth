@@ -633,9 +633,15 @@ describe('CATEGORY 6: Edge Cases & System Integrity', () => {
     const aiGate = result.gates.find((g) => g.gate === 'ai_image_check');
     expect(aiGate?.passed).toBe(false);
 
-    // Risk: min(1, 2*0.09 + 999*0.35 + 999*0.25 + 0) = min(1, enormous) = 1
-    expect(result.riskScore).toBe(1);
+    // Scores are now clamped to 0-1 before risk calculation (P1 fix)
+    // Risk: min(1, 2*0.09 + 1.0*0.35 + 1.0*0.25 + 0) = 0.78
+    expect(result.riskScore).toBe(0.78);
     expect(result.decision).toBe('rejected');
+
+    // Verify clamp flags were set (audit trail for anomalous upstream values)
+    expect(result.clampFlags).toBeDefined();
+    expect(result.clampFlags).toContain('ai_clamped:999->1');
+    expect(result.clampFlags).toContain('tamper_clamped:999->1');
 
     // followerCount is huge => min_followers gate passes
     const followerGate = result.gates.find((g) => g.gate === 'min_followers');
@@ -928,5 +934,79 @@ describe('CATEGORY 9: Location Scoring Depth', () => {
 
     expect(result.riskAdjustment).toBe(0);
     expect(result.flags).toHaveLength(0);
+  });
+});
+
+// ═══════════════════════════════════════════
+// CATEGORY 10: API Fault Tolerance & Retry
+// ═══════════════════════════════════════════
+describe('CATEGORY 10: API Fault Tolerance', () => {
+  it('Test 41: followerCount=-1 (API failure) returns retry_later, not rejected', () => {
+    const result = evaluateClaim(validClaim({ followerCount: -1 }));
+    expect(result.decision).toBe('retry_later');
+    expect(result.riskScore).toBe(0);
+  });
+
+  it('Test 42: followerCount=0 is NOT an API failure — fails gate normally', () => {
+    const result = evaluateClaim(validClaim({ followerCount: 0 }));
+    expect(result.decision).not.toBe('retry_later');
+    const gate = result.gates.find((g) => g.gate === 'min_followers');
+    expect(gate?.passed).toBe(false);
+  });
+
+  it('Test 43: Clamp flags generated for out-of-range scores', () => {
+    const result = evaluateClaim(validClaim({ aiScore: 2.5, tamperScore: -0.5 }));
+    expect(result.clampFlags).toBeDefined();
+    expect(result.clampFlags).toContain('ai_clamped:2.5->1');
+    expect(result.clampFlags).toContain('tamper_clamped:-0.5->0');
+  });
+
+  it('Test 44: Normal scores produce no clamp flags', () => {
+    const result = evaluateClaim(validClaim({ aiScore: 0.3, tamperScore: 0.2 }));
+    expect(result.clampFlags).toBeUndefined();
+  });
+
+  it('Test 45: Tamper=0.99 alone blocks even with perfect AI score', () => {
+    const result = evaluateClaim(validClaim({ aiScore: 0.0, tamperScore: 0.99 }));
+    const tamperGate = result.gates.find((g) => g.gate === 'tamper_check');
+    expect(tamperGate?.passed).toBe(false);
+    expect(result.failed.length).toBeGreaterThan(0);
+  });
+});
+
+// ═══════════════════════════════════════════
+// CATEGORY 11: Historical Signal Decay
+// ═══════════════════════════════════════════
+describe('CATEGORY 11: Historical Signal Decay', () => {
+  it('Test 46: Recent snapshot (30d) — full penalty for follower dump', () => {
+    const result = scoreAccountQuality(
+      { username: 'test', public_metrics: { followers_count: 500, following_count: 100, tweet_count: 200, listed_count: 2 }, description: 'Real user', profile_image_url: 'https://img.com/pic.jpg', created_at: '2024-01-01T00:00:00Z' } as any,
+      { previousFollowerCount: 10000, snapshotAge: 30 },
+    );
+    expect(result.flags).toContain('follower_drop_95pct');
+    // Base 50 + age>365(+10) + listed(+10) + tweets>=200(+5) - drop(-20) + followers<100(-5) = 50
+    // Exact score depends on all signals, but the drop flag MUST be present
+    expect(result.score).toBeLessThan(65);
+  });
+
+  it('Test 47: Old snapshot (200d) — reduced penalty for same dump', () => {
+    const result = scoreAccountQuality(
+      { username: 'test', public_metrics: { followers_count: 500, following_count: 100, tweet_count: 200, listed_count: 2 }, description: 'Real user', profile_image_url: 'https://img.com/pic.jpg', created_at: '2024-01-01T00:00:00Z' } as any,
+      { previousFollowerCount: 10000, snapshotAge: 200 },
+    );
+    expect(result.flags).toContain('follower_drop_95pct');
+    expect(result.score).toBeGreaterThan(50);
+  });
+
+  it('Test 48: Private account penalty decays with snapshot age', () => {
+    const recent = scoreAccountQuality(
+      { username: 'test', public_metrics: { followers_count: 500, following_count: 100, tweet_count: 200, listed_count: 2 }, description: 'Real user', profile_image_url: 'https://img.com/pic.jpg', created_at: '2024-01-01T00:00:00Z' } as any,
+      { isProtected: true, snapshotAge: 10 },
+    );
+    const old = scoreAccountQuality(
+      { username: 'test', public_metrics: { followers_count: 500, following_count: 100, tweet_count: 200, listed_count: 2 }, description: 'Real user', profile_image_url: 'https://img.com/pic.jpg', created_at: '2024-01-01T00:00:00Z' } as any,
+      { isProtected: true, snapshotAge: 200 },
+    );
+    expect(old.score).toBeGreaterThan(recent.score);
   });
 });

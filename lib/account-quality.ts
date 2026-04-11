@@ -22,6 +22,8 @@ export interface HistoricalSignals {
   xLocation?: string | null;
   bio?: string | null;
   accountCreatedAt?: string | null;
+  /** When the historical snapshot was taken — used for signal decay */
+  snapshotAge?: number | null; // days since snapshot
 }
 
 const MIN_ACCOUNT_QUALITY_SCORE = 40;
@@ -67,18 +69,22 @@ export function scoreAccountQuality(user: XUser, history?: HistoricalSignals): A
       score += 5;
     }
 
-    // --- Follower count anomaly (historical comparison) ---
+    // --- Follower count anomaly (historical comparison with decay) ---
     if (history?.previousFollowerCount != null && history.previousFollowerCount > 0) {
+      // Signal decay: recent snapshots (< 90 days) at full weight, older at reduced weight
+      const ageDays = history?.snapshotAge ?? 0;
+      const decayWeight = ageDays <= 90 ? 1.0 : ageDays <= 180 ? 0.6 : 0.3;
+
       const dropPct = (history.previousFollowerCount - followers) / history.previousFollowerCount;
       if (dropPct > 0.5) {
-        // Lost 50%+ followers since last check — bought followers dumped
-        score -= 20;
+        const penalty = Math.round(20 * decayWeight);
+        score -= penalty;
         flags.push(`follower_drop_${Math.round(dropPct * 100)}pct`);
       }
       const spikePct = (followers - history.previousFollowerCount) / history.previousFollowerCount;
       if (spikePct > 5 && followers < 5000) {
-        // 5x+ follower spike on a small account — bot injection
-        score -= 15;
+        const penalty = Math.round(15 * decayWeight);
+        score -= penalty;
         flags.push(`follower_spike_${Math.round(spikePct * 100)}pct`);
       }
     }
@@ -122,7 +128,9 @@ export function scoreAccountQuality(user: XUser, history?: HistoricalSignals): A
 
   // --- Protected account (went private after previous submission) ---
   if (history?.isProtected === true) {
-    score -= 15;
+    const ageDays = history?.snapshotAge ?? 0;
+    const decayWeight = ageDays <= 90 ? 1.0 : ageDays <= 180 ? 0.6 : 0.3;
+    score -= Math.round(15 * decayWeight);
     flags.push('account_went_private');
   }
 

@@ -164,11 +164,15 @@ export async function POST(req: Request){
 
   const { data: lastMetrics } = await supabase
     .from('user_metrics_history')
-    .select('follower_count')
+    .select('follower_count, created_at')
     .eq('wallet', wallet)
     .order('created_at', { ascending: false })
     .limit(1)
     .maybeSingle();
+
+  const snapshotAgeDays = lastMetrics?.created_at
+    ? Math.floor((Date.now() - new Date(lastMetrics.created_at).getTime()) / 86400000)
+    : null;
 
   const accountQuality = userLookup.user ? scoreAccountQuality(userLookup.user, {
     previousFollowerCount: lastMetrics?.follower_count ?? null,
@@ -178,6 +182,7 @@ export async function POST(req: Request){
     xLocation: walletLink?.x_location ?? null,
     bio: walletLink?.bio ?? null,
     accountCreatedAt: walletLink?.x_account_created_at ?? null,
+    snapshotAge: snapshotAgeDays,
   }) : { score: 0, passed: false, flags: ['user_lookup_failed'] };
 
   // Pass OCR pipeline data to fraud checks to avoid redundant processing
@@ -232,6 +237,17 @@ export async function POST(req: Request){
     accountQualityScore: accountQuality.score,
     accountQualityPassed: accountQuality.passed,
   });
+
+  // If X API failed, tell user to retry — don't penalize them
+  if (result.decision === 'retry_later') {
+    return NextResponse.json({
+      ok: false,
+      error: 'api_unavailable',
+      retryable: true,
+      message: 'Social verification temporarily unavailable. Please try again in a few minutes.',
+      gates: result.gates,
+    }, { status: 503 });
+  }
 
   // upsert user and wallet linkage
   const { data: userRow, error: userErr } = await supabase
@@ -387,7 +403,8 @@ export async function POST(req: Request){
       riskScore: result.riskScore,
       decision: result.decision,
       duplicateHash,
-      duplicatePhash
+      duplicatePhash,
+      ...(result.clampFlags ? { clampFlags: result.clampFlags } : {}),
     }
   });
 
