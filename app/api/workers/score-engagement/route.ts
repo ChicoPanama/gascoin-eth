@@ -3,7 +3,7 @@ import { getSupabaseAdmin } from '../../../../lib/supabase';
 import { calculateEngagementPoints } from '../../../../lib/engagement-rewards';
 import { scoreTweetQuality, calculateWalletTrust, awardVerifiedPoints } from '../../../../lib/ai-points-engine';
 import { searchRecentTweets, extractMetrics, getUserByUsername } from '../../../../lib/x-api';
-import type { XTweet } from '../../../../lib/x-api';
+import type { XTweet, XMedia } from '../../../../lib/x-api';
 import { isAuthorizedCron as isAuthorized } from '../../../../lib/cron-auth';
 import { updateQualityTrend } from '../../../../lib/data-intelligence';
 import { addMemory } from '../../../../lib/mem0';
@@ -143,7 +143,7 @@ export async function POST(req: Request) {
         tweetsFound += result.tweets.length;
 
         for (const tweet of result.tweets) {
-          const scoreResult = await scoreTweet(supabase, wallet, handle, tweet, followerCount, rescoreCutoff, walletTrustCache.get(wallet));
+          const scoreResult = await scoreTweet(supabase, wallet, handle, tweet, followerCount, rescoreCutoff, walletTrustCache.get(wallet), result.media);
           if (scoreResult.scored) scored++;
           if (scoreResult.pointsAwarded > 0) totalPointsAwarded += scoreResult.pointsAwarded;
           if (scoreResult.heldForReview) heldForReview++;
@@ -195,6 +195,7 @@ async function scoreTweet(
   followerCount: number,
   rescoreCutoff: string,
   walletTrust?: ReturnType<typeof calculateWalletTrust>,
+  mediaIncludes: XMedia[] = [],
 ): Promise<{ scored: boolean; pointsAwarded: number; heldForReview: boolean }> {
   // Check if already scored recently
   const { data: existingScored } = await supabase
@@ -207,7 +208,7 @@ async function scoreTweet(
     return { scored: false, pointsAwarded: 0, heldForReview: false };
   }
 
-  const metrics = extractMetrics(tweet);
+  const metrics = extractMetrics(tweet, mediaIncludes);
   const rawPoints = calculateEngagementPoints(metrics);
   const tweetText = tweet.text || '';
 
@@ -219,11 +220,12 @@ async function scoreTweet(
     retweets: metrics.retweets,
     replies: metrics.replies,
     followerCount,
+    contentType: metrics.content_type,
   });
 
   const points = Math.round(rawPoints * qualityScore.multiplier);
 
-  // Upsert scored tweet record (now includes bookmarks)
+  // Upsert scored tweet record (now includes bookmarks + content_type)
   await supabase.from('scored_tweets').upsert({
     wallet,
     x_handle: handle,
@@ -231,7 +233,13 @@ async function scoreTweet(
     tweet_url: `https://x.com/${handle}/status/${tweet.id}`,
     tweet_text: tweetText.slice(0, 500),
     posted_at: tweet.created_at,
-    ...metrics,
+    impressions: metrics.impressions,
+    likes: metrics.likes,
+    retweets: metrics.retweets,
+    quote_tweets: metrics.quote_tweets,
+    replies: metrics.replies,
+    bookmarks: metrics.bookmarks,
+    content_type: metrics.content_type,
     raw_points: rawPoints,
     adjusted_points: points,
     quality_score: qualityScore.quality,
@@ -261,6 +269,7 @@ async function scoreTweet(
     metadata: {
       tweet_id: tweet.id, x_handle: handle, metrics, tweetText: tweetText.slice(0, 200),
       quality: qualityScore.quality, multiplier: qualityScore.multiplier,
+      content_type: metrics.content_type,
       isClaimLinked: false, isDelta: !!existingScored,
     },
     walletTrust: trust,

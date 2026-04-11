@@ -73,8 +73,9 @@ export async function scoreTweetQuality(params: {
   retweets: number;
   replies: number;
   followerCount: number;
+  contentType?: string;
 }): Promise<TweetQualityScore> {
-  const { tweetText, impressions, likes, retweets, replies, followerCount } = params;
+  const { tweetText, impressions, likes, retweets, replies, followerCount, contentType } = params;
 
   // Heuristic pre-checks (free, instant)
   const wordCount = tweetText.split(/\s+/).length;
@@ -95,16 +96,18 @@ export async function scoreTweetQuality(params: {
   }
 
   // AI quality assessment
-  const prompt = `Rate this tweet's quality for a gas refund community platform. Return ONLY valid JSON.
+  const contentTypeLabel = contentType || 'unknown';
+  const prompt = `Rate this tweet's quality for a gas refund community platform (GASCOIN). Return ONLY valid JSON.
 
 Tweet: "${tweetText.slice(0, 280)}"
+Content type: ${contentTypeLabel}
 Metrics: ${impressions} impressions, ${likes} likes, ${retweets} RTs, ${replies} replies
 Author followers: ${followerCount}
 
 Score these (0-1 each):
 {
-  "quality": 0.0-1.0 (is this genuine, thoughtful content about gas prices/refunds?),
-  "spam_probability": 0.0-1.0 (pure hashtag spam, copy-paste, no original thought?),
+  "quality": 0.0-1.0 (is this genuine, original content about GASCOIN/gas prices/refunds? Original videos and personal takes score highest. Reposts, cross-posted content, or #gascoin slapped on unrelated content score lowest.),
+  "spam_probability": 0.0-1.0 (pure hashtag spam, copy-paste, hashtag on unrelated video, no original thought?),
   "bot_engagement_probability": 0.0-1.0 (do the engagement numbers look artificial?),
   "reason": "one sentence explanation"
 }`;

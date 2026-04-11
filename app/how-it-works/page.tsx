@@ -116,7 +116,7 @@ const STEPS: Step[] = [
     title: 'Post on X',
     time: '1 min',
     bullets: [
-      'Post a tweet on X. Say whatever you want — just include the hashtag #gascoin somewhere in the tweet.',
+      'Post a tweet on X with the hashtag #gascoin. Original videos earn 3x points — record yourself, share your story, show your receipt at the pump. Reposts earn almost nothing.',
       'Keep the tweet up. If you delete it, your submission will fail verification.',
       'Copy the URL of your tweet — you\'ll paste it in the next step.',
     ],
