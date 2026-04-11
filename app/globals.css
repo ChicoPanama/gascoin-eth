@@ -3353,6 +3353,22 @@ button.docs-footer-link {
   padding: 56px 32px;
   border-bottom: 2px solid var(--accent);
   box-shadow: 0 0 32px var(--accent-glow-soft);
+  overflow: hidden;
+}
+.lb-podium-card--first::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url('/leaderboard/podium-bg-1.jpg');
+  background-repeat: no-repeat;
+  background-position: center 72%;
+  background-size: 78% auto;
+  opacity: 0.14;
+  pointer-events: none;
+}
+.lb-podium-card--first > * {
+  position: relative;
+  z-index: 1;
 }
 .lb-podium-card--second, .lb-podium-card--third {
   align-self: stretch;
