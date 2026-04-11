@@ -3354,16 +3354,7 @@ button.docs-footer-link {
   border: 1px solid rgba(255,255,255,0.15);
   border-bottom: 2px solid var(--accent);
   box-shadow: 0 0 40px var(--accent-glow-soft), inset 0 1px 0 rgba(255,255,255,0.08);
-}
-.lb-podium-card--first::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  z-index: 1;
-  background: linear-gradient(120deg, transparent 30%, rgba(212,175,55,0.06) 42%, rgba(212,175,55,0.13) 50%, rgba(212,175,55,0.06) 58%, transparent 70%);
-  background-size: 250% 100%;
-  animation: shimmerSweep 5s ease-in-out infinite;
+  animation: championPulse 4s ease-in-out infinite;
 }
 .lb-podium-card--first::after {
   content: '';
@@ -3375,9 +3366,15 @@ button.docs-footer-link {
   background: linear-gradient(90deg, transparent, rgba(255,255,255,0.12) 50%, transparent);
   pointer-events: none;
 }
-@keyframes shimmerSweep {
-  0% { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
+@keyframes championPulse {
+  0%, 100% {
+    box-shadow: 0 0 30px rgba(255,255,255,0.10), inset 0 1px 0 rgba(255,255,255,0.08);
+    border-color: rgba(255,255,255,0.15);
+  }
+  50% {
+    box-shadow: 0 0 50px rgba(255,255,255,0.22), inset 0 1px 0 rgba(255,255,255,0.12);
+    border-color: rgba(255,255,255,0.35);
+  }
 }
 .lb-podium-card--second, .lb-podium-card--third {
   align-self: stretch;
