@@ -2591,14 +2591,17 @@ button.docs-footer-link {
   from { opacity: 0; max-height: 0; padding-top: 0; padding-bottom: 0; }
   to { opacity: 1; max-height: 800px; }
 }
-.gt-detail-text {
+.gt-detail-line {
   font-family: var(--font-body);
   font-weight: 300;
   font-size: 13px;
   color: rgba(255,255,255,0.65);
   line-height: 1.7;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
 }
-.gt-detail-text strong {
+.gt-detail-line:last-child { border-bottom: none; }
+.gt-detail-line strong {
   color: rgba(255,255,255,0.9);
   font-weight: 500;
 
@@ -4838,7 +4841,7 @@ button.docs-footer-link {
 
   .gt-cards-grid { grid-template-columns: 1fr; }
   .gt-detail { padding: 16px; }
-  .gt-detail-text { font-size: 12px; }
+  .gt-detail-line { font-size: 12px; }
   .gt-checklist-section { padding: 24px; }
   .gt-checklist-footer { flex-direction: column; align-items: flex-start; }
   .gt-teaser { padding: 60px 24px; }

@@ -3,19 +3,19 @@
 import type { GateWithStats } from '../../types/gates';
 
 export function GateDetailPanel({ gate }: { gate: GateWithStats }) {
-  const { definition: def, top_failures } = gate;
-
-  const failures = def.common_failures.join('; ');
+  const { definition: def } = gate;
 
   return (
     <div className="gt-detail">
-      <p className="gt-detail-text">
+      <div className="gt-detail-line">
         <strong>Check:</strong> {def.what_we_check}
-        {' · '}
-        <strong>Fails when:</strong> {failures}.
-        {' · '}
+      </div>
+      <div className="gt-detail-line">
+        <strong>Fails when:</strong> {def.common_failures.join('; ')}.
+      </div>
+      <div className="gt-detail-line">
         <strong>Fix:</strong> {def.how_to_pass}
-      </p>
+      </div>
     </div>
   );
 }
