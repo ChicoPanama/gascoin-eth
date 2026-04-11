@@ -3355,7 +3355,7 @@ button.docs-footer-link {
   box-shadow: 0 0 32px var(--accent-glow-soft);
 }
 .lb-podium-card--second, .lb-podium-card--third {
-  align-self: end;
+  align-self: stretch;
 }
 .lb-podium-card--you {
   border-color: rgba(255,255,255,0.5);
