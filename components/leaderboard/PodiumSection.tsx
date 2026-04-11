@@ -9,6 +9,7 @@ function PodiumArt({ rank }: { rank: number }) {
     `/leaderboard/podium-hero-${rank}.jpg`,
     `/leaderboard/podium-hero-${rank}.png`,
     `/leaderboard/podium-rank-${rank}.png`,
+    ...(rank === 1 ? ['/leaderboard/podium-bg-1.jpg'] : []),
   ];
   const [idx, setIdx] = useState(0);
   const src = candidates[idx];
@@ -33,22 +34,22 @@ function UserAvatar({ entry, size = 48 }: { entry: LeaderboardEntry; size?: numb
         alt={entry.x_handle ? `@${entry.x_handle}` : 'User'}
         width={size}
         height={size}
-        className="lb-podium-avatar"
         style={{ borderRadius: '50%', objectFit: 'cover', border: '2px solid var(--glass-border)' }}
       />
     );
   }
-  // Fixed green spotlight fallback to match leaderboard visual style
+  // Gradient circle fallback — deterministic color from wallet
+  const hash = entry.wallet_address.split('').reduce((a, c) => a + c.charCodeAt(0), 0);
+  const hue1 = hash % 360;
+  const hue2 = (hash * 7) % 360;
   return (
     <div
-      className="lb-podium-avatar"
       style={{
         width: size,
         height: size,
         borderRadius: '50%',
-        background: 'linear-gradient(135deg, #8AE25A 0%, #55B83A 100%)',
-        border: '4px solid #1f2126',
-        boxShadow: '0 8px 20px rgba(0,0,0,0.45)',
+        background: `linear-gradient(135deg, hsl(${hue1}, 60%, 45%), hsl(${hue2}, 50%, 35%))`,
+        border: '2px solid var(--glass-border)',
         flexShrink: 0,
       }}
     />
@@ -65,7 +66,7 @@ function UserIdentity({ entry }: { entry: LeaderboardEntry }) {
         className="lb-podium-handle"
         style={{ color: 'var(--fg)', textDecoration: 'none' }}
       >
-        @{entry.x_handle}
+        @{entry.x_handle} <span style={{ fontSize: 10, opacity: 0.4 }}>↗</span>
       </a>
     );
   }
@@ -94,11 +95,11 @@ export function PodiumSection({ entries, connectedWallet }: {
             {isYou && <span className="lb-you-badge">YOU</span>}
             <div className="lb-podium-art-wrap">
               <PodiumArt rank={e.rank} />
-              {e.rank !== 1 && <div className="lb-podium-rank-badge">{formatRank(e.rank)}</div>}
+              <div className="lb-podium-rank-badge">{formatRank(e.rank)}</div>
             </div>
 
             <div className="lb-podium-identity-row">
-              <UserAvatar entry={e} size={88} />
+              <UserAvatar entry={e} size={24} />
               <div>
                 <UserIdentity entry={e} />
                 <div className="lb-podium-points">{Math.round(e.composite_score).toLocaleString()} points</div>

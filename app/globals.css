@@ -3329,32 +3329,34 @@ button.docs-footer-link {
 .lb-podium {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
-  gap: 16px;
-  background: transparent;
+  gap: 1px;
+  background: var(--line);
   margin: 48px 0;
 }
 .lb-podium-card {
-  background: #111319;
-  padding: 24px;
+  background: var(--glass-bg);
+  padding: 40px 32px;
   position: relative;
   display: flex;
   flex-direction: column;
-  align-items: stretch;
-  text-align: left;
-  border: 1px solid rgba(255,255,255,0.12);
+  align-items: center;
+  text-align: center;
+  border-bottom: 1px solid rgba(255,255,255,0.3);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
   transition: background var(--duration-normal), transform var(--duration-fast);
 }
-.lb-podium-card:hover { background: #141722; transform: translateY(-1px); }
+.lb-podium-card:hover { background: var(--card-hover); transform: translateY(-1px); }
 .lb-podium-card--first {
-  background: #0f121a;
-  border: 1px solid rgba(255,255,255,0.18);
-  padding: 24px;
+  background: var(--glass-bg);
+  border: 1px solid rgba(255,255,255,0.2);
+  padding: 28px 24px;
   border-bottom: 2px solid var(--accent);
   box-shadow: 0 0 32px var(--accent-glow-soft);
 }
 .lb-podium-card--second, .lb-podium-card--third {
   align-self: stretch;
-  padding: 24px;
+  padding: 28px 24px;
 }
 .lb-podium-card--you {
   border-color: rgba(255,255,255,0.5);
@@ -3378,12 +3380,11 @@ button.docs-footer-link {
 }
 .lb-podium-art-wrap {
   width: 100%;
-  aspect-ratio: 3 / 4;
-  background: #0c0f15;
-  border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 10px;
+  aspect-ratio: 4 / 5;
+  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(255,255,255,0.1);
   position: relative;
-  margin-bottom: 18px;
+  margin-bottom: 14px;
   overflow: hidden;
 }
 
@@ -3391,7 +3392,6 @@ button.docs-footer-link {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: center 22%;
   display: block;
 }
 
@@ -3407,34 +3407,29 @@ button.docs-footer-link {
 
 .lb-podium-rank-badge {
   position: absolute;
-  right: 14px;
-  top: 14px;
+  right: 10px;
+  top: 10px;
   font-family: var(--font-mono);
-  font-size: 22px;
+  font-size: 16px;
   letter-spacing: 0.05em;
-  border: 3px solid rgba(255,255,255,0.95);
-  border-radius: 10px 10px 12px 12px;
-  padding: 5px 12px;
+  border: 2px solid rgba(255,255,255,0.9);
+  border-radius: 8px;
+  padding: 3px 8px;
   color: #fff;
-  background: rgba(0,0,0,0.45);
-  line-height: 1;
+  background: rgba(0,0,0,0.35);
 }
 
 .lb-podium-identity-row {
   width: 100%;
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 10px;
   justify-content: flex-start;
-}
-
-.lb-podium-avatar {
-  flex-shrink: 0;
 }
 
 .lb-podium-handle {
   font-family: var(--font-mono);
-  font-size: 46px;
+  font-size: 27px;
   letter-spacing: 0.01em;
   line-height: 1.1;
   margin: 0;
@@ -3442,18 +3437,13 @@ button.docs-footer-link {
 
 .lb-podium-points {
   font-family: var(--font-mono);
-  font-size: 22px;
+  font-size: 13px;
   color: rgba(255,255,255,0.65);
-  margin-top: 8px;
+  margin-top: 4px;
 }
 
 .lb-podium-card--second .lb-podium-handle,
 .lb-podium-card--third .lb-podium-handle {
-  font-size: 32px;
-}
-
-.lb-podium-card--second .lb-podium-points,
-.lb-podium-card--third .lb-podium-points {
   font-size: 16px;
 }
 .lb-podium-sol {
@@ -4875,19 +4865,7 @@ button.docs-footer-link {
   .cf-teaser-title { font-size: 48px; }
 
   .lb-podium { grid-template-columns: 1fr; }
-  .lb-podium-card--first,
-  .lb-podium-card--second,
-  .lb-podium-card--third { padding: 18px; }
-  .lb-podium-art-wrap { aspect-ratio: 3 / 4; }
-  .lb-podium-rank-badge { font-size: 16px; padding: 4px 8px; right: 10px; top: 10px; }
-  .lb-podium-identity-row { gap: 10px; }
-  .lb-podium-avatar { width: 64px !important; height: 64px !important; }
-  .lb-podium-handle,
-  .lb-podium-card--second .lb-podium-handle,
-  .lb-podium-card--third .lb-podium-handle { font-size: 24px; }
-  .lb-podium-points,
-  .lb-podium-card--second .lb-podium-points,
-  .lb-podium-card--third .lb-podium-points { font-size: 14px; }
+  .lb-podium-card--first { padding: 40px 32px; }
   .lb-drill { width: 100%; min-width: unset; }
   .lb-teaser { padding: 60px 24px; }
   .lb-teaser-inner { grid-template-columns: 1fr; gap: 32px; }
