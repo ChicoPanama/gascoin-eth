@@ -292,7 +292,7 @@ export default async function Home() {
                   <div className="gc-tech-layer-tag">CLAUDE SONNET · ANTHROPIC · FINAL REVIEW</div>
                   <p className="gc-tech-layer-desc">
                     Before SOL leaves the treasury, Claude reviews the complete submission package —
-                    all 12 gate results, fraud scores, location signals, X account metrics, and
+                    all 12 gate results, fraud scores, X account metrics, and
                     submission history. Returns a verdict with a written audit narrative.
                     The manager that signs off before money moves.
                   </p>
@@ -307,32 +307,9 @@ export default async function Home() {
 
               <div className="gc-tech-connector" />
 
-              {/* Layer 5 — Location Intelligence */}
-              <div className="gc-tech-layer">
-                <div className="gc-tech-layer-num">05</div>
-                <div className="gc-tech-layer-content">
-                  <div className="gc-tech-layer-title">Location Intelligence</div>
-                  <div className="gc-tech-layer-tag">EDGE PROXY · GEOBLOCKING · GPS CROSS-REFERENCE</div>
-                  <p className="gc-tech-layer-desc">
-                    Four independent location signals are cross-referenced: Vercel edge IP country,
-                    OCR-extracted receipt country, receipt currency, and EXIF GPS coordinates.
-                    Mismatches elevate risk. Known bot-farm countries are blocked at the edge
-                    before any processing occurs.
-                  </p>
-                  <div className="gc-tech-layer-catches">
-                    <span className="gc-tech-catch">IP Geolocation</span>
-                    <span className="gc-tech-catch">OCR Country</span>
-                    <span className="gc-tech-catch">Currency Match</span>
-                    <span className="gc-tech-catch">EXIF GPS</span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="gc-tech-connector" />
-
-              {/* Layer 6 — Referral Pipeline */}
+              {/* Layer 5 — Referral Pipeline */}
               <div className="gc-tech-layer gc-tech-layer--ai">
-                <div className="gc-tech-layer-num">06</div>
+                <div className="gc-tech-layer-num">05</div>
                 <div className="gc-tech-layer-content">
                   <div className="gc-tech-layer-title">Automated Referral Pipeline</div>
                   <div className="gc-tech-layer-tag">EVERY 15 MIN · RING DETECTION · AUTO-VERIFY</div>
@@ -362,7 +339,7 @@ export default async function Home() {
                 <div className="gc-tech-stat-label">Automated Gates</div>
               </div>
               <div className="gc-tech-stat">
-                <div className="gc-tech-stat-value">6</div>
+                <div className="gc-tech-stat-value">5</div>
                 <div className="gc-tech-stat-label">Verification Layers</div>
               </div>
               <div className="gc-tech-stat">

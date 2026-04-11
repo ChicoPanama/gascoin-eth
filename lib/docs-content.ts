@@ -540,11 +540,11 @@ export const DOC_CATEGORIES: DocCategory[] = [
   │  ├─ EXIF forensics     ├─ Pattern analysis   ├─ Payout gate    │
   │  └─ Image integrity    └─ Fraud reasoning    └─ Verdict        │
   ├─────────────────────────────────────────────────────────────────┤
-  │  X API v2              LOCATION INTEL        REFERRAL ENGINE   │
-  │  ├─ Tweet verify       ├─ IP geolocation     ├─ Ring detection │
-  │  ├─ Account quality    ├─ OCR country        ├─ Anti-farm      │
-  │  ├─ Follower history   ├─ Currency match     ├─ Auto-verify    │
-  │  └─ 100% persistence  └─ EXIF GPS           └─ Points reward  │
+  │  X API v2                              REFERRAL ENGINE        │
+  │  ├─ Tweet verify                      ├─ Ring detection       │
+  │  ├─ Account quality                   ├─ Anti-farm            │
+  │  ├─ Follower history                  ├─ Auto-verify          │
+  │  └─ 100% persistence                 └─ Points reward        │
   ├─────────────────────────────────────────────────────────────────┤
   │  REDIS CACHE · EDGE PROXY · 225 STRESS TESTS · SIGNAL DECAY   │
   └─────────────────────────────────────────────────────────────────┘
@@ -796,7 +796,7 @@ Inputs(wallet,tweet,receipt)
       },
       {
         slug: "4-layer-fraud-detection",
-        title: "6-Layer Verification Stack",
+        title: "5-Layer Verification Stack",
         categorySlug: "technology",
         category: "Technology",
         description: "",
@@ -810,9 +810,7 @@ Inputs(wallet,tweet,receipt)
   ─────────────────────────────────────────────────────────────────────────────────
   LAYER 4   Claude Oversight            Final review + audit narrative + payout gate
   ─────────────────────────────────────────────────────────────────────────────────
-  LAYER 5   Location Intelligence       IP geolocation + OCR country + currency + EXIF GPS
-  ─────────────────────────────────────────────────────────────────────────────────
-  LAYER 6   Referral Pipeline           Ring detection + anti-farm + auto-verify
+  LAYER 5   Referral Pipeline           Ring detection + anti-farm + auto-verify
 </pre>
 <h3>Layer 1 — Gemini Vision</h3>
 <p>Google Gemini processes every receipt image: OCR extraction of structured data (date, amount, station, wallet characters), tamper detection scoring, EXIF forensics analysis, and image integrity verification. This is the first line of defense against fabricated or manipulated receipt images.</p>
@@ -822,9 +820,7 @@ Inputs(wallet,tweet,receipt)
 <p>The submitter's X account is evaluated for authenticity signals: follower count, account age, posting history, engagement patterns, and network quality. xAI-powered scoring identifies bot accounts, purchased followers, and coordinated networks. This layer makes it economically infeasible to create fake accounts at scale.</p>
 <h3>Layer 4 — Claude Oversight</h3>
 <p>Claude (Anthropic) reviews every auto-approved claim before SOL is dispatched. It receives all gate results, fraud scores, and cross-validation signals, then returns an approve/flag/reject verdict with a confidence score and written audit narrative. Flagged claims revert to admin review.</p>
-<h3>Layer 5 — Location Intelligence</h3>
-<p>Four independent location signals are cross-referenced: IP country (Vercel edge), OCR receipt country, receipt currency, and EXIF GPS coordinates. Mismatches elevate the risk score. Edge proxy geoblocking and bot user-agent detection add additional protection at the network layer.</p>
-<h3>Layer 6 — Referral Pipeline</h3>
+<h3>Layer 5 — Referral Pipeline</h3>
 <p>Graph analysis maps referral relationships and identifies circular referral patterns, mutual-referral schemes, and coordinated sign-up networks. Detected rings are flagged and excluded from referral rewards. Legitimate referrals are auto-verified and rewarded with points.</p>`,
         order: 32,
       },
@@ -888,7 +884,7 @@ Inputs(wallet,tweet,receipt)
 <li>All 12 gate results (pass/fail + metadata)</li>
 <li>Fraud scores from Gemini and Grok</li>
 <li>Cross-validation signals between receipt, tweet, and wallet</li>
-<li>Location signals (IP country, OCR country, currency, EXIF GPS)</li>
+<li>Submission metadata and fraud flags</li>
 <li>X account metrics (follower count, account age, engagement history)</li>
 <li>Submission history for the wallet (previous claims, approval rate, flags)</li>
 </ul>
@@ -913,41 +909,6 @@ Inputs(wallet,tweet,receipt)
 </pre>
 <p>Three independent AI systems from three different providers ensure no single point of model failure or bias can compromise the verification pipeline.</p>`,
         order: 29,
-      },
-      {
-        slug: "location-intelligence",
-        title: "Location Intelligence",
-        categorySlug: "technology",
-        category: "Technology",
-        description: "",
-        content: `<h3>What this is</h3>
-<p>Location Intelligence cross-references four independent geographic signals to detect submissions where the claimed purchase location does not match the submitter's actual location.</p>
-
-<h3>The 4 signals</h3>
-<ul>
-<li><strong>IP country (Vercel edge):</strong> The country detected from the submitter's IP address at the network edge</li>
-<li><strong>OCR receipt country:</strong> The country inferred from receipt text (station name, address, language, formatting)</li>
-<li><strong>Receipt currency:</strong> The currency symbol or code extracted from the receipt total</li>
-<li><strong>EXIF GPS:</strong> GPS coordinates embedded in the receipt photo metadata (if available)</li>
-</ul>
-
-<h3>How mismatches affect scoring</h3>
-<p>When signals disagree, the risk score is elevated proportionally. A single mismatch adds a moderate penalty; multiple mismatches compound. The maximum location-based risk elevation is capped at +0.20 to prevent location alone from causing a rejection — it is one signal among many.</p>
-
-<h3>Edge-level protection</h3>
-<ul>
-<li><strong>Geoblocking:</strong> Edge proxy blocks requests from known bot-farm countries before they reach the application layer</li>
-<li><strong>Bot user-agent detection:</strong> Automated user agents (headless browsers, scripted HTTP clients) are rejected at edge</li>
-</ul>
-
-<h3>Signal examples</h3>
-<pre class="doc-ascii">
-  IP=USA + Receipt=USA + Currency=USD + GPS=USA     → Low risk (consistent)
-  IP=Nigeria + Receipt=USA + Currency=USD + no GPS  → High risk (IP mismatch, no GPS)
-  IP=UK + Receipt=UK + Currency=GBP + GPS=UK        → Low risk (consistent)
-  IP=Vietnam + Receipt=Japan + Currency=JPY + no GPS → High risk (IP mismatch, no GPS)
-</pre>`,
-        order: 30,
       },
     ],
   },
