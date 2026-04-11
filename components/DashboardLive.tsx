@@ -268,7 +268,7 @@ export function TreasuryChart() {
 
     const w = rect.width;
     const h = rect.height;
-    const pad = { top: 20, right: 20, bottom: 40, left: 60 };
+    const pad = { top: 20, right: 20, bottom: 40, left: 90 };
     const plotW = w - pad.left - pad.right;
     const plotH = h - pad.top - pad.bottom;
 
