@@ -153,6 +153,8 @@ export async function POST(req: Request) {
         if (authorUser) {
           if ((authorUser as any).location) linkUpdate.x_location = (authorUser as any).location;
           if ((authorUser as any).description) linkUpdate.bio = (authorUser as any).description;
+          if ((authorUser as any).created_at) linkUpdate.x_account_created_at = (authorUser as any).created_at;
+          if ((authorUser as any).protected !== undefined) linkUpdate.x_is_protected = !!(authorUser as any).protected;
         }
         await supabase.from('wallet_x_links')
           .update(linkUpdate)
