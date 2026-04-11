@@ -4,22 +4,26 @@ import { useState } from 'react';
 import type { LeaderboardEntry } from '../../types/leaderboard';
 import { truncateWallet, formatRank } from '../../lib/formatters';
 
-function PodiumRank({ rank }: { rank: number }) {
-  const [imgError, setImgError] = useState(false);
-  const src = `/leaderboard/podium-rank-${rank}.png`;
+function PodiumArt({ rank }: { rank: number }) {
+  const candidates = [
+    `/leaderboard/podium-hero-${rank}.jpg`,
+    `/leaderboard/podium-hero-${rank}.png`,
+    `/leaderboard/podium-rank-${rank}.png`,
+    ...(rank === 1 ? ['/leaderboard/podium-bg-1.jpg'] : []),
+  ];
+  const [idx, setIdx] = useState(0);
+  const src = candidates[idx];
 
-  if (!imgError) {
-    return (
-      <img
-        src={src}
-        alt={`#${rank}`}
-        className="lb-podium-rank-art"
-        onError={() => setImgError(true)}
-      />
-    );
-  }
+  if (!src) return <div className="lb-podium-art-fallback">{formatRank(rank)}</div>;
 
-  return <div className="lb-podium-rank">{formatRank(rank)}</div>;
+  return (
+    <img
+      src={src}
+      alt={`Podium rank ${rank}`}
+      className="lb-podium-art-image"
+      onError={() => setIdx((v) => v + 1)}
+    />
+  );
 }
 
 function UserAvatar({ entry, size = 48 }: { entry: LeaderboardEntry; size?: number }) {
@@ -59,14 +63,14 @@ function UserIdentity({ entry }: { entry: LeaderboardEntry }) {
         href={`https://x.com/${entry.x_handle}`}
         target="_blank"
         rel="noopener noreferrer"
-        className="lb-podium-wallet"
+        className="lb-podium-handle"
         style={{ color: 'var(--fg)', textDecoration: 'none' }}
       >
         @{entry.x_handle} <span style={{ fontSize: 10, opacity: 0.4 }}>↗</span>
       </a>
     );
   }
-  return <div className="lb-podium-wallet">{truncateWallet(entry.wallet_address)}</div>;
+  return <div className="lb-podium-handle">{truncateWallet(entry.wallet_address)}</div>;
 }
 
 export function PodiumSection({ entries, connectedWallet }: {
@@ -89,13 +93,17 @@ export function PodiumSection({ entries, connectedWallet }: {
             className={`lb-podium-card ${heights[i]}${isYou ? ' lb-podium-card--you' : ''}`}
           >
             {isYou && <span className="lb-you-badge">YOU</span>}
-            <PodiumRank rank={e.rank} />
-            <div style={{ margin: '12px 0' }}>
-              <UserAvatar entry={e} size={i === 1 ? 56 : 44} />
+            <div className="lb-podium-art-wrap">
+              <PodiumArt rank={e.rank} />
+              <div className="lb-podium-rank-badge">{formatRank(e.rank)}</div>
             </div>
-            <UserIdentity entry={e} />
-            <div className="lb-podium-score" style={{ marginTop: 16 }}>
-              {Math.round(e.composite_score).toLocaleString()} Points
+
+            <div className="lb-podium-identity-row">
+              <UserAvatar entry={e} size={24} />
+              <div>
+                <UserIdentity entry={e} />
+                <div className="lb-podium-points">{Math.round(e.composite_score).toLocaleString()} points</div>
+              </div>
             </div>
           </div>
         );

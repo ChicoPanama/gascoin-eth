@@ -3350,28 +3350,13 @@ button.docs-footer-link {
 .lb-podium-card--first {
   background: var(--glass-bg);
   border: 1px solid rgba(255,255,255,0.2);
-  padding: 56px 32px;
+  padding: 28px 24px;
   border-bottom: 2px solid var(--accent);
   box-shadow: 0 0 32px var(--accent-glow-soft);
-  overflow: hidden;
-}
-.lb-podium-card--first::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background-image: url('/leaderboard/podium-bg-1.jpg');
-  background-repeat: no-repeat;
-  background-position: center 72%;
-  background-size: 78% auto;
-  opacity: 0.14;
-  pointer-events: none;
-}
-.lb-podium-card--first > * {
-  position: relative;
-  z-index: 1;
 }
 .lb-podium-card--second, .lb-podium-card--third {
   align-self: stretch;
+  padding: 28px 24px;
 }
 .lb-podium-card--you {
   border-color: rgba(255,255,255,0.5);
@@ -3393,23 +3378,73 @@ button.docs-footer-link {
   margin-left: 8px;
   vertical-align: middle;
 }
-.lb-podium-rank {
-  font-family: var(--font-display);
-  font-size: 48px;
-  letter-spacing: 0.02em;
-  margin-bottom: 8px;
+.lb-podium-art-wrap {
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(255,255,255,0.1);
+  position: relative;
+  margin-bottom: 14px;
+  overflow: hidden;
 }
-.lb-podium-rank-art {
-  width: 120px;
-  height: 64px;
-  object-fit: contain;
+
+.lb-podium-art-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
   display: block;
-  margin: 0 auto 8px;
 }
-.lb-podium-wallet {
+
+.lb-podium-art-fallback {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  font-family: var(--font-display);
+  font-size: 56px;
+  color: rgba(255,255,255,0.45);
+}
+
+.lb-podium-rank-badge {
+  position: absolute;
+  right: 10px;
+  top: 10px;
+  font-family: var(--font-mono);
+  font-size: 16px;
+  letter-spacing: 0.05em;
+  border: 2px solid rgba(255,255,255,0.9);
+  border-radius: 8px;
+  padding: 3px 8px;
+  color: #fff;
+  background: rgba(0,0,0,0.35);
+}
+
+.lb-podium-identity-row {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  justify-content: flex-start;
+}
+
+.lb-podium-handle {
+  font-family: var(--font-mono);
+  font-size: 27px;
+  letter-spacing: 0.01em;
+  line-height: 1.1;
+  margin: 0;
+}
+
+.lb-podium-points {
   font-family: var(--font-mono);
   font-size: 13px;
-  margin-bottom: 12px;
+  color: rgba(255,255,255,0.65);
+  margin-top: 4px;
+}
+
+.lb-podium-card--second .lb-podium-handle,
+.lb-podium-card--third .lb-podium-handle {
+  font-size: 16px;
 }
 .lb-podium-sol {
   font-family: var(--font-display);
