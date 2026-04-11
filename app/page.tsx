@@ -289,7 +289,7 @@ export default async function Home() {
                 </div>
                 <div className="gc-tech-layer-content">
                   <div className="gc-tech-layer-title">Claude Oversight</div>
-                  <div className="gc-tech-layer-tag">CLAUDE SONNET · ANTHROPIC · FINAL REVIEW</div>
+                  <div className="gc-tech-layer-tag">CLAUDE OPUS · ANTHROPIC · FINAL REVIEW</div>
                   <p className="gc-tech-layer-desc">
                     Before SOL leaves the treasury, Claude reviews the complete submission package —
                     all 12 gate results, fraud scores, X account metrics, and
