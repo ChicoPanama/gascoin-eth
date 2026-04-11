@@ -1,11 +1,17 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" role="img" aria-label="Grok logo" fill="none">
   <title>Grok</title>
-  <!-- Ring -->
-  <circle cx="12" cy="12" r="6.3" stroke="#fff" stroke-width="2.8" />
 
-  <!-- Lightning/needle slash -->
-  <path d="M4.1 18.8L11.1 12.2L13.8 9.7L19.8 4.1L14.2 11.4L11.4 14.1L4.1 18.8Z" fill="#fff"/>
+  <!-- Broken ring -->
+  <path
+    d="M16.05 6.2a6.45 6.45 0 1 0 1.78 9.05"
+    stroke="#fff"
+    stroke-width="2.7"
+    stroke-linecap="round"
+  />
 
-  <!-- Carve a small notch so the ring reads like the Grok mark -->
-  <path d="M7.5 16.2L10.2 14.2L11.5 15.6L8.7 17.8Z" fill="#000"/>
+  <!-- Diagonal spear / bolt -->
+  <path
+    d="M3.35 18.9 10.8 12.15 13.45 9.75 20.45 3.35 14.15 11.25 11.35 13.9 3.35 18.9Z"
+    fill="#fff"
+  />
 </svg>

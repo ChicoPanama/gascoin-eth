@@ -1,8 +1,17 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" role="img" aria-label="xAI logo" fill="none">
   <title>xAI</title>
-  <path d="M2.6 6.2h3.7l2.5 4.1-2.6 4.2H2.7l2.6-4.2z" fill="#fff"/>
-  <path d="M7.2 6.2h3.6l2.6 4.2-2.6 4.2H7.2l2.6-4.2z" fill="#fff"/>
-  <path d="M9.9 2h4.2l-3.8 5.8H6.2z" fill="#fff"/>
-  <path d="M14.1 6.2h3.5V22h-3.5z" fill="#fff"/>
-  <path d="M14.1 2h4.9l-1.4 2.1h-3.5z" fill="#fff"/>
+
+  <!-- Broken ring -->
+  <path
+    d="M16.05 6.2a6.45 6.45 0 1 0 1.78 9.05"
+    stroke="#fff"
+    stroke-width="2.7"
+    stroke-linecap="round"
+  />
+
+  <!-- Diagonal spear / bolt -->
+  <path
+    d="M3.35 18.9 10.8 12.15 13.45 9.75 20.45 3.35 14.15 11.25 11.35 13.9 3.35 18.9Z"
+    fill="#fff"
+  />
 </svg>
