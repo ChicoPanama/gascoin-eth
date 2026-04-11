@@ -285,7 +285,7 @@ export default async function Home() {
               <div className="gc-tech-layer gc-tech-layer--ai">
                 <div className="gc-tech-layer-num">04</div>
                 <div className="gc-tech-layer-icon">
-                  <img src="/icons/xai-icon.jpg" alt="xAI" className="gc-tech-layer-icon-img" style={{ filter: 'invert(1)', borderRadius: '6px' }} />
+                  <img src="/icons/brands/grok-bw.svg" alt="Grok" className="gc-tech-layer-icon-img" />
                 </div>
                 <div className="gc-tech-layer-content">
                   <div className="gc-tech-layer-title">Automated Referral Pipeline</div>
