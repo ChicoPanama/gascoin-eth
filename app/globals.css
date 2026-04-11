@@ -1561,6 +1561,16 @@ input:focus, textarea:focus, select:focus {
 }
 .docs-search-input::placeholder { color: rgba(255,255,255,0.2); }
 .docs-search-input:focus { border-color: rgba(255,255,255,0.3); }
+.docs-search-input:-webkit-autofill,
+.docs-search-input:-webkit-autofill:hover,
+.docs-search-input:-webkit-autofill:focus,
+.docs-search-input:-webkit-autofill:active {
+  -webkit-text-fill-color: #fff;
+  caret-color: #fff;
+  box-shadow: 0 0 0 1000px #131416 inset;
+  -webkit-box-shadow: 0 0 0 1000px #131416 inset;
+  transition: background-color 9999s ease-out 0s;
+}
 .docs-search-clear {
   position: absolute; right: 24px; top: 50%; transform: translateY(-50%);
   background: transparent; border: none; color: rgba(255,255,255,0.3); font-size: 11px; cursor: pointer;
