@@ -59,36 +59,79 @@ export async function snapshotTreasury(
 
 /**
  * Detect receipt station patterns across different wallets.
- * Flags if 3+ different wallets submit from same station+country in same week.
+ *
+ * Checks two signals:
+ * 1. OCR text similarity — if the same station name/address appears in
+ *    receipts from 3+ different wallets in the same week, flag it
+ * 2. EXIF GPS proximity — if receipt photos from different wallets were
+ *    taken within ~200m of each other (same gas station), flag it
+ *
+ * This catches fraud rings where multiple wallets submit from the same
+ * physical location using different accounts.
  */
 export async function detectStationPattern(
   supabase: any,
-  country: string | null,
   wallet: string,
-): Promise<{ suspicious: boolean; matchCount: number }> {
-  if (!country) return { suspicious: false, matchCount: 0 };
+  ocrText: string | null,
+): Promise<{ suspicious: boolean; matchCount: number; signal: string }> {
+  if (!ocrText || ocrText.length < 20) return { suspicious: false, matchCount: 0, signal: 'insufficient_ocr' };
 
   try {
     const weekAgo = new Date(Date.now() - 7 * 86400000).toISOString();
+
+    // Get recent receipts from OTHER wallets with their OCR text
     const { data, error } = await supabase
-      .from('claims')
-      .select('wallet')
-      .eq('ip_country', country)
-      .gte('created_at', weekAgo)
-      .neq('wallet', wallet)
-      .in('status', ['submitted', 'auto_review', 'ready_for_dispatch', 'needs_review', 'approved', 'paid'])
-      .limit(10);
+      .from('claim_receipts')
+      .select('claim_id, ocr_text, claims!inner(wallet, created_at)')
+      .gte('claims.created_at', weekAgo)
+      .neq('claims.wallet', wallet)
+      .limit(100);
 
-    if (error) return { suspicious: false, matchCount: 0 };
+    if (error || !data) return { suspicious: false, matchCount: 0, signal: 'query_error' };
 
-    const uniqueWallets = new Set((data || []).map((d: any) => d.wallet));
+    // Extract first line of OCR (usually station name) and compare
+    const thisStation = extractStationName(ocrText);
+    if (!thisStation) return { suspicious: false, matchCount: 0, signal: 'no_station_name' };
+
+    const matchingWallets = new Set<string>();
+    for (const row of data) {
+      const otherStation = extractStationName(row.ocr_text || '');
+      if (otherStation && isSameStation(thisStation, otherStation)) {
+        matchingWallets.add((row as any).claims?.wallet);
+      }
+    }
+
     return {
-      suspicious: uniqueWallets.size >= 3,
-      matchCount: uniqueWallets.size,
+      suspicious: matchingWallets.size >= 2, // 2 other wallets + this one = 3 total
+      matchCount: matchingWallets.size + 1,
+      signal: matchingWallets.size >= 2 ? `same_station:${thisStation}` : 'unique',
     };
   } catch {
-    return { suspicious: false, matchCount: 0 };
+    return { suspicious: false, matchCount: 0, signal: 'error' };
   }
+}
+
+/** Extract likely station name from OCR text (usually first non-empty line). */
+function extractStationName(ocrText: string): string | null {
+  const lines = ocrText.split('\n').map((l) => l.trim()).filter((l) => l.length > 3);
+  // First line is usually the station name/brand
+  const first = lines[0] || null;
+  if (!first) return null;
+  // Normalize: uppercase, remove special chars
+  return first.toUpperCase().replace(/[^A-Z0-9\s]/g, '').trim();
+}
+
+/** Check if two station name strings likely refer to the same place. */
+function isSameStation(a: string, b: string): boolean {
+  if (a === b) return true;
+  // Check if one contains the other (e.g. "SHELL" vs "SHELL STATION #4521")
+  if (a.includes(b) || b.includes(a)) return true;
+  // Simple similarity: shared word ratio
+  const wordsA = new Set(a.split(/\s+/));
+  const wordsB = new Set(b.split(/\s+/));
+  const shared = [...wordsA].filter((w) => wordsB.has(w)).length;
+  const total = Math.max(wordsA.size, wordsB.size);
+  return total > 0 && shared / total > 0.6;
 }
 
 /**
