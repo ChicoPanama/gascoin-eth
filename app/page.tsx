@@ -307,9 +307,36 @@ export default async function Home() {
 
               <div className="gc-tech-connector" />
 
-              {/* Layer 5 — Claude Oversight */}
+              {/* Layer 5 — Memory Layer */}
               <div className="gc-tech-layer gc-tech-layer--ai">
                 <div className="gc-tech-layer-num">05</div>
+                <div className="gc-tech-layer-icon">
+                  <img src="/icons/brands/memory-layer-bw.svg" alt="Memory Layer" className="gc-tech-layer-icon-img" />
+                </div>
+                <div className="gc-tech-layer-content">
+                  <div className="gc-tech-layer-title">Memory Layer</div>
+                  <div className="gc-tech-layer-tag">PERSISTENT CONTEXT · MEMORY ENGINE · RECURSIVE LEARNING</div>
+                  <p className="gc-tech-layer-desc">
+                    Every submission, fraud pattern, account behavior, and payout decision is remembered.
+                    mem0 provides a persistent AI memory layer that grows smarter with every interaction —
+                    flagging repeat offenders, recognizing patterns across submissions, and feeding
+                    Claude&apos;s final review with full historical context. Obsidian maintains the structured
+                    knowledge protocol behind every verification rule and gate decision.
+                  </p>
+                  <div className="gc-tech-layer-catches">
+                    <span className="gc-tech-catch">Recursive Memory</span>
+                    <span className="gc-tech-catch">Pattern Recognition</span>
+                    <span className="gc-tech-catch">Historical Context</span>
+                    <span className="gc-tech-catch">Knowledge Protocol</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="gc-tech-connector" />
+
+              {/* Layer 6 — Claude Oversight */}
+              <div className="gc-tech-layer gc-tech-layer--ai">
+                <div className="gc-tech-layer-num">06</div>
                 <div className="gc-tech-layer-icon">
                   <img src="/icons/brands/claude-bw.svg" alt="Claude" className="gc-tech-layer-icon-img" />
                 </div>
@@ -318,8 +345,9 @@ export default async function Home() {
                   <div className="gc-tech-layer-tag">CLAUDE OPUS · ANTHROPIC · FINAL REVIEW</div>
                   <p className="gc-tech-layer-desc">
                     Before SOL leaves the treasury, Claude reviews the complete submission package —
-                    all 12 gate results, fraud scores, X account metrics, and
-                    submission history. Returns a verdict with a written audit narrative.
+                    all 12 gate results, fraud scores, X account metrics,
+                    submission history, and full mem0 intelligence profile.
+                    Returns a verdict with a written audit narrative.
                     The manager that signs off before money moves.
                   </p>
                   <div className="gc-tech-layer-catches">
@@ -335,7 +363,7 @@ export default async function Home() {
             {/* Bottom stats */}
             <div className="gc-tech-stats">
               <div className="gc-tech-stat">
-                <div className="gc-tech-stat-value">3</div>
+                <div className="gc-tech-stat-value">5</div>
                 <div className="gc-tech-stat-label">AI Engines</div>
               </div>
               <div className="gc-tech-stat">
@@ -343,11 +371,11 @@ export default async function Home() {
                 <div className="gc-tech-stat-label">Automated Gates</div>
               </div>
               <div className="gc-tech-stat">
-                <div className="gc-tech-stat-value">5</div>
+                <div className="gc-tech-stat-value">7</div>
                 <div className="gc-tech-stat-label">Verification Layers</div>
               </div>
               <div className="gc-tech-stat">
-                <div className="gc-tech-stat-value">225</div>
+                <div className="gc-tech-stat-value">258</div>
                 <div className="gc-tech-stat-label">Stress Tests</div>
               </div>
             </div>

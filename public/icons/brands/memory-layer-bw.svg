@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" role="img" aria-label="Memory layer logo" fill="none">
+  <title>Memory Layer</title>
+  <circle cx="12" cy="12" r="2.6" fill="#fff"/>
+
+  <g fill="#fff">
+    <circle cx="12" cy="4.2" r="1.35"/>
+    <circle cx="16.8" cy="5.6" r="1.25"/>
+    <circle cx="19.6" cy="9.4" r="1.15"/>
+    <circle cx="19.6" cy="14.6" r="1.15"/>
+    <circle cx="16.8" cy="18.4" r="1.25"/>
+    <circle cx="12" cy="19.8" r="1.35"/>
+    <circle cx="7.2" cy="18.4" r="1.25"/>
+    <circle cx="4.4" cy="14.6" r="1.15"/>
+    <circle cx="4.4" cy="9.4" r="1.15"/>
+    <circle cx="7.2" cy="5.6" r="1.25"/>
+  </g>
+
+  <g stroke="#fff" stroke-width="1.6" stroke-linecap="round" opacity="0.95">
+    <path d="M12 9.7v-2.5"/>
+    <path d="M13.8 10.4 15.9 8.4"/>
+    <path d="M14.5 12h2.6"/>
+    <path d="M13.8 13.6 15.9 15.6"/>
+    <path d="M12 14.3v2.5"/>
+    <path d="M10.2 13.6 8.1 15.6"/>
+    <path d="M9.5 12H6.9"/>
+    <path d="M10.2 10.4 8.1 8.4"/>
+  </g>
+</svg>
