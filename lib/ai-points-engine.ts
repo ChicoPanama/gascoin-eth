@@ -7,14 +7,27 @@
 // 3. Wallet Trust Scorer — behavioral reputation
 // 4. Daily Audit Narrator — human-readable summaries
 //
-// All AI calls go through OpenRouter (Gemini Flash)
-// Cost: ~$0.0001 per analysis
+// AI priority: Grok (reasoning) → Gemini (fallback)
+// Gemini handles vision. Grok handles reasoning.
 // ═══════════════════════════════════════════
+
+import { callGrok, isGrokAvailable } from './integrations/grok';
 
 const OPENROUTER_URL = 'https://openrouter.ai/api/v1/chat/completions';
 const AI_MODEL = process.env.RECEIPT_FRAUD_MODEL || 'google/gemini-2.0-flash-001';
 
 async function aiCall(prompt: string): Promise<string> {
+  // Primary: Grok for reasoning tasks
+  if (isGrokAvailable()) {
+    try {
+      const grokRes = await callGrok(prompt, { temperature: 0, maxTokens: 500 });
+      if (grokRes.ok && grokRes.content) return grokRes.content.trim();
+    } catch {
+      // Fall through to Gemini
+    }
+  }
+
+  // Fallback: OpenRouter → Gemini
   const key = process.env.OPENROUTER_API_KEY;
   if (!key) return '';
 

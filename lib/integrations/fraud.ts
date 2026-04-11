@@ -5,6 +5,7 @@ import {
   checkImageDimensions,
   type PipelineResult,
 } from './receipt-pipeline';
+import { callGrok, isGrokAvailable } from './grok';
 
 export type FraudSignals = {
   aiScore: number;
@@ -28,7 +29,7 @@ export type CrossValidationResult = {
   concerns: string[];
 };
 
-async function aiFraudAnalysis(signals: {
+function buildFraudPrompt(signals: {
   aiScore: number;
   tamperScore: number;
   exifScore: number;
@@ -38,13 +39,8 @@ async function aiFraudAnalysis(signals: {
   isPhysicalReceipt?: boolean;
   isDigitallyManipulated?: boolean;
   country?: string;
-}): Promise<CrossValidationResult> {
-  const apiKey = process.env.OPENROUTER_API_KEY || '';
-  const model = process.env.RECEIPT_FRAUD_MODEL || 'google/gemini-2.0-flash-001';
-  if (!apiKey) return { fraudRiskLevel: 'medium', confidence: 0.5, reasoning: 'AI fraud analysis unavailable — no API key', concerns: ['no_api_key'] };
-
-  try {
-    const prompt = `You are a fraud analyst for a gas receipt refund protocol. Analyze these signals and determine the fraud risk level.
+}): string {
+  return `You are a fraud analyst for a gas receipt refund protocol. Analyze these signals and determine the fraud risk level.
 
 SIGNALS:
 - AI generation score: ${signals.aiScore.toFixed(3)} (0=real, 1=AI-generated, threshold: 0.65)
@@ -59,7 +55,56 @@ SIGNALS:
 
 Respond ONLY with valid JSON:
 {"fraudRiskLevel":"low|medium|high","confidence":0.0-1.0,"reasoning":"one sentence","concerns":["list","of","specific","concerns"]}`;
+}
 
+function parseFraudResponse(text: string): CrossValidationResult {
+  const cleaned = text.replace(/```json\n?|\n?```/g, '').trim();
+  const parsed = JSON.parse(cleaned);
+  return {
+    fraudRiskLevel: parsed.fraudRiskLevel || 'medium',
+    confidence: Number(parsed.confidence) || 0.5,
+    reasoning: String(parsed.reasoning || ''),
+    concerns: Array.isArray(parsed.concerns) ? parsed.concerns : [],
+  };
+}
+
+async function aiFraudAnalysis(signals: {
+  aiScore: number;
+  tamperScore: number;
+  exifScore: number;
+  dimensionScore: number;
+  flags: string[];
+  ocrConfidence?: number;
+  isPhysicalReceipt?: boolean;
+  isDigitallyManipulated?: boolean;
+  country?: string;
+}): Promise<CrossValidationResult> {
+  const prompt = buildFraudPrompt(signals);
+
+  // Use Grok for cross-signal fraud REASONING (not image analysis — Gemini handles that)
+  if (isGrokAvailable()) {
+    try {
+      const grokRes = await callGrok(prompt, {
+        temperature: 0.1,
+        maxTokens: 300,
+        systemPrompt: 'You are a fraud reasoning engine. You receive pre-computed signals from image analysis (Gemini) and social verification (X API). Your job is to reason about whether the COMBINATION of signals indicates fraud. Respond only with valid JSON.',
+      });
+      if (grokRes.ok && grokRes.content) {
+        const result = parseFraudResponse(grokRes.content);
+        result.reasoning = `[grok] ${result.reasoning}`;
+        return result;
+      }
+    } catch {
+      // Fall through to Gemini reasoning fallback
+    }
+  }
+
+  // Fallback: Use Gemini for reasoning too (less ideal but functional)
+  const apiKey = process.env.OPENROUTER_API_KEY || '';
+  const model = process.env.RECEIPT_FRAUD_MODEL || 'google/gemini-2.0-flash-001';
+  if (!apiKey) return { fraudRiskLevel: 'medium', confidence: 0.5, reasoning: 'No reasoning engine available', concerns: ['no_api_key'] };
+
+  try {
     const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
@@ -67,18 +112,14 @@ Respond ONLY with valid JSON:
       cache: 'no-store',
     });
 
-    if (!res.ok) return { fraudRiskLevel: 'medium', confidence: 0.5, reasoning: 'AI fraud analysis API error', concerns: ['api_error'] };
+    if (!res.ok) return { fraudRiskLevel: 'medium', confidence: 0.5, reasoning: 'Gemini reasoning fallback error', concerns: ['api_error'] };
     const json = await res.json() as any;
     const text = json?.choices?.[0]?.message?.content || '';
-    const parsed = JSON.parse(text.replace(/```json\n?|\n?```/g, '').trim());
-    return {
-      fraudRiskLevel: parsed.fraudRiskLevel || 'medium',
-      confidence: Number(parsed.confidence) || 0.5,
-      reasoning: String(parsed.reasoning || ''),
-      concerns: Array.isArray(parsed.concerns) ? parsed.concerns : [],
-    };
+    const result = parseFraudResponse(text);
+    result.reasoning = `[gemini-fallback] ${result.reasoning}`;
+    return result;
   } catch {
-    return { fraudRiskLevel: 'medium', confidence: 0.5, reasoning: 'AI fraud analysis failed to parse', concerns: ['parse_error'] };
+    return { fraudRiskLevel: 'medium', confidence: 0.5, reasoning: 'All reasoning engines failed', concerns: ['all_engines_failed'] };
   }
 }
 
