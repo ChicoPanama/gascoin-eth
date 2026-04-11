@@ -310,12 +310,13 @@ export default async function Home() {
               {/* Layer 5 — Memory Layer */}
               <div className="gc-tech-layer gc-tech-layer--ai">
                 <div className="gc-tech-layer-num">05</div>
-                <div className="gc-tech-layer-icon">
-                  <img src="/icons/brands/memory-layer-bw.svg" alt="Memory Layer" className="gc-tech-layer-icon-img" />
+                <div className="gc-tech-layer-icon" style={{ width: 'auto', gap: '8px' }}>
+                  <img src="/icons/brands/memory-layer-bw.svg" alt="Memory Layer" className="gc-tech-layer-icon-img" style={{ width: '30px', height: '30px' }} />
+                  <img src="/icons/brands/obsidian-layer-bw.svg" alt="Obsidian" className="gc-tech-layer-icon-img" style={{ width: '30px', height: '30px' }} />
                 </div>
                 <div className="gc-tech-layer-content">
                   <div className="gc-tech-layer-title">Memory Layer</div>
-                  <div className="gc-tech-layer-tag">PERSISTENT CONTEXT · MEMORY ENGINE · RECURSIVE LEARNING</div>
+                  <div className="gc-tech-layer-tag">PERSISTENT CONTEXT · MEMORY ENGINE + OBSIDIAN · RECURSIVE LEARNING</div>
                   <p className="gc-tech-layer-desc">
                     Every submission, fraud pattern, account behavior, and payout decision is remembered.
                     mem0 provides a persistent AI memory layer that grows smarter with every interaction —

@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" role="img" aria-label="Obsidian logo" fill="none">
+  <title>Obsidian</title>
+  <!-- Outer shard -->
+  <path d="M12 2.2 16.9 6.8 17.2 11.2 19.1 14.1 16.8 17.4 16.1 20.3 12.3 21.9 7.7 21.3 5.1 18.2 3.8 14.8 5.3 11.1 6.2 7.4Z" fill="#FFFFFF"/>
+
+  <!-- Facets (monochrome shading) -->
+  <path d="M12 2.2 9.1 7.3 8.6 11.8 10.1 14.1 12.1 13.6 13.2 9.5 14.8 6.1Z" fill="#D7D7D7"/>
+  <path d="M6.2 7.4 5.2 11 7.1 13.6 8.6 16.2 8.2 20.3 5.1 18.2 3.8 14.8 5.3 11.1Z" fill="#BDBDBD"/>
+  <path d="M10.1 14.1 12.1 13.6 15.2 14.5 16.8 17.4 16.1 20.3 12.3 21.9 8.2 20.3 8.6 16.2Z" fill="#A6A6A6"/>
+  <path d="M14.8 6.1 17.2 11.2 19.1 14.1 16.8 17.4 15.2 14.5 13.2 9.5Z" fill="#C7C7C7"/>
+</svg>
