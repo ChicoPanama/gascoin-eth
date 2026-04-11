@@ -1053,9 +1053,42 @@ Inputs(wallet,tweet,receipt)
 <li>They submit a gas receipt using the platform</li>
 <li>Their submission passes all 10 verification gates and is approved</li>
 <li>The system detects your referral code on their submission and checks eligibility</li>
-<li>If eligible, 500 points are awarded to your wallet through the AI verification gate</li>
+<li>If eligible, 500 points are awarded to your wallet through the Grok AI verification gate</li>
 <li>Points are credited automatically. No admin action needed for referral points</li>
 </ol>
+<pre class="doc-ascii">
+  REFERRAL PIPELINE (runs every 15 minutes)
+  ──────────────────────────────────────────
+
+  REFERRER shares link ──→ NEW USER clicks ──→ 7-day cookie stored
+                                                    │
+                                               Submits receipt
+                                                    │
+                                               12 Gates pass?
+                                              No │        │ Yes
+                                                 ▼        ▼
+                                            No reward   CONVERSION DETECTED
+                                                              │
+                                          ┌───────────────────┘
+                                          ▼
+                                   ELIGIBILITY CHECKS
+                                   ├─ Self-referral?        → skip
+                                   ├─ Referrer approved?    → skip if not
+                                   ├─ Monthly cap (20)?     → skip if hit
+                                   └─ Points cap (10K)?     → skip if hit
+                                          │
+                                          ▼ All pass
+                                   GROK AI VERIFICATION
+                                   ├─ Ring detection (circular referrals)
+                                   ├─ Wallet trust score
+                                   ├─ Velocity check (too many too fast?)
+                                   └─ Award or hold for review
+                                          │
+                                          ▼
+                                   500 POINTS → REFERRER WALLET
+</pre>
+<h3>How Grok protects the referral system</h3>
+<p>Every referral point award passes through Grok before it lands in your wallet. Grok runs four checks: ring detection (catches A→B→C→A circular referral schemes), wallet trust scoring (new or low-trust wallets get extra scrutiny), velocity analysis (flags accounts earning referral points faster than normal), and AI verification for high-value or suspicious awards. If Grok flags an award, it is held for manual review instead of being credited automatically.</p>
 <h3>Referral rules and limits</h3>
 <h3>Referral dashboard metrics</h3>
 <p>The referral page dashboard shows: Total Clicks (how many times your link has been clicked), Unique Visitors (unique devices), Conversions (approved submissions through your link), Conversion Rate (unique clicks that resulted in an approved submission), and Points Earned (total referral points to date).</p>
