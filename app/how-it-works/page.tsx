@@ -138,6 +138,7 @@ const STEPS: Step[] = [
     ],
     links: [
       { name: 'Submit Receipt', url: '/submit', icon: '/logo/gascoin-g.jpg' },
+      { name: 'View All 10 Gates', url: '/gates', icon: '/logo/gascoin-g.jpg' },
     ],
   },
   {
