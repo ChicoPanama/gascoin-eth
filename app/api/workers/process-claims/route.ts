@@ -6,6 +6,7 @@ import { hasMinimumGascoin, bustTreasuryCache, getTreasuryBalances } from '../..
 import { snapshotTreasury } from '../../../../lib/data-intelligence';
 import { reviewClaim } from '../../../../lib/integrations/claude';
 import { isAuthorizedCron as isAuthorized } from '../../../../lib/cron-auth';
+import { writeIntelligence } from '../../../../lib/knowledge-base';
 
 export async function POST(req: Request) {
   if (!isAuthorized(req)) {
@@ -124,6 +125,19 @@ export async function POST(req: Request) {
       target_id: claim.id,
       payload_json: { verdict: claudeVerdict.verdict, confidence: claudeVerdict.confidence, narrative: claudeVerdict.narrative, concerns: claudeVerdict.concerns },
     });
+
+    // Write escalation to intelligence entries for admin visibility
+    if (claudeVerdict.verdict !== 'approve') {
+      writeIntelligence({
+        entry_type: 'claude_escalation',
+        entity_type: 'wallet',
+        entity_id: claim.wallet,
+        summary: `Claude ${claudeVerdict.verdict}: ${claudeVerdict.narrative}`,
+        detail_json: { claimId: claim.id, concerns: claudeVerdict.concerns, confidence: claudeVerdict.confidence },
+        severity: claudeVerdict.verdict === 'reject' ? 'critical' : 'warning',
+        pipeline_source: 'process_claims',
+      }).catch(() => {});
+    }
 
     // If Claude flags or rejects, revert to needs_review — skip payout
     if (claudeVerdict.verdict === 'flag' || claudeVerdict.verdict === 'reject') {

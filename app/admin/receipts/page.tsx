@@ -25,10 +25,9 @@ export default async function ReceiptsPage({
       created_at,
       claim_receipts (
         id,
-        storage_path,
-        file_name,
-        mime_type,
+        storage_path_private,
         is_image_redacted,
+        ocr_confidence,
         created_at
       )
     `)
@@ -46,10 +45,9 @@ export default async function ReceiptsPage({
         created_at,
         claim_receipts (
           id,
-          storage_path,
-          file_name,
-          mime_type,
+          storage_path_private,
           is_image_redacted,
+          ocr_confidence,
           created_at
         )
       `)
@@ -66,8 +64,7 @@ export default async function ReceiptsPage({
     claimCreatedAt: string;
     receiptId: string;
     storagePath: string;
-    fileName: string;
-    mimeType: string;
+    ocrConfidence: number | null;
     isRedacted: boolean;
     receiptCreatedAt: string;
   }> = [];
@@ -86,9 +83,8 @@ export default async function ReceiptsPage({
         claimStatus: claim.status,
         claimCreatedAt: claim.created_at,
         receiptId: r.id,
-        storagePath: r.storage_path ?? '—',
-        fileName: r.file_name ?? '—',
-        mimeType: r.mime_type ?? '—',
+        storagePath: r.storage_path_private ?? '—',
+        ocrConfidence: r.ocr_confidence ?? null,
         isRedacted: r.is_image_redacted ?? false,
         receiptCreatedAt: r.created_at,
       });
@@ -137,9 +133,8 @@ export default async function ReceiptsPage({
             <tr>
               <th>CLAIM ID</th>
               <th>WALLET</th>
-              <th>FILE</th>
               <th>STORAGE PATH</th>
-              <th>TYPE</th>
+              <th>OCR CONFIDENCE</th>
               <th>REDACTED</th>
               <th>SUBMITTED</th>
             </tr>
@@ -147,7 +142,7 @@ export default async function ReceiptsPage({
           <tbody>
             {receipts.length === 0 ? (
               <tr className="lb-table-row">
-                <td colSpan={7} style={{ padding: '32px 16px', fontFamily: 'IBM Plex Mono', fontSize: 12, color: 'rgba(255,255,255,0.25)', textAlign: 'center' }}>
+                <td colSpan={6} style={{ padding: '32px 16px', fontFamily: 'IBM Plex Mono', fontSize: 12, color: 'rgba(255,255,255,0.25)', textAlign: 'center' }}>
                   No receipt records found.
                 </td>
               </tr>
@@ -158,7 +153,6 @@ export default async function ReceiptsPage({
                     {r.claimId.slice(0, 8)}…
                   </td>
                   <td className="lb-table-wallet">{truncateWallet(r.wallet)}</td>
-                  <td className="lb-table-time">{r.fileName}</td>
                   <td
                     className="lb-table-time"
                     style={{ maxWidth: 220, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
@@ -166,7 +160,9 @@ export default async function ReceiptsPage({
                   >
                     {r.storagePath}
                   </td>
-                  <td className="lb-table-time">{r.mimeType}</td>
+                  <td className="lb-table-time">
+                    {r.ocrConfidence != null ? `${(r.ocrConfidence * 100).toFixed(0)}%` : '—'}
+                  </td>
                   <td className="lb-table-time">
                     {r.isRedacted ? (
                       <span style={{ color: 'rgba(255,80,80,0.8)' }}>YES</span>

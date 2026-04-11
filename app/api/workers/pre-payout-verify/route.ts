@@ -5,6 +5,7 @@ import { getUserByUsername } from '../../../../lib/x-api';
 import { scoreAccountQuality } from '../../../../lib/account-quality';
 
 import { isAuthorizedCron as isAuthorized } from '../../../../lib/cron-auth';
+import { addMemory } from '../../../../lib/mem0';
 import { persistMetricsSnapshot } from '../../../../lib/metrics-snapshot';
 import { hasMinimumGascoin } from '../../../../lib/integrations/solana';
 import { getTierForBalance } from '../../../../lib/token-tiers';
@@ -62,7 +63,7 @@ export async function GET(req: Request) {
     // 1. Re-verify tweet
     const tweetCheck = await verifyTweetProof(claim.tweet_url, xHandle);
     if (!tweetCheck.ok) {
-      await revertClaim(supabase, claim.id, `tweet_invalid: ${tweetCheck.reason}`);
+      await revertClaim(supabase, claim.id, `tweet_invalid: ${tweetCheck.reason}`, claim.wallet);
       failures.push({ claimId: claim.id, reason: `tweet: ${tweetCheck.reason}` });
       reverted++;
       continue;
@@ -71,7 +72,7 @@ export async function GET(req: Request) {
     // 2. Re-verify follower count
     const followers = await getFollowerCount(handle);
     if (followers >= 0 && followers < MIN_FOLLOWERS) {
-      await revertClaim(supabase, claim.id, `followers_dropped: ${followers}`);
+      await revertClaim(supabase, claim.id, `followers_dropped: ${followers}`, claim.wallet);
       failures.push({ claimId: claim.id, reason: `followers: ${followers}` });
       reverted++;
       continue;
@@ -98,7 +99,7 @@ export async function GET(req: Request) {
     if (userLookup.user) {
       const quality = scoreAccountQuality(userLookup.user, historySignals);
       if (!quality.passed) {
-        await revertClaim(supabase, claim.id, `account_quality: score=${quality.score} flags=${quality.flags.join(',')}`);
+        await revertClaim(supabase, claim.id, `account_quality: score=${quality.score} flags=${quality.flags.join(',')}`, claim.wallet);
         failures.push({ claimId: claim.id, reason: `quality: ${quality.score}` });
         reverted++;
         continue;
@@ -132,7 +133,7 @@ export async function GET(req: Request) {
   });
 }
 
-async function revertClaim(supabase: any, claimId: string, reason: string) {
+async function revertClaim(supabase: any, claimId: string, reason: string, wallet?: string) {
   await supabase.from('claims').update({
     status: 'needs_review',
     updated_at: new Date().toISOString(),
@@ -155,4 +156,12 @@ async function revertClaim(supabase: any, claimId: string, reason: string) {
     target_id: claimId,
     payload_json: { reason },
   });
+
+  // Record pre-payout failure in mem0 for cross-pipeline intelligence
+  if (wallet) {
+    addMemory('wallet', wallet,
+      `Pre-payout verification failed: ${reason}. Claim ${claimId} reverted.`,
+      { pipeline: 'pre_payout_verify', signal: 'payout_blocked' },
+    ).catch(() => {});
+  }
 }

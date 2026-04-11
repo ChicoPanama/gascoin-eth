@@ -6,6 +6,7 @@ import { searchRecentTweets, extractMetrics, getUserByUsername } from '../../../
 import type { XTweet } from '../../../../lib/x-api';
 import { isAuthorizedCron as isAuthorized } from '../../../../lib/cron-auth';
 import { updateQualityTrend } from '../../../../lib/data-intelligence';
+import { addMemory } from '../../../../lib/mem0';
 
 // ═══════════════════════════════════════════
 // Engagement Worker v3
@@ -18,10 +19,10 @@ import { updateQualityTrend } from '../../../../lib/data-intelligence';
 // - Looks up real wallet trust data instead of hardcoded defaults
 // - Uses extractMetrics helper for consistent metric parsing
 //
-// Runs every 6 hours via Vercel cron
+// Runs every hour via Vercel cron
 // ═══════════════════════════════════════════
 
-const RESCORE_INTERVAL_MS = 6 * 3600000;
+const RESCORE_INTERVAL_MS = 1 * 3600000; // 1 hour — captures engagement velocity during peak growth window
 
 export async function POST(req: Request) {
   if (!isAuthorized(req)) {
@@ -265,6 +266,15 @@ async function scoreTweet(
     walletTrust: trust,
     tweetQuality: qualityScore,
   });
+
+  // Record notable engagement signals in mem0
+  if (qualityScore.isSpam || qualityScore.isBotEngagement || (result.awarded && result.points > 500)) {
+    addMemory('wallet', wallet,
+      `Engagement: tweet ${tweet.id} quality=${qualityScore.quality.toFixed(2)}, ` +
+      `spam=${qualityScore.isSpam}, bot=${qualityScore.isBotEngagement}, points=${result.awarded ? result.points : 0}`,
+      { pipeline: 'engagement', tweet_id: tweet.id, points: result.awarded ? result.points : 0 },
+    ).catch(() => {});
+  }
 
   return {
     scored: true,

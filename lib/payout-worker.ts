@@ -3,6 +3,7 @@ import { verifyTweetProof, getFollowerCount } from './integrations/x';
 import { getUserByUsername } from './x-api';
 import { scoreAccountQuality } from './account-quality';
 import { getSupabaseAdmin } from './supabase';
+import { getCachedFlags, addMemory } from './mem0';
 
 const RETRY_BASE_SECONDS = 60;
 const MIN_FOLLOWERS = 100;
@@ -39,6 +40,25 @@ export async function processQueuedPayout(claimId: string) {
       .eq('status', 'paid')
       .maybeSingle();
     return { ok: true, txHash: existingPaid?.tx_hash || null, reused: true };
+  }
+
+  // --- Cross-pipeline guard via mem0 ---
+  // Check if wallet was flagged by another pipeline after claim approval
+  const mem0Flags = await getCachedFlags(job.wallet);
+  if (mem0Flags?.riskFlags.some((f: string) => f.includes('ring_detected') || f.includes('banned'))) {
+    await supabase.from('claims').update({ status: 'needs_review', updated_at: new Date().toISOString() }).eq('id', claimId);
+    await supabase.from('claim_status_events').insert({
+      claim_id: claimId, from_status: 'approved', to_status: 'needs_review',
+      actor_type: 'system', actor_id: 'payout_worker',
+      reason: `mem0_cross_pipeline_flag: ${mem0Flags.riskFlags.join(', ')}`,
+    });
+    await supabase.from('audit_logs').insert({
+      actor_type: 'system', actor_id: 'payout_worker',
+      action: 'payout_blocked_cross_pipeline',
+      target_type: 'claim', target_id: claimId,
+      payload_json: { wallet: job.wallet, flags: mem0Flags.riskFlags, trajectory: mem0Flags.trajectory },
+    });
+    return { ok: false, error: 'cross_pipeline_flag', flags: mem0Flags.riskFlags };
   }
 
   // --- Pre-payout re-verification ---
@@ -192,6 +212,12 @@ export async function processQueuedPayout(claimId: string) {
     target_id: claimId,
     payload_json: { wallet: job.wallet, amountSol: job.amount_sol, txHash: sent.txHash }
   });
+
+  // Record payout in mem0 for cross-pipeline intelligence
+  addMemory('wallet', job.wallet,
+    `Payout sent: ${job.amount_sol} SOL for claim ${claimId}, tx=${sent.txHash}`,
+    { pipeline: 'payout', amount: job.amount_sol },
+  ).catch(() => {});
 
   return { ok: true, txHash: sent.txHash, gate, reused: false };
 }

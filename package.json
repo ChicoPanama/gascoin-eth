@@ -16,7 +16,9 @@
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:report": "playwright show-report",
-    "test:all": "npm run test && npm run test:e2e"
+    "test:all": "npm run test && npm run test:e2e",
+    "sync:obsidian": "tsx scripts/sync-obsidian.ts",
+    "seed:kb": "tsx scripts/seed-knowledge-base.ts"
   },
   "dependencies": {
     "@farcaster/mini-app-solana": "^1.1.3",

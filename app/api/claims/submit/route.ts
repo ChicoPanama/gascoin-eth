@@ -16,6 +16,7 @@ import { checkRateLimit } from '../../../../lib/rate-limit';
 import { persistMetricsSnapshot } from '../../../../lib/metrics-snapshot';
 import { bustBalanceCache } from '../../../../lib/integrations/solana';
 import { recordGasPrice, detectStationPattern } from '../../../../lib/data-intelligence';
+import { getCachedFlags, addMemory } from '../../../../lib/mem0';
 
 const SUBMIT_WINDOW_SEC = 60;
 const SUBMIT_MAX_PER_WINDOW = 12;
@@ -218,6 +219,9 @@ export async function POST(req: Request){
     ? await checkCooldown(supabase, userRowForCooldown.id, userTier.cooldown_days)
     : true; // new user, no cooldown
 
+  // Read cached mem0 flags (Redis only — never hits mem0 API on hot path)
+  const mem0Flags = await getCachedFlags(wallet);
+
   const result = evaluateClaim({
     xVerified: session.xVerified,
     tweetUrl,
@@ -405,8 +409,16 @@ export async function POST(req: Request){
       duplicateHash,
       duplicatePhash,
       ...(result.clampFlags ? { clampFlags: result.clampFlags } : {}),
+      ...(mem0Flags ? { mem0Flags: mem0Flags.riskFlags, mem0Trust: mem0Flags.trustLevel } : {}),
     }
   });
+
+  // Fire-and-forget: record submission signal in mem0
+  addMemory('wallet', wallet,
+    `Submitted claim ${claimId}: decision=${result.decision}, risk=${result.riskScore}, ` +
+    `failed=[${result.failed.map((f: any) => f.gate).join(',')}], tier=${userTier.slug}, amount=$${amountUsd}`,
+    { pipeline: 'submission', decision: result.decision, riskScore: result.riskScore },
+  ).catch(() => {});
 
   // Snapshot metrics for historical tracking (non-blocking)
   if (userRow?.id) {
@@ -436,7 +448,7 @@ export async function POST(req: Request){
 
   // Auto-ban check: if claim was rejected, check if user should be banned
   if (result.decision === 'rejected' && userRow?.id) {
-    const banResult = await checkAndAutoBan(userRow.id, `claim_rejected:${claimId}`);
+    const banResult = await checkAndAutoBan(userRow.id, `claim_rejected:${claimId}`, wallet);
     if (banResult.banned) {
       return NextResponse.json({
         ok: false,

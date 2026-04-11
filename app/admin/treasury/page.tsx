@@ -23,7 +23,7 @@ export default async function TreasuryPage() {
         .eq('reward_status', 'pending'),
       supabase
         .from('payout_jobs')
-        .select('id, claim_id, wallet, amount_sol, status, created_at, tx_signature')
+        .select('id, claim_id, wallet, amount_sol, status, created_at')
         .order('created_at', { ascending: false })
         .limit(20),
     ]);
@@ -135,9 +135,7 @@ export default async function TreasuryPage() {
                       <span style={{ color: statusColor }}>{(job.status ?? '—').toUpperCase()}</span>
                     </td>
                     <td className="lb-table-time" style={{ maxWidth: 160, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                      {job.tx_signature
-                        ? `${job.tx_signature.slice(0, 12)}…`
-                        : '—'}
+                      —
                     </td>
                   </tr>
                 );

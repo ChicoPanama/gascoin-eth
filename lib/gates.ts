@@ -1,6 +1,8 @@
 export interface GateDefinition {
   id: number;
   slug: string;
+  /** The gate_name value stored in gate_results by the policy engine */
+  policyGate: string;
   name: string;
   category: 'tweet' | 'receipt' | 'wallet' | 'treasury';
   description: string;
@@ -14,7 +16,7 @@ export interface GateDefinition {
 
 export const GATES: GateDefinition[] = [
   {
-    id: 1, slug: 'tweet-detected', name: 'Tweet Detected', category: 'tweet',
+    id: 1, slug: 'tweet-detected', policyGate: 'tweet_live', name: 'Tweet Detected', category: 'tweet',
     description: 'We verify that the submitted URL resolves to a real, accessible tweet on X.',
     what_we_check: 'The tweet URL format is valid, the tweet exists, and the account is not suspended.',
     common_failures: [
@@ -27,7 +29,7 @@ export const GATES: GateDefinition[] = [
     checklist_label: 'My tweet URL is valid and the tweet still exists',
   },
   {
-    id: 2, slug: 'tweet-public', name: 'Tweet Public', category: 'tweet',
+    id: 2, slug: 'tweet-public', policyGate: 'x_verified', name: 'Tweet Public', category: 'tweet',
     description: 'The tweet and the account posting it must be fully public at time of verification.',
     what_we_check: 'Account privacy setting is public. Tweet is not limited in visibility. Account is not in read-only mode.',
     common_failures: [
@@ -40,7 +42,7 @@ export const GATES: GateDefinition[] = [
     checklist_label: 'My X account is set to public',
   },
   {
-    id: 3, slug: 'hashtag-verified', name: '#gascoin Hashtag', category: 'tweet',
+    id: 3, slug: 'hashtag-verified', policyGate: 'tweet_hashtag', name: '#gascoin Hashtag', category: 'tweet',
     description: 'The tweet body must contain the exact hashtag #gascoin in any position.',
     what_we_check: 'Case-insensitive search for #gascoin in tweet text. Hashtag must be standalone — not embedded in a URL or another word.',
     common_failures: [
@@ -53,7 +55,7 @@ export const GATES: GateDefinition[] = [
     checklist_label: 'My tweet contains the exact hashtag #gascoin',
   },
   {
-    id: 4, slug: 'tweet-age', name: 'Tweet Age', category: 'tweet',
+    id: 4, slug: 'tweet-age', policyGate: 'receipt_hashtag', name: 'Tweet Age', category: 'tweet',
     description: 'Tweet must have been posted within 48 hours before the time of submission.',
     what_we_check: 'Tweet timestamp from X API compared against submission timestamp. Difference must be less than 172,800 seconds.',
     common_failures: [
@@ -66,7 +68,7 @@ export const GATES: GateDefinition[] = [
     checklist_label: 'My tweet was posted within the last 48 hours',
   },
   {
-    id: 5, slug: 'wallet-on-receipt', name: 'Wallet on Receipt', category: 'receipt',
+    id: 5, slug: 'wallet-on-receipt', policyGate: 'wallet_match', name: 'Wallet on Receipt', category: 'receipt',
     description: 'The last 4 characters of your Solana wallet address must be written on the gas receipt in the photo.',
     what_we_check: 'OCR scan of receipt image searches for the last 4 characters of your connected wallet address. The extracted characters are compared against your wallet.',
     common_failures: [
@@ -81,7 +83,7 @@ export const GATES: GateDefinition[] = [
     checklist_label: 'The last 4 characters of my wallet are written on the receipt',
   },
   {
-    id: 6, slug: 'receipt-legible', name: 'Receipt Legible', category: 'receipt',
+    id: 6, slug: 'receipt-legible', policyGate: 'ai_image_check', name: 'Receipt Legible', category: 'receipt',
     description: 'The receipt image must be clear enough for automated reading of key fields.',
     what_we_check: 'Image resolution minimum 800x600px. Receipt text is not blurred. Key fields (total, date) are detectable. File is not corrupted.',
     common_failures: [
@@ -95,7 +97,7 @@ export const GATES: GateDefinition[] = [
     checklist_label: 'My receipt photo is clear, well-lit, and unblurred',
   },
   {
-    id: 7, slug: 'receipt-date', name: 'Receipt Date Valid', category: 'receipt',
+    id: 7, slug: 'receipt-date', policyGate: 'tamper_check', name: 'Receipt Date Valid', category: 'receipt',
     description: 'The gas purchase must have occurred within 7 days before the submission date.',
     what_we_check: 'OCR-extracted receipt date compared against submission timestamp. Delta must be 7 days or less. Future-dated receipts automatically fail.',
     common_failures: [
@@ -109,7 +111,7 @@ export const GATES: GateDefinition[] = [
     checklist_label: 'My gas purchase was made within the last 7 days',
   },
   {
-    id: 8, slug: 'no-duplicate-wallet', name: 'Submission Cooldown', category: 'wallet',
+    id: 8, slug: 'no-duplicate-wallet', policyGate: 'cooldown', name: 'Submission Cooldown', category: 'wallet',
     description: 'Each X account has a tier-based cooldown between submissions. Standard/Commuter: 7 days (1/week). Road Warrior: 3.5 days (2/week). Fleet: 1.75 days (4/week).',
     what_we_check: 'X account is checked against all active claims within the cooldown window for your tier. Cooldown is per X account, regardless of wallet.',
     common_failures: [
@@ -122,7 +124,7 @@ export const GATES: GateDefinition[] = [
     checklist_label: 'My cooldown has expired since my last submission',
   },
   {
-    id: 9, slug: 'no-duplicate-receipt', name: 'No Duplicate Receipt', category: 'receipt',
+    id: 9, slug: 'no-duplicate-receipt', policyGate: 'not_duplicate', name: 'No Duplicate Receipt', category: 'receipt',
     description: 'The same gas receipt may never be submitted twice regardless of wallet address.',
     what_we_check: 'Perceptual image hash of uploaded receipt compared against all previously submitted receipts. High similarity score triggers failure.',
     common_failures: [
@@ -135,7 +137,7 @@ export const GATES: GateDefinition[] = [
     checklist_label: 'This specific receipt has never been submitted before',
   },
   {
-    id: 10, slug: 'treasury-solvent', name: 'Treasury Solvent', category: 'treasury',
+    id: 10, slug: 'treasury-solvent', policyGate: 'gascoin_min_hold', name: 'Treasury Solvent', category: 'treasury',
     description: 'The GASCOIN treasury must hold sufficient SOL to cover the refund amount at time of payout.',
     what_we_check: 'Live on-chain balance of treasury wallet via Solana RPC. Compared against refund amount plus estimated transaction fee.',
     common_failures: [

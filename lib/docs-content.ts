@@ -540,13 +540,19 @@ export const DOC_CATEGORIES: DocCategory[] = [
   │  ├─ EXIF forensics     ├─ Pattern analysis   ├─ Payout gate    │
   │  └─ Image integrity    └─ Fraud reasoning    └─ Verdict        │
   ├─────────────────────────────────────────────────────────────────┤
+  │  mem0 INTELLIGENCE                   KNOWLEDGE BASE            │
+  │  ├─ Cross-pipeline memory           ├─ Gate rules + policy     │
+  │  ├─ Wallet trust trajectory         ├─ Fraud pattern library   │
+  │  ├─ Behavioral velocity             ├─ Decision history        │
+  │  └─ Redis flag cache                └─ Weekly intel reports    │
+  ├─────────────────────────────────────────────────────────────────┤
   │  X API v2                              REFERRAL ENGINE        │
   │  ├─ Tweet verify                      ├─ Ring detection       │
   │  ├─ Account quality                   ├─ Anti-farm            │
   │  ├─ Follower history                  ├─ Auto-verify          │
   │  └─ 100% persistence                 └─ Points reward        │
   ├─────────────────────────────────────────────────────────────────┤
-  │  REDIS CACHE · EDGE PROXY · 225 STRESS TESTS · SIGNAL DECAY   │
+  │  REDIS CACHE · EDGE PROXY · 258 STRESS TESTS · SIGNAL DECAY   │
   └─────────────────────────────────────────────────────────────────┘
 </pre>
 
@@ -555,6 +561,8 @@ export const DOC_CATEGORIES: DocCategory[] = [
 <li>Signal ingestion (wallet, X, receipt payloads)</li>
 <li>Receipt intelligence (OCR, integrity, duplicate checks)</li>
 <li>Deterministic gate/policy engine</li>
+<li>Persistent memory layer (mem0) for cross-pipeline intelligence</li>
+<li>Institutional knowledge base for dynamic policy context</li>
 <li>Queue/retry orchestration for treasury constraints</li>
 <li>Immutable audit and reviewer observability</li>
 </ul>
@@ -580,14 +588,19 @@ export const DOC_CATEGORIES: DocCategory[] = [
   ┌──────────────┐  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐
   │ Wallet + X   │→ │ Session/Auth │→ │ X API + OCR  │→ │ AI / Fraud   │
   │ + Receipt    │  │ Rate limit   │  │ Extract data │  │ Score + Hash │
-  └──────────────┘  └──────────────┘  └──────────────┘  └──────┬───────┘
+  └──────────────┘  └──────┬───────┘  └──────────────┘  └──────┬───────┘
+                           │                                    │
+                    ┌──────▼───────┐                     ┌──────▼───────┐
+                    │ mem0 FLAGS   │                     │ Gate Engine  │
+                    │ (Redis read) │                     │ Gates 1-12   │
+                    └──────────────┘                     └──────┬───────┘
                                                                │
                     ┌──────────────┐  ┌──────────────┐  ┌──────▼───────┐
-                    │   PAYOUT     │← │ Queue/Retry  │← │ Gate Engine  │
-                    │ SOL → Wallet │  │ (Gate 10)    │  │ Gates 1-9    │
+                    │   PAYOUT     │← │ mem0 GUARD   │← │ Claude + KB  │
+                    │ SOL → Wallet │  │ + Queue      │  │ + mem0 Intel │
                     └──────────────┘  └──────────────┘  └──────────────┘
 
-                    Every action logged → Immutable Audit Trail
+                    Every action logged → Audit Trail + mem0 Memory
 </pre>
 <h3>Read this map in 4 passes</h3>
 <ol>
@@ -796,11 +809,11 @@ Inputs(wallet,tweet,receipt)
       },
       {
         slug: "4-layer-fraud-detection",
-        title: "5-Layer Verification Stack",
+        title: "7-Layer Verification Stack",
         categorySlug: "technology",
         category: "Technology",
         description: "",
-        content: `<p>GASCOIN's verification system operates in six independent layers. Each layer catches a different class of attack. All six must pass for a submission to be approved.</p>
+        content: `<p>GASCOIN's verification system operates in seven independent layers. Each layer catches a different class of attack. All layers work together to ensure no fraudulent submission reaches payout.</p>
 <pre class="doc-ascii">
   LAYER 1   Gemini Vision               Receipt OCR + tamper detection + EXIF forensics
   ─────────────────────────────────────────────────────────────────────────────────
@@ -811,6 +824,10 @@ Inputs(wallet,tweet,receipt)
   LAYER 4   Claude Oversight            Final review + audit narrative + payout gate
   ─────────────────────────────────────────────────────────────────────────────────
   LAYER 5   Referral Pipeline           Ring detection + anti-farm + auto-verify
+  ─────────────────────────────────────────────────────────────────────────────────
+  LAYER 6   mem0 Intelligence           Cross-pipeline memory + trust trajectory
+  ─────────────────────────────────────────────────────────────────────────────────
+  LAYER 7   Knowledge Base              Institutional rules + fraud pattern library
 </pre>
 <h3>Layer 1 — Gemini Vision</h3>
 <p>Google Gemini processes every receipt image: OCR extraction of structured data (date, amount, station, wallet characters), tamper detection scoring, EXIF forensics analysis, and image integrity verification. This is the first line of defense against fabricated or manipulated receipt images.</p>
@@ -819,9 +836,13 @@ Inputs(wallet,tweet,receipt)
 <h3>Layer 3 — X API v2</h3>
 <p>The submitter's X account is evaluated for authenticity signals: follower count, account age, posting history, engagement patterns, and network quality. xAI-powered scoring identifies bot accounts, purchased followers, and coordinated networks. This layer makes it economically infeasible to create fake accounts at scale.</p>
 <h3>Layer 4 — Claude Oversight</h3>
-<p>Claude (Anthropic) reviews every auto-approved claim before SOL is dispatched. It receives all gate results, fraud scores, and cross-validation signals, then returns an approve/flag/reject verdict with a confidence score and written audit narrative. Flagged claims revert to admin review.</p>
+<p>Claude (Anthropic) reviews every auto-approved claim before SOL is dispatched. It receives all gate results, fraud scores, cross-validation signals, mem0 entity intelligence, and knowledge base context, then returns an approve/flag/reject verdict with a confidence score and written audit narrative. Flagged claims revert to admin review. Every verdict is written back to mem0 to inform future reviews.</p>
 <h3>Layer 5 — Referral Pipeline</h3>
-<p>Graph analysis maps referral relationships and identifies circular referral patterns, mutual-referral schemes, and coordinated sign-up networks. Detected rings are flagged and excluded from referral rewards. Legitimate referrals are auto-verified and rewarded with points.</p>`,
+<p>Graph analysis maps referral relationships and identifies circular referral patterns, mutual-referral schemes, and coordinated sign-up networks. Detected rings are flagged and excluded from referral rewards. Ring signals are written to mem0 and propagated to the payout worker — if a wallet is flagged for ring activity, its pending payouts are blocked.</p>
+<h3>Layer 6 — mem0 Cross-Pipeline Intelligence</h3>
+<p>Every pipeline writes signals to mem0 persistent memory: submission verdicts, payout results, engagement anomalies, referral rings, handle changes, and auto-bans. This creates a longitudinal profile for each wallet and X account. The payout worker checks mem0 flags before dispatching SOL — a wallet flagged by the referral pipeline after a claim was auto-approved will be caught here. Claude receives the full mem0 entity profile during review, giving it awareness of behavior across all pipelines. A daily intelligence worker synthesizes cross-pipeline patterns and refreshes Redis flag caches.</p>
+<h3>Layer 7 — Institutional Knowledge Base</h3>
+<p>Gate rules, fraud patterns, policy thresholds, and decision history are stored in a knowledge base synced from operational documentation. Claude's review prompt dynamically pulls relevant entries based on the claim's risk profile — high-risk claims get fraud pattern context, failed gates get rule explanations, referral flags get ring detection rules. Weekly intelligence reports generated from cross-pipeline analysis are stored back into the knowledge base, creating an ever-growing institutional memory.</p>`,
         order: 32,
       },
       {
@@ -861,7 +882,9 @@ Inputs(wallet,tweet,receipt)
 <li><strong>Pre-payout re-verification</strong> — Before every SOL dispatch, the system re-checks: tweet still live, follower count still valid, account quality still passing, token balance still held</li>
 <li><strong>Admin review layer</strong> — Every submission is reviewed by a human admin before funds are released. The admin has full visibility into all gate results, AI scores, and fraud signals</li>
 <li><strong>Immutable audit log</strong> — Every action on the platform is permanently recorded. Nothing can be done silently</li>
-<li><strong>Claude oversight</strong> — Every claim is reviewed by AI manager before SOL moves. Claude receives all 12 gate results, fraud scores, and cross-validation signals, then returns a verdict with confidence score and audit narrative</li>
+<li><strong>Claude oversight with memory</strong> — Every claim is reviewed by AI manager before SOL moves. Claude receives all 12 gate results, fraud scores, cross-validation signals, plus the wallet's full behavioral history from mem0 and relevant institutional rules from the knowledge base. A wallet with a declining trust trajectory and cross-pipeline flags gets extra scrutiny</li>
+<li><strong>Cross-pipeline memory</strong> — Every pipeline writes signals to persistent memory. A referral ring detected at 10am blocks the pending payout at 10:05am. Engagement spam flagged on Monday informs Claude's review on Tuesday. Nothing is forgotten</li>
+<li><strong>Payout cross-pipeline guard</strong> — Before SOL is dispatched, the payout worker checks for flags from other pipelines. A wallet flagged for ring activity, auto-banned, or showing declining trust is blocked even if the claim was already approved</li>
 <li><strong>API fault tolerance</strong> — If X API fails, user gets retry_later (503), not a rejection. No legitimate claim is penalized for upstream outages</li>
 <li><strong>Signal decay</strong> — Historical penalties weaken over time (30% weight at 180+ days) — prevents false positives from legitimate X purges</li>
 <li><strong>Score clamping</strong> — Anomalous upstream values (AI score=999) are clamped and logged for audit. No single signal can produce an out-of-range result</li>
@@ -879,7 +902,7 @@ Inputs(wallet,tweet,receipt)
 <p>Claude (Anthropic) acts as the final AI reviewer for every auto-approved claim before SOL is dispatched. This is the last verification layer before funds move.</p>
 
 <h3>How it works</h3>
-<p>After the policy engine auto-approves a claim, Claude receives the complete verification payload:</p>
+<p>After the policy engine auto-approves a claim, Claude receives the complete verification payload plus cross-pipeline intelligence:</p>
 <ul>
 <li>All 12 gate results (pass/fail + metadata)</li>
 <li>Fraud scores from Gemini and Grok</li>
@@ -887,6 +910,8 @@ Inputs(wallet,tweet,receipt)
 <li>Submission metadata and fraud flags</li>
 <li>X account metrics (follower count, account age, engagement history)</li>
 <li>Submission history for the wallet (previous claims, approval rate, flags)</li>
+<li><strong>Entity intelligence from mem0:</strong> trust trajectory (improving/stable/declining), cross-pipeline flags from referral/engagement/payout pipelines, recent Claude verdicts on this wallet, 7-day submission velocity, and notable behavioral patterns</li>
+<li><strong>Institutional context from knowledge base:</strong> dynamically selected gate rules, known fraud patterns, and current policy thresholds relevant to this specific claim's risk profile</li>
 </ul>
 
 <h3>What Claude returns</h3>
@@ -904,10 +929,10 @@ Inputs(wallet,tweet,receipt)
 
 <h3>Architecture summary</h3>
 <pre class="doc-ascii">
-  Gemini sees ──→ Grok thinks ──→ Claude decides
-  (vision/OCR)    (reasoning)      (oversight)
+  Gemini sees ──→ Grok thinks ──→ mem0 remembers ──→ Claude decides
+  (vision/OCR)    (reasoning)      (history)          (oversight)
 </pre>
-<p>Three independent AI systems from three different providers ensure no single point of model failure or bias can compromise the verification pipeline.</p>`,
+<p>Three independent AI systems from three different providers, backed by persistent cross-pipeline memory, ensure no single point of model failure or bias can compromise the verification pipeline. Claude's verdict is written back to mem0, building an ever-growing intelligence corpus that informs future reviews.</p>`,
         order: 29,
       },
     ],

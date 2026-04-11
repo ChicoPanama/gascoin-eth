@@ -1,0 +1,39 @@
+{
+  "rpcUrl": "https://api.devnet.solana.com",
+  "dryRun": true,
+  "keypairFilePath": "../../../../research/meteora/meteora-invent/studio/keypair.json",
+  "computeUnitPriceMicroLamports": 100000,
+  "quoteMint": "So11111111111111111111111111111111111111112",
+  "dlmmConfig": {
+    "binStep": 25,
+    "feeBps": 500,
+    "initialPrice": 0.000125,
+    "activationType": 1,
+    "activationPoint": 1775702016,
+    "priceRounding": "up",
+    "creatorPoolOnOffControl": true,
+    "hasAlphaVault": true
+  },
+  "singleBinSeedLiquidity": {
+    "price": 0.000125,
+    "priceRounding": "up",
+    "seedAmount": "400000000",
+    "operatorKeypairFilepath": "../../../../research/meteora/meteora-invent/studio/keypair.json",
+    "positionOwner": "11111111111111111111111111111111",
+    "feeOwner": "11111111111111111111111111111111",
+    "lockReleasePoint": 1776306816,
+    "seedTokenXToPositionOwner": true
+  },
+  "alphaVault": {
+    "poolType": "dlmm",
+    "alphaVaultType": "fcfs",
+    "maxDepositCap": 50000,
+    "individualDepositingCap": 2000,
+    "depositingPoint": 1775529216,
+    "startVestingPoint": 1776306816,
+    "endVestingPoint": 1776306816,
+    "escrowFee": 0,
+    "whitelistMode": "permissioned_with_merkle_proof",
+    "whitelistFilepath": "./whitelist_wallets.csv"
+  }
+}

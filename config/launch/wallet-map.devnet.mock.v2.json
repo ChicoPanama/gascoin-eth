@@ -1,0 +1,23 @@
+{
+  "network": "devnet",
+  "notes": "DRY MOCK V2 ONLY \u2014 replace placeholders before any tx",
+  "wallets": {
+    "launch_operator": "REPLACE_WITH_DEVNET_LAUNCH_OPERATOR",
+    "lp_position_owner": "REPLACE_WITH_DEVNET_LP_POSITION_OWNER",
+    "fee_collector_treasury": "REPLACE_WITH_DEVNET_FEE_COLLECTOR_TREASURY",
+    "gas_refund_treasury": "REPLACE_WITH_DEVNET_GAS_REFUND_TREASURY",
+    "dev_cost_wallet": "REPLACE_WITH_DEVNET_DEV_COST_WALLET",
+    "team_wallet": "REPLACE_WITH_DEVNET_TEAM_WALLET",
+    "advertiser_wallet": "REPLACE_WITH_DEVNET_ADS_WALLET",
+    "liquidity_reserve_wallet": "REPLACE_WITH_DEVNET_LIQ_RESERVE_WALLET",
+    "airdrop_treasury_wallet": "REPLACE_WITH_DEVNET_AIRDROP_TREASURY_WALLET"
+  },
+  "policy": {
+    "fee_split": {
+      "gas_refund_treasury_pct": 80,
+      "dev_cost_wallet_pct": 20
+    },
+    "lp_lock_target_days": 365,
+    "initial_whitelist_lock_days": 7
+  }
+}

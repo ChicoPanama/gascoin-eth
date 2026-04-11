@@ -1,0 +1,17 @@
+{
+  "version": "v1",
+  "mode": "time_gated",
+  "restrictionsEnabled": true,
+  "restrictionWindowSeconds": 3600,
+  "maxWalletBps": 100,
+  "maxTxBps": 50,
+  "enforcement": "token_transfer_layer",
+  "exemptWallets": [
+    "TODO_TREASURY_WALLET",
+    "TODO_TEAM_VESTING_WALLET",
+    "TODO_METEORA_POOL_AUTHORITY",
+    "TODO_OPERATOR_WALLET"
+  ],
+  "autoDisableAtPlusSeconds": 3600,
+  "notes": "Mock template only. Enforce on-chain transfer controls for router-agnostic coverage."
+}

@@ -3,6 +3,8 @@ import { getSupabaseAdmin } from '../../../../lib/supabase';
 import { REFERRAL_CONFIG } from '../../../../lib/referral-config';
 import { calculateWalletTrust, detectReferralRing, awardVerifiedPoints } from '../../../../lib/ai-points-engine';
 import { isAuthorizedCron as isAuthorized } from '../../../../lib/cron-auth';
+import { addMemory } from '../../../../lib/mem0';
+import { writeIntelligence } from '../../../../lib/knowledge-base';
 
 // Worker: auto-verify referrals + award POINTS (not SOL)
 // SOL payouts are for gas receipts ONLY
@@ -98,6 +100,19 @@ export async function POST(req: Request) {
           referredWallet: ref.referred_wallet,
           allReferrals: (allRefs || []).map((r: any) => ({ referrer: r.referrer_wallet, referred: r.referred_wallet, created_at: r.created_at })),
         });
+
+        // Record ring detection signals to mem0 + intelligence entries
+        if (ringCheck.isSuspicious) {
+          const ringMsg = `Referral ring detected (${ringCheck.ringType}): ${ringCheck.reason}`;
+          addMemory('wallet', ref.referrer_wallet, ringMsg, { pipeline: 'referral', signal: 'ring_detected' }).catch(() => {});
+          addMemory('wallet', ref.referred_wallet, ringMsg, { pipeline: 'referral', signal: 'ring_detected' }).catch(() => {});
+          writeIntelligence({
+            entry_type: 'ring_detected', entity_type: 'wallet', entity_id: ref.referrer_wallet,
+            summary: ringMsg,
+            detail_json: { ringType: ringCheck.ringType, wallets: ringCheck.wallets, confidence: ringCheck.confidence },
+            severity: 'critical', pipeline_source: 'verify_referrals',
+          }).catch(() => {});
+        }
 
         const walletTrust = calculateWalletTrust({
           totalSubmissions: 1, approvedSubmissions: 1, rejectedSubmissions: 0,

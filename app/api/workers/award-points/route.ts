@@ -4,6 +4,8 @@ import { POINTS_CONFIG } from '../../../../lib/engagement-rewards';
 import { TOKEN_TIERS, getTierForBalance } from '../../../../lib/token-tiers';
 import { detectReferralRing, calculateWalletTrust, generateAuditSummary, awardVerifiedPoints } from '../../../../lib/ai-points-engine';
 import { isAuthorizedCron as isAuthorized } from '../../../../lib/cron-auth';
+import { addMemory } from '../../../../lib/mem0';
+import { writeIntelligence } from '../../../../lib/knowledge-base';
 
 // ═══════════════════════════════════════════
 // Daily Points Worker
@@ -324,6 +326,23 @@ export async function POST(req: Request) {
         flaggedWallets,
       });
     } catch {}
+
+    // Write daily intelligence to mem0 + intelligence_entries
+    const totalPtsToday = submissionPointsAwarded + streakPointsAwarded + holdingsPointsAwarded;
+    addMemory('system', 'gascoin',
+      `Daily audit ${todayKey}: ${totalPtsToday} points awarded, ${anomalies.length} anomalies, ${flaggedWallets} flagged. ${auditSummary.slice(0, 300)}`,
+      { pipeline: 'award_points', date: todayKey },
+    ).catch(() => {});
+
+    for (const anomaly of anomalies) {
+      writeIntelligence({
+        entry_type: 'anomaly', entity_type: 'system', entity_id: 'daily_audit',
+        summary: anomaly,
+        detail_json: { date: todayKey },
+        severity: anomaly.startsWith('HIGH') || anomaly.startsWith('RING') ? 'critical' : 'warning',
+        pipeline_source: 'award_points',
+      }).catch(() => {});
+    }
 
     // Log full audit results
     await supabase.from('audit_logs').insert({

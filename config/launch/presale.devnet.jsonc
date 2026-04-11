@@ -1,0 +1,35 @@
+{
+  // GASCOIN Presale Vault Config (Devnet) — fixed_price + delayed claim
+  "rpcUrl": "https://api.devnet.solana.com",
+  "dryRun": true,
+  "keypairFilePath": "./keys/operator.devnet.json", // TODO
+  "quoteMint": "So11111111111111111111111111111111111111112",
+  "presaleVaultType": "fixed_price",
+  "presaleVault": {
+    "presaleRegistries": [
+      {
+        "presaleSupply": 400000000000000,
+        "buyerMaximumDepositCap": 2000000000000,
+        "buyerMinimumDepositCap": 100000000,
+        "depositFeeBps": 0
+      }
+    ],
+    "presaleArgs": {
+      "presaleMaximumCap": 50000000000000,
+      "presaleMinimumCap": 5000000000000,
+      "presaleStartTime": 1775529216, // TODO
+      "presaleEndTime": 1775702016, // TODO
+      "whitelistMode": 1,
+      "unsoldTokenAction": 1
+    },
+    "fixedPricePresaleConfig": {
+      "price": 0.000125,
+      "rounding": "down"
+    },
+    "lockedVestingArgs": {
+      "lockDuration": 604800,
+      "vestDuration": 1,
+      "immediateReleaseBps": 10000
+    }
+  }
+}

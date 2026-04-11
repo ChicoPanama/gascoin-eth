@@ -1,4 +1,5 @@
 import { getSupabaseAdmin } from './supabase';
+import { addMemory } from './mem0';
 
 /**
  * Auto-ban system — catches sybil attackers and serial fraudsters.
@@ -19,6 +20,7 @@ const LIFETIME_REJECT_THRESHOLD = 10; // 10 lifetime rejections = serial bad act
 export async function checkAndAutoBan(
   userId: string,
   reason: string,
+  wallet?: string,
 ): Promise<{ banned: boolean; reason?: string }> {
   const supabase = getSupabaseAdmin();
 
@@ -92,6 +94,14 @@ export async function checkAndAutoBan(
       lifetimeRejects: lifetimeRejects ?? 0,
     },
   });
+
+  // Record ban in mem0 for cross-pipeline intelligence
+  if (wallet) {
+    addMemory('wallet', wallet,
+      `AUTO-BANNED: ${banReason}`,
+      { pipeline: 'auto_ban', signal: 'banned', severity: 'critical' },
+    ).catch(() => {});
+  }
 
   return { banned: true, reason: banReason };
 }

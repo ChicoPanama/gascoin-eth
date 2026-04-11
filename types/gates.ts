@@ -1,7 +1,7 @@
 import type { GateDefinition } from '../lib/gates';
 
 export interface GateStats {
-  gate_id: number;
+  gate_id: string | number;
   total_passed: number;
   total_failed: number;
   total_processed: number;
@@ -11,7 +11,7 @@ export interface GateStats {
 }
 
 export interface GateFailureReason {
-  gate_id: number;
+  gate_id: string | number;
   failure_reason: string;
   occurrence_count: number;
   pct_of_gate_failures: number;

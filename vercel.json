@@ -10,7 +10,7 @@
     },
     {
       "path": "/api/workers/score-engagement",
-      "schedule": "0 */6 * * *"
+      "schedule": "0 * * * *"
     },
     {
       "path": "/api/workers/award-points",
@@ -27,6 +27,10 @@
     {
       "path": "/api/workers/pre-payout-verify",
       "schedule": "55 23 * * *"
+    },
+    {
+      "path": "/api/workers/aggregate-intelligence",
+      "schedule": "0 7 * * *"
     }
   ]
 }

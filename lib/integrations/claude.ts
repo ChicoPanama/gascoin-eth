@@ -7,7 +7,13 @@
  *
  * Sits in the process-claims worker AFTER auto-approval but BEFORE
  * payout job creation — the "manager signs off" moment.
+ *
+ * Enhanced with mem0 entity intelligence and knowledge base context
+ * for cross-pipeline awareness and institutional knowledge injection.
  */
+
+import { getEntityProfile, addMemory, type EntityProfile } from '../mem0';
+import { buildClaudeKBContext } from '../knowledge-base';
 
 export interface ClaudeReviewContext {
   claimId: string;
@@ -55,6 +61,38 @@ export async function reviewClaim(context: ClaudeReviewContext): Promise<ClaudeV
     const failedGates = context.gateResults.filter((g) => !g.passed);
     const passedGates = context.gateResults.filter((g) => g.passed);
 
+    // Fetch mem0 entity profile first, then build KB context with referral flag awareness
+    const entityProfile = await getEntityProfile('wallet', context.wallet).catch(() => null);
+    const hasReferralFlags = entityProfile?.cross_pipeline_flags?.some((f) => f.includes('referral')) ?? false;
+    const kbContext = await buildClaudeKBContext({
+      riskScore: context.riskScore,
+      failedGates: failedGates.map((g) => g.gate),
+      fraudRisk: context.fraudRisk,
+      hasReferralFlags,
+    }).catch(() => '');
+
+    // Build entity intelligence section (only if we have data)
+    let entitySection = '';
+    if (entityProfile && (entityProfile.cross_pipeline_flags.length > 0 || entityProfile.claude_narratives.length > 0 || entityProfile.trust_trajectory !== 'new')) {
+      entitySection = `
+ENTITY INTELLIGENCE:
+- Trust trajectory: ${entityProfile.trust_trajectory}
+- Cross-pipeline flags: ${entityProfile.cross_pipeline_flags.join(', ') || 'none'}
+- Recent verdicts: ${entityProfile.claude_narratives.slice(0, 3).join(' | ') || 'first review'}
+- 7d velocity: ${entityProfile.velocity.submissions_7d} submissions, ${entityProfile.velocity.points_7d} points
+- Patterns: ${entityProfile.notable_patterns.join('; ') || 'none detected'}
+`;
+    }
+
+    // Build institutional context section (only if we have entries)
+    let kbSection = '';
+    if (kbContext) {
+      kbSection = `
+INSTITUTIONAL CONTEXT:
+${kbContext}
+`;
+    }
+
     const prompt = `You are the oversight manager for GASCOIN, a gas receipt refund protocol on Solana. Your job is to review auto-approved claims before SOL is dispatched. Be thorough but fair.
 
 CLAIM SUMMARY:
@@ -89,11 +127,13 @@ HISTORY:
 - Previous submissions: ${context.previousSubmissions ?? 0}
 - Previous approvals: ${context.previousApprovals ?? 0}
 - Previous rejections: ${context.previousRejections ?? 0}
-
+${entitySection}${kbSection}
 Based on ALL signals above, determine if this claim should be:
 - "approve" — all looks legitimate, dispatch SOL
 - "flag" — something is off, send to manual review (needs_review)
 - "reject" — clear fraud indicators
+
+Pay special attention to entity intelligence — cross-pipeline signals and trust trajectory are strong indicators. A declining trajectory with new flags warrants extra scrutiny.
 
 Respond ONLY with valid JSON:
 {"verdict":"approve|flag|reject","confidence":0.0-1.0,"narrative":"2-3 sentence explanation for audit log","concerns":["list","of","specific","concerns"]}`;
@@ -125,12 +165,20 @@ Respond ONLY with valid JSON:
     const cleaned = text.replace(/```json\n?|\n?```/g, '').trim();
     const parsed = JSON.parse(cleaned);
 
-    return {
+    const verdict: ClaudeVerdict = {
       verdict: parsed.verdict || 'approve',
       confidence: Number(parsed.confidence) || 0.5,
       narrative: String(parsed.narrative || ''),
       concerns: Array.isArray(parsed.concerns) ? parsed.concerns : [],
     };
+
+    // Write Claude's verdict to mem0 for future cross-pipeline intelligence
+    addMemory('wallet', context.wallet,
+      `Claude ${verdict.verdict} claim ${context.claimId}: ${verdict.narrative}`,
+      { pipeline: 'process_claims', verdict: verdict.verdict, confidence: verdict.confidence },
+    ).catch(() => {});
+
+    return verdict;
   } catch (err) {
     // On any failure, don't block the pipeline — approve with note
     return {

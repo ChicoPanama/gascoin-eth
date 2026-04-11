@@ -3,6 +3,7 @@ import { getSupabaseAdmin } from '../../../../lib/supabase';
 import { getUserByUsername } from '../../../../lib/x-api';
 import { isAuthorizedCron as isAuthorized } from '../../../../lib/cron-auth';
 import { persistHandleChange } from '../../../../lib/metrics-snapshot';
+import { addMemory } from '../../../../lib/mem0';
 
 // ══════════════���════════════════════════════
 // Handle Sync Worker
@@ -90,6 +91,12 @@ export async function POST(req: Request) {
               .eq('x_handle', link.x_handle);
 
             changes.push({ wallet: link.wallet, old_handle: link.x_handle, new_handle: currentHandle });
+
+            // Record handle change in mem0 for cross-pipeline intelligence
+            addMemory('wallet', link.wallet,
+              `X handle changed from @${link.x_handle} to @${currentHandle}`,
+              { pipeline: 'sync_x_handles', signal: 'handle_change' },
+            ).catch(() => {});
 
             // Persist handle change history for audit trail
             persistHandleChange(supabase, null as any, link.x_user_id, link.x_handle, currentHandle).catch(() => {});

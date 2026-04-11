@@ -1,0 +1,41 @@
+{
+  // GASCOIN Launch Config (Mainnet) — Alpha Vault Presale Path A
+  // Status: scaffolded; keep dryRun=true until go-live gate approval
+  "rpcUrl": "https://api.mainnet-beta.solana.com",
+  "dryRun": true,
+  "keypairFilePath": "./keys/operator.mainnet.json", // TODO
+  "computeUnitPriceMicroLamports": 100000,
+  "quoteMint": "So11111111111111111111111111111111111111112",
+  "dlmmConfig": {
+    "binStep": 25,
+    "feeBps": 500,
+    "initialPrice": 0.000125,
+    "activationType": 1,
+    "activationPoint": 1775702016, // TODO
+    "priceRounding": "up",
+    "creatorPoolOnOffControl": true,
+    "hasAlphaVault": true
+  },
+  "singleBinSeedLiquidity": {
+    "price": 0.000125,
+    "priceRounding": "up",
+    "seedAmount": "400000000",
+    "operatorKeypairFilepath": "./keys/operator.mainnet.json", // TODO
+    "positionOwner": "11111111111111111111111111111111", // TODO
+    "feeOwner": "11111111111111111111111111111111", // TODO
+    "lockReleasePoint": 1776306816, // TODO
+    "seedTokenXToPositionOwner": true
+  },
+  "alphaVault": {
+    "poolType": "dlmm",
+    "alphaVaultType": "fcfs",
+    "maxDepositCap": 50000,
+    "individualDepositingCap": 2000,
+    "depositingPoint": 1775529216, // TODO
+    "startVestingPoint": 1776306816, // TODO
+    "endVestingPoint": 1776306816, // TODO
+    "escrowFee": 0,
+    "whitelistMode": "permissioned_with_merkle_proof",
+    "whitelistFilepath": "./whitelist_wallets.csv"
+  }
+}

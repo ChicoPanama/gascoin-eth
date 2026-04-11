@@ -1,6 +1,6 @@
 {
   "schema": "whiteclaw.memory.unified.enterprise.v1",
-  "generatedAt": "2026-04-06T06:20:23.780195+00:00",
+  "generatedAt": "2026-04-11T06:20:06.204893+00:00",
   "openclawOps": {
     "cron": {
       "totalJobs": 11,
@@ -16,18 +16,18 @@
             "tz": "America/Los_Angeles"
           },
           "lastStatus": "ok",
-          "nextRunAtMs": 1775541600000
+          "nextRunAtMs": 1775973600000
         },
         {
           "id": "38d706c9-da3f-40d0-b5a1-d11c3485c2b1",
           "name": "daily-memory-file-bootstrap",
           "schedule": {
             "kind": "cron",
-            "expr": "30 22 * * *",
+            "expr": "5 0 * * *",
             "tz": "America/Los_Angeles"
           },
           "lastStatus": "ok",
-          "nextRunAtMs": 1775539800000
+          "nextRunAtMs": 1775891100000
         },
         {
           "id": "31e70675-73bb-49a6-8411-75284205683b",
@@ -49,7 +49,7 @@
             "tz": "America/Los_Angeles"
           },
           "lastStatus": "ok",
-          "nextRunAtMs": 1775487600000
+          "nextRunAtMs": 1775919600000
         },
         {
           "id": "61c09223-5ac7-44a6-8f4e-88315c0d6822",
@@ -60,7 +60,7 @@
             "tz": "America/Los_Angeles"
           },
           "lastStatus": "ok",
-          "nextRunAtMs": 1775542200000
+          "nextRunAtMs": 1775974200000
         },
         {
           "id": "0d83b535-08c3-4859-bb96-594eb0d87054",
@@ -71,7 +71,7 @@
             "tz": "America/Los_Angeles"
           },
           "lastStatus": "ok",
-          "nextRunAtMs": 1775485800000
+          "nextRunAtMs": 1775917800000
         },
         {
           "id": "20e24ba9-ebce-4884-add8-0491530c6e4f",
@@ -82,7 +82,7 @@
             "tz": "America/Los_Angeles"
           },
           "lastStatus": "ok",
-          "nextRunAtMs": 1775469600000
+          "nextRunAtMs": 1775901600000
         },
         {
           "id": "7b3308f0-5158-4dc0-a6d7-f7f108665be6",
@@ -93,7 +93,7 @@
             "tz": "America/Los_Angeles"
           },
           "lastStatus": "ok",
-          "nextRunAtMs": 1775486700000
+          "nextRunAtMs": 1775918700000
         },
         {
           "id": "18fe62c8-ce11-4e8f-a302-41acb36e0834",
@@ -104,7 +104,7 @@
             "tz": "America/Los_Angeles"
           },
           "lastStatus": "ok",
-          "nextRunAtMs": 1775456400000
+          "nextRunAtMs": 1775888400000
         },
         {
           "id": "77785420-f132-4a77-af97-d19577613bab",
@@ -115,7 +115,7 @@
             "tz": "America/Los_Angeles"
           },
           "lastStatus": "ok",
-          "nextRunAtMs": 1775457000000
+          "nextRunAtMs": 1775889000000
         },
         {
           "id": "dbc2e24c-75c1-4873-a7d3-fede7a9f30a0",
@@ -131,8 +131,8 @@
       ]
     },
     "logs": {
-      "gatewayErrLogMb": 3.34,
-      "gatewayLogMb": 0.93
+      "gatewayErrLogMb": 4.51,
+      "gatewayLogMb": 1.13
     }
   },
   "deployTopology": {
@@ -166,7 +166,7 @@
         "git": {
           "branch": "main",
           "dirty": true,
-          "lastCommit": "b4bbd9c 2026-04-05 21:14:59 -0700 Fix Playwright toHaveCount API usage in e2e homepage test"
+          "lastCommit": "8fea860 2026-04-10 23:13:20 -0700 Add CLAUDE.md + mem0 persistent memory config"
         }
       },
       {

@@ -16,6 +16,12 @@ describe('GATES', () => {
   it('slugs are unique', () => {
     expect(new Set(GATES.map((g) => g.slug)).size).toBe(GATES.length);
   });
+  it('policyGates are unique', () => {
+    expect(new Set(GATES.map((g) => g.policyGate)).size).toBe(GATES.length);
+  });
+  it('every gate has a policyGate', () => {
+    GATES.forEach((g) => expect(g.policyGate, `Gate ${g.id} missing policyGate`).toBeTruthy());
+  });
   it('all have required fields', () => {
     GATES.forEach((g) => {
       expect(g.name).toBeTruthy();

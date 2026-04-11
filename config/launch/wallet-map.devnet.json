@@ -1,0 +1,17 @@
+{
+  "operator": {
+    "keypair": "./keys/operator.devnet.json",
+    "pubkey": "TODO_OPERATOR_PUBKEY"
+  },
+  "treasury": {
+    "wallet": "TODO_TREASURY_WALLET"
+  },
+  "token": {
+    "mint": "TODO_GASCOIN_MINT"
+  },
+  "policy": {
+    "mode": "PathA_AlphaVault_DelayedClaim_LPLock",
+    "lp_lock_target_days": 365,
+    "initial_whitelist_lock_days": 7
+  }
+}
