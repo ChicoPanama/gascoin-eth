@@ -2583,7 +2583,7 @@ button.docs-footer-link {
   background: #060606;
   border-top: 1px solid var(--line);
   border-bottom: 1px solid var(--line);
-  padding: 48px;
+  padding: 24px 32px;
   animation: gtDetailIn 0.35s cubic-bezier(0.16, 1, 0.3, 1);
   grid-column: 1 / -1;
 }
@@ -2591,44 +2591,39 @@ button.docs-footer-link {
   from { opacity: 0; max-height: 0; padding-top: 0; padding-bottom: 0; }
   to { opacity: 1; max-height: 800px; }
 }
-.gt-detail-cols {
-  display: grid;
-  grid-template-columns: 2fr 1.5fr 1.5fr;
-  gap: 48px;
+.gt-detail-row {
+  display: flex;
+  gap: 32px;
+  align-items: flex-start;
 }
-.gt-detail-heading {
+.gt-detail-cell {
+  flex: 1;
+  min-width: 0;
+}
+.gt-detail-label {
+  display: block;
   font-family: var(--font-mono);
   font-size: 10px;
   color: var(--muted);
   letter-spacing: 0.25em;
   text-transform: uppercase;
-  margin-bottom: 16px;
+  margin-bottom: 8px;
 }
-.gt-detail-body {
+.gt-detail-value {
   font-family: var(--font-body);
   font-weight: 300;
-  font-size: 14px;
+  font-size: 13px;
   color: rgba(255,255,255,0.7);
-  line-height: 1.75;
+  line-height: 1.6;
 }
-.gt-detail-failures { display: flex; flex-direction: column; gap: 8px; }
-.gt-detail-failure-item {
-  font-family: var(--font-mono);
-  font-size: 12px;
-  color: rgba(255,255,255,0.5);
-  line-height: 1.8;
+.gt-detail-failure-inline {
+  font-size: 13px;
+  color: rgba(255,255,255,0.6);
 }
 .gt-detail-seen {
-  display: block;
-  font-size: 10px;
-  color: rgba(255,255,255,0.3);
-  margin-left: 16px;
-}
-.gt-detail-time {
-  font-family: var(--font-mono);
   font-size: 11px;
-  color: var(--muted);
-  margin-top: 16px;
+  color: rgba(255,255,255,0.3);
+
 }
 
 /* Checklist */
@@ -4864,14 +4859,11 @@ button.docs-footer-link {
   .wt-teaser-title { font-size: 48px; }
 
   .gt-cards-grid { grid-template-columns: 1fr; }
-  .gt-detail-cols { grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
-  .gt-detail { padding: 16px 12px; }
-  .gt-detail-heading { font-size: 9px; margin-bottom: 6px; }
-  .gt-detail-body { font-size: 11px; line-height: 1.5; }
-  .gt-detail-failure-item { font-size: 10px; line-height: 1.5; }
-  .gt-detail-failures { gap: 4px; }
-  .gt-detail-seen { font-size: 9px; margin-left: 10px; }
-  .gt-detail-time { font-size: 9px; margin-top: 8px; }
+  .gt-detail { padding: 16px; }
+  .gt-detail-row { gap: 16px; }
+  .gt-detail-label { font-size: 9px; margin-bottom: 6px; }
+  .gt-detail-value { font-size: 11px; line-height: 1.5; }
+  .gt-detail-failure-inline { font-size: 11px; }
   .gt-checklist-section { padding: 24px; }
   .gt-checklist-footer { flex-direction: column; align-items: flex-start; }
   .gt-teaser { padding: 60px 24px; }
