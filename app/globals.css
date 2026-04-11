@@ -3427,6 +3427,7 @@ button.docs-footer-link {
   height: 100%;
   object-fit: cover;
   display: block;
+  filter: invert(1);
 }
 
 .lb-podium-art-fallback {

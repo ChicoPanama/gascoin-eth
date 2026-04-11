@@ -38,18 +38,18 @@ function UserAvatar({ entry, size = 48 }: { entry: LeaderboardEntry; size?: numb
       />
     );
   }
-  // Gradient circle fallback — deterministic color from wallet
+  // Monochrome gradient fallback — deterministic from wallet
   const hash = entry.wallet_address.split('').reduce((a, c) => a + c.charCodeAt(0), 0);
-  const hue1 = hash % 360;
-  const hue2 = (hash * 7) % 360;
+  const light1 = 20 + (hash % 25);
+  const light2 = 10 + ((hash * 7) % 20);
   return (
     <div
       style={{
         width: size,
         height: size,
         borderRadius: '50%',
-        background: `linear-gradient(135deg, hsl(${hue1}, 60%, 45%), hsl(${hue2}, 50%, 35%))`,
-        border: '2px solid var(--glass-border)',
+        background: `linear-gradient(135deg, hsl(0, 0%, ${light1}%), hsl(0, 0%, ${light2}%))`,
+        border: '1px solid rgba(255,255,255,0.15)',
         flexShrink: 0,
       }}
     />
