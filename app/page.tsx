@@ -203,101 +203,143 @@ export default async function Home() {
             </div>
 
             <div className="gc-tech-pipeline">
-              {/* AI Layer 1 — Receipt Processing */}
+              {/* Layer 1 — Gemini Vision */}
               <div className="gc-tech-layer gc-tech-layer--ai">
                 <div className="gc-tech-layer-num">01</div>
                 <div className="gc-tech-layer-icon">
-                  <img src="/icons/grok-icon.jpg" alt="Grok" className="gc-tech-layer-icon-img" />
+                  <img src="/icons/grok-icon.jpg" alt="Gemini" className="gc-tech-layer-icon-img" />
                 </div>
                 <div className="gc-tech-layer-content">
-                  <div className="gc-tech-layer-title">AI Receipt Processing</div>
-                  <div className="gc-tech-layer-tag">INTEGRATED WITH GROK</div>
+                  <div className="gc-tech-layer-title">Gemini Vision</div>
+                  <div className="gc-tech-layer-tag">GEMINI 2.0 FLASH · RECEIPT ANALYSIS</div>
                   <p className="gc-tech-layer-desc">
-                    Upload a receipt photo and AI extracts everything in one call — country,
-                    date, total amount, and your wallet address. Simultaneously scores
-                    5 fraud signals: is it a physical receipt, from a real gas station, is it
-                    manipulated, does it have handwriting, and is the wallet readable.
+                    Upload a receipt photo and Gemini Vision extracts everything in one call — country,
+                    date, total amount, and your wallet characters. Simultaneously scores
+                    fraud signals: physical receipt check, gas station verification, manipulation
+                    detection, handwriting analysis, and EXIF forensics. One API call. Sub-second.
                   </p>
                   <div className="gc-tech-layer-catches">
-                    <span className="gc-tech-catch">Auto-Extract</span>
-                    <span className="gc-tech-catch">OCR</span>
-                    <span className="gc-tech-catch">Fraud Score</span>
-                    <span className="gc-tech-catch">Wallet Match</span>
+                    <span className="gc-tech-catch">OCR Extract</span>
+                    <span className="gc-tech-catch">EXIF Forensics</span>
+                    <span className="gc-tech-catch">Tamper Score</span>
+                    <span className="gc-tech-catch">dHash + SHA-256</span>
                   </div>
                 </div>
               </div>
 
               <div className="gc-tech-connector" />
 
-              {/* AI Layer 2 — Fraud Detection */}
-              <div className="gc-tech-layer">
+              {/* Layer 2 — Grok Reasoning */}
+              <div className="gc-tech-layer gc-tech-layer--ai">
                 <div className="gc-tech-layer-num">02</div>
                 <div className="gc-tech-layer-icon">
-                  <img src="/icons/grok-icon.jpg" alt="Grok" className="gc-tech-layer-icon-img" />
+                  <img src="/icons/xai-icon.jpg" alt="Grok" className="gc-tech-layer-icon-img" />
                 </div>
                 <div className="gc-tech-layer-content">
-                  <div className="gc-tech-layer-title">4-Layer Fraud Detection</div>
-                  <div className="gc-tech-layer-tag">INTEGRATED WITH GROK</div>
+                  <div className="gc-tech-layer-title">Grok Reasoning Engine</div>
+                  <div className="gc-tech-layer-tag">GROK 4.1 FAST REASONING · xAI</div>
                   <p className="gc-tech-layer-desc">
-                    Before AI even sees the image, three free layers run instantly: EXIF forensics
-                    checks camera model, timestamps, and editing software. Dimensional analysis flags
-                    AI-generated image sizes. Perceptual hashing catches receipt reuse from any angle.
-                    Zero cost. Zero latency.
+                    Grok receives all signals from Gemini and reasons about what they mean together.
+                    A receipt that passes image analysis might still be suspicious when cross-referenced
+                    against account age, location, and submission history. Grok catches what individual
+                    checks miss. Also powers tweet quality scoring and audit narratives.
                   </p>
                   <div className="gc-tech-layer-catches">
-                    <span className="gc-tech-catch">EXIF Forensics</span>
-                    <span className="gc-tech-catch">Dimension Check</span>
-                    <span className="gc-tech-catch">dHash</span>
-                    <span className="gc-tech-catch">SHA-256</span>
+                    <span className="gc-tech-catch">Cross-Validation</span>
+                    <span className="gc-tech-catch">Fraud Reasoning</span>
+                    <span className="gc-tech-catch">Tweet Quality</span>
+                    <span className="gc-tech-catch">Pattern Analysis</span>
                   </div>
                 </div>
               </div>
 
               <div className="gc-tech-connector" />
 
-              {/* AI Layer 3 — X + xAI Intelligence Pipeline */}
-              <div className="gc-tech-layer gc-tech-layer--ai">
+              {/* Layer 3 — X API v2 */}
+              <div className="gc-tech-layer">
                 <div className="gc-tech-layer-num">03</div>
                 <div className="gc-tech-layer-icon">
-                  <img src="/icons/xai-icon.jpg" alt="xAI" className="gc-tech-layer-icon-img" />
+                  <img src="/icons/xai-icon.jpg" alt="X" className="gc-tech-layer-icon-img" />
                 </div>
                 <div className="gc-tech-layer-content">
-                  <div className="gc-tech-layer-title">X + xAI Intelligence Pipeline</div>
-                  <div className="gc-tech-layer-tag">X API V2 · xAI-POWERED SCORING · AUTOMATED</div>
+                  <div className="gc-tech-layer-title">X API v2 Intelligence</div>
+                  <div className="gc-tech-layer-tag">100% DATA PERSISTENCE · REAL-TIME VERIFICATION</div>
                   <p className="gc-tech-layer-desc">
-                    Your #gascoin tweet passes through 4 sequential verification gates via the X API —
-                    existence, public account, hashtag, 48-hour window — then enters an xAI-powered
-                    scoring engine. Real engagement is pulled automatically and scored through AI
-                    quality analysis that rewards genuine virality and suppresses bot activity.
-                    Your X handle stays synced to your wallet so you never miss points.
+                    Every field from the X API is captured and stored — followers, following, tweets,
+                    account age, bio, location, protected status. Historical snapshots track changes
+                    over time. Follower dumps and bot injection spikes are detected automatically.
+                    Nothing is discarded. Every data point feeds the scoring engine.
                   </p>
                   <div className="gc-tech-layer-catches">
-                    <span className="gc-tech-catch">X API Verification</span>
-                    <span className="gc-tech-catch">xAI Quality Scoring</span>
-                    <span className="gc-tech-catch">Bot Detection</span>
+                    <span className="gc-tech-catch">Tweet Verification</span>
+                    <span className="gc-tech-catch">Account Quality</span>
+                    <span className="gc-tech-catch">Historical Tracking</span>
                     <span className="gc-tech-catch">Handle Sync</span>
-                    <span className="gc-tech-catch">Points System</span>
-                    <span className="gc-tech-catch">Leaderboard Rank</span>
                   </div>
                 </div>
               </div>
 
               <div className="gc-tech-connector" />
 
-              {/* AI Layer 4 — Referral Validation */}
+              {/* Layer 4 — Claude Oversight */}
               <div className="gc-tech-layer gc-tech-layer--ai">
                 <div className="gc-tech-layer-num">04</div>
                 <div className="gc-tech-layer-icon">
-                  <img src="/icons/grok-icon.jpg" alt="Grok" className="gc-tech-layer-icon-img" />
+                  <img src="/icons/grok-icon.jpg" alt="Claude" className="gc-tech-layer-icon-img" />
                 </div>
                 <div className="gc-tech-layer-content">
+                  <div className="gc-tech-layer-title">Claude Oversight</div>
+                  <div className="gc-tech-layer-tag">CLAUDE SONNET · ANTHROPIC · FINAL REVIEW</div>
+                  <p className="gc-tech-layer-desc">
+                    Before SOL leaves the treasury, Claude reviews the complete submission package —
+                    all 12 gate results, fraud scores, location signals, X account metrics, and
+                    submission history. Returns a verdict with a written audit narrative.
+                    The manager that signs off before money moves.
+                  </p>
+                  <div className="gc-tech-layer-catches">
+                    <span className="gc-tech-catch">Full Context Review</span>
+                    <span className="gc-tech-catch">Audit Narrative</span>
+                    <span className="gc-tech-catch">Final Verdict</span>
+                    <span className="gc-tech-catch">Payout Gate</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="gc-tech-connector" />
+
+              {/* Layer 5 — Location Intelligence */}
+              <div className="gc-tech-layer">
+                <div className="gc-tech-layer-num">05</div>
+                <div className="gc-tech-layer-content">
+                  <div className="gc-tech-layer-title">Location Intelligence</div>
+                  <div className="gc-tech-layer-tag">EDGE PROXY · GEOBLOCKING · GPS CROSS-REFERENCE</div>
+                  <p className="gc-tech-layer-desc">
+                    Four independent location signals are cross-referenced: Vercel edge IP country,
+                    OCR-extracted receipt country, receipt currency, and EXIF GPS coordinates.
+                    Mismatches elevate risk. Known bot-farm countries are blocked at the edge
+                    before any processing occurs.
+                  </p>
+                  <div className="gc-tech-layer-catches">
+                    <span className="gc-tech-catch">IP Geolocation</span>
+                    <span className="gc-tech-catch">OCR Country</span>
+                    <span className="gc-tech-catch">Currency Match</span>
+                    <span className="gc-tech-catch">EXIF GPS</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="gc-tech-connector" />
+
+              {/* Layer 6 — Referral Pipeline */}
+              <div className="gc-tech-layer gc-tech-layer--ai">
+                <div className="gc-tech-layer-num">06</div>
+                <div className="gc-tech-layer-content">
                   <div className="gc-tech-layer-title">Automated Referral Pipeline</div>
-                  <div className="gc-tech-layer-tag">EVERY 15 MIN · ELIGIBILITY CHECKS</div>
+                  <div className="gc-tech-layer-tag">EVERY 15 MIN · RING DETECTION · AUTO-VERIFY</div>
                   <p className="gc-tech-layer-desc">
                     Referral conversions are verified automatically — self-referral detection,
                     referrer approval status, monthly cap enforcement, and rolling window limits.
-                    Legitimate referrals earn points that boost your leaderboard rank and status.
-                    AI ring detection catches farming schemes. No manual processing.
+                    AI ring detection catches farming schemes across the social graph.
                   </p>
                   <div className="gc-tech-layer-catches">
                     <span className="gc-tech-catch">Anti-Farm</span>
@@ -312,20 +354,20 @@ export default async function Home() {
             {/* Bottom stats */}
             <div className="gc-tech-stats">
               <div className="gc-tech-stat">
-                <div className="gc-tech-stat-value">{'<'}8s</div>
-                <div className="gc-tech-stat-label">Receipt to Verdict</div>
+                <div className="gc-tech-stat-value">3</div>
+                <div className="gc-tech-stat-label">AI Engines</div>
               </div>
               <div className="gc-tech-stat">
-                <div className="gc-tech-stat-value">10</div>
+                <div className="gc-tech-stat-value">12</div>
                 <div className="gc-tech-stat-label">Automated Gates</div>
               </div>
               <div className="gc-tech-stat">
-                <div className="gc-tech-stat-value">5</div>
-                <div className="gc-tech-stat-label">AI Systems</div>
+                <div className="gc-tech-stat-value">6</div>
+                <div className="gc-tech-stat-label">Verification Layers</div>
               </div>
               <div className="gc-tech-stat">
-                <div className="gc-tech-stat-value">0</div>
-                <div className="gc-tech-stat-label">Manual Steps</div>
+                <div className="gc-tech-stat-value">225</div>
+                <div className="gc-tech-stat-label">Stress Tests</div>
               </div>
             </div>
 

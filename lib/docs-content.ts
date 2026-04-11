@@ -534,13 +534,19 @@ export const DOC_CATEGORIES: DocCategory[] = [
   ┌─────────────────────────────────────────────────────────────────┐
   │                    GASCOIN VERIFICATION STACK                   │
   ├─────────────────────────────────────────────────────────────────┤
-  │  GROK AI ENGINE          X API v2            SOLANA BLOCKCHAIN  │
-  │  ├─ Receipt OCR          ├─ Tweet verify     ├─ Token balance   │
-  │  ├─ AI detection         ├─ Account quality  ├─ Treasury check  │
-  │  ├─ Tamper scoring       ├─ Follower count   ├─ SOL dispatch    │
-  │  └─ Adaptive learning    └─ Social graph     └─ Audit trail     │
+  │  GEMINI VISION         GROK REASONING       CLAUDE OVERSIGHT   │
+  │  ├─ Receipt OCR        ├─ Cross-validation   ├─ Final review   │
+  │  ├─ Tamper detection   ├─ Tweet quality      ├─ Audit narrative│
+  │  ├─ EXIF forensics     ├─ Pattern analysis   ├─ Payout gate    │
+  │  └─ Image integrity    └─ Fraud reasoning    └─ Verdict        │
   ├─────────────────────────────────────────────────────────────────┤
-  │              xAI SCORING · FRAUD DETECTION · PAYOUT             │
+  │  X API v2              LOCATION INTEL        REFERRAL ENGINE   │
+  │  ├─ Tweet verify       ├─ IP geolocation     ├─ Ring detection │
+  │  ├─ Account quality    ├─ OCR country        ├─ Anti-farm      │
+  │  ├─ Follower history   ├─ Currency match     ├─ Auto-verify    │
+  │  └─ 100% persistence  └─ EXIF GPS           └─ Points reward  │
+  ├─────────────────────────────────────────────────────────────────┤
+  │  REDIS CACHE · EDGE PROXY · 225 STRESS TESTS · SIGNAL DECAY   │
   └─────────────────────────────────────────────────────────────────┘
 </pre>
 
@@ -790,28 +796,36 @@ Inputs(wallet,tweet,receipt)
       },
       {
         slug: "4-layer-fraud-detection",
-        title: "4-Layer Fraud Detection",
+        title: "6-Layer Verification Stack",
         categorySlug: "technology",
         category: "Technology",
         description: "",
-        content: `<p>GASCOIN's anti-fraud system operates in four independent layers. Each layer catches a different class of attack. All four must pass for a submission to be approved.</p>
+        content: `<p>GASCOIN's verification system operates in six independent layers. Each layer catches a different class of attack. All six must pass for a submission to be approved.</p>
 <pre class="doc-ascii">
-  LAYER 1   Gate-Based Verification     10 sequential checks, any failure = reject
+  LAYER 1   Gemini Vision               Receipt OCR + tamper detection + EXIF forensics
   ─────────────────────────────────────────────────────────────────────────────────
-  LAYER 2   AI Image Analysis (Grok)    AI generation score + tamper detection
+  LAYER 2   Grok Reasoning              Cross-validation + tweet quality + fraud reasoning
   ─────────────────────────────────────────────────────────────────────────────────
-  LAYER 3   Perceptual Hashing          Duplicate receipt fingerprinting
+  LAYER 3   X API v2                    Tweet verify + account quality + social graph
   ─────────────────────────────────────────────────────────────────────────────────
-  LAYER 4   Social Signal Analysis      X account quality + network scoring
+  LAYER 4   Claude Oversight            Final review + audit narrative + payout gate
+  ─────────────────────────────────────────────────────────────────────────────────
+  LAYER 5   Location Intelligence       IP geolocation + OCR country + currency + EXIF GPS
+  ─────────────────────────────────────────────────────────────────────────────────
+  LAYER 6   Referral Pipeline           Ring detection + anti-farm + auto-verify
 </pre>
-<h3>Layer 1 — Gate-Based Sequential Verification</h3>
-<p>10 automated gates run in sequence. Each gate checks a specific requirement: tweet validity, receipt authenticity, wallet matching, cooldown compliance, and more. Any single gate failure blocks the entire submission. There is no partial pass.</p>
-<h3>Layer 2 — AI Image Analysis (Grok)</h3>
-<p>Grok-powered analysis evaluates every receipt image for AI generation, digital manipulation, and tampering. Two independent scores (AI probability and tamper score) must both fall below their thresholds. This layer catches sophisticated image forgeries that pass visual inspection.</p>
-<h3>Layer 3 — Perceptual Hashing</h3>
-<p>Every receipt image is converted to a perceptual hash — a digital fingerprint that is resistant to cropping, rotation, brightness changes, and minor edits. This hash is compared against every previously submitted receipt in the system. Even heavily modified versions of the same receipt are detected and rejected.</p>
-<h3>Layer 4 — Social Signal Analysis</h3>
-<p>The submitter's X account is evaluated for authenticity signals: follower count, account age, posting history, engagement patterns, and network quality. xAI-powered scoring identifies bot accounts, purchased followers, and coordinated networks. This layer makes it economically infeasible to create fake accounts at scale.</p>`,
+<h3>Layer 1 — Gemini Vision</h3>
+<p>Google Gemini processes every receipt image: OCR extraction of structured data (date, amount, station, wallet characters), tamper detection scoring, EXIF forensics analysis, and image integrity verification. This is the first line of defense against fabricated or manipulated receipt images.</p>
+<h3>Layer 2 — Grok Reasoning</h3>
+<p>Grok (xAI) performs cross-validation of all extracted signals, tweet quality analysis, pattern detection across submission history, and fraud reasoning. Two independent scores (AI probability and tamper score) must both fall below their thresholds. This layer catches sophisticated forgeries that pass visual inspection.</p>
+<h3>Layer 3 — X API v2</h3>
+<p>The submitter's X account is evaluated for authenticity signals: follower count, account age, posting history, engagement patterns, and network quality. xAI-powered scoring identifies bot accounts, purchased followers, and coordinated networks. This layer makes it economically infeasible to create fake accounts at scale.</p>
+<h3>Layer 4 — Claude Oversight</h3>
+<p>Claude (Anthropic) reviews every auto-approved claim before SOL is dispatched. It receives all gate results, fraud scores, and cross-validation signals, then returns an approve/flag/reject verdict with a confidence score and written audit narrative. Flagged claims revert to admin review.</p>
+<h3>Layer 5 — Location Intelligence</h3>
+<p>Four independent location signals are cross-referenced: IP country (Vercel edge), OCR receipt country, receipt currency, and EXIF GPS coordinates. Mismatches elevate the risk score. Edge proxy geoblocking and bot user-agent detection add additional protection at the network layer.</p>
+<h3>Layer 6 — Referral Pipeline</h3>
+<p>Graph analysis maps referral relationships and identifies circular referral patterns, mutual-referral schemes, and coordinated sign-up networks. Detected rings are flagged and excluded from referral rewards. Legitimate referrals are auto-verified and rewarded with points.</p>`,
         order: 32,
       },
       {
@@ -851,9 +865,89 @@ Inputs(wallet,tweet,receipt)
 <li><strong>Pre-payout re-verification</strong> — Before every SOL dispatch, the system re-checks: tweet still live, follower count still valid, account quality still passing, token balance still held</li>
 <li><strong>Admin review layer</strong> — Every submission is reviewed by a human admin before funds are released. The admin has full visibility into all gate results, AI scores, and fraud signals</li>
 <li><strong>Immutable audit log</strong> — Every action on the platform is permanently recorded. Nothing can be done silently</li>
+<li><strong>Claude oversight</strong> — Every claim is reviewed by AI manager before SOL moves. Claude receives all 12 gate results, fraud scores, and cross-validation signals, then returns a verdict with confidence score and audit narrative</li>
+<li><strong>API fault tolerance</strong> — If X API fails, user gets retry_later (503), not a rejection. No legitimate claim is penalized for upstream outages</li>
+<li><strong>Signal decay</strong> — Historical penalties weaken over time (30% weight at 180+ days) — prevents false positives from legitimate X purges</li>
+<li><strong>Score clamping</strong> — Anomalous upstream values (AI score=999) are clamped and logged for audit. No single signal can produce an out-of-range result</li>
 </ul>
 <p>To successfully game GASCOIN, an attacker would need to: physically obtain a gas receipt, write a wallet ID on it by hand, photograph it convincingly enough to fool Grok's AI analysis, maintain a legitimate X account with real followers and activity, post a public tweet, hold GASCOIN tokens, and pass admin review. The cost of doing this at scale makes it economically irrational.</p>`,
         order: 34,
+      },
+      {
+        slug: "claude-oversight-engine",
+        title: "Claude Oversight Engine",
+        categorySlug: "technology",
+        category: "Technology",
+        description: "",
+        content: `<h3>What this is</h3>
+<p>Claude (Anthropic) acts as the final AI reviewer for every auto-approved claim before SOL is dispatched. This is the last verification layer before funds move.</p>
+
+<h3>How it works</h3>
+<p>After the policy engine auto-approves a claim, Claude receives the complete verification payload:</p>
+<ul>
+<li>All 12 gate results (pass/fail + metadata)</li>
+<li>Fraud scores from Gemini and Grok</li>
+<li>Cross-validation signals between receipt, tweet, and wallet</li>
+<li>Location signals (IP country, OCR country, currency, EXIF GPS)</li>
+<li>X account metrics (follower count, account age, engagement history)</li>
+<li>Submission history for the wallet (previous claims, approval rate, flags)</li>
+</ul>
+
+<h3>What Claude returns</h3>
+<ul>
+<li><strong>Verdict:</strong> approve / flag / reject</li>
+<li><strong>Confidence score:</strong> 0-1 scale indicating certainty</li>
+<li><strong>Audit narrative:</strong> Written explanation of the decision reasoning, stored permanently in the audit log</li>
+</ul>
+
+<h3>Flag behavior</h3>
+<p>If Claude flags a claim, it reverts from auto-approved to needs_review status. An admin must manually review the claim with full visibility into Claude's narrative and all underlying signals before funds can be released.</p>
+
+<h3>Graceful fallback</h3>
+<p>If the Claude API is unavailable (timeout, rate limit, outage), the policy engine's original decision stands. The claim is not blocked — it proceeds with the deterministic gate verdict. API availability is logged for operational monitoring.</p>
+
+<h3>Architecture summary</h3>
+<pre class="doc-ascii">
+  Gemini sees ──→ Grok thinks ──→ Claude decides
+  (vision/OCR)    (reasoning)      (oversight)
+</pre>
+<p>Three independent AI systems from three different providers ensure no single point of model failure or bias can compromise the verification pipeline.</p>`,
+        order: 29,
+      },
+      {
+        slug: "location-intelligence",
+        title: "Location Intelligence",
+        categorySlug: "technology",
+        category: "Technology",
+        description: "",
+        content: `<h3>What this is</h3>
+<p>Location Intelligence cross-references four independent geographic signals to detect submissions where the claimed purchase location does not match the submitter's actual location.</p>
+
+<h3>The 4 signals</h3>
+<ul>
+<li><strong>IP country (Vercel edge):</strong> The country detected from the submitter's IP address at the network edge</li>
+<li><strong>OCR receipt country:</strong> The country inferred from receipt text (station name, address, language, formatting)</li>
+<li><strong>Receipt currency:</strong> The currency symbol or code extracted from the receipt total</li>
+<li><strong>EXIF GPS:</strong> GPS coordinates embedded in the receipt photo metadata (if available)</li>
+</ul>
+
+<h3>How mismatches affect scoring</h3>
+<p>When signals disagree, the risk score is elevated proportionally. A single mismatch adds a moderate penalty; multiple mismatches compound. The maximum location-based risk elevation is capped at +0.20 to prevent location alone from causing a rejection — it is one signal among many.</p>
+
+<h3>Edge-level protection</h3>
+<ul>
+<li><strong>Geoblocking:</strong> Edge proxy blocks requests from known bot-farm countries before they reach the application layer</li>
+<li><strong>Bot user-agent detection:</strong> Automated user agents (headless browsers, scripted HTTP clients) are rejected at edge</li>
+</ul>
+
+<h3>Signal examples</h3>
+<pre class="doc-ascii">
+  IP=USA + Receipt=USA + Currency=USD + GPS=USA     → Low risk (consistent)
+  IP=Nigeria + Receipt=USA + Currency=USD + no GPS  → High risk (IP mismatch, no GPS)
+  IP=UK + Receipt=UK + Currency=GBP + GPS=UK        → Low risk (consistent)
+  IP=Vietnam + Receipt=Japan + Currency=JPY + no GPS → High risk (IP mismatch, no GPS)
+</pre>`,
+        order: 30,
       },
     ],
   },
