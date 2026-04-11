@@ -14,6 +14,7 @@ const NAV_LINKS = [
   { href: '/dashboard', label: 'Treasury', icon: '▣' },
   { href: '/community', label: 'Community', icon: '◎' },
   { href: '/leaderboard', label: 'Leaderboard', icon: '▲' },
+  { href: '/points', label: 'Points', icon: '◆' },
   { href: '/referral', label: 'Refer', icon: '↗' },
   { href: '/perks', label: 'Perks', icon: '✦' },
   { href: '/gates', label: 'Gates', icon: '◈' },

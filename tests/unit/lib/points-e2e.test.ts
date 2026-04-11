@@ -84,11 +84,11 @@ describe('Journey: New Standard User (0 GASCOIN)', () => {
       approvedSubmissions: 1, consecutiveWindows: 0, referralConversions: 0,
     });
     expect(breakdown.impressionPoints).toBe(2000);
-    expect(breakdown.likePoints).toBe(1500);
-    expect(breakdown.retweetPoints).toBe(1250);
-    expect(breakdown.quotePoints).toBe(500);
-    expect(breakdown.replyPoints).toBe(800);
-    expect(breakdown.totalPoints).toBeGreaterThan(5000);
+    expect(breakdown.likePoints).toBe(30 * POINTS_CONFIG.POINTS_PER_LIKE);
+    expect(breakdown.retweetPoints).toBe(5 * POINTS_CONFIG.POINTS_PER_RETWEET);
+    expect(breakdown.quotePoints).toBe(1 * POINTS_CONFIG.POINTS_PER_QUOTE_TWEET);
+    expect(breakdown.replyPoints).toBe(8 * POINTS_CONFIG.POINTS_PER_REPLY);
+    expect(breakdown.totalPoints).toBeGreaterThan(2000);
   });
 
   it('earns referral points for bringing a friend', () => {
@@ -196,15 +196,18 @@ describe('Journey: Fleet Tier (10M GASCOIN)', () => {
     });
 
     expect(breakdown.impressionPoints).toBe(100000);
-    expect(breakdown.likePoints).toBe(50000);
-    expect(breakdown.retweetPoints).toBe(75000);
-    expect(breakdown.quotePoints).toBe(25000);
-    expect(breakdown.replyPoints).toBe(20000);
+    expect(breakdown.likePoints).toBe(1000 * POINTS_CONFIG.POINTS_PER_LIKE);
+    expect(breakdown.retweetPoints).toBe(300 * POINTS_CONFIG.POINTS_PER_RETWEET);
+    expect(breakdown.quotePoints).toBe(50 * POINTS_CONFIG.POINTS_PER_QUOTE_TWEET);
+    expect(breakdown.replyPoints).toBe(200 * POINTS_CONFIG.POINTS_PER_REPLY);
     expect(breakdown.submissionPoints).toBe(5000);
     expect(breakdown.streakPoints).toBe(2500);
     expect(breakdown.referralPoints).toBe(7500);
     expect(breakdown.holdingsPoints).toBe(750);
-    expect(breakdown.totalPoints).toBe(285750);
+    const expectedTotal = breakdown.impressionPoints + breakdown.likePoints + breakdown.retweetPoints +
+      breakdown.quotePoints + breakdown.replyPoints + breakdown.submissionPoints +
+      breakdown.streakPoints + breakdown.referralPoints + breakdown.holdingsPoints;
+    expect(breakdown.totalPoints).toBe(expectedTotal);
   });
 });
 

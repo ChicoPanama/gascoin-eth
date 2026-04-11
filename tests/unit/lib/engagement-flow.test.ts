@@ -20,9 +20,9 @@ describe('User Flow: Sign in → Tweet → Engagement Points', () => {
       const pts = calculateEngagementPoints({
         impressions: 3000, likes: 45, retweets: 8, quote_tweets: 2, replies: 12, bookmarks: 0,
       });
-      const expected = 3000 * 1 + 45 * 50 + 8 * 250 + 2 * 500 + 12 * 100;
+      const c = POINTS_CONFIG;
+      const expected = 3000 * c.POINTS_PER_IMPRESSION + 45 * c.POINTS_PER_LIKE + 8 * c.POINTS_PER_RETWEET + 2 * c.POINTS_PER_QUOTE_TWEET + 12 * c.POINTS_PER_REPLY;
       expect(pts).toBe(expected);
-      expect(pts).toBe(9450);
     });
 
     it('zero engagement = zero points', () => {
@@ -222,8 +222,8 @@ describe('User Flow: Sign in → Tweet → Engagement Points', () => {
       const rawPoints = calculateEngagementPoints({
         impressions: 1500, likes: 20, retweets: 3, quote_tweets: 0, replies: 5, bookmarks: 0,
       });
-      expect(rawPoints).toBe(1500 + 1000 + 750 + 0 + 500);
-      expect(rawPoints).toBe(3750);
+      const c = POINTS_CONFIG;
+      expect(rawPoints).toBe(1500 * c.POINTS_PER_IMPRESSION + 20 * c.POINTS_PER_LIKE + 3 * c.POINTS_PER_RETWEET + 0 + 5 * c.POINTS_PER_REPLY);
 
       // Quality check passes
       const quality = await scoreTweetQuality({

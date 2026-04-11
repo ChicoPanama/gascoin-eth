@@ -16,12 +16,15 @@ import type { ContentType } from './x-api';
 
 export const POINTS_CONFIG = {
   // ─── Tweet engagement points ───
+  // Rebalanced to align with X algorithm: X rewards conversation
+  // depth (replies), saves (bookmarks), and new content (quotes).
+  // Passive engagement (likes) and reposting (retweets) devalued.
   POINTS_PER_IMPRESSION: 1,
-  POINTS_PER_LIKE: 50,
-  POINTS_PER_RETWEET: 250,
+  POINTS_PER_LIKE: 25,
+  POINTS_PER_RETWEET: 50,
   POINTS_PER_QUOTE_TWEET: 500,
-  POINTS_PER_REPLY: 100,
-  POINTS_PER_BOOKMARK: 150,
+  POINTS_PER_REPLY: 300,
+  POINTS_PER_BOOKMARK: 250,
 
   // ─── Content type multipliers (aligned with X algorithm) ───
   // X applies up to 90% impression deduction on reposts/third-party content.
