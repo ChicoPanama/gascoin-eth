@@ -3383,6 +3383,13 @@ button.docs-footer-link {
   letter-spacing: 0.02em;
   margin-bottom: 8px;
 }
+.lb-podium-rank-art {
+  width: 120px;
+  height: 64px;
+  object-fit: contain;
+  display: block;
+  margin: 0 auto 8px;
+}
 .lb-podium-wallet {
   font-family: var(--font-mono);
   font-size: 13px;

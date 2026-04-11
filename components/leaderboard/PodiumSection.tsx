@@ -1,7 +1,26 @@
 'use client';
 
+import { useState } from 'react';
 import type { LeaderboardEntry } from '../../types/leaderboard';
 import { truncateWallet, formatRank } from '../../lib/formatters';
+
+function PodiumRank({ rank }: { rank: number }) {
+  const [imgError, setImgError] = useState(false);
+  const src = `/leaderboard/podium-rank-${rank}.png`;
+
+  if (!imgError) {
+    return (
+      <img
+        src={src}
+        alt={`#${rank}`}
+        className="lb-podium-rank-art"
+        onError={() => setImgError(true)}
+      />
+    );
+  }
+
+  return <div className="lb-podium-rank">{formatRank(rank)}</div>;
+}
 
 function UserAvatar({ entry, size = 48 }: { entry: LeaderboardEntry; size?: number }) {
   if (entry.profile_image_url) {
@@ -70,7 +89,7 @@ export function PodiumSection({ entries, connectedWallet }: {
             className={`lb-podium-card ${heights[i]}${isYou ? ' lb-podium-card--you' : ''}`}
           >
             {isYou && <span className="lb-you-badge">YOU</span>}
-            <div className="lb-podium-rank">{formatRank(e.rank)}</div>
+            <PodiumRank rank={e.rank} />
             <div style={{ margin: '12px 0' }}>
               <UserAvatar entry={e} size={i === 1 ? 56 : 44} />
             </div>
