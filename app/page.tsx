@@ -281,9 +281,35 @@ export default async function Home() {
 
               <div className="gc-tech-connector" />
 
-              {/* Layer 4 — Claude Oversight */}
+              {/* Layer 4 — Referral Pipeline */}
               <div className="gc-tech-layer gc-tech-layer--ai">
                 <div className="gc-tech-layer-num">04</div>
+                <div className="gc-tech-layer-icon">
+                  <img src="/icons/brands/xai-bw.svg" alt="xAI" className="gc-tech-layer-icon-img" />
+                </div>
+                <div className="gc-tech-layer-content">
+                  <div className="gc-tech-layer-title">Automated Referral Pipeline</div>
+                  <div className="gc-tech-layer-tag">GROK-POWERED · EVERY 15 MIN · AUTO-VERIFY</div>
+                  <p className="gc-tech-layer-desc">
+                    Referral conversions are verified automatically — self-referral detection,
+                    referrer approval status, monthly cap enforcement, and rolling window limits.
+                    Grok-powered ring detection catches farming schemes across the social graph.
+                    Every point award passes through AI verification before it lands.
+                  </p>
+                  <div className="gc-tech-layer-catches">
+                    <span className="gc-tech-catch">Anti-Farm</span>
+                    <span className="gc-tech-catch">Ring Detection</span>
+                    <span className="gc-tech-catch">Auto-Verify</span>
+                    <span className="gc-tech-catch">Points Reward</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="gc-tech-connector" />
+
+              {/* Layer 5 — Claude Oversight */}
+              <div className="gc-tech-layer gc-tech-layer--ai">
+                <div className="gc-tech-layer-num">05</div>
                 <div className="gc-tech-layer-icon">
                   <img src="/icons/brands/claude-bw.svg" alt="Claude" className="gc-tech-layer-icon-img" />
                 </div>
@@ -301,32 +327,6 @@ export default async function Home() {
                     <span className="gc-tech-catch">Audit Narrative</span>
                     <span className="gc-tech-catch">Final Verdict</span>
                     <span className="gc-tech-catch">Payout Gate</span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="gc-tech-connector" />
-
-              {/* Layer 5 — Referral Pipeline */}
-              <div className="gc-tech-layer gc-tech-layer--ai">
-                <div className="gc-tech-layer-num">05</div>
-                <div className="gc-tech-layer-icon">
-                  <img src="/icons/brands/grok-bw.svg" alt="Grok" className="gc-tech-layer-icon-img" />
-                </div>
-                <div className="gc-tech-layer-content">
-                  <div className="gc-tech-layer-title">Automated Referral Pipeline</div>
-                  <div className="gc-tech-layer-tag">GROK-POWERED · EVERY 15 MIN · AUTO-VERIFY</div>
-                  <p className="gc-tech-layer-desc">
-                    Referral conversions are verified automatically — self-referral detection,
-                    referrer approval status, monthly cap enforcement, and rolling window limits.
-                    Grok-powered ring detection catches farming schemes across the social graph.
-                    Every point award passes through AI verification before it lands.
-                  </p>
-                  <div className="gc-tech-layer-catches">
-                    <span className="gc-tech-catch">Anti-Farm</span>
-                    <span className="gc-tech-catch">Ring Detection</span>
-                    <span className="gc-tech-catch">Auto-Verify</span>
-                    <span className="gc-tech-catch">Points Reward</span>
                   </div>
                 </div>
               </div>
