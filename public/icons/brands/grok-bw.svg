@@ -1,0 +1,5 @@
+<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Grok symbol">
+  <rect x="6" y="6" width="52" height="52" rx="10" stroke="#FFFFFF88"/>
+  <path d="M20 45L44 19" stroke="white" stroke-width="5" stroke-linecap="round"/>
+  <path d="M21 20L44 44" stroke="white" stroke-width="5" stroke-linecap="round"/>
+</svg>

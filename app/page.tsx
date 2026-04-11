@@ -207,7 +207,7 @@ export default async function Home() {
               <div className="gc-tech-layer gc-tech-layer--ai">
                 <div className="gc-tech-layer-num">01</div>
                 <div className="gc-tech-layer-icon">
-                  <img src="/icons/grok-icon.jpg" alt="Gemini" className="gc-tech-layer-icon-img" />
+                  <img src="/icons/brands/gemini-bw.svg" alt="Gemini" className="gc-tech-layer-icon-img" />
                 </div>
                 <div className="gc-tech-layer-content">
                   <div className="gc-tech-layer-title">Gemini Vision</div>
@@ -233,7 +233,7 @@ export default async function Home() {
               <div className="gc-tech-layer gc-tech-layer--ai">
                 <div className="gc-tech-layer-num">02</div>
                 <div className="gc-tech-layer-icon">
-                  <img src="/icons/xai-icon.jpg" alt="Grok" className="gc-tech-layer-icon-img" />
+                  <img src="/icons/brands/grok-bw.svg" alt="Grok" className="gc-tech-layer-icon-img" />
                 </div>
                 <div className="gc-tech-layer-content">
                   <div className="gc-tech-layer-title">Grok Reasoning Engine</div>
