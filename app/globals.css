@@ -2591,38 +2591,16 @@ button.docs-footer-link {
   from { opacity: 0; max-height: 0; padding-top: 0; padding-bottom: 0; }
   to { opacity: 1; max-height: 800px; }
 }
-.gt-detail-row {
-  display: flex;
-  gap: 32px;
-  align-items: flex-start;
-}
-.gt-detail-cell {
-  flex: 1;
-  min-width: 0;
-}
-.gt-detail-label {
-  display: block;
-  font-family: var(--font-mono);
-  font-size: 10px;
-  color: var(--muted);
-  letter-spacing: 0.25em;
-  text-transform: uppercase;
-  margin-bottom: 8px;
-}
-.gt-detail-value {
+.gt-detail-text {
   font-family: var(--font-body);
   font-weight: 300;
   font-size: 13px;
-  color: rgba(255,255,255,0.7);
-  line-height: 1.6;
+  color: rgba(255,255,255,0.65);
+  line-height: 1.7;
 }
-.gt-detail-failure-inline {
-  font-size: 13px;
-  color: rgba(255,255,255,0.6);
-}
-.gt-detail-seen {
-  font-size: 11px;
-  color: rgba(255,255,255,0.3);
+.gt-detail-text strong {
+  color: rgba(255,255,255,0.9);
+  font-weight: 500;
 
 }
 
@@ -4860,10 +4838,7 @@ button.docs-footer-link {
 
   .gt-cards-grid { grid-template-columns: 1fr; }
   .gt-detail { padding: 16px; }
-  .gt-detail-row { gap: 16px; }
-  .gt-detail-label { font-size: 9px; margin-bottom: 6px; }
-  .gt-detail-value { font-size: 11px; line-height: 1.5; }
-  .gt-detail-failure-inline { font-size: 11px; }
+  .gt-detail-text { font-size: 12px; }
   .gt-checklist-section { padding: 24px; }
   .gt-checklist-footer { flex-direction: column; align-items: flex-start; }
   .gt-teaser { padding: 60px 24px; }
