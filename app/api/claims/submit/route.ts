@@ -155,7 +155,30 @@ export async function POST(req: Request){
     getUserByUsername(session.xHandle)
   ]);
 
-  const accountQuality = userLookup.user ? scoreAccountQuality(userLookup.user) : { score: 0, passed: false, flags: ['user_lookup_failed'] };
+  // Fetch historical signals for enhanced account quality scoring
+  const { data: walletLink } = await supabase
+    .from('wallet_x_links')
+    .select('avg_quality_score, x_is_protected, x_location, bio, x_account_created_at')
+    .eq('wallet', wallet)
+    .maybeSingle();
+
+  const { data: lastMetrics } = await supabase
+    .from('user_metrics_history')
+    .select('follower_count')
+    .eq('wallet', wallet)
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  const accountQuality = userLookup.user ? scoreAccountQuality(userLookup.user, {
+    previousFollowerCount: lastMetrics?.follower_count ?? null,
+    avgQualityScore: walletLink?.avg_quality_score ?? null,
+    isProtected: walletLink?.x_is_protected ?? null,
+    ipCountry: ipCountry,
+    xLocation: walletLink?.x_location ?? null,
+    bio: walletLink?.bio ?? null,
+    accountCreatedAt: walletLink?.x_account_created_at ?? null,
+  }) : { score: 0, passed: false, flags: ['user_lookup_failed'] };
 
   // Pass OCR pipeline data to fraud checks to avoid redundant processing
   const fraudBase = await runFraudChecks(receiptBuffer, ocr.pipeline);

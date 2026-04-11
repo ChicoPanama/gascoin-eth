@@ -77,10 +77,26 @@ export async function GET(req: Request) {
       continue;
     }
 
-    // 3. Re-verify account quality
+    // 3. Re-verify account quality with historical signals
     const userLookup = await getUserByUsername(handle);
+    const { data: linkData } = await supabase.from('wallet_x_links')
+      .select('avg_quality_score, x_is_protected, x_location, bio, x_account_created_at')
+      .eq('wallet', claim.wallet).maybeSingle();
+    const { data: prevMetrics } = await supabase.from('user_metrics_history')
+      .select('follower_count').eq('wallet', claim.wallet)
+      .order('created_at', { ascending: false }).limit(1).maybeSingle();
+
+    const historySignals = {
+      previousFollowerCount: prevMetrics?.follower_count ?? null,
+      avgQualityScore: linkData?.avg_quality_score ?? null,
+      isProtected: linkData?.x_is_protected ?? null,
+      xLocation: linkData?.x_location ?? null,
+      bio: linkData?.bio ?? null,
+      accountCreatedAt: linkData?.x_account_created_at ?? null,
+    };
+
     if (userLookup.user) {
-      const quality = scoreAccountQuality(userLookup.user);
+      const quality = scoreAccountQuality(userLookup.user, historySignals);
       if (!quality.passed) {
         await revertClaim(supabase, claim.id, `account_quality: score=${quality.score} flags=${quality.flags.join(',')}`);
         failures.push({ claimId: claim.id, reason: `quality: ${quality.score}` });
@@ -97,8 +113,8 @@ export async function GET(req: Request) {
       wallet: claim.wallet,
       xHandle: handle,
       xUser: userLookup?.user ?? null,
-      accountQualityScore: userLookup?.user ? scoreAccountQuality(userLookup.user).score : undefined,
-      accountQualityPassed: userLookup?.user ? scoreAccountQuality(userLookup.user).passed : undefined,
+      accountQualityScore: userLookup?.user ? scoreAccountQuality(userLookup.user, historySignals).score : undefined,
+      accountQualityPassed: userLookup?.user ? scoreAccountQuality(userLookup.user, historySignals).passed : undefined,
       gascoinBalance: balCheck.tokenBalance ?? 0,
       tierId: tier.id,
       source: 'payout_verify',

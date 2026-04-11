@@ -82,10 +82,24 @@ export async function processQueuedPayout(claimId: string) {
       return { ok: false, error: 'followers_below_threshold', followers };
     }
 
-    // Re-verify account quality
+    // Re-verify account quality with historical signals
     const userLookup = await getUserByUsername(handle);
+    const { data: linkData } = await supabase.from('wallet_x_links')
+      .select('avg_quality_score, x_is_protected, x_location, bio, x_account_created_at')
+      .eq('wallet', job.wallet).maybeSingle();
+    const { data: prevMetrics } = await supabase.from('user_metrics_history')
+      .select('follower_count').eq('wallet', job.wallet)
+      .order('created_at', { ascending: false }).limit(1).maybeSingle();
+
     if (userLookup.user) {
-      const quality = scoreAccountQuality(userLookup.user);
+      const quality = scoreAccountQuality(userLookup.user, {
+        previousFollowerCount: prevMetrics?.follower_count ?? null,
+        avgQualityScore: linkData?.avg_quality_score ?? null,
+        isProtected: linkData?.x_is_protected ?? null,
+        xLocation: linkData?.x_location ?? null,
+        bio: linkData?.bio ?? null,
+        accountCreatedAt: linkData?.x_account_created_at ?? null,
+      });
       if (!quality.passed) {
         await supabase.from('claims').update({ status: 'needs_review', updated_at: new Date().toISOString() }).eq('id', claimId);
         await supabase.from('claim_status_events').insert({
