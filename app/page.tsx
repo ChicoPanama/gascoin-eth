@@ -259,7 +259,7 @@ export default async function Home() {
               <div className="gc-tech-layer">
                 <div className="gc-tech-layer-num">03</div>
                 <div className="gc-tech-layer-icon">
-                  <img src="/icons/xai-icon.jpg" alt="X" className="gc-tech-layer-icon-img" />
+                  <img src="/icons/brands/x.svg" alt="X" className="gc-tech-layer-icon-img" />
                 </div>
                 <div className="gc-tech-layer-content">
                   <div className="gc-tech-layer-title">X API v2 Intelligence</div>
@@ -285,7 +285,7 @@ export default async function Home() {
               <div className="gc-tech-layer gc-tech-layer--ai">
                 <div className="gc-tech-layer-num">04</div>
                 <div className="gc-tech-layer-icon">
-                  <img src="/icons/grok-icon.jpg" alt="Claude" className="gc-tech-layer-icon-img" />
+                  <img src="/icons/brands/claude-bw.svg" alt="Claude" className="gc-tech-layer-icon-img" />
                 </div>
                 <div className="gc-tech-layer-content">
                   <div className="gc-tech-layer-title">Claude Oversight</div>

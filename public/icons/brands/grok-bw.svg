@@ -1,10 +1,5 @@
-<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Grok symbol">
-  <rect x="8" y="8" width="48" height="48" rx="11" stroke="#FFFFFFCC" stroke-width="2"/>
-
-  <circle cx="32" cy="32" r="11.5" stroke="#FFFFFF" stroke-width="2.8"/>
-  <path d="M24.5 39.5L39.5 24.5" stroke="#FFFFFF" stroke-width="3.2" stroke-linecap="round"/>
-
-  <path d="M23 38.5C18.8 35.8 17.7 29.8 20.3 25.5" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round"/>
-  <path d="M41 25.2C40 22.6 37.6 20.5 34.8 19.8" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round"/>
-  <circle cx="42.8" cy="22.3" r="1.6" fill="#FFFFFF"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" role="img" aria-label="Grok symbol">
+  <circle cx="12" cy="12" r="8" stroke="#fff" stroke-width="1.8"/>
+  <path d="M7.6 16.4L16.4 7.6" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+  <path d="M16.4 7.6V11" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/>
 </svg>

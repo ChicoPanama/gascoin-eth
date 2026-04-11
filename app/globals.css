@@ -1384,10 +1384,10 @@ input:focus, textarea:focus, select:focus {
 .gc-tech-layer:hover .gc-tech-layer-icon { color: rgba(255,255,255,0.62); }
 
 .gc-tech-layer-icon-img {
-  width: 24px;
-  height: 24px;
-  object-fit: cover;
-  border-radius: 4px;
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+  border-radius: 0;
   border: 0;
   background: transparent;
   display: block;
