@@ -259,7 +259,7 @@ export default async function Home() {
               <div className="gc-tech-layer">
                 <div className="gc-tech-layer-num">03</div>
                 <div className="gc-tech-layer-icon">
-                  <img src="/icons/brands/x.svg" alt="X" className="gc-tech-layer-icon-img" />
+                  <img src="/icons/brands/xai-square-mark.svg" alt="xAI" className="gc-tech-layer-icon-img" />
                 </div>
                 <div className="gc-tech-layer-content">
                   <div className="gc-tech-layer-title">X API v2 Intelligence</div>
