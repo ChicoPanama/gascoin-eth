@@ -1372,8 +1372,8 @@ input:focus, textarea:focus, select:focus {
 .gc-tech-layer--ai:hover .gc-tech-layer-num { color: rgba(255, 255, 255, 0.24); }
 
 .gc-tech-layer-icon {
-  width: 40px;
-  height: 40px;
+  width: 52px;
+  height: 52px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1384,8 +1384,8 @@ input:focus, textarea:focus, select:focus {
 .gc-tech-layer:hover .gc-tech-layer-icon { color: rgba(255,255,255,0.62); }
 
 .gc-tech-layer-icon-img {
-  width: 20px;
-  height: 20px;
+  width: 30px;
+  height: 30px;
   object-fit: contain;
   border-radius: 0;
   border: 0;
