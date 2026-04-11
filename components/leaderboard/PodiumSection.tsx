@@ -95,15 +95,13 @@ export function PodiumSection({ entries, connectedWallet }: {
             {isYou && <span className="lb-you-badge">YOU</span>}
             <div className="lb-podium-art-wrap">
               <PodiumArt rank={e.rank} />
-              <div className="lb-podium-rank-badge">{formatRank(e.rank)}</div>
             </div>
+            <div className="lb-podium-rank-badge">{formatRank(e.rank)}</div>
 
-            <div className="lb-podium-identity-row">
-              <UserAvatar entry={e} size={24} />
-              <div>
-                <UserIdentity entry={e} />
-                <div className="lb-podium-points">{Math.round(e.composite_score).toLocaleString()} points</div>
-              </div>
+            <div className="lb-podium-identity">
+              <UserAvatar entry={e} size={e.rank === 1 ? 56 : 44} />
+              <UserIdentity entry={e} />
+              <div className="lb-podium-points">{Math.round(e.composite_score).toLocaleString()} points</div>
             </div>
           </div>
         );

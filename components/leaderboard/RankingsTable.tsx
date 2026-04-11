@@ -8,6 +8,21 @@ import { truncateWallet, formatRank } from '../../lib/formatters';
 const PAGE_SIZE = 25;
 
 function UserCell({ entry, isYou }: { entry: LeaderboardEntry; isYou: boolean }) {
+  const avatar = entry.profile_image_url ? (
+    <img
+      src={entry.profile_image_url}
+      alt=""
+      width={24}
+      height={24}
+      style={{
+        borderRadius: '50%',
+        objectFit: 'cover',
+        border: '1px solid var(--glass-border)',
+        flexShrink: 0,
+      }}
+    />
+  ) : null;
+
   const display = entry.x_handle ? (
     <a
       href={`https://x.com/${entry.x_handle}`}
@@ -24,8 +39,11 @@ function UserCell({ entry, isYou }: { entry: LeaderboardEntry; isYou: boolean })
 
   return (
     <td className="lb-table-wallet">
-      {display}
-      {isYou && <span className="lb-you-badge lb-you-badge--inline">YOU</span>}
+      <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+        {avatar}
+        {display}
+        {isYou && <span className="lb-you-badge lb-you-badge--inline">YOU</span>}
+      </span>
     </td>
   );
 }
