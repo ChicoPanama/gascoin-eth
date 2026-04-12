@@ -100,6 +100,12 @@ export default function MeDashboardPage() {
           stats={data.stats}
           networkImpact={data.networkImpact}
           pricing={data.pricing}
+          points={data.points}
+          tier={data.tier}
+          leaderboard={data.leaderboard}
+          engagement={data.engagement}
+          streak={data.streak}
+          cooldown={data.cooldown}
         />
       </main>
     </div>

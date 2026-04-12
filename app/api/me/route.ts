@@ -167,6 +167,86 @@ export async function GET(req: Request) {
     };
   }
 
+  // ─── Points breakdown by source ───
+  const { data: pointsRaw } = await supabase
+    .from('engagement_points')
+    .select('source, points')
+    .eq('wallet', wallet);
+
+  const pointsBySource: Record<string, number> = {};
+  let totalPoints = 0;
+  for (const p of pointsRaw || []) {
+    const src = String(p.source || 'unknown');
+    pointsBySource[src] = (pointsBySource[src] || 0) + Number(p.points || 0);
+    totalPoints += Number(p.points || 0);
+  }
+
+  // ─── Tier info ───
+  const { data: cachedTier } = await supabase
+    .from('wallet_token_cache')
+    .select('gascoin_balance, tier_id')
+    .eq('wallet_address', wallet)
+    .maybeSingle();
+
+  const { TOKEN_TIERS } = await import('../../../lib/token-tiers');
+  const currentTierId = cachedTier?.tier_id ?? 0;
+  const currentTier = TOKEN_TIERS[currentTierId] || TOKEN_TIERS[0];
+  const nextTier = TOKEN_TIERS[currentTierId + 1] || null;
+  const gascoinBalance = Number(cachedTier?.gascoin_balance || 0);
+
+  // ─── Leaderboard rank ───
+  const { data: allPayouts } = await supabase
+    .from('payouts')
+    .select('wallet, amount_sol')
+    .eq('status', 'paid');
+
+  const walletScores = new Map<string, number>();
+  for (const p of allPayouts || []) {
+    walletScores.set(p.wallet, (walletScores.get(p.wallet) || 0) + Number(p.amount_sol || 0));
+  }
+  // Simple rank by total points (approximate — full composite uses holdings + engagement weights)
+  const allWalletPoints = new Map<string, number>();
+  const { data: allPoints } = await supabase
+    .from('engagement_points')
+    .select('wallet, points');
+  for (const p of allPoints || []) {
+    allWalletPoints.set(p.wallet, (allWalletPoints.get(p.wallet) || 0) + Number(p.points || 0));
+  }
+  const sorted = [...allWalletPoints.entries()].sort((a, b) => b[1] - a[1]);
+  const rank = sorted.findIndex(([w]) => w === wallet) + 1;
+  const totalRanked = sorted.length;
+
+  // ─── Top engagement tweets ───
+  const { data: topTweets } = await supabase
+    .from('scored_tweets')
+    .select('tweet_id, tweet_url, tweet_text, impressions, likes, retweets, replies, bookmarks, adjusted_points, quality_score, content_type, posted_at')
+    .eq('wallet', wallet)
+    .order('adjusted_points', { ascending: false })
+    .limit(5);
+
+  // ─── Streak info ───
+  const paidPayouts = payouts.filter((p: any) => p.status === 'paid');
+  let consecutiveWindows = 0;
+  if (paidPayouts.length > 0) {
+    let checkDate = new Date();
+    for (let i = 0; i < 5; i++) {
+      const windowStart = new Date(checkDate.getTime() - 30 * 86400000);
+      const hasInWindow = paidPayouts.some((p: any) => {
+        const d = new Date(p.created_at);
+        return d >= windowStart && d <= checkDate;
+      });
+      if (hasInWindow) { consecutiveWindows++; checkDate = windowStart; }
+      else break;
+    }
+  }
+
+  // ─── Cooldown status ───
+  const lastClaim = claims[0];
+  const cooldownDays = currentTier.cooldown_days;
+  const lastClaimDate = lastClaim ? new Date(lastClaim.created_at) : null;
+  const cooldownEnds = lastClaimDate ? new Date(lastClaimDate.getTime() + cooldownDays * 86400000) : null;
+  const cooldownRemaining = cooldownEnds ? Math.max(0, cooldownEnds.getTime() - Date.now()) : 0;
+
   return NextResponse.json({
     wallet,
     xHandle,
@@ -181,5 +261,32 @@ export async function GET(req: Request) {
     stats: { totalEarned, totalEarnedUsdc: totalEarned * solPriceUsd, approved, pending, rejected },
     pricing: { solPriceUsd },
     networkImpact,
+    // New enriched data
+    points: {
+      total: totalPoints,
+      bySource: pointsBySource,
+    },
+    tier: {
+      current: { id: currentTier.id, name: currentTier.name, max_sol_refund: currentTier.max_sol_refund },
+      next: nextTier ? { id: nextTier.id, name: nextTier.name, min_tokens: nextTier.min_tokens } : null,
+      gascoinBalance,
+      tokensToNext: nextTier ? Math.max(0, nextTier.min_tokens - gascoinBalance) : 0,
+    },
+    leaderboard: {
+      rank: rank || totalRanked + 1,
+      totalRanked,
+    },
+    engagement: {
+      topTweets: topTweets || [],
+    },
+    streak: {
+      consecutiveWindows,
+      maxMultiplier: 5,
+    },
+    cooldown: {
+      days: cooldownDays,
+      endsAt: cooldownEnds?.toISOString() || null,
+      remainingMs: cooldownRemaining,
+    },
   });
 }

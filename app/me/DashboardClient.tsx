@@ -59,6 +59,33 @@ interface NetworkImpact {
   combinedUsd: number;
 }
 
+interface PointsData {
+  total: number;
+  bySource: Record<string, number>;
+}
+
+interface TierData {
+  current: { id: number; name: string; max_sol_refund: number };
+  next: { id: number; name: string; min_tokens: number } | null;
+  gascoinBalance: number;
+  tokensToNext: number;
+}
+
+interface TopTweet {
+  tweet_id: string;
+  tweet_url: string;
+  tweet_text: string;
+  impressions: number;
+  likes: number;
+  retweets: number;
+  replies: number;
+  bookmarks: number;
+  adjusted_points: number;
+  quality_score: number;
+  content_type: string;
+  posted_at: string;
+}
+
 interface Props {
   wallet: string;
   xHandle: string | null;
@@ -68,6 +95,12 @@ interface Props {
   stats: Stats;
   networkImpact: NetworkImpact;
   pricing?: { solPriceUsd?: number };
+  points?: PointsData;
+  tier?: TierData;
+  leaderboard?: { rank: number; totalRanked: number };
+  engagement?: { topTweets: TopTweet[] };
+  streak?: { consecutiveWindows: number; maxMultiplier: number };
+  cooldown?: { days: number; endsAt: string | null; remainingMs: number };
 }
 
 // ── Helpers ──
@@ -131,7 +164,7 @@ function UsdcIcon() {
 }
 
 // ── Component ──
-export function DashboardClient({ wallet, xHandle, claims, payouts, referral, stats, networkImpact, pricing }: Props) {
+export function DashboardClient({ wallet, xHandle, claims, payouts, referral, stats, networkImpact, pricing, points, tier, leaderboard, engagement, streak, cooldown }: Props) {
   const [expandedClaim, setExpandedClaim] = useState<string | null>(null);
   const [tab, setTab] = useState<'all' | 'approved' | 'pending' | 'rejected'>('all');
   const [solUsdPrice, setSolUsdPrice] = useState(Number(pricing?.solPriceUsd || 170));
@@ -227,6 +260,123 @@ export function DashboardClient({ wallet, xHandle, claims, payouts, referral, st
         <Link href="/wallet" className="gc-btn-ghost">Wallet Tracker</Link>
         <Link href="/perks" className="gc-btn-ghost">View Perks</Link>
       </section>
+
+      {/* ── Rank & Tier Strip ── */}
+      <section className="gc-stats" style={{ marginBottom: 32 }}>
+        <div className="gc-stats-grid">
+          <div className="gc-stat">
+            <div className="gc-stat-label">Leaderboard Rank</div>
+            <div className="gc-stat-value">#{leaderboard?.rank || '—'}</div>
+            <div className="gc-stat-sub">of {leaderboard?.totalRanked || 0} wallets</div>
+          </div>
+          <div className="gc-stat">
+            <div className="gc-stat-label">Total Points</div>
+            <div className="gc-stat-value">{(points?.total || 0).toLocaleString()}</div>
+            <div className="gc-stat-sub">all sources</div>
+          </div>
+          <div className="gc-stat">
+            <div className="gc-stat-label">Current Tier</div>
+            <div className="gc-stat-value">{tier?.current?.name?.toUpperCase() || 'STANDARD'}</div>
+            <div className="gc-stat-sub">{Math.round(tier?.gascoinBalance || 0).toLocaleString()} GASCOIN</div>
+          </div>
+          <div className="gc-stat">
+            <div className="gc-stat-label">Streak</div>
+            <div className="gc-stat-value">{streak?.consecutiveWindows || 0}x</div>
+            <div className="gc-stat-sub">of {streak?.maxMultiplier || 5} max</div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── Points Breakdown ── */}
+      {points && Object.keys(points.bySource).length > 0 && (
+        <section className="ud-section">
+          <div className="ud-section__header">
+            <h2 className="ud-section__title">Points Breakdown</h2>
+            <Link href="/points" className="gc-btn-ghost">How Points Work</Link>
+          </div>
+          <div className="gc-stats">
+            <div className="gc-stats-grid">
+              {[
+                { key: 'tweet_engagement', label: 'Engagement' },
+                { key: 'holdings_bonus', label: 'Holdings' },
+                { key: 'submission_approved', label: 'Submissions' },
+                { key: 'referral_conversion', label: 'Referral Bonus' },
+                { key: 'referral_passive', label: 'Referral Passive' },
+                { key: 'streak_bonus', label: 'Streak' },
+              ].map(({ key, label }) => {
+                const val = points.bySource[key] || 0;
+                if (val <= 0) return null;
+                return (
+                  <div key={key} className="gc-stat">
+                    <div className="gc-stat-label">{label}</div>
+                    <div className="gc-stat-value">{val.toLocaleString()}</div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* ── Tier Progress ── */}
+      {tier?.next && (
+        <section className="ud-section">
+          <div className="ud-section__header">
+            <h2 className="ud-section__title">Tier Progress</h2>
+            <Link href="/perks" className="gc-btn-ghost">View Perks</Link>
+          </div>
+          <div style={{ padding: '16px 0' }}>
+            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'rgba(255,255,255,0.4)', marginBottom: 8 }}>
+              NEXT: {tier.next.name.toUpperCase()} — {tier.tokensToNext.toLocaleString()} GASCOIN needed
+            </div>
+            <div className="gt-progress-track">
+              <div className="gt-progress-fill" style={{ width: `${Math.min(100, tier.gascoinBalance / tier.next.min_tokens * 100)}%` }} />
+            </div>
+            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'rgba(255,255,255,0.3)', marginTop: 8 }}>
+              Max refund: {tier.current.max_sol_refund} SOL · Cooldown: {cooldown?.days || 7}d
+              {cooldown?.remainingMs && cooldown.remainingMs > 0 ? ` · Next submission: ${Math.ceil(cooldown.remainingMs / 3600000)}h` : ' · Ready to submit'}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* ── Top Tweets ── */}
+      {engagement?.topTweets && engagement.topTweets.length > 0 && (
+        <section className="ud-section">
+          <div className="ud-section__header">
+            <h2 className="ud-section__title">Top Performing Tweets</h2>
+          </div>
+          <div className="ud-claims">
+            {engagement.topTweets.map((t) => (
+              <div key={t.tweet_id} className="ud-claim" style={{ cursor: 'default' }}>
+                <div className="ud-claim__top">
+                  <span className="ud-claim__date">{timeAgo(t.posted_at)}</span>
+                  <span className="ud-badge ud-badge--pass">{t.content_type?.replace(/_/g, ' ').toUpperCase() || 'TEXT'}</span>
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--fg)', marginLeft: 'auto' }}>
+                    {t.adjusted_points.toLocaleString()} pts
+                  </span>
+                </div>
+                <div style={{ fontFamily: 'var(--font-body)', fontSize: 13, color: 'rgba(255,255,255,0.6)', lineHeight: 1.6, marginTop: 8 }}>
+                  {t.tweet_text?.slice(0, 120)}{t.tweet_text?.length > 120 ? '...' : ''}
+                </div>
+                <div style={{ display: 'flex', gap: 16, marginTop: 8, fontFamily: 'var(--font-mono)', fontSize: 11, color: 'rgba(255,255,255,0.35)' }}>
+                  <span>{t.impressions.toLocaleString()} impr</span>
+                  <span>{t.likes} likes</span>
+                  <span>{t.replies} replies</span>
+                  <span>{t.retweets} RTs</span>
+                  <span>{t.bookmarks} saves</span>
+                  <span>Q: {(t.quality_score * 100).toFixed(0)}%</span>
+                </div>
+                {t.tweet_url && (
+                  <a href={t.tweet_url} target="_blank" rel="noopener noreferrer" style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'rgba(255,255,255,0.3)', marginTop: 4, display: 'inline-block' }}>
+                    View on X ↗
+                  </a>
+                )}
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* ── Submission History ── */}
       <section className="ud-section">
