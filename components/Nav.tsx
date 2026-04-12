@@ -56,7 +56,7 @@ export function Nav() {
         </Link>
       )}
     </div>
-    <span ref={actionsRef as any} style={{ marginLeft: 'auto', display: 'flex', gap: 8, alignItems: 'center' }}>
+    <span ref={actionsRef as any} className="nav-actions">
       <WalletButton />
       <AuthNavButton />
       <Link href="/docs" className={`btn nav-link-desktop${pathname.startsWith('/docs') ? ' nav-link-active' : ''}`} style={{ fontSize: 10, padding: '6px 14px', letterSpacing: '0.1em' }}>

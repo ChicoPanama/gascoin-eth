@@ -1220,12 +1220,27 @@ input:focus, textarea:focus, select:focus {
   margin-bottom: 32px;
   border-bottom: 1px solid var(--line);
   padding-bottom: 16px;
+  min-width: 0;
 }
 
 .nav-links-desktop {
   display: flex;
   align-items: center;
   gap: 0;
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+}
+.nav-links-desktop::-webkit-scrollbar { display: none; }
+
+.nav-actions {
+  margin-left: 8px;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-shrink: 0;
 }
 .nav-brand-wrap {
   display: inline-flex;
