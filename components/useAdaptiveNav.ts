@@ -16,7 +16,8 @@ function subscribe(cb: () => void) {
 }
 
 function getSnapshot() {
-  return window.innerWidth <= 1100;
+  // Desktop full nav remains visible until true mobile widths.
+  return window.innerWidth <= 900;
 }
 
 function getServerSnapshot() {

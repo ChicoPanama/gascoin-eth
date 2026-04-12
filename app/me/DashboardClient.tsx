@@ -236,11 +236,11 @@ export function DashboardClient({ wallet, xHandle, isDryRun = false, claims, pay
   return (
     <>
       {/* ── Header ── */}
-      <header className="ud-header">
-        <div className="ud-header__meta">
-          <span className="gc-section-label">— Personal Dashboard</span>
+      <header className="lb-header">
+        <div className="lb-header__meta">
+          <span className="lb-tag">— Personal Dashboard · Your Activity</span>
         </div>
-        <h1 className="ud-title">MY GASCOIN</h1>
+        <h1 className="lb-title">MY GASCOIN</h1>
         <div className="ud-header__identity">
           {xHandle && <span className="ud-handle">@{xHandle}</span>}
           {wallet && <span className="ud-wallet">{truncate(wallet, 6)}</span>}

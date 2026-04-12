@@ -5,7 +5,6 @@ import { usePrivy } from '@privy-io/react-auth';
 import { useRouter } from 'next/navigation';
 import { Nav } from '../../components/Nav';
 import { DashboardClient } from './DashboardClient';
-import './dashboard.css';
 
 export default function MeDashboardPage() {
   const { ready, authenticated, getAccessToken } = usePrivy();
@@ -48,11 +47,11 @@ export default function MeDashboardPage() {
       <div className="container ud-page">
         <Nav />
         <main id="main-content">
-          <header className="ud-header">
-            <div className="ud-header__meta">
-              <span className="gc-section-label">— Personal Dashboard</span>
+          <header className="lb-header">
+            <div className="lb-header__meta">
+              <span className="lb-tag">— Personal Dashboard · Your Activity</span>
             </div>
-            <h1 className="ud-title" style={{ opacity: 0.15 }}>MY GASCOIN</h1>
+            <h1 className="lb-title" style={{ opacity: 0.15 }}>MY GASCOIN</h1>
           </header>
           <section className="gc-stats">
             <div className="gc-stats-grid">
