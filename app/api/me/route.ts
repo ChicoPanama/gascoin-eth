@@ -43,6 +43,7 @@ export async function GET(req: Request) {
     return NextResponse.json({
       wallet: '',
       xHandle,
+      isDryRun: process.env.ENABLE_LIVE_PAYOUT !== 'true',
       claims: [],
       payouts: [],
       referral: { code: '', clicks: 0, uniqueClicks: 0, conversions: 0 },
@@ -311,9 +312,12 @@ export async function GET(req: Request) {
   const pointsPrior30 = (priorPoints || []).reduce((s: number, e: any) => s + Number(e.points || 0), 0);
   const pointsTrend = pointsPrior30 > 0 ? Math.round((pointsLast30 - pointsPrior30) / pointsPrior30 * 100) : (pointsLast30 > 0 ? 100 : 0);
 
+  const isDryRun = process.env.ENABLE_LIVE_PAYOUT !== 'true';
+
   return NextResponse.json({
     wallet,
     xHandle,
+    isDryRun,
     claims,
     payouts: payoutsWithUsd,
     referral: {

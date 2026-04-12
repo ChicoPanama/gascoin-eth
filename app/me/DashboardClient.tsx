@@ -106,6 +106,7 @@ interface Analytics {
 interface Props {
   wallet: string;
   xHandle: string | null;
+  isDryRun?: boolean;
   claims: Claim[];
   payouts: Payout[];
   referral: Referral;
@@ -183,7 +184,7 @@ function UsdcIcon() {
 }
 
 // ── Component ──
-export function DashboardClient({ wallet, xHandle, claims, payouts, referral, stats, networkImpact, pricing, points, tier, leaderboard, engagement, streak, cooldown, analytics }: Props) {
+export function DashboardClient({ wallet, xHandle, isDryRun = false, claims, payouts, referral, stats, networkImpact, pricing, points, tier, leaderboard, engagement, streak, cooldown, analytics }: Props) {
   const [expandedClaim, setExpandedClaim] = useState<string | null>(null);
   const [tab, setTab] = useState<'all' | 'approved' | 'pending' | 'rejected'>('all');
   const [solUsdPrice, setSolUsdPrice] = useState(Number(pricing?.solPriceUsd || 170));
@@ -246,13 +247,43 @@ export function DashboardClient({ wallet, xHandle, claims, payouts, referral, st
         </div>
       </header>
 
+      {/* ── Season 1 Banner ── */}
+      {isDryRun && (
+        <div style={{
+          fontFamily: 'var(--font-mono)',
+          fontSize: 11,
+          letterSpacing: '0.08em',
+          padding: '14px 20px',
+          marginBottom: 32,
+          background: 'rgba(255,200,80,0.06)',
+          border: '1px solid rgba(255,200,80,0.25)',
+          color: 'rgba(255,220,140,0.9)',
+          display: 'flex',
+          alignItems: 'center',
+          gap: 12,
+        }}>
+          <span style={{ fontSize: 10, padding: '3px 8px', background: 'rgba(255,200,80,0.15)', border: '1px solid rgba(255,200,80,0.3)', letterSpacing: '0.15em' }}>
+            SEASON 1
+          </span>
+          <span>
+            Points-only mode. Your points earn leaderboard rank and become a claim on the treasury when it activates at token launch.
+          </span>
+        </div>
+      )}
+
       {/* ── Stats Bar ── */}
       <section className="gc-stats">
         <div className="gc-stats-grid">
           <div className="gc-stat">
-            <div className="gc-stat-label">Total Earned</div>
-            <div className="gc-stat-value">{formatUsd((stats as any).totalEarnedUsdc ?? (stats.totalEarned * solUsdPrice))}</div>
-            <div className="gc-stat-sub"><span className="gc-inline-token"><UsdcIcon />USDC</span></div>
+            <div className="gc-stat-label">{isDryRun ? 'Season 1 Points' : 'Total Earned'}</div>
+            <div className="gc-stat-value">
+              {isDryRun
+                ? (points?.total || 0).toLocaleString()
+                : formatUsd((stats as any).totalEarnedUsdc ?? (stats.totalEarned * solUsdPrice))}
+            </div>
+            <div className="gc-stat-sub">
+              {isDryRun ? 'claim on treasury' : <span className="gc-inline-token"><UsdcIcon />USDC</span>}
+            </div>
           </div>
           <div className="gc-stat">
             <div className="gc-stat-label">Approved</div>
@@ -633,14 +664,20 @@ export function DashboardClient({ wallet, xHandle, claims, payouts, referral, st
                         {payout?.tx_hash && (
                           <div className="ud-meta__row">
                             <span className="ud-meta__label">Transaction</span>
-                            <a
-                              href={`https://solscan.io/tx/${payout.tx_hash}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="ud-meta__link"
-                            >
-                              {truncate(payout.tx_hash, 6)} ↗
-                            </a>
+                            {payout.tx_hash.startsWith('DRYRUN_') ? (
+                              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, padding: '2px 6px', background: 'rgba(255,200,80,0.1)', border: '1px solid rgba(255,200,80,0.25)', color: 'rgba(255,220,140,0.8)', letterSpacing: '0.12em' }}>
+                                SEASON 1
+                              </span>
+                            ) : (
+                              <a
+                                href={`https://solscan.io/tx/${payout.tx_hash}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="ud-meta__link"
+                              >
+                                {truncate(payout.tx_hash, 6)} ↗
+                              </a>
+                            )}
                           </div>
                         )}
                       </div>
@@ -664,26 +701,39 @@ export function DashboardClient({ wallet, xHandle, claims, payouts, referral, st
               <span>Status</span>
               <span>Transaction</span>
             </div>
-            {payouts.map((p) => (
-              <div key={p.id} className="ud-payouts__row">
-                <span className="ud-payouts__date">{timeAgo(p.created_at)}</span>
-                <span className="ud-payouts__amount">{formatUsd((p.amount_usdc ?? (p.amount_sol * solUsdPrice)))} <span className="gc-inline-token"><UsdcIcon />USDC</span></span>
-                <span>{statusBadge(p.status)}</span>
-                <span className="ud-payouts__tx">
-                  {p.tx_hash ? (
-                    <a
-                      href={`https://solscan.io/tx/${p.tx_hash}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      {truncate(p.tx_hash, 6)} ↗
-                    </a>
-                  ) : (
-                    '—'
-                  )}
-                </span>
-              </div>
-            ))}
+            {payouts.map((p) => {
+              const isDryRunTx = p.tx_hash?.startsWith('DRYRUN_');
+              return (
+                <div key={p.id} className="ud-payouts__row">
+                  <span className="ud-payouts__date">{timeAgo(p.created_at)}</span>
+                  <span className="ud-payouts__amount">
+                    {isDryRunTx
+                      ? <span style={{ color: 'rgba(255,220,140,0.8)' }}>1,000 pts</span>
+                      : <>{formatUsd((p.amount_usdc ?? (p.amount_sol * solUsdPrice)))} <span className="gc-inline-token"><UsdcIcon />USDC</span></>}
+                  </span>
+                  <span>{statusBadge(p.status)}</span>
+                  <span className="ud-payouts__tx">
+                    {p.tx_hash ? (
+                      isDryRunTx ? (
+                        <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, padding: '2px 6px', background: 'rgba(255,200,80,0.1)', border: '1px solid rgba(255,200,80,0.25)', color: 'rgba(255,220,140,0.8)', letterSpacing: '0.12em' }}>
+                          SEASON 1
+                        </span>
+                      ) : (
+                        <a
+                          href={`https://solscan.io/tx/${p.tx_hash}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          {truncate(p.tx_hash, 6)} ↗
+                        </a>
+                      )
+                    ) : (
+                      '—'
+                    )}
+                  </span>
+                </div>
+              );
+            })}
           </div>
         </section>
       )}

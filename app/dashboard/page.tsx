@@ -62,6 +62,31 @@ export default async function Dashboard() {
         </div>
       </header>
 
+      {/* Season 1 banner — only renders when ENABLE_LIVE_PAYOUT !== 'true'. */}
+      {/* When you go live: flip ENABLE_LIVE_PAYOUT=true in Vercel and this disappears automatically. */}
+      {process.env.ENABLE_LIVE_PAYOUT !== 'true' && (
+        <div style={{
+          fontFamily: 'var(--font-mono)',
+          fontSize: 11,
+          letterSpacing: '0.08em',
+          padding: '14px 20px',
+          marginBottom: 32,
+          background: 'rgba(255,200,80,0.06)',
+          border: '1px solid rgba(255,200,80,0.25)',
+          color: 'rgba(255,220,140,0.9)',
+          display: 'flex',
+          alignItems: 'center',
+          gap: 12,
+        }}>
+          <span style={{ fontSize: 10, padding: '3px 8px', background: 'rgba(255,200,80,0.15)', border: '1px solid rgba(255,200,80,0.3)', letterSpacing: '0.15em' }}>
+            SEASON 1
+          </span>
+          <span>
+            Points-only mode. Treasury activates at token launch — current balances reflect dry-run accounting only.
+          </span>
+        </div>
+      )}
+
       {/* Zone 1 — Stats */}
       <LiveStatsBar
         refundsToday={refundsToday}

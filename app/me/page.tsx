@@ -94,6 +94,7 @@ export default function MeDashboardPage() {
         <DashboardClient
           wallet={data.wallet}
           xHandle={data.xHandle}
+          isDryRun={data.isDryRun}
           claims={data.claims}
           payouts={data.payouts}
           referral={data.referral}
