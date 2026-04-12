@@ -4943,8 +4943,8 @@ button.docs-footer-link {
 .gc-teaser-link:hover { color: var(--fg); }
 .gc-teaser-link::after { content: '\2192'; font-size: 14px; }
 
-/* Hide docs button on smaller screens — accessible via hamburger menu */
-@media (max-width: 1400px) {
+/* Hide docs button on laptops and smaller — accessible via hamburger menu */
+@media (max-width: 1600px) {
   .nav-docs-btn { display: none !important; }
 }
 
