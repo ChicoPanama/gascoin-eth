@@ -106,6 +106,7 @@ export default function MeDashboardPage() {
           engagement={data.engagement}
           streak={data.streak}
           cooldown={data.cooldown}
+          analytics={data.analytics}
         />
       </main>
     </div>

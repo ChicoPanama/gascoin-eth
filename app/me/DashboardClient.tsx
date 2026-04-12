@@ -86,6 +86,23 @@ interface TopTweet {
   posted_at: string;
 }
 
+interface GateFailure {
+  gate: string;
+  count: number;
+}
+
+interface Analytics {
+  approvalRate: number;
+  avgRefundSol: number;
+  avgRefundUsd: number;
+  topGateFailures: GateFailure[];
+  conversionRate: number;
+  percentile: number;
+  pointsLast30: number;
+  pointsPrior30: number;
+  pointsTrend: number;
+}
+
 interface Props {
   wallet: string;
   xHandle: string | null;
@@ -98,9 +115,10 @@ interface Props {
   points?: PointsData;
   tier?: TierData;
   leaderboard?: { rank: number; totalRanked: number };
-  engagement?: { topTweets: TopTweet[] };
+  engagement?: { topTweets: TopTweet[]; contentTypeDist?: Record<string, { count: number; points: number }>; totalScoredTweets?: number };
   streak?: { consecutiveWindows: number; maxMultiplier: number };
   cooldown?: { days: number; endsAt: string | null; remainingMs: number };
+  analytics?: Analytics;
 }
 
 // ── Helpers ──
@@ -164,7 +182,7 @@ function UsdcIcon() {
 }
 
 // ── Component ──
-export function DashboardClient({ wallet, xHandle, claims, payouts, referral, stats, networkImpact, pricing, points, tier, leaderboard, engagement, streak, cooldown }: Props) {
+export function DashboardClient({ wallet, xHandle, claims, payouts, referral, stats, networkImpact, pricing, points, tier, leaderboard, engagement, streak, cooldown, analytics }: Props) {
   const [expandedClaim, setExpandedClaim] = useState<string | null>(null);
   const [tab, setTab] = useState<'all' | 'approved' | 'pending' | 'rejected'>('all');
   const [solUsdPrice, setSolUsdPrice] = useState(Number(pricing?.solPriceUsd || 170));
@@ -314,6 +332,97 @@ export function DashboardClient({ wallet, xHandle, claims, payouts, referral, st
                 );
               })}
             </div>
+          </div>
+        </section>
+      )}
+
+      {/* ── Performance Analytics ── */}
+      {analytics && (
+        <section className="ud-section">
+          <div className="ud-section__header">
+            <h2 className="ud-section__title">Performance Analytics</h2>
+          </div>
+          <div className="gc-stats">
+            <div className="gc-stats-grid">
+              <div className="gc-stat">
+                <div className="gc-stat-label">Approval Rate</div>
+                <div className="gc-stat-value">{analytics.approvalRate}%</div>
+                <div className="gc-stat-sub">{stats.approved} of {claims.length} submissions</div>
+              </div>
+              <div className="gc-stat">
+                <div className="gc-stat-label">Avg Refund</div>
+                <div className="gc-stat-value">{formatUsd(analytics.avgRefundUsd)}</div>
+                <div className="gc-stat-sub">{analytics.avgRefundSol.toFixed(4)} SOL</div>
+              </div>
+              <div className="gc-stat">
+                <div className="gc-stat-label">Percentile</div>
+                <div className="gc-stat-value">Top {analytics.percentile > 0 ? `${analytics.percentile}%` : '—'}</div>
+                <div className="gc-stat-sub">of all users</div>
+              </div>
+              <div className="gc-stat">
+                <div className="gc-stat-label">30-Day Trend</div>
+                <div className="gc-stat-value">{analytics.pointsTrend > 0 ? '+' : ''}{analytics.pointsTrend}%</div>
+                <div className="gc-stat-sub">{analytics.pointsLast30.toLocaleString()} pts this month</div>
+              </div>
+            </div>
+          </div>
+
+          {/* Gate failure patterns */}
+          {analytics.topGateFailures.length > 0 && (
+            <div style={{ marginTop: 24 }}>
+              <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.2em', color: 'var(--muted)', marginBottom: 12 }}>
+                MOST COMMON GATE FAILURES
+              </div>
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                {analytics.topGateFailures.map((f) => (
+                  <div key={f.gate} style={{
+                    fontFamily: 'var(--font-mono)', fontSize: 11, color: 'rgba(255,100,100,0.7)',
+                    background: 'rgba(255,100,100,0.06)', border: '1px solid rgba(255,100,100,0.12)',
+                    padding: '6px 12px', display: 'flex', gap: 8, alignItems: 'center',
+                  }}>
+                    <span>{GATE_DISPLAY[f.gate] || f.gate}</span>
+                    <span style={{ color: 'rgba(255,255,255,0.3)' }}>{f.count}x</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </section>
+      )}
+
+      {/* ── Content Type Distribution ── */}
+      {engagement?.contentTypeDist && Object.keys(engagement.contentTypeDist).length > 0 && (
+        <section className="ud-section">
+          <div className="ud-section__header">
+            <h2 className="ud-section__title">Content Distribution</h2>
+            <Link href="/points" className="gc-btn-ghost">Multipliers</Link>
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {Object.entries(engagement.contentTypeDist)
+              .sort((a, b) => b[1].points - a[1].points)
+              .map(([type, data]) => {
+                const maxPts = Math.max(...Object.values(engagement.contentTypeDist!).map((d) => d.points), 1);
+                const pct = (data.points / maxPts) * 100;
+                return (
+                  <div key={type} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'rgba(255,255,255,0.6)', width: 110, flexShrink: 0 }}>
+                      {type.replace(/_/g, ' ')}
+                    </span>
+                    <div style={{ flex: 1, height: 6, background: 'rgba(255,255,255,0.05)', borderRadius: 3, overflow: 'hidden' }}>
+                      <div style={{ height: '100%', width: `${pct}%`, background: '#fff', borderRadius: 3 }} />
+                    </div>
+                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'rgba(255,255,255,0.4)', width: 80, textAlign: 'right', flexShrink: 0 }}>
+                      {data.count} tweets
+                    </span>
+                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--fg)', width: 70, textAlign: 'right', flexShrink: 0 }}>
+                      {data.points.toLocaleString()} pts
+                    </span>
+                  </div>
+                );
+              })}
+          </div>
+          <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'rgba(255,255,255,0.25)', marginTop: 12 }}>
+            {engagement.totalScoredTweets || 0} total tweets scored
           </div>
         </section>
       )}
@@ -568,33 +677,51 @@ export function DashboardClient({ wallet, xHandle, claims, payouts, referral, st
         />
       )}
 
-      {/* ── Referral Summary ── */}
+      {/* ── Referral Program ── */}
       <section className="ud-section">
         <div className="ud-section__header">
           <h2 className="ud-section__title">Referral Program</h2>
           <Link href="/referral" className="gc-btn-ghost">Manage</Link>
         </div>
         {referral.conversions > 0 || referral.clicks > 0 ? (
-          <div className="gc-stats">
-            <div className="gc-stats-grid ud-stats-grid--3">
-              <div className="gc-stat">
-                <div className="gc-stat-label">Referral Code</div>
-                <div className="gc-stat-value ud-stat-value--sm">{referral.code}</div>
-              </div>
-              <div className="gc-stat">
-                <div className="gc-stat-label">Conversions</div>
-                <div className="gc-stat-value">{referral.conversions}</div>
-                <div className="gc-stat-sub">{referral.uniqueClicks} unique clicks</div>
-              </div>
-              <div className="gc-stat">
-                <div className="gc-stat-label">Total Clicks</div>
-                <div className="gc-stat-value">{referral.clicks}</div>
+          <>
+            <div className="gc-stats">
+              <div className="gc-stats-grid">
+                <div className="gc-stat">
+                  <div className="gc-stat-label">Referral Code</div>
+                  <div className="gc-stat-value ud-stat-value--sm">{referral.code}</div>
+                </div>
+                <div className="gc-stat">
+                  <div className="gc-stat-label">Clicks</div>
+                  <div className="gc-stat-value">{referral.clicks}</div>
+                  <div className="gc-stat-sub">{referral.uniqueClicks} unique</div>
+                </div>
+                <div className="gc-stat">
+                  <div className="gc-stat-label">Conversions</div>
+                  <div className="gc-stat-value">{referral.conversions}</div>
+                  <div className="gc-stat-sub">{analytics?.conversionRate || 0}% rate</div>
+                </div>
+                <div className="gc-stat">
+                  <div className="gc-stat-label">Passive Income</div>
+                  <div className="gc-stat-value">{(points?.bySource?.referral_passive || 0).toLocaleString()}</div>
+                  <div className="gc-stat-sub">pts earned from referrals</div>
+                </div>
               </div>
             </div>
-          </div>
+            {/* Referral funnel */}
+            <div style={{ marginTop: 16, display: 'flex', alignItems: 'center', gap: 8, fontFamily: 'var(--font-mono)', fontSize: 11 }}>
+              <span style={{ color: 'rgba(255,255,255,0.4)' }}>{referral.clicks} clicks</span>
+              <span style={{ color: 'rgba(255,255,255,0.15)' }}>→</span>
+              <span style={{ color: 'rgba(255,255,255,0.4)' }}>{referral.uniqueClicks} unique</span>
+              <span style={{ color: 'rgba(255,255,255,0.15)' }}>→</span>
+              <span style={{ color: 'rgba(255,255,255,0.6)' }}>{referral.conversions} converted</span>
+              <span style={{ color: 'rgba(255,255,255,0.15)' }}>→</span>
+              <span style={{ color: 'var(--fg)' }}>2% passive</span>
+            </div>
+          </>
         ) : (
           <div className="ud-empty">
-            <p>Get 1 approved submission to unlock your referral link.</p>
+            <p>Get 1 approved submission to unlock your referral link and start earning 2% passive income from referred users.</p>
             <Link href="/referral" className="gc-btn-ghost">Learn More</Link>
           </div>
         )}

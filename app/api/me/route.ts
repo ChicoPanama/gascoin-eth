@@ -247,6 +247,63 @@ export async function GET(req: Request) {
   const cooldownEnds = lastClaimDate ? new Date(lastClaimDate.getTime() + cooldownDays * 86400000) : null;
   const cooldownRemaining = cooldownEnds ? Math.max(0, cooldownEnds.getTime() - Date.now()) : 0;
 
+  // ─── Analytics: approval rate, avg refund, gate failures ───
+  const approvalRate = claims.length > 0 ? (approved / claims.length * 100) : 0;
+  const avgRefund = paidPayouts.length > 0
+    ? paidPayouts.reduce((s: number, p: any) => s + Number(p.amount_sol || 0), 0) / paidPayouts.length
+    : 0;
+
+  // Gate failure analysis — which gates fail most
+  const gateFailCounts: Record<string, number> = {};
+  for (const claim of claims) {
+    for (const g of (claim as any).gate_results || []) {
+      if (!g.passed) gateFailCounts[g.gate] = (gateFailCounts[g.gate] || 0) + 1;
+    }
+  }
+  const topGateFailures = Object.entries(gateFailCounts)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 5)
+    .map(([gate, count]) => ({ gate, count }));
+
+  // Content type distribution from scored tweets
+  const { data: allScoredTweets } = await supabase
+    .from('scored_tweets')
+    .select('content_type, adjusted_points')
+    .eq('wallet', wallet);
+
+  const contentTypeDist: Record<string, { count: number; points: number }> = {};
+  for (const t of allScoredTweets || []) {
+    const ct = t.content_type || 'text_only';
+    if (!contentTypeDist[ct]) contentTypeDist[ct] = { count: 0, points: 0 };
+    contentTypeDist[ct].count++;
+    contentTypeDist[ct].points += Number(t.adjusted_points || 0);
+  }
+
+  // Referral funnel
+  const conversionRate = referralCode && uniqueClicks > 0 ? (totalConversions / uniqueClicks * 100) : 0;
+
+  // Percentile rank
+  const percentile = totalRanked > 0 ? Math.round((1 - (rank - 1) / totalRanked) * 100) : 0;
+
+  // Monthly points breakdown (last 30 days vs prior 30 days)
+  const thirtyDaysAgo = new Date(Date.now() - 30 * 86400000).toISOString();
+  const sixtyDaysAgo = new Date(Date.now() - 60 * 86400000).toISOString();
+  const { data: recentPoints } = await supabase
+    .from('engagement_points')
+    .select('points')
+    .eq('wallet', wallet)
+    .gte('created_at', thirtyDaysAgo);
+  const { data: priorPoints } = await supabase
+    .from('engagement_points')
+    .select('points')
+    .eq('wallet', wallet)
+    .gte('created_at', sixtyDaysAgo)
+    .lt('created_at', thirtyDaysAgo);
+
+  const pointsLast30 = (recentPoints || []).reduce((s: number, e: any) => s + Number(e.points || 0), 0);
+  const pointsPrior30 = (priorPoints || []).reduce((s: number, e: any) => s + Number(e.points || 0), 0);
+  const pointsTrend = pointsPrior30 > 0 ? Math.round((pointsLast30 - pointsPrior30) / pointsPrior30 * 100) : (pointsLast30 > 0 ? 100 : 0);
+
   return NextResponse.json({
     wallet,
     xHandle,
@@ -278,6 +335,8 @@ export async function GET(req: Request) {
     },
     engagement: {
       topTweets: topTweets || [],
+      contentTypeDist,
+      totalScoredTweets: (allScoredTweets || []).length,
     },
     streak: {
       consecutiveWindows,
@@ -287,6 +346,17 @@ export async function GET(req: Request) {
       days: cooldownDays,
       endsAt: cooldownEnds?.toISOString() || null,
       remainingMs: cooldownRemaining,
+    },
+    analytics: {
+      approvalRate: +approvalRate.toFixed(1),
+      avgRefundSol: +avgRefund.toFixed(4),
+      avgRefundUsd: +(avgRefund * solPriceUsd).toFixed(2),
+      topGateFailures,
+      conversionRate: +conversionRate.toFixed(1),
+      percentile,
+      pointsLast30,
+      pointsPrior30,
+      pointsTrend,
     },
   });
 }
