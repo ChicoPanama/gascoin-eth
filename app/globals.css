@@ -5758,16 +5758,6 @@ button.docs-footer-link {
    Design tokens: --bg, --fg, --muted, --muted-deep, --line, --card, --card-hover
    ═══════════════════════════════════════════ */
 
-/* ── Scroll fix ── */
-.ud-page {
-  overflow-y: auto;
-  /* CRITICAL: explicit overflow-x: visible so the nav's negative-margin
-     breakout (.container > .gc-nav) isn't clipped. CSS implicitly sets
-     overflow-x: auto when only overflow-y is set, which would crop the nav. */
-  overflow-x: visible;
-  min-height: 0;
-}
-
 /* ── Header ── */
 .ud-header {
   padding: 40px 0 24px;

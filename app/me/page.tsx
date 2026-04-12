@@ -44,7 +44,7 @@ export default function MeDashboardPage() {
 
   if (!ready || loading) {
     return (
-      <div className="container ud-page">
+      <div className="container">
         <Nav />
         <main id="main-content">
           <header className="lb-header">
@@ -73,7 +73,7 @@ export default function MeDashboardPage() {
 
   if (error) {
     return (
-      <div className="container ud-page">
+      <div className="container">
         <Nav />
         <main id="main-content">
           <div style={{ padding: '120px 0', textAlign: 'center', fontFamily: '"IBM Plex Mono", monospace', fontSize: 13, color: 'rgba(255,100,100,0.8)' }}>
@@ -87,7 +87,7 @@ export default function MeDashboardPage() {
   if (!data) return null;
 
   return (
-    <div className="container ud-page">
+    <div className="container">
       <Nav />
       <main id="main-content">
         <DashboardClient
