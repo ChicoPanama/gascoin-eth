@@ -133,6 +133,7 @@ const GATE_DISPLAY: Record<string, string> = {
   ai_image_check: 'AI Image Check',
   tamper_check: 'Tamper Check',
   cooldown: 'Cooldown',
+  min_amount: 'Min Amount',
   min_followers: 'Min Followers',
   account_quality: 'Account Quality',
 };

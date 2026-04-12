@@ -49,6 +49,13 @@ export async function GET(req: Request) {
       stats: { totalEarned: 0, totalEarnedUsdc: 0, approved: 0, pending: 0, rejected: 0 },
       pricing: { solPriceUsd },
       networkImpact: emptyNetworkImpact,
+      points: { total: 0, bySource: {} },
+      tier: { current: { id: 0, name: 'Standard', max_sol_refund: 0.10 }, next: { id: 1, name: 'Commuter', min_tokens: 100000 }, gascoinBalance: 0, tokensToNext: 100000 },
+      leaderboard: { rank: 0, totalRanked: 0 },
+      engagement: { topTweets: [], contentTypeDist: {}, totalScoredTweets: 0 },
+      streak: { consecutiveWindows: 0, maxMultiplier: 5 },
+      cooldown: { days: 7, endsAt: null, remainingMs: 0 },
+      analytics: { approvalRate: 0, avgRefundSol: 0, avgRefundUsd: 0, topGateFailures: [], conversionRate: 0, percentile: 0, pointsLast30: 0, pointsPrior30: 0, pointsTrend: 0 },
     });
   }
 
