@@ -7,6 +7,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { usePrivy } from '@privy-io/react-auth';
 
+// Full nav — everything accessible from hamburger
 const NAV_LINKS = [
   { href: '/how-it-works', label: 'How It Works' },
   { href: '/submit', label: 'Submit' },
@@ -27,13 +28,9 @@ export function MobileMenu() {
   const pathname = usePathname();
   const { authenticated } = usePrivy();
 
-  // Portal needs to wait for client mount
   useEffect(() => { setMounted(true); }, []);
-
-  // Close menu on route change
   useEffect(() => { setOpen(false); }, [pathname]);
 
-  // Lock body scroll when open
   useEffect(() => {
     if (open) {
       document.body.style.overflow = 'hidden';

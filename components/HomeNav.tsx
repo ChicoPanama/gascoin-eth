@@ -8,17 +8,9 @@ import { AuthNavButton } from './AuthNavButton';
 import { MobileMenu } from './ui/MobileMenu';
 import { useAdaptiveNav } from './useAdaptiveNav';
 
-const NAV_LINKS = [
+const PRIMARY_LINKS = [
   { href: '/how-it-works', label: 'How It Works', icon: '?' },
-  { href: '/submit', label: 'Submit', icon: '◇' },
-  { href: '/dashboard', label: 'Treasury', icon: '▣' },
-  { href: '/community', label: 'Community', icon: '◎' },
   { href: '/leaderboard', label: 'Leaderboard', icon: '▲' },
-  { href: '/points', label: 'Points', icon: '◆' },
-  { href: '/referral', label: 'Refer', icon: '↗' },
-  { href: '/perks', label: 'Perks', icon: '✦' },
-  { href: '/gates', label: 'Gates', icon: '◈' },
-  { href: '/wallet', label: 'Tracker', icon: '⌁' },
 ];
 
 export function HomeNav() {
@@ -33,7 +25,7 @@ export function HomeNav() {
         <span className="gc-nav-brand">GASCOIN</span>
       </Link>
       <div ref={linksRef as any} className="gc-nav-links">
-        {NAV_LINKS.map(({ href, label, icon }) => (
+        {PRIMARY_LINKS.map(({ href, label, icon }) => (
           <Link key={href} href={href} className={pathname === href ? 'gc-nav-active' : ''}>
             <span className="gc-nav-link-inner">
               <span className="gc-nav-link-icon" aria-hidden>{icon}</span>
