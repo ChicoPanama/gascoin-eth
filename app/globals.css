@@ -61,13 +61,6 @@ code, .mono {
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
 }
-/* When nav is inside a padded container, break out to viewport edges */
-.container > .gc-nav {
-  margin-left: -48px;
-  margin-right: -48px;
-  margin-top: -32px;
-  margin-bottom: 32px;
-}
 
 .gc-nav-brand-wrap {
   display: inline-flex;
