@@ -5154,9 +5154,27 @@ button.docs-footer-link {
 }
 
 /* ═══════════════════════════════════════════
-   MOBILE MENU — hidden on desktop
+   HAMBURGER MENU — always visible across all screens
+   Contains full nav (secondary links + Docs)
    ═══════════════════════════════════════════ */
-.mobile-menu-toggle { display: none; }
+.mobile-menu-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background: none;
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 4px;
+  cursor: pointer;
+  padding: 0;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 101;
+}
+.mobile-menu-toggle:hover {
+  border-color: rgba(255,255,255,0.35);
+}
 
 /* Adaptive compact mode (can trigger above 900px when space is tight) */
 .gc-nav--compact {
