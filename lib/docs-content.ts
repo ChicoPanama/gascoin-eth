@@ -529,43 +529,92 @@ export const DOC_CATEGORIES: DocCategory[] = [
         category: "Technology",
         description: "The full GASCOIN verification + AI cost-defense stack on one page.",
         content: `<h3>What this is</h3>
-<p>An architecture summary of the AI-assisted verification and payout system, including the four-layer cache defense that makes the AI cost predictable at any traffic level.</p>
+<p>The real, end-to-end GASCOIN verification pipeline. Arrows always point in the direction data moves. The three AI providers are <strong>not peers</strong> — they form a pipeline where Gemini Vision runs first on the receipt image, Grok runs second (conditionally, on elevated risk signals) to reason across Gemini's output, and Claude runs last as the <strong>final reviewer</strong> of everything before a single lamport of SOL leaves the treasury.</p>
 <pre class="doc-ascii">
-  ┌──────────────────────────────────────────────────────────────────────┐
-  │                    GASCOIN VERIFICATION STACK                        │
-  ├──────────────────────────────────────────────────────────────────────┤
-  │  GEMINI VISION         GROK REASONING         CLAUDE OVERSIGHT      │
-  │  ├─ Receipt OCR        ├─ Cross-validation    ├─ Final review       │
-  │  ├─ Tamper detection   ├─ Tweet quality       ├─ Audit narrative    │
-  │  ├─ EXIF forensics     ├─ Pattern analysis    ├─ Payout gate        │
-  │  └─ Image integrity    └─ Fraud reasoning     └─ Verdict            │
-  │         ▲                     ▲                       ▲             │
-  │         └─────────────────────┴───────────────────────┘             │
-  │                              │                                       │
-  │                  VERCEL AI GATEWAY (unified routing)                 │
-  │              OIDC auth · failover · tags · budget caps               │
-  ├──────────────────────────────────────────────────────────────────────┤
-  │  mem0 INTELLIGENCE                      KNOWLEDGE BASE               │
-  │  ├─ Cross-pipeline memory               ├─ Gate rules + policy       │
-  │  ├─ Wallet trust trajectory             ├─ Fraud pattern library     │
-  │  ├─ Distilled profile compression       ├─ Decision history          │
-  │  └─ Redis flag cache                    └─ Weekly intel reports      │
-  ├──────────────────────────────────────────────────────────────────────┤
-  │  X API v2                               REFERRAL ENGINE              │
-  │  ├─ Tweet verify                        ├─ Ring detection (BFS)      │
-  │  ├─ Account quality                     ├─ Anti-farm thresholds      │
-  │  ├─ Follower history                    ├─ Auto-verify               │
-  │  └─ 100% persistence                    └─ Points reward             │
-  ├──────────────────────────────────────────────────────────────────────┤
-  │                    FOUR-LAYER CACHE DEFENSE                          │
-  │  L1: Provider-native prompt caching  (90% off Claude, 75% Gemini)    │
-  │  L2: Upstash Redis + single-flight coalescing (SHA/id dedup)         │
-  │  L3: Vercel Data Cache  (unstable_cache + tag-based revalidation)    │
-  │  L4: Vercel Edge Config (live-editable prompts, sub-ms reads)        │
-  ├──────────────────────────────────────────────────────────────────────┤
-  │  FLUID COMPUTE · OIDC AUTH · 258 UNIT TESTS · VERIFIED COMMITS       │
-  └──────────────────────────────────────────────────────────────────────┘
+  ┌──────────────────────────────────────────────────────────────────────────┐
+  │                       GASCOIN VERIFICATION PIPELINE                      │
+  │                                                                          │
+  │   USER SUBMIT                                                            │
+  │       │                                                                  │
+  │       ├──► X API v2 (verifyTweet, followers, account quality) ──┐        │
+  │       │                                                         │        │
+  │       ├──► Solana RPC (tier holdings) ─────────────────────────┐│        │
+  │       │                                                        ││        │
+  │       └──► GEMINI VISION (receipt OCR, EXIF, tamper, AI signal)││        │
+  │                       │                                       ▼▼        │
+  │                       ▼                       ┌────────────────────┐    │
+  │             fraud.ts::runFraudChecks ────────►│  POLICY GATES      │    │
+  │                       │ (elevated risk?)      │  (13 sequential)   │    │
+  │                       ▼                       │                    │    │
+  │               GROK REASONING                  │  ai_image · tamper │    │
+  │           (cross-signal fraud)────────────────►  x_verified · etc  │    │
+  │                                                └─────────┬──────────┘    │
+  │                                                          │               │
+  │                                                          ▼               │
+  │                                                 DB + audit log + mem0    │
+  │                                                          │               │
+  │                                        (async — cron worker boundary)    │
+  │                                                          │               │
+  │                                    ┌─────────────────────┴──────────┐    │
+  │                                    ▼                                │    │
+  │                      ┌──────────────────────────┐                   │    │
+  │  Knowledge Base ────►│    CLAUDE OVERSIGHT      │◄── mem0 profile   │    │
+  │  (gate rules,        │  (FINAL reviewer of      │    (wallet trust  │    │
+  │   fraud patterns)    │   Gemini + Grok + gates  │    trajectory,    │    │
+  │                      │   + KB + entity intel)   │    distilled      │    │
+  │                      │                          │    summary)       │    │
+  │                      │  verdict: approve/flag   │                   │    │
+  │                      │           /reject        │───► mem0 write    │    │
+  │                      └──────────┬───────────────┘    (distilled     │    │
+  │                                 │                     profile)      │    │
+  │                                 ▼                                   │    │
+  │                      ┌──────────────────────────┐                   │    │
+  │                      │   PAYOUT WORKER          │                   │    │
+  │                      │  · re-verify X API       │                   │    │
+  │                      │  · check mem0 ring flags │                   │    │
+  │                      │  · sendSolPayout (Helius)│                   │    │
+  │                      └──────────┬───────────────┘                   │    │
+  │                                 │                                   │    │
+  │                                 ▼                                   │    │
+  │                           ON-CHAIN SOL                              │    │
+  │                           + payout row                              │    │
+  │                           + audit log                               │    │
+  │                                                                     │    │
+  ├─────────────────────────────────────────────────────────────────────┼────┤
+  │   mem0 CROSS-PIPELINE BUS (horizontal hub)                          │    │
+  │                                                                     │    │
+  │     ┌─ Submit pipeline ──────► addMemory after each claim ─────┐    │    │
+  │     ├─ Claude oversight ─────► writeDistilledProfile ─────────┐│    │    │
+  │     ├─ Referral worker ──────► ring flags (BFS detect) ──────┐││    │    │
+  │     └─ Engagement worker ────► tweet quality + points ──────┐│││    │    │
+  │                                                             ▼▼▼▼    │    │
+  │                            (read by Claude + Payout Worker) ───────┘    │
+  │                                                                          │
+  ├──────────────────────────────────────────────────────────────────────────┤
+  │   UNIFIED AI ROUTING — Vercel AI Gateway                                 │
+  │   OIDC auth · failover · per-call tags · hard budget cap · audit log     │
+  ├──────────────────────────────────────────────────────────────────────────┤
+  │   FOUR-LAYER CACHE DEFENSE                                               │
+  │   L1  Provider-native prompt caching  (90% Claude · 75% Gemini ·         │
+  │                                        50-75% Grok — cached rulebook)    │
+  │   L2  Upstash Redis + single-flight coalescing                           │
+  │       (SHA-256 receipt dedup · claim verdict dedup · tweet quality)      │
+  │   L3  Vercel Data Cache (unstable_cache + revalidateTag)                 │
+  │       (KB context, leaderboard, mem0 profiles)                           │
+  │   L4  Vercel Edge Config (sub-ms live-editable prompt prefixes)          │
+  ├──────────────────────────────────────────────────────────────────────────┤
+  │   FLUID COMPUTE · OIDC AUTH · 258 UNIT TESTS · VERIFIED COMMITS           │
+  └──────────────────────────────────────────────────────────────────────────┘
 </pre>
+
+<h3>How to read the diagram</h3>
+<ul>
+<li><strong>Top block (the real flow).</strong> A user submission fans out in parallel to the cheap signals (X API v2, Solana RPC) and the expensive signal (Gemini Vision receipt extraction). The fraud module conditionally escalates to Grok. The 13-gate policy engine consumes everything, persists the decision, and returns the user their response.</li>
+<li><strong>The async boundary.</strong> Claude does not run inside the submit request. Auto-approved claims are picked up by a cron worker, which is where Claude acts as the <em>final reviewer</em> — with the Gemini output, the Grok verdict (if it ran), the gate results, the mem0 entity profile, and the knowledge base rulebook all in front of it. No SOL moves until Claude has signed off.</li>
+<li><strong>The payout worker does a second verification pass.</strong> It re-hits the X API to confirm the tweet is still live and re-reads mem0 for referral-ring flags before calling <code>sendSolPayout</code>. This is why a referral ring detected <em>after</em> a claim was approved still blocks the payout.</li>
+<li><strong>mem0 is a horizontal bus, not a sidebar.</strong> The submit pipeline, Claude oversight, the referral worker, and the engagement worker all write to it. Claude and the payout worker read from it. Nothing is floating — every block has arrows into and out of the rest of the system.</li>
+<li><strong>Bottom three rows are horizontal support layers.</strong> The AI Gateway routes every model call; the four-layer cache defense sits underneath; Fluid Compute with elastic concurrency is the runtime that makes the in-memory single-flight coalescing actually work.</li>
+</ul>
 
 <h3>Core components</h3>
 <ul>
@@ -606,7 +655,7 @@ export const DOC_CATEGORIES: DocCategory[] = [
                            │                                    │
                     ┌──────▼───────┐                     ┌──────▼───────┐
                     │ mem0 FLAGS   │                     │ Gate Engine  │
-                    │ (Redis read) │                     │ Gates 1-12   │
+                    │ (Redis read) │                     │ Gates 1-13   │
                     └──────────────┘                     └──────┬───────┘
                                                                │
                     ┌──────────────┐  ┌──────────────┐  ┌──────▼───────┐
@@ -646,9 +695,9 @@ All states/events -> Persistence + Audit Log (immutable trail)
         content: `<p>This page gives two views of GASCOIN AI operations: a plain-English path for newcomers, and a systems path for technical operators.</p>
 <h3>Model contract (clear boundaries)</h3>
 <ul>
-<li><strong>Deterministic policy layer:</strong> gates, thresholds, cooldown, queue rules, and payout state transitions</li>
-<li><strong>Model-assisted layer (Grok/xAI + OCR):</strong> text extraction, tamper likelihood, AI-likelihood, and quality scoring</li>
-<li><strong>Safety principle:</strong> model outputs inform decisions; deterministic policy enforces final pass/fail paths</li>
+<li><strong>Deterministic policy layer:</strong> 13 sequential gates, thresholds, cooldown, queue rules, and payout state transitions</li>
+<li><strong>Model-assisted layer (Gemini Vision + Grok Reasoning + Claude Oversight):</strong> Gemini extracts receipt data and flags tampering, Grok reasons across signals for high-risk cases, Claude runs later as the final reviewer before SOL dispatch</li>
+<li><strong>Safety principle:</strong> model outputs inform decisions; deterministic policy enforces final pass/fail paths. Claude can only <em>block</em> or <em>flag</em> an already auto-approved claim — never unilaterally approve one the gates rejected</li>
 </ul>
 <h3>Newcomer Path (Simple)</h3>
 <ul>
@@ -685,10 +734,14 @@ All states/events -> Persistence + Audit Log (immutable trail)
 <h3>ASCII quick map (GitHub-style)</h3>
 <pre style="font-family:ui-monospace, SFMono-Regular, Menlo, monospace; font-size:12px; line-height:1.45; color:rgba(255,255,255,0.78); background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.12); padding:12px; overflow:auto">
 Inputs(wallet,tweet,receipt)
-    -> Extract(X API + OCR)
-    -> Score(AI-likelihood,tamper,pHash,account)
-    -> Policy(gates 1..10)
-    -> Execute(approve/reject/queue)
+    -> Extract(X API + Gemini Vision OCR)
+    -> Score(AI-likelihood, tamper, pHash, account quality)
+    -> Fraud(Grok cross-signal reasoning, conditional)
+    -> Policy(gates 1..13)
+    -> Persist(DB + audit log + mem0 signals)
+    -> [async boundary — cron worker]
+    -> Oversight(Claude final reviewer + KB + mem0 profile)
+    -> Payout(re-verify X, re-check mem0 rings, sendSolPayout)
     -> Audit(log every privileged/system action)
 </pre>`,
         order: 26,
@@ -918,7 +971,7 @@ Inputs(wallet,tweet,receipt)
 <h3>How it works</h3>
 <p>After the policy engine auto-approves a claim, Claude receives the complete verification payload plus cross-pipeline intelligence:</p>
 <ul>
-<li>All 12 gate results (pass/fail + metadata)</li>
+<li>All 13 gate results (pass/fail + metadata)</li>
 <li>Fraud scores from Gemini and Grok</li>
 <li>Cross-validation signals between receipt, tweet, and wallet</li>
 <li>Submission metadata and fraud flags</li>
@@ -1121,19 +1174,54 @@ Inputs(wallet,tweet,receipt)
 <p>No AI outage can block a legitimate payout. No cache outage can compromise fraud detection. No provider price move can surprise the treasury. The system is designed to fail into safety.</p>
 
 <h3>End-to-end flow</h3>
+<p>The flow is split across a <em>synchronous submit path</em> that runs inside the user's request, and an <em>asynchronous worker path</em> that runs on a cron boundary. Claude lives entirely on the async side — it is the <strong>final reviewer</strong>, not a parallel column.</p>
 <pre class="doc-ascii">
-  SUBMIT → [Gates 1-13] → [Gemini Vision] → [Grok Reasoning] → [mem0 Lookup] → [Claude Oversight] → PAYOUT
-                               │                   │                 │                  │
-                               └── cached ─────────┴── cached ───────┴── cached ────────┘
-                                    by SHA-256        by signal hash    by wallet
-                                    (7 days)          (1 hour)          (15 min)
+  REQUEST                                                PAYOUT
+     │                                                      ▲
+     ▼                                                      │
+  [ SYNCHRONOUS SUBMIT PATH ]                [ ASYNC WORKER PATH ]
+     │                                                      │
+     ├─► X API v2 ───────────┐                              │
+     ├─► Solana holdings ────┤                              │
+     ├─► Gemini Vision ──────┤                              │
+     │        │              ▼                              │
+     │        ▼       ┌──────────────┐                      │
+     │    fraud.ts ──►│  13  GATES   │──► DB + audit ───────┤
+     │        │       └──────────────┘                      │
+     │        ▼                                             │
+     │    Grok Reasoning (conditional)                      │
+     │    (cross-signal, high-risk only)                    │
+     │                                                      │
+     │        ┌────────────────────────────┐                │
+     │        │   CLAUDE OVERSIGHT         │◄── KB context  │
+     │        │   (FINAL reviewer of       │◄── mem0 profile│
+     │        │    Gemini + Grok + gates   │                │
+     │        │    + mem0 + KB rulebook)   │───► mem0 write │
+     │        └──────────┬─────────────────┘  (distilled)   │
+     │                   │                                  │
+     │                   ▼                                  │
+     │        ┌────────────────────────────┐                │
+     │        │   PAYOUT WORKER            │                │
+     │        │   · re-verify X API        │                │
+     │        │   · check mem0 ring flags  │                │
+     │        │   · sendSolPayout (Helius) │                │
+     │        └──────────┬─────────────────┘                │
+     │                   │                                  │
+     └───────────────────┴──────────────────────────────────┘
 
-  Each stage has exit ramps:
+  Cached (transparently) at every stage:
+    · Gemini receipt extraction  by SHA-256 hash   (7 days)
+    · Claude oversight verdict   by claim ID       (1 hour)
+    · mem0 entity profile        by wallet         (15 minutes)
+    · KB context                 by signal shape   (tag-revalidated)
+
+  Graceful degradation at every stage:
     · Strong fraud signal → short-circuit REJECT
     · Graceful fallback   → preserve deterministic gate verdict
     · Budget cap hit      → HTTP 402 → conservative defaults
-    · Provider outage     → automatic failover to next provider
+    · Provider outage     → AI Gateway failover to next provider
 </pre>
+<p>Every submission fans out in parallel to the cheap signals (X API v2, Solana holdings) and the expensive signal (Gemini Vision receipt extraction). The fraud module conditionally escalates to Grok for cross-signal reasoning when the initial signals look suspicious. The 13-gate policy engine consumes everything, persists the decision, and returns the user their response. Auto-approved claims then cross an async boundary into the cron worker, where <strong>Claude acts as the final reviewer</strong> — receiving the Gemini output, the Grok verdict (if it ran), the gate results, the mem0 entity profile, and the knowledge base rulebook — before any SOL is dispatched. The payout worker does a final X API re-verify and a mem0 ring-flag check, then executes the on-chain transfer. mem0 is the horizontal bus that lets the referral and engagement workers influence the payout decision without being coupled to the submission path.</p>
 <p>Verifiable. Auditable. Economically bounded. This is what it looks like when a protocol treats AI as infrastructure instead of a line item.</p>
 
 <h3>What is live right now</h3>
