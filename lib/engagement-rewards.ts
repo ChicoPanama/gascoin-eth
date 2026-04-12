@@ -52,6 +52,12 @@ export const POINTS_CONFIG = {
   POINTS_PER_CYCLE_COMMUTER: 100,
   POINTS_PER_CYCLE_ROAD_WARRIOR: 300,
   POINTS_PER_CYCLE_FLEET: 750,
+
+  // ─── Anti-gaming caps ───
+  // Hard limits to prevent runaway points from bot engagement or viral exploits
+  MAX_POINTS_PER_TWEET: 50_000,
+  MAX_ENGAGEMENT_POINTS_PER_DAY: 25_000,
+  MAX_ENGAGEMENT_POINTS_PER_MONTH: 200_000,
 } as const;
 
 // ─── Content type multiplier ───
@@ -90,7 +96,8 @@ export function calculateEngagementPoints(metrics: {
     metrics.bookmarks * c.POINTS_PER_BOOKMARK
   );
   const contentMultiplier = metrics.content_type ? getContentTypeMultiplier(metrics.content_type) : 1.0;
-  return Math.round(base * contentMultiplier);
+  const raw = Math.round(base * contentMultiplier);
+  return Math.min(raw, c.MAX_POINTS_PER_TWEET);
 }
 
 export function calculateStreakBonus(consecutiveWindows: number): number {

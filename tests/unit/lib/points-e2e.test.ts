@@ -236,12 +236,12 @@ describe('Tweet Quality Scoring', () => {
   it('passes normal tweet through', async () => {
     const result = await scoreTweetQuality({
       tweetText: 'Gas prices are insane right now. Just filled up at $4.89/gal. Thank god for #gascoin giving real money back.',
-      impressions: 3000, likes: 40, retweets: 8, replies: 5, followerCount: 500,
+      impressions: 3000, likes: 20, retweets: 5, replies: 3, followerCount: 500,
     });
     expect(result.isSpam).toBe(false);
     expect(result.isBotEngagement).toBe(false);
-    // Without API key, defaults to 1.0 multiplier
-    expect(result.multiplier).toBeGreaterThanOrEqual(0.7);
+    // Without API key, conservative fallback to 0.5 multiplier
+    expect(result.multiplier).toBeGreaterThanOrEqual(0.5);
   });
 });
 
@@ -392,7 +392,7 @@ describe('Gate Verification → Points Integration', () => {
 
   it('all 12 gates evaluate correctly for a valid submission', () => {
     const result = evaluateClaim(validClaim());
-    expect(result.gates).toHaveLength(12);
+    expect(result.gates).toHaveLength(13);
     expect(result.failed).toHaveLength(0);
   });
 });

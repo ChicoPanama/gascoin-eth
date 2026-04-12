@@ -114,9 +114,42 @@ export async function POST(req: Request) {
           }).catch(() => {});
         }
 
+        // ─── Wallet age gate: referred wallet must be 7+ days old ───
+        const { data: referredFirstClaim } = await supabase
+          .from('claims')
+          .select('created_at')
+          .eq('wallet', ref.referred_wallet)
+          .order('created_at', { ascending: true })
+          .limit(1)
+          .maybeSingle();
+
+        const referredAgeDays = referredFirstClaim?.created_at
+          ? Math.floor((Date.now() - new Date(referredFirstClaim.created_at).getTime()) / 86400000)
+          : 0;
+
+        if (referredAgeDays < 7) {
+          skipped++;
+          continue; // Too new — skip to prevent Sybil farming
+        }
+
+        // ─── Fetch real wallet trust for referrer ───
+        const { data: refClaims } = await supabase
+          .from('claims')
+          .select('status, created_at')
+          .eq('wallet', ref.referrer_wallet);
+
+        const refApproved = (refClaims || []).filter((c: any) => ['approved', 'paid', 'ready_for_dispatch'].includes(c.status)).length;
+        const refRejected = (refClaims || []).filter((c: any) => c.status === 'rejected').length;
+        const refFirst = (refClaims || []).sort((a: any, b: any) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())[0] as any;
+        const refAgeDays = refFirst?.created_at ? Math.floor((Date.now() - new Date(refFirst.created_at).getTime()) / 86400000) : 0;
+
         const walletTrust = calculateWalletTrust({
-          totalSubmissions: 1, approvedSubmissions: 1, rejectedSubmissions: 0,
-          referralConversions: 0, skippedReferrals: 0, accountAgeDays: 30, anomalyCount: 0,
+          totalSubmissions: (refClaims || []).length,
+          approvedSubmissions: refApproved,
+          rejectedSubmissions: refRejected,
+          referralConversions: 0, skippedReferrals: 0,
+          accountAgeDays: refAgeDays,
+          anomalyCount: 0,
         });
 
         const result = await awardVerifiedPoints(supabase, {

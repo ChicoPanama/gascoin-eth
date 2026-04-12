@@ -87,7 +87,7 @@ describe('CATEGORY 1: Policy Engine Gate Bypass Attempts', () => {
     // WHY: Confirms the happy path works end-to-end. If this fails, everything is broken.
     const result = evaluateClaim(validClaim());
 
-    expect(result.gates).toHaveLength(12);
+    expect(result.gates).toHaveLength(13);
     expect(result.failed).toHaveLength(0);
     expect(result.decision).toBe('ready_for_dispatch');
     expect(result.riskScore).toBeLessThan(0.35);
@@ -634,8 +634,8 @@ describe('CATEGORY 6: Edge Cases & System Integrity', () => {
     expect(aiGate?.passed).toBe(false);
 
     // Scores are now clamped to 0-1 before risk calculation (P1 fix)
-    // Risk: min(1, 2*0.09 + 1.0*0.35 + 1.0*0.25 + 0) = 0.78
-    expect(result.riskScore).toBe(0.78);
+    // Risk: min(1, 3*0.09 + 1.0*0.35 + 1.0*0.25 + 0) = 0.87 (3 failed: ai + tamper + min_amount)
+    expect(result.riskScore).toBe(0.87);
     expect(result.decision).toBe('rejected');
 
     // Verify clamp flags were set (audit trail for anomalous upstream values)

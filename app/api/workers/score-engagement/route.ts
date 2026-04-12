@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { createHash } from 'crypto';
 import { getSupabaseAdmin } from '../../../../lib/supabase';
 import { calculateEngagementPoints } from '../../../../lib/engagement-rewards';
 import { scoreTweetQuality, calculateWalletTrust, awardVerifiedPoints } from '../../../../lib/ai-points-engine';
@@ -69,6 +70,24 @@ export async function POST(req: Request) {
       const handleMatch = claim.tweet_url?.match(/x\.com\/([^/]+)\//);
       if (handleMatch) walletHandles.set(claim.wallet, { handle: handleMatch[1], userId: null });
     }
+
+    // ─── Handle dedup: only score each X handle once (most recent active wallet) ───
+    const handleToWallet = new Map<string, string>();
+    for (const [wallet, { handle }] of walletHandles) {
+      const h = handle.toLowerCase();
+      // Last entry wins — walletHandles is built with links first (newer), claims second
+      if (!handleToWallet.has(h)) handleToWallet.set(h, wallet);
+    }
+    // Rebuild walletHandles keeping only deduplicated entries
+    const deduped = new Map<string, { handle: string; userId: string | null }>();
+    for (const [handle, wallet] of handleToWallet) {
+      const entry = walletHandles.get(wallet);
+      if (entry) deduped.set(wallet, entry);
+    }
+    const originalCount = walletHandles.size;
+    // Replace with deduplicated map
+    walletHandles.clear();
+    for (const [k, v] of deduped) walletHandles.set(k, v);
 
     // ─── Pre-fetch real wallet trust data for all wallets in batch ───
     const allWallets = [...walletHandles.keys()];
@@ -212,6 +231,22 @@ async function scoreTweet(
   const rawPoints = calculateEngagementPoints(metrics);
   const tweetText = tweet.text || '';
 
+  // ─── Content dedup: prevent delete-and-repost gaming ───
+  const contentHash = createHash('sha256').update(tweetText.toLowerCase().trim()).digest('hex');
+  const thirtyDaysAgo = new Date(Date.now() - 30 * 86400000).toISOString();
+  const { data: dupeContent } = await supabase
+    .from('scored_tweets')
+    .select('tweet_id')
+    .eq('wallet', wallet)
+    .eq('content_hash', contentHash)
+    .neq('tweet_id', tweet.id)
+    .gte('posted_at', thirtyDaysAgo)
+    .limit(1);
+
+  if (dupeContent && dupeContent.length > 0) {
+    return { scored: false, pointsAwarded: 0, heldForReview: false };
+  }
+
   // AI quality scoring
   const qualityScore = await scoreTweetQuality({
     tweetText,
@@ -240,6 +275,7 @@ async function scoreTweet(
     replies: metrics.replies,
     bookmarks: metrics.bookmarks,
     content_type: metrics.content_type,
+    content_hash: contentHash,
     raw_points: rawPoints,
     adjusted_points: points,
     quality_score: qualityScore.quality,

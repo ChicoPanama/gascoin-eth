@@ -82,17 +82,25 @@ export async function scoreTweetQuality(params: {
   const hashtagCount = (tweetText.match(/#/g) || []).length;
   const isOnlyHashtags = wordCount <= hashtagCount + 2;
 
-  // Engagement ratio check — bot signal
-  const engagementRate = followerCount > 0 ? (likes + retweets + replies) / followerCount : 0;
-  const suspiciousEngagement = engagementRate > 5; // >500% engagement rate is suspicious
+  // Engagement ratio check — tiered bot signal by follower count
+  // Organic engagement rarely exceeds 1-2%. Thresholds per tier:
+  const totalEngagement = likes + retweets + replies;
+  const engagementRate = followerCount > 0 ? totalEngagement / followerCount : 0;
+  const suspiciousEngagement = followerCount < 100
+    ? engagementRate > 0.2    // 20% for tiny accounts
+    : followerCount < 1000
+    ? engagementRate > 0.1    // 10% for small accounts
+    : followerCount < 10000
+    ? engagementRate > 0.05   // 5% for mid accounts
+    : engagementRate > 0.02;  // 2% for large accounts
 
   // If obvious spam, skip AI call
   if (isOnlyHashtags) {
     return { quality: 0.1, isSpam: true, isBotEngagement: false, multiplier: 0.2, reason: 'Tweet is mostly hashtags with no meaningful content' };
   }
 
-  if (suspiciousEngagement && followerCount < 100) {
-    return { quality: 0.2, isSpam: false, isBotEngagement: true, multiplier: 0.3, reason: 'Engagement rate abnormally high relative to follower count' };
+  if (suspiciousEngagement) {
+    return { quality: 0.2, isSpam: false, isBotEngagement: true, multiplier: 0.3, reason: `Engagement rate ${(engagementRate * 100).toFixed(1)}% abnormally high for ${followerCount} followers` };
   }
 
   // AI quality assessment
@@ -116,7 +124,7 @@ Score these (0-1 each):
 
   try {
     const jsonMatch = response.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) return { quality: 0.7, isSpam: false, isBotEngagement: false, multiplier: 1.0, reason: 'AI unavailable — default scoring' };
+    if (!jsonMatch) return { quality: 0.5, isSpam: false, isBotEngagement: false, multiplier: 0.5, reason: 'AI unavailable — conservative fallback' };
 
     const parsed = JSON.parse(jsonMatch[0]);
     const quality = Math.max(0, Math.min(1, Number(parsed.quality || 0.7)));
@@ -131,7 +139,7 @@ Score these (0-1 each):
 
     return { quality, isSpam, isBotEngagement, multiplier, reason: parsed.reason || '' };
   } catch {
-    return { quality: 0.7, isSpam: false, isBotEngagement: false, multiplier: 1.0, reason: 'Parse error — default scoring' };
+    return { quality: 0.5, isSpam: false, isBotEngagement: false, multiplier: 0.5, reason: 'Parse error — conservative fallback' };
   }
 }
 
@@ -152,44 +160,58 @@ export async function detectReferralRing(params: {
 }): Promise<RingDetectionResult> {
   const { referrerWallet, referredWallet, allReferrals } = params;
 
-  // Graph analysis (free, instant)
-
-  // Check circular: A→B + B→A
-  const directCircle = allReferrals.some(
-    (r) => r.referrer === referredWallet && r.referred === referrerWallet
-  );
-  if (directCircle) {
-    return { isSuspicious: true, ringType: 'circular', confidence: 0.95, wallets: [referrerWallet, referredWallet], reason: 'Direct circular referral: A referred B, B referred A' };
+  // ─── BFS cycle detection up to 6 nodes ───
+  // Given new edge referrer→referred, check if referred can reach referrer (cycle)
+  const cyclePath = detectCycleBFS(referredWallet, referrerWallet, allReferrals, 6);
+  if (cyclePath) {
+    return {
+      isSuspicious: true, ringType: 'circular', confidence: 0.95,
+      wallets: cyclePath,
+      reason: `${cyclePath.length}-node cycle: ${cyclePath.map((w) => w.slice(0, 6)).join('→')}→back`,
+    };
   }
 
-  // Check 3-node cycle: A→B, B→C, C→A
-  const bReferrals = allReferrals.filter((r) => r.referrer === referredWallet);
-  for (const bRef of bReferrals) {
-    const cReferrals = allReferrals.filter((r) => r.referrer === bRef.referred);
-    if (cReferrals.some((r) => r.referred === referrerWallet)) {
-      return {
-        isSuspicious: true, ringType: 'circular', confidence: 0.9,
-        wallets: [referrerWallet, referredWallet, bRef.referred],
-        reason: `3-node cycle: ${referrerWallet.slice(0, 6)}→${referredWallet.slice(0, 6)}→${bRef.referred.slice(0, 6)}→back`,
-      };
-    }
-  }
-
-  // Check chain farming: referrer has >5 referrals all created within 24h
+  // ─── Chain farming: referrer has 3+ referrals within 7 days ───
   const referrerRefs = allReferrals.filter((r) => r.referrer === referrerWallet);
-  if (referrerRefs.length >= 5) {
+  if (referrerRefs.length >= 3) {
     const timestamps = referrerRefs.map((r) => new Date(r.created_at).getTime()).sort();
     const span = timestamps[timestamps.length - 1] - timestamps[0];
-    if (span < 24 * 3600000) {
+    if (span < 7 * 86400000) {
       return {
         isSuspicious: true, ringType: 'chain', confidence: 0.8,
         wallets: [referrerWallet, ...referrerRefs.map((r) => r.referred)],
-        reason: `${referrerRefs.length} referrals created within ${Math.round(span / 3600000)}h — possible farming`,
+        reason: `${referrerRefs.length} referrals within ${Math.round(span / 86400000)}d — possible farming`,
       };
     }
   }
 
   return { isSuspicious: false, ringType: 'none', confidence: 0, wallets: [], reason: '' };
+}
+
+// BFS: from `start`, can we reach `target` following referral edges? Max depth.
+function detectCycleBFS(
+  start: string,
+  target: string,
+  allReferrals: Array<{ referrer: string; referred: string }>,
+  maxDepth: number,
+): string[] | null {
+  const visited = new Set<string>();
+  const queue: Array<{ node: string; path: string[] }> = [{ node: start, path: [start] }];
+
+  while (queue.length > 0) {
+    const { node, path } = queue.shift()!;
+    if (path.length > maxDepth) continue;
+    if (node === target && path.length > 1) return path;
+    if (visited.has(node)) continue;
+    visited.add(node);
+
+    for (const r of allReferrals) {
+      if (r.referrer === node && !visited.has(r.referred)) {
+        queue.push({ node: r.referred, path: [...path, r.referred] });
+      }
+    }
+  }
+  return null;
 }
 
 // ─── 3. WALLET TRUST SCORER ───
@@ -364,7 +386,7 @@ export async function verifyPointAward(params: {
 
   // ─── Layer 4: AI verification (only for flagged or high-value awards) ───
   // Only call AI when something looks suspicious — saves cost on clean awards
-  if (flags.length > 0 || adjustedPoints > 5000) {
+  if (flags.length > 0 || adjustedPoints > 1000) {
     const aiVerdict = await aiVerifyAward({
       wallet: params.wallet.slice(0, 8) + '...',
       source: params.source,
@@ -529,6 +551,35 @@ export async function awardVerifiedPoints(
 
   if (verification.adjustedPoints <= 0) {
     return { awarded: false, points: 0, heldForReview: false, reason: verification.reason };
+  }
+
+  // ─── Enforce daily/monthly engagement caps ───
+  if (params.source === 'tweet_engagement') {
+    const { POINTS_CONFIG } = await import('./engagement-rewards');
+    if (totalPointsToday + verification.adjustedPoints > POINTS_CONFIG.MAX_ENGAGEMENT_POINTS_PER_DAY) {
+      const remaining = Math.max(0, POINTS_CONFIG.MAX_ENGAGEMENT_POINTS_PER_DAY - totalPointsToday);
+      if (remaining <= 0) {
+        return { awarded: false, points: 0, heldForReview: false, reason: 'daily_engagement_cap_reached' };
+      }
+      verification.adjustedPoints = remaining;
+    }
+
+    // Monthly cap
+    const monthStart = `${todayKey.slice(0, 7)}-01T00:00:00Z`;
+    const { data: monthEntries } = await supabase
+      .from('engagement_points')
+      .select('points')
+      .eq('wallet', params.wallet)
+      .eq('source', 'tweet_engagement')
+      .gte('created_at', monthStart);
+    const totalPointsMonth = (monthEntries || []).reduce((s: number, e: any) => s + Number(e.points || 0), 0);
+    if (totalPointsMonth + verification.adjustedPoints > POINTS_CONFIG.MAX_ENGAGEMENT_POINTS_PER_MONTH) {
+      const remaining = Math.max(0, POINTS_CONFIG.MAX_ENGAGEMENT_POINTS_PER_MONTH - totalPointsMonth);
+      if (remaining <= 0) {
+        return { awarded: false, points: 0, heldForReview: false, reason: 'monthly_engagement_cap_reached' };
+      }
+      verification.adjustedPoints = remaining;
+    }
   }
 
   // Write verified points

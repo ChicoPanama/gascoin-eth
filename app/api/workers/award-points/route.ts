@@ -28,6 +28,26 @@ export async function POST(req: Request) {
     const now = new Date();
     const todayKey = now.toISOString().split('T')[0]; // YYYY-MM-DD
 
+    // ─── Idempotency: prevent double awards if worker retried ───
+    const runKey = `award-points:${todayKey}`;
+    const { data: existingRun } = await supabase
+      .from('idempotency_keys')
+      .select('id')
+      .eq('key', runKey)
+      .eq('scope', 'worker')
+      .maybeSingle();
+
+    if (existingRun) {
+      return NextResponse.json({ ok: true, skipped: true, reason: 'already_ran_today' });
+    }
+
+    await supabase.from('idempotency_keys').insert({
+      key: runKey,
+      scope: 'worker',
+      status: 'processing',
+      request_hash: `daily-${todayKey}`,
+    });
+
     let submissionPointsAwarded = 0;
     let streakPointsAwarded = 0;
     let holdingsPointsAwarded = 0;
@@ -144,8 +164,25 @@ export async function POST(req: Request) {
     };
 
     for (const cached of cachedWallets || []) {
-      const points = tierPointsMap[cached.tier_id] || 0;
-      if (points <= 0) continue;
+      // ─── Anti-gaming: verify on-chain balance before awarding ───
+      // Prevents flash-loan attack: borrow tokens → cache tier → return → earn bonus
+      let verifiedPoints = tierPointsMap[cached.tier_id] || 0;
+      try {
+        const { getWalletGascoinBalance } = await import('../../../../lib/integrations/solana');
+        const { getTierForBalance } = await import('../../../../lib/token-tiers');
+        const freshBalance = await getWalletGascoinBalance(cached.wallet_address);
+        const freshTier = getTierForBalance(freshBalance);
+        const freshPts = tierPointsMap[freshTier.id] || 0;
+        if (freshPts < verifiedPoints) {
+          anomalies.push(`FLASH_LOAN_SUSPECT: ${cached.wallet_address.slice(0, 8)}... cached tier ${cached.tier_id} but on-chain tier ${freshTier.id}`);
+          verifiedPoints = freshPts; // Use the lower (real) tier
+        }
+      } catch {
+        // If on-chain check fails, use cached but flag it
+        anomalies.push(`BALANCE_CHECK_FAILED: ${cached.wallet_address.slice(0, 8)}... using cached tier`);
+      }
+
+      if (verifiedPoints <= 0) continue;
 
       // Check if already awarded today
       const { data: holdingsToday } = await supabase
@@ -165,8 +202,8 @@ export async function POST(req: Request) {
       const holdResult = await awardVerifiedPoints(supabase, {
         wallet: cached.wallet_address,
         source: 'holdings_bonus',
-        rawPoints: points,
-        metadata: { tier_id: cached.tier_id, gascoin_balance: cached.gascoin_balance, awarded_date: todayKey },
+        rawPoints: verifiedPoints,
+        metadata: { tier_id: cached.tier_id, gascoin_balance: cached.gascoin_balance, awarded_date: todayKey, verified_onchain: true },
         walletTrust: holdTrust,
       });
       if (holdResult.awarded) holdingsPointsAwarded += holdResult.points;

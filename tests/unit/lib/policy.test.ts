@@ -152,9 +152,9 @@ describe('evaluateClaim', () => {
     expect(r.failed.some((g) => g.gate === 'account_quality')).toBe(false);
   });
 
-  it('returns exactly 12 gates', () => {
+  it('returns exactly 13 gates', () => {
     const r = evaluateClaim(validInput());
-    expect(r.gates).toHaveLength(12);
+    expect(r.gates).toHaveLength(13);
   });
 
   it('risk score is between 0 and 1', () => {

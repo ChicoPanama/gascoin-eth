@@ -17,11 +17,12 @@ describe('calculateEngagementPoints', () => {
     expect(rt).toBeGreaterThan(like);
   });
 
-  it('calculates correctly for a viral tweet', () => {
+  it('calculates correctly for a viral tweet (capped)', () => {
     const pts = calculateEngagementPoints({ impressions: 50000, likes: 500, retweets: 200, quote_tweets: 50, replies: 100, bookmarks: 20 });
     const c = POINTS_CONFIG;
-    const expected = 50000 * c.POINTS_PER_IMPRESSION + 500 * c.POINTS_PER_LIKE + 200 * c.POINTS_PER_RETWEET + 50 * c.POINTS_PER_QUOTE_TWEET + 100 * c.POINTS_PER_REPLY + 20 * c.POINTS_PER_BOOKMARK;
-    expect(pts).toBe(expected);
+    const raw = 50000 * c.POINTS_PER_IMPRESSION + 500 * c.POINTS_PER_LIKE + 200 * c.POINTS_PER_RETWEET + 50 * c.POINTS_PER_QUOTE_TWEET + 100 * c.POINTS_PER_REPLY + 20 * c.POINTS_PER_BOOKMARK;
+    // Per-tweet cap enforced
+    expect(pts).toBe(Math.min(raw, c.MAX_POINTS_PER_TWEET));
   });
 });
 

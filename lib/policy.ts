@@ -57,6 +57,7 @@ export function evaluateClaim(c: ClaimInput){
   gates.push({ gate:'ai_image_check', passed:c.aiScore<0.65, score:c.aiScore, reason:'AI probability too high' });
   gates.push({ gate:'tamper_check', passed:c.tamperScore<0.55, score:c.tamperScore, reason:'Tamper risk too high' });
   gates.push({ gate:'cooldown', passed:c.cooldownOk, reason:'Submission cooldown has not expired' });
+  gates.push({ gate:'min_amount', passed:c.amountUsd >= 5, score:c.amountUsd, reason:'Receipt must be at least $5.00 to prevent streak/submission gaming' });
   gates.push({ gate:'min_followers', passed:c.followerCount >= 100, score:c.followerCount, reason:'Account must have at least 100 followers' });
   gates.push({ gate:'account_quality', passed:c.accountQualityPassed, score:c.accountQualityScore, reason:'Account does not meet quality threshold (age, activity, profile completeness)' });
 
