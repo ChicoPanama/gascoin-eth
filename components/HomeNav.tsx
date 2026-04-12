@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { usePrivy } from '@privy-io/react-auth';
 import { WalletButton } from './ui/WalletButton';
 import { AuthNavButton } from './AuthNavButton';
@@ -13,6 +14,7 @@ const NAV_LINKS = [
   { href: '/dashboard', label: 'Treasury', icon: '▣' },
   { href: '/community', label: 'Community', icon: '◎' },
   { href: '/leaderboard', label: 'Leaderboard', icon: '▲' },
+  { href: '/points', label: 'Points', icon: '◆' },
   { href: '/referral', label: 'Refer', icon: '↗' },
   { href: '/perks', label: 'Perks', icon: '✦' },
   { href: '/gates', label: 'Gates', icon: '◈' },
@@ -20,6 +22,7 @@ const NAV_LINKS = [
 ];
 
 export function HomeNav() {
+  const pathname = usePathname();
   const { authenticated } = usePrivy();
   const { compact, navRef, brandRef, linksRef, actionsRef } = useAdaptiveNav();
 
@@ -31,7 +34,7 @@ export function HomeNav() {
       </Link>
       <div ref={linksRef as any} className="gc-nav-links">
         {NAV_LINKS.map(({ href, label, icon }) => (
-          <Link key={href} href={href}>
+          <Link key={href} href={href} className={pathname === href ? 'gc-nav-active' : ''}>
             <span className="gc-nav-link-inner">
               <span className="gc-nav-link-icon" aria-hidden>{icon}</span>
               <span>{label}</span>
@@ -39,19 +42,13 @@ export function HomeNav() {
           </Link>
         ))}
         {authenticated && (
-          <Link href="/me">
+          <Link href="/me" className={pathname === '/me' ? 'gc-nav-active' : ''}>
             <span className="gc-nav-link-inner">
               <span className="gc-nav-link-icon" aria-hidden>◉</span>
               <span>Me</span>
             </span>
           </Link>
         )}
-        <Link href="/docs">
-          <span className="gc-nav-link-inner">
-            <span className="gc-nav-link-icon" aria-hidden>⧉</span>
-            <span>Docs</span>
-          </span>
-        </Link>
       </div>
       <div ref={actionsRef as any} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
         <WalletButton />
