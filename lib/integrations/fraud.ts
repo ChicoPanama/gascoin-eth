@@ -8,6 +8,7 @@ import {
 } from './receipt-pipeline';
 import { getSystemPrompt, PROMPT_KEYS } from '../prompts';
 import { generateAIJson, isAiGatewayAvailable, AI_MODELS } from './ai-gateway';
+import { writeFraudSignal } from '../mem0';
 
 export type FraudSignals = {
   aiScore: number;
@@ -108,7 +109,75 @@ async function aiFraudAnalysis(signals: {
   return result.data;
 }
 
-export async function runFraudChecks(raw: ArrayBuffer, pipeline?: PipelineResult): Promise<FraudSignals> {
+/**
+ * Record high-severity fraud signals to mem0 as a side-effect of fraud
+ * checking. Fire-and-forget — never blocks the submission pipeline.
+ * Lands in fraud_signals category with a 90-day TTL; recent signals
+ * dominate retrieval, old ones decay automatically.
+ */
+function recordFraudSignalsToMem0(
+  wallet: string | undefined,
+  claimId: string | undefined,
+  signals: {
+    aiScore: number;
+    tamperScore: number;
+    isDigitallyManipulated?: boolean;
+    isPhysicalReceipt?: boolean;
+    flags: string[];
+    crossValidation: CrossValidationResult | null;
+  },
+): void {
+  if (!wallet) return;
+  // Only record when the signal is strong — we don't want to flood mem0 with
+  // every borderline hit. The fraud_signals category is for actionable risk.
+  if (signals.aiScore > 0.65) {
+    writeFraudSignal(wallet, {
+      name: `aiScore_${signals.aiScore.toFixed(2)}`,
+      source: 'gemini_vision',
+      severity: signals.aiScore > 0.85 ? 'critical' : 'high',
+      detail: 'AI-generation score exceeded threshold 0.65',
+      claimId,
+    }).catch(() => {});
+  }
+  if (signals.tamperScore > 0.55) {
+    writeFraudSignal(wallet, {
+      name: `tamperScore_${signals.tamperScore.toFixed(2)}`,
+      source: 'heuristic',
+      severity: signals.tamperScore > 0.75 ? 'critical' : 'high',
+      detail: 'Tamper score exceeded threshold 0.55',
+      claimId,
+    }).catch(() => {});
+  }
+  if (signals.isDigitallyManipulated) {
+    writeFraudSignal(wallet, {
+      name: 'digitally_manipulated',
+      source: 'gemini_vision',
+      severity: 'high',
+      detail: 'Vision model flagged digital manipulation',
+      claimId,
+    }).catch(() => {});
+  }
+  if (signals.isPhysicalReceipt === false) {
+    writeFraudSignal(wallet, {
+      name: 'not_physical_receipt',
+      source: 'gemini_vision',
+      severity: 'high',
+      detail: 'Vision model classified as screenshot or digital, not paper photo',
+      claimId,
+    }).catch(() => {});
+  }
+  if (signals.crossValidation?.fraudRiskLevel === 'high' && signals.crossValidation.confidence > 0.7) {
+    writeFraudSignal(wallet, {
+      name: `grok_cross_validation_${signals.crossValidation.confidence.toFixed(2)}`,
+      source: 'grok_reasoning',
+      severity: 'high',
+      detail: signals.crossValidation.reasoning.slice(0, 180),
+      claimId,
+    }).catch(() => {});
+  }
+}
+
+export async function runFraudChecks(raw: ArrayBuffer, pipeline?: PipelineResult, context?: { wallet?: string; claimId?: string }): Promise<FraudSignals> {
   const buf = Buffer.from(raw);
 
   // Use pipeline data if available (already computed in OCR step)
@@ -166,6 +235,18 @@ export async function runFraudChecks(raw: ArrayBuffer, pipeline?: PipelineResult
       tamperScore = Math.max(tamperScore, 0.5);
     }
   }
+
+  // Fire-and-forget: record high-severity signals to mem0 for cross-pipeline
+  // intelligence. The Claude oversight worker will pick these up on the next
+  // getEntityProfile() read for this wallet.
+  recordFraudSignalsToMem0(context?.wallet, context?.claimId, {
+    aiScore,
+    tamperScore,
+    isDigitallyManipulated: pipeline?.extraction?.is_digitally_manipulated,
+    isPhysicalReceipt: pipeline?.extraction?.is_physical_receipt,
+    flags,
+    crossValidation,
+  });
 
   return {
     aiScore,

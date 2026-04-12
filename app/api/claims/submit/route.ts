@@ -189,8 +189,13 @@ export async function POST(req: Request){
     snapshotAge: snapshotAgeDays,
   }) : { score: 0, passed: false, flags: ['user_lookup_failed'] };
 
-  // Pass OCR pipeline data to fraud checks to avoid redundant processing
-  const fraudBase = await runFraudChecks(receiptBuffer, ocr.pipeline);
+  // Pass OCR pipeline data to fraud checks to avoid redundant processing.
+  // Wallet context lets fraud.ts write high-severity signals directly to
+  // mem0 as a side effect. claimId is not yet assigned at this point in the
+  // flow — the submit-pipeline signal is what we need anyway.
+  const fraudBase = await runFraudChecks(receiptBuffer, ocr.pipeline, {
+    wallet,
+  });
 
   const walletOnReceipt = walletOnReceiptInput || ocr.walletOnReceipt || '';
 

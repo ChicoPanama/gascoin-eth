@@ -3,7 +3,7 @@ import { getSupabaseAdmin } from '../../../../lib/supabase';
 import { REFERRAL_CONFIG } from '../../../../lib/referral-config';
 import { calculateWalletTrust, detectReferralRing, awardVerifiedPoints } from '../../../../lib/ai-points-engine';
 import { isAuthorizedCron as isAuthorized } from '../../../../lib/cron-auth';
-import { addMemory } from '../../../../lib/mem0';
+import { addMemory, writeReferralRingFlag } from '../../../../lib/mem0';
 import { writeIntelligence } from '../../../../lib/knowledge-base';
 
 // Worker: auto-verify referrals + award POINTS (not SOL)
@@ -108,8 +108,22 @@ export async function POST(req: Request) {
         // Record ring detection signals to mem0 + intelligence entries
         if (ringCheck.isSuspicious) {
           const ringMsg = `Referral ring detected (${ringCheck.ringType}): ${ringCheck.reason}`;
-          addMemory('wallet', ref.referrer_wallet, ringMsg, { pipeline: 'referral', signal: 'ring_detected' }).catch(() => {});
-          addMemory('wallet', ref.referred_wallet, ringMsg, { pipeline: 'referral', signal: 'ring_detected' }).catch(() => {});
+          // Use the typed writeReferralRingFlag helper — categorizes under
+          // referral_ring_flag, marks immutable, assigns agent/app scope, and
+          // busts the Upstash profile cache. The ringType/confidence/cyclePath
+          // metadata is what the payout worker reads before dispatching SOL.
+          writeReferralRingFlag(ref.referrer_wallet, {
+            ringType: ringCheck.ringType === 'none' ? 'cluster' : ringCheck.ringType,
+            confidence: ringCheck.confidence,
+            cyclePath: ringCheck.wallets,
+            reason: ringCheck.reason,
+          }).catch(() => {});
+          writeReferralRingFlag(ref.referred_wallet, {
+            ringType: ringCheck.ringType === 'none' ? 'cluster' : ringCheck.ringType,
+            confidence: ringCheck.confidence,
+            cyclePath: ringCheck.wallets,
+            reason: ringCheck.reason,
+          }).catch(() => {});
           writeIntelligence({
             entry_type: 'ring_detected', entity_type: 'wallet', entity_id: ref.referrer_wallet,
             summary: ringMsg,

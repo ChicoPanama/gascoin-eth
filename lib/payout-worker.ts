@@ -3,7 +3,7 @@ import { verifyTweetProof, getFollowerCount } from './integrations/x';
 import { getUserByUsername } from './x-api';
 import { scoreAccountQuality } from './account-quality';
 import { getSupabaseAdmin } from './supabase';
-import { getCachedFlags, addMemory } from './mem0';
+import { getCachedFlags, addMemory, writePayoutEvent } from './mem0';
 
 const RETRY_BASE_SECONDS = 60;
 const MIN_FOLLOWERS = 100;
@@ -213,11 +213,15 @@ export async function processQueuedPayout(claimId: string) {
     payload_json: { wallet: job.wallet, amountSol: job.amount_sol, txHash: sent.txHash }
   });
 
-  // Record payout in mem0 for cross-pipeline intelligence
-  addMemory('wallet', job.wallet,
-    `Payout sent: ${job.amount_sol} SOL for claim ${claimId}, tx=${sent.txHash}`,
-    { pipeline: 'payout', amount: job.amount_sol },
-  ).catch(() => {});
+  // Record payout in mem0 as an immutable on-chain event — typed helper
+  // categorizes under payout_event, assigns agent/app scope, and marks the
+  // memory immutable (permanent audit record that cannot be overwritten).
+  writePayoutEvent(job.wallet, {
+    claimId,
+    amountSol: job.amount_sol,
+    txHash: sent.txHash || 'unknown',
+    status: 'dispatched',
+  }).catch(() => {});
 
   return { ok: true, txHash: sent.txHash, gate, reused: false };
 }

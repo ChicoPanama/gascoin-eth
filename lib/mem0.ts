@@ -116,10 +116,46 @@ function entityUserId(entityType: 'wallet' | 'x_handle' | 'system', entityId: st
 // Core API functions
 // ---------------------------------------------------------------------------
 
+// ---------------------------------------------------------------------------
+// Scope constants — agent_id / app_id namespaces used across the protocol
+// ---------------------------------------------------------------------------
+
+/**
+ * Which AI agent wrote a memory. Used as mem0 `agent_id` for forensic queries
+ * ("show me everything claude-oversight wrote for this wallet").
+ */
+export const MEM0_AGENTS = {
+  CLAUDE_OVERSIGHT: 'claude-oversight',
+  GROK_FRAUD: 'grok-fraud',
+  GEMINI_VISION: 'gemini-vision',
+  REFERRAL_WORKER: 'referral-worker',
+  PAYOUT_WORKER: 'payout-worker',
+  ENGAGEMENT_WORKER: 'engagement-worker',
+  SUBMIT_PIPELINE: 'submit-pipeline',
+  INTELLIGENCE_AGGREGATOR: 'intelligence-aggregator',
+} as const;
+
+export type Mem0Agent = (typeof MEM0_AGENTS)[keyof typeof MEM0_AGENTS];
+
+/**
+ * Which GASCOIN app/pipeline produced the memory. Used as mem0 `app_id`.
+ */
+export const MEM0_APPS = {
+  SUBMIT: 'gascoin-submit',
+  WORKERS: 'gascoin-workers',
+  PAYOUT: 'gascoin-payout',
+  ADMIN: 'gascoin-admin',
+} as const;
+
+export type Mem0App = (typeof MEM0_APPS)[keyof typeof MEM0_APPS];
+
 /**
  * Search memories for a specific entity. Uses the v2 search endpoint with
- * org + project scoping. Supports optional metadata filters to narrow by
- * category, pipeline, or severity.
+ * org + project scoping. Supports optional metadata filters, reranking, and
+ * top_k tuning.
+ *
+ * `rerank: true` adds ~150-200ms but significantly improves relevance by
+ * running a second semantic-understanding pass over the top results.
  */
 export async function searchMemories(
   entityType: 'wallet' | 'x_handle' | 'system',
@@ -130,6 +166,7 @@ export async function searchMemories(
     category?: Mem0Category;
     pipeline?: string;
     sinceIso?: string;
+    rerank?: boolean;
   },
 ): Promise<Mem0Memory[]> {
   const cfg = getConfig();
@@ -154,6 +191,7 @@ export async function searchMemories(
     org_id: cfg.orgId,
     project_id: cfg.projectId,
   };
+  if (options?.rerank) body.rerank = true;
 
   try {
     const res = await fetch(`${MEM0_API_HOST}/v2/memories/search/`, {
@@ -175,6 +213,102 @@ export async function searchMemories(
 }
 
 /**
+ * List all memories for an entity with optional category + limit. Uses the
+ * GET /v1/memories/ endpoint with query-string filters — this is the
+ * primitive the admin dashboard uses to show a wallet's full history.
+ */
+export async function listMemoriesForEntity(
+  entityType: 'wallet' | 'x_handle' | 'system',
+  entityId: string,
+  options?: { limit?: number },
+): Promise<Mem0Memory[]> {
+  const cfg = getConfig();
+  if (!cfg) return [];
+
+  const params = new URLSearchParams({
+    user_id: entityUserId(entityType, entityId),
+    org_id: cfg.orgId,
+    project_id: cfg.projectId,
+    limit: String(options?.limit ?? 50),
+  });
+
+  try {
+    const res = await fetch(`${MEM0_API_HOST}/v1/memories/?${params.toString()}`, {
+      method: 'GET',
+      headers: { Authorization: `Token ${cfg.apiKey}` },
+      cache: 'no-store',
+    });
+    if (!res.ok) return [];
+    const json = (await res.json()) as any;
+    if (Array.isArray(json)) return json as Mem0Memory[];
+    if (Array.isArray(json?.results)) return json.results as Mem0Memory[];
+    return [];
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Fetch the change history for a single memory (additions, updates, deletes).
+ * Used by the admin audit dashboard to show why/when a memory flipped.
+ */
+export async function getMemoryHistory(memoryId: string): Promise<unknown[]> {
+  const cfg = getConfig();
+  if (!cfg) return [];
+  try {
+    const res = await fetch(
+      `${MEM0_API_HOST}/v1/memories/${memoryId}/history/?org_id=${cfg.orgId}&project_id=${cfg.projectId}`,
+      {
+        method: 'GET',
+        headers: { Authorization: `Token ${cfg.apiKey}` },
+        cache: 'no-store',
+      },
+    );
+    if (!res.ok) return [];
+    const json = (await res.json()) as any;
+    return Array.isArray(json) ? json : (Array.isArray(json?.results) ? json.results : []);
+  } catch {
+    return [];
+  }
+}
+
+// Reserved option keys that are extracted from the call and mapped to mem0
+// top-level parameters. Anything NOT in this set is treated as free-form
+// metadata and flattened into the memory record — this keeps all 11 legacy
+// call sites (which pass { pipeline, signal, ... } directly) working.
+const RESERVED_OPTION_KEYS = new Set([
+  'category', 'agentId', 'appId', 'runId', 'immutable', 'expirationDate', 'metadata',
+]);
+
+export interface AddMemoryOptions {
+  /** Category tag — lands the memory in one of the 13 project-level custom categories. */
+  category?: Mem0Category;
+  /** Which AI agent authored this memory (Pro-tier scoping). */
+  agentId?: Mem0Agent;
+  /** Which GASCOIN pipeline/app produced this memory. */
+  appId?: Mem0App;
+  /** Unique per-flow run ID (e.g. `claim_{id}_review`) for forensic grouping. */
+  runId?: string;
+  /**
+   * If true, the memory cannot be modified or deleted by subsequent writes.
+   * Use for append-only events (ring flags, payouts, ban records).
+   */
+  immutable?: boolean;
+  /**
+   * YYYY-MM-DD date after which the memory is auto-expired by mem0.
+   * Use for decaying signals (e.g. 90-day fraud signal TTL).
+   */
+  expirationDate?: string;
+  /** Arbitrary additional metadata (stored in the memory record). */
+  metadata?: Record<string, unknown>;
+  /**
+   * Legacy pass-through: any other key at the top level is folded into
+   * metadata automatically. Kept so existing call sites don't need updating.
+   */
+  [key: string]: unknown;
+}
+
+/**
  * Add a memory for an entity. Fire-and-forget safe.
  *
  * Defaults:
@@ -182,17 +316,52 @@ export async function searchMemories(
  *   - output_format: v1.1 (matches mem0 SDK default)
  *   - version: v2 (newer API shape)
  *
- * Pass a `category` in metadata (one of MEM0_CATEGORIES) so the memory lands
- * in the right bucket for retrieval by Claude oversight.
+ * Pro-tier scoping fields are optional — pass them to enable:
+ *   - agent_id: forensic "which AI agent wrote this"
+ *   - app_id: which pipeline produced it
+ *   - run_id: unique per-claim-review flow
+ *   - immutable: true for ring flags, payouts, ban state
+ *   - expiration_date: TTL for decaying signals
  */
 export async function addMemory(
   entityType: 'wallet' | 'x_handle' | 'system',
   entityId: string,
   content: string,
-  metadata?: Record<string, unknown> & { category?: Mem0Category },
+  options?: AddMemoryOptions,
 ): Promise<void> {
   const cfg = getConfig();
   if (!cfg) return;
+
+  // Extract any non-reserved keys at the top level into metadata (legacy compat).
+  const legacyMeta: Record<string, unknown> = {};
+  if (options) {
+    for (const k of Object.keys(options)) {
+      if (!RESERVED_OPTION_KEYS.has(k)) legacyMeta[k] = (options as Record<string, unknown>)[k];
+    }
+  }
+
+  const body: Record<string, unknown> = {
+    messages: [{ role: 'user', content }],
+    user_id: entityUserId(entityType, entityId),
+    org_id: cfg.orgId,
+    project_id: cfg.projectId,
+    enable_graph: true,
+    output_format: 'v1.1',
+    version: 'v2',
+    metadata: {
+      ...legacyMeta,
+      ...(options?.metadata || {}),
+      ...(options?.category ? { category: options.category } : {}),
+      entity_type: entityType,
+      entity_id: entityId,
+      ts: new Date().toISOString(),
+    },
+  };
+  if (options?.agentId) body.agent_id = options.agentId;
+  if (options?.appId) body.app_id = options.appId;
+  if (options?.runId) body.run_id = options.runId;
+  if (options?.immutable) body.immutable = true;
+  if (options?.expirationDate) body.expiration_date = options.expirationDate;
 
   try {
     await fetch(`${MEM0_API_HOST}/v1/memories/`, {
@@ -201,26 +370,19 @@ export async function addMemory(
         'Content-Type': 'application/json',
         Authorization: `Token ${cfg.apiKey}`,
       },
-      body: JSON.stringify({
-        messages: [{ role: 'user', content }],
-        user_id: entityUserId(entityType, entityId),
-        org_id: cfg.orgId,
-        project_id: cfg.projectId,
-        enable_graph: true,
-        output_format: 'v1.1',
-        version: 'v2',
-        metadata: {
-          ...metadata,
-          entity_type: entityType,
-          entity_id: entityId,
-          ts: new Date().toISOString(),
-        },
-      }),
+      body: JSON.stringify(body),
       cache: 'no-store',
     });
   } catch {
     // Silent failure — never block a pipeline
   }
+}
+
+// Helper — compute YYYY-MM-DD that is N days in the future.
+function daysFromNow(days: number): string {
+  const d = new Date();
+  d.setUTCDate(d.getUTCDate() + days);
+  return d.toISOString().slice(0, 10);
 }
 
 // ---------------------------------------------------------------------------
@@ -405,6 +567,7 @@ export async function writeDistilledProfile(
     claimCount: number;
     lastFlags: string[];
     narrative: string; // Claude's one-line explanation of the decision
+    claimId?: string;
   },
 ): Promise<void> {
   // Build a ~50-token compressed fingerprint that Claude/Grok can re-use.
@@ -412,12 +575,20 @@ export async function writeDistilledProfile(
 
   await addMemory('wallet', wallet, line, {
     category: MEM0_CATEGORIES.CLAIM_VERDICT,
-    pipeline: 'process_claims',
-    signal: 'distilled_profile',
-    verdict: summary.verdict,
-    risk: summary.riskBucket,
-    tier: summary.tier,
-    severity: summary.riskBucket === 'critical' ? 'high' : 'info',
+    agentId: MEM0_AGENTS.CLAUDE_OVERSIGHT,
+    appId: MEM0_APPS.WORKERS,
+    runId: summary.claimId ? `claim_${summary.claimId}_review` : undefined,
+    // Claim verdicts are append-only history — never overwrite, never decay.
+    immutable: true,
+    metadata: {
+      pipeline: 'process_claims',
+      signal: 'distilled_profile',
+      verdict: summary.verdict,
+      risk: summary.riskBucket,
+      tier: summary.tier,
+      severity: summary.riskBucket === 'critical' ? 'high' : 'info',
+      claim_id: summary.claimId,
+    },
   });
 
   // Bust the Upstash profile cache so the next read gets the fresh distillation.
@@ -428,6 +599,10 @@ export async function writeDistilledProfile(
  * Record a detected fraud signal — one of the most common writes from the
  * submission pipeline. Lands in the fraud_signals category with explicit
  * severity so retrieval ranks it appropriately for Claude.
+ *
+ * Fraud signals decay after 90 days — a single aiScore hit from 6 months ago
+ * shouldn't dominate a wallet's profile forever. Ring flags and ban state
+ * don't decay (use writeReferralRingFlag / writeBanState for those).
  */
 export async function writeFraudSignal(
   wallet: string,
@@ -440,19 +615,32 @@ export async function writeFraudSignal(
   },
 ): Promise<void> {
   const line = `fraud:${signal.name} | source=${signal.source} | severity=${signal.severity}${signal.claimId ? ' | claim=' + signal.claimId : ''}${signal.detail ? ' | ' + signal.detail.slice(0, 100) : ''}`;
+  const sourceAgent = signal.source === 'gemini_vision' ? MEM0_AGENTS.GEMINI_VISION
+    : signal.source === 'grok_reasoning' ? MEM0_AGENTS.GROK_FRAUD
+    : signal.source === 'claude_oversight' ? MEM0_AGENTS.CLAUDE_OVERSIGHT
+    : MEM0_AGENTS.SUBMIT_PIPELINE;
   await addMemory('wallet', wallet, line, {
     category: MEM0_CATEGORIES.FRAUD_SIGNALS,
-    pipeline: signal.source,
-    signal: signal.name,
-    severity: signal.severity,
-    claim_id: signal.claimId,
+    agentId: sourceAgent,
+    appId: MEM0_APPS.SUBMIT,
+    runId: signal.claimId ? `claim_${signal.claimId}_fraud` : undefined,
+    // 90-day TTL — critical fraud signals surface strongly within the window,
+    // then decay so they don't dominate a wallet's profile forever.
+    expirationDate: daysFromNow(90),
+    metadata: {
+      pipeline: signal.source,
+      signal: signal.name,
+      severity: signal.severity,
+      claim_id: signal.claimId,
+    },
   });
   await bustEntityProfileCache('wallet', wallet);
 }
 
 /**
  * Record a detected referral ring — the highest-priority memory for the
- * payout worker's cross-pipeline guard. Lands in referral_ring_flag.
+ * payout worker's cross-pipeline guard. Lands in referral_ring_flag,
+ * marked immutable (never remove), and never expires.
  */
 export async function writeReferralRingFlag(
   wallet: string,
@@ -466,19 +654,25 @@ export async function writeReferralRingFlag(
   const line = `ring:${ring.ringType} | confidence=${ring.confidence.toFixed(2)} | nodes=${ring.cyclePath.length} | ${ring.reason.slice(0, 120)}`;
   await addMemory('wallet', wallet, line, {
     category: MEM0_CATEGORIES.REFERRAL_RING_FLAG,
-    pipeline: 'verify_referrals',
-    signal: 'ring_detected',
-    severity: 'critical',
-    ring_type: ring.ringType,
-    confidence: ring.confidence,
-    cycle_path: ring.cyclePath,
+    agentId: MEM0_AGENTS.REFERRAL_WORKER,
+    appId: MEM0_APPS.WORKERS,
+    // Ring flags are immutable fraud evidence — never overwritten, never decay.
+    immutable: true,
+    metadata: {
+      pipeline: 'verify_referrals',
+      signal: 'ring_detected',
+      severity: 'critical',
+      ring_type: ring.ringType,
+      confidence: ring.confidence,
+      cycle_path: ring.cyclePath,
+    },
   });
   await bustEntityProfileCache('wallet', wallet);
 }
 
 /**
- * Record a payout event (on-chain SOL dispatch). Lands in payout_event and
- * is appended, never replaced.
+ * Record a payout event (on-chain SOL dispatch). Lands in payout_event,
+ * marked immutable (permanent audit record).
  */
 export async function writePayoutEvent(
   wallet: string,
@@ -492,14 +686,110 @@ export async function writePayoutEvent(
   const line = `payout:${payout.status} | ${payout.amountSol.toFixed(4)} SOL | claim=${payout.claimId} | tx=${payout.txHash.slice(0, 16)}...`;
   await addMemory('wallet', wallet, line, {
     category: MEM0_CATEGORIES.PAYOUT_EVENT,
-    pipeline: 'payout_worker',
-    signal: payout.status,
-    severity: payout.status === 'failed' ? 'high' : 'info',
-    claim_id: payout.claimId,
-    amount_sol: payout.amountSol,
-    tx_hash: payout.txHash,
+    agentId: MEM0_AGENTS.PAYOUT_WORKER,
+    appId: MEM0_APPS.PAYOUT,
+    runId: `claim_${payout.claimId}_payout`,
+    // On-chain events are immutable ground truth.
+    immutable: true,
+    metadata: {
+      pipeline: 'payout_worker',
+      signal: payout.status,
+      severity: payout.status === 'failed' ? 'high' : 'info',
+      claim_id: payout.claimId,
+      amount_sol: payout.amountSol,
+      tx_hash: payout.txHash,
+    },
   });
   await bustEntityProfileCache('wallet', wallet);
+}
+
+/**
+ * Record a ban state change. Immutable — a subsequent unban writes a new
+ * memory rather than removing this one, preserving the audit trail.
+ */
+export async function writeBanState(
+  wallet: string,
+  ban: {
+    state: 'banned' | 'unbanned';
+    reason: string;
+    durationDays?: number;
+    triggeredBy?: string; // 'auto' | 'admin:{id}'
+  },
+): Promise<void> {
+  const line = `ban:${ban.state}${ban.durationDays ? ` (${ban.durationDays}d)` : ''} | ${ban.reason.slice(0, 120)}${ban.triggeredBy ? ' | by=' + ban.triggeredBy : ''}`;
+  await addMemory('wallet', wallet, line, {
+    category: MEM0_CATEGORIES.BAN_STATE,
+    agentId: MEM0_AGENTS.INTELLIGENCE_AGGREGATOR,
+    appId: MEM0_APPS.ADMIN,
+    immutable: true,
+    metadata: {
+      pipeline: 'auto_ban',
+      signal: ban.state,
+      severity: ban.state === 'banned' ? 'high' : 'info',
+      reason: ban.reason,
+      duration_days: ban.durationDays,
+      triggered_by: ban.triggeredBy,
+    },
+  });
+  await bustEntityProfileCache('wallet', wallet);
+}
+
+// ---------------------------------------------------------------------------
+// Webhook management — register a URL on the project to receive event pings
+// ---------------------------------------------------------------------------
+
+export interface Mem0Webhook {
+  webhook_id?: string;
+  name: string;
+  url: string;
+  event_types: Array<'memory_add' | 'memory_update' | 'memory_delete' | 'memory_categorize'>;
+  is_active?: boolean;
+}
+
+/**
+ * Create a webhook on the current project. Returns webhook_id on success.
+ * Intended for one-time setup from a script — not the hot path.
+ */
+export async function createWebhook(webhook: Mem0Webhook): Promise<string | null> {
+  const cfg = getConfig();
+  if (!cfg) return null;
+  try {
+    const res = await fetch(`${MEM0_API_HOST}/api/v1/webhooks/projects/${cfg.projectId}/`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Token ${cfg.apiKey}`,
+      },
+      body: JSON.stringify({
+        name: webhook.name,
+        url: webhook.url,
+        event_types: webhook.event_types,
+        is_active: webhook.is_active ?? true,
+      }),
+    });
+    if (!res.ok) return null;
+    const json = (await res.json()) as any;
+    return json?.webhook_id || null;
+  } catch {
+    return null;
+  }
+}
+
+/** List webhooks registered on the current project. */
+export async function listWebhooks(): Promise<Mem0Webhook[]> {
+  const cfg = getConfig();
+  if (!cfg) return [];
+  try {
+    const res = await fetch(`${MEM0_API_HOST}/api/v1/webhooks/projects/${cfg.projectId}/`, {
+      method: 'GET',
+      headers: { Authorization: `Token ${cfg.apiKey}` },
+    });
+    if (!res.ok) return [];
+    const json = (await res.json()) as any;
+    return Array.isArray(json) ? json : (Array.isArray(json?.results) ? json.results : []);
+  } catch {
+    return [];
+  }
 }
 
 /**
