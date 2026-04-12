@@ -4943,6 +4943,11 @@ button.docs-footer-link {
 .gc-teaser-link:hover { color: var(--fg); }
 .gc-teaser-link::after { content: '\2192'; font-size: 14px; }
 
+/* Hide docs button on smaller screens — accessible via hamburger menu */
+@media (max-width: 1400px) {
+  .nav-docs-btn { display: none !important; }
+}
+
 /* ─── RESPONSIVE ─── */
 @media (max-width: 900px) {
   .lb-header {
@@ -5173,7 +5178,7 @@ button.docs-footer-link {
 }
 
 .nav--compact .nav-docs-btn {
-  display: inline-flex !important;
+  display: none !important;
 }
 
 .gc-nav--compact .mobile-menu-toggle,
