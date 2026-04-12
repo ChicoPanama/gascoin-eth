@@ -1,76 +1,57 @@
+// Next.js 16 routing proxy. Runs before requests hit route handlers.
+// Uses Node runtime by default in Next 16.
+
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
+import { checkRateLimit } from './lib/rate-limit';
 
-/**
- * GASCOIN Edge Proxy — Next.js 16
- *
- * Handles: geoblocking, bot detection, worker route protection,
- * sensitive path blocking, and geo header forwarding.
- *
- * CSP intentionally omitted — wallet browser extensions inject scripts from
- * chrome-extension:// and brave:// origins that cannot be allowlisted.
- * Security headers (HSTS, X-Frame-Options, etc.) are set in next.config.js.
- */
+// Global rate limit: 60 requests / minute / IP on /api/*
+// Exceptions:
+//  - /api/rpc is rate-limited internally (100/min) — skip here to avoid double-counting
+//
+// The matcher below ensures we only run on /api/*. Static assets (_next/*, public files)
+// are excluded via the matcher and never hit the proxy.
+const GLOBAL_API_LIMIT = 60;
+const GLOBAL_API_WINDOW_SEC = 60;
 
-// Country geoblocking — keep in sync with lib/geo-config.ts
-const BLOCKED_COUNTRIES = new Set<string>([
-  // Add country codes when fraud patterns emerge from submission data
-  // Example: 'XX', 'YY'
-]);
+function clientIp(req: NextRequest): string {
+  return (
+    req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
+    req.headers.get('x-real-ip') ||
+    'unknown'
+  );
+}
 
-const BOT_USER_AGENTS = [
-  'bot', 'crawler', 'spider', 'scraper', 'curl', 'wget', 'python-requests',
-  'go-http-client', 'java/', 'libwww', 'lwp-trivial', 'httpunit',
-];
-
-export function proxy(req: NextRequest) {
+export async function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl;
-  const country = req.headers.get('x-vercel-ip-country') || '';
-  const ua = (req.headers.get('user-agent') || '').toLowerCase();
 
-  // 1. Block access to sensitive files/paths
-  if (/^\/(\.env|\.git|\.next)/.test(pathname)) {
-    return new NextResponse('Not Found', { status: 404 });
+  // Skip /api/rpc — it has its own 100/min limiter
+  if (pathname.startsWith('/api/rpc')) {
+    return NextResponse.next();
   }
 
-  // 2. Country geoblocking
-  if (country && BLOCKED_COUNTRIES.has(country.toUpperCase())) {
-    return new NextResponse(
-      JSON.stringify({ error: 'service_unavailable_in_region' }),
-      { status: 451, headers: { 'Content-Type': 'application/json' } },
+  const ip = clientIp(req);
+  const rl = await checkRateLimit(`api:${ip}`, GLOBAL_API_LIMIT, GLOBAL_API_WINDOW_SEC);
+
+  if (!rl.ok) {
+    return NextResponse.json(
+      { error: 'Too many requests' },
+      {
+        status: 429,
+        headers: {
+          'Retry-After': String(rl.resetSec),
+          'X-RateLimit-Limit': String(GLOBAL_API_LIMIT),
+          'X-RateLimit-Remaining': String(rl.remaining),
+        },
+      },
     );
   }
 
-  // 3. Bot detection — block known bot user-agents on API routes
-  if (pathname.startsWith('/api/') && !pathname.startsWith('/api/workers/') && !pathname.startsWith('/api/public/')) {
-    const isBot = BOT_USER_AGENTS.some((b) => ua.includes(b));
-    if (isBot) {
-      return new NextResponse(
-        JSON.stringify({ error: 'automated_access_denied' }),
-        { status: 403, headers: { 'Content-Type': 'application/json' } },
-      );
-    }
-  }
-
-  // 4. Protect worker routes from casual browser access
-  if (pathname.startsWith('/api/workers/') && req.method === 'GET') {
-    const hasAuth = req.headers.get('authorization') || req.headers.get('x-cron-secret');
-    if (!hasAuth) {
-      return new NextResponse(null, { status: 404 });
-    }
-  }
-
-  // 5. Pass through with geo headers for downstream use
-  const res = NextResponse.next();
-  if (country) res.headers.set('x-gc-ip-country', country);
-  const city = req.headers.get('x-vercel-ip-city') || '';
-  if (city) res.headers.set('x-gc-ip-city', city);
-
-  return res;
+  return NextResponse.next();
 }
 
-export const proxyConfig = {
-  matcher: [
-    '/((?!_next/static|_next/image|favicon.ico|icons/|logo/|docs/diagrams/).*)',
-  ],
+// Only run middleware on API routes. Static assets (_next/*, /public/*),
+// pages, and images are NOT matched and never hit the rate limiter.
+export const config = {
+  matcher: ['/api/:path*'],
 };

@@ -23,6 +23,9 @@ import { addMemory } from '../../../../lib/mem0';
 // Runs every hour via Vercel cron
 // ═══════════════════════════════════════════
 
+// AI quality scoring + X API paginated reads can take time; bump timeout to 60s
+export const maxDuration = 60;
+
 const RESCORE_INTERVAL_MS = 1 * 3600000; // 1 hour — captures engagement velocity during peak growth window
 
 export async function POST(req: Request) {

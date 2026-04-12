@@ -18,6 +18,9 @@ import { bustBalanceCache } from '../../../../lib/integrations/solana';
 import { recordGasPrice, detectStationPattern } from '../../../../lib/data-intelligence';
 import { getCachedFlags, addMemory } from '../../../../lib/mem0';
 
+// Fraud + OCR + AI calls can take 30s+; bump function timeout to 60s
+export const maxDuration = 60;
+
 const SUBMIT_WINDOW_SEC = 60;
 const SUBMIT_MAX_PER_WINDOW = 12;
 

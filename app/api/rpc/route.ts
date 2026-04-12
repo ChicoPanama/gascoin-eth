@@ -1,9 +1,8 @@
 import { NextResponse } from 'next/server';
 import { checkRateLimit } from '../../../lib/rate-limit';
 
-const RPC_URL = process.env.SOLANA_RPC_URL
-  || process.env.NEXT_PUBLIC_SOLANA_RPC_URL
-  || 'https://api.mainnet-beta.solana.com';
+// Server-side only. Never fall through to NEXT_PUBLIC_* — that would defeat the proxy.
+const RPC_URL = process.env.SOLANA_RPC_URL || 'https://api.mainnet-beta.solana.com';
 
 // SECURITY: Only allow read methods + sendTransaction. Block admin/debug methods.
 const ALLOWED_METHODS = new Set([
@@ -26,12 +25,16 @@ function clientIp(req: Request): string {
 }
 
 export async function POST(req: Request) {
-  // Rate limit: 60 requests per minute per IP
-  const rl = await checkRateLimit(`rpc:${clientIp(req)}`, 60, 60);
+  // Rate limit: 100 requests per minute per IP (per security hardening spec)
+  const rl = await checkRateLimit(`rpc:${clientIp(req)}`, 100, 60);
   if (!rl.ok) {
     return NextResponse.json(
-      { jsonrpc: '2.0', error: { code: -32000, message: 'rate_limited' }, id: null },
-      { status: 429 },
+      {
+        jsonrpc: '2.0',
+        error: { code: -32000, message: 'Rate limit exceeded. Try again in a moment.' },
+        id: null,
+      },
+      { status: 429, headers: { 'Retry-After': '60' } },
     );
   }
 

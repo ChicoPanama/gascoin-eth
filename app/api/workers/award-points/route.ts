@@ -18,6 +18,10 @@ import { writeIntelligence } from '../../../../lib/knowledge-base';
 //
 // Cron: 0 6 * * * (daily at 6am UTC)
 // ═══════════════════════════════════════════
+
+// AI audit calls + on-chain balance checks — bump timeout to 60s
+export const maxDuration = 60;
+
 export async function POST(req: Request) {
   if (!isAuthorized(req)) {
     return NextResponse.json({ ok: false, error: 'unauthorized' }, { status: 401 });

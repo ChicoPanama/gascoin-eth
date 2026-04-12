@@ -18,6 +18,9 @@ import { callGrok, isGrokAvailable } from '../../../../lib/integrations/grok';
  * Phase 4: Cache refresh — warm Redis for next day's submission pipeline
  */
 
+// Grok + mem0 synthesis calls — bump timeout to 60s
+export const maxDuration = 60;
+
 export async function POST(req: Request) {
   if (!isAuthorized(req)) {
     return NextResponse.json({ ok: false, error: 'unauthorized' }, { status: 401 });

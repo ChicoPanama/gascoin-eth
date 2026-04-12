@@ -9,6 +9,10 @@ import { writeIntelligence } from '../../../../lib/knowledge-base';
 // Worker: auto-verify referrals + award POINTS (not SOL)
 // SOL payouts are for gas receipts ONLY
 // Runs every 15 minutes via Vercel cron
+
+// Ring detection BFS + AI verification calls — bump timeout to 60s
+export const maxDuration = 60;
+
 export async function POST(req: Request) {
   if (!isAuthorized(req)) {
     return NextResponse.json({ ok: false, error: 'unauthorized' }, { status: 401 });
