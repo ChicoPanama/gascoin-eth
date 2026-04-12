@@ -50,7 +50,7 @@ export default function PointsPage() {
       </header>
 
       {/* Section 1: What X Rewards */}
-      <div className="gc-section-num" style={{ marginBottom: 16 }}>What X Rewards</div>
+      <div className="pts-heading" style={{ marginBottom: 16 }}>What X Rewards</div>
       <div className="pts-do-dont">
         <div className="pts-do">
           <div className="pts-do-label">DO — Maximum Reach &amp; Points</div>
@@ -77,7 +77,7 @@ export default function PointsPage() {
       </div>
 
       {/* Section 2: Content Type Multipliers */}
-      <div className="gc-section-num" style={{ marginTop: 64, marginBottom: 16 }}>Content Type Multipliers</div>
+      <div className="pts-heading" style={{ marginTop: 64, marginBottom: 16 }}>Content Type Multipliers</div>
       <div className="pts-multiplier-grid">
         {CONTENT_TYPES.map(({ type, label }) => {
           const mult = getContentTypeMultiplier(type);
@@ -95,7 +95,7 @@ export default function PointsPage() {
       </div>
 
       {/* Section 3: Engagement Points */}
-      <div className="gc-section-num" style={{ marginTop: 64, marginBottom: 16 }}>Engagement Points</div>
+      <div className="pts-heading" style={{ marginTop: 64, marginBottom: 16 }}>Engagement Points</div>
       <p className="gt-header-body" style={{ marginBottom: 24 }}>
         We weight engagement that X&apos;s algorithm rewards — replies, bookmarks, and quotes earn the most because they signal real interest. Likes and retweets are passive and worth less.
       </p>
@@ -114,7 +114,7 @@ export default function PointsPage() {
       </div>
 
       {/* Section 4: Other Ways to Earn */}
-      <div className="gc-section-num" style={{ marginTop: 64, marginBottom: 16 }}>Other Ways to Earn</div>
+      <div className="pts-heading" style={{ marginTop: 64, marginBottom: 16 }}>Other Ways to Earn</div>
       <table className="pts-table">
         <thead>
           <tr><th>Action</th><th>Points</th></tr>
@@ -132,7 +132,7 @@ export default function PointsPage() {
       </div>
 
       {/* Section 5: Holdings Tiers */}
-      <div className="gc-section-num" style={{ marginTop: 64, marginBottom: 16 }}>Holdings Tiers</div>
+      <div className="pts-heading" style={{ marginTop: 64, marginBottom: 16 }}>Holdings Tiers</div>
       <table className="pts-table">
         <thead>
           <tr><th>Tier</th><th>Min Tokens</th><th>Points/Day</th><th>Cooldown</th><th>Max Refund</th></tr>
@@ -151,13 +151,13 @@ export default function PointsPage() {
       </table>
 
       {/* Section 6: Quality & Trust */}
-      <div className="gc-section-num" style={{ marginTop: 64, marginBottom: 16 }}>Quality &amp; Trust</div>
+      <div className="pts-heading" style={{ marginTop: 64, marginBottom: 16 }}>Quality &amp; Trust</div>
       <p className="gt-header-body" style={{ marginBottom: 24 }}>
         We use AI to score your tweet quality. Genuine, original content about GASCOIN earns up to 1.5x bonus. Spam, bot engagement, and hashtag-stuffing get penalized (0.1–0.3x). Your wallet builds a trust score over time — veterans with clean records earn 1.2x on everything.
       </p>
 
       {/* Section 7: Leaderboard Ranking */}
-      <div className="gc-section-num" style={{ marginTop: 64, marginBottom: 16 }}>Leaderboard Ranking</div>
+      <div className="pts-heading" style={{ marginTop: 64, marginBottom: 16 }}>Leaderboard Ranking</div>
       <p className="gt-header-body" style={{ marginBottom: 24 }}>
         Your leaderboard rank is based on a composite score weighted toward long-term commitment:
       </p>
