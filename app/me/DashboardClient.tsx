@@ -306,42 +306,37 @@ export function DashboardClient({ wallet, xHandle, claims, payouts, referral, st
       </section>
 
       {/* ── Points Breakdown ── */}
-      {points && Object.keys(points.bySource).length > 0 && (
-        <section className="ud-section">
-          <div className="ud-section__header">
-            <h2 className="ud-section__title">Points Breakdown</h2>
-            <Link href="/points" className="gc-btn-ghost">How Points Work</Link>
+      <section className="ud-section">
+        <div className="ud-section__header">
+          <h2 className="ud-section__title">Points Breakdown</h2>
+          <Link href="/points" className="gc-btn-ghost">How Points Work</Link>
+        </div>
+        <div className="gc-stats">
+          <div className="gc-stats-grid">
+            {[
+              { key: 'tweet_engagement', label: 'Engagement' },
+              { key: 'holdings_bonus', label: 'Holdings' },
+              { key: 'submission_approved', label: 'Submissions' },
+              { key: 'referral_conversion', label: 'Referral Bonus' },
+              { key: 'referral_passive', label: 'Referral Passive' },
+              { key: 'streak_bonus', label: 'Streak' },
+            ].map(({ key, label }) => (
+              <div key={key} className="gc-stat">
+                <div className="gc-stat-label">{label}</div>
+                <div className="gc-stat-value">{(points?.bySource?.[key] || 0).toLocaleString()}</div>
+              </div>
+            ))}
           </div>
-          <div className="gc-stats">
-            <div className="gc-stats-grid">
-              {[
-                { key: 'tweet_engagement', label: 'Engagement' },
-                { key: 'holdings_bonus', label: 'Holdings' },
-                { key: 'submission_approved', label: 'Submissions' },
-                { key: 'referral_conversion', label: 'Referral Bonus' },
-                { key: 'referral_passive', label: 'Referral Passive' },
-                { key: 'streak_bonus', label: 'Streak' },
-              ].map(({ key, label }) => {
-                const val = points.bySource[key] || 0;
-                if (val <= 0) return null;
-                return (
-                  <div key={key} className="gc-stat">
-                    <div className="gc-stat-label">{label}</div>
-                    <div className="gc-stat-value">{val.toLocaleString()}</div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </section>
-      )}
+        </div>
+      </section>
 
       {/* ── Performance Analytics ── */}
-      {analytics && (
-        <section className="ud-section">
-          <div className="ud-section__header">
-            <h2 className="ud-section__title">Performance Analytics</h2>
-          </div>
+      <section className="ud-section">
+        <div className="ud-section__header">
+          <h2 className="ud-section__title">Performance Analytics</h2>
+        </div>
+        {analytics ? (
+          <>
           <div className="gc-stats">
             <div className="gc-stats-grid">
               <div className="gc-stat">
@@ -387,16 +382,27 @@ export function DashboardClient({ wallet, xHandle, claims, payouts, referral, st
               </div>
             </div>
           )}
-        </section>
-      )}
+        </>
+        ) : (
+          <div className="gc-stats">
+            <div className="gc-stats-grid">
+              <div className="gc-stat"><div className="gc-stat-label">Approval Rate</div><div className="gc-stat-value">—</div></div>
+              <div className="gc-stat"><div className="gc-stat-label">Avg Refund</div><div className="gc-stat-value">—</div></div>
+              <div className="gc-stat"><div className="gc-stat-label">Percentile</div><div className="gc-stat-value">—</div></div>
+              <div className="gc-stat"><div className="gc-stat-label">30-Day Trend</div><div className="gc-stat-value">—</div></div>
+            </div>
+          </div>
+        )}
+      </section>
 
       {/* ── Content Type Distribution ── */}
-      {engagement?.contentTypeDist && Object.keys(engagement.contentTypeDist).length > 0 && (
-        <section className="ud-section">
-          <div className="ud-section__header">
-            <h2 className="ud-section__title">Content Distribution</h2>
-            <Link href="/points" className="gc-btn-ghost">Multipliers</Link>
-          </div>
+      <section className="ud-section">
+        <div className="ud-section__header">
+          <h2 className="ud-section__title">Content Distribution</h2>
+          <Link href="/points" className="gc-btn-ghost">Multipliers</Link>
+        </div>
+        {engagement?.contentTypeDist && Object.keys(engagement.contentTypeDist).length > 0 ? (
+          <>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             {Object.entries(engagement.contentTypeDist)
               .sort((a, b) => b[1].points - a[1].points)
@@ -422,18 +428,23 @@ export function DashboardClient({ wallet, xHandle, claims, payouts, referral, st
               })}
           </div>
           <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'rgba(255,255,255,0.25)', marginTop: 12 }}>
-            {engagement.totalScoredTweets || 0} total tweets scored
+            {engagement?.totalScoredTweets || 0} total tweets scored
           </div>
-        </section>
-      )}
+          </>
+        ) : (
+          <div style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: 'rgba(255,255,255,0.3)', padding: '24px 0' }}>
+            No tweets scored yet. Post with #gascoin to start earning engagement points.
+          </div>
+        )}
+      </section>
 
       {/* ── Tier Progress ── */}
-      {tier?.next && (
-        <section className="ud-section">
-          <div className="ud-section__header">
-            <h2 className="ud-section__title">Tier Progress</h2>
-            <Link href="/perks" className="gc-btn-ghost">View Perks</Link>
-          </div>
+      <section className="ud-section">
+        <div className="ud-section__header">
+          <h2 className="ud-section__title">Tier Progress</h2>
+          <Link href="/perks" className="gc-btn-ghost">View Perks</Link>
+        </div>
+        {tier?.next ? (
           <div style={{ padding: '16px 0' }}>
             <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'rgba(255,255,255,0.4)', marginBottom: 8 }}>
               NEXT: {tier.next.name.toUpperCase()} — {tier.tokensToNext.toLocaleString()} GASCOIN needed
@@ -442,19 +453,23 @@ export function DashboardClient({ wallet, xHandle, claims, payouts, referral, st
               <div className="gt-progress-fill" style={{ width: `${Math.min(100, tier.gascoinBalance / tier.next.min_tokens * 100)}%` }} />
             </div>
             <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'rgba(255,255,255,0.3)', marginTop: 8 }}>
-              Max refund: {tier.current.max_sol_refund} SOL · Cooldown: {cooldown?.days || 7}d
+              Max refund: {tier?.current?.max_sol_refund || 0.10} SOL · Cooldown: {cooldown?.days || 7}d
               {cooldown?.remainingMs && cooldown.remainingMs > 0 ? ` · Next submission: ${Math.ceil(cooldown.remainingMs / 3600000)}h` : ' · Ready to submit'}
             </div>
           </div>
-        </section>
-      )}
+        ) : (
+          <div style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: 'rgba(255,255,255,0.3)', padding: '24px 0' }}>
+            {tier?.current?.name === 'Fleet' ? 'You are at the highest tier.' : `Current tier: ${tier?.current?.name || 'Standard'}. Hold more GASCOIN to unlock higher tiers.`}
+          </div>
+        )}
+      </section>
 
       {/* ── Top Tweets ── */}
-      {engagement?.topTweets && engagement.topTweets.length > 0 && (
-        <section className="ud-section">
-          <div className="ud-section__header">
-            <h2 className="ud-section__title">Top Performing Tweets</h2>
-          </div>
+      <section className="ud-section">
+        <div className="ud-section__header">
+          <h2 className="ud-section__title">Top Performing Tweets</h2>
+        </div>
+        {engagement?.topTweets && engagement.topTweets.length > 0 ? (
           <div className="ud-claims">
             {engagement.topTweets.map((t) => (
               <div key={t.tweet_id} className="ud-claim" style={{ cursor: 'default' }}>
@@ -484,8 +499,12 @@ export function DashboardClient({ wallet, xHandle, claims, payouts, referral, st
               </div>
             ))}
           </div>
-        </section>
-      )}
+        ) : (
+          <div style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: 'rgba(255,255,255,0.3)', padding: '24px 0' }}>
+            No tweets scored yet. Post with #gascoin to start earning engagement points.
+          </div>
+        )}
+      </section>
 
       {/* ── Submission History ── */}
       <section className="ud-section">
