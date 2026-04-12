@@ -5,12 +5,13 @@
 // ═══════════════════════════════════════════
 
 export const REFERRAL_CONFIG = {
-  // Points reward per verified conversion
-  POINTS_PER_CONVERSION: 500,
+  // Welcome bonus: one-time when referred user's first claim approved
+  // Ongoing passive income (2%) handled by daily award-points worker
+  POINTS_PER_CONVERSION: 100,  // Welcome bonus (was 500 flat)
 
   // Monthly caps (30-day rolling window)
   MAX_CONVERSIONS_30D: 20,
-  MAX_POINTS_30D: 10000,
+  MAX_POINTS_30D: 2000,  // 20 × 100 welcome bonuses
 
   // Requirements
   REQUIRE_FULL_APPROVAL: true,

@@ -322,7 +322,7 @@ export interface PointVerification {
 
 export async function verifyPointAward(params: {
   wallet: string;
-  source: 'tweet_engagement' | 'referral_conversion' | 'submission_approved' | 'streak_bonus' | 'holdings_bonus';
+  source: 'tweet_engagement' | 'referral_conversion' | 'referral_passive' | 'submission_approved' | 'streak_bonus' | 'holdings_bonus';
   rawPoints: number;
   metadata: Record<string, any>;
   // Context for AI decision
@@ -492,7 +492,7 @@ export async function awardVerifiedPoints(
   supabase: any,
   params: {
     wallet: string;
-    source: 'tweet_engagement' | 'referral_conversion' | 'submission_approved' | 'streak_bonus' | 'holdings_bonus';
+    source: 'tweet_engagement' | 'referral_conversion' | 'referral_passive' | 'submission_approved' | 'streak_bonus' | 'holdings_bonus';
     rawPoints: number;
     metadata: Record<string, any>;
     walletTrust: WalletTrustScore;

@@ -122,10 +122,13 @@ export default function PointsPage() {
             </tbody>
           </table>
         </div>
+        <div className="pts-callout">
+          Caps: {POINTS_CONFIG.MAX_POINTS_PER_TWEET.toLocaleString()} pts max per tweet · {POINTS_CONFIG.MAX_ENGAGEMENT_POINTS_PER_DAY.toLocaleString()} pts max per day · {POINTS_CONFIG.MAX_ENGAGEMENT_POINTS_PER_MONTH.toLocaleString()} pts max per month. Consistent daily content beats one viral moment.
+        </div>
         <div className="pts-example">
           <div className="pts-example-label">Example</div>
           <p>
-            Your original video gets {videoReplies} replies and {videoLikes} likes: ({videoReplies} × {POINTS_CONFIG.POINTS_PER_REPLY} + {videoLikes} × {POINTS_CONFIG.POINTS_PER_LIKE}) × {videoMultiplier} = <strong>{videoPoints.toLocaleString()} points</strong>.
+            Your original video gets 15 replies and 50 likes: (15 × {POINTS_CONFIG.POINTS_PER_REPLY} + 50 × {POINTS_CONFIG.POINTS_PER_LIKE}) × {videoMultiplier} = <strong>{Math.min(Math.round((15 * POINTS_CONFIG.POINTS_PER_REPLY + 50 * POINTS_CONFIG.POINTS_PER_LIKE) * videoMultiplier), POINTS_CONFIG.MAX_POINTS_PER_TWEET).toLocaleString()} points</strong> (capped at {POINTS_CONFIG.MAX_POINTS_PER_TWEET.toLocaleString()}).
           </p>
           <p>
             A repost gets {repostRetweets} retweets: ({repostRetweets} × {POINTS_CONFIG.POINTS_PER_RETWEET}) × {repostMultiplier} = <strong>{repostPoints.toLocaleString()} points</strong>. Create, don&apos;t repost.
@@ -143,11 +146,15 @@ export default function PointsPage() {
             </thead>
             <tbody>
               <tr><td>Submit a gas receipt (approved)</td><td>{POINTS_CONFIG.POINTS_PER_APPROVED_SUBMISSION.toLocaleString()}</td></tr>
-              <tr><td>Refer a friend (conversion)</td><td>{POINTS_CONFIG.POINTS_PER_REFERRAL_CONVERSION.toLocaleString()}</td></tr>
+              <tr><td>Refer a friend (welcome bonus)</td><td>{POINTS_CONFIG.REFERRAL_WELCOME_BONUS}</td></tr>
+              <tr><td>Referral passive income (2% of referred users&apos; points)</td><td>Up to {POINTS_CONFIG.REFERRAL_PASSIVE_CAP_MONTHLY.toLocaleString()}/month</td></tr>
               <tr><td>Submission streak (per 30-day window, max {POINTS_CONFIG.MAX_STREAK_MULTIPLIER}x)</td><td>{POINTS_CONFIG.POINTS_PER_STREAK_WINDOW.toLocaleString()}</td></tr>
-              <tr><td>Hold GASCOIN (daily bonus by tier)</td><td>{POINTS_CONFIG.POINTS_PER_CYCLE_STANDARD}–{POINTS_CONFIG.POINTS_PER_CYCLE_FLEET}</td></tr>
+              <tr><td>Hold GASCOIN (daily bonus by tier)</td><td>{POINTS_CONFIG.POINTS_PER_CYCLE_STANDARD.toLocaleString()}–{POINTS_CONFIG.POINTS_PER_CYCLE_FLEET.toLocaleString()}/day</td></tr>
             </tbody>
           </table>
+        </div>
+        <div className="pts-callout">
+          Referral passive income rewards quality over quantity. You earn 2% of all points your referred users earn — but only while they&apos;re active. Refer real creators, not bots.
         </div>
       </section>
 
@@ -180,6 +187,29 @@ export default function PointsPage() {
         <p className="pts-section-desc">
           We use AI to score your tweet quality. Genuine, original content about GASCOIN earns up to 1.5x bonus. Spam, bot engagement, and hashtag-stuffing get penalized (0.1–0.3x). Your wallet builds a trust score over time — veterans with clean records earn 1.2x on everything.
         </p>
+      </section>
+
+      {/* Section 7: Leaderboard */}
+      <section className="pts-section">
+        <h2 className="pts-section-title">Leaderboard Ranking</h2>
+        <p className="pts-section-desc">
+          Your leaderboard rank is based on a composite score weighted toward long-term commitment:
+        </p>
+        <div className="pts-table-wrap">
+          <table className="pts-table">
+            <thead>
+              <tr><th>Category</th><th>Weight</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Holdings bonus points (daily reward for holding GASCOIN)</td><td>55%</td></tr>
+              <tr><td>Engagement points (tweets, submissions, streaks, referral passive)</td><td>25%</td></tr>
+              <tr><td>Referral points (welcome bonuses from verified conversions)</td><td>20%</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div className="pts-callout">
+          Holding GASCOIN is the strongest signal. Whales who also create content and refer users are untouchable on the leaderboard.
+        </div>
       </section>
     </div>
   );

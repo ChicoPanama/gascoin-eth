@@ -37,6 +37,13 @@ export const POINTS_CONFIG = {
   CONTENT_TYPE_MULTIPLIER_EXTERNAL_LINK: 0.3,
 
   // ─── Referral points ───
+  // Flat conversion bonus replaced with ongoing passive model.
+  // 100pt welcome bonus when referred user's first claim approved.
+  // 2% ongoing passive income from referred users' points (capped).
+  REFERRAL_WELCOME_BONUS: 100,
+  REFERRAL_PASSIVE_RATE: 0.02,           // 2% of referred users' points
+  REFERRAL_PASSIVE_CAP_MONTHLY: 10_000,  // Max passive income per month
+  // Legacy — kept for backward compat in tests/types but no longer awarded
   POINTS_PER_REFERRAL_CONVERSION: 500,
 
   // ─── Submission points ───
@@ -47,17 +54,20 @@ export const POINTS_CONFIG = {
   MAX_STREAK_MULTIPLIER: 5,          // Cap at 5x
 
   // ─── GASCOIN holdings bonus ───
-  // Every tier earns points per cycle — higher tier = more points
-  POINTS_PER_CYCLE_STANDARD: 25,
-  POINTS_PER_CYCLE_COMMUTER: 100,
-  POINTS_PER_CYCLE_ROAD_WARRIOR: 300,
-  POINTS_PER_CYCLE_FLEET: 750,
+  // Scaled to properly reward token commitment.
+  // Whales hold the price — without them the ecosystem is worthless.
+  POINTS_PER_CYCLE_STANDARD: 100,
+  POINTS_PER_CYCLE_COMMUTER: 500,
+  POINTS_PER_CYCLE_ROAD_WARRIOR: 1_500,
+  POINTS_PER_CYCLE_FLEET: 5_000,
 
   // ─── Anti-gaming caps ───
-  // Hard limits to prevent runaway points from bot engagement or viral exploits
-  MAX_POINTS_PER_TWEET: 50_000,
-  MAX_ENGAGEMENT_POINTS_PER_DAY: 25_000,
-  MAX_ENGAGEMENT_POINTS_PER_MONTH: 200_000,
+  // Tight caps so no single tweet or day eclipses long-term holders.
+  // Fleet whale earns 150K/month from holdings alone — engagement
+  // should complement, not dominate.
+  MAX_POINTS_PER_TWEET: 5_000,
+  MAX_ENGAGEMENT_POINTS_PER_DAY: 10_000,
+  MAX_ENGAGEMENT_POINTS_PER_MONTH: 50_000,
 } as const;
 
 // ─── Content type multiplier ───

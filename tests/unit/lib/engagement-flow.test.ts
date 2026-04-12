@@ -21,17 +21,17 @@ describe('User Flow: Sign in → Tweet → Engagement Points', () => {
         impressions: 3000, likes: 45, retweets: 8, quote_tweets: 2, replies: 12, bookmarks: 0,
       });
       const c = POINTS_CONFIG;
-      const expected = 3000 * c.POINTS_PER_IMPRESSION + 45 * c.POINTS_PER_LIKE + 8 * c.POINTS_PER_RETWEET + 2 * c.POINTS_PER_QUOTE_TWEET + 12 * c.POINTS_PER_REPLY;
-      expect(pts).toBe(expected);
+      const raw = 3000 * c.POINTS_PER_IMPRESSION + 45 * c.POINTS_PER_LIKE + 8 * c.POINTS_PER_RETWEET + 2 * c.POINTS_PER_QUOTE_TWEET + 12 * c.POINTS_PER_REPLY;
+      expect(pts).toBe(Math.min(raw, c.MAX_POINTS_PER_TWEET));
     });
 
     it('zero engagement = zero points', () => {
       expect(calculateEngagementPoints({ impressions: 0, likes: 0, retweets: 0, quote_tweets: 0, replies: 0, bookmarks: 0 })).toBe(0);
     });
 
-    it('impressions alone earn points', () => {
+    it('impressions alone earn points (capped)', () => {
       const pts = calculateEngagementPoints({ impressions: 10000, likes: 0, retweets: 0, quote_tweets: 0, replies: 0, bookmarks: 0 });
-      expect(pts).toBe(10000);
+      expect(pts).toBe(Math.min(10000, POINTS_CONFIG.MAX_POINTS_PER_TWEET));
     });
   });
 

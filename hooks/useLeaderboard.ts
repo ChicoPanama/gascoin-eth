@@ -32,11 +32,17 @@ async function fetchGascoinBalance(wallet: string): Promise<number> {
   }
 }
 
-// Composite score: 40% Referrals + 35% Engagement + 25% GASCOIN Holdings
+// Composite score: 55% Holdings points + 25% Engagement + 20% Referrals
+// Holdings-dominant: whales hold the price, they ARE the ecosystem.
+// Engagement supplements. Referrals reward growth.
 // SOL earned is NOT a factor — points only. SOL is for receipts only.
-function computeCompositeScore(solEarned: number, gascoinHoldings: number, referrals: number, engagement: number): number {
-  const gcNorm = gascoinHoldings / 1_000_000;
-  return (referrals * 0.40) + (engagement * 0.35) + (gcNorm * 0.25);
+function computeCompositeScore(solEarned: number, gascoinHoldings: number, referrals: number, engagement: number, holdingsPoints: number = 0): number {
+  // Holdings-dominant: whales hold the price, they ARE the ecosystem.
+  // holdingsPoints = accumulated daily bonus points from holding GASCOIN.
+  // Fleet (10M tokens) earns 5,000pts/day = 150K/month.
+  // engagement = tweet + submission + streak + referral_passive points.
+  // referrals = welcome bonus points from verified conversions.
+  return (holdingsPoints * 0.55) + (engagement * 0.25) + (referrals * 0.20);
 }
 
 export function useLeaderboard() {
@@ -130,14 +136,23 @@ export function useLeaderboard() {
         }
       } catch {}
 
+      const holdingsPointsMap = new Map<string, number>();
       try {
-        // All non-referral points = engagement (tweet + submission + streak + holdings)
+        // Engagement points = tweet + submission + streak (NOT holdings — counted separately)
         const { data: engPoints } = await supabaseBrowser
           .from('engagement_points')
           .select('wallet, points, source')
-          .in('source', ['tweet_engagement', 'submission_approved', 'streak_bonus', 'holdings_bonus']);
+          .in('source', ['tweet_engagement', 'submission_approved', 'streak_bonus', 'referral_passive']);
         for (const e of engPoints || []) {
           engMap.set(e.wallet, (engMap.get(e.wallet) || 0) + Number(e.points || 0));
+        }
+        // Holdings bonus points tracked separately for composite weighting
+        const { data: holdPoints } = await supabaseBrowser
+          .from('engagement_points')
+          .select('wallet, points')
+          .eq('source', 'holdings_bonus');
+        for (const h of holdPoints || []) {
+          holdingsPointsMap.set(h.wallet, (holdingsPointsMap.get(h.wallet) || 0) + Number(h.points || 0));
         }
       } catch {}
 
@@ -159,7 +174,8 @@ export function useLeaderboard() {
         const gc = holdingsMap.get(w) || 0;
         const referrals = refMap.get(w) || 0;
         const engagement = engMap.get(w) || 0;
-        const score = computeCompositeScore(d.total_sol, gc, referrals, engagement);
+        const holdingsPts = holdingsPointsMap.get(w) || 0;
+        const score = computeCompositeScore(d.total_sol, gc, referrals, engagement, holdingsPts);
 
         return {
           wallet_address: w,

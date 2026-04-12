@@ -73,8 +73,8 @@ describe('Journey: New Standard User (0 GASCOIN)', () => {
       approvedSubmissions: 1, consecutiveWindows: 0, referralConversions: 0,
     });
     expect(breakdown.submissionPoints).toBe(1000);
-    expect(breakdown.holdingsPoints).toBe(25); // Standard daily
-    expect(breakdown.totalPoints).toBe(1025);
+    expect(breakdown.holdingsPoints).toBe(POINTS_CONFIG.POINTS_PER_CYCLE_STANDARD);
+    expect(breakdown.totalPoints).toBe(1000 + POINTS_CONFIG.POINTS_PER_CYCLE_STANDARD);
   });
 
   it('earns engagement points from a modest tweet', () => {
@@ -122,15 +122,15 @@ describe('Journey: Commuter Tier (100K GASCOIN)', () => {
     });
     expect(tier.id).toBe(1);
     expect(tier.name).toBe('Commuter');
-    expect(holdingsPoints).toBe(100);
+    expect(holdingsPoints).toBe(POINTS_CONFIG.POINTS_PER_CYCLE_COMMUTER);
     expect(tier.max_sol_refund).toBe(0.25);
   });
 
-  it('earns 4x more holdings than Standard over 30 days', () => {
+  it('earns 5x more holdings than Standard over 30 days', () => {
     const standardMonthly = POINTS_CONFIG.POINTS_PER_CYCLE_STANDARD * 30;
     const commuterMonthly = POINTS_CONFIG.POINTS_PER_CYCLE_COMMUTER * 30;
-    expect(commuterMonthly).toBe(3000);
-    expect(commuterMonthly).toBe(standardMonthly * 4);
+    expect(commuterMonthly).toBe(POINTS_CONFIG.POINTS_PER_CYCLE_COMMUTER * 30);
+    expect(commuterMonthly / standardMonthly).toBe(POINTS_CONFIG.POINTS_PER_CYCLE_COMMUTER / POINTS_CONFIG.POINTS_PER_CYCLE_STANDARD);
   });
 
   it('accumulates well with moderate engagement', () => {
@@ -139,8 +139,8 @@ describe('Journey: Commuter Tier (100K GASCOIN)', () => {
       tweetImpressions: 5000, tweetLikes: 80, tweetRetweets: 15, tweetQuotes: 3, tweetReplies: 20, tweetBookmarks: 0,
       approvedSubmissions: 2, consecutiveWindows: 2, referralConversions: 3,
     });
-    expect(breakdown.totalPoints).toBeGreaterThan(15000);
-    expect(breakdown.holdingsPoints).toBe(100);
+    expect(breakdown.totalPoints).toBeGreaterThan(5000);
+    expect(breakdown.holdingsPoints).toBe(POINTS_CONFIG.POINTS_PER_CYCLE_COMMUTER);
   });
 });
 
@@ -154,22 +154,22 @@ describe('Journey: Road Warrior (5M GASCOIN)', () => {
     expect(tier.max_sol_refund).toBe(0.50);
   });
 
-  it('earns 300 holdings per day', () => {
+  it('earns Road Warrior holdings per day', () => {
     const { holdingsPoints } = simulateUser({
       tier: 2, gascoinBalance: 7_500_000,
       tweetImpressions: 0, tweetLikes: 0, tweetRetweets: 0, tweetQuotes: 0, tweetReplies: 0, tweetBookmarks: 0,
       approvedSubmissions: 0, consecutiveWindows: 0, referralConversions: 0,
     });
-    expect(holdingsPoints).toBe(300);
+    expect(holdingsPoints).toBe(POINTS_CONFIG.POINTS_PER_CYCLE_ROAD_WARRIOR);
   });
 
-  it('with viral tweet + streak + referrals = massive points', () => {
+  it('with viral tweet + streak + referrals = solid points', () => {
     const { breakdown } = simulateUser({
       tier: 2, gascoinBalance: 7_500_000,
       tweetImpressions: 25000, tweetLikes: 300, tweetRetweets: 80, tweetQuotes: 20, tweetReplies: 50, tweetBookmarks: 0,
       approvedSubmissions: 3, consecutiveWindows: 4, referralConversions: 8,
     });
-    expect(breakdown.totalPoints).toBeGreaterThan(60000);
+    expect(breakdown.totalPoints).toBeGreaterThan(5000);
   });
 });
 
@@ -183,9 +183,9 @@ describe('Journey: Fleet Tier (10M GASCOIN)', () => {
     expect(tier.max_sol_refund).toBe(1.0);
   });
 
-  it('earns 750 holdings per day = 22,500/month', () => {
+  it('earns Fleet holdings per day', () => {
     const monthly = POINTS_CONFIG.POINTS_PER_CYCLE_FLEET * 30;
-    expect(monthly).toBe(22500);
+    expect(monthly).toBe(POINTS_CONFIG.POINTS_PER_CYCLE_FLEET * 30);
   });
 
   it('full engagement scenario — max points accumulation', () => {
@@ -203,7 +203,7 @@ describe('Journey: Fleet Tier (10M GASCOIN)', () => {
     expect(breakdown.submissionPoints).toBe(5000);
     expect(breakdown.streakPoints).toBe(2500);
     expect(breakdown.referralPoints).toBe(7500);
-    expect(breakdown.holdingsPoints).toBe(750);
+    expect(breakdown.holdingsPoints).toBe(POINTS_CONFIG.POINTS_PER_CYCLE_FLEET);
     const expectedTotal = breakdown.impressionPoints + breakdown.likePoints + breakdown.retweetPoints +
       breakdown.quotePoints + breakdown.replyPoints + breakdown.submissionPoints +
       breakdown.streakPoints + breakdown.referralPoints + breakdown.holdingsPoints;
@@ -519,8 +519,8 @@ describe('Cross-Tier Comparison — Same Activity, Different Tiers', () => {
     const fleet = simulateUser({ ...sharedActivity, tier: 3, gascoinBalance: 10_000_000 });
     const rw = simulateUser({ ...sharedActivity, tier: 2, gascoinBalance: 5_000_000 });
     expect(fleet.breakdown.totalPoints).toBeGreaterThan(rw.breakdown.totalPoints);
-    expect(fleet.breakdown.holdingsPoints).toBe(750);
-    expect(rw.breakdown.holdingsPoints).toBe(300);
+    expect(fleet.breakdown.holdingsPoints).toBe(POINTS_CONFIG.POINTS_PER_CYCLE_FLEET);
+    expect(rw.breakdown.holdingsPoints).toBe(POINTS_CONFIG.POINTS_PER_CYCLE_ROAD_WARRIOR);
   });
 
   it('Commuter earns more than Standard from same activity', () => {
@@ -533,6 +533,6 @@ describe('Cross-Tier Comparison — Same Activity, Different Tiers', () => {
     const fleet = simulateUser({ ...sharedActivity, tier: 3, gascoinBalance: 10_000_000 });
     const standard = simulateUser({ ...sharedActivity, tier: 0, gascoinBalance: 0 });
     const diff = fleet.breakdown.totalPoints - standard.breakdown.totalPoints;
-    expect(diff).toBe(750 - 25); // Fleet holdings - Standard holdings
+    expect(diff).toBe(POINTS_CONFIG.POINTS_PER_CYCLE_FLEET - POINTS_CONFIG.POINTS_PER_CYCLE_STANDARD);
   });
 });

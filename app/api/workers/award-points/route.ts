@@ -210,7 +210,84 @@ export async function POST(req: Request) {
       if (holdResult.heldForReview) heldCount++;
     }
 
-    // ─── 4. AI AUDIT — Integrity Check ───
+    // ─── 4. PASSIVE REFERRAL INCOME ───
+    // Referrers earn 2% of their referred users' points from the last 30 days.
+    // Capped at REFERRAL_PASSIVE_CAP_MONTHLY per referrer per month.
+    let referralPassiveAwarded = 0;
+
+    const thirtyDaysAgo = new Date(Date.now() - 30 * 86400000).toISOString();
+    const { data: allConversions } = await supabase
+      .from('referral_conversions')
+      .select('referrer_wallet, referred_wallet')
+      .eq('status', 'verified');
+
+    if (allConversions && allConversions.length > 0) {
+      // Group by referrer
+      const referrerMap = new Map<string, string[]>();
+      for (const conv of allConversions) {
+        const list = referrerMap.get(conv.referrer_wallet) || [];
+        list.push(conv.referred_wallet);
+        referrerMap.set(conv.referrer_wallet, list);
+      }
+
+      for (const [referrerWallet, referredWallets] of referrerMap) {
+        // Check how much passive referral income already awarded this month
+        const monthStart = `${todayKey.slice(0, 7)}-01T00:00:00Z`;
+        const { data: existingPassive } = await supabase
+          .from('engagement_points')
+          .select('points')
+          .eq('wallet', referrerWallet)
+          .eq('source', 'referral_passive')
+          .gte('created_at', monthStart);
+
+        const passiveThisMonth = (existingPassive || []).reduce((s: number, e: any) => s + Number(e.points || 0), 0);
+        if (passiveThisMonth >= POINTS_CONFIG.REFERRAL_PASSIVE_CAP_MONTHLY) continue;
+
+        // Sum points earned by all referred wallets in last 30 days
+        let referredTotal = 0;
+        for (const rw of referredWallets) {
+          const { data: rwPoints } = await supabase
+            .from('engagement_points')
+            .select('points')
+            .eq('wallet', rw)
+            .in('source', ['tweet_engagement', 'submission_approved', 'streak_bonus'])
+            .gte('created_at', thirtyDaysAgo);
+
+          referredTotal += (rwPoints || []).reduce((s: number, e: any) => s + Number(e.points || 0), 0);
+        }
+
+        if (referredTotal <= 0) continue;
+
+        const passiveEarned = Math.round(referredTotal * POINTS_CONFIG.REFERRAL_PASSIVE_RATE);
+        const remaining = POINTS_CONFIG.REFERRAL_PASSIVE_CAP_MONTHLY - passiveThisMonth;
+        const toAward = Math.min(passiveEarned, remaining);
+
+        if (toAward <= 0) continue;
+
+        const passiveTrust = calculateWalletTrust({
+          totalSubmissions: 1, approvedSubmissions: 1, rejectedSubmissions: 0,
+          referralConversions: referredWallets.length, skippedReferrals: 0,
+          accountAgeDays: 30, anomalyCount: 0,
+        });
+
+        const passiveResult = await awardVerifiedPoints(supabase, {
+          wallet: referrerWallet,
+          source: 'referral_passive' as any,
+          rawPoints: toAward,
+          metadata: {
+            referred_wallets: referredWallets.length,
+            referred_total_points: referredTotal,
+            passive_rate: POINTS_CONFIG.REFERRAL_PASSIVE_RATE,
+            awarded_date: todayKey,
+          },
+          walletTrust: passiveTrust,
+        });
+
+        if (passiveResult.awarded) referralPassiveAwarded += passiveResult.points;
+      }
+    }
+
+    // ─── 5. AI AUDIT — Integrity Check ───
     // Check for anomalies in point distribution
 
     // 4a: Any wallet with >50,000 points in a single day? (suspicious)
