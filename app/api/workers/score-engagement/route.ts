@@ -315,9 +315,9 @@ async function scoreTweet(
   // Record notable engagement signals in mem0
   if (qualityScore.isSpam || qualityScore.isBotEngagement || (result.awarded && result.points > 500)) {
     addMemory('wallet', wallet,
-      `Engagement: tweet ${tweet.id} quality=${qualityScore.quality.toFixed(2)}, ` +
+      `Engagement: tweet ${tweet.id} type=${metrics.content_type} quality=${qualityScore.quality.toFixed(2)}, ` +
       `spam=${qualityScore.isSpam}, bot=${qualityScore.isBotEngagement}, points=${result.awarded ? result.points : 0}`,
-      { pipeline: 'engagement', tweet_id: tweet.id, points: result.awarded ? result.points : 0 },
+      { pipeline: 'engagement', tweet_id: tweet.id, content_type: metrics.content_type, points: result.awarded ? result.points : 0 },
     ).catch(() => {});
   }
 

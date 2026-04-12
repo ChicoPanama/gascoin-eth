@@ -1065,7 +1065,7 @@ Inputs(wallet,tweet,receipt)
         categorySlug: "platform",
         category: "Platform Pages",
         description: "",
-        content: `<p>The Referral Engine allows approved GASCOIN submitters to earn points by referring new users to the platform. When someone uses your referral link to submit and gets approved, you earn 500 points that boost your leaderboard rank and status.</p>
+        content: `<p>The Referral Engine allows approved GASCOIN submitters to earn points by referring new users to the platform. When someone you referred gets their first submission approved, you earn a 100-point welcome bonus. You also earn 2% of all points your referred users accumulate — ongoing passive income capped at 10,000 points per month.</p>
 <h3>Who can use the referral system</h3>
 <p>You must have at least one approved submission to generate a referral link and earn rewards. Users without any approved submission can see the referral page but the link generation is locked until they complete a successful submission.</p>
 <h3>Your referral link</h3>
@@ -1078,7 +1078,7 @@ Inputs(wallet,tweet,receipt)
 <li>They submit a gas receipt using the platform</li>
 <li>Their submission passes all 10 verification gates and is approved</li>
 <li>The system detects your referral code on their submission and checks eligibility</li>
-<li>If eligible, 500 points are awarded to your wallet through the Grok AI verification gate</li>
+<li>If eligible, a 100-point welcome bonus is awarded to your wallet. You also begin earning 2% passive income from their future points</li>
 <li>Points are credited automatically. No admin action needed for referral points</li>
 </ol>
 <pre class="doc-ascii">
@@ -1110,7 +1110,8 @@ Inputs(wallet,tweet,receipt)
                                    └─ Award or hold for review
                                           │
                                           ▼
-                                   500 POINTS → REFERRER WALLET
+                                   100 PT WELCOME BONUS → REFERRER
+                                   + 2% ONGOING PASSIVE INCOME
 </pre>
 <h3>How Grok protects the referral system</h3>
 <p>Every referral point award passes through Grok before it lands in your wallet. Grok runs four checks: ring detection (catches A→B→C→A circular referral schemes), wallet trust scoring (new or low-trust wallets get extra scrutiny), velocity analysis (flags accounts earning referral points faster than normal), and AI verification for high-value or suspicious awards. If Grok flags an award, it is held for manual review instead of being credited automatically.</p>
@@ -1244,7 +1245,7 @@ Inputs(wallet,tweet,receipt)
 <h3>How referral points work</h3>
 <ul>
 <li>Open /admin/referrals to see all referral conversions</li>
-<li>Verified conversions show 500 points awarded to the referrer</li>
+<li>Verified conversions show 100-point welcome bonus awarded to the referrer, plus ongoing 2% passive income</li>
 <li>Skipped conversions show the skip reason (self-referral, cap reached, etc.)</li>
 <li>The AI ring detector flags suspicious referral patterns (circular refs, chain farming)</li>
 <li>Points are awarded automatically by the verify-referrals worker (every 15 minutes)</li>
@@ -1715,16 +1716,21 @@ Inputs(wallet,tweet,receipt)
 <h3>What Earns Points</h3>
 <p>Six engagement metrics are tracked:</p>
 <ul>
-<li><strong>Impressions</strong> — 1 point each. How many people saw your tweet</li>
-<li><strong>Likes</strong> — 50 points each. Basic engagement signal</li>
-<li><strong>Replies</strong> — 100 points each. Conversations are valued</li>
-<li><strong>Bookmarks</strong> — 150 points each. Saves indicate high-value content</li>
-<li><strong>Retweets</strong> — 250 points each. Amplification is heavily rewarded</li>
-<li><strong>Quote Tweets</strong> — 500 points each. The highest-value engagement</li>
+<li><strong>Quote Tweets</strong> — 500 points each. Creates new content — highest value</li>
+<li><strong>Replies</strong> — 300 points each. X rewards conversation depth</li>
+<li><strong>Bookmarks</strong> — 250 points each. Saves indicate genuine value</li>
+<li><strong>Retweets</strong> — 50 points each. Passive amplification — X devalues this</li>
+<li><strong>Likes</strong> — 25 points each. Passive, low-signal engagement</li>
+<li><strong>Impressions</strong> — 1 point each. Raw reach baseline</li>
 </ul>
 
+<p>Content type multipliers also apply: original video 3x, original image 1.5x, text 1x, quote 0.5x, external link 0.3x, repost 0.1x. Create original content — X&apos;s algorithm rewards it and so do we.</p>
+
+<h3>Caps</h3>
+<p>5,000 points max per tweet. 10,000 points max per day. 50,000 points max per month. Consistent daily content beats one viral moment.</p>
+
 <h3>How Scoring Works</h3>
-<p>Points are awarded incrementally. Each 6-hour cycle calculates the delta since the last check. You earn points for new engagement only — not retroactively. Only tweets linked to GASCOIN submissions are scored.</p>`,
+<p>Points are awarded incrementally. Each hourly cycle calculates the delta since the last check. You earn points for new engagement only — not retroactively. Only tweets with #gascoin are scored.</p>`,
         order: 71,
       },
       {
@@ -1734,14 +1740,16 @@ Inputs(wallet,tweet,receipt)
         category: "Help",
         description: "How referral conversions earn points.",
         content: `<h3>Referral Points</h3>
-<p>When someone uses your referral link to submit a gas receipt and that receipt gets approved through all 10 gates, you earn <strong>500 points</strong>.</p>
+<p>When someone uses your referral link to submit a gas receipt and that receipt gets approved, you earn a <strong>100-point welcome bonus</strong>. You also earn <strong>2% ongoing passive income</strong> from all points your referred users earn — capped at 10,000 passive points per month.</p>
 
 <h3>Eligibility Rules</h3>
 <ul>
 <li>You must have at least one approved submission yourself to generate a referral link</li>
+<li>Referred wallet must be at least 7 days old before conversion points are awarded</li>
 <li>Self-referrals are blocked — you cannot use your own link</li>
 <li>Maximum 20 conversions per 30-day rolling window</li>
-<li>Maximum 10,000 points per 30-day rolling window from referrals</li>
+<li>Maximum 2,000 welcome bonus points per 30-day rolling window</li>
+<li>Maximum 10,000 passive referral income per month</li>
 </ul>
 
 <h3>When Referral Points Are Skipped</h3>
@@ -1751,11 +1759,11 @@ Inputs(wallet,tweet,receipt)
 <tr><td>Self-referral</td><td>You submitted using your own referral link</td></tr>
 <tr><td>Referrer not approved</td><td>You had no approved submissions when the conversion occurred</td></tr>
 <tr><td>Monthly cap reached</td><td>You hit 20 conversions in the rolling 30-day window</td></tr>
-<tr><td>Monthly points cap</td><td>You hit 10,000 referral points in the rolling 30-day window</td></tr>
+<tr><td>Referred wallet too new</td><td>Referred wallet must be 7+ days old to prevent Sybil farming</td></tr>
 </tbody>
 </table>
 
-<p>Referral conversions are checked automatically every 15 minutes by the verification worker.</p>`,
+<p>Welcome bonuses are checked every 15 minutes. Passive income is calculated daily by the award-points worker.</p>`,
         order: 72,
       },
       {
@@ -1791,15 +1799,15 @@ Inputs(wallet,tweet,receipt)
         category: "Help",
         description: "How holding GASCOIN tokens earns daily points.",
         content: `<h3>Holdings Bonus</h3>
-<p>Every day, GASCOIN token holders earn points based on their tier. The more GASCOIN you hold, the more daily points you accumulate. This rewards long-term holders and creates an incentive to acquire and hold GASCOIN beyond just the receipt refund tier benefits.</p>
+<p>Every day, GASCOIN token holders earn points based on their tier. Holdings bonus is the dominant factor in leaderboard ranking (55% weight). Whales who hold the price are the backbone of the ecosystem — their commitment is rewarded proportionally. Balance is verified on-chain before each daily award to prevent flash-loan gaming.</p>
 
 <table>
 <thead><tr><th>Tier</th><th>GASCOIN Required</th><th>Points Per Day</th><th>Points Per Month (30d)</th></tr></thead>
 <tbody>
-<tr><td>Standard</td><td>1</td><td>25</td><td>750</td></tr>
-<tr><td>Commuter</td><td>100,000</td><td>100</td><td>3,000</td></tr>
-<tr><td>Road Warrior</td><td>5,000,000</td><td>300</td><td>9,000</td></tr>
-<tr><td>Fleet</td><td>10,000,000</td><td>750</td><td>22,500</td></tr>
+<tr><td>Standard</td><td>1</td><td>100</td><td>3,000</td></tr>
+<tr><td>Commuter</td><td>100,000</td><td>500</td><td>15,000</td></tr>
+<tr><td>Road Warrior</td><td>5,000,000</td><td>1,500</td><td>45,000</td></tr>
+<tr><td>Fleet</td><td>10,000,000</td><td>5,000</td><td>150,000</td></tr>
 </tbody>
 </table>
 

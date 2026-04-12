@@ -53,7 +53,7 @@ export function ViralShareCard(props: Props) {
       <div className="vsc-post-approval">
         <div className="vsc-post__headline">Invite Friends</div>
         <p className="vsc-post__text">
-          Help your friends save on gas too. Share your referral link and earn 500 points per signup.
+          Help your friends save on gas too. Share your referral link and earn 2% of their points — ongoing.
         </p>
         <div className="vsc-post__actions">
           <button

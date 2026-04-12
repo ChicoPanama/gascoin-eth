@@ -55,11 +55,14 @@ Identical on homepage (`HomeNav`) and all inner pages (`Nav`).
 - Referrals earn points, not SOL (everywhere)
 
 ### Points system
-- Engagement: impressions (1), likes (50), retweets (250), quote tweets (500), replies (100), bookmarks (150)
-- Referral: 500 points per verified conversion
-- Submission: 1000 points per approved receipt
+- Engagement: impressions (1), likes (25), retweets (50), quote tweets (500), replies (300), bookmarks (250)
+- Content type multipliers: original video 3x, image 1.5x, text 1x, quote 0.5x, link 0.3x, repost 0.1x
+- Referral: 100pt welcome bonus + 2% ongoing passive income (capped 10K/month)
+- Submission: 1000 points per approved receipt (min $5 amount)
 - Streak: 500 per consecutive 30-day window (max 5x)
-- Holdings: 25-750 per cycle by tier
+- Holdings: 100-5,000 per day by tier (Standard 100, Commuter 500, RW 1500, Fleet 5000)
+- Caps: 5K/tweet, 10K/day, 50K/month engagement
+- Composite score: Holdings 55% + Engagement 25% + Referrals 20%
 - All awards pass through AI verification gate (`lib/ai-points-engine.ts`)
 
 ### Privy integration
