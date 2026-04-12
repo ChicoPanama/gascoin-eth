@@ -8,12 +8,19 @@
  * Sits in the process-claims worker AFTER auto-approval but BEFORE
  * payout job creation — the "manager signs off" moment.
  *
- * Enhanced with mem0 entity intelligence and knowledge base context
- * for cross-pipeline awareness and institutional knowledge injection.
+ * Routed through Vercel AI Gateway:
+ *   - Model: anthropic/claude-sonnet-4.6 (1h extended cache TTL)
+ *   - Native prompt caching on a bulked >1024 token system rulebook (90% off)
+ *   - Upstash exact-match cache by claimId (1h) prevents worker re-queries
+ *   - Fallback chain: claude-sonnet-4.6 → claude-sonnet-4.5 → grok-4.1-fast-reasoning
  */
 
-import { getEntityProfile, addMemory, type EntityProfile } from '../mem0';
+import { z } from 'zod';
+import { getEntityProfile, addMemory, writeDistilledProfile } from '../mem0';
 import { buildClaudeKBContext } from '../knowledge-base';
+import { cacheGetOrFetch } from '../cache';
+import { getSystemPrompt, PROMPT_KEYS } from '../prompts';
+import { generateAIJson, isAiGatewayAvailable, AI_MODELS } from './ai-gateway';
 
 export interface ClaudeReviewContext {
   claimId: string;
@@ -50,31 +57,50 @@ export interface ClaudeVerdict {
   concerns: string[];
 }
 
-export async function reviewClaim(context: ClaudeReviewContext): Promise<ClaudeVerdict> {
-  const apiKey = process.env.ANTHROPIC_API_KEY || '';
-  if (!apiKey) {
-    // No API key — auto-approve (don't block pipeline)
-    return { verdict: 'approve', confidence: 1, narrative: 'Claude oversight unavailable — auto-approved by policy engine', concerns: [] };
+const VerdictSchema = z.object({
+  verdict: z.enum(['approve', 'flag', 'reject']),
+  confidence: z.number().min(0).max(1),
+  narrative: z.string().describe('2-3 sentence explanation for audit log'),
+  concerns: z.array(z.string()),
+});
+
+// System prompt is loaded from Edge Config (or bundled default) at call time
+// via getSystemPrompt(). Kept stable across calls to maximize Anthropic
+// provider-native cache hit rate (90% off cached input on Sonnet 4.6).
+
+async function doClaudeReview(context: ClaudeReviewContext): Promise<ClaudeVerdict> {
+  if (!isAiGatewayAvailable()) {
+    return {
+      verdict: 'approve',
+      confidence: 1,
+      narrative: 'Claude oversight unavailable — auto-approved by policy engine',
+      concerns: [],
+    };
   }
 
-  try {
-    const failedGates = context.gateResults.filter((g) => !g.passed);
-    const passedGates = context.gateResults.filter((g) => g.passed);
+  // Fetch mem0 entity profile first, then build KB context with referral awareness
+  const failedGates = context.gateResults.filter((g) => !g.passed);
+  const passedGates = context.gateResults.filter((g) => g.passed);
 
-    // Fetch mem0 entity profile first, then build KB context with referral flag awareness
-    const entityProfile = await getEntityProfile('wallet', context.wallet).catch(() => null);
-    const hasReferralFlags = entityProfile?.cross_pipeline_flags?.some((f) => f.includes('referral')) ?? false;
-    const kbContext = await buildClaudeKBContext({
-      riskScore: context.riskScore,
-      failedGates: failedGates.map((g) => g.gate),
-      fraudRisk: context.fraudRisk,
-      hasReferralFlags,
-    }).catch(() => '');
+  const entityProfile = await getEntityProfile('wallet', context.wallet).catch(() => null);
+  const hasReferralFlags =
+    entityProfile?.cross_pipeline_flags?.some((f) => f.includes('referral')) ?? false;
+  const kbContext = await buildClaudeKBContext({
+    riskScore: context.riskScore,
+    failedGates: failedGates.map((g) => g.gate),
+    fraudRisk: context.fraudRisk,
+    hasReferralFlags,
+  }).catch(() => '');
 
-    // Build entity intelligence section (only if we have data)
-    let entitySection = '';
-    if (entityProfile && (entityProfile.cross_pipeline_flags.length > 0 || entityProfile.claude_narratives.length > 0 || entityProfile.trust_trajectory !== 'new')) {
-      entitySection = `
+  // Entity intelligence section (only if we have non-trivial data)
+  let entitySection = '';
+  if (
+    entityProfile &&
+    (entityProfile.cross_pipeline_flags.length > 0 ||
+      entityProfile.claude_narratives.length > 0 ||
+      entityProfile.trust_trajectory !== 'new')
+  ) {
+    entitySection = `
 ENTITY INTELLIGENCE:
 - Trust trajectory: ${entityProfile.trust_trajectory}
 - Cross-pipeline flags: ${entityProfile.cross_pipeline_flags.join(', ') || 'none'}
@@ -82,20 +108,11 @@ ENTITY INTELLIGENCE:
 - 7d velocity: ${entityProfile.velocity.submissions_7d} submissions, ${entityProfile.velocity.points_7d} points
 - Patterns: ${entityProfile.notable_patterns.join('; ') || 'none detected'}
 `;
-    }
+  }
 
-    // Build institutional context section (only if we have entries)
-    let kbSection = '';
-    if (kbContext) {
-      kbSection = `
-INSTITUTIONAL CONTEXT:
-${kbContext}
-`;
-    }
+  const kbSection = kbContext ? `\nINSTITUTIONAL CONTEXT:\n${kbContext}\n` : '';
 
-    const prompt = `You are the oversight manager for GASCOIN, a gas receipt refund protocol on Solana. Your job is to review auto-approved claims before SOL is dispatched. Be thorough but fair.
-
-CLAIM SUMMARY:
+  const userPrompt = `CLAIM SUMMARY:
 - Claim ID: ${context.claimId}
 - Wallet: ${context.wallet}
 - X Handle: @${context.xHandle}
@@ -128,80 +145,88 @@ HISTORY:
 - Previous approvals: ${context.previousApprovals ?? 0}
 - Previous rejections: ${context.previousRejections ?? 0}
 ${entitySection}${kbSection}
-Based on ALL signals above, determine if this claim should be:
-- "approve" — all looks legitimate, dispatch SOL
-- "flag" — something is off, send to manual review (needs_review)
-- "reject" — clear fraud indicators
+Return your verdict as JSON matching the required schema.`;
 
-Pay special attention to entity intelligence — cross-pipeline signals and trust trajectory are strong indicators. A declining trajectory with new flags warrants extra scrutiny.
+  const systemPrompt = await getSystemPrompt(PROMPT_KEYS.CLAUDE_OVERSIGHT);
+  const result = await generateAIJson(VerdictSchema, {
+    model: AI_MODELS.CLAUDE,
+    system: systemPrompt,
+    prompt: userPrompt,
+    maxTokens: 400,
+    temperature: 0.1,
+    enableAnthropicCache: true,
+    fallbackModels: ['anthropic/claude-sonnet-4.5', AI_MODELS.GROK],
+    tags: ['feature:claude-oversight', 'pipeline:process-claims'],
+  });
 
-Respond ONLY with valid JSON:
-{"verdict":"approve|flag|reject","confidence":0.0-1.0,"narrative":"2-3 sentence explanation for audit log","concerns":["list","of","specific","concerns"]}`;
-
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01',
-      },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 300,
-        temperature: 0.1,
-        messages: [{ role: 'user', content: prompt }],
-      }),
-      cache: 'no-store',
-    });
-
-    if (!res.ok) {
-      return { verdict: 'approve', confidence: 0.5, narrative: `Claude API returned ${res.status} — defaulting to policy engine decision`, concerns: ['api_error'] };
-    }
-
-    const json = await res.json() as any;
-    const text = json?.content?.[0]?.text || '';
-
-    // Parse JSON from Claude's response (handle markdown code blocks)
-    const cleaned = text.replace(/```json\n?|\n?```/g, '').trim();
-    const parsed = JSON.parse(cleaned);
-
-    const verdict: ClaudeVerdict = {
-      verdict: parsed.verdict || 'approve',
-      confidence: Number(parsed.confidence) || 0.5,
-      narrative: String(parsed.narrative || ''),
-      concerns: Array.isArray(parsed.concerns) ? parsed.concerns : [],
-    };
-
-    // Write Claude's verdict to mem0 for future cross-pipeline intelligence
-    addMemory('wallet', context.wallet,
-      `Claude ${verdict.verdict} claim ${context.claimId}: ${verdict.narrative}`,
-      { pipeline: 'process_claims', verdict: verdict.verdict, confidence: verdict.confidence },
-    ).catch(() => {});
-
-    return verdict;
-  } catch (err) {
-    // On any failure, don't block the pipeline — approve with note
+  if (!result.ok) {
     return {
       verdict: 'approve',
       confidence: 0.5,
-      narrative: 'Claude oversight encountered an error — defaulting to policy engine decision',
+      narrative: `Claude oversight errored (${result.error}) — defaulting to policy engine decision`,
       concerns: ['claude_error'],
     };
   }
+
+  const verdict: ClaudeVerdict = {
+    verdict: result.data.verdict,
+    confidence: result.data.confidence,
+    narrative: result.data.narrative,
+    concerns: result.data.concerns,
+  };
+
+  // Write the raw verdict + a distilled profile line to mem0. The distilled
+  // line gets pulled into the NEXT claim for this wallet as compressed
+  // context, cutting input token count while preserving recent history.
+  addMemory(
+    'wallet',
+    context.wallet,
+    `Claude ${verdict.verdict} claim ${context.claimId}: ${verdict.narrative}`,
+    { pipeline: 'process_claims', verdict: verdict.verdict, confidence: verdict.confidence },
+  ).catch(() => {});
+
+  writeDistilledProfile(context.wallet, {
+    verdict: verdict.verdict,
+    riskBucket:
+      context.riskScore > 0.75
+        ? 'critical'
+        : context.riskScore > 0.5
+        ? 'high'
+        : context.riskScore > 0.25
+        ? 'medium'
+        : 'low',
+    tier: context.tier,
+    claimCount: (context.previousSubmissions ?? 0) + 1,
+    lastFlags: verdict.concerns.slice(0, 3),
+    narrative: verdict.narrative,
+  }).catch(() => {});
+
+  return verdict;
+}
+
+export async function reviewClaim(context: ClaudeReviewContext): Promise<ClaudeVerdict> {
+  // Upstash exact-match by claimId (1h TTL): a worker re-run on the same
+  // claim returns the cached verdict instead of re-querying Claude. Single-
+  // flight coalescing also prevents concurrent workers from duplicating work.
+  return cacheGetOrFetch(
+    `claude:review:${context.claimId}`,
+    () => doClaudeReview(context),
+    3600,
+  );
 }
 
 /**
- * Batch review multiple claims in one Claude call (cost optimization).
- * Falls back to individual reviews if batch parsing fails.
+ * Batch review multiple claims. Currently sequential — could be parallelized
+ * with Promise.all once we verify Gateway handles concurrent calls without
+ * exhausting per-user rate limits.
  */
-export async function reviewClaimsBatch(contexts: ClaudeReviewContext[]): Promise<Map<string, ClaudeVerdict>> {
+export async function reviewClaimsBatch(
+  contexts: ClaudeReviewContext[],
+): Promise<Map<string, ClaudeVerdict>> {
   const results = new Map<string, ClaudeVerdict>();
-
-  // For now, review individually — batch prompt optimization can come later
   for (const ctx of contexts) {
     const verdict = await reviewClaim(ctx);
     results.set(ctx.claimId, verdict);
   }
-
   return results;
 }

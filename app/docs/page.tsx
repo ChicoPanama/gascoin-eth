@@ -28,6 +28,7 @@ export default function DocsIndex() {
       <ul style={{ lineHeight: 1.9 }}>
         <li><Link href="/docs/the-10-verification-gates-complete-reference">10 Verification Gates Reference</Link></li>
         <li><Link href="/docs/ai-system-overview">AI System Overview (Flow Paths)</Link></li>
+        <li><Link href="/docs/ai-engine-architecture">AI Engine Architecture &amp; Cost Defense</Link></li>
         <li><Link href="/docs/receipt-intelligence-pipeline">Receipt Intelligence Pipeline</Link></li>
         <li><Link href="/docs/gate-decision-and-retry-paths">Gate Decision and Retry Paths</Link></li>
         <li><Link href="/docs/support-and-contact">Support and Contact</Link></li>

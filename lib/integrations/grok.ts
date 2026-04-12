@@ -1,21 +1,21 @@
 /**
- * xAI Grok Integration
+ * xAI Grok Integration (via Vercel AI Gateway)
  *
- * Direct connection to xAI's API for Grok models.
- * Used for fraud analysis, receipt verification, and cross-signal reasoning.
- * The xAI API is OpenAI-compatible (same request/response format).
+ * Grok handles fraud reasoning across pre-computed signals (from Gemini vision
+ * + X account checks + gate heuristics). Routed through the AI Gateway so we
+ * get automatic prompt caching, failover to Gemini on outage, and unified
+ * cost attribution via tags.
+ *
+ * The public API (callGrok, callGrokVision, isGrokAvailable, GrokResponse) is
+ * preserved so existing call sites in fraud.ts and ai-points-engine.ts keep
+ * working without changes — they're migrated separately.
  */
 
-const XAI_API_URL = 'https://api.x.ai/v1/chat/completions';
-
-function getConfig() {
-  const apiKey = process.env.XAI_API_KEY || '';
-  const model = process.env.XAI_MODEL || 'grok-4-1-fast-reasoning';
-  return { apiKey, model };
-}
+import { generateAIText, isAiGatewayAvailable, AI_MODELS } from './ai-gateway';
 
 export function isGrokAvailable(): boolean {
-  return !!process.env.XAI_API_KEY;
+  // Grok via Gateway is available whenever the gateway itself is available.
+  return isAiGatewayAvailable();
 }
 
 export interface GrokResponse {
@@ -28,104 +28,97 @@ export interface GrokResponse {
 
 /**
  * Send a prompt to Grok and get a response.
- * Uses the OpenAI-compatible xAI API.
+ * Routed through AI Gateway with fallback to Gemini if xAI is unavailable.
  */
-export async function callGrok(prompt: string, options?: {
-  temperature?: number;
-  maxTokens?: number;
-  systemPrompt?: string;
-}): Promise<GrokResponse> {
-  const { apiKey, model } = getConfig();
-  if (!apiKey) {
-    return { ok: false, content: '', model: 'none', error: 'XAI_API_KEY not configured' };
+export async function callGrok(
+  prompt: string,
+  options?: {
+    temperature?: number;
+    maxTokens?: number;
+    systemPrompt?: string;
+  },
+): Promise<GrokResponse> {
+  if (!isAiGatewayAvailable()) {
+    return { ok: false, content: '', model: 'none', error: 'AI Gateway not configured' };
   }
 
-  const messages: Array<{ role: string; content: string }> = [];
-  if (options?.systemPrompt) {
-    messages.push({ role: 'system', content: options.systemPrompt });
+  const result = await generateAIText({
+    model: AI_MODELS.GROK,
+    system: options?.systemPrompt,
+    prompt,
+    maxTokens: options?.maxTokens ?? 500,
+    temperature: options?.temperature ?? 0.1,
+    fallbackModels: [AI_MODELS.GEMINI_FAST, 'google/gemini-2.5-flash'],
+    tags: ['feature:grok-reasoning'],
+  });
+
+  if (!result.ok) {
+    return { ok: false, content: '', model: AI_MODELS.GROK, error: result.error };
   }
-  messages.push({ role: 'user', content: prompt });
 
-  try {
-    const res = await fetch(XAI_API_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${apiKey}`,
-      },
-      body: JSON.stringify({
-        model,
-        messages,
-        temperature: options?.temperature ?? 0.1,
-        max_tokens: options?.maxTokens ?? 500,
-      }),
-      cache: 'no-store',
-    });
-
-    if (!res.ok) {
-      const errText = await res.text().catch(() => '');
-      return { ok: false, content: '', model, error: `Grok API ${res.status}: ${errText.slice(0, 200)}` };
-    }
-
-    const json = await res.json() as any;
-    const content = json?.choices?.[0]?.message?.content || '';
-
-    return {
-      ok: true,
-      content,
-      model: json?.model || model,
-      usage: json?.usage,
-    };
-  } catch (err) {
-    return { ok: false, content: '', model, error: `Grok API error: ${(err as Error).message}` };
-  }
+  return {
+    ok: true,
+    content: result.text,
+    model: AI_MODELS.GROK,
+    usage: result.usage
+      ? {
+          prompt_tokens: result.usage.input,
+          completion_tokens: result.usage.output,
+          total_tokens: result.usage.total,
+        }
+      : undefined,
+  };
 }
 
 /**
- * Send a vision prompt to Grok with an image.
- * Used for receipt analysis and fraud detection.
+ * Send a vision prompt with an image. Routes through Gemini Vision via the
+ * Gateway (xAI vision is behind the same API — Gateway picks the right
+ * provider). Used by legacy callers that haven't been migrated to the
+ * unified ai-gateway vision helper.
  */
-export async function callGrokVision(prompt: string, imageBase64: string, mimeType: string = 'image/jpeg'): Promise<GrokResponse> {
-  const { apiKey, model } = getConfig();
-  if (!apiKey) {
-    return { ok: false, content: '', model: 'none', error: 'XAI_API_KEY not configured' };
+export async function callGrokVision(
+  prompt: string,
+  imageBase64: string,
+  mimeType: string = 'image/jpeg',
+): Promise<GrokResponse> {
+  if (!isAiGatewayAvailable()) {
+    return { ok: false, content: '', model: 'none', error: 'AI Gateway not configured' };
   }
 
-  try {
-    const res = await fetch(XAI_API_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${apiKey}`,
-      },
-      body: JSON.stringify({
-        model,
-        messages: [{
-          role: 'user',
-          content: [
-            { type: 'text', text: prompt },
-            { type: 'image_url', image_url: { url: `data:${mimeType};base64,${imageBase64}` } },
-          ],
-        }],
-        temperature: 0.1,
-        max_tokens: 500,
-      }),
-      cache: 'no-store',
-    });
+  // Import lazily to avoid pulling the vision path into plain-text callers.
+  const { generateAIJsonVision } = await import('./ai-gateway');
+  const { z } = await import('zod');
 
-    if (!res.ok) {
-      const errText = await res.text().catch(() => '');
-      return { ok: false, content: '', model, error: `Grok Vision ${res.status}: ${errText.slice(0, 200)}` };
-    }
+  const buf = Buffer.from(imageBase64, 'base64');
+  const result = await generateAIJsonVision(
+    z.object({ content: z.string() }),
+    {
+      model: AI_MODELS.GEMINI_VISION,
+      system: 'Analyze the image and respond to the user instruction.',
+      prompt,
+      image: buf,
+      mimeType,
+      maxTokens: 800,
+      temperature: 0.1,
+      fallbackModels: [AI_MODELS.GEMINI_FAST],
+      tags: ['feature:grok-vision-legacy'],
+    },
+  );
 
-    const json = await res.json() as any;
-    return {
-      ok: true,
-      content: json?.choices?.[0]?.message?.content || '',
-      model: json?.model || model,
-      usage: json?.usage,
-    };
-  } catch (err) {
-    return { ok: false, content: '', model, error: `Grok Vision error: ${(err as Error).message}` };
+  if (!result.ok) {
+    return { ok: false, content: '', model: AI_MODELS.GEMINI_VISION, error: result.error };
   }
+
+  return {
+    ok: true,
+    content: result.data.content,
+    model: AI_MODELS.GEMINI_VISION,
+    usage: result.usage
+      ? {
+          prompt_tokens: result.usage.input,
+          completion_tokens: result.usage.output,
+          total_tokens: result.usage.total,
+        }
+      : undefined,
+  };
 }

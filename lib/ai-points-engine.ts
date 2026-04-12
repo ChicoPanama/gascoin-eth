@@ -7,53 +7,28 @@
 // 3. Wallet Trust Scorer — behavioral reputation
 // 4. Daily Audit Narrator — human-readable summaries
 //
-// AI priority: Grok (reasoning) → Gemini (fallback)
-// Gemini handles vision. Grok handles reasoning.
+// All AI calls routed through Vercel AI Gateway:
+//   - Primary: xai/grok-4.1-fast-reasoning (reasoning)
+//   - Fallback: google/gemini-3-flash
+//   - Native prompt caching + tags for cost attribution
 // ═══════════════════════════════════════════
 
-import { callGrok, isGrokAvailable } from './integrations/grok';
+import { generateAIText, isAiGatewayAvailable, AI_MODELS } from './integrations/ai-gateway';
+import { cacheGetOrFetch } from './cache';
 
-const OPENROUTER_URL = 'https://openrouter.ai/api/v1/chat/completions';
-const AI_MODEL = process.env.RECEIPT_FRAUD_MODEL || 'google/gemini-2.0-flash-001';
+async function aiCall(prompt: string, tag: string = 'points-engine'): Promise<string> {
+  if (!isAiGatewayAvailable()) return '';
 
-async function aiCall(prompt: string): Promise<string> {
-  // Primary: Grok for reasoning tasks
-  if (isGrokAvailable()) {
-    try {
-      const grokRes = await callGrok(prompt, { temperature: 0, maxTokens: 500 });
-      if (grokRes.ok && grokRes.content) return grokRes.content.trim();
-    } catch {
-      // Fall through to Gemini
-    }
-  }
+  const result = await generateAIText({
+    model: AI_MODELS.GROK,
+    prompt,
+    maxTokens: 500,
+    temperature: 0,
+    fallbackModels: [AI_MODELS.GEMINI_FAST, 'google/gemini-2.5-flash'],
+    tags: [`feature:${tag}`, 'pipeline:workers'],
+  });
 
-  // Fallback: OpenRouter → Gemini
-  const key = process.env.OPENROUTER_API_KEY;
-  if (!key) return '';
-
-  try {
-    const res = await fetch(OPENROUTER_URL, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${key}`,
-        'Content-Type': 'application/json',
-        'HTTP-Referer': 'https://platform-ebon-nine.vercel.app',
-        'X-Title': 'GASCOIN Points Engine',
-      },
-      body: JSON.stringify({
-        model: AI_MODEL,
-        messages: [{ role: 'user', content: prompt }],
-        temperature: 0,
-        max_tokens: 500,
-      }),
-    });
-
-    if (!res.ok) return '';
-    const json = (await res.json()) as any;
-    return json?.choices?.[0]?.message?.content?.trim() || '';
-  } catch {
-    return '';
-  }
+  return result.ok ? result.text.trim() : '';
 }
 
 // ─── 1. TWEET QUALITY SCORER ───
@@ -67,6 +42,30 @@ export interface TweetQualityScore {
 }
 
 export async function scoreTweetQuality(params: {
+  tweetText: string;
+  impressions: number;
+  likes: number;
+  retweets: number;
+  replies: number;
+  followerCount: number;
+  contentType?: string;
+  tweetId?: string;
+}): Promise<TweetQualityScore> {
+  // Upstash exact-match cache: key by tweet_id + impression bucket. Re-scores
+  // only when impressions cross a 1000-unit threshold — prevents hourly workers
+  // from re-querying AI for the same tweet when metrics are stable.
+  if (params.tweetId) {
+    const bucket = Math.floor(params.impressions / 1000);
+    return cacheGetOrFetch(
+      `tweetquality:${params.tweetId}:${bucket}`,
+      () => doScoreTweetQuality(params),
+      3600, // 1 hour
+    );
+  }
+  return doScoreTweetQuality(params);
+}
+
+async function doScoreTweetQuality(params: {
   tweetText: string;
   impressions: number;
   likes: number;

@@ -1,4 +1,8 @@
 import crypto from 'crypto';
+import { z } from 'zod';
+import { generateAIJsonVision, isAiGatewayAvailable, AI_MODELS } from './ai-gateway';
+import { cacheGetOrFetch } from '../cache';
+import { getSystemPrompt, PROMPT_KEYS } from '../prompts';
 
 // ═══════════════════════════════════════════
 // GASCOIN Receipt Processing Pipeline
@@ -6,16 +10,12 @@ import crypto from 'crypto';
 // Step 1: EXIF check (free, instant)
 // Step 2: Dimension/format check (free, instant)
 // Step 3: dHash perceptual hash (free, local)
-// Step 4: Gemini Flash — structured extraction + fraud scoring (one API call)
+// Step 4: Gemini Vision — structured extraction + fraud scoring (one AI call)
+//         Routed through Vercel AI Gateway with:
+//           - Provider-native Gemini caching (automatic)
+//           - Upstash SHA256 exact-match dedup (7d) → identical uploads skip AI
+//           - Tags for cost attribution in Vercel dashboard
 // ═══════════════════════════════════════════
-
-const OPENROUTER_URL = 'https://openrouter.ai/api/v1/chat/completions';
-const OCR_MODEL = process.env.RECEIPT_OCR_MODEL || 'google/gemini-2.0-flash-lite-001';
-const FRAUD_MODEL = process.env.RECEIPT_FRAUD_MODEL || 'google/gemini-2.0-flash-001';
-
-function getApiKey(): string {
-  return process.env.OPENROUTER_API_KEY || '';
-}
 
 // ─── STEP 1: EXIF Metadata Check ───
 
@@ -248,100 +248,67 @@ export interface ReceiptExtraction {
   raw_text: string;
 }
 
-export async function extractAndScoreReceipt(buf: Buffer, mimeType: string): Promise<ReceiptExtraction> {
-  const apiKey = getApiKey();
-  if (!apiKey) {
+// Zod schema — the AI Gateway enforces this structure via Output.object().
+// Privacy-first: country only, no city/state/station name.
+const ReceiptSchema = z.object({
+  station_country: z.string().nullable().describe('country code (US, CA, UK, etc.) or null'),
+  receipt_date: z.string().nullable().describe('YYYY-MM-DD or null'),
+  total_amount: z.number().nullable(),
+  currency: z.string().default('USD'),
+  wallet_address: z
+    .string()
+    .nullable()
+    .describe('any long alphanumeric string (32-44 chars) found handwritten or null'),
+  has_handwriting: z.boolean(),
+  has_gascoin_hashtag: z.boolean(),
+  is_physical_receipt: z.boolean().describe('false if screenshot, digital receipt, or AI-generated'),
+  is_gas_station: z.boolean(),
+  is_digitally_manipulated: z.boolean().describe('true if edited, pasted, or overlaid'),
+  confidence: z.number().min(0).max(1).describe('0-1 confidence in extraction accuracy'),
+  fraud_notes: z.string(),
+  raw_text: z.string().describe('all readable text on the receipt'),
+});
+
+async function doReceiptExtraction(buf: Buffer, mimeType: string): Promise<ReceiptExtraction> {
+  if (!isAiGatewayAvailable()) {
     return fallbackExtraction();
   }
 
-  const b64 = buf.toString('base64');
+  // System prompt is Edge-Config-backed so it can be tuned live without a
+  // redeploy. Falls back to bundled default from lib/prompts.ts.
+  const systemPrompt = await getSystemPrompt(PROMPT_KEYS.GEMINI_RECEIPT);
 
-  const prompt = `Analyze this gas station receipt image. Return ONLY valid JSON with these exact fields:
+  const result = await generateAIJsonVision(ReceiptSchema, {
+    model: AI_MODELS.GEMINI_VISION,
+    system: systemPrompt,
+    prompt:
+      'Extract structured data from this gas-station receipt and detect fraud signals. Return the JSON object only.',
+    image: buf,
+    mimeType: mimeType || 'image/jpeg',
+    maxTokens: 1200,
+    temperature: 0,
+    fallbackModels: [AI_MODELS.GEMINI_FAST, 'google/gemini-2.5-flash'],
+    tags: ['feature:receipt-ocr', 'pipeline:submit'],
+  });
 
-{
-  "station_country": "country code (US, CA, UK, etc.) or null",
-  "receipt_date": "YYYY-MM-DD or null",
-  "total_amount": 0.00,
-  "currency": "USD",
-  "wallet_address": "any long alphanumeric string (32-44 chars) found handwritten or null",
-  "has_handwriting": true,
-  "has_gascoin_hashtag": false,
-  "is_physical_receipt": true,
-  "is_gas_station": true,
-  "is_digitally_manipulated": false,
-  "confidence": 0.85,
-  "fraud_notes": "any concerns about authenticity",
-  "raw_text": "all readable text on the receipt"
+  if (!result.ok) {
+    console.error('Receipt extraction failed:', result.error);
+    return fallbackExtraction();
+  }
+
+  return result.data;
 }
 
-Be strict about fraud detection:
-- is_physical_receipt: false if this is a screenshot, digital receipt, or AI-generated image
-- is_digitally_manipulated: true if you see signs of editing, pasting, or digital overlay
-- confidence: 0-1 how confident you are in the extraction accuracy
-- wallet_address: look for a long string of mixed case letters and numbers, possibly handwritten`;
-
-  try {
-    const res = await fetch(OPENROUTER_URL, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${apiKey}`,
-        'Content-Type': 'application/json',
-        'HTTP-Referer': 'https://platform-ebon-nine.vercel.app',
-        'X-Title': 'GASCOIN Receipt Verification',
-      },
-      body: JSON.stringify({
-        model: FRAUD_MODEL,
-        messages: [
-          {
-            role: 'user',
-            content: [
-              { type: 'text', text: prompt },
-              { type: 'image_url', image_url: { url: `data:${mimeType || 'image/jpeg'};base64,${b64}` } },
-            ],
-          },
-        ],
-        temperature: 0,
-        max_tokens: 1000,
-      }),
-    });
-
-    if (!res.ok) {
-      console.error('OpenRouter error:', res.status, await res.text().catch(() => ''));
-      return fallbackExtraction();
-    }
-
-    const json = (await res.json()) as any;
-    const text = json?.choices?.[0]?.message?.content || '';
-
-    // Extract JSON from response (model may wrap in markdown code blocks)
-    const jsonMatch = text.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) {
-      console.error('No JSON in model response');
-      return { ...fallbackExtraction(), raw_text: text };
-    }
-
-    const parsed = JSON.parse(jsonMatch[0]);
-    return {
-      // Privacy-first: country only
-
-      station_country: parsed.station_country || null,
-      receipt_date: parsed.receipt_date || null,
-      total_amount: typeof parsed.total_amount === 'number' ? parsed.total_amount : null,
-      currency: parsed.currency || 'USD',
-      wallet_address: parsed.wallet_address || null,
-      has_handwriting: !!parsed.has_handwriting,
-      has_gascoin_hashtag: !!parsed.has_gascoin_hashtag,
-      is_physical_receipt: parsed.is_physical_receipt !== false,
-      is_gas_station: parsed.is_gas_station !== false,
-      is_digitally_manipulated: !!parsed.is_digitally_manipulated,
-      confidence: typeof parsed.confidence === 'number' ? parsed.confidence : 0.5,
-      fraud_notes: parsed.fraud_notes || '',
-      raw_text: parsed.raw_text || text,
-    };
-  } catch (e: any) {
-    console.error('Receipt extraction failed:', e.message);
-    return fallbackExtraction();
-  }
+export async function extractAndScoreReceipt(buf: Buffer, mimeType: string): Promise<ReceiptExtraction> {
+  // Upstash exact-match dedup by SHA256: identical uploads skip the AI call
+  // entirely (7d TTL). Single-flight coalescing in cacheGetOrFetch also
+  // collapses concurrent duplicate uploads within the same warm instance.
+  const sha256 = crypto.createHash('sha256').update(buf).digest('hex');
+  return cacheGetOrFetch(
+    `receipt:extract:${sha256}`,
+    () => doReceiptExtraction(buf, mimeType),
+    7 * 24 * 60 * 60, // 7 days
+  );
 }
 
 function fallbackExtraction(): ReceiptExtraction {

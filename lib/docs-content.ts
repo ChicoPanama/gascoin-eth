@@ -935,6 +935,124 @@ Inputs(wallet,tweet,receipt)
 <p>Three independent AI systems from three different providers, backed by persistent cross-pipeline memory, ensure no single point of model failure or bias can compromise the verification pipeline. Claude's verdict is written back to mem0, building an ever-growing intelligence corpus that informs future reviews.</p>`,
         order: 29,
       },
+      {
+        slug: "ai-engine-architecture",
+        title: "AI Engine Architecture & Cost Defense",
+        categorySlug: "technology",
+        category: "Technology",
+        description: "How GASCOIN routes, caches, and governs every paid AI call to keep the protocol economically sustainable.",
+        content: `<p>GASCOIN runs three independent AI providers — <strong>Anthropic Claude</strong> (final oversight), <strong>xAI Grok</strong> (fraud reasoning), and <strong>Google Gemini</strong> (vision + receipt extraction) — behind a unified infrastructure layer. This page explains the architecture that keeps AI costs predictable, latency low, and failure modes graceful.</p>
+
+<h3>Why this matters</h3>
+<p>Every submission can touch 2–3 paid AI providers. At the protocol's growth curve, a naive implementation would burn tokens on duplicate work, thundering-herd retries, and per-provider integration drift. GASCOIN solves this with a four-layer cache architecture, provider-agnostic routing, and persistent institutional memory.</p>
+
+<h3>The four-layer cache architecture</h3>
+<pre class="doc-ascii">
+           ┌──────────────────────────────────────────────────┐
+           │   Next.js Route Handler                           │
+           │   (Vercel Fluid Compute — elastic concurrency)    │
+           │   Single warm instance serves many concurrent     │
+           │   requests, making single-flight coalescing       │
+           │   provably effective.                             │
+           └────────────────┬───────────────────────────────────┘
+                            │
+           ┌────────────────┴───────────────────┐
+           │                                    │
+      ┌────▼──────┐                  ┌──────────▼─────────┐
+      │  Upstash  │                  │  Vercel AI Gateway  │◄── provider-native
+      │  Redis    │                  │  caching: 'auto'    │    prompt caching:
+      │           │                  └──┬──┬──┬───┬────────┘    · Claude (90% off)
+      │ cacheGet  │                     │  │  │   │             · Gemini (75% off)
+      │ OrFetch   │                     ▼  ▼  ▼   ▼             · Grok   (50-75%)
+      │ (exact    │               Claude Grok Gemini …
+      │  match +  │                  ┌──────────────────────┐
+      │ single-   │                  │  Vercel Data Cache   │◄── unstable_cache
+      │ flight)   │                  │  (KB context, LB,    │    tag-based
+      │           │                  │   mem0 profiles)     │    invalidation
+      └───────────┘                  └──────────────────────┘
+                                     ┌──────────────────────┐
+                                     │  Vercel Edge Config  │◄── stable prompt
+                                     │  (prompt prefixes)   │    prefixes edited
+                                     │                      │    live from the
+                                     │  Sub-ms edge reads   │    dashboard —
+                                     │                      │    no redeploy.
+                                     └──────────────────────┘
+</pre>
+
+<p>Each layer does a different job:</p>
+
+<h4>Layer 1 — Provider-native prompt caching (via Vercel AI Gateway)</h4>
+<ul>
+<li><strong>What it does:</strong> Uses the cache feature built into each AI provider (Anthropic, Gemini, Grok) to avoid paying for the same tokens twice.</li>
+<li><strong>How it works:</strong> Large stable rulebooks (tier rules, fraud taxonomy, decision matrices) are sent as the system prompt. The provider marks them as cache breakpoints. Subsequent calls reading from cache are charged at a fraction of the normal input rate — up to 90% off on Claude, 75% off on Gemini, 50–75% off on Grok.</li>
+<li><strong>Why GASCOIN can use it:</strong> System prompts are bulked to &gt;1024 tokens so every provider's minimum cache requirement is satisfied. Variable data (the specific claim under review) stays tiny in the user message, maximizing cache hit rate.</li>
+</ul>
+
+<h4>Layer 2 — Upstash Redis exact-match dedup</h4>
+<ul>
+<li><strong>What it does:</strong> Deduplicates entire AI calls by content hash. Two users uploading the same receipt image only invoke Gemini once.</li>
+<li><strong>How it works:</strong> A Lua-backed atomic cache layer with single-flight coalescing. When N concurrent requests hit a cold key for the same input, exactly one origin call fires and the rest wait on that promise.</li>
+<li><strong>Where it applies:</strong> Receipt extraction (keyed by SHA-256 of the image, 7-day TTL), Claude oversight (keyed by claim ID, 1-hour TTL), tweet quality scoring (keyed by tweet ID and engagement bucket, 1-hour TTL).</li>
+</ul>
+
+<h4>Layer 3 — Vercel Data Cache (framework outputs)</h4>
+<ul>
+<li><strong>What it does:</strong> Caches computed non-AI outputs at the framework level, separate from Upstash. Things like the synthesized knowledge-base context, leaderboards, and distilled entity profiles.</li>
+<li><strong>How it works:</strong> Next.js <code>unstable_cache</code> persists function results in a Vercel-managed edge-replicated cache with tag-based invalidation (<code>revalidateTag</code>). Admin edits to the knowledge base instantly invalidate everywhere.</li>
+<li><strong>Why two cache layers:</strong> Upstash is for application state and dedup; Vercel Data Cache is for framework outputs and tag-based workflows. They complement each other.</li>
+</ul>
+
+<h4>Layer 4 — Vercel Edge Config (live-editable prompts)</h4>
+<ul>
+<li><strong>What it does:</strong> Stores the stable prompt prefixes (oversight rulebook, fraud taxonomy, extraction rules) in an edge-replicated key-value store with sub-millisecond reads.</li>
+<li><strong>Why it matters:</strong> Operators can tune prompts from the Vercel dashboard without a code push. Edits propagate across all edges in ~1 second. Bundled defaults ship with every deploy, so nothing breaks if Edge Config is unavailable.</li>
+<li><strong>Maximizes Layer 1:</strong> Because every call reads the exact same byte-identical prefix, provider cache hit rate stays near 100%.</li>
+</ul>
+
+<h3>Vercel AI Gateway — unified provider routing</h3>
+<p>All AI calls route through the <strong>Vercel AI Gateway</strong>, a single endpoint in front of every provider. This gives the protocol:</p>
+<ul>
+<li><strong>Automatic failover</strong> — if Grok is down, requests fall through to Gemini transparently. If Anthropic is rate-limited, Claude requests retry against an alternative provider in the same family.</li>
+<li><strong>Unified authentication</strong> — Vercel's OIDC token is auto-injected and auto-refreshed in production. No long-lived provider API keys to rotate.</li>
+<li><strong>Cost attribution</strong> — every call is tagged (e.g. <code>feature:claude-oversight</code>, <code>pipeline:submit</code>, <code>feature:receipt-ocr</code>) so spend can be audited per feature in the dashboard.</li>
+<li><strong>Hard budget caps</strong> — monthly and per-user spend limits are enforced at the gateway. If a cap is hit, the gateway returns HTTP 402 and the pipeline degrades gracefully instead of running up a bill.</li>
+<li><strong>Audit logging</strong> — every request records timestamp, model, provider used, token counts, latency, user ID, tags, and which providers were tried in the failover chain.</li>
+</ul>
+
+<h3>Fluid Compute — concurrency that matters</h3>
+<p>The platform runs on Vercel's <strong>Fluid Compute</strong> runtime. Unlike classic serverless (one isolate per request), Fluid warms a single instance that handles dozens of concurrent requests simultaneously, with peaks above 250 per instance. This is essential for:</p>
+<ul>
+<li><strong>Single-flight coalescing</strong> — the in-memory promise map that deduplicates concurrent cold-key misses only works when requests share an instance. Fluid makes this the default.</li>
+<li><strong>Prompt cache warmth</strong> — repeated Gateway calls from the same warm instance use the same provider-side cache entries, maximizing hit rate.</li>
+<li><strong>Lower p99 latency</strong> — no cold start penalty between related submissions.</li>
+</ul>
+
+<h3>mem0 — context compression, not just memory</h3>
+<p>mem0 stores per-wallet trust trajectory and cross-pipeline signals as distilled summaries. After every claim decision, a compressed fingerprint is written back. On the next claim for the same wallet, Claude receives a ~50-token summary instead of replaying raw history. This compounds with Layer 1: the stable system prompt stays cached while only the tiny summary varies, driving cache hit rate up and input token count down.</p>
+
+<h3>What this delivers</h3>
+<ul>
+<li><strong>No single point of failure</strong> — three independent providers, automatic failover, graceful degradation.</li>
+<li><strong>Duplicate receipts are free</strong> — SHA-256 dedup means identical uploads never reach a paid API.</li>
+<li><strong>Worker retries are free</strong> — claim review cached by ID for an hour.</li>
+<li><strong>Live prompt tuning</strong> — rulebooks edited from the dashboard, changes live in seconds.</li>
+<li><strong>Hard cost ceiling</strong> — budget caps enforced by the gateway, not by code.</li>
+<li><strong>Full audit trail</strong> — every AI call is logged with tags for forensic review.</li>
+</ul>
+
+<h3>Safety posture</h3>
+<p>If any layer fails — Edge Config unreachable, Gateway down, mem0 unavailable, Upstash degraded — the pipeline continues with the next-best fallback and logs the event. No AI outage can block a legitimate payout; no cache outage can compromise fraud detection. The system is designed to fail into safety, not into permissiveness.</p>
+
+<h3>ASCII quick reference</h3>
+<pre class="doc-ascii">
+  SUBMISSION → [Gates 1-13] → [Gemini Vision] → [Grok Reasoning] → [mem0 Lookup] → [Claude Oversight] → PAYOUT
+                                   │                  │                 │                 │
+                                   └── cached ────────┴── cached ───────┴── cached ───────┘
+                                        by SHA           by signals       by wallet
+</pre>
+<p>Every stage has exit ramps: a strong fraud signal at any layer short-circuits to reject; a graceful fallback at any layer preserves the deterministic decision. The system is verifiable, auditable, and economically bounded.</p>`,
+        order: 30,
+      },
     ],
   },
   {

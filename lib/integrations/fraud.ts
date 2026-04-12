@@ -1,3 +1,4 @@
+import { z } from 'zod';
 import {
   computeExactHash,
   computePerceptualHash,
@@ -5,7 +6,8 @@ import {
   checkImageDimensions,
   type PipelineResult,
 } from './receipt-pipeline';
-import { callGrok, isGrokAvailable } from './grok';
+import { getSystemPrompt, PROMPT_KEYS } from '../prompts';
+import { generateAIJson, isAiGatewayAvailable, AI_MODELS } from './ai-gateway';
 
 export type FraudSignals = {
   aiScore: number;
@@ -29,7 +31,14 @@ export type CrossValidationResult = {
   concerns: string[];
 };
 
-function buildFraudPrompt(signals: {
+const FraudResultSchema = z.object({
+  fraudRiskLevel: z.enum(['low', 'medium', 'high']),
+  confidence: z.number().min(0).max(1),
+  reasoning: z.string(),
+  concerns: z.array(z.string()),
+});
+
+function buildFraudUserPrompt(signals: {
   aiScore: number;
   tamperScore: number;
   exifScore: number;
@@ -40,32 +49,19 @@ function buildFraudPrompt(signals: {
   isDigitallyManipulated?: boolean;
   country?: string;
 }): string {
-  return `You are a fraud analyst for a gas receipt refund protocol. Analyze these signals and determine the fraud risk level.
+  return `Analyze these signals for one submission:
 
-SIGNALS:
-- AI generation score: ${signals.aiScore.toFixed(3)} (0=real, 1=AI-generated, threshold: 0.65)
-- Tamper score: ${signals.tamperScore.toFixed(3)} (0=clean, 1=tampered, threshold: 0.55)
-- EXIF metadata score: ${signals.exifScore.toFixed(2)} (1=real camera EXIF present, 0=stripped/missing)
-- Image dimension score: ${signals.dimensionScore.toFixed(2)} (1=real photo dimensions, 0=suspicious AI dimensions)
+- AI generation score: ${signals.aiScore.toFixed(3)}
+- Tamper score: ${signals.tamperScore.toFixed(3)}
+- EXIF metadata score: ${signals.exifScore.toFixed(2)}
+- Image dimension score: ${signals.dimensionScore.toFixed(2)}
 - OCR confidence: ${signals.ocrConfidence?.toFixed(2) ?? 'unknown'}
 - Is physical receipt: ${signals.isPhysicalReceipt ?? 'unknown'}
 - Digitally manipulated: ${signals.isDigitallyManipulated ?? 'unknown'}
 - Country: ${signals.country ?? 'unknown'}
 - Flags: ${signals.flags.length > 0 ? signals.flags.join(', ') : 'none'}
 
-Respond ONLY with valid JSON:
-{"fraudRiskLevel":"low|medium|high","confidence":0.0-1.0,"reasoning":"one sentence","concerns":["list","of","specific","concerns"]}`;
-}
-
-function parseFraudResponse(text: string): CrossValidationResult {
-  const cleaned = text.replace(/```json\n?|\n?```/g, '').trim();
-  const parsed = JSON.parse(cleaned);
-  return {
-    fraudRiskLevel: parsed.fraudRiskLevel || 'medium',
-    confidence: Number(parsed.confidence) || 0.5,
-    reasoning: String(parsed.reasoning || ''),
-    concerns: Array.isArray(parsed.concerns) ? parsed.concerns : [],
-  };
+Return the verdict JSON.`;
 }
 
 async function aiFraudAnalysis(signals: {
@@ -79,48 +75,37 @@ async function aiFraudAnalysis(signals: {
   isDigitallyManipulated?: boolean;
   country?: string;
 }): Promise<CrossValidationResult> {
-  const prompt = buildFraudPrompt(signals);
-
-  // Use Grok for cross-signal fraud REASONING (not image analysis — Gemini handles that)
-  if (isGrokAvailable()) {
-    try {
-      const grokRes = await callGrok(prompt, {
-        temperature: 0.1,
-        maxTokens: 300,
-        systemPrompt: 'You are a fraud reasoning engine. You receive pre-computed signals from image analysis (Gemini) and social verification (X API). Your job is to reason about whether the COMBINATION of signals indicates fraud. Respond only with valid JSON.',
-      });
-      if (grokRes.ok && grokRes.content) {
-        const result = parseFraudResponse(grokRes.content);
-        result.reasoning = `[grok] ${result.reasoning}`;
-        return result;
-      }
-    } catch {
-      // Fall through to Gemini reasoning fallback
-    }
+  if (!isAiGatewayAvailable()) {
+    return {
+      fraudRiskLevel: 'medium',
+      confidence: 0.5,
+      reasoning: 'AI reasoning unavailable — heuristic posture preserved',
+      concerns: ['ai_unavailable'],
+    };
   }
 
-  // Fallback: Use Gemini for reasoning too (less ideal but functional)
-  const apiKey = process.env.OPENROUTER_API_KEY || '';
-  const model = process.env.RECEIPT_FRAUD_MODEL || 'google/gemini-2.0-flash-001';
-  if (!apiKey) return { fraudRiskLevel: 'medium', confidence: 0.5, reasoning: 'No reasoning engine available', concerns: ['no_api_key'] };
+  const systemPrompt = await getSystemPrompt(PROMPT_KEYS.GROK_FRAUD);
+  const result = await generateAIJson(FraudResultSchema, {
+    model: AI_MODELS.GROK,
+    system: systemPrompt,
+    prompt: buildFraudUserPrompt(signals),
+    maxTokens: 300,
+    temperature: 0.1,
+    enableAnthropicCache: true, // safe no-op on non-anthropic, future-proofs migration
+    fallbackModels: [AI_MODELS.GEMINI_FAST, 'google/gemini-2.5-flash'],
+    tags: ['feature:fraud-reasoning', 'pipeline:submit'],
+  });
 
-  try {
-    const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
-      body: JSON.stringify({ model, messages: [{ role: 'user', content: prompt }], temperature: 0.1, max_tokens: 200 }),
-      cache: 'no-store',
-    });
-
-    if (!res.ok) return { fraudRiskLevel: 'medium', confidence: 0.5, reasoning: 'Gemini reasoning fallback error', concerns: ['api_error'] };
-    const json = await res.json() as any;
-    const text = json?.choices?.[0]?.message?.content || '';
-    const result = parseFraudResponse(text);
-    result.reasoning = `[gemini-fallback] ${result.reasoning}`;
-    return result;
-  } catch {
-    return { fraudRiskLevel: 'medium', confidence: 0.5, reasoning: 'All reasoning engines failed', concerns: ['all_engines_failed'] };
+  if (!result.ok) {
+    return {
+      fraudRiskLevel: 'medium',
+      confidence: 0.5,
+      reasoning: `AI Gateway error: ${result.error}`,
+      concerns: ['gateway_error'],
+    };
   }
+
+  return result.data;
 }
 
 export async function runFraudChecks(raw: ArrayBuffer, pipeline?: PipelineResult): Promise<FraudSignals> {

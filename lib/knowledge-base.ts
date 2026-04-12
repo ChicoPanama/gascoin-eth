@@ -9,6 +9,7 @@
  * and recent decisions into the oversight prompt.
  */
 
+import { unstable_cache } from 'next/cache';
 import { getSupabaseAdmin } from './supabase';
 import { cacheGetOrFetch } from './cache';
 
@@ -119,7 +120,22 @@ const MAX_CONTEXT_CHARS = 1200; // ~300 tokens
  * Conditionally includes: fraud patterns (high risk), gate rules (failed gates),
  * ring patterns (referral flags)
  */
-export async function buildClaudeKBContext(signals: {
+/**
+ * Composed KB context for Claude oversight. Wrapped in Next.js unstable_cache
+ * (Vercel Data Cache) — framework-level caching layered on top of Upstash.
+ *
+ * Cache key is derived from the signal shape (risk bucket + fraud level +
+ * failed-gate set + referral flag), so identical claim postures share cache
+ * entries. Revalidate with `revalidateTag('kb:context')` whenever the KB
+ * itself is edited (admin UI or Obsidian sync).
+ */
+export const buildClaudeKBContext = unstable_cache(
+  buildClaudeKBContextImpl,
+  ['gc:kb:claude-context'],
+  { revalidate: 3600, tags: ['kb:context'] },
+);
+
+async function buildClaudeKBContextImpl(signals: {
   riskScore: number;
   failedGates: string[];
   fraudRisk: string;
