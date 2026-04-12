@@ -3809,57 +3809,7 @@ button.docs-footer-link {
 .lb-mini-sol { color: var(--muted); text-align: right; }
 
 /* ─── POINTS PAGE ─── */
-.pts-header {
-  text-align: center;
-  padding: 80px 24px 40px;
-}
-.pts-eyebrow {
-  font-family: var(--font-mono);
-  font-size: 11px;
-  letter-spacing: 0.3em;
-  color: var(--muted);
-  margin-bottom: 16px;
-}
-.pts-title {
-  font-family: var(--font-display);
-  font-size: 48px;
-  font-weight: 800;
-  text-transform: uppercase;
-  color: var(--fg);
-  margin: 0 0 16px;
-}
-.pts-subtitle {
-  font-family: var(--font-body);
-  font-size: 15px;
-  font-weight: 300;
-  color: rgba(255,255,255,0.6);
-  max-width: 600px;
-  margin: 0 auto;
-  line-height: 1.7;
-}
-.pts-section {
-  max-width: 800px;
-  margin: 0 auto 48px;
-  padding: 0 24px;
-}
-.pts-section-title {
-  font-family: var(--font-display);
-  font-size: 24px;
-  font-weight: 700;
-  text-transform: uppercase;
-  color: var(--fg);
-  margin: 0 0 16px;
-  padding-bottom: 12px;
-  border-bottom: 1px solid var(--line);
-}
-.pts-section-desc {
-  font-family: var(--font-body);
-  font-weight: 300;
-  font-size: 14px;
-  color: rgba(255,255,255,0.6);
-  line-height: 1.7;
-  margin-bottom: 24px;
-}
+/* Uses lb-header, lb-title, gc-section-num, gt-header-body from shared styles */
 .pts-do-dont {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -3921,11 +3871,6 @@ button.docs-footer-link {
   align-items: center;
   gap: 12px;
 }
-.pts-mult-icon {
-  font-size: 16px;
-  width: 24px;
-  text-align: center;
-}
 .pts-mult-label {
   font-family: var(--font-mono);
   font-size: 12px;
@@ -3952,9 +3897,6 @@ button.docs-footer-link {
   color: var(--fg);
   width: 40px;
   text-align: right;
-}
-.pts-table-wrap {
-  overflow-x: auto;
 }
 .pts-table {
   width: 100%;
@@ -5042,7 +4984,6 @@ button.docs-footer-link {
   .gt-teaser-inner { grid-template-columns: 1fr; gap: 32px; }
   .gt-teaser-title { font-size: 48px; }
 
-  .pts-title { font-size: 32px; }
   .pts-do-dont { grid-template-columns: 1fr; }
   .pts-mult-label { width: 90px; font-size: 11px; }
 
