@@ -59,7 +59,7 @@ export function Nav() {
     <span ref={actionsRef as any} className="nav-actions">
       <WalletButton />
       <AuthNavButton />
-      <Link href="/docs" className={`btn nav-link-desktop${pathname.startsWith('/docs') ? ' nav-link-active' : ''}`} style={{ fontSize: 10, padding: '6px 14px', letterSpacing: '0.1em' }}>
+      <Link href="/docs" className={`btn nav-docs-btn${pathname.startsWith('/docs') ? ' nav-link-active' : ''}`} style={{ fontSize: 10, padding: '6px 14px', letterSpacing: '0.1em' }}>
         <span className="nav-link-inner">
           <span className="nav-link-icon" aria-hidden>⧉</span>
           <span>DOCS</span>

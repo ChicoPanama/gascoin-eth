@@ -5169,9 +5169,13 @@ button.docs-footer-link {
 
 .nav--compact { flex-wrap: nowrap; overflow: hidden; gap: 0; }
 .nav--compact .nav-link-desktop { display: none !important; }
-.nav--compact .wallet-btn,
-.nav--compact .auth-signed-in { display: none !important; }
-.nav--compact > span > .btn { display: none !important; }
+.nav--compact .nav-actions {
+  margin-left: auto;
+}
+
+.nav--compact .nav-docs-btn {
+  display: inline-flex !important;
+}
 
 .gc-nav--compact .mobile-menu-toggle,
 .nav--compact .mobile-menu-toggle {

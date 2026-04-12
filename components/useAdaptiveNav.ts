@@ -22,7 +22,7 @@ export function useAdaptiveNav(): AdaptiveNavResult {
   const [compact, setCompact] = useState(false);
 
   useEffect(() => {
-    const sync = () => setCompact(window.innerWidth <= 900);
+    const sync = () => setCompact(window.innerWidth <= 1200);
     sync();
     window.addEventListener('resize', sync);
     return () => window.removeEventListener('resize', sync);
