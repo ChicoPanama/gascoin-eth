@@ -13,6 +13,7 @@ const NAV_LINKS = [
   { href: '/dashboard', label: 'Treasury' },
   { href: '/community', label: 'Community' },
   { href: '/leaderboard', label: 'Leaderboard' },
+  { href: '/points', label: 'Points' },
   { href: '/referral', label: 'Refer' },
   { href: '/perks', label: 'Perks' },
   { href: '/gates', label: 'Gates' },

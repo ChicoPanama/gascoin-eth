@@ -11,8 +11,9 @@ type AdaptiveNavResult = {
 };
 
 /**
- * Keep top bar stable on desktop/laptop.
- * Compact mode is strictly mobile (<=900px).
+ * Adaptive nav: switches to compact (hamburger) mode when links overflow.
+ * Checks actual content width, not just viewport breakpoint.
+ * Fallback: always compact below 1100px since we have 11+ links.
  */
 export function useAdaptiveNav(): AdaptiveNavResult {
   const navRef = useRef<HTMLElement | null>(null);
@@ -22,10 +23,29 @@ export function useAdaptiveNav(): AdaptiveNavResult {
   const [compact, setCompact] = useState(false);
 
   useEffect(() => {
-    const sync = () => setCompact(window.innerWidth <= 900);
-    sync();
+    const sync = () => {
+      // Hard cutoff for mobile
+      if (window.innerWidth <= 1100) {
+        setCompact(true);
+        return;
+      }
+      // Check actual overflow: if links + brand + actions exceed nav width
+      const nav = navRef.current;
+      const brand = brandRef.current;
+      const links = linksRef.current;
+      const actions = actionsRef.current;
+      if (nav && brand && links && actions) {
+        const available = nav.clientWidth;
+        const needed = brand.scrollWidth + links.scrollWidth + actions.scrollWidth + 32;
+        setCompact(needed > available);
+      } else {
+        setCompact(false);
+      }
+    };
+    // Initial check after render
+    const raf = requestAnimationFrame(sync);
     window.addEventListener('resize', sync);
-    return () => window.removeEventListener('resize', sync);
+    return () => { cancelAnimationFrame(raf); window.removeEventListener('resize', sync); };
   }, []);
 
   return { compact, navRef, brandRef, linksRef, actionsRef };
