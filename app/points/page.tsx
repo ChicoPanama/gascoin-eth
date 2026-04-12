@@ -43,7 +43,12 @@ export default function PointsPage() {
         <div className="lb-header__meta">
           <span className="lb-tag">— Points System · Beat the Algorithm</span>
         </div>
-        <h1 className="lb-title">POINTS</h1>
+        <h1 className="lb-title lb-title--iconed">
+          <span className="lb-title-icon-wrap" aria-hidden>
+            <img src="/icons/points-logo.jpg" alt="" className="lb-title-icon" />
+          </span>
+          POINTS
+        </h1>
         <p className="gt-header-body">
           Your points drive your leaderboard rank. X rewards original content — so do we. Here&apos;s how to maximize both.
         </p>
