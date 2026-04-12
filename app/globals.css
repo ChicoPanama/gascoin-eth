@@ -4957,7 +4957,101 @@ button.docs-footer-link {
   .nav-docs-btn { display: none !important; }
 }
 
-/* ─── RESPONSIVE ─── */
+/* ─── MOBILE OPTIMIZATION ─── */
+
+/* Tablet and smaller */
+@media (max-width: 1100px) {
+  .container { padding: 24px 24px; max-width: 100%; }
+  .container > .gc-nav { margin-left: -24px; margin-right: -24px; margin-top: -24px; }
+}
+
+/* Phone breakpoint */
+@media (max-width: 640px) {
+  .container { padding: 16px 16px; }
+  .container > .gc-nav { margin-left: -16px; margin-right: -16px; margin-top: -16px; margin-bottom: 16px; }
+
+  /* Nav shrinks on phones */
+  .gc-nav { height: 52px; padding: 0 16px; }
+  .gc-nav-brand { font-size: 16px; letter-spacing: 0.12em; }
+  .gc-nav-logo-icon { width: 20px; height: 20px; }
+
+  /* Dashboard / Me page — stack everything */
+  .ud-header { padding: 24px 0 16px; }
+  .ud-title { font-size: 36px !important; }
+  .ud-header__identity { flex-direction: column; align-items: flex-start; gap: 4px; }
+  .ud-handle { font-size: 12px; }
+  .ud-wallet { font-size: 11px; }
+  .ud-section { margin-bottom: 32px; }
+  .ud-section__header { flex-direction: column; align-items: flex-start; gap: 8px; }
+  .ud-section__title { font-size: 18px !important; }
+  .ud-actions { flex-wrap: wrap; gap: 8px; }
+  .ud-actions > a { flex: 1 1 auto; min-width: 140px; font-size: 11px; padding: 10px 12px; }
+  .ud-tabs { flex-wrap: wrap; gap: 4px; }
+  .ud-tab { flex: 1 1 auto; font-size: 10px; padding: 8px 10px; }
+  .ud-claim__row { flex-wrap: wrap; gap: 8px; padding: 12px; }
+  .ud-claim__left, .ud-claim__center, .ud-claim__right { flex: 1 1 auto; }
+  .ud-payouts__header, .ud-payouts__row { grid-template-columns: 1fr 1fr !important; gap: 8px; font-size: 11px; }
+  .ud-gates__grid { grid-template-columns: 1fr 1fr !important; }
+
+  /* All stats grids — 2 columns on phones */
+  .gc-stats-grid {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 0;
+  }
+  .gc-stat {
+    padding: 16px 12px;
+    border-right: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+  }
+  .gc-stat:nth-child(2n) { border-right: none; }
+  .gc-stat-label { font-size: 9px; }
+  .gc-stat-value { font-size: 22px !important; }
+  .gc-stat-sub { font-size: 9px; }
+
+  /* Points page mobile */
+  .pts-heading { font-size: 20px !important; margin-bottom: 12px; padding-bottom: 8px; }
+  .pts-do-dont { grid-template-columns: 1fr; gap: 16px; }
+  .pts-do, .pts-dont { padding: 16px; }
+  .pts-do-label, .pts-dont-label { font-size: 10px; }
+  .pts-list li { font-size: 12px; }
+  .pts-callout { font-size: 12px; padding: 12px 16px; }
+  .pts-mult-row { gap: 8px; }
+  .pts-mult-label { width: 80px; font-size: 10px; }
+  .pts-mult-value { font-size: 11px; width: 32px; }
+  .pts-table { font-size: 11px; }
+  .pts-table th { font-size: 9px; padding: 6px 8px; }
+  .pts-table td { padding: 8px; }
+  .pts-table th:nth-child(n+4), .pts-table td:nth-child(n+4) { display: none; }
+
+  /* Leaderboard mobile */
+  .lb-header { padding: 32px 0 24px; }
+  .lb-title { font-size: 40px !important; }
+  .lb-title-icon { width: 40px; height: 40px; }
+  .lb-rankings th, .lb-rankings td { font-size: 11px; padding: 8px; }
+
+  /* Submit flow mobile */
+  .sf-form { padding: 24px 16px !important; }
+  .sf-field input, .sf-field textarea { font-size: 16px !important; }
+
+  /* Gates mobile */
+  .gt-card { padding: 20px 16px; }
+  .gt-detail { padding: 12px; }
+  .gt-detail-line { font-size: 11px; }
+
+  /* Typography scales */
+  h1 { font-size: 32px !important; }
+  h2 { font-size: 22px !important; }
+  h3 { font-size: 18px !important; }
+}
+
+/* Very small phones */
+@media (max-width: 380px) {
+  .gc-stats-grid { grid-template-columns: 1fr !important; }
+  .gc-stat { border-right: none !important; }
+  .pts-table th:nth-child(n+3), .pts-table td:nth-child(n+3) { display: none; }
+}
+
+/* ─── RESPONSIVE (legacy 900px breakpoint) ─── */
 @media (max-width: 900px) {
   .lb-header {
     padding: 48px 0 32px;
