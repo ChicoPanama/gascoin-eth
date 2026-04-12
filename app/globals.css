@@ -91,6 +91,14 @@ code, .mono {
   text-transform: uppercase;
 }
 
+/* Toggle between full and compact link sets */
+.gc-nav-links--full { display: flex; }
+.gc-nav-links--compact { display: none; }
+@media (max-width: 1600px) {
+  .gc-nav-links--full { display: none; }
+  .gc-nav-links--compact { display: flex; }
+}
+
 .gc-nav-links {
   display: flex;
   gap: 36px;
@@ -5161,26 +5169,30 @@ button.docs-footer-link {
 }
 
 /* ═══════════════════════════════════════════
-   HAMBURGER MENU — always visible across all screens
-   Contains full nav (secondary links + Docs)
+   HAMBURGER MENU — hidden on large desktops
+   Visible below 1600px (laptops, MacBook Air, mobile)
    ═══════════════════════════════════════════ */
-.mobile-menu-toggle {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 36px;
-  height: 36px;
-  background: none;
-  border: 1px solid rgba(255,255,255,0.15);
-  border-radius: 4px;
-  cursor: pointer;
-  padding: 0;
-  flex-shrink: 0;
-  position: relative;
-  z-index: 101;
-}
-.mobile-menu-toggle:hover {
-  border-color: rgba(255,255,255,0.35);
+.mobile-menu-toggle { display: none; }
+
+@media (max-width: 1600px) {
+  .mobile-menu-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    background: none;
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 4px;
+    cursor: pointer;
+    padding: 0;
+    flex-shrink: 0;
+    position: relative;
+    z-index: 101;
+  }
+  .mobile-menu-toggle:hover {
+    border-color: rgba(255,255,255,0.35);
+  }
 }
 
 /* Adaptive compact mode (can trigger above 900px when space is tight) */
