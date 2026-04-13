@@ -754,6 +754,57 @@ code, .mono {
   50% { transform: translateY(5px); }
 }
 
+/* ─── Hero — laptop breakpoint (901-1280px) ─────────────────────────
+ * The floating side-by-side logo layout only has room to breathe at
+ * 1281px and above. At narrower widths the logo's `left: 58%` viewport-
+ * percentage position collides with the `max-width: 800px` content
+ * block — exactly the issue visible on MacBook Air viewports.
+ *
+ * Fix: at 901-1280px, switch the logo out of absolute positioning and
+ * stack it above the hero text (same pattern the <=900px mobile rule
+ * uses, with slightly more generous sizing for the extra space).
+ * Mobile rule at <=900px still applies below that range.
+ * ─────────────────────────────────────────────────────────────────── */
+@media (min-width: 901px) and (max-width: 1280px) {
+  .gc-hero {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 72px 48px 64px;
+    min-height: auto;
+    gap: 40px;
+  }
+
+  .gc-hero-content {
+    max-width: 100%;
+  }
+
+  .gc-hero-logo-float {
+    position: relative;
+    top: auto;
+    left: auto;
+    right: auto;
+    transform: none;
+    width: clamp(180px, 26vw, 260px);
+    margin: 0;
+    align-self: center;
+    order: -1; /* render above the content in flex flow */
+  }
+
+  .gc-hero-logo-g-layer {
+    animation: gcLogoFloatMobile 4s ease-in-out infinite;
+  }
+
+  .gc-hero h1 {
+    font-size: clamp(48px, 6.5vw, 72px);
+  }
+
+  .gc-hero-ghost {
+    font-size: 400px;
+    right: -40px;
+    top: -40px;
+  }
+}
+
 .gc-section-label {
   font-family: var(--font-mono);
   font-size: 12px;
