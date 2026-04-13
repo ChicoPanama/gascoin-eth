@@ -1239,6 +1239,200 @@ Inputs(wallet,tweet,receipt)
 <p>This is the kind of infrastructure most projects talk about building <em>someday</em>. GASCOIN is shipping it now, in production, with a hard cost ceiling and a full audit trail.</p>`,
         order: 30,
       },
+      {
+        slug: "memory-intelligence",
+        title: "Memory Intelligence (mem0 Pro)",
+        categorySlug: "technology",
+        category: "Technology",
+        description: "How GASCOIN uses mem0 Pro as a cross-pipeline memory bus so every worker shares intelligence without being coupled to every other worker.",
+        content: `<h3>The short version</h3>
+<p>GASCOIN runs five or six independent workers — the submission pipeline, Claude oversight, the referral verification worker, the engagement worker, the intelligence aggregator, the payout worker. Each one sees a slice of what a wallet is doing. None of them, on their own, can catch a wallet that looks clean in one slice and suspicious in another.</p>
+<p><strong>mem0 is the memory bus that stitches those slices together.</strong> Every worker writes distilled signals about a wallet into mem0. Every worker reads the synthesized profile back. A referral ring detected by the referral worker ends up in front of the payout worker. A verdict by Claude oversight ends up in front of the next Claude review for the same wallet. Nothing is coupled directly; everything communicates through memories.</p>
+<p>GASCOIN runs mem0 <strong>Pro</strong>. Every Pro-tier feature is engaged — dedicated project, graph memory, custom categories, custom fact-extraction instructions, agent/app/run scoping, immutable records, time-to-live decay, reranking, and real-time webhooks.</p>
+
+<h3>What is mem0?</h3>
+<p>mem0 is a managed memory layer for AI agents. You write facts into it, you search it back later. Under the hood it runs an LLM-powered extraction pipeline that:</p>
+<ul>
+<li>Reads what you sent it (a string, a JSON event, a chat message)</li>
+<li>Extracts durable facts per your custom instructions (what to keep, what to drop)</li>
+<li>Tags each fact into a category you configured (fraud signals, verdicts, ring flags, etc.)</li>
+<li>Stores the fact in a vector database + a graph database for retrieval</li>
+<li>On your next query, it semantically searches the relevant memories and returns them</li>
+</ul>
+<p>The interesting part is the <em>transformation on write</em>. You don't just dump raw data in — mem0 applies your extraction rules and stores the distilled form. GASCOIN tested this live: a raw input like <code>"approve | tier=Commuter | claims=3 | risk=low | receipt authentic, gate signals consistent, trust trajectory stable"</code> gets stored as <code>"Claim approved, low risk, Commuter tier, strongest signal: receipt authentic."</code> That's the custom fact-extraction instructions doing their job automatically.</p>
+
+<h3>The dedicated project</h3>
+<p>GASCOIN production memories live in a <strong>dedicated mem0 project</strong> called <code>gascoin-production</code>, completely separate from any personal or dev memories. That means:</p>
+<ul>
+<li>Protocol runtime memories never mix with development memories from other projects</li>
+<li>The project has its own API key that can be rotated independently</li>
+<li>Budget, quota, and analytics are tracked at the project level</li>
+<li>You can delete or export the entire GASCOIN memory set without affecting anything else</li>
+</ul>
+
+<h3>Graph memory — why it matters</h3>
+<p>Most memory systems store facts as a flat list. mem0 Pro stores them as a <strong>graph</strong> — every memory is a node, and mem0's extraction pipeline identifies entity relationships and builds edges between them.</p>
+<p>For GASCOIN, this matters when fraud investigations require multi-hop reasoning. Questions like <em>"which wallets share referral connections with the ring that hit claim X last week?"</em> become a graph traversal instead of a linear scan through every memory. As the protocol grows and the fraud patterns get more sophisticated, the graph structure is what keeps retrieval fast and informative.</p>
+<p>Graph memory is always on for GASCOIN — every write engages it automatically.</p>
+
+<h3>The 13 GASCOIN memory categories</h3>
+<p>Default mem0 categories (<em>personal_details</em>, <em>food</em>, <em>travel</em>, etc.) are useless for a fraud detection pipeline. GASCOIN replaced them with a <strong>protocol-specific taxonomy</strong> of 13 categories, each one representing a distinct class of signal the AI layers care about:</p>
+<pre class="doc-ascii">
+  ┌──────────────────────────────────────────────────────────────────┐
+  │                 GASCOIN MEMORY CATEGORIES                        │
+  ├──────────────────────────────────────────────────────────────────┤
+  │  wallet_trust_trajectory · whether a wallet's trust is           │
+  │                            improving / stable / declining / new │
+  │                                                                  │
+  │  claim_verdict           · Claude's distilled verdicts on past  │
+  │                            claims, compressed for fast re-use  │
+  │                                                                  │
+  │  fraud_signals           · detected fraud indicators with       │
+  │                            severity and source agent           │
+  │                                                                  │
+  │  referral_ring_flag      · BFS-detected ring cycles             │
+  │                            (highest retrieval priority)        │
+  │                                                                  │
+  │  tier_change             · when a wallet crosses a GASCOIN tier │
+  │                            boundary (Standard → Commuter → RW)  │
+  │                                                                  │
+  │  engagement_pattern      · tweet quality signals, bot detection,│
+  │                            spam flags, content-type anomalies  │
+  │                                                                  │
+  │  payout_event            · on-chain SOL dispatch events         │
+  │                            (immutable history)                 │
+  │                                                                  │
+  │  account_quality         · X account quality signals            │
+  │                                                                  │
+  │  geo_signal              · IP / OCR / EXIF country consistency  │
+  │                                                                  │
+  │  cooldown_window         · per-wallet submission cooldown state │
+  │                                                                  │
+  │  ban_state               · auto-ban or manual admin ban events  │
+  │                                                                  │
+  │  pipeline_anomaly        · unusual behaviors worth admin review │
+  │                                                                  │
+  │  misc                    · durable signals that don't fit above │
+  └──────────────────────────────────────────────────────────────────┘
+</pre>
+<p>Every write lands in one of these buckets. The category drives how mem0 extracts facts, how it surfaces them in retrieval, and how the webhook receiver classifies alerts.</p>
+
+<h3>Typed helpers — not raw writes</h3>
+<p>Pipeline code doesn't call mem0 directly. It calls typed helpers like <code>writeFraudSignal</code>, <code>writeReferralRingFlag</code>, <code>writePayoutEvent</code>, <code>writeDistilledProfile</code>, and <code>writeBanState</code>. Each helper knows:</p>
+<ul>
+<li>Which <strong>category</strong> to tag</li>
+<li>Which <strong>AI agent</strong> authored the memory (Gemini Vision, Grok Fraud, Claude Oversight, Referral Worker, Payout Worker)</li>
+<li>Which <strong>app / pipeline</strong> produced it (submit / workers / payout / admin)</li>
+<li>What <strong>run ID</strong> to assign for forensic grouping (e.g. <code>claim_abc123_review</code>)</li>
+<li>Whether the memory is <strong>immutable</strong> (permanent record) or can be updated</li>
+<li>What <strong>TTL</strong> applies (decaying signals vs permanent truth)</li>
+</ul>
+<p>This means every memory in GASCOIN is richly scoped by default. You can query <em>"show me every memory Claude-oversight wrote via gascoin-workers for wallet X in the last 7 days"</em> as a direct filter — no post-processing required.</p>
+
+<h3>Immutability — permanent ground truth</h3>
+<p>Some GASCOIN events should never be rewritten once they happen. Ring flags are fraud evidence. Payout transactions are on-chain truth. Ban records are audit history. Claude verdicts are the audit log of why a claim was approved, flagged, or rejected.</p>
+<p>All four of these helpers mark their writes <code>immutable: true</code>. mem0 refuses to overwrite or delete them — even the extraction pipeline can't merge them into something else. They are permanent, append-only, and guaranteed to exist for any future investigation.</p>
+<p>If a wallet is unbanned later, that's a <em>new</em> memory (<code>writeBanState</code> with state="unbanned") rather than removal of the old one. The audit trail is preserved.</p>
+
+<h3>Time-to-live — old signals decay automatically</h3>
+<p>Not every signal should live forever. A single elevated aiScore from 6 months ago shouldn't dominate a wallet's profile today if the wallet has been clean since. GASCOIN sets <code>fraud_signals</code> to expire after <strong>90 days</strong> — recent fraud signals surface strongly within the window, then mem0 auto-expires them. Retrieval naturally weights recent activity more than ancient activity.</p>
+<p>Ring flags, payouts, ban state, and claim verdicts <em>never</em> decay — those are permanent records.</p>
+
+<h3>Reranking — Pro-tier retrieval quality</h3>
+<p>Standard vector search returns the top-K memories by semantic similarity. mem0 Pro adds an optional <strong>reranking</strong> pass that runs a second deep-semantic-understanding model over the top results and reorders them by true relevance. It costs ~150–200ms but significantly improves the quality of what Claude oversight sees.</p>
+<p>GASCOIN uses reranking as an opt-in flag for latency-tolerant reads (Claude oversight runs on the async worker side, so the extra 150ms doesn't matter). Hot-path reads on the submission side stay fast.</p>
+
+<h3>Real-time admin alerts via webhooks</h3>
+<p>mem0 Pro supports webhooks that fire the moment a memory is added or categorized. GASCOIN has a webhook registered on the <code>gascoin-production</code> project that subscribes to two events:</p>
+<ul>
+<li><code>memory_add</code> — fires whenever a new memory is created</li>
+<li><code>memory_categorize</code> — fires when mem0 tags a memory into a category</li>
+</ul>
+<p>The webhook points at a protected endpoint in the GASCOIN platform. When mem0 posts an event, the receiver:</p>
+<ol>
+<li>Validates the bearer token against a shared secret (fail-closed if missing)</li>
+<li>Writes the full event to the immutable <code>audit_logs</code> table for forensic review</li>
+<li>If the event is high-severity — explicitly tagged high/critical, or in a category that's always critical like <code>referral_ring_flag</code> or <code>ban_state</code> — it also writes to the admin dashboard feed</li>
+</ol>
+<p>This means: the moment the referral worker writes a ring flag, within ~1 second the webhook fires, the receiver classifies it as critical (category rule), and an admin looking at the dashboard sees the alert without polling anything. Real-time cross-pipeline visibility without any custom event-bus infrastructure.</p>
+
+<h3>How the cross-pipeline bus actually works</h3>
+<pre class="doc-ascii">
+  ┌─────────────────────────────────────────────────────────────────┐
+  │                mem0 CROSS-PIPELINE MEMORY BUS                   │
+  │                                                                 │
+  │   ┌─ Submit pipeline ────────────────────────────────────┐     │
+  │   │  writes: fraud_signals (high-severity only)          │     │
+  │   └──────────────────────────────────────────────────────┘     │
+  │                           │                                    │
+  │   ┌─ Claude oversight ────┴────────────────────────────┐       │
+  │   │  reads:  getEntityProfile(wallet) — trust          │       │
+  │   │          trajectory, past verdicts, fraud signals, │       │
+  │   │          ring flags, patterns                      │       │
+  │   │  writes: writeDistilledProfile (claim_verdict,     │       │
+  │   │          immutable, agent=claude-oversight)        │       │
+  │   └────────────────────────────────────────────────────┘       │
+  │                                                                │
+  │   ┌─ Referral worker ─────────────────────────────────┐        │
+  │   │  writes: writeReferralRingFlag (referral_ring_flag,│       │
+  │   │          immutable, severity=critical)             │       │
+  │   └────────────────────────────────────────────────────┘       │
+  │                                                                │
+  │   ┌─ Engagement worker ──────────────────────────────┐         │
+  │   │  writes: engagement_pattern, tweet quality      │         │
+  │   └───────────────────────────────────────────────────┘        │
+  │                                                                │
+  │   ┌─ Payout worker ───────────────────────────────────┐        │
+  │   │  reads:  getCachedFlags (Upstash hot-path) +       │       │
+  │   │          getEntityProfile (mem0) before dispatch   │       │
+  │   │  writes: writePayoutEvent (payout_event,           │       │
+  │   │          immutable, run_id=claim_X_payout)         │       │
+  │   └────────────────────────────────────────────────────┘       │
+  │                                                                │
+  │   ┌─ Webhooks → admin dashboard ─────────────────────┐         │
+  │   │  memory_add + memory_categorize → POST receiver   │       │
+  │   │  critical events → admin alerts feed in real time │       │
+  │   └────────────────────────────────────────────────────┘       │
+  └─────────────────────────────────────────────────────────────────┘
+</pre>
+
+<p>The critical property: <strong>a referral ring detected <em>after</em> Claude already approved a claim still blocks the payout</strong>. That's because the referral worker writes a ring flag to mem0, the payout worker reads mem0 right before dispatching SOL, sees the flag, and refuses to send. No direct coupling between the two workers — the mem0 bus is the entire interface.</p>
+
+<h3>What this means in plain terms</h3>
+<ul>
+<li><strong>Cross-pipeline intelligence without coupling.</strong> Every worker learns from every other worker's signals without importing each other's code.</li>
+<li><strong>Fraud history follows a wallet forever.</strong> Ring flags and ban records are immutable — even a new team member investigating a wallet months later sees the full fraud trail.</li>
+<li><strong>Recent signals dominate, old ones decay.</strong> Fraud signals expire after 90 days so clean behavior can rehabilitate a wallet's profile naturally.</li>
+<li><strong>Real-time admin visibility.</strong> Critical events hit the admin dashboard within a second of being detected — no polling, no custom event bus.</li>
+<li><strong>Forensic queries are trivial.</strong> Every memory is scoped by agent, app, and run ID. Audit questions that would normally require log spelunking become one mem0 query.</li>
+<li><strong>Graph structure scales.</strong> Multi-hop fraud reasoning (which wallets share connections with a known ring) stays fast as the protocol grows.</li>
+<li><strong>Zero single point of failure.</strong> Every mem0 call is fire-and-forget — a mem0 outage never blocks a pipeline. The payout worker falls back to deterministic gate state if mem0 is unavailable.</li>
+</ul>
+
+<h3>Safety posture</h3>
+<p>mem0 is never on the submission hot path. Hot-path reads go through a 15-minute Upstash Redis cache (<code>mem0:profile:{wallet}</code>) with single-flight coalescing — the first read hydrates the cache from mem0, every subsequent read for 15 minutes is served from Redis. A mem0 outage just means the cache doesn't refresh, and the pipeline continues with stale-but-safe data until mem0 comes back.</p>
+<p>On the write side, every helper is <code>fire-and-forget safe</code>. If mem0 errors out, the write is dropped but the pipeline keeps running. The next successful write for the same wallet restores synchronization.</p>
+<p>mem0 custom exclusion rules make sure the memory system never stores PII beyond a country code, never stores secrets of any kind, and drops the entire memory if it detects a secret in the input. Privacy-first by construction.</p>
+
+<h3>What is live right now</h3>
+<ul>
+<li><strong>Dedicated mem0 Pro project</strong> (<code>gascoin-production</code>) separate from personal dev memories</li>
+<li><strong>Graph memory</strong> enabled on every write</li>
+<li><strong>13 custom categories</strong> configured at the project level</li>
+<li><strong>Custom fact-extraction instructions</strong> (~2,000 chars) tuned to GASCOIN pipeline events</li>
+<li><strong>Custom update instructions</strong> controlling how memories merge on conflict</li>
+<li><strong>Inclusion and exclusion prompts</strong> set at the project level</li>
+<li><strong>Agent / app / run scoping</strong> on every write via typed helpers</li>
+<li><strong>Immutable records</strong> for ring flags, payouts, verdicts, and bans</li>
+<li><strong>90-day TTL</strong> on fraud signals</li>
+<li><strong>Reranking</strong> available as an opt-in flag on searches</li>
+<li><strong>Webhook receiver</strong> live at a protected endpoint, writing to immutable audit logs and the admin alerts feed</li>
+<li><strong>Upstash hot-path cache</strong> protecting submission latency from mem0 outages</li>
+<li><strong>Fire-and-forget safety</strong> on every mem0 call — a mem0 outage never blocks the pipeline</li>
+</ul>
+<p>mem0 is not a log. It is not a database. It is an <em>intelligence system</em> that grows richer with every claim, every verdict, every fraud signal, and every payout. As GASCOIN runs, the cross-pipeline knowledge compounds — and every new review benefits from everything the protocol has seen before.</p>`,
+        order: 31,
+      },
     ],
   },
   {
