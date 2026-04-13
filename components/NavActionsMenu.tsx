@@ -6,43 +6,83 @@
  * Compact dropdown trigger that collapses the `WalletButton` + `AuthNavButton`
  * actions cluster into a single button at laptop widths (901–1440px).
  *
- * Visibility is CSS-controlled via `.gc-nav-actions-menu` in `app/globals.css`:
- *   - Shown   for 901–1440px (default)
- *   - Hidden  for >=1441px    (inline actions cluster shows instead)
- *   - Hidden  for <=900px     (MobileMenu takes over)
+ * ── Why the dropdown is portaled ─────────────────────────────────────
+ * `.gc-nav` has `backdrop-filter: blur(24px)` which creates a new CSS
+ * stacking context. An `position: absolute` descendant cannot escape the
+ * 60px-tall sticky nav's box no matter how high `z-index` is set — it
+ * gets visually clipped at the nav's bottom edge.
  *
- * The component renders both breakpoints via CSS rather than JS viewport
- * detection, so there's no hydration flicker and no state sync with
- * `useAdaptiveNav`.
+ * Solution: render the dropdown panel via `createPortal(..., document.body)`
+ * with `position: fixed` and coordinates computed from the trigger's
+ * `getBoundingClientRect()`. This escapes the nav's stacking context
+ * entirely and lets the panel render anywhere on the screen.
  *
- * Aesthetic notes: matches the existing brutalist-monospace nav language
- * (IBM Plex Mono, 1px border, zero radius, ASCII glyph for the trigger,
- * 80ms motion). Do NOT convert this into a generic three-lines hamburger —
- * that's the mobile menu and fires at a different breakpoint.
+ * Same pattern `MobileMenu.tsx` uses for its full-screen overlay.
+ *
+ * ── Visibility is still CSS-driven ───────────────────────────────────
+ * The TRIGGER button is shown/hidden by the `.gc-nav-actions-menu`
+ * wrapper class via media queries in `app/globals.css`:
+ *   - >=1441px → hidden (full inline cluster shows instead)
+ *   - 901–1440 → visible (default)
+ *   - <=900px → hidden (MobileMenu takes over)
+ *
+ * No JS viewport detection, no hydration flicker.
+ *
+ * ── Aesthetic notes ──────────────────────────────────────────────────
+ * Matches the brutalist-monospace nav: IBM Plex Mono, 1px sharp border,
+ * zero radius, ASCII glyph trigger (◉), restrained 80ms motion. At
+ * ≤1280px the trigger collapses to icon-only to preserve space for the
+ * 11 nav links. Do NOT convert to a three-lines hamburger — that glyph
+ * is reserved for `<=900px` where MobileMenu takes over.
  */
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+// @ts-ignore — react-dom types not installed but createPortal works at runtime
+import { createPortal } from 'react-dom';
 import { WalletButton } from './ui/WalletButton';
 import { AuthNavButton } from './AuthNavButton';
 
+type Coords = { top: number; right: number } | null;
+
+// useLayoutEffect on the client, useEffect on the server (avoids SSR warning)
+const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
+
 export function NavActionsMenu() {
   const [open, setOpen] = useState(false);
-  const wrapperRef = useRef<HTMLDivElement | null>(null);
+  const [coords, setCoords] = useState<Coords>(null);
+  const [mounted, setMounted] = useState(false);
   const triggerRef = useRef<HTMLButtonElement | null>(null);
+  const panelRef = useRef<HTMLDivElement | null>(null);
 
-  // Click-outside close
+  // Portal target — wait for client mount so SSR doesn't try to touch document.body
+  useEffect(() => { setMounted(true); }, []);
+
+  // Compute the panel's screen coordinates from the trigger rect whenever
+  // the dropdown opens. `position: fixed` + these inline styles is what
+  // lets the portaled panel float anywhere without a positioned ancestor.
+  useIsomorphicLayoutEffect(() => {
+    if (!open || !triggerRef.current) return;
+    const rect = triggerRef.current.getBoundingClientRect();
+    setCoords({
+      top: Math.round(rect.bottom + 8),
+      right: Math.round(window.innerWidth - rect.right),
+    });
+  }, [open]);
+
+  // Click-outside close. Panel uses e.stopPropagation on mousedown so
+  // clicks inside the panel don't bubble to this handler.
   useEffect(() => {
     if (!open) return;
     function handler(e: MouseEvent) {
-      if (!wrapperRef.current) return;
-      if (wrapperRef.current.contains(e.target as Node)) return;
+      if (triggerRef.current?.contains(e.target as Node)) return;
+      if (panelRef.current?.contains(e.target as Node)) return;
       setOpen(false);
     }
     document.addEventListener('mousedown', handler);
     return () => document.removeEventListener('mousedown', handler);
   }, [open]);
 
-  // Escape key close
+  // Escape key close + focus return to trigger
   useEffect(() => {
     if (!open) return;
     function handler(e: KeyboardEvent) {
@@ -55,8 +95,22 @@ export function NavActionsMenu() {
     return () => document.removeEventListener('keydown', handler);
   }, [open]);
 
+  // Close on scroll or resize — the portaled panel's fixed coords go
+  // stale the moment the viewport moves. Simpler to close than to
+  // recompute on every scroll event.
+  useEffect(() => {
+    if (!open) return;
+    function close() { setOpen(false); }
+    window.addEventListener('scroll', close, { passive: true });
+    window.addEventListener('resize', close);
+    return () => {
+      window.removeEventListener('scroll', close);
+      window.removeEventListener('resize', close);
+    };
+  }, [open]);
+
   return (
-    <div ref={wrapperRef} className="gc-nav-actions-menu-wrap">
+    <div className="gc-nav-actions-menu-wrap">
       <button
         ref={triggerRef}
         type="button"
@@ -68,15 +122,16 @@ export function NavActionsMenu() {
       >
         <span className="gc-nav-actions-trigger-glyph" aria-hidden>◉</span>
         <span className="gc-nav-actions-trigger-label">WALLET</span>
-        <span className="gc-nav-actions-trigger-caret" aria-hidden>{open ? '↑' : '↓'}</span>
+        <span className="gc-nav-actions-trigger-caret" aria-hidden>{open ? '▲' : '▼'}</span>
       </button>
 
-      {open && (
+      {open && mounted && coords && createPortal(
         <div
+          ref={panelRef}
           role="menu"
           aria-label="Wallet actions"
           className="gc-nav-actions-panel"
-          // Stop propagation so clicks inside the panel don't trigger click-outside
+          style={{ top: coords.top, right: coords.right }}
           onMouseDown={(e) => e.stopPropagation()}
         >
           <div className="gc-nav-actions-panel-row">
@@ -85,7 +140,8 @@ export function NavActionsMenu() {
           <div className="gc-nav-actions-panel-row">
             <AuthNavButton />
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

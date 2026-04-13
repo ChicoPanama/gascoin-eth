@@ -206,9 +206,12 @@ code, .mono {
   .gc-nav-actions-menu { display: none; }
 }
 
-/* Dropdown trigger — brutalist-mono glyph + label + caret */
+/* Dropdown trigger — brutalist-mono glyph + label + caret.
+ * NOT position:relative on the wrap: the panel is portaled to document.body
+ * because .gc-nav has backdrop-filter which creates a stacking context that
+ * would otherwise clip a position:absolute descendant at the nav's bottom edge.
+ */
 .gc-nav-actions-menu-wrap {
-  position: relative;
   display: inline-flex;
 }
 
@@ -222,17 +225,17 @@ code, .mono {
   text-transform: uppercase;
   letter-spacing: 0.12em;
   color: var(--fg);
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.16);
   border-radius: 0;
   padding: 8px 14px;
   cursor: pointer;
-  transition: background 120ms ease-out, border-color 120ms ease-out;
+  transition: background 120ms ease-out, border-color 120ms ease-out, transform 120ms ease-out;
 }
 
 .gc-nav-actions-trigger:hover {
-  background: rgba(255, 255, 255, 0.07);
-  border-color: rgba(255, 255, 255, 0.25);
+  background: rgba(255, 255, 255, 0.09);
+  border-color: rgba(255, 255, 255, 0.3);
 }
 
 .gc-nav-actions-trigger:focus-visible {
@@ -241,40 +244,72 @@ code, .mono {
 }
 
 .gc-nav-actions-trigger--open {
-  background: rgba(255, 255, 255, 0.1);
-  border-color: rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.36);
 }
 
 .gc-nav-actions-trigger-glyph {
-  font-size: 11px;
-  opacity: 0.75;
+  font-size: 12px;
+  opacity: 0.85;
 }
 
 .gc-nav-actions-trigger-label {
   font-size: 11px;
+  line-height: 1;
 }
 
 .gc-nav-actions-trigger-caret {
-  font-size: 11px;
+  font-size: 9px;
   opacity: 0.7;
+  transform: translateY(1px);
 }
 
-/* Dropdown panel — anchored to the trigger's bottom-right */
+/* Below 1280px, collapse the trigger to icon-only. Frees ~60px of
+ * horizontal space so the 11 nav links can breathe. */
+@media (max-width: 1280px) {
+  .gc-nav-actions-trigger {
+    padding: 7px 10px;
+    gap: 6px;
+  }
+  .gc-nav-actions-trigger-label {
+    display: none;
+  }
+  .gc-nav-actions-trigger-glyph {
+    font-size: 13px;
+  }
+}
+
+/* Dropdown panel — portaled to document.body, positioned via inline
+ * style from the trigger's getBoundingClientRect. Both inline top/right
+ * are set by NavActionsMenu.tsx; the rest of the shape lives here. */
 .gc-nav-actions-panel {
-  position: absolute;
-  top: calc(100% + 8px);
-  right: 0;
-  min-width: 240px;
-  padding: 12px;
+  position: fixed;
+  min-width: 260px;
+  padding: 14px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
   background: #0a0a0a;
-  border: 1px solid rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.18);
   border-radius: 0;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
-  z-index: 200;
-  animation: gc-nav-actions-panel-in 80ms ease-out;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.7), 0 2px 0 rgba(255, 255, 255, 0.04) inset;
+  z-index: 9999;
+  animation: gc-nav-actions-panel-in 90ms ease-out;
+}
+
+/* Little square-cut notch pointing up at the trigger — reads as a menu
+ * indicator, not a tooltip arrow. Pure monospace-brutalist. */
+.gc-nav-actions-panel::before {
+  content: '';
+  position: absolute;
+  top: -5px;
+  right: 18px;
+  width: 8px;
+  height: 8px;
+  background: #0a0a0a;
+  border-top: 1px solid rgba(255, 255, 255, 0.18);
+  border-left: 1px solid rgba(255, 255, 255, 0.18);
+  transform: rotate(45deg);
 }
 
 .gc-nav-actions-panel-row {
@@ -286,10 +321,18 @@ code, .mono {
   width: 100%;
 }
 
+/* Make WalletButton and AuthNavButton span the full panel width for
+ * visual weight. They render their own monospace styling. */
+.gc-nav-actions-panel-row button,
+.gc-nav-actions-panel-row a {
+  width: 100%;
+  justify-content: center;
+}
+
 @keyframes gc-nav-actions-panel-in {
   from {
     opacity: 0;
-    transform: translateY(-4px);
+    transform: translateY(-6px);
   }
   to {
     opacity: 1;
