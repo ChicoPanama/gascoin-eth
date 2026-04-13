@@ -43,10 +43,14 @@ export async function GET() {
   const heliusKey = process.env.HELIUS_API_KEY;
 
   const [supabase, upstash, mem0, helius] = await Promise.all([
-    // Supabase REST root — returns 200 on the OpenAPI spec
+    // Supabase REST root — returns 200 on the OpenAPI spec.
+    // Supabase REST requires BOTH `apikey` AND `Authorization: Bearer` headers.
     supabaseUrl
       ? pingUrl(`${supabaseUrl}/rest/v1/`, {
-          headers: { apikey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '' },
+          headers: {
+            apikey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '',
+            Authorization: `Bearer ${process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''}`,
+          },
         })
       : Promise.resolve({ ok: false, error: 'not_configured' } as DepStatus),
     // Upstash Redis REST PING
