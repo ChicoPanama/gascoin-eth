@@ -2,13 +2,13 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
-import { useWalletModal } from "@solana/wallet-adapter-react-ui";
+import { WalletConnectModal } from "../WalletConnectModal";
 
 const CONNECT_TIMEOUT_MS = 15000;
 
 export function WalletButton() {
   const { connected, publicKey, disconnect, connecting, wallet } = useWallet();
-  const { setVisible } = useWalletModal();
+  const [modalOpen, setModalOpen] = useState(false);
   const [timedOut, setTimedOut] = useState(false);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -32,13 +32,19 @@ export function WalletButton() {
   // Timed out — let user retry
   if (connecting && timedOut) {
     return (
-      <button className="wallet-btn" onClick={() => {
-        // Force disconnect to reset adapter state, then reopen modal
-        disconnect().catch(() => {});
-        setTimeout(() => setVisible(true), 100);
-      }}>
-        RETRY
-      </button>
+      <>
+        <button
+          className="wallet-btn"
+          onClick={() => {
+            // Force disconnect to reset adapter state, then reopen modal
+            disconnect().catch(() => {});
+            setTimeout(() => setModalOpen(true), 100);
+          }}
+        >
+          RETRY
+        </button>
+        <WalletConnectModal open={modalOpen} onClose={() => setModalOpen(false)} />
+      </>
     );
   }
 
@@ -60,10 +66,13 @@ export function WalletButton() {
     );
   }
 
-  // Idle — show connect button
+  // Idle — show connect button + custom modal
   return (
-    <button className="wallet-btn" onClick={() => setVisible(true)}>
-      CONNECT WALLET
-    </button>
+    <>
+      <button className="wallet-btn" onClick={() => setModalOpen(true)}>
+        CONNECT WALLET
+      </button>
+      <WalletConnectModal open={modalOpen} onClose={() => setModalOpen(false)} />
+    </>
   );
 }

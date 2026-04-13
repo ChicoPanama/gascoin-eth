@@ -340,6 +340,267 @@ code, .mono {
   }
 }
 
+/* ─── Wallet Connect Modal (gc-wcm) ─────────────────────────────────
+ * Custom wallet picker for the WalletButton flow. Replaces the third-
+ * party wallet-adapter modal so we can render an explicit
+ * "INSTALL PHANTOM" CTA when Phantom isn't auto-detected via Wallet
+ * Standard. Brutalist-mono aesthetic matches the rest of the site.
+ * ─────────────────────────────────────────────────────────────────── */
+.gc-wcm-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(0, 0, 0, 0.72);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  animation: gc-wcm-fade-in 100ms ease-out;
+}
+
+.gc-wcm {
+  width: 100%;
+  max-width: 440px;
+  min-width: 320px;
+  background: #0a0a0a;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 0;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.75), 0 2px 0 rgba(255, 255, 255, 0.04) inset;
+  display: flex;
+  flex-direction: column;
+  animation: gc-wcm-rise 120ms ease-out;
+}
+
+.gc-wcm-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 18px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.gc-wcm-title {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--fg);
+}
+
+.gc-wcm-close {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.65);
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 0;
+  padding: 4px 10px;
+  cursor: pointer;
+  transition: color 120ms ease-out, border-color 120ms ease-out;
+}
+
+.gc-wcm-close:hover {
+  color: var(--fg);
+  border-color: rgba(255, 255, 255, 0.35);
+}
+
+.gc-wcm-close:focus-visible {
+  outline: 1px solid var(--fg);
+  outline-offset: 2px;
+}
+
+.gc-wcm-body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 14px 14px 14px 14px;
+}
+
+.gc-wcm-empty {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  color: rgba(255, 255, 255, 0.55);
+  padding: 18px 12px;
+  text-align: center;
+  border: 1px dashed rgba(255, 255, 255, 0.14);
+}
+
+.gc-wcm-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 14px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 0;
+  color: var(--fg);
+  font-family: var(--font-mono);
+  cursor: pointer;
+  text-align: left;
+  transition: background 120ms ease-out, border-color 120ms ease-out, transform 80ms ease-out;
+}
+
+.gc-wcm-row:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.28);
+}
+
+.gc-wcm-row:focus-visible {
+  outline: 1px solid var(--fg);
+  outline-offset: 2px;
+}
+
+.gc-wcm-row:active {
+  transform: translateY(1px);
+}
+
+.gc-wcm-row[disabled],
+.gc-wcm-row--busy {
+  opacity: 0.6;
+  cursor: progress;
+}
+
+.gc-wcm-icon {
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  border-radius: 0;
+  object-fit: contain;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.gc-wcm-icon--emoji {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  line-height: 1;
+}
+
+.gc-wcm-name {
+  flex: 1;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--fg);
+}
+
+.gc-wcm-badge {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  padding: 4px 8px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.gc-wcm-badge--detected {
+  color: #6ee7a8;
+  border-color: rgba(110, 231, 168, 0.4);
+  background: rgba(110, 231, 168, 0.06);
+}
+
+.gc-wcm-badge--ready {
+  color: #c4d6ff;
+  border-color: rgba(196, 214, 255, 0.4);
+  background: rgba(196, 214, 255, 0.06);
+}
+
+.gc-wcm-badge--install {
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.gc-wcm-badge--cta {
+  color: #ffd56b;
+  border-color: rgba(255, 213, 107, 0.45);
+  background: rgba(255, 213, 107, 0.08);
+  font-size: 12px;
+}
+
+/* Install Phantom CTA — distinct treatment so the user clearly sees
+ * it as a "get a wallet first" action, not a wallet they can connect
+ * with right now. */
+.gc-wcm-install-cta {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px;
+  margin-top: 4px;
+  background: linear-gradient(180deg, rgba(255, 213, 107, 0.06), rgba(255, 213, 107, 0.02));
+  border: 1px solid rgba(255, 213, 107, 0.32);
+  border-radius: 0;
+  color: var(--fg);
+  text-decoration: none;
+  font-family: var(--font-mono);
+  cursor: pointer;
+  transition: background 120ms ease-out, border-color 120ms ease-out, transform 80ms ease-out;
+}
+
+.gc-wcm-install-cta:hover {
+  background: linear-gradient(180deg, rgba(255, 213, 107, 0.12), rgba(255, 213, 107, 0.04));
+  border-color: rgba(255, 213, 107, 0.55);
+}
+
+.gc-wcm-install-cta:focus-visible {
+  outline: 1px solid #ffd56b;
+  outline-offset: 2px;
+}
+
+.gc-wcm-install-cta:active {
+  transform: translateY(1px);
+}
+
+.gc-wcm-footer {
+  padding: 14px 18px 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: rgba(255, 255, 255, 0.5);
+  text-align: center;
+  line-height: 1.5;
+}
+
+@keyframes gc-wcm-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes gc-wcm-rise {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 480px) {
+  .gc-wcm {
+    max-width: 100%;
+  }
+  .gc-wcm-header,
+  .gc-wcm-footer {
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+  .gc-wcm-row,
+  .gc-wcm-install-cta {
+    padding: 12px;
+  }
+}
+
 .gc-nav-cta {
   font-family: var(--font-mono);
   font-size: 10px;
