@@ -43,12 +43,19 @@ export async function GET() {
   const heliusKey = process.env.HELIUS_API_KEY;
 
   const [supabase, upstash, mem0, helius] = await Promise.all([
-    // Supabase auth service health endpoint — unauthenticated, returns 200
-    // with {"name":"GoTrue",...} when Supabase is alive. Better than the
-    // REST `/rest/v1/` root which requires an API key and is restricted in
-    // some Supabase configurations.
-    supabaseUrl
-      ? pingUrl(`${supabaseUrl}/auth/v1/health`)
+    // Supabase REST ping using the service_role key. Server-side only.
+    // Service role bypasses RLS and auth gates, so this is "can the platform
+    // reach its own database with admin credentials". Both `/rest/v1/` OpenAPI
+    // root and `/auth/v1/health` returned 401 in this project config — neither
+    // is publicly reachable. Service role + /rest/v1/ is the one combination
+    // guaranteed to return 200 whenever Supabase is alive.
+    (supabaseUrl && process.env.SUPABASE_SERVICE_ROLE_KEY)
+      ? pingUrl(`${supabaseUrl}/rest/v1/`, {
+          headers: {
+            apikey: process.env.SUPABASE_SERVICE_ROLE_KEY,
+            Authorization: `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY}`,
+          },
+        })
       : Promise.resolve({ ok: false, error: 'not_configured' } as DepStatus),
     // Upstash Redis REST PING
     upstashUrl
