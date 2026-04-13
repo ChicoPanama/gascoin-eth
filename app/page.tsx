@@ -55,11 +55,48 @@ export default async function Home() {
   volume = fallback(volume, DEMO_TREASURY_DISPLAY.volume);
   const isDemo = treasuryUsd === DEMO_TREASURY_DISPLAY.treasuryUsd;
 
+  // Season 1 banner — only renders when ENABLE_LIVE_PAYOUT !== 'true'.
+  // First-thing visitors see, so they know the platform is in dry-run /
+  // points-only mode for beta. Auto-disappears the moment we flip
+  // ENABLE_LIVE_PAYOUT=true in Vercel — no code change needed at launch.
+  const isDryRun = process.env.ENABLE_LIVE_PAYOUT !== 'true';
+
   return (
     <>
         {/* NAV */}
         <HomeNav />
         <main id="main-content">
+
+        {/* SEASON 1 BANNER — top of page, above hero */}
+        {isDryRun && (
+          <div style={{
+            fontFamily: 'var(--font-mono)',
+            fontSize: 11,
+            letterSpacing: '0.08em',
+            padding: '14px 48px',
+            background: 'rgba(255,200,80,0.06)',
+            borderBottom: '1px solid rgba(255,200,80,0.25)',
+            color: 'rgba(255,220,140,0.9)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 14,
+            flexWrap: 'wrap',
+          }}>
+            <span style={{
+              fontSize: 10,
+              padding: '4px 10px',
+              background: 'rgba(255,200,80,0.15)',
+              border: '1px solid rgba(255,200,80,0.35)',
+              letterSpacing: '0.18em',
+              fontWeight: 600,
+            }}>
+              SEASON 1 · BETA
+            </span>
+            <span>
+              Points-only mode. Submit receipts, climb the leaderboard, earn Season 1 points — treasury payouts activate at token launch. No real SOL is dispatched yet.
+            </span>
+          </div>
+        )}
 
         {/* HERO */}
         <section className="gc-hero">
