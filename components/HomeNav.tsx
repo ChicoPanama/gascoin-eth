@@ -6,6 +6,7 @@ import { usePrivy } from '@privy-io/react-auth';
 import { WalletButton } from './ui/WalletButton';
 import { AuthNavButton } from './AuthNavButton';
 import { MobileMenu } from './ui/MobileMenu';
+import { NavActionsMenu } from './NavActionsMenu';
 import { useAdaptiveNav } from './useAdaptiveNav';
 
 const NAV_LINKS = [
@@ -50,9 +51,17 @@ export function HomeNav() {
           </Link>
         )}
       </div>
-      <div ref={actionsRef as any} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-        <WalletButton />
-        <AuthNavButton />
+      <div ref={actionsRef as any} className="gc-nav-actions">
+        {/* Desktop (>=1441px): full inline actions cluster */}
+        <div className="gc-nav-actions-full">
+          <WalletButton />
+          <AuthNavButton />
+        </div>
+        {/* Laptop (901–1440px): compact dropdown of the same two controls */}
+        <div className="gc-nav-actions-menu">
+          <NavActionsMenu />
+        </div>
+        {/* Mobile (<=900px): MobileMenu handles everything via its own CSS */}
         <MobileMenu />
       </div>
     </nav>

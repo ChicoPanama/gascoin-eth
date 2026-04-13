@@ -168,6 +168,135 @@ code, .mono {
   }
 }
 
+/* ─── Nav actions cluster ───────────────────────────────────────────
+ * Three-state responsive pattern:
+ *   >=1441px  → full inline actions (WalletButton + AuthNavButton)
+ *   901–1440  → compact dropdown (NavActionsMenu)
+ *   <=900px   → MobileMenu handles everything
+ *
+ * Defaults here assume the laptop range; explicit breakpoints override.
+ * Visibility is CSS-only so there's no hydration flicker and no JS
+ * viewport detection needed in the React tree.
+ * ─────────────────────────────────────────────────────────────────── */
+.gc-nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.gc-nav-actions-full {
+  display: none;
+  align-items: center;
+  gap: 12px;
+}
+
+.gc-nav-actions-menu {
+  display: inline-flex;
+  align-items: center;
+  position: relative;
+}
+
+@media (min-width: 1441px) {
+  .gc-nav-actions-full { display: inline-flex; }
+  .gc-nav-actions-menu { display: none; }
+}
+
+@media (max-width: 900px) {
+  .gc-nav-actions-full,
+  .gc-nav-actions-menu { display: none; }
+}
+
+/* Dropdown trigger — brutalist-mono glyph + label + caret */
+.gc-nav-actions-menu-wrap {
+  position: relative;
+  display: inline-flex;
+}
+
+.gc-nav-actions-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--fg);
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 0;
+  padding: 8px 14px;
+  cursor: pointer;
+  transition: background 120ms ease-out, border-color 120ms ease-out;
+}
+
+.gc-nav-actions-trigger:hover {
+  background: rgba(255, 255, 255, 0.07);
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+.gc-nav-actions-trigger:focus-visible {
+  outline: 1px solid var(--fg);
+  outline-offset: 2px;
+}
+
+.gc-nav-actions-trigger--open {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.gc-nav-actions-trigger-glyph {
+  font-size: 11px;
+  opacity: 0.75;
+}
+
+.gc-nav-actions-trigger-label {
+  font-size: 11px;
+}
+
+.gc-nav-actions-trigger-caret {
+  font-size: 11px;
+  opacity: 0.7;
+}
+
+/* Dropdown panel — anchored to the trigger's bottom-right */
+.gc-nav-actions-panel {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  min-width: 240px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: #0a0a0a;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 0;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+  z-index: 200;
+  animation: gc-nav-actions-panel-in 80ms ease-out;
+}
+
+.gc-nav-actions-panel-row {
+  display: flex;
+  align-items: stretch;
+}
+
+.gc-nav-actions-panel-row > * {
+  width: 100%;
+}
+
+@keyframes gc-nav-actions-panel-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .gc-nav-cta {
   font-family: var(--font-mono);
   font-size: 10px;
