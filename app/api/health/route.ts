@@ -43,15 +43,12 @@ export async function GET() {
   const heliusKey = process.env.HELIUS_API_KEY;
 
   const [supabase, upstash, mem0, helius] = await Promise.all([
-    // Supabase REST root — returns 200 on the OpenAPI spec.
-    // Supabase REST requires BOTH `apikey` AND `Authorization: Bearer` headers.
+    // Supabase auth service health endpoint — unauthenticated, returns 200
+    // with {"name":"GoTrue",...} when Supabase is alive. Better than the
+    // REST `/rest/v1/` root which requires an API key and is restricted in
+    // some Supabase configurations.
     supabaseUrl
-      ? pingUrl(`${supabaseUrl}/rest/v1/`, {
-          headers: {
-            apikey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '',
-            Authorization: `Bearer ${process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''}`,
-          },
-        })
+      ? pingUrl(`${supabaseUrl}/auth/v1/health`)
       : Promise.resolve({ ok: false, error: 'not_configured' } as DepStatus),
     // Upstash Redis REST PING
     upstashUrl
