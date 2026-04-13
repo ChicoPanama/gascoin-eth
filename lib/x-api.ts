@@ -62,6 +62,7 @@ export interface XUser {
   description?: string;
   profile_image_url?: string;
   verified?: boolean;
+  verified_type?: 'none' | 'blue' | 'business' | 'government';
   public_metrics?: {
     followers_count: number;
     following_count: number;
@@ -94,14 +95,14 @@ export async function getTweet(tweetId: string): Promise<{ tweet?: XTweet; notFo
 // ─── User operations ───
 
 export async function getUser(userId: string): Promise<{ user?: XUser; error?: string }> {
-  const res = await xFetch(`/users/${userId}`, { 'user.fields': 'protected,username,public_metrics,created_at,description,profile_image_url,verified' });
+  const res = await xFetch(`/users/${userId}`, { 'user.fields': 'protected,username,public_metrics,created_at,description,profile_image_url,verified,verified_type' });
   if (!res.ok) { const err = await res.json().catch(() => ({})); return { error: (err as any)?.detail || `API ${res.status}` }; }
   const data = await res.json();
   return { user: data.data };
 }
 
 async function fetchUserByUsername(handle: string): Promise<{ user?: XUser; error?: string }> {
-  const res = await xFetch(`/users/by/username/${handle}`, { 'user.fields': 'protected,username,public_metrics,created_at,description,profile_image_url,verified,location' });
+  const res = await xFetch(`/users/by/username/${handle}`, { 'user.fields': 'protected,username,public_metrics,created_at,description,profile_image_url,verified,verified_type,location' });
   if (res.status === 404) return { error: 'user_not_found' };
   if (!res.ok) { const err = await res.json().catch(() => ({})); return { error: (err as any)?.detail || `API ${res.status}` }; }
   const data = await res.json();

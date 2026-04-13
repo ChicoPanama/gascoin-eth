@@ -78,8 +78,25 @@ export async function GET(req: Request) {
       continue;
     }
 
-    // 3. Re-verify account quality with historical signals
+    // 3. Re-verify X verified checkmark. A user can be verified at submission
+    // time and then lose their blue/business/government checkmark before the
+    // 24–48h payout window (subscription lapse, account restricted, checkmark
+    // revoked). Pre-payout is the last chance to catch this — the x_verified
+    // gate is a hard sybil-resistance requirement and must still hold at
+    // dispatch time, not just at submission time.
     const userLookup = await getUserByUsername(handle);
+    if (userLookup.user) {
+      const vt = userLookup.user.verified_type;
+      const stillVerified = vt !== undefined ? vt !== 'none' : !!userLookup.user.verified;
+      if (!stillVerified) {
+        await revertClaim(supabase, claim.id, `x_verified_revoked: lost checkmark before payout`, claim.wallet);
+        failures.push({ claimId: claim.id, reason: 'x_verified: lost checkmark before payout' });
+        reverted++;
+        continue;
+      }
+    }
+
+    // 4. Re-verify account quality with historical signals
     const { data: linkData } = await supabase.from('wallet_x_links')
       .select('avg_quality_score, x_is_protected, x_location, bio, x_account_created_at')
       .eq('wallet', claim.wallet).maybeSingle();

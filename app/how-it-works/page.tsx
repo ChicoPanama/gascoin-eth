@@ -43,6 +43,7 @@ const STEPS: Step[] = [
     title: 'Set Up X (Twitter)',
     time: '2 min',
     bullets: [
+      'Your X account must be verified (blue/business/government checkmark). Unverified accounts are rejected at submission to prevent sybil attacks.',
       'You need a public X account with at least 100 followers.',
       'Your profile needs a bio and some posting history — brand new or empty accounts won\'t pass verification.',
       'Private accounts don\'t work. The system needs to see your tweet publicly.',

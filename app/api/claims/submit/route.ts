@@ -230,8 +230,17 @@ export async function POST(req: Request){
   // Read cached mem0 flags (Redis only — never hits mem0 API on hot path)
   const mem0Flags = await getCachedFlags(wallet);
 
+  // Authoritative verified signal comes from the X API, not Privy.
+  // Privy's xVerified only means "the X account is linked", not "has a blue
+  // checkmark". We require a real paid verification (blue/business/government)
+  // to prevent sybil attacks on the submission pipeline.
+  const xApiVerified = !!userLookup.user &&
+    userLookup.user.verified_type !== undefined
+      ? userLookup.user.verified_type !== 'none'
+      : !!userLookup.user?.verified;
+
   const result = evaluateClaim({
-    xVerified: session.xVerified,
+    xVerified: xApiVerified,
     tweetUrl,
     tweetHasGascoin: !!tweet.containsGascoin,
     tweetLive: !!tweet.live,
@@ -267,7 +276,7 @@ export async function POST(req: Request){
     .upsert({
       x_user_id: session.xId || `x_${session.xHandle}`,
       x_handle: `@${session.xHandle}`,
-      x_verified: session.xVerified
+      x_verified: xApiVerified
     }, { onConflict: 'x_user_id' })
     .select('id')
     .single();
@@ -470,7 +479,7 @@ export async function POST(req: Request){
   const response = {
     ok:true,
     claimId,
-    session: { xHandle: session.xHandle, wallet: session.wallet, xVerified: session.xVerified },
+    session: { xHandle: session.xHandle, wallet: session.wallet, xVerified: xApiVerified },
     decision: result.decision,
     riskScore: result.riskScore,
     gates: result.gates,

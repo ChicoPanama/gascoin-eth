@@ -97,7 +97,10 @@ export async function verifyPrivySession(
 
       if (twitter?.username) {
         xHandle = String(twitter.username).replace(/^@/, '');
-        xVerified = true;
+        // NOTE: xVerified stays false here. A linked Twitter OAuth account is
+        // NOT the same as "has a verified blue checkmark". The authoritative
+        // verification signal comes from the X API (verified_type) and is
+        // applied in the claim-submit pipeline, not here.
       }
       if (linkedWallet) wallet = String(linkedWallet);
     } catch {
