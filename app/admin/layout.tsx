@@ -12,9 +12,12 @@ const NAV_SECTIONS = [
   { label: 'MODERATION', links: [
     { href: '/admin/receipts', label: 'Receipt Review' },
     { href: '/admin/gates', label: 'Gate Overrides' },
+    { href: '/admin/moderation/bans', label: 'Banned Users' },
+    { href: '/admin/intelligence', label: 'Intelligence Feed' },
   ]},
   { label: 'ANALYTICS', links: [
     { href: '/admin/stats', label: 'Platform Stats' },
+    { href: '/admin/engagement', label: 'Engagement Scoring' },
     { href: '/admin/audit', label: 'Audit Log' },
   ]},
   { label: 'SYSTEM', links: [
