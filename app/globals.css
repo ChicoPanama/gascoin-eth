@@ -14,12 +14,22 @@ body {
   background: var(--bg);
   color: var(--fg);
   font-family: var(--font-body);
-  font-weight: 300;
+  /* font-weight: 400 matches X.com's default body weight. Was 300 (Light)
+     which is notoriously hard to read on any background — that's most of
+     the "washed out" feeling users reported regardless of color. X uses
+     400 for body, 700 for emphasis, 800 for display headings. */
+  font-weight: 400;
   font-size: var(--text-body);
-  line-height: 1.75;
+  line-height: 1.6;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
 }
+
+/* X-typical emphasis weights. Use <strong> for bold and <em> for italic
+   — stop relying on rgba opacity for visual hierarchy. */
+strong, b { font-weight: 700; }
+
 
 /* Grain overlay — opacity follows theme (cream needs slightly more grain
    to read as paper, dark bg is happy with 0.03). In light mode we invert
@@ -2746,7 +2756,7 @@ button.docs-footer-link {
 }
 .wt-cooldown-why {
   font-family: var(--font-body);
-  font-weight: 300;
+  font-weight: 400;
   font-size: 13px;
   color: rgba(var(--fg-rgb),0.5);
   line-height: 1.7;
@@ -2853,7 +2863,7 @@ button.docs-footer-link {
 }
 .wt-gate-failure-text {
   font-family: var(--font-body);
-  font-weight: 300;
+  font-weight: 400;
   font-size: 13px;
   color: rgba(var(--fg-rgb),0.6);
 }
@@ -2927,7 +2937,7 @@ button.docs-footer-link {
 }
 .wt-idle-body {
   font-family: var(--font-body);
-  font-weight: 300;
+  font-weight: 400;
   font-size: 14px;
   color: rgba(var(--fg-rgb),0.35);
   max-width: 400px;
@@ -2991,7 +3001,7 @@ button.docs-footer-link {
 /* ─── GATES ─── */
 .gt-header-body {
   font-family: var(--font-body);
-  font-weight: 300;
+  font-weight: 400;
   font-size: 15px;
   color: rgba(var(--fg-rgb),0.65);
   max-width: 560px;
@@ -3086,7 +3096,7 @@ button.docs-footer-link {
 }
 .gt-card-desc {
   font-family: var(--font-body);
-  font-weight: 300;
+  font-weight: 400;
   font-size: 13px;
   color: rgba(var(--fg-rgb),0.55);
   line-height: 1.65;
@@ -3126,7 +3136,7 @@ button.docs-footer-link {
 }
 .gt-detail-line {
   font-family: var(--font-body);
-  font-weight: 300;
+  font-weight: 400;
   font-size: 13px;
   color: rgba(var(--fg-rgb),0.65);
   line-height: 1.7;
@@ -3155,7 +3165,7 @@ button.docs-footer-link {
 }
 .gt-checklist-sub {
   font-family: var(--font-body);
-  font-weight: 300;
+  font-weight: 400;
   font-size: 14px;
   color: var(--muted);
   margin-bottom: 24px;
@@ -3256,7 +3266,7 @@ button.docs-footer-link {
 }
 .gt-faq-answer {
   font-family: var(--font-body);
-  font-weight: 300;
+  font-weight: 400;
   font-size: 14px;
   color: rgba(var(--fg-rgb),0.6);
   line-height: 1.75;
@@ -4170,7 +4180,7 @@ button.docs-footer-link {
 }
 .lb-empty p {
   font-family: var(--font-body);
-  font-weight: 300;
+  font-weight: 400;
   font-size: 16px;
   color: var(--muted);
   margin-bottom: 16px;
@@ -4380,7 +4390,7 @@ button.docs-footer-link {
 }
 .pts-list li {
   font-family: var(--font-body);
-  font-weight: 300;
+  font-weight: 400;
   font-size: 13px;
   color: rgba(var(--fg-rgb),0.65);
   line-height: 1.7;
@@ -4399,7 +4409,7 @@ button.docs-footer-link {
   border-left: 2px solid rgba(var(--fg-rgb),0.15);
   padding: 16px 20px;
   font-family: var(--font-body);
-  font-weight: 300;
+  font-weight: 400;
   font-size: 13px;
   color: rgba(var(--fg-rgb),0.6);
   line-height: 1.7;
@@ -4478,7 +4488,7 @@ button.docs-footer-link {
 }
 .pts-example p {
   font-family: var(--font-body);
-  font-weight: 300;
+  font-weight: 400;
   font-size: 13px;
   color: rgba(var(--fg-rgb),0.65);
   line-height: 1.7;
@@ -4635,7 +4645,7 @@ button.docs-footer-link {
 
 .sf-sub {
   font-family: var(--font-body);
-  font-weight: 300;
+  font-weight: 400;
   font-size: 15px;
   color: rgba(var(--fg-rgb),0.5);
   line-height: 1.75;
@@ -4786,7 +4796,7 @@ button.docs-footer-link {
 
 .sf-tweet-text {
   font-family: var(--font-body);
-  font-weight: 300;
+  font-weight: 400;
   font-size: 14px;
   line-height: 1.6;
   margin-bottom: 8px;
@@ -4896,7 +4906,7 @@ button.docs-footer-link {
   padding: 10px 0;
   cursor: crosshair;
   font-family: var(--font-body);
-  font-weight: 300;
+  font-weight: 400;
   font-size: 14px;
   color: rgba(var(--fg-rgb),0.6);
   border-bottom: 1px solid var(--line);
@@ -4953,7 +4963,7 @@ button.docs-footer-link {
 
 .sf-fine-print {
   font-family: var(--font-body);
-  font-weight: 300;
+  font-weight: 400;
   font-size: 12px;
   color: var(--muted);
   margin-bottom: 32px;
@@ -5011,7 +5021,7 @@ button.docs-footer-link {
 
 .sf-result-text {
   font-family: var(--font-body);
-  font-weight: 300;
+  font-weight: 400;
   font-size: 15px;
   color: var(--muted);
   margin-bottom: 24px;
@@ -5028,7 +5038,7 @@ button.docs-footer-link {
 
 .sf-fix-details {
   font-family: var(--font-body);
-  font-weight: 300;
+  font-weight: 400;
   font-size: 13px;
   color: var(--muted);
   line-height: 1.7;

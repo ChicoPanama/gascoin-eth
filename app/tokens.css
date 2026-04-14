@@ -4,18 +4,34 @@
    ═══════════════════════════════════════════ */
 
 :root {
-  /* ── Colors (X Black & White — dark-mode defaults) ── */
+  /* ── Colors — X.com "Lights Out" exact values ──
+     These are X's actual dark-mode tokens verified against authoritative
+     brand references (March 2026). Primary text is #E7E9EA, NOT pure
+     white — that's what gives X its signature "slightly-warm off-white"
+     reading quality. Secondary text is #71767B and tertiary is #536471
+     — these are discrete shades, not rgba opacities. Dividers are
+     #2F3336 — visible on pure black but subtle. */
   --bg: #000000;
   --bg-rgb: 0, 0, 0;
-  --fg: #F2F2F2;
-  --fg-rgb: 242, 242, 242;
-  --muted: #B8B8B8;
-  --muted-deep: #969696;
+  --fg: #E7E9EA;
+  --fg-rgb: 231, 233, 234;
+  --muted: #71767B;
+  --muted-deep: #536471;
   --muted-decorative: #3D3D3D;
-  --line: #3A3A3A;
-  --line-rgb: 58, 58, 58;
-  --card: #141414;
-  --card-hover: #1E1E1E;
+  --line: #2F3336;
+  --line-rgb: 47, 51, 54;
+  --card: #16181C;          /* X.com actual card surface on Lights Out */
+  --card-hover: #1D1F23;    /* X.com actual hover state */
+
+  /* ── Semantic text hierarchy (NEW — prefer over rgba opacities) ──
+     X uses discrete grays, not opacity. Use these tokens for any text
+     that needs a specific level of emphasis. Avoid rgba(var(--fg-rgb), x)
+     for text — it produces washed-out grays that don't match X's
+     familiar shades. Borders, backgrounds, and decorative elements can
+     still use the rgba pattern. */
+  --text-primary: #E7E9EA;     /* main body / headings */
+  --text-secondary: #71767B;   /* metadata, captions, muted labels */
+  --text-tertiary: #536471;    /* placeholder / very low emphasis */
 
   /* ── Accent (monochrome) ── */
   --accent: #FFFFFF;
@@ -117,14 +133,20 @@
   --muted: #536471;
   --muted-deep: #3A424A;
   --muted-decorative: #AAB8C2;
-  /* --line darkened from #EFF3F4 to #CFD9DE. X.com uses #EFF3F4 but
-     reads fine on their UI because of contextual shadows and the density
-     of white-on-white surfaces. GASCOIN's brutalist density needs harder
-     edges — this is still X-family gray but visibly present as a divider. */
+  /* --line matches X.com's stronger divider color. X has two divider
+     tiers: #EFF3F4 (subtle, between list rows) and #CFD9DE (strong,
+     between sections). GASCOIN uses the strong tier as its default
+     because brutalist density requires visible structure. */
   --line: #CFD9DE;
   --line-rgb: 207, 217, 222;
   --card: #FFFFFF;
   --card-hover: #F7F9F9;
+
+  /* Semantic text hierarchy — X.com exact shades. Discrete colors, NOT
+     rgba opacities. These are the shades X users' eyes are trained on. */
+  --text-primary: #0F1419;
+  --text-secondary: #536471;
+  --text-tertiary: #8899A5;
 
   /* ── Accent inversion — dark chip on white ── */
   --accent: #0F1419;
