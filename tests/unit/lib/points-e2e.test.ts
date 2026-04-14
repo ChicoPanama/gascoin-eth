@@ -360,7 +360,8 @@ describe('Wallet Trust Scoring', () => {
 describe('Gate Verification → Points Integration', () => {
   function validClaim(): ClaimInput {
     return {
-      xVerified: true, tweetUrl: 'https://x.com/user/status/123',
+      xVerified: true, followsGascoin: true,
+      tweetUrl: 'https://x.com/user/status/123',
       tweetHasGascoin: true, tweetLive: true,
       connectedWallet: 'GAsWallet123', walletOnReceipt: 'GAsWallet123',
       receiptHasGascoin: true, gascoinTokenBalance: 100,
@@ -390,9 +391,9 @@ describe('Gate Verification → Points Integration', () => {
     // Rejected → no points
   });
 
-  it('all 12 gates evaluate correctly for a valid submission', () => {
+  it('all 14 gates evaluate correctly for a valid submission', () => {
     const result = evaluateClaim(validClaim());
-    expect(result.gates).toHaveLength(13);
+    expect(result.gates).toHaveLength(14);
     expect(result.failed).toHaveLength(0);
   });
 });

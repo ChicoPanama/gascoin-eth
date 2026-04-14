@@ -3,7 +3,8 @@ import { evaluateClaim, type ClaimInput } from '@/lib/policy';
 
 function validInput(overrides: Partial<ClaimInput> = {}): ClaimInput {
   return {
-    xVerified: true, tweetUrl: 'https://x.com/user/status/123', tweetHasGascoin: true,
+    xVerified: true, followsGascoin: true,
+    tweetUrl: 'https://x.com/user/status/123', tweetHasGascoin: true,
     tweetLive: true, connectedWallet: 'GAsWallet123', walletOnReceipt: 'GAsWallet123',
     receiptHasGascoin: true, gascoinTokenBalance: 100, aiScore: 0.1, tamperScore: 0.1,
     duplicateHash: false, duplicatePhash: false, cooldownOk: true, amountUsd: 50,
@@ -23,6 +24,17 @@ describe('evaluateClaim', () => {
   it('fails gate x_verified when false', () => {
     const r = evaluateClaim(validInput({ xVerified: false }));
     expect(r.failed.some((g) => g.gate === 'x_verified')).toBe(true);
+  });
+
+  // Gate: follows_gascoin
+  it('fails gate follows_gascoin when user does not follow @GasCoinApp', () => {
+    const r = evaluateClaim(validInput({ followsGascoin: false }));
+    expect(r.failed.some((g) => g.gate === 'follows_gascoin')).toBe(true);
+  });
+
+  it('passes gate follows_gascoin when user follows @GasCoinApp', () => {
+    const r = evaluateClaim(validInput({ followsGascoin: true }));
+    expect(r.failed.some((g) => g.gate === 'follows_gascoin')).toBe(false);
   });
 
   // Gate 2: tweet_hashtag
@@ -152,9 +164,9 @@ describe('evaluateClaim', () => {
     expect(r.failed.some((g) => g.gate === 'account_quality')).toBe(false);
   });
 
-  it('returns exactly 13 gates', () => {
+  it('returns exactly 14 gates', () => {
     const r = evaluateClaim(validInput());
-    expect(r.gates).toHaveLength(13);
+    expect(r.gates).toHaveLength(14);
   });
 
   it('risk score is between 0 and 1', () => {

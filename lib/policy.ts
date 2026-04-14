@@ -1,6 +1,7 @@
 export type GateResult = { gate: string; passed: boolean; reason?: string; score?: number };
 export type ClaimInput = {
   xVerified: boolean;
+  followsGascoin: boolean;
   tweetUrl: string;
   tweetHasGascoin: boolean;
   tweetLive: boolean;
@@ -30,6 +31,7 @@ export function evaluateClaim(c: ClaimInput){
     // X API returned -1 (failure) — can't evaluate social gates reliably
     // Return retry_later so user can resubmit without penalty
     gates.push({ gate:'x_verified', passed:c.xVerified, reason:'X must be verified' });
+    gates.push({ gate:'follows_gascoin', passed:false, reason:'X API unavailable — retry later' });
     gates.push({ gate:'tweet_hashtag', passed:c.tweetHasGascoin, reason:'Tweet must include #gascoin' });
     gates.push({ gate:'tweet_live', passed:c.tweetLive, reason:'Tweet must remain live' });
     gates.push({ gate:'receipt_hashtag', passed:c.receiptHasGascoin, reason:'Receipt must include #gascoin' });
@@ -47,6 +49,7 @@ export function evaluateClaim(c: ClaimInput){
   }
 
   gates.push({ gate:'x_verified', passed:c.xVerified, reason:'X must be verified' });
+  gates.push({ gate:'follows_gascoin', passed:c.followsGascoin, reason:'You must follow @GasCoinApp on X before submitting' });
   gates.push({ gate:'tweet_hashtag', passed:c.tweetHasGascoin, reason:'Tweet must include #gascoin' });
   gates.push({ gate:'tweet_live', passed:c.tweetLive, reason:'Tweet must remain live' });
   gates.push({ gate:'receipt_hashtag', passed:c.receiptHasGascoin, reason:'Receipt must include #gascoin' });

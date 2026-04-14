@@ -2,7 +2,7 @@ import crypto from 'crypto';
 import { NextResponse } from 'next/server';
 import { evaluateClaim } from '../../../../lib/policy';
 import { getTierForBalance } from '../../../../lib/token-tiers';
-import { verifyTweetProof, getFollowerCount } from '../../../../lib/integrations/x';
+import { verifyTweetProof, getFollowerCount, isFollowingGascoin } from '../../../../lib/integrations/x';
 import { analyzeReceipt } from '../../../../lib/integrations/ocr';
 import { runFraudChecks } from '../../../../lib/integrations/fraud';
 import { hasMinimumGascoin } from '../../../../lib/integrations/solana';
@@ -150,13 +150,15 @@ export async function POST(req: Request){
     await supabase.from('idempotency_keys').insert({ key: idemKey, scope: 'claim_submit', request_hash: reqHash, status: 'processing' });
   }
 
-  // Run tweet verification, OCR, balance check, follower check, and account quality in parallel
-  const [tweet, ocr, minHold, followerCount, userLookup] = await Promise.all([
+  // Run tweet verification, OCR, balance check, follower count, account lookup,
+  // and follows-gascoin membership check all in parallel.
+  const [tweet, ocr, minHold, followerCount, userLookup, followsGascoinCheck] = await Promise.all([
     verifyTweetProof(tweetUrl, `@${session.xHandle}`),
     analyzeReceipt(receipt),
     hasMinimumGascoin(wallet, 1),
     getFollowerCount(session.xHandle),
-    getUserByUsername(session.xHandle)
+    getUserByUsername(session.xHandle),
+    isFollowingGascoin(session.xId || ''),
   ]);
 
   // Fetch historical signals for enhanced account quality scoring
@@ -239,8 +241,21 @@ export async function POST(req: Request){
       ? userLookup.user.verified_type !== 'none'
       : !!userLookup.user?.verified;
 
+  // follows_gascoin: if the X API failed during the cache refresh, return
+  // retry_later instead of failing the user. Matches the pattern used for
+  // min_followers / account_quality on X API outages.
+  if (followsGascoinCheck.apiFailure) {
+    return NextResponse.json({
+      ok: false,
+      error: 'api_unavailable',
+      retryable: true,
+      message: 'Social verification temporarily unavailable. Please try again in a few minutes.',
+    }, { status: 503 });
+  }
+
   const result = evaluateClaim({
     xVerified: xApiVerified,
+    followsGascoin: followsGascoinCheck.ok,
     tweetUrl,
     tweetHasGascoin: !!tweet.containsGascoin,
     tweetLive: !!tweet.live,

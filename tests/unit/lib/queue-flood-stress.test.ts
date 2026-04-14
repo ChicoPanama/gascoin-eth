@@ -34,6 +34,7 @@ import { calculateEngagementPoints, POINTS_CONFIG } from '@/lib/engagement-rewar
 function validClaim(overrides: Partial<ClaimInput> = {}): ClaimInput {
   return {
     xVerified: true,
+    followsGascoin: true,
     tweetUrl: 'https://x.com/user/status/123',
     tweetHasGascoin: true,
     tweetLive: true,

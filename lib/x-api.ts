@@ -114,6 +114,52 @@ export async function getUserByUsername(username: string): Promise<{ user?: XUse
   return cacheGetOrFetch(`xuser:${handle}`, () => fetchUserByUsername(handle), 900);
 }
 
+/**
+ * Paginate a user's followers from the X API v2.
+ *
+ * Used by the sync-gascoin-followers worker to rebuild the `gascoin:x_followers`
+ * Redis SET that backs the `follows_gascoin` gate. Returns the full list of
+ * follower X user IDs (strings), or an error if the API is unreachable.
+ *
+ * Pagination: `/2/users/:id/followers?max_results=1000` caps at 1000 per page.
+ * `maxPages` bounds worst-case cost — for a new brand account this is usually
+ * 1 page, so we default to a generous 20 (up to 20k followers) before bailing.
+ */
+export async function getUserFollowers(
+  userId: string,
+  opts?: { maxPages?: number },
+): Promise<{ ids: string[]; error?: string; truncated?: boolean }> {
+  const maxPages = opts?.maxPages ?? 20;
+  const ids: string[] = [];
+  let pageToken: string | undefined;
+  let pages = 0;
+
+  while (pages < maxPages) {
+    const params: Record<string, string> = {
+      max_results: '1000',
+      'user.fields': 'id',
+    };
+    if (pageToken) params.pagination_token = pageToken;
+
+    const res = await xFetch(`/users/${userId}/followers`, params);
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      return { ids, error: (err as any)?.detail || `API ${res.status}` };
+    }
+    const data = await res.json() as any;
+    const page = Array.isArray(data?.data) ? data.data : [];
+    for (const u of page) {
+      if (u?.id) ids.push(String(u.id));
+    }
+    pageToken = data?.meta?.next_token;
+    pages += 1;
+    if (!pageToken) return { ids };
+  }
+
+  // Hit the page cap — caller should widen maxPages or accept truncation
+  return { ids, truncated: true };
+}
+
 // ─── Search ───
 
 export async function searchRecentTweets(query: string, maxResults = 10, sinceId?: string): Promise<XSearchResult> {

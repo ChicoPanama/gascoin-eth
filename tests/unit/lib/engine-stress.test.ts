@@ -37,6 +37,7 @@ import {
 function validClaim(overrides: Partial<ClaimInput> = {}): ClaimInput {
   return {
     xVerified: true,
+    followsGascoin: true,
     tweetUrl: 'https://x.com/user/status/123',
     tweetHasGascoin: true,
     tweetLive: true,
@@ -87,7 +88,7 @@ describe('CATEGORY 1: Policy Engine Gate Bypass Attempts', () => {
     // WHY: Confirms the happy path works end-to-end. If this fails, everything is broken.
     const result = evaluateClaim(validClaim());
 
-    expect(result.gates).toHaveLength(13);
+    expect(result.gates).toHaveLength(14);
     expect(result.failed).toHaveLength(0);
     expect(result.decision).toBe('ready_for_dispatch');
     expect(result.riskScore).toBeLessThan(0.35);
@@ -160,6 +161,7 @@ describe('CATEGORY 1: Policy Engine Gate Bypass Attempts', () => {
     // not leave it in review limbo.
     const input: ClaimInput = {
       xVerified: false,
+      followsGascoin: false,
       tweetUrl: '',
       tweetHasGascoin: false,
       tweetLive: false,

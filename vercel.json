@@ -31,6 +31,10 @@
     {
       "path": "/api/workers/aggregate-intelligence",
       "schedule": "0 7 * * *"
+    },
+    {
+      "path": "/api/workers/sync-gascoin-followers",
+      "schedule": "*/30 * * * *"
     }
   ],
   "headers": [

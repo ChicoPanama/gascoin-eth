@@ -113,6 +113,64 @@ export async function cacheMGet<T>(keys: string[]): Promise<(T | null)[]> {
   });
 }
 
+// ── Redis SET primitives ──────────────────────────────────────────────────
+// Used for membership-test gates (e.g. "does this X user follow @GasCoinApp?").
+// SISMEMBER is O(1) so we can make per-submission checks without hitting any
+// upstream API on the hot path. The set is rebuilt periodically by a worker.
+
+/** Test set membership. Returns false on Redis failure (fail-open so gates
+ * don't flake on infra blips — caller decides policy). */
+export async function cacheSetIsMember(key: string, member: string): Promise<boolean> {
+  const client = getRedis();
+  if (!client) return false;
+  try {
+    const res = await client.sismember(`gc:${key}`, member);
+    return res === 1;
+  } catch {
+    return false;
+  }
+}
+
+/** Replace a set's contents atomically: delete old, add new members, set TTL.
+ * Returns the count added, or -1 on failure. */
+export async function cacheSetReplace(
+  key: string,
+  members: string[],
+  ttlSeconds: number,
+): Promise<number> {
+  const client = getRedis();
+  if (!client) return -1;
+  const prefixed = `gc:${key}`;
+  try {
+    await client.del(prefixed);
+    // SADD in chunks to avoid oversized requests (Upstash REST has a size cap).
+    const CHUNK = 500;
+    for (let i = 0; i < members.length; i += CHUNK) {
+      const slice = members.slice(i, i + CHUNK);
+      if (slice.length > 0) {
+        await client.sadd(prefixed, slice[0], ...slice.slice(1));
+      }
+    }
+    if (ttlSeconds > 0) await client.expire(prefixed, ttlSeconds);
+    return members.length;
+  } catch {
+    return -1;
+  }
+}
+
+/** Does the set exist and have at least one member? Useful for cold-cache
+ * detection — if false, caller should trigger a refresh before testing. */
+export async function cacheSetExists(key: string): Promise<boolean> {
+  const client = getRedis();
+  if (!client) return false;
+  try {
+    const card = await client.scard(`gc:${key}`);
+    return typeof card === 'number' && card > 0;
+  } catch {
+    return false;
+  }
+}
+
 // ── Single-flight coalescing ──────────────────────────────────────────────
 // Map of in-flight fetcher promises keyed by cache key. Per-process.
 // On serverless: each warm instance has its own map — still collapses N

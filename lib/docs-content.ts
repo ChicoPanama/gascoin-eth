@@ -96,6 +96,7 @@ export const DOC_CATEGORIES: DocCategory[] = [
         content: `<ul>
 <li><strong>Required: </strong>A Solana wallet — Phantom, Solflare, or Backpack (all free to install)</li>
 <li><strong>Required: </strong>A <strong>verified</strong> X (Twitter) account (blue, business, or government checkmark) set to public, with at least 100 followers, a profile bio, and posting history. Unverified accounts are rejected at submission to prevent sybil attacks.</li>
+<li><strong>Required: </strong>You must <strong>follow <a href="https://x.com/GasCoinApp" target="_blank" rel="noopener">@GasCoinApp</a></strong> on X before submitting. The system checks the official follower list on every submission — non-followers are rejected at the gate.</li>
 <li><strong>Required: </strong>A physical gas receipt from a real gas station purchase within the last 7 days</li>
 <li><strong>Required: </strong>A pen to write the last 4 characters of your wallet on the receipt</li>
 <li><strong>Required: </strong>The receipt must be photographed clearly — well-lit, unblurred, full receipt visible</li>

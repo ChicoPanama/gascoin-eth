@@ -120,6 +120,110 @@ export async function getFollowerCount(handle: string): Promise<number> {
   return cacheGetOrFetch(`xfollowers:${username}`, () => fetchFollowerCount(handle), 900);
 }
 
+// ─── follows_gascoin gate ─────────────────────────────────────────────────
+//
+// The sybil model for GASCOIN requires submitters to follow @GasCoinApp on X
+// before a claim is accepted. Rather than hit the X API per submission (slow,
+// rate-limited, and requires OAuth user context for arbitrary users), we:
+//
+//   1. Run a cron worker (sync-gascoin-followers) that paginates the full
+//      follower list of @GasCoinApp via the X API every 30 minutes
+//   2. Store the set of follower X user IDs in Redis as `gascoin:x_followers`
+//   3. Check membership via SISMEMBER on the submission hot path — O(1)
+//
+// Cold-cache fallback: if the Redis SET doesn't exist yet (e.g. first boot
+// after deploy, or Redis flush), callers of `isFollowingGascoin` should check
+// `isGascoinFollowersCacheWarm` first and trigger `refreshGascoinFollowersCache`
+// synchronously before failing the gate. This avoids false rejections during
+// the very first submission after an env change.
+//
+// The target handle is read from `NEXT_PUBLIC_GASCOIN_X_HANDLE` (defaults to
+// `GasCoinApp`) so it's changeable without code deploys if we ever rebrand.
+
+import { getUserByUsername, getUserFollowers } from '../x-api';
+import { cacheSetIsMember, cacheSetExists, cacheSetReplace, cacheGet, cacheSet } from '../cache';
+
+const FOLLOWERS_SET_KEY = 'gascoin:x_followers';
+const FOLLOWERS_SET_TTL_SECONDS = 60 * 60 * 6; // 6h — worker refreshes every 30m
+const GASCOIN_X_ID_KEY = 'gascoin:x_user_id';
+const GASCOIN_X_ID_TTL_SECONDS = 60 * 60 * 24; // 24h — handle rarely changes
+
+function gascoinXHandle(): string {
+  return (process.env.NEXT_PUBLIC_GASCOIN_X_HANDLE || 'GasCoinApp').replace(/^@/, '');
+}
+
+/** Resolve @GasCoinApp → X user ID, cached for 24h. Returns null if lookup fails. */
+export async function getGascoinXUserId(): Promise<string | null> {
+  const cached = await cacheGet<string>(GASCOIN_X_ID_KEY);
+  if (cached) return cached;
+
+  const lookup = await getUserByUsername(gascoinXHandle());
+  const id = lookup.user?.id || null;
+  if (id) {
+    await cacheSet(GASCOIN_X_ID_KEY, id, GASCOIN_X_ID_TTL_SECONDS);
+  }
+  return id;
+}
+
+/** Is the cached follower set warm enough to test membership against? */
+export async function isGascoinFollowersCacheWarm(): Promise<boolean> {
+  return cacheSetExists(FOLLOWERS_SET_KEY);
+}
+
+/**
+ * Rebuild the Redis SET from the X API. Called by the sync-gascoin-followers
+ * cron worker, and as a synchronous fallback from the submit pipeline when the
+ * cache is cold. Returns the count cached, or -1 on error.
+ */
+export async function refreshGascoinFollowersCache(): Promise<{ count: number; error?: string }> {
+  const gcId = await getGascoinXUserId();
+  if (!gcId) return { count: -1, error: 'gascoin_user_lookup_failed' };
+
+  const res = await getUserFollowers(gcId);
+  if (res.error) return { count: -1, error: res.error };
+
+  const n = await cacheSetReplace(FOLLOWERS_SET_KEY, res.ids, FOLLOWERS_SET_TTL_SECONDS);
+  if (n < 0) return { count: -1, error: 'redis_write_failed' };
+
+  return { count: n };
+}
+
+/**
+ * Does this submitter follow @GasCoinApp?
+ *
+ * Hot-path check: one SISMEMBER against the Redis SET. On cold cache (set
+ * missing), synchronously rebuilds the cache before testing — pays the
+ * one-shot X API latency exactly once per TTL window, then O(1) forever.
+ *
+ * Failure modes:
+ *   - `submitterXUserId` is empty/invalid → `{ ok: false, apiFailure: false }`
+ *   - Redis unreachable → `{ ok: false, apiFailure: true }` (gate should not
+ *     penalize the user; submit pipeline returns `retry_later` instead)
+ *   - X API fails during cold-cache refresh → `{ ok: false, apiFailure: true }`
+ */
+export async function isFollowingGascoin(
+  submitterXUserId: string,
+): Promise<{ ok: boolean; apiFailure: boolean }> {
+  const xId = String(submitterXUserId || '').trim();
+  if (!xId) return { ok: false, apiFailure: false };
+
+  // Hot path
+  const warm = await isGascoinFollowersCacheWarm();
+  if (warm) {
+    const isMember = await cacheSetIsMember(FOLLOWERS_SET_KEY, xId);
+    return { ok: isMember, apiFailure: false };
+  }
+
+  // Cold cache — rebuild synchronously. This is the first-submission-after-deploy
+  // case and takes ~300–800ms. After this, every subsequent check is O(1).
+  const refresh = await refreshGascoinFollowersCache();
+  if (refresh.count < 0) {
+    return { ok: false, apiFailure: true };
+  }
+  const isMember = await cacheSetIsMember(FOLLOWERS_SET_KEY, xId);
+  return { ok: isMember, apiFailure: false };
+}
+
 export async function verifyTweetProof(tweetUrl: string, expectedHandle: string): Promise<TweetProofResult> {
   if (!tweetUrl.includes('x.com') && !tweetUrl.includes('twitter.com')) {
     return { ok: false, reason: 'invalid_tweet_url' };
