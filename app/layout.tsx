@@ -2,8 +2,10 @@ import './globals.css';
 import '../styles/wallet-override.css';
 import type { ReactNode } from 'react';
 import type { Metadata, Viewport } from 'next';
+import Script from 'next/script';
 import { Providers } from './providers';
 import { GlobalFooter } from '../components/GlobalFooter';
+import { THEME_INIT_SCRIPT } from '../components/ThemeProvider';
 
 export const viewport: Viewport = {
   width: 'device-width',
@@ -35,6 +37,13 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
       <head>
+        {/* Theme init — runs before React hydrates so the first paint is
+            already in the correct mode. Reads localStorage `gc_theme` and
+            sets data-theme on <html>. */}
+        <Script
+          id="gc-theme-init"
+          strategy="beforeInteractive"
+        >{THEME_INIT_SCRIPT}</Script>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link

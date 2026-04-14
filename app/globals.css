@@ -21,16 +21,23 @@ body {
   overflow-x: hidden;
 }
 
-/* Grain overlay */
+/* Grain overlay — opacity follows theme (cream needs slightly more grain
+   to read as paper, dark bg is happy with 0.03). In light mode we invert
+   the SVG's implicit "white noise on transparent" via mix-blend-mode so
+   the grain reads as dark flecks on cream rather than ghostly highlights. */
 body::before {
   content: '';
   position: fixed;
   inset: 0;
   z-index: 9000;
   pointer-events: none;
-  opacity: 0.03;
+  opacity: var(--grain-opacity);
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   background-size: 128px 128px;
+}
+
+[data-theme="light"] body::before {
+  mix-blend-mode: multiply;
 }
 
 a { color: var(--fg); text-decoration: none; }
@@ -57,7 +64,7 @@ code, .mono {
   height: 60px;
   padding: 0 48px;
   border-bottom: 1px solid var(--line);
-  background: rgba(0, 0, 0, 0.85);
+  background: var(--nav-bg);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
 }
@@ -68,12 +75,25 @@ code, .mono {
   gap: 10px;
 }
 
+/* Link half of the brand wrap — the old .gc-nav-brand-wrap was itself an
+   <a>, but the theme toggle needs to sit as a sibling (a <button> inside
+   an <a> is invalid HTML). The wrap is now a flex <div> that contains
+   the link + the toggle, and this class handles the logo+wordmark layout
+   that used to belong to the anchor. */
+.gc-nav-brand-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--fg);
+  text-decoration: none;
+}
+
 .gc-nav-logo-icon {
   width: 24px;
   height: 24px;
   border-radius: 6px;
   object-fit: cover;
-  border: 1px solid rgba(255,255,255,0.2);
+  border: 1px solid rgba(var(--fg-rgb), 0.2);
 }
 
 .gc-nav-brand {
@@ -907,8 +927,8 @@ code, .mono {
   text-transform: uppercase;
   letter-spacing: 0.1em;
   padding: 14px 32px;
-  background: linear-gradient(135deg, #FFFFFF, #E7E9EA);
-  color: #000000;
+  background: var(--btn-solid-bg);
+  color: var(--btn-solid-fg);
   cursor: crosshair;
   transition: all 0.25s;
   text-decoration: none;
@@ -6652,5 +6672,186 @@ button.docs-footer-link {
   .ud-payouts__header,
   .ud-payouts__row {
     gap: 8px;
+  }
+}
+
+/* ═══════════════════════════════════════════
+   LIGHT MODE — TARGETED SURFACE OVERRIDES
+   ═══════════════════════════════════════════
+
+   Most of globals.css uses var(--fg), var(--bg), var(--line), var(--card)
+   which flip automatically via the [data-theme="light"] block in tokens.css.
+   This section handles the long tail of hardcoded rgba(255,255,255,x) and
+   rgba(0,0,0,x) patterns that couldn't be var-ified without touching every
+   line. Kept in one block so the cascade is predictable and the overrides
+   are easy to audit.
+
+   Scope: the highest-visibility surfaces (nav menus, wallet connect modal,
+   card panels, glass effects, hero gradients). Admin-only and debug
+   surfaces are left for a follow-up pass — dark-only there is acceptable
+   until we get closer to a wide launch.
+*/
+
+[data-theme="light"] {
+  /* Nav action triggers / menu panels — were all rgba(255,255,255,x) */
+  .gc-nav-actions-trigger,
+  .gc-nav-actions-panel,
+  .gc-nav-actions-panel::before {
+    background: #F7F2E5;
+  }
+  .gc-nav-actions-trigger {
+    background: rgba(20, 18, 16, 0.04);
+    border-color: var(--line);
+  }
+  .gc-nav-actions-trigger:hover {
+    background: rgba(20, 18, 16, 0.08);
+  }
+  .gc-nav-actions-panel {
+    box-shadow: 0 16px 48px rgba(20, 18, 16, 0.18),
+                0 2px 0 rgba(20, 18, 16, 0.06) inset;
+  }
+
+  /* Wallet Connect Modal — cream panel with dark borders */
+  .gc-wcm,
+  .gc-wcm::before {
+    background: var(--wcm-bg);
+  }
+  .gc-wcm {
+    box-shadow: 0 24px 64px rgba(20, 18, 16, 0.22),
+                0 2px 0 rgba(20, 18, 16, 0.06) inset;
+  }
+  .gc-wcm-row {
+    background: rgba(20, 18, 16, 0.02);
+    border-color: rgba(20, 18, 16, 0.15);
+  }
+  .gc-wcm-row:hover {
+    background: rgba(20, 18, 16, 0.06);
+    border-color: rgba(20, 18, 16, 0.32);
+  }
+  .gc-wcm-icon {
+    background: rgba(20, 18, 16, 0.04);
+  }
+  .gc-wcm-badge {
+    border-color: rgba(20, 18, 16, 0.25);
+    color: rgba(20, 18, 16, 0.7);
+  }
+  .gc-wcm-badge--install {
+    color: rgba(20, 18, 16, 0.55);
+  }
+
+  /* Hero — invert the white vignettes + text-shadow glow so the hero
+     reads as a dark spotlight on cream rather than a light bloom on black.
+     This keeps the brutalist "stage lit" feeling in both themes. */
+  .gc-hero::before {
+    background:
+      radial-gradient(ellipse 1200px 600px at 50% 0%, var(--hero-vignette-1) 0%, transparent 60%),
+      radial-gradient(ellipse 800px 400px at 30% 100%, var(--hero-vignette-2) 0%, transparent 50%);
+  }
+  .gc-hero-glow {
+    text-shadow:
+      0 0 1px rgba(20, 18, 16, 0.72),
+      0 0 8px rgba(20, 18, 16, 0.35),
+      0 0 24px rgba(20, 18, 16, 0.22);
+  }
+  .gc-hero-logo-shadow {
+    background: radial-gradient(ellipse at center, rgba(20, 18, 16, 0.18) 0%, transparent 70%);
+  }
+
+  /* Solid button hover glow — was 0 0 24px rgba(255,255,255,0.2) */
+  .gc-btn-solid:hover {
+    box-shadow: 0 0 24px rgba(20, 18, 16, 0.20);
+  }
+
+  /* Stat cards + stat grid borders */
+  .gc-stat {
+    border-color: var(--line);
+  }
+
+  /* Footer muted hover — was rgba(255,255,255,0.7) */
+  .gc-footer-links a:hover {
+    color: rgba(20, 18, 16, 0.7);
+  }
+
+  /* Form inputs — textarea, input, select — the monochrome dark scheme
+     uses rgba(255,255,255,0.04) backgrounds. Flip to cream. */
+  input[type="text"],
+  input[type="email"],
+  input[type="url"],
+  input[type="number"],
+  input[type="password"],
+  textarea,
+  select {
+    background: rgba(20, 18, 16, 0.03);
+    border-color: var(--line);
+    color: var(--fg);
+  }
+  input[type="text"]:focus,
+  input[type="email"]:focus,
+  input[type="url"]:focus,
+  input[type="number"]:focus,
+  input[type="password"]:focus,
+  textarea:focus,
+  select:focus {
+    background: rgba(20, 18, 16, 0.06);
+    outline: 1px solid var(--fg);
+    outline-offset: 2px;
+  }
+}
+
+/* ═══════════════════════════════════════════
+   THEME TOGGLE WIDGET
+   ═══════════════════════════════════════════
+
+   Tight 28×28 square button that lives inside .gc-nav-brand-wrap, to the
+   right of the GASCOIN wordmark. Three-state cycle: ● (dark) → ○ (light)
+   → ◐ (auto / system). Matches the brutalist badge aesthetic used by
+   SEASON 1 and tier chips — 1px border, mono typography, zero rounding,
+   crosshair cursor to echo the rest of the site.
+
+   On mobile the button stays in the nav brand wrap so it remains visible
+   even when the nav collapses. It's 28×28 on desktop and expands to 32×32
+   on touch devices via a media query so it meets the 32px touch target
+   minimum without growing visually elsewhere.
+*/
+.gc-theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  margin-left: 4px;
+  padding: 0;
+  font-family: var(--font-mono);
+  font-size: 14px;
+  line-height: 1;
+  background: transparent;
+  color: var(--fg);
+  border: 1px solid var(--line);
+  border-radius: 0;
+  cursor: crosshair;
+  transition: background 120ms ease-out, border-color 120ms ease-out, color 120ms ease-out;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.gc-theme-toggle:hover {
+  background: rgba(var(--fg-rgb), 0.08);
+  border-color: var(--fg);
+}
+
+.gc-theme-toggle:focus-visible {
+  outline: 1px solid var(--fg);
+  outline-offset: 2px;
+}
+
+.gc-theme-toggle:active {
+  transform: translateY(1px);
+}
+
+@media (hover: none) and (pointer: coarse) {
+  .gc-theme-toggle {
+    width: 32px;
+    height: 32px;
+    font-size: 15px;
   }
 }

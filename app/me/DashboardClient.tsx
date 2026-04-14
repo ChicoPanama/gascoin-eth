@@ -255,9 +255,9 @@ export function DashboardClient({ wallet, xHandle, isDryRun = false, claims, pay
           letterSpacing: '0.08em',
           padding: '14px 20px',
           marginBottom: 32,
-          background: 'rgba(255,200,80,0.06)',
-          border: '1px solid rgba(255,200,80,0.25)',
-          color: 'rgba(255,220,140,0.9)',
+          background: 'var(--status-warn-bg)',
+          border: '1px solid var(--status-warn-border)',
+          color: 'var(--status-warn)',
           display: 'flex',
           alignItems: 'center',
           gap: 12,
@@ -408,7 +408,7 @@ export function DashboardClient({ wallet, xHandle, isDryRun = false, claims, pay
                     padding: '6px 12px', display: 'flex', gap: 8, alignItems: 'center',
                   }}>
                     <span>{GATE_DISPLAY[f.gate] || f.gate}</span>
-                    <span style={{ color: 'rgba(255,255,255,0.3)' }}>{f.count}x</span>
+                    <span style={{ color: 'rgba(var(--fg-rgb),0.3)' }}>{f.count}x</span>
                   </div>
                 ))}
               </div>
@@ -443,13 +443,13 @@ export function DashboardClient({ wallet, xHandle, isDryRun = false, claims, pay
                 const pct = (data.points / maxPts) * 100;
                 return (
                   <div key={type} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'rgba(255,255,255,0.6)', width: 110, flexShrink: 0 }}>
+                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'rgba(var(--fg-rgb),0.6)', width: 110, flexShrink: 0 }}>
                       {type.replace(/_/g, ' ')}
                     </span>
-                    <div style={{ flex: 1, height: 6, background: 'rgba(255,255,255,0.05)', borderRadius: 3, overflow: 'hidden' }}>
+                    <div style={{ flex: 1, height: 6, background: 'rgba(var(--fg-rgb),0.05)', borderRadius: 3, overflow: 'hidden' }}>
                       <div style={{ height: '100%', width: `${pct}%`, background: '#fff', borderRadius: 3 }} />
                     </div>
-                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'rgba(255,255,255,0.4)', width: 80, textAlign: 'right', flexShrink: 0 }}>
+                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'rgba(var(--fg-rgb),0.4)', width: 80, textAlign: 'right', flexShrink: 0 }}>
                       {data.count} tweets
                     </span>
                     <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--fg)', width: 70, textAlign: 'right', flexShrink: 0 }}>
@@ -459,12 +459,12 @@ export function DashboardClient({ wallet, xHandle, isDryRun = false, claims, pay
                 );
               })}
           </div>
-          <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'rgba(255,255,255,0.25)', marginTop: 12 }}>
+          <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'rgba(var(--fg-rgb),0.25)', marginTop: 12 }}>
             {engagement?.totalScoredTweets || 0} total tweets scored
           </div>
           </>
         ) : (
-          <div style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: 'rgba(255,255,255,0.3)', padding: '24px 0' }}>
+          <div style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: 'rgba(var(--fg-rgb),0.3)', padding: '24px 0' }}>
             No tweets scored yet. Post with #gascoin to start earning engagement points.
           </div>
         )}
@@ -478,19 +478,19 @@ export function DashboardClient({ wallet, xHandle, isDryRun = false, claims, pay
         </div>
         {tier?.next ? (
           <div style={{ padding: '16px 0' }}>
-            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'rgba(255,255,255,0.4)', marginBottom: 8 }}>
+            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'rgba(var(--fg-rgb),0.4)', marginBottom: 8 }}>
               NEXT: {tier.next.name.toUpperCase()} — {tier.tokensToNext.toLocaleString()} GASCOIN needed
             </div>
             <div className="gt-progress-track">
               <div className="gt-progress-fill" style={{ width: `${Math.min(100, tier.gascoinBalance / tier.next.min_tokens * 100)}%` }} />
             </div>
-            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'rgba(255,255,255,0.3)', marginTop: 8 }}>
+            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'rgba(var(--fg-rgb),0.3)', marginTop: 8 }}>
               Max refund: {tier?.current?.max_sol_refund || 0.10} SOL · Cooldown: {cooldown?.days || 7}d
               {cooldown?.remainingMs && cooldown.remainingMs > 0 ? ` · Next submission: ${Math.ceil(cooldown.remainingMs / 3600000)}h` : ' · Ready to submit'}
             </div>
           </div>
         ) : (
-          <div style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: 'rgba(255,255,255,0.3)', padding: '24px 0' }}>
+          <div style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: 'rgba(var(--fg-rgb),0.3)', padding: '24px 0' }}>
             {tier?.current?.name === 'Fleet' ? 'You are at the highest tier.' : `Current tier: ${tier?.current?.name || 'Standard'}. Hold more GASCOIN to unlock higher tiers.`}
           </div>
         )}
@@ -512,10 +512,10 @@ export function DashboardClient({ wallet, xHandle, isDryRun = false, claims, pay
                     {t.adjusted_points.toLocaleString()} pts
                   </span>
                 </div>
-                <div style={{ fontFamily: 'var(--font-body)', fontSize: 13, color: 'rgba(255,255,255,0.6)', lineHeight: 1.6, marginTop: 8 }}>
+                <div style={{ fontFamily: 'var(--font-body)', fontSize: 13, color: 'rgba(var(--fg-rgb),0.6)', lineHeight: 1.6, marginTop: 8 }}>
                   {t.tweet_text?.slice(0, 120)}{t.tweet_text?.length > 120 ? '...' : ''}
                 </div>
-                <div style={{ display: 'flex', gap: 16, marginTop: 8, fontFamily: 'var(--font-mono)', fontSize: 11, color: 'rgba(255,255,255,0.35)' }}>
+                <div style={{ display: 'flex', gap: 16, marginTop: 8, fontFamily: 'var(--font-mono)', fontSize: 11, color: 'rgba(var(--fg-rgb),0.35)' }}>
                   <span>{t.impressions.toLocaleString()} impr</span>
                   <span>{t.likes} likes</span>
                   <span>{t.replies} replies</span>
@@ -524,7 +524,7 @@ export function DashboardClient({ wallet, xHandle, isDryRun = false, claims, pay
                   <span>Q: {(t.quality_score * 100).toFixed(0)}%</span>
                 </div>
                 {t.tweet_url && (
-                  <a href={t.tweet_url} target="_blank" rel="noopener noreferrer" style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'rgba(255,255,255,0.3)', marginTop: 4, display: 'inline-block' }}>
+                  <a href={t.tweet_url} target="_blank" rel="noopener noreferrer" style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'rgba(var(--fg-rgb),0.3)', marginTop: 4, display: 'inline-block' }}>
                     View on X ↗
                   </a>
                 )}
@@ -532,7 +532,7 @@ export function DashboardClient({ wallet, xHandle, isDryRun = false, claims, pay
             ))}
           </div>
         ) : (
-          <div style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: 'rgba(255,255,255,0.3)', padding: '24px 0' }}>
+          <div style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: 'rgba(var(--fg-rgb),0.3)', padding: '24px 0' }}>
             No tweets scored yet. Post with #gascoin to start earning engagement points.
           </div>
         )}
@@ -779,12 +779,12 @@ export function DashboardClient({ wallet, xHandle, isDryRun = false, claims, pay
         </div>
         {/* Referral funnel */}
         <div style={{ marginTop: 16, display: 'flex', alignItems: 'center', gap: 8, fontFamily: 'var(--font-mono)', fontSize: 11 }}>
-          <span style={{ color: 'rgba(255,255,255,0.4)' }}>{referral.clicks} clicks</span>
-          <span style={{ color: 'rgba(255,255,255,0.15)' }}>→</span>
-          <span style={{ color: 'rgba(255,255,255,0.4)' }}>{referral.uniqueClicks} unique</span>
-          <span style={{ color: 'rgba(255,255,255,0.15)' }}>→</span>
-          <span style={{ color: 'rgba(255,255,255,0.6)' }}>{referral.conversions} converted</span>
-          <span style={{ color: 'rgba(255,255,255,0.15)' }}>→</span>
+          <span style={{ color: 'rgba(var(--fg-rgb),0.4)' }}>{referral.clicks} clicks</span>
+          <span style={{ color: 'rgba(var(--fg-rgb),0.15)' }}>→</span>
+          <span style={{ color: 'rgba(var(--fg-rgb),0.4)' }}>{referral.uniqueClicks} unique</span>
+          <span style={{ color: 'rgba(var(--fg-rgb),0.15)' }}>→</span>
+          <span style={{ color: 'rgba(var(--fg-rgb),0.6)' }}>{referral.conversions} converted</span>
+          <span style={{ color: 'rgba(var(--fg-rgb),0.15)' }}>→</span>
           <span style={{ color: 'var(--fg)' }}>2% passive</span>
         </div>
       </section>

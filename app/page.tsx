@@ -67,16 +67,18 @@ export default async function Home() {
         <HomeNav />
         <main id="main-content">
 
-        {/* SEASON 1 BANNER — top of page, above hero */}
+        {/* SEASON 1 BANNER — top of page, above hero. Colors come from the
+            --status-warn* tokens so the banner re-tunes for light mode
+            without changing its brutalist shape. */}
         {isDryRun && (
           <div style={{
             fontFamily: 'var(--font-mono)',
             fontSize: 11,
             letterSpacing: '0.08em',
             padding: '14px 48px',
-            background: 'rgba(255,200,80,0.06)',
-            borderBottom: '1px solid rgba(255,200,80,0.25)',
-            color: 'rgba(255,220,140,0.9)',
+            background: 'var(--status-warn-bg)',
+            borderBottom: '1px solid var(--status-warn-border)',
+            color: 'var(--status-warn)',
             display: 'flex',
             alignItems: 'center',
             gap: 14,
@@ -85,8 +87,8 @@ export default async function Home() {
             <span style={{
               fontSize: 10,
               padding: '4px 10px',
-              background: 'rgba(255,200,80,0.15)',
-              border: '1px solid rgba(255,200,80,0.35)',
+              background: 'var(--status-warn-bg)',
+              border: '1px solid var(--status-warn-border)',
               letterSpacing: '0.18em',
               fontWeight: 600,
             }}>

@@ -8,6 +8,7 @@ import { WalletButton } from './ui/WalletButton';
 import { MobileMenu } from './ui/MobileMenu';
 import { NavActionsMenu } from './NavActionsMenu';
 import { useAdaptiveNav } from './useAdaptiveNav';
+import { ThemeToggle } from './ThemeToggle';
 
 const NAV_LINKS = [
   { href: '/how-it-works', label: 'How It Works', icon: '?' },
@@ -31,10 +32,13 @@ export function Nav() {
 
   return (
     <nav ref={navRef as any} className={`gc-nav${compact ? ' gc-nav--compact' : ''}`}>
-      <Link ref={brandRef as any} href="/" className="gc-nav-brand-wrap" aria-label="GASCOIN home">
-        <img src="/logo/gascoin-g.jpg" alt="" className="gc-nav-logo-icon" aria-hidden />
-        <span className="gc-nav-brand">GASCOIN</span>
-      </Link>
+      <div ref={brandRef as any} className="gc-nav-brand-wrap">
+        <Link href="/" className="gc-nav-brand-link" aria-label="GASCOIN home">
+          <img src="/logo/gascoin-g.jpg" alt="" className="gc-nav-logo-icon" aria-hidden />
+          <span className="gc-nav-brand">GASCOIN</span>
+        </Link>
+        <ThemeToggle />
+      </div>
       <div ref={linksRef as any} className="gc-nav-links">
         {NAV_LINKS.map(({ href, label, icon }) => (
           <Link key={href} href={href} className={pathname === href ? 'gc-nav-active' : ''}>
