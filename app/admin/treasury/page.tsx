@@ -23,7 +23,7 @@ export default async function TreasuryPage() {
         .eq('reward_status', 'pending'),
       supabase
         .from('payout_jobs')
-        .select('id, claim_id, wallet, amount_sol, status, created_at')
+        .select('id, claim_id, wallet, amount_sol, status, created_at, tx_hash')
         .order('created_at', { ascending: false })
         .limit(20),
     ]);
@@ -134,8 +134,23 @@ export default async function TreasuryPage() {
                     <td className="lb-table-time">
                       <span style={{ color: statusColor }}>{(job.status ?? '—').toUpperCase()}</span>
                     </td>
-                    <td className="lb-table-time" style={{ maxWidth: 160, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                      —
+                    <td className="lb-table-time" style={{ maxWidth: 180, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontFamily: 'var(--font-mono)', fontSize: 11 }}>
+                      {job.tx_hash ? (
+                        job.tx_hash.startsWith('DRYRUN_') ? (
+                          <span style={{ color: 'var(--status-warn)' }}>{job.tx_hash}</span>
+                        ) : (
+                          <a
+                            href={`https://solscan.io/tx/${job.tx_hash}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style={{ color: 'var(--status-info)', textDecoration: 'underline' }}
+                          >
+                            {job.tx_hash.slice(0, 8)}…{job.tx_hash.slice(-6)}
+                          </a>
+                        )
+                      ) : (
+                        <span style={{ color: 'var(--text-tertiary)' }}>—</span>
+                      )}
                     </td>
                   </tr>
                 );

@@ -7,6 +7,7 @@ const NAV_SECTIONS = [
     { href: '/admin/submissions', label: 'Submissions' },
     { href: '/admin/referrals', label: 'Referral Rewards' },
     { href: '/admin/treasury', label: 'Treasury' },
+    { href: '/admin/invites', label: 'Beta Invites' },
   ]},
   { label: 'MODERATION', links: [
     { href: '/admin/receipts', label: 'Receipt Review' },
@@ -17,6 +18,7 @@ const NAV_SECTIONS = [
     { href: '/admin/audit', label: 'Audit Log' },
   ]},
   { label: 'SYSTEM', links: [
+    { href: '/admin/health', label: 'System Health' },
     { href: '/admin/settings', label: 'Settings' },
   ]},
 ];

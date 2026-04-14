@@ -73,6 +73,27 @@ export async function POST(req: Request){
     return NextResponse.json({ ok:false, error:'supabase_not_configured' }, { status: 500 });
   }
 
+  // ─── Season 1 beta gate: invite code required ───
+  // Checked before any expensive work (OCR, X API, fraud) so non-invited
+  // users are bounced cheaply. Bypassable via env flag for local dev /
+  // smoke tests where running through the Privy + invite flow is noise.
+  if (process.env.INVITE_GATE_DISABLED !== 'true') {
+    const { data: inviteRow } = await supabase
+      .from('invite_codes')
+      .select('code')
+      .eq('used_by_x_user_id', session.xId)
+      .limit(1)
+      .maybeSingle();
+
+    if (!inviteRow) {
+      return NextResponse.json({
+        ok: false,
+        error: 'invite_required',
+        message: 'Redeem a Season 1 beta invite code before submitting.',
+      }, { status: 403 });
+    }
+  }
+
   const form = await req.formData();
   const tweetUrl = String(form.get('tweetUrl')||'');
   const walletInput = String(form.get('wallet')||'').trim();

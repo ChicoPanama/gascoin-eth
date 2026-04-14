@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect, useCallback } from 'react';
+import { usePrivy } from '@privy-io/react-auth';
 import { generateReferralCodeClient } from '../lib/referral-code-client';
 import { ViralShareCard } from './shared/ViralShareCard';
 
@@ -593,6 +594,227 @@ function usePrivyHandle(): string {
   }
 }
 
+// ═══════════════════════════════════════════
+// SEASON 1 — Invite Gate
+// ═══════════════════════════════════════════
+//
+// Gates the entire submit flow behind a single-use beta invite code.
+// Only appears after the user has signed in with Privy — before sign-in,
+// there's nothing to bind the code to. Flow:
+//
+//   not authenticated → "sign in to continue" panel
+//   authenticated but no invite → invite redemption panel
+//   authenticated + has invite → children (the 5-step flow)
+//
+// The gate polls /api/invites/redeem (GET) on mount to check status,
+// then posts to the same endpoint on code submission. Once redeemed,
+// the response is cached in a local state flag so the flow reveals
+// immediately without a re-fetch. The server is authoritative — every
+// /api/claims/submit call independently verifies invite status.
+
+function InviteGate({ children }: { children: React.ReactNode }) {
+  const { ready, authenticated, login, getAccessToken, user } = usePrivy();
+  const [checking, setChecking] = useState(true);
+  const [hasInvite, setHasInvite] = useState(false);
+  const [code, setCode] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState('');
+
+  const handle = ((user as any)?.twitter?.username || '').toString();
+
+  // Check invite status whenever auth state changes
+  useEffect(() => {
+    let cancelled = false;
+    if (!ready) return;
+    if (!authenticated) { setChecking(false); setHasInvite(false); return; }
+
+    (async () => {
+      setChecking(true);
+      try {
+        const token = await getAccessToken();
+        if (!token) { setChecking(false); return; }
+        const res = await fetch('/api/invites/redeem', {
+          method: 'GET',
+          headers: {
+            authorization: `Bearer ${token}`,
+            'x-privy-user-id': String((user as any)?.id || ''),
+            'x-privy-handle': handle,
+          },
+        });
+        const data = await res.json();
+        if (!cancelled) {
+          setHasInvite(!!data?.hasInvite);
+          setChecking(false);
+        }
+      } catch {
+        if (!cancelled) setChecking(false);
+      }
+    })();
+
+    return () => { cancelled = true; };
+  }, [ready, authenticated, getAccessToken, user, handle]);
+
+  async function redeem(e: React.FormEvent) {
+    e.preventDefault();
+    setError('');
+    const normalized = code.trim().toUpperCase();
+    if (!/^GC-[A-Z0-9]{4}-[A-Z0-9]{4}$/.test(normalized)) {
+      setError('Invalid code format. Expected GC-XXXX-XXXX.');
+      return;
+    }
+    setSubmitting(true);
+    try {
+      const token = await getAccessToken();
+      if (!token) { setError('Sign in required.'); setSubmitting(false); return; }
+      const res = await fetch('/api/invites/redeem', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          authorization: `Bearer ${token}`,
+          'x-privy-user-id': String((user as any)?.id || ''),
+          'x-privy-handle': handle,
+        },
+        body: JSON.stringify({ code: normalized }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data?.message || data?.error || 'Redemption failed.');
+        return;
+      }
+      setHasInvite(true);
+      setCode('');
+    } catch (err: any) {
+      setError(err?.message || 'Redemption failed.');
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  if (!ready || checking) {
+    return (
+      <div className="sf-container">
+        <div className="sf-step">
+          <h2 className="sf-headline">Loading…</h2>
+        </div>
+      </div>
+    );
+  }
+
+  if (!authenticated) {
+    return (
+      <div className="sf-container">
+        <div className="sf-step">
+          <div className="sf-eyebrow">— SEASON 1 · BETA</div>
+          <h2 className="sf-headline">Sign in to continue</h2>
+          <p className="sf-sub">
+            Beta access is gated behind a single-use invite code. Sign in with your
+            verified X account first, then enter your code to unlock the submission
+            flow.
+          </p>
+          <button
+            type="button"
+            className="sf-btn-solid"
+            onClick={() => login()}
+            style={{ marginTop: 24 }}
+          >
+            Sign in with X
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (!hasInvite) {
+    return (
+      <div className="sf-container">
+        <div className="sf-step">
+          <div className="sf-eyebrow">— SEASON 1 · BETA · INVITE REQUIRED</div>
+          <h2 className="sf-headline">Enter your beta invite code</h2>
+          <p className="sf-sub">
+            You&apos;re signed in as <strong>@{handle || 'user'}</strong>. Enter the
+            single-use invite code you received to unlock receipt submission.
+            Browsing the leaderboard, docs, and gates stays public — the code is
+            only required to submit.
+          </p>
+          <form onSubmit={redeem} style={{ marginTop: 32, maxWidth: 420 }}>
+            <label
+              style={{
+                display: 'block',
+                fontFamily: 'var(--font-mono)',
+                fontSize: 11,
+                letterSpacing: '0.15em',
+                textTransform: 'uppercase',
+                color: 'var(--text-secondary)',
+                marginBottom: 8,
+              }}
+            >
+              Invite Code
+            </label>
+            <input
+              type="text"
+              value={code}
+              onChange={(e) => setCode(e.target.value)}
+              placeholder="GC-XXXX-XXXX"
+              autoFocus
+              autoComplete="off"
+              spellCheck={false}
+              maxLength={11}
+              style={{
+                width: '100%',
+                padding: '14px 18px',
+                fontFamily: 'var(--font-mono)',
+                fontSize: 18,
+                letterSpacing: '0.12em',
+                textTransform: 'uppercase',
+                background: 'rgba(var(--fg-rgb), 0.03)',
+                color: 'var(--fg)',
+                border: '1px solid var(--line)',
+                borderRadius: 0,
+                outline: 'none',
+              }}
+            />
+            {error && (
+              <p
+                style={{
+                  marginTop: 12,
+                  fontFamily: 'var(--font-mono)',
+                  fontSize: 12,
+                  color: 'var(--status-fail)',
+                }}
+              >
+                {error}
+              </p>
+            )}
+            <button
+              type="submit"
+              disabled={submitting || code.trim().length < 11}
+              className="sf-btn-solid"
+              style={{ marginTop: 20, width: '100%' }}
+            >
+              {submitting ? 'Redeeming…' : 'Redeem Code'}
+            </button>
+          </form>
+          <p
+            style={{
+              marginTop: 24,
+              fontFamily: 'var(--font-mono)',
+              fontSize: 11,
+              color: 'var(--text-tertiary)',
+              maxWidth: 420,
+            }}
+          >
+            Don&apos;t have a code? Season 1 is closed beta. Codes are distributed
+            directly to selected testers. Public access arrives with the token
+            launch.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  return <>{children}</>;
+}
+
 export function SubmitFlow() {
   const [step, setStep] = useState<Step>(1);
   const [maxStep, setMaxStep] = useState<Step>(1);
@@ -623,6 +845,7 @@ export function SubmitFlow() {
   // Hardened 2026-04-06 — use React DevTools or proper test harness instead.
 
   return (
+    <InviteGate>
     <div className="sf-container">
       <ProgressBar step={step} maxStep={maxStep} />
 
@@ -674,5 +897,6 @@ export function SubmitFlow() {
         />
       )}
     </div>
+    </InviteGate>
   );
 }
