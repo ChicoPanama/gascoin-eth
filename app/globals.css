@@ -4374,15 +4374,30 @@ button.docs-footer-link {
   border: 1px solid var(--line);
   padding: 24px;
 }
+/* Left accent bar so each column is identifiable at a glance, even
+   before the label is parsed. Green-left for DO, red-left for DON'T. */
+.pts-do { border-left: 3px solid var(--status-pass); }
+.pts-dont { border-left: 3px solid var(--status-fail); }
+
 .pts-do-label, .pts-dont-label {
+  /* X-style solid-fill status pill instead of faded tinted text. Dark
+     chip on the accent color for maximum contrast and "this is a label"
+     reading in both themes. Was rgba(100,255,150,0.8) / rgba(255,100,100,0.8)
+     — both pale and unreadable on white. */
+  display: inline-block;
   font-family: var(--font-mono);
   font-size: 11px;
-  letter-spacing: 0.2em;
+  font-weight: 700;
+  letter-spacing: 0.15em;
   text-transform: uppercase;
+  padding: 5px 12px;
   margin-bottom: 16px;
+  color: #FFFFFF;
+  border: 1px solid transparent;
 }
-.pts-do-label { color: rgba(100,255,150,0.8); }
-.pts-dont-label { color: rgba(255,100,100,0.8); }
+.pts-do-label  { background: var(--status-pass); }
+.pts-dont-label { background: var(--status-fail); }
+
 .pts-list {
   list-style: none;
   padding: 0;
@@ -4391,19 +4406,25 @@ button.docs-footer-link {
 .pts-list li {
   font-family: var(--font-body);
   font-weight: 400;
-  font-size: 13px;
-  color: rgba(var(--fg-rgb),0.65);
+  font-size: 14px;
+  /* X secondary text shade — discrete gray, readable in both themes */
+  color: var(--text-secondary);
   line-height: 1.7;
   padding: 4px 0;
   padding-left: 16px;
   position: relative;
 }
+/* Primary-color bullet marker so the dash pops against the secondary text */
 .pts-list li::before {
   content: '—';
   position: absolute;
   left: 0;
-  color: rgba(var(--fg-rgb),0.3);
+  color: var(--text-primary);
 }
+/* Dark-side bullet markers inherit the status color for stronger semantic
+   cue — green dashes on the DO column, red dashes on the DON'T column. */
+.pts-do .pts-list li::before { color: var(--status-pass); }
+.pts-dont .pts-list li::before { color: var(--status-fail); }
 .pts-callout {
   background: rgba(var(--fg-rgb),0.03);
   border-left: 2px solid rgba(var(--fg-rgb),0.15);

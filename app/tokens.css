@@ -64,7 +64,7 @@
   --glass-blur: 16px;
 
   /* ── Status ── */
-  --status-pass: #FFFFFF;
+  --status-pass: #00BA7C;          /* X green — verification checkmarks */
   --status-fail: #F4212E;
   --status-pending: #FFD400;
   --status-warn: #FFC849;       /* banner alerts — Season 1, etc. */
