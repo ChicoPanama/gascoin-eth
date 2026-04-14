@@ -6697,7 +6697,16 @@ button.docs-footer-link {
   .gc-nav-actions-trigger,
   .gc-nav-actions-panel,
   .gc-nav-actions-panel::before {
-    background: #F7F2E5;
+    background: var(--bg);
+  }
+  /* Mobile hamburger slide-out panel — hardcoded #0a0a0a in base styles,
+     overridden here so it matches the cream/white background in light mode. */
+  .mobile-menu {
+    background: var(--bg);
+    border-left-color: var(--line);
+  }
+  .mobile-menu-link {
+    border-bottom-color: var(--line);
   }
   .gc-nav-actions-trigger {
     background: rgba(var(--fg-rgb), 0.04);
