@@ -19,7 +19,7 @@ export const metadata: Metadata = {
     description: 'Post #gascoin on X, submit your gas receipt, and receive SOL directly to your wallet. 10 automated verification gates. No middlemen.',
     siteName: 'GASCOIN',
     type: 'website',
-    url: 'https://platform-ebon-nine.vercel.app',
+    url: process.env.NEXT_PUBLIC_BASE_URL || 'https://gascoin.app',
   },
   twitter: {
     card: 'summary_large_image',

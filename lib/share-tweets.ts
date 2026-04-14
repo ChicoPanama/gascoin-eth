@@ -1,6 +1,6 @@
 function getBaseUrl(): string {
   if (typeof window !== 'undefined') return window.location.origin;
-  return process.env.NEXT_PUBLIC_BASE_URL || 'https://platform-ebon-nine.vercel.app';
+  return process.env.NEXT_PUBLIC_BASE_URL || 'https://gascoin.app';
 }
 
 export function composeDashboardTweet(params: {

@@ -1,4 +1,4 @@
 Contact: mailto:security@gascoin.io
 Preferred-Languages: en
-Canonical: https://platform-ebon-nine.vercel.app/.well-known/security.txt
+Canonical: https://gascoin.app/.well-known/security.txt
 Expires: 2027-04-06T00:00:00.000Z

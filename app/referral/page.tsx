@@ -41,7 +41,7 @@ export default function ReferralPage() {
   const [expandedSkip, setExpandedSkip] = useState<string | null>(null);
 
   const isUnlocked = !!wallet && hasApprovedSubmission;
-  const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'https://gascoin.xyz';
+  const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'https://gascoin.app';
   const referralUrl = referralCode ? `${baseUrl}/submit?ref=${referralCode}` : '';
 
   const copyLink = async () => {
