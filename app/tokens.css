@@ -104,54 +104,59 @@
    high-contrast darks on light, mirroring dark mode's high-contrast
    lights on dark. */
 [data-theme="light"] {
-  /* ── Core palette ── */
-  --bg: #F2EDE0;
-  --bg-rgb: 242, 237, 224;
-  --fg: #141210;
-  --fg-rgb: 20, 18, 16;
-  --muted: #5C5852;
-  --muted-deep: #3A3632;
-  --muted-decorative: #C7C0AC;
-  --line: #141210;
-  --line-rgb: 20, 18, 16;
-  --card: #EAE3D2;
-  --card-hover: #E0D8C0;
+  /* X.com light-mode palette — pure white, near-black text, X brand blue.
+     Matches what x.com actually serves in 2026 (verified March 2026 via
+     authoritative brand references). Dark mode already matches X's
+     "Lights Out" (#000 + near-white), so light mode mirrors X's default. */
 
-  /* ── Accent inversion — dark chip on cream ── */
-  --accent: #141210;
-  --accent-rgb: 20, 18, 16;
-  --accent-purple: #5C5852;
-  --accent-glow: rgba(20, 18, 16, 0.35);
-  --accent-glow-soft: rgba(20, 18, 16, 0.12);
-  --accent-purple-glow: rgba(20, 18, 16, 0.08);
+  /* ── Core palette ── */
+  --bg: #FFFFFF;
+  --bg-rgb: 255, 255, 255;
+  --fg: #0F1419;
+  --fg-rgb: 15, 20, 25;
+  --muted: #536471;
+  --muted-deep: #3A424A;
+  --muted-decorative: #CFD9DE;
+  --line: #EFF3F4;
+  --line-rgb: 239, 243, 244;
+  --card: #FFFFFF;
+  --card-hover: #F7F9F9;
+
+  /* ── Accent inversion — dark chip on white ── */
+  --accent: #0F1419;
+  --accent-rgb: 15, 20, 25;
+  --accent-purple: #536471;
+  --accent-glow: rgba(15, 20, 25, 0.35);
+  --accent-glow-soft: rgba(15, 20, 25, 0.10);
+  --accent-purple-glow: rgba(15, 20, 25, 0.06);
 
   /* ── Nav / button / hero semantic tokens ── */
-  --nav-bg: rgba(242, 237, 224, 0.88);
-  --btn-solid-bg: linear-gradient(135deg, #141210 0%, #2A2620 100%);
-  --btn-solid-fg: #F2EDE0;
-  --btn-solid-hover-bg: linear-gradient(135deg, #2A2620 0%, #141210 100%);
-  --hero-vignette-1: rgba(20, 18, 16, 0.07);
-  --hero-vignette-2: rgba(20, 18, 16, 0.05);
-  --wcm-bg: #F7F2E5;
-  --grain-opacity: 0.05;
-  --shadow-card: 0 4px 24px rgba(20, 18, 16, 0.10);
-  --shadow-lift: 0 8px 32px rgba(20, 18, 16, 0.18);
+  --nav-bg: rgba(255, 255, 255, 0.92);
+  --btn-solid-bg: linear-gradient(135deg, #0F1419 0%, #1A2025 100%);
+  --btn-solid-fg: #FFFFFF;
+  --btn-solid-hover-bg: linear-gradient(135deg, #1A2025 0%, #0F1419 100%);
+  --hero-vignette-1: rgba(15, 20, 25, 0.06);
+  --hero-vignette-2: rgba(15, 20, 25, 0.04);
+  --wcm-bg: #FFFFFF;
+  --grain-opacity: 0.02;
+  --shadow-card: 0 4px 24px rgba(15, 20, 25, 0.08);
+  --shadow-lift: 0 8px 32px rgba(15, 20, 25, 0.14);
 
-  /* ── Glass System (inverted) ── */
-  --glass-bg: rgba(20, 18, 16, 0.04);
-  --glass-border: #141210;
-  --glass-highlight: 0 1px 0 0 rgba(20, 18, 16, 0.06) inset;
-  --glass-shadow: 0 4px 24px rgba(20, 18, 16, 0.10);
+  /* ── Glass System ── */
+  --glass-bg: rgba(15, 20, 25, 0.03);
+  --glass-border: #EFF3F4;
+  --glass-highlight: 0 1px 0 0 rgba(15, 20, 25, 0.05) inset;
+  --glass-shadow: 0 4px 24px rgba(15, 20, 25, 0.08);
 
-  /* ── Status (re-tuned for cream background) ── */
-  --status-pass: #0B6E3A;
-  --status-fail: #C4112E;
-  --status-pending: #9C6400;
-  --status-warn: #9C6400;
-  --status-warn-bg: rgba(156, 100, 0, 0.08);
-  --status-warn-border: rgba(156, 100, 0, 0.35);
-  --status-info: #2C4BBA;
-  --status-info-bg: rgba(44, 75, 186, 0.08);
+  /* ── Status — X.com brand-aligned ── */
+  --status-pass: #00BA7C;          /* X green — verification checkmarks */
+  --status-fail: #F4212E;          /* X red — unchanged in both themes */
+  --status-pending: #FFD400;
+  --status-warn: #FFAD1F;          /* X amber — warning banners */
+  --status-warn-bg: rgba(255, 173, 31, 0.08);
+  --status-warn-border: rgba(255, 173, 31, 0.35);
+  --status-info: #1D9BF0;          /* X brand blue — confirmed unchanged post-rebrand */
+  --status-info-bg: rgba(29, 155, 240, 0.08);
 
   /* ── Color-scheme hint for form controls and scrollbars ── */
   color-scheme: light;
