@@ -10,25 +10,48 @@ export default async function TreasuryPage() {
 
   const supabase = getSupabaseAdmin();
 
-  const [treasury, { count: pendingRefunds }, { count: pendingReferrals }, { data: recentPayouts }] =
-    await Promise.all([
-      getTreasuryBalances(),
-      supabase
-        .from('payout_jobs')
-        .select('*', { count: 'exact', head: true })
-        .eq('status', 'queued'),
-      supabase
-        .from('referral_conversions')
-        .select('*', { count: 'exact', head: true })
-        .eq('reward_status', 'pending'),
-      supabase
-        .from('payout_jobs')
-        .select('id, claim_id, wallet, amount_sol, status, created_at, tx_hash')
-        .order('created_at', { ascending: false })
-        .limit(20),
-    ]);
+  const [
+    treasury,
+    { count: pendingRefunds },
+    { count: pendingReferrals },
+    { data: recentPayouts },
+    { data: snapshotRows },
+    { data: failedJobs },
+  ] = await Promise.all([
+    getTreasuryBalances(),
+    supabase
+      .from('payout_jobs')
+      .select('*', { count: 'exact', head: true })
+      .eq('status', 'queued'),
+    supabase
+      .from('referral_conversions')
+      .select('*', { count: 'exact', head: true })
+      .eq('reward_status', 'pending'),
+    supabase
+      .from('payout_jobs')
+      .select('id, claim_id, wallet, amount_sol, status, created_at, tx_hash, last_error, attempts')
+      .order('created_at', { ascending: false })
+      .limit(20),
+    supabase
+      .from('treasury_snapshots')
+      .select('ts, sol_balance, usd_value, gascoin_balance')
+      .order('ts', { ascending: false })
+      .limit(30),
+    supabase
+      .from('payout_jobs')
+      .select('id, claim_id, wallet, amount_sol, last_error, attempts, max_attempts, updated_at')
+      .eq('status', 'failed')
+      .order('updated_at', { ascending: false })
+      .limit(10),
+  ]);
 
   const treasuryWallet = process.env.GASCOIN_TREASURY_WALLET ?? null;
+
+  // Treasury snapshot history — reverse chronological from query, reverse
+  // for chart (oldest → newest left to right)
+  const snapshots = (snapshotRows || []).slice().reverse();
+  const snapshotMax = Math.max(1, ...snapshots.map((s: any) => Number(s.sol_balance || 0)));
+  const snapshotMin = Math.min(...snapshots.map((s: any) => Number(s.sol_balance || 0)), snapshotMax);
 
   return (
     <div style={{ padding: '32px 40px' }}>
@@ -92,8 +115,86 @@ export default async function TreasuryPage() {
         PAYOUT MODE: {process.env.ENABLE_LIVE_PAYOUT === 'true' ? 'LIVE — real SOL transactions' : 'DRY RUN — no real transactions'}
       </div>
 
+      {/* Treasury snapshot history */}
+      {snapshots.length > 0 && (
+        <div style={{ marginBottom: 32 }}>
+          <div style={{ fontFamily: 'IBM Plex Mono', fontSize: 10, color: 'var(--text-secondary)', letterSpacing: '0.3em', textTransform: 'uppercase', marginBottom: 16 }}>
+            SOL BALANCE · LAST {snapshots.length} SNAPSHOTS
+          </div>
+          <div style={{ border: '1px solid var(--line)', padding: 16, background: 'rgba(var(--fg-rgb), 0.02)' }}>
+            <div style={{ display: 'flex', gap: 2, alignItems: 'flex-end', height: 100 }}>
+              {snapshots.map((s: any, i: number) => {
+                const sol = Number(s.sol_balance || 0);
+                const range = snapshotMax - snapshotMin || 1;
+                const pct = (sol - snapshotMin) / range;
+                return (
+                  <div
+                    key={i}
+                    title={`${new Date(s.ts).toLocaleString()}\n${sol.toFixed(4)} SOL\n$${Number(s.usd_value || 0).toFixed(2)}`}
+                    style={{
+                      flex: 1,
+                      height: `${Math.max(4, pct * 80 + 12)}px`,
+                      background: 'var(--status-info)',
+                      transition: 'height 0.3s ease',
+                    }}
+                  />
+                );
+              })}
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 8, fontFamily: 'IBM Plex Mono', fontSize: 10, color: 'var(--text-tertiary)' }}>
+              <span>oldest · {snapshots[0] ? new Date(snapshots[0].ts).toLocaleDateString() : '—'}</span>
+              <span>min {snapshotMin.toFixed(2)} · max {snapshotMax.toFixed(2)}</span>
+              <span>newest · {snapshots[snapshots.length - 1] ? new Date(snapshots[snapshots.length - 1].ts).toLocaleDateString() : '—'}</span>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Failed payout jobs */}
+      {failedJobs && failedJobs.length > 0 && (
+        <div style={{ marginBottom: 32 }}>
+          <div style={{ fontFamily: 'IBM Plex Mono', fontSize: 10, color: 'var(--status-fail)', letterSpacing: '0.3em', textTransform: 'uppercase', marginBottom: 16 }}>
+            FAILED PAYOUT JOBS · {failedJobs.length}
+          </div>
+          <div style={{ border: '1px solid var(--status-fail)', borderLeftWidth: 3 }}>
+            {failedJobs.map((j: any) => (
+              <div
+                key={j.id}
+                style={{
+                  padding: '12px 16px',
+                  borderBottom: '1px solid var(--line)',
+                  fontFamily: 'IBM Plex Mono',
+                  fontSize: 11,
+                }}
+              >
+                <div style={{ display: 'flex', gap: 16, marginBottom: 6, flexWrap: 'wrap' }}>
+                  <span style={{ color: 'var(--text-secondary)' }}>
+                    CLAIM <span style={{ color: 'var(--fg)' }}>{j.claim_id?.slice(0, 8)}…</span>
+                  </span>
+                  <span style={{ color: 'var(--text-secondary)' }}>
+                    WALLET <span style={{ color: 'var(--fg)' }}>{j.wallet ? `${j.wallet.slice(0, 4)}…${j.wallet.slice(-4)}` : '—'}</span>
+                  </span>
+                  <span style={{ color: 'var(--text-secondary)' }}>
+                    AMOUNT <span style={{ color: 'var(--fg)' }}>{formatSol(Number(j.amount_sol || 0))}</span>
+                  </span>
+                  <span style={{ color: 'var(--text-secondary)' }}>
+                    ATTEMPTS <span style={{ color: 'var(--status-warn)' }}>{j.attempts}/{j.max_attempts}</span>
+                  </span>
+                  <span style={{ color: 'var(--text-tertiary)', marginLeft: 'auto' }}>
+                    {new Date(j.updated_at).toLocaleString()}
+                  </span>
+                </div>
+                <div style={{ color: 'var(--status-fail)', fontSize: 11, lineHeight: 1.5 }}>
+                  {j.last_error || '(no error message)'}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Recent payouts */}
-      <div style={{ fontFamily: 'IBM Plex Mono', fontSize: 10, color: 'rgba(255,255,255,0.3)', letterSpacing: '0.3em', textTransform: 'uppercase', marginBottom: 16 }}>
+      <div style={{ fontFamily: 'IBM Plex Mono', fontSize: 10, color: 'var(--text-secondary)', letterSpacing: '0.3em', textTransform: 'uppercase', marginBottom: 16 }}>
         RECENT PAYOUT JOBS
       </div>
 

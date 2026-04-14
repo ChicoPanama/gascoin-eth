@@ -52,13 +52,15 @@ export default async function SubmissionsPage(props: { searchParams: Promise<{ f
 
   const supabase = getSupabaseAdmin();
 
-  // Get claims with receipts and gate results
+  // Get claims with receipts and gate results. Added x_verified to users
+  // select and phash/hash_sha256 to claim_receipts for the enrichment
+  // columns below (verified badge + dedup indicator).
   const { data: claims } = await supabase
     .from('claims')
     .select(`
       id, created_at, wallet, status, risk_score, parsed_amount, claimed_amount, decision_reason,
-      users(x_handle),
-      claim_receipts(storage_path_private, ai_score, tamper_score, ocr_confidence, metadata_json),
+      users(x_handle, x_verified),
+      claim_receipts(storage_path_private, ai_score, tamper_score, ocr_confidence, hash_sha256, phash, metadata_json),
       gate_results(gate_name, passed, score, reason_code)
     `)
     .in('status', statuses)
@@ -75,6 +77,45 @@ export default async function SubmissionsPage(props: { searchParams: Promise<{ f
     .from('claims')
     .select('*', { count: 'exact', head: true })
     .eq('status', 'needs_review');
+
+  // Risk score distribution across ALL claims in the last 30 days.
+  // Surfaces whether the pipeline is sitting in a healthy band or
+  // drifting toward high-risk territory.
+  const thirtyDaysAgo = new Date(Date.now() - 30 * 86_400_000).toISOString();
+  const { data: riskClaims } = await supabase
+    .from('claims')
+    .select('risk_score')
+    .gte('created_at', thirtyDaysAgo)
+    .not('risk_score', 'is', null);
+
+  const riskBuckets = [0, 0, 0, 0, 0]; // [0-0.2, 0.2-0.4, 0.4-0.6, 0.6-0.8, 0.8+]
+  for (const r of (riskClaims || []) as any[]) {
+    const s = Number(r.risk_score || 0);
+    const b = Math.min(4, Math.floor(s * 5));
+    riskBuckets[b] += 1;
+  }
+  const riskMax = Math.max(1, ...riskBuckets);
+
+  // Phash collision map — for each phash in the current view, count how
+  // many times it appears across the last 7 days of claims. A count >1
+  // means the same receipt image (perceptually) is being submitted
+  // multiple times. One query, cheap.
+  const phashes = (claims || [])
+    .flatMap((c: any) => (c.claim_receipts || []).map((r: any) => r.phash))
+    .filter((p: string | null | undefined): p is string => !!p);
+  const sevenDaysAgo = new Date(Date.now() - 7 * 86_400_000).toISOString();
+  const collisionMap = new Map<string, number>();
+  if (phashes.length > 0) {
+    const { data: collisions } = await supabase
+      .from('claim_receipts')
+      .select('phash')
+      .gte('created_at', sevenDaysAgo)
+      .in('phash', phashes);
+    for (const row of (collisions || []) as any[]) {
+      const p = row.phash as string;
+      collisionMap.set(p, (collisionMap.get(p) || 0) + 1);
+    }
+  }
 
   return (
     <div>
@@ -103,6 +144,59 @@ export default async function SubmissionsPage(props: { searchParams: Promise<{ f
         </div>
       </div>
 
+      {/* Risk distribution histogram (last 30 days) */}
+      <div
+        style={{
+          border: '1px solid var(--line)',
+          padding: 16,
+          marginBottom: 24,
+          background: 'rgba(var(--fg-rgb), 0.02)',
+        }}
+      >
+        <div
+          style={{
+            fontFamily: 'var(--font-mono)',
+            fontSize: 10,
+            letterSpacing: '0.15em',
+            textTransform: 'uppercase',
+            color: 'var(--text-secondary)',
+            marginBottom: 10,
+          }}
+        >
+          Risk Score Distribution · last 30 days · {riskClaims?.length ?? 0} claims
+        </div>
+        <div style={{ display: 'flex', gap: 4, alignItems: 'flex-end', height: 80 }}>
+          {['0–0.2', '0.2–0.4', '0.4–0.6', '0.6–0.8', '0.8+'].map((label, i) => {
+            const count = riskBuckets[i];
+            const pct = count / riskMax;
+            const color =
+              i === 0 ? 'var(--status-pass)' :
+              i === 1 ? 'var(--status-pass)' :
+              i === 2 ? 'var(--status-warn)' :
+              i === 3 ? 'var(--status-warn)' :
+              'var(--status-fail)';
+            return (
+              <div key={label} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
+                <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--fg)', fontWeight: 600 }}>
+                  {count}
+                </div>
+                <div
+                  style={{
+                    width: '100%',
+                    height: `${Math.max(2, pct * 60)}px`,
+                    background: color,
+                    transition: 'height 0.3s ease',
+                  }}
+                />
+                <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--text-tertiary)', letterSpacing: '0.05em' }}>
+                  {label}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
       {/* Filter tabs */}
       <div style={{ display: 'flex', gap: 8, marginBottom: 24 }}>
         {Object.keys(FILTER_MAP).map((f) => (
@@ -124,9 +218,11 @@ export default async function SubmissionsPage(props: { searchParams: Promise<{ f
             <th>Submitted</th>
             <th>Wallet</th>
             <th>X Handle</th>
+            <th>✓</th>
             <th>Status</th>
             <th>Risk</th>
             <th>Auth Score</th>
+            <th>Dedup</th>
             <th>Gates</th>
             <th>SOL</th>
             <th>Actions</th>
@@ -143,14 +239,26 @@ export default async function SubmissionsPage(props: { searchParams: Promise<{ f
             const recommendedSol = Math.max(0.001, +(Number(c.parsed_amount || 0) / 200).toFixed(6));
             const canDispatch = ['ready_for_dispatch', 'needs_review'].includes(c.status);
 
+            const user = Array.isArray(c.users) ? c.users[0] : c.users;
+            const xVerified = !!user?.x_verified;
+            const phash = receipt?.phash;
+            const phashCollisions = phash ? (collisionMap.get(phash) || 0) : 0;
+
             return (
               <tr key={c.id} className="lb-table-row">
-                <td style={{ fontFamily: 'IBM Plex Mono', fontSize: 9, color: 'rgba(255,255,255,0.3)' }}>
+                <td style={{ fontFamily: 'IBM Plex Mono', fontSize: 9, color: 'var(--text-tertiary)' }}>
                   {c.id.slice(0, 8)}
                 </td>
                 <td className="lb-table-time">{timeAgo(c.created_at)}</td>
                 <td className="lb-table-wallet">{truncateWallet(c.wallet)}</td>
-                <td className="lb-table-claims">{c.users?.x_handle || '—'}</td>
+                <td className="lb-table-claims">{user?.x_handle || '—'}</td>
+                <td style={{ textAlign: 'center', fontFamily: 'IBM Plex Mono', fontSize: 13 }}>
+                  {xVerified ? (
+                    <span style={{ color: 'var(--status-pass)', fontWeight: 700 }} title="X Verified">✓</span>
+                  ) : (
+                    <span style={{ color: 'var(--text-tertiary)' }} title="Not verified">—</span>
+                  )}
+                </td>
                 <td>
                   <span style={{
                     fontFamily: 'IBM Plex Mono', fontSize: 9, fontWeight: 600,
@@ -170,8 +278,23 @@ export default async function SubmissionsPage(props: { searchParams: Promise<{ f
                     </span>
                   ) : '—'}
                   {fraudRisk && (
-                    <span style={{ fontFamily: 'IBM Plex Mono', fontSize: 9, color: 'rgba(255,255,255,0.3)', marginLeft: 4 }}>
+                    <span style={{ fontFamily: 'IBM Plex Mono', fontSize: 9, color: 'var(--text-tertiary)', marginLeft: 4 }}>
                       {fraudRisk}
+                    </span>
+                  )}
+                </td>
+                <td style={{ fontFamily: 'IBM Plex Mono', fontSize: 11, textAlign: 'center' }}>
+                  {phashCollisions <= 1 ? (
+                    <span style={{ color: 'var(--text-tertiary)' }} title="Unique phash">—</span>
+                  ) : (
+                    <span
+                      style={{
+                        color: 'var(--status-fail)',
+                        fontWeight: 700,
+                      }}
+                      title={`This phash appears in ${phashCollisions} claims in the last 7 days — potential duplicate receipt`}
+                    >
+                      ×{phashCollisions}
                     </span>
                   )}
                 </td>
@@ -213,7 +336,7 @@ export default async function SubmissionsPage(props: { searchParams: Promise<{ f
           })}
           {(!claims || claims.length === 0) && (
             <tr>
-              <td colSpan={10} style={{ textAlign: 'center', padding: 48, color: 'rgba(255,255,255,0.3)', fontFamily: 'IBM Plex Mono', fontSize: 12 }}>
+              <td colSpan={12} style={{ textAlign: 'center', padding: 48, color: 'var(--text-tertiary)', fontFamily: 'IBM Plex Mono', fontSize: 12 }}>
                 {activeFilter === 'DISPATCH' ? 'No receipts ready for dispatch' : 'No claims match this filter'}
               </td>
             </tr>
