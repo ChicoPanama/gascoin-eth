@@ -116,9 +116,13 @@
   --fg-rgb: 15, 20, 25;
   --muted: #536471;
   --muted-deep: #3A424A;
-  --muted-decorative: #CFD9DE;
-  --line: #EFF3F4;
-  --line-rgb: 239, 243, 244;
+  --muted-decorative: #AAB8C2;
+  /* --line darkened from #EFF3F4 to #CFD9DE. X.com uses #EFF3F4 but
+     reads fine on their UI because of contextual shadows and the density
+     of white-on-white surfaces. GASCOIN's brutalist density needs harder
+     edges — this is still X-family gray but visibly present as a divider. */
+  --line: #CFD9DE;
+  --line-rgb: 207, 217, 222;
   --card: #FFFFFF;
   --card-hover: #F7F9F9;
 
@@ -149,12 +153,18 @@
   --glass-shadow: 0 4px 24px rgba(15, 20, 25, 0.08);
 
   /* ── Status — X.com brand-aligned ── */
+  /* Status colors retuned for legibility on pure white.
+     Dark amber text (#5A3A00) on pale amber bg (#FFEBA3) gives ~8.5:1
+     contrast — well past WCAG AA (4.5). Solid amber border (#FFAD1F)
+     anchors the banner visually. In dark mode (default :root below),
+     --status-warn stays as the bright amber text color because it
+     reads fine on dark backgrounds. */
   --status-pass: #00BA7C;          /* X green — verification checkmarks */
-  --status-fail: #F4212E;          /* X red — unchanged in both themes */
-  --status-pending: #FFD400;
-  --status-warn: #FFAD1F;          /* X amber — warning banners */
-  --status-warn-bg: rgba(255, 173, 31, 0.08);
-  --status-warn-border: rgba(255, 173, 31, 0.35);
+  --status-fail: #C4112E;          /* darker X red — better on white */
+  --status-pending: #8F5A00;       /* dark amber */
+  --status-warn: #5A3A00;          /* dark amber text — 8.5:1 on #FFEBA3 */
+  --status-warn-bg: #FFEBA3;       /* solid pale amber fill */
+  --status-warn-border: #FFAD1F;   /* solid amber border */
   --status-info: #1D9BF0;          /* X brand blue — confirmed unchanged post-rebrand */
   --status-info-bg: rgba(29, 155, 240, 0.08);
 

@@ -69,32 +69,42 @@ export default async function Home() {
 
         {/* SEASON 1 BANNER — top of page, above hero. Colors come from the
             --status-warn* tokens so the banner re-tunes for light mode
-            without changing its brutalist shape. */}
+            without changing its brutalist shape. In light mode the bg is
+            solid pale amber (#FFEBA3) with dark amber text (#5A3A00) for
+            WCAG AA contrast. Padding uses clamp() for mobile-safe insets. */}
         {isDryRun && (
-          <div style={{
-            fontFamily: 'var(--font-mono)',
-            fontSize: 11,
-            letterSpacing: '0.08em',
-            padding: '14px 48px',
-            background: 'var(--status-warn-bg)',
-            borderBottom: '1px solid var(--status-warn-border)',
-            color: 'var(--status-warn)',
-            display: 'flex',
-            alignItems: 'center',
-            gap: 14,
-            flexWrap: 'wrap',
-          }}>
-            <span style={{
-              fontSize: 10,
-              padding: '4px 10px',
+          <div
+            className="gc-season-banner"
+            style={{
+              fontFamily: 'var(--font-mono)',
+              fontSize: 11,
+              letterSpacing: '0.08em',
+              padding: '14px clamp(16px, 4vw, 48px)',
               background: 'var(--status-warn-bg)',
-              border: '1px solid var(--status-warn-border)',
-              letterSpacing: '0.18em',
-              fontWeight: 600,
-            }}>
+              borderTop: '1px solid var(--status-warn-border)',
+              borderBottom: '1px solid var(--status-warn-border)',
+              color: 'var(--status-warn)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 14,
+              flexWrap: 'wrap',
+            }}
+          >
+            <span
+              style={{
+                fontSize: 10,
+                padding: '4px 10px',
+                background: 'var(--status-warn-border)',
+                color: 'var(--bg)',
+                border: '1px solid var(--status-warn-border)',
+                letterSpacing: '0.18em',
+                fontWeight: 700,
+                flexShrink: 0,
+              }}
+            >
               SEASON 1 · BETA
             </span>
-            <span>
+            <span style={{ flex: '1 1 auto', minWidth: 0 }}>
               Points-only mode. Submit receipts, climb the leaderboard, earn Season 1 points — treasury payouts activate at token launch. No real SOL is dispatched yet.
             </span>
           </div>

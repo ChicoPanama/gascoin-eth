@@ -253,7 +253,7 @@ export function DashboardClient({ wallet, xHandle, isDryRun = false, claims, pay
           fontFamily: 'var(--font-mono)',
           fontSize: 11,
           letterSpacing: '0.08em',
-          padding: '14px 20px',
+          padding: '14px clamp(16px, 4vw, 20px)',
           marginBottom: 32,
           background: 'var(--status-warn-bg)',
           border: '1px solid var(--status-warn-border)',
@@ -261,11 +261,21 @@ export function DashboardClient({ wallet, xHandle, isDryRun = false, claims, pay
           display: 'flex',
           alignItems: 'center',
           gap: 12,
+          flexWrap: 'wrap',
         }}>
-          <span style={{ fontSize: 10, padding: '3px 8px', background: 'rgba(255,200,80,0.15)', border: '1px solid rgba(255,200,80,0.3)', letterSpacing: '0.15em' }}>
+          <span style={{
+            fontSize: 10,
+            padding: '3px 8px',
+            background: 'var(--status-warn-border)',
+            color: 'var(--bg)',
+            border: '1px solid var(--status-warn-border)',
+            letterSpacing: '0.15em',
+            fontWeight: 700,
+            flexShrink: 0,
+          }}>
             SEASON 1
           </span>
-          <span>
+          <span style={{ flex: '1 1 auto', minWidth: 0 }}>
             Points-only mode. Your points earn leaderboard rank and become a claim on the treasury when it activates at token launch.
           </span>
         </div>

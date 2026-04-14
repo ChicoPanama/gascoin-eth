@@ -6873,9 +6873,104 @@ button.docs-footer-link {
 }
 
 @media (hover: none) and (pointer: coarse) {
+  /* WCAG minimum touch target is 44x44. On touch devices we expand the
+     toggle without changing the visual footprint on desktop where the
+     28x28 chip is part of the brutalist aesthetic. */
   .gc-theme-toggle {
-    width: 32px;
-    height: 32px;
-    font-size: 15px;
+    width: 44px;
+    height: 44px;
+    font-size: 16px;
   }
+  /* Sign-in / wallet button also needs a 44px minimum on touch */
+  .wallet-btn {
+    min-height: 44px;
+    padding: 10px 18px;
+  }
+  /* Nav link icons are only visible in the expanded desktop nav, but when
+     the nav is compact the links themselves need to be tap-sized. */
+  .gc-nav-links a {
+    min-height: 44px;
+    padding: 10px 12px;
+  }
+}
+
+/* ═══════════════════════════════════════════
+   MOBILE / SMALL-SCREEN OPTIMIZATIONS
+   ═══════════════════════════════════════════ */
+
+/* Form inputs: iOS zooms on focus when font-size < 16px. Force 16px
+   across the submission form and any other input under 900px. */
+@media (max-width: 900px) {
+  input[type="text"],
+  input[type="email"],
+  input[type="url"],
+  input[type="number"],
+  input[type="password"],
+  input[type="tel"],
+  textarea,
+  select,
+  .sf-input {
+    font-size: 16px !important;
+  }
+}
+
+/* Safe-area insets for notched iPhones (12, 13, 14, 15, 16 Pro).
+   The nav is sticky so the notch would eat the brand otherwise; the
+   footer sits at the bottom where the home indicator lives. */
+.gc-nav {
+  padding-left: max(48px, env(safe-area-inset-left));
+  padding-right: max(48px, env(safe-area-inset-right));
+}
+.gc-footer {
+  padding-bottom: max(24px, env(safe-area-inset-bottom));
+}
+@media (max-width: 900px) {
+  .gc-nav {
+    padding-left: max(16px, env(safe-area-inset-left));
+    padding-right: max(16px, env(safe-area-inset-right));
+  }
+}
+
+/* iPhone SE / very-small breakpoint. Tighter padding on the hero,
+   banner, and stats so text doesn't feel crushed. */
+@media (max-width: 400px) {
+  .gc-hero {
+    padding: 48px 16px;
+  }
+  .gc-hero h1 {
+    font-size: clamp(40px, 11vw, 56px);
+  }
+  .gc-footer {
+    padding: 24px 16px;
+  }
+}
+
+/* Tablet (600-900px) stats grid: 2-column intermediate so 4 stats
+   don't stretch to full-height cards between desktop and single-column.
+   Also applies to steps grid so How It Works doesn't jump from 3 -> 1. */
+@media (min-width: 600px) and (max-width: 900px) {
+  .gc-stats-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+  .gc-stat {
+    border-right: none;
+  }
+  .gc-stat:nth-child(odd) {
+    border-right: 1px solid var(--line);
+  }
+  .gc-stat:nth-child(-n+2) {
+    border-bottom: 1px solid var(--line);
+  }
+  .gc-steps-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* Warning callout: use the token instead of hardcoded #FFD400 */
+.doc-callout--warn {
+  border-left-color: var(--status-warn-border);
+  background: var(--status-warn-bg);
+}
+[data-theme="light"] .doc-callout--warn p {
+  color: var(--status-warn);
 }
