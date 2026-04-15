@@ -1,3 +1,6 @@
+import { GATES, GATE_CATEGORIES, type GateDefinition } from './gates';
+import { GATE_COUNT } from './policy';
+
 export interface DocSection {
   slug: string;
   title: string;
@@ -14,6 +17,55 @@ export interface DocCategory {
   label: string;
   sections: DocSection[];
 }
+
+
+// ── Gate documentation generator ────────────────────────────────────────────
+// Every verification gate in the docs is generated from `lib/gates.ts`, which
+// is itself pinned to `lib/policy.ts`'s GATE_DEFS at module load (see the
+// runtime guard at the bottom of gates.ts). This means:
+//
+//   - Adding a gate to the engine -> it appears in docs automatically.
+//   - Removing a gate from the engine -> it disappears from docs automatically.
+//   - Renaming a gate -> the doc title updates automatically.
+//
+// Do NOT hand-write gate DocSection entries below. The pre-PR-#40 era of
+// 10 hand-written "gate-1-tweet-detected" etc. entries was fiction — those
+// gates never existed in the engine. This generator is the fix.
+
+function buildGateContent(g: GateDefinition): string {
+  const failures = g.common_failures.map((f) => `<li>${f}</li>`).join('\n');
+  const blockingLabel = g.is_blocking
+    ? 'Yes — failing this gate rejects the claim'
+    : 'No — non-blocking, retried asynchronously';
+  const categoryLabel = GATE_CATEGORIES[g.category]?.label ?? g.category;
+  return `<h3>What this gate checks</h3>
+<p>${g.description}</p>
+<p><strong>Under the hood:</strong> ${g.what_we_check}</p>
+<h3>Common failure reasons</h3>
+<ul>
+${failures}
+</ul>
+<h3>How to pass this gate</h3>
+<p>${g.how_to_pass}</p>
+<h3>At a glance</h3>
+<ul>
+<li>Category: <strong>${categoryLabel}</strong></li>
+<li>Blocking: <strong>${blockingLabel}</strong></li>
+<li>Typical duration: <strong>~${g.estimated_time_seconds}s</strong></li>
+<li>Policy engine id: <code>${g.policyGate}</code></li>
+<li>Pre-flight checklist item: <em>"${g.checklist_label}"</em></li>
+</ul>`;
+}
+
+const GATE_DOC_SECTIONS: DocSection[] = GATES.map((g, i) => ({
+  slug: `gate-${String(g.id).padStart(2, '0')}-${g.slug}`,
+  title: `Gate ${g.id} — ${g.name}`,
+  categorySlug: 'verification',
+  category: 'Verification Gates',
+  description: g.description,
+  content: buildGateContent(g),
+  order: 12 + i,
+}));
 
 export const DOC_CATEGORIES: DocCategory[] = [
   {
@@ -204,7 +256,7 @@ export const DOC_CATEGORIES: DocCategory[] = [
         category: "Submitting",
         description: "",
         content: `<p>Step 3 requires you to upload a photo of your gas receipt. This is the physical paper receipt from a real gas station. The receipt must have the last 4 characters of your Solana wallet address written on it in pen.</p>
-<div class="doc-callout doc-callout--warn"><p>IMPORTANT: You must write the last 4 characters of your wallet address on the physical receipt BEFORE photographing it. They must be clearly legible in the photo. This is a required element — submissions without readable wallet characters on the receipt will fail Gate 5 and be rejected.</p></div>
+<div class="doc-callout doc-callout--warn"><p>IMPORTANT: You must write the last 4 characters of your wallet address on the physical receipt BEFORE photographing it. They must be clearly legible in the photo. This is a required element — submissions without readable wallet characters on the receipt will fail the Wallet Match gate and be rejected.</p></div>
 <h3>How to prepare your receipt</h3>
 <ol>
 <li>Obtain the paper receipt from the gas station at the time of purchase, or retrieve a saved receipt from within the last 7 days</li>
@@ -230,7 +282,7 @@ export const DOC_CATEGORIES: DocCategory[] = [
 <p>GASCOIN requires a photograph of a physical paper receipt from the gas station. Digital receipts — including email receipts, in-app receipts, SMS receipts, and PDF receipts — cannot be accepted because the verification system requires you to write the last 4 characters of your wallet directly on the receipt in pen before photographing it.</p>
 <p>If your gas station does not offer paper receipts, ask the attendant for a printed copy at the time of purchase.</p>
 <h3>Receipt photography — do's and don'ts</h3>
-<p>Gate 5 (Wallet on Receipt) is the most commonly failed gate. Follow these rules exactly:</p>
+<p>The Wallet Match gate is the most commonly failed gate. Follow these rules exactly:</p>
 <p><strong>DO:</strong></p>
 <ul>
 <li>Write the last 4 characters on the BACK of the receipt if the front is too small</li>
@@ -252,7 +304,7 @@ export const DOC_CATEGORIES: DocCategory[] = [
 </ul>
 <h3>Your receipt image privacy</h3>
 <p>Receipt photos are stored in the GASCOIN secure storage system. If your submission is approved, your receipt image may appear on the Community Feed with your gas station location (city and state/country only) and refund amount visible. The admin team reviews every approved receipt and redacts any sensitive information. You can prevent your receipt from appearing on the community feed by contacting the admin team after approval. Receipt images are never sold or shared with third parties.</p>
-<p>→ See also: Gate 5 (Wallet on Receipt), Gate 6 (Receipt Legible)</p>`,
+<p>→ See also: Wallet Match gate, Receipt Hashtag gate</p>`,
         order: 8,
       },
       {
@@ -278,14 +330,14 @@ export const DOC_CATEGORIES: DocCategory[] = [
 <h3>Reading the gate progress screen</h3>
 <p>Each of the 15 gates is listed vertically. Each gate shows a status icon:</p>
 <h3>How long verification takes</h3>
-<p>Most gates complete in under 10 seconds. Gate 5 (Wallet on Receipt) involves OCR image processing and can take up to 45 seconds. The entire verification process typically completes within 2-5 minutes for a passing submission.</p>
+<p>Most gates complete in under 10 seconds. The wallet-match gate involves OCR image processing and can take up to 45 seconds. The entire verification process typically completes within 2-5 minutes for a passing submission.</p>
 <h3>If all 15 gates pass</h3>
 <p>The screen displays SUBMISSION APPROVED. Your SOL refund will be dispatched to your wallet within 24-48 hours. You can track your submission status at any time using the Wallet Tracker page at /wallet.</p>
 <h3>If a gate fails</h3>
 <p>The screen displays SUBMISSION INCOMPLETE. The failed gate is highlighted and a specific failure reason is shown explaining exactly what went wrong. Gates that come after the failed gate show the dash icon — they were not run because a previous gate blocked progress.</p>
 <p>After a failure, you can resubmit. Different gates have different resubmission requirements — see the Gates section of this document for details on each gate and how to fix failures.</p>
-<h3>Gate 10 — Special Case (Non-Blocking)</h3>
-<p>Gate 10 (Treasury Solvent) is the only non-blocking gate. If Gate 10 fails, your submission is not rejected. Instead, it is placed in a priority queue and automatically retried every 6 hours until the treasury has enough SOL to cover your refund. You do not need to resubmit if Gate 10 fails.</p>`,
+<h3>Treasury check (happens after all gates pass)</h3>
+<p>After every gate passes, the payout worker verifies the GASCOIN treasury has enough SOL to cover your refund before dispatch. This is NOT a policy gate — it is a pre-payout safety check. If the treasury is temporarily low, your approved submission enters a queue and is automatically retried every 6 hours until funds are available. You do not need to resubmit or take any action — the retry is automatic.</p>`,
         order: 10,
       },
     ],
@@ -295,228 +347,34 @@ export const DOC_CATEGORIES: DocCategory[] = [
     label: "Verification Gates",
     sections: [
       {
-        slug: "the-10-verification-gates-complete-reference",
-        title: "10 Verification Gates Reference",
+        slug: "verification-gates-reference",
+        title: `${GATE_COUNT} Verification Gates Reference`,
         categorySlug: "verification",
         category: "Verification Gates",
-        description: "",
+        description: `The deterministic policy reference for all ${GATE_COUNT} gates used in claim validation. Generated directly from the engine source of truth.`,
         content: `<h3>What this is</h3>
-<p>The policy reference for all ten gates used in claim validation.</p>
+<p>The deterministic policy reference for all ${GATE_COUNT} gates used in claim validation. Every gate page below is generated directly from <code>lib/gates.ts</code> and pinned to <code>lib/policy.ts::GATE_DEFS</code> at module load. If a gate is added, removed, or renamed in the engine, it updates here automatically.</p>
 
 <h3>How gate execution works</h3>
 <ul>
-<li><strong>Gates 1–9:</strong> blocking checks. First failure stops progression</li>
-<li><strong>Gate 10:</strong> non-blocking treasury solvency check with queue/retry behavior</li>
+<li><strong>Blocking gates:</strong> the first failure stops progression and the claim is rejected. Users see the specific failed gate and a remediation message.</li>
+<li><strong>Non-blocking gates:</strong> (currently only <code>gascoin_min_hold</code>, which is bypassed during Season 1 dry-run) do not reject the claim on failure.</li>
+<li><strong>Treasury solvency</strong> is NOT a policy gate — it is a pre-payout check performed by the payout worker, not the policy engine. If the treasury is low, approved claims queue until replenished. See the Payout Worker section in Technology for details.</li>
 </ul>
 
 <h3>How to use this page</h3>
 <ol>
-<li>Identify the first failed gate in Wallet Tracker</li>
-<li>Apply remediation for that specific gate only</li>
+<li>Identify the first failed gate in the Wallet Tracker</li>
+<li>Open the gate's section below by name (Ctrl+F the gate name or scroll chapter III)</li>
+<li>Apply the remediation for that specific gate only</li>
 <li>Resubmit with fresh inputs when required</li>
 </ol>
 
 <h3>Operator note</h3>
-<p>Overrides are exceptional and auditable. Gate policy is deterministic at runtime.</p>`,
+<p>Gate policy is deterministic at runtime. Gate overrides by admins are exceptional and auditable — see the Admin & Anti-Fraud chapter.</p>`,
         order: 11,
       },
-      {
-        slug: "gate-1-tweet-detected",
-        title: "Gate 1 — Tweet Detected",
-        categorySlug: "verification",
-        category: "Verification Gates",
-        description: "",
-        content: `<h3>What this gate checks</h3>
-<p>Gate 1 verifies that the URL you submitted points to a real, accessible tweet on X. The system fetches the tweet directly using the X API v2 and confirms that the tweet ID exists and the account is not suspended.</p>
-<h3>Common failure reasons</h3>
-<ul>
-<li>The tweet URL was pasted incorrectly — characters missing from the end</li>
-<li>The tweet was deleted after submission was initiated</li>
-<li>The X account was suspended after the tweet was posted</li>
-<li>The URL is from a different platform (not x.com or twitter.com)</li>
-</ul>
-<h3>How to ensure Gate 1 passes</h3>
-<p>Use the X share button to copy the tweet URL — never type it manually. Verify the tweet is still live before submitting. Do not delete your tweet during the submission process.</p>`,
-        order: 12,
-      },
-      {
-        slug: "gate-2-tweet-public",
-        title: "Gate 2 — Tweet Public",
-        categorySlug: "verification",
-        category: "Verification Gates",
-        description: "",
-        content: `<h3>What this gate checks</h3>
-<p>Gate 2 verifies that the X account that posted the tweet is set to fully public visibility at the time of verification. Private accounts cannot be read by the system regardless of the tweet content.</p>
-<h3>Common failure reasons</h3>
-<ul>
-<li>Account was switched to private after posting the tweet</li>
-<li>Account is in a temporary read-only state</li>
-<li>Account visibility was set to followers-only</li>
-</ul>
-<h3>How to ensure Gate 2 passes</h3>
-<p>Set your X account to public before posting and keep it public until your refund is confirmed. Do not change privacy settings during the submission and verification period.</p>`,
-        order: 13,
-      },
-      {
-        slug: "gate-3-gascoin-hashtag",
-        title: "Gate 3 — #gascoin Hashtag",
-        categorySlug: "verification",
-        category: "Verification Gates",
-        description: "",
-        content: `<h3>What this gate checks</h3>
-<p>Gate 3 verifies that the tweet body contains either the hashtag #gascoin or the cashtag $GASCOIN. The check is case-insensitive, so #GASCOIN, #Gascoin, $gascoin, and $GASCOIN all pass. Either symbol must be a standalone token in the tweet — not embedded in a URL or concatenated with another word. We also strongly recommend tagging @GasCoinApp in the same tweet so new users can find the profile.</p>
-<h3>Common failure reasons</h3>
-<ul>
-<li>Hashtag misspelled: #gas_coin, #gasCoin (with capital C), #gasc0in</li>
-<li>#gascoin appears only in a reply to the tweet, not in the original tweet body</li>
-<li>The hashtag is embedded inside a URL</li>
-</ul>
-<h3>How to ensure Gate 3 passes</h3>
-<p>Type #gascoin or $GASCOIN as a standalone token in your tweet before posting, and tag @GasCoinApp for discovery. Any capitalization variation is accepted. Do not use underscores or spaces within the hashtag/cashtag.</p>`,
-        order: 14,
-      },
-      {
-        slug: "gate-4-tweet-age",
-        title: "Gate 4 — Tweet Age",
-        categorySlug: "verification",
-        category: "Verification Gates",
-        description: "",
-        content: `<h3>What this gate checks</h3>
-<p>Gate 4 verifies that the tweet was posted within 48 hours before your submission time. The system compares the tweet's timestamp from the X API against the submission timestamp. The difference must be less than 172,800 seconds (48 hours).</p>
-<h3>Common failure reasons</h3>
-<ul>
-<li>Tweet was posted more than 48 hours before submission</li>
-<li>Reusing a tweet from a previous submission attempt</li>
-<li>Time zone confusion — the system uses UTC for all timestamps</li>
-</ul>
-<h3>How to ensure Gate 4 passes</h3>
-<p>Post your #gascoin tweet and submit your receipt in the same session. Do not save tweet URLs for later use. The moment you post, the 48-hour window begins.</p>`,
-        order: 15,
-      },
-      {
-        slug: "gate-5-wallet-on-receipt",
-        title: "Gate 5 — Wallet on Receipt",
-        categorySlug: "verification",
-        category: "Verification Gates",
-        description: "",
-        content: `<h3>What this gate checks</h3>
-<p>Gate 5 uses optical character recognition (OCR) to scan your receipt photo for the last 4 characters of your Solana wallet address. The system extracts handwritten characters and compares them against the last 4 characters of the wallet you connected in Step 1. They must match.</p>
-<h3>Common failure reasons</h3>
-<ul>
-<li>Characters written too small to be read by OCR</li>
-<li>Characters written in pencil or light ink — low contrast against receipt paper</li>
-<li>Photo taken at an angle that distorts the handwritten text</li>
-<li>Characters written on a separate piece of paper held next to the receipt — must be written directly on the receipt</li>
-<li>Wrong characters written — do not match the last 4 of the wallet connected in Step 1</li>
-<li>Characters partially obscured by a fold or crease in the receipt</li>
-</ul>
-<h3>How to ensure Gate 5 passes</h3>
-<p>Write the last 4 characters of your wallet address in black pen directly on the receipt. Use clear, printed characters. Write large — at least 3-4mm tall. Double-check before photographing. Take the photo from directly above, not at an angle.</p>
-<div class="doc-callout doc-callout--warn"><p>IMPORTANT: This is the most commonly failed gate. Before submitting, zoom in on your receipt photo on your phone and verify the characters are fully readable. If you cannot read them clearly, retake the photo.</p></div>`,
-        order: 16,
-      },
-      {
-        slug: "gate-6-receipt-legible",
-        title: "Gate 6 — Receipt Legible",
-        categorySlug: "verification",
-        category: "Verification Gates",
-        description: "",
-        content: `<h3>What this gate checks</h3>
-<p>Gate 6 verifies that the overall receipt image is clear enough for automated reading. The system checks image resolution, blur level, and whether key receipt fields (total amount, date) are detectable. A corrupted or damaged image file also fails this gate.</p>
-<h3>Common failure reasons</h3>
-<ul>
-<li>Photo taken in low light — dark, grainy image</li>
-<li>Camera too far from the receipt — text is too small to read</li>
-<li>Receipt crumpled or folded, obscuring key fields</li>
-<li>HEIC file from iPhone not processed correctly — try converting to JPG</li>
-<li>File is corrupted or partially uploaded</li>
-</ul>
-<h3>How to ensure Gate 6 passes</h3>
-<p>Photograph the receipt flat on a bright surface with good overhead lighting. Fill the frame with the receipt. Ensure the total amount and date are clearly visible before uploading. Check the preview in Step 3 — if it looks blurry to you, it will fail the gate.</p>`,
-        order: 17,
-      },
-      {
-        slug: "gate-7-receipt-date-valid",
-        title: "Gate 7 — Receipt Date Valid",
-        categorySlug: "verification",
-        category: "Verification Gates",
-        description: "",
-        content: `<h3>What this gate checks</h3>
-<p>Gate 7 uses OCR to extract the purchase date from the receipt and compares it against the submission date. The gas purchase must have occurred within 7 days before submission. Future-dated receipts automatically fail. Receipts with no readable date also fail.</p>
-<h3>Common failure reasons</h3>
-<ul>
-<li>Receipt is older than 7 days</li>
-<li>Receipt date field is missing, torn off, or illegible</li>
-<li>Date format is ambiguous and cannot be parsed (e.g., partially faded thermal print)</li>
-<li>Reusing a receipt from a previous failed submission</li>
-</ul>
-<h3>How to ensure Gate 7 passes</h3>
-<p>Use a receipt from a gas purchase within the last 7 days. Ensure the date is clearly printed and fully visible. Do not fold or tear the portion of the receipt showing the date.</p>`,
-        order: 18,
-      },
-      {
-        slug: "gate-8-no-duplicate-wallet",
-        title: "Gate 8 — Submission Cooldown",
-        categorySlug: "verification",
-        category: "Verification Gates",
-        description: "",
-        content: `<h3>What this gate checks</h3>
-<p>Gate 8 checks that your X account has not submitted a claim within the cooldown period for your tier. Standard and Commuter tiers have a 7-day cooldown, Road Warrior 3.5 days, and Fleet 1.75 days. The cooldown is tied to your X account, not your wallet.</p>
-<h3>Common failure reasons</h3>
-<ul>
-<li>Submitting again before 7 days have passed since your last submission</li>
-<li>Having a pending or in-review submission still active</li>
-</ul>
-<h3>How to ensure Gate 8 passes</h3>
-<p>Wait for your tier-specific cooldown to expire before submitting again. Use the Wallet Tracker at /wallet to check your cooldown status.</p>
-<p><strong>Example:</strong> You submit on Monday. Your next eligible submission is the following Monday.</p>
-<pre class="doc-ascii">
-  STANDARD / COMMUTER          ROAD WARRIOR               FLEET
-  ├─ 7 day cooldown            ├─ 3.5 day cooldown        ├─ 1.75 day cooldown
-  ├─ 1 submission / week       ├─ 2 submissions / week    ├─ 4 submissions / week
-  └─ [Submit]───7d───[Ready]   └─ [Submit]──3.5d──[Ready] └─ [Submit]──42h──[Ready]
-</pre>`,
-        order: 19,
-      },
-      {
-        slug: "gate-9-no-duplicate-receipt",
-        title: "Gate 9 — No Duplicate Receipt",
-        categorySlug: "verification",
-        category: "Verification Gates",
-        description: "",
-        content: `<h3>What this gate checks</h3>
-<p>Gate 9 generates a perceptual image hash of your uploaded receipt photo and compares it against all previously submitted receipts in the system. If the hash similarity score exceeds a threshold, the receipt is considered a duplicate and the submission fails. This applies regardless of the wallet address — the same physical receipt cannot be submitted twice even from different wallets.</p>
-<h3>Common failure reasons</h3>
-<ul>
-<li>Submitting the same receipt a second time after a previous failed submission</li>
-<li>Two different users submitting photos of the same physical receipt</li>
-<li>Submitting a photo of a photo of a receipt (the hash will still match)</li>
-</ul>
-<h3>How to ensure Gate 9 passes</h3>
-<p>Each submission requires a unique, original gas receipt that has never been submitted to GASCOIN before. Never resubmit a receipt — even if your previous submission failed on a different gate. Get a new receipt from a new gas purchase.</p>`,
-        order: 20,
-      },
-      {
-        slug: "gate-10-treasury-solvent",
-        title: "Gate 10 — Treasury Solvent",
-        categorySlug: "verification",
-        category: "Verification Gates",
-        description: "",
-        content: `<h3>What this gate checks</h3>
-<p>Gate 10 queries the GASCOIN treasury wallet on the Solana blockchain via RPC and verifies that the current SOL balance is sufficient to cover your refund amount plus estimated transaction fees. This check happens immediately before the SOL is dispatched.</p>
-<h3>What happens if Gate 10 fails</h3>
-<p>Unlike Gates 1-9, Gate 10 failure does NOT reject your submission. Instead, your submission enters a priority queue. The system automatically retries Gate 10 every 6 hours. When the treasury is replenished and has sufficient balance, your submission automatically moves to approved and SOL is dispatched to your wallet. You do not need to resubmit or take any action.</p>
-<h3>How long does a Gate 10 queue take</h3>
-<p>This depends entirely on when the treasury is next replenished. The treasury admin monitors the treasury balance and adds SOL as needed. Most Gate 10 queue situations resolve within 48-72 hours.</p><h3>What to expect while in Gate 10 queue</h3>
-<p>When your submission enters the Gate 10 queue, three things happen automatically:</p>
-<ul>
-<li>Your submission status in the Wallet Tracker changes from "processing" to "pending queue"</li>
-<li>The system retries Gate 10 every 6 hours automatically — you do not need to do anything</li>
-<li>When the treasury is replenished and your retry passes, your status changes to "approved" and SOL dispatch is initiated</li>
-</ul>
-<p>Typical Gate 10 queue resolution time: 24-72 hours. The treasury balance is publicly visible on the Treasury page at /dashboard so you can monitor it yourself.</p>`,
-        order: 21,
-      },
+      ...GATE_DOC_SECTIONS,
     ],
   },
   {
@@ -678,7 +536,7 @@ export const DOC_CATEGORIES: DocCategory[] = [
 Client Submit -> Session/Auth -> Signal Extraction -> AI/Fraud -> Gate Engine
                                                            |
                                                            v
-                                                   Queue/Retry (Gate 10)
+                                                   Queue/Retry (treasury)
                                                            |
                                                            v
                                                         Payout
@@ -785,10 +643,10 @@ Inputs(wallet,tweet,receipt)
         categorySlug: "technology",
         category: "Technology",
         description: "",
-        content: `<p>This flow shows exactly how a submission moves through gate checks, rejection paths, and the non-blocking Gate 10 treasury queue.</p>
+        content: `<p>This flow shows exactly how a submission moves through gate checks, rejection paths, and the post-approval treasury queue (used when the treasury is temporarily low).</p>
 <ul>
 <li>Gates 1-9 are blocking</li>
-<li>Gate 10 is non-blocking and queue-based</li>
+<li>Treasury solvency is a post-approval check, not a gate</li>
 <li>Retries are automated and logged</li>
 <li>Admin review remains auditable</li>
 </ul>
@@ -800,7 +658,7 @@ Inputs(wallet,tweet,receipt)
       │
       ▼
   ┌─────────────────────────┐
-  │  GATES 1-9 (blocking)   │──── Any gate fails ────→ REJECTED
+  │  ALL POLICY GATES       │──── Any gate fails ────→ REJECTED
   │  Tweet · Receipt · AI   │                          (see which gate)
   │  Wallet · Cooldown      │
   └────────────┬────────────┘
@@ -1187,7 +1045,7 @@ Inputs(wallet,tweet,receipt)
      ├─► Gemini Vision ──────┤                              │
      │        │              ▼                              │
      │        ▼       ┌──────────────┐                      │
-     │    fraud.ts ──►│  13  GATES   │──► DB + audit ───────┤
+     │    fraud.ts ──►│ POLICY GATES │──► DB + audit ───────┤
      │        │       └──────────────┘                      │
      │        ▼                                             │
      │    Grok Reasoning (conditional)                      │
@@ -1506,7 +1364,7 @@ Inputs(wallet,tweet,receipt)
 <li>Receipt Total: the USD amount of the gas purchase</li>
 <li>Submission Date: when the submission was made</li>
 <li>Wallet: the submitter's wallet address in truncated format</li>
-<li>Gates: 10/10 indicating all verification gates passed</li>
+<li>Gates: all passed, indicating every verification gate passed</li>
 <li>Receipt Image: a photo of the actual gas receipt (may be redacted if sensitive info detected)</li>
 </ul>
 <h3>Filters and sorting</h3>
@@ -1588,7 +1446,7 @@ Inputs(wallet,tweet,receipt)
                                                     │
                                                Submits receipt
                                                     │
-                                               12 Gates pass?
+                                             All gates pass?
                                               No │        │ Yes
                                                  ▼        ▼
                                             No reward   CONVERSION DETECTED
@@ -1811,13 +1669,13 @@ Inputs(wallet,tweet,receipt)
         categorySlug: "security",
         category: "Security & Admin",
         description: "",
-        content: `<p>The 15-gate sequential system is the primary fraud prevention mechanism. No submission can receive a refund without passing all 15 automated checks. Gates 1-14 are fully automated with no human input. Gate 15 is a final treasury solvency check. No gate can be individually disabled by a user.</p>`,
+        content: `<p>The ${GATE_COUNT}-gate sequential system is the primary fraud prevention mechanism. No submission can receive a refund without passing all ${GATE_COUNT} automated checks. Every gate is fully automated with no human input during evaluation. Treasury solvency is checked separately by the payout worker after gate evaluation succeeds. No gate can be individually disabled by a user — admin overrides are exceptional and fully audited.</p>`,
         order: 49,
         navHidden: true,
       },
       {
-        slug: "perceptual-hashing-gate-9",
-        title: "Perceptual hashing (Gate 9)",
+        slug: "perceptual-hashing-duplicate-detection",
+        title: "Perceptual hashing (duplicate detection)",
         categorySlug: "security",
         category: "Security & Admin",
         description: "",
@@ -1825,8 +1683,8 @@ Inputs(wallet,tweet,receipt)
         order: 50,
       },
       {
-        slug: "-day-wallet-cooldown-gate-8",
-        title: "Tier-based submission cooldown (Gate 8)",
+        slug: "tier-based-submission-cooldown",
+        title: "Tier-based submission cooldown",
         categorySlug: "security",
         category: "Security & Admin",
         description: "",
@@ -1835,18 +1693,8 @@ Inputs(wallet,tweet,receipt)
         navHidden: true,
       },
       {
-        slug: "receipt-date-validation-gate-7",
-        title: "Receipt date validation (Gate 7)",
-        categorySlug: "security",
-        category: "Security & Admin",
-        description: "",
-        content: `<p>Receipts older than 7 days are rejected. This prevents the use of stockpiled receipts and ensures refunds correspond to recent, real-world gas purchases.</p>`,
-        order: 52,
-        navHidden: true,
-      },
-      {
-        slug: "wallet-address-on-receipt-gate-5",
-        title: "Wallet address on receipt (Gate 5)",
+        slug: "wallet-address-on-receipt",
+        title: "Wallet address on receipt (wallet-match gate)",
         categorySlug: "security",
         category: "Security & Admin",
         description: "",
@@ -1894,7 +1742,7 @@ Inputs(wallet,tweet,receipt)
 <li><strong>Tweet:</strong> account public, <code>#gascoin</code> present, tweet live</li>
 <li><strong>Receipt:</strong> physical, legible, in policy date range, wallet marks visible</li>
 <li><strong>Cooldown:</strong> verify timer in <a href="/wallet">/wallet</a></li>
-<li><strong>Treasury queue:</strong> Gate 10 retries are automatic</li>
+<li><strong>Treasury queue:</strong> approved-but-underfunded claims retry automatically every 6 hours</li>
 </ol>
 
 <h3>Best self-service pages</h3>
@@ -1925,7 +1773,7 @@ Inputs(wallet,tweet,receipt)
       },
       {
         slug: "my-tweet-failed-gate-2-not-public",
-        title: "My tweet failed Gate 2 (not public)",
+        title: "My tweet failed the Tweet Live gate",
         categorySlug: "help",
         category: "Help",
         description: "",
@@ -1939,7 +1787,7 @@ Inputs(wallet,tweet,receipt)
       },
       {
         slug: "my-receipt-failed-gate-5-wallet-not-found-on-recei",
-        title: "My receipt failed Gate 5 (wallet not found on receipt)",
+        title: "My receipt failed the Wallet Match gate",
         categorySlug: "help",
         category: "Help",
         description: "",
@@ -1954,7 +1802,7 @@ Inputs(wallet,tweet,receipt)
       },
       {
         slug: "my-receipt-failed-gate-7-date-not-valid",
-        title: "My receipt failed Gate 7 (date not valid)",
+        title: "My receipt is older than 7 days",
         categorySlug: "help",
         category: "Help",
         description: "",
@@ -1967,8 +1815,8 @@ Inputs(wallet,tweet,receipt)
         navHidden: true,
       },
       {
-        slug: "gate-8-says-im-in-cooldown",
-        title: "Gate 8 says I'm in cooldown",
+        slug: "im-in-submission-cooldown",
+        title: "I'm in submission cooldown",
         categorySlug: "help",
         category: "Help",
         description: "",
@@ -1982,21 +1830,21 @@ Inputs(wallet,tweet,receipt)
       },
       {
         slug: "my-submission-is-stuck-on-gate-5-for-a-long-time",
-        title: "My submission is stuck on Gate 5 for a long time",
+        title: "My submission is stuck on the Wallet Match gate",
         categorySlug: "help",
         category: "Help",
         description: "",
-        content: `<p>Gate 5 OCR processing can take up to 45 seconds under normal conditions. If more than 2 minutes have elapsed with Gate 5 still showing the spinning icon, this may indicate a processing backlog. Wait 5 minutes and check the Wallet Tracker — if the status has not updated, contact the admin team.</p>`,
+        content: `<p>OCR processing for the Wallet Match gate can take up to 45 seconds under normal conditions. If more than 2 minutes have elapsed with that gate still showing the spinning icon, this may indicate a processing backlog. Wait 5 minutes and check the Wallet Tracker — if the status has not updated, contact the admin team.</p>`,
         order: 44,
         navHidden: true,
       },
       {
-        slug: "gate-10-failed-where-is-my-sol",
-        title: "Gate 10 failed — where is my SOL",
+        slug: "approved-but-sol-hasnt-arrived",
+        title: "My claim was approved but SOL hasn't arrived",
         categorySlug: "help",
         category: "Help",
         description: "",
-        content: `<p>Gate 10 failure means the treasury had insufficient SOL at the exact moment your refund was being dispatched. Your submission is in the queue and will be automatically retried. Check the Wallet Tracker — your submission will show status 'pending queue'. No action is required from you. SOL will be dispatched when the treasury is replenished.</p>`,
+        content: `<p>If your submission was approved but SOL has not yet arrived, the treasury likely had insufficient SOL at the exact moment your refund was being dispatched. Your approved submission is in the payout queue and will be automatically retried every 6 hours. Check the Wallet Tracker — your submission will show status 'pending queue'. No action is required from you. SOL will be dispatched when the treasury is replenished.</p>`,
         order: 45,
       },
       {
@@ -2064,7 +1912,7 @@ Inputs(wallet,tweet,receipt)
         categorySlug: "help",
         category: "Help",
         description: "",
-        content: `<p>An active X (Twitter) account is currently required for submission. Gate 3 and Gate 4 both depend on tweet verification via the X API. There is no alternative verification path for users without X accounts at this time.</p>`,
+        content: `<p>An active X (Twitter) account is currently required for submission. Multiple gates depend on tweet verification via the X API (hashtag, @GasCoinApp mention, liveness, tweet content). There is no alternative verification path for users without X accounts at this time.</p>`,
         order: 60,
         navHidden: true,
       },
