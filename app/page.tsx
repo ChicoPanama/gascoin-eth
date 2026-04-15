@@ -8,6 +8,7 @@ import { ReferralTeaser } from '../components/referral/ReferralTeaser';
 import { HeroStagger, HeroItem } from '../components/ui/HeroStagger';
 import { ScrollReveal } from '../components/ui/ScrollReveal';
 import { DEMO_TREASURY_DISPLAY, fallback } from '../lib/demo-data';
+import { GATE_COUNT } from '../lib/policy';
 
 function UsdcIcon() {
   return (
@@ -29,7 +30,7 @@ export default async function Home() {
   let treasuryUsd = '—';
   let marketCap = '—';
   let volume = '—';
-  let gates = '10';
+  const gates = String(GATE_COUNT);
 
   try {
     const { getTreasuryBalances } = await import('../lib/integrations/solana');
@@ -205,9 +206,9 @@ export default async function Home() {
             <div className="gc-step">
               <div className="gc-step-ghost">01</div>
               <div className="gc-step-index">Step 01</div>
-              <div className="gc-step-title">Tweet #gascoin</div>
+              <div className="gc-step-title">Tweet $GASCOIN</div>
               <p className="gc-step-desc">
-                Post a tweet with the #gascoin hashtag from your verified X account.
+                Post a tweet with <strong>$GASCOIN</strong> cashtag and <strong>#gascoin</strong> hashtag from your verified X account. Cashtag unlocks X&apos;s price chart overlay.
                 This registers your intent and links your social identity to the
                 refund pipeline.
               </p>

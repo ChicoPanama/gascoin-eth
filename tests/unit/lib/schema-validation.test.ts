@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { validateSelect, SCHEMA, VIEWS } from '../../mocks/schema';
 import { GATES } from '@/lib/gates';
+import { GATE_DEFS } from '@/lib/policy';
 
 /**
  * Schema validation tests — catch column/table mismatches at test time
@@ -66,12 +67,9 @@ describe('Schema: gate views', () => {
 });
 
 describe('Schema: GATES policyGate mapping', () => {
-  const VALID_POLICY_GATES = [
-    'x_verified', 'tweet_hashtag', 'tweet_live', 'receipt_hashtag',
-    'wallet_match', 'gascoin_min_hold', 'not_duplicate',
-    'ai_image_check', 'tamper_check', 'cooldown',
-    'min_followers', 'account_quality',
-  ];
+  // Single source of truth — pulled from lib/policy.ts so this test
+  // can never drift from the actual enforcement engine.
+  const VALID_POLICY_GATES: readonly string[] = GATE_DEFS.map((g) => g.id);
 
   it('every GATE has a policyGate field', () => {
     for (const gate of GATES) {

@@ -1,17 +1,22 @@
 import { describe, it, expect } from 'vitest';
 import { GATES, GATE_CATEGORIES } from '@/lib/gates';
+import { GATE_COUNT } from '@/lib/policy';
 
 describe('GATES', () => {
-  it('has 10 gates', () => { expect(GATES).toHaveLength(10); });
-  it('IDs are 1-10', () => { GATES.forEach((g, i) => expect(g.id).toBe(i + 1)); });
-  it('gate 10 is only non-blocking', () => {
+  it(`has ${GATE_COUNT} gates`, () => { expect(GATES).toHaveLength(GATE_COUNT); });
+  it(`IDs are sequential 1..${GATE_COUNT}`, () => {
+    GATES.forEach((g, i) => expect(g.id).toBe(i + 1));
+  });
+  it('gascoin_min_hold is the only non-blocking gate (Season 1 dry-run)', () => {
     const nb = GATES.filter((g) => !g.is_blocking);
     expect(nb).toHaveLength(1);
-    expect(nb[0].id).toBe(10);
+    expect(nb[0].policyGate).toBe('gascoin_min_hold');
   });
-  it('category counts match', () => {
+  it('category counts match GATE_CATEGORIES', () => {
+    expect(GATES.filter((g) => g.category === 'identity')).toHaveLength(GATE_CATEGORIES.identity.count);
     expect(GATES.filter((g) => g.category === 'tweet')).toHaveLength(GATE_CATEGORIES.tweet.count);
     expect(GATES.filter((g) => g.category === 'receipt')).toHaveLength(GATE_CATEGORIES.receipt.count);
+    expect(GATES.filter((g) => g.category === 'wallet')).toHaveLength(GATE_CATEGORIES.wallet.count);
   });
   it('slugs are unique', () => {
     expect(new Set(GATES.map((g) => g.slug)).size).toBe(GATES.length);

@@ -47,12 +47,34 @@ export async function verifyGate3(tweetUrl: string): Promise<GateVerifyResult> {
   const { tweet, error } = await getTweet(parsed.tweetId);
   if (!tweet || error) return { gate_id: 3, passed: false, failure_reason: 'Could not retrieve tweet', duration_ms: Date.now() - start };
 
-  const hasEntity = tweet.entities?.hashtags?.some((h) => h.tag.toLowerCase() === 'gascoin');
-  const hasText = tweet.text.toLowerCase().includes('#gascoin');
+  // Cashtag-aware (X April 2026). Accept either #gascoin hashtag OR
+  // $GASCOIN cashtag via three channels:
+  //   1. X API v2 `hashtags` entity (structured)
+  //   2. X API v2 `cashtags` entity (structured, may or may not be populated
+  //      by X yet — speculative fallback)
+  //   3. Plain-text includes — guarantees correctness regardless of entity
+  //      population
+  const hasHashtagEntity = tweet.entities?.hashtags?.some((h) => h.tag.toLowerCase() === 'gascoin');
+  const hasCashtagEntity = (tweet.entities as any)?.cashtags?.some(
+    (c: any) => String(c?.tag || '').toLowerCase() === 'gascoin',
+  );
+  const lowerText = tweet.text.toLowerCase();
+  const hasText = lowerText.includes('#gascoin') || lowerText.includes('$gascoin');
 
-  if (!hasEntity && !hasText) return { gate_id: 3, passed: false, failure_reason: '#gascoin hashtag not found in tweet', duration_ms: Date.now() - start };
+  if (!hasHashtagEntity && !hasCashtagEntity && !hasText) {
+    return { gate_id: 3, passed: false, failure_reason: '#gascoin / $GASCOIN not found in tweet', duration_ms: Date.now() - start };
+  }
 
-  return { gate_id: 3, passed: true, failure_reason: null, duration_ms: Date.now() - start, metadata: { hashtag_in_entities: !!hasEntity } };
+  return {
+    gate_id: 3,
+    passed: true,
+    failure_reason: null,
+    duration_ms: Date.now() - start,
+    metadata: {
+      hashtag_in_entities: !!hasHashtagEntity,
+      cashtag_in_entities: !!hasCashtagEntity,
+    },
+  };
 }
 
 export async function verifyGate4(tweetUrl: string): Promise<GateVerifyResult> {

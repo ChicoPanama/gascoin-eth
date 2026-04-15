@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { evaluateClaim, type ClaimInput } from '@/lib/policy';
+import { evaluateClaim, GATE_DEFS, GATE_COUNT, type ClaimInput } from '@/lib/policy';
+import { GATES } from '@/lib/gates';
 
 function validInput(overrides: Partial<ClaimInput> = {}): ClaimInput {
   return {
@@ -11,6 +12,32 @@ function validInput(overrides: Partial<ClaimInput> = {}): ClaimInput {
     followerCount: 200, accountQualityScore: 60, accountQualityPassed: true, ...overrides,
   };
 }
+
+// ─── Single source of truth alignment ─────────────────────────────
+// These tests enforce that GATE_DEFS, GATE_COUNT, the actual evaluateClaim
+// output, and the public-facing GATES documentation in lib/gates.ts all
+// stay in lock-step. If a future PR adds a gate to evaluateClaim() but
+// forgets to update GATE_DEFS or GATES, these tests fail loudly.
+describe('GATE_DEFS / GATE_COUNT alignment', () => {
+  it('GATE_COUNT matches GATE_DEFS.length', () => {
+    expect(GATE_COUNT).toBe(GATE_DEFS.length);
+  });
+
+  it('GATE_DEFS has 14 entries', () => {
+    expect(GATE_DEFS.length).toBe(14);
+  });
+
+  it('lib/gates.ts GATES has the same number of entries as GATE_DEFS', () => {
+    expect(GATES.length).toBe(GATE_COUNT);
+  });
+
+  it('every lib/gates.ts entry has a policyGate that exists in GATE_DEFS', () => {
+    const policyIds = new Set(GATE_DEFS.map((g) => g.id));
+    for (const g of GATES) {
+      expect(policyIds.has(g.policyGate as any)).toBe(true);
+    }
+  });
+});
 
 describe('evaluateClaim', () => {
   it('approves (ready_for_dispatch) when all gates pass and low risk', () => {
@@ -164,9 +191,9 @@ describe('evaluateClaim', () => {
     expect(r.failed.some((g) => g.gate === 'account_quality')).toBe(false);
   });
 
-  it('returns exactly 14 gates', () => {
+  it('returns exactly GATE_COUNT gates', () => {
     const r = evaluateClaim(validInput());
-    expect(r.gates).toHaveLength(14);
+    expect(r.gates).toHaveLength(GATE_COUNT);
   });
 
   it('risk score is between 0 and 1', () => {

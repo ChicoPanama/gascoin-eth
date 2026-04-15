@@ -47,7 +47,7 @@ export async function POST(req: Request) {
   }
 
   // --- Phase 2: Auto-approve ready_for_dispatch claims ---
-  // Claims that passed all 12 gates automatically get approved and queued
+  // Claims that passed all 14 gates automatically get approved and queued
   // for the daily midnight batch payout. Payout amount set by token tier.
   const { data: readyClaims } = await supabase
     .from('claims')

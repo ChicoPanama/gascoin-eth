@@ -1,3 +1,34 @@
+/**
+ * GATE_DEFS — the canonical ordered list of submission-verification gates.
+ *
+ * Single source of truth: any component that needs to know "how many gates
+ * are there?" or "what are they called?" should read from here instead of
+ * hardcoding a number. Adding a new gate = add a row here + add the matching
+ * gates.push(...) call in evaluateClaim() below. Everything else (nav copy,
+ * hero count, docs, progress bar, metadata) picks up the change automatically.
+ *
+ * Keeping GATE_DEFS in lock-step with the gates.push() calls is enforced by
+ * tests/unit/lib/policy.test.ts which asserts result.gates.length === GATE_COUNT.
+ */
+export const GATE_DEFS = [
+  { id: 'x_verified',       label: 'X Verified' },
+  { id: 'follows_gascoin',  label: 'Follows @GasCoinApp' },
+  { id: 'tweet_hashtag',    label: 'Tweet #gascoin / $GASCOIN' },
+  { id: 'tweet_live',       label: 'Tweet Live' },
+  { id: 'receipt_hashtag',  label: 'Receipt Hashtag' },
+  { id: 'wallet_match',     label: 'Wallet Match on Receipt' },
+  { id: 'gascoin_min_hold', label: 'GASCOIN Min Hold' },
+  { id: 'not_duplicate',    label: 'Not a Duplicate' },
+  { id: 'ai_image_check',   label: 'Not AI-Generated' },
+  { id: 'tamper_check',     label: 'Not Tampered' },
+  { id: 'cooldown',         label: 'Cooldown Expired' },
+  { id: 'min_amount',       label: 'Min $5 Receipt' },
+  { id: 'min_followers',    label: 'Min 100 Followers' },
+  { id: 'account_quality',  label: 'Account Quality' },
+] as const;
+
+export const GATE_COUNT = GATE_DEFS.length;
+
 export type GateResult = { gate: string; passed: boolean; reason?: string; score?: number };
 export type ClaimInput = {
   xVerified: boolean;

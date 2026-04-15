@@ -13,12 +13,15 @@ export const viewport: Viewport = {
   viewportFit: 'cover',
 };
 
+// Note: gate count is hardcoded here because Next.js metadata is evaluated
+// at module load and we don't want to import policy.ts into the root layout.
+// If GATE_COUNT changes, update the "14" in this description manually.
 export const metadata: Metadata = {
   title: 'GASCOIN',
-  description: 'Community gas refunds on Solana. Post #gascoin, submit a receipt, get SOL back.',
+  description: 'Community gas refunds on Solana. Post $GASCOIN or #gascoin, submit a receipt, get SOL back.',
   openGraph: {
     title: 'GASCOIN — Community Gas Refunds on Solana',
-    description: 'Post #gascoin on X, submit your gas receipt, and receive SOL directly to your wallet. 10 automated verification gates. No middlemen.',
+    description: 'Post $GASCOIN or #gascoin on X, submit your gas receipt, and receive SOL directly to your wallet. 14 automated verification gates. No middlemen.',
     siteName: 'GASCOIN',
     type: 'website',
     url: process.env.NEXT_PUBLIC_BASE_URL || 'https://gascoin.app',
@@ -26,7 +29,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'GASCOIN — Community Gas Refunds on Solana',
-    description: 'Post #gascoin on X, submit your gas receipt, and receive SOL directly to your wallet.',
+    description: 'Post $GASCOIN or #gascoin on X, submit your gas receipt, and receive SOL directly to your wallet.',
   },
   icons: {
     icon: '/favicon.svg',

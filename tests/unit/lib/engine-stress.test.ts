@@ -181,8 +181,8 @@ describe('CATEGORY 1: Policy Engine Gate Bypass Attempts', () => {
     };
     const result = evaluateClaim(input);
 
-    // In dry-run mode, gascoin_min_hold is bypassed, so 11 of 12 gates fail
-    // (or 12 if ENABLE_LIVE_PAYOUT=true). Either way, the risk is extreme.
+    // In dry-run mode, gascoin_min_hold is bypassed, so 13 of 14 gates fail
+    // (or 14 if ENABLE_LIVE_PAYOUT=true). Either way, the risk is extreme.
     expect(result.failed.length).toBeGreaterThanOrEqual(11);
     expect(result.decision).toBe('rejected');
     expect(result.riskScore).toBeGreaterThanOrEqual(0.6);
@@ -670,7 +670,7 @@ describe('CATEGORY 7: Pipeline Depth Tests — Pass Gates, Test Scoring', () => 
       tamperScore: 0.54,
     }));
 
-    // All 12 gates pass
+    // All 14 gates pass
     expect(result.failed).toHaveLength(0);
 
     // But the risk score is elevated

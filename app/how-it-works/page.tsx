@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { Nav } from '../../components/Nav';
+import { GATE_COUNT } from '../../lib/policy';
 
 type StepLink = { name: string; url: string; icon: string };
 type Step = {
@@ -118,7 +119,8 @@ const STEPS: Step[] = [
     title: 'Post on X',
     time: '1 min',
     bullets: [
-      'Post a tweet on X with the hashtag #gascoin. Original videos earn 3x points — record yourself, share your story, show your receipt at the pump. Reposts earn almost nothing.',
+      'Post a tweet on X with both #gascoin (hashtag) and $GASCOIN (cashtag). The $GASCOIN cashtag unlocks X\'s price chart overlay on your post — required for max reach. Either alone is enough to pass the gate, both together is the recommended move.',
+      'Original videos earn 3x points — record yourself, share your story, show your receipt at the pump. Reposts earn almost nothing.',
       'Keep the tweet up. If you delete it, your submission will fail verification.',
       'Copy the URL of your tweet — you\'ll paste it in the next step.',
     ],
@@ -140,14 +142,14 @@ const STEPS: Step[] = [
     ],
     links: [
       { name: 'Submit Receipt', url: '/submit', icon: '/logo/gascoin-g.jpg' },
-      { name: 'View All 10 Gates', url: '/gates', icon: '/logo/gascoin-g.jpg' },
+      { name: `View All ${GATE_COUNT} Gates`, url: '/gates', icon: '/logo/gascoin-g.jpg' },
     ],
   },
   {
     number: 9,
     title: 'Wait for Verification',
     bullets: [
-      'The system automatically runs 10 verification checks on your submission. This takes 2-5 minutes.',
+      `The system automatically runs ${GATE_COUNT} verification checks on your submission. This takes 2-5 minutes.`,
       'If all checks pass, an admin reviews your submission and approves it.',
       'SOL is sent directly to your Phantom wallet within 24-48 hours.',
       'You can track your submission status on the Tracker page.',

@@ -57,7 +57,9 @@ async function verifyViaXApi(tweetId: string, expectedHandle: string): Promise<T
   const user = j?.includes?.users?.[0] || {};
   const username = String(user?.username || '').toLowerCase();
   const expected = expectedHandle.replace(/^@/, '').toLowerCase();
-  const containsGascoin = /#gascoin\b/i.test(text);
+  // Cashtag-aware: accepts #gascoin (hashtag) OR $gascoin (X cashtag,
+  // April 2026). Character class [#$] matches either token prefix.
+  const containsGascoin = /[#$]gascoin\b/i.test(text);
   const authorMatch = !!expected && username === expected;
 
   return {
@@ -78,7 +80,8 @@ async function verifyViaOEmbed(tweetUrl: string, expectedHandle: string): Promis
 
   const j = (await r.json()) as any;
   const html = String(j?.html || '');
-  const containsGascoin = /#gascoin\b/i.test(html);
+  // Cashtag-aware — mirrors the X API path above
+  const containsGascoin = /[#$]gascoin\b/i.test(html);
   const handleMatch = html.match(/twitter\.com\/([A-Za-z0-9_]+)/i);
   const found = handleMatch?.[1] ? `@${handleMatch[1]}` : undefined;
   const authorMatch = !!found && found.toLowerCase() === expectedHandle.toLowerCase();

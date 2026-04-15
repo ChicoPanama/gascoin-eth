@@ -8,6 +8,7 @@ import { useGascoinWallet } from '../../hooks/useGascoinWallet';
 import { useReferralDashboard } from '../../hooks/useReferralDashboard';
 import { truncateWallet, formatSol, timeAgo } from '../../lib/formatters';
 import { REFERRAL_CONFIG, SKIP_REASON_LABELS } from '../../lib/referral-config';
+import { GATE_COUNT } from '../../lib/policy';
 import type { ReferralConversion } from '../../types/referral';
 
 function useAnimVal(target: number, dur = 1000) {
@@ -50,9 +51,9 @@ export default function ReferralPage() {
 
   const shareLink = () => {
     if (navigator.share) {
-      navigator.share({ title: 'GASCOIN', text: 'Get your gas money back. Submit a receipt #gascoin', url: referralUrl });
+      navigator.share({ title: 'GASCOIN', text: 'Get your gas money back. Submit a receipt $GASCOIN #gascoin', url: referralUrl });
     } else {
-      window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent('Get your gas money back. Submit a receipt #gascoin → ' + referralUrl)}`, '_blank');
+      window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent('Get your gas money back. Submit a receipt $GASCOIN #gascoin → ' + referralUrl)}`, '_blank');
     }
   };
 
@@ -275,7 +276,7 @@ export default function ReferralPage() {
             {[
               { num: '01', title: 'Get Your Link', desc: 'Connect your wallet. Your unique referral link is generated instantly — no sign-up, no application.' },
               { num: '02', title: 'Share It', desc: 'Post your link on X, Telegram, group chats, anywhere someone might be paying for gas. 7-day attribution window.' },
-              { num: '03', title: 'They Submit', desc: 'Your referral submits a gas receipt using your link. All 10 verification gates must pass for the conversion to count.' },
+              { num: '03', title: 'They Submit', desc: `Your referral submits a gas receipt using your link. All ${GATE_COUNT} verification gates must pass for the conversion to count.` },
             ].map((s) => (
               <div key={s.num} className="gc-step">
                 <div className="gc-step-ghost">{s.num}</div>

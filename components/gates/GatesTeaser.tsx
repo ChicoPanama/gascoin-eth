@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { supabaseBrowser } from '../../lib/supabase-client';
 import { GATES } from '../../lib/gates';
+import { GATE_COUNT } from '../../lib/policy';
 import { DEMO_GATE_RATES } from '../../lib/demo-data';
 
 export function GatesTeaser() {
@@ -36,14 +37,14 @@ export function GatesTeaser() {
         <div className="gt-teaser-left">
           <div className="gc-section-num">05 — How We Verify</div>
           <h2 className="gt-teaser-title">
-            <span>10 Gates.</span>
+            <span>{GATE_COUNT} Gates.</span>
             <span className="gt-teaser-ghost">0 Exceptions.</span>
           </h2>
           <p className="gt-teaser-sub">
-            Every submission passes through 10 sequential verification checks
+            Every submission passes through {GATE_COUNT} sequential verification checks
             before a single lamport leaves the treasury.
           </p>
-          <Link href="/gates" className="gc-teaser-link">See all 10 gates</Link>
+          <Link href="/gates" className="gc-teaser-link">See all {GATE_COUNT} gates</Link>
         </div>
         <div className="gt-teaser-right glass-card" style={{ padding: 24 }}>
           <div className="gt-teaser-list">

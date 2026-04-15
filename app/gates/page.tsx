@@ -8,6 +8,7 @@ import { PreSubmissionChecklist } from '../../components/gates/PreSubmissionChec
 import { GateFAQ } from '../../components/gates/GateFAQ';
 import { useGateStats } from '../../hooks/useGateStats';
 import { GATES, GATE_CATEGORIES } from '../../lib/gates';
+import { GATE_COUNT } from '../../lib/policy';
 import { timeAgo } from '../../lib/formatters';
 import type { GateCategoryFilter } from '../../types/gates';
 
@@ -63,7 +64,7 @@ export default function GatesPage() {
       {/* Zone 1 — Header */}
       <header className="lb-header">
         <div className="lb-header__meta">
-          <span className="lb-tag">— 10 Verification Gates · Full System Transparency</span>
+          <span className="lb-tag">— {GATE_COUNT} Verification Gates · Full System Transparency</span>
         </div>
         <h1 className="lb-title lb-title--iconed">
           <span className="lb-title-icon-wrap" aria-hidden>
@@ -72,7 +73,7 @@ export default function GatesPage() {
           GATES
         </h1>
         <p className="gt-header-body">
-          Every GASCOIN submission passes through 10 sequential verification
+          Every GASCOIN submission passes through {GATE_COUNT} sequential verification
           gates before SOL is released. All gate logic is documented here in
           full. Admin review may apply in edge cases.
         </p>

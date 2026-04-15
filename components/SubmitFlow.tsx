@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { usePrivy } from '@privy-io/react-auth';
 import { generateReferralCodeClient } from '../lib/referral-code-client';
+import { GATE_DEFS, GATE_COUNT } from '../lib/policy';
 import { ViralShareCard } from './shared/ViralShareCard';
 
 // ─── Types ───
@@ -10,19 +11,9 @@ type Step = 1 | 2 | 3 | 4 | 5;
 type GateStatus = 'pending' | 'processing' | 'passed' | 'failed';
 type Gate = { name: string; status: GateStatus; reason?: string };
 
-const GATE_NAMES = [
-  'Tweet Detected',
-  'Tweet Public',
-  '#gascoin Hashtag',
-  'Wallet on Receipt',
-  'Receipt Legible',
-  'Receipt Date Valid',
-  'Station Verified',
-  'No Duplicate Wallet',
-  'No Duplicate Receipt',
-  'Treasury Solvent',
-  'Min 100 Followers',
-];
+// Single source of truth: pull the canonical gate list from lib/policy.ts
+// so adding/removing a gate never requires a parallel update here.
+const GATE_NAMES: readonly string[] = GATE_DEFS.map((g) => g.label);
 
 // ─── Progress Bar ───
 function ProgressBar({ step, maxStep }: { step: Step; maxStep: Step }) {
@@ -222,7 +213,7 @@ function StepTweet({ onVerified, onBack, initialUrl, loggedInHandle }: {
   return (
     <div className="sf-step">
       <h2 className="sf-headline">Verify Your Tweet</h2>
-      <p className="sf-sub">Paste the URL of your #gascoin tweet. Must be public and posted within the last 48 hours.</p>
+      <p className="sf-sub">Paste the URL of your tweet. Must include <strong>#gascoin</strong> or <strong>$GASCOIN</strong>, be public, and posted within the last 48 hours.</p>
 
       <input
         type="text"
@@ -237,7 +228,7 @@ function StepTweet({ onVerified, onBack, initialUrl, loggedInHandle }: {
           <div className="sf-tweet-avatar">{handle[0]?.toUpperCase() || 'G'}</div>
           <div className="sf-tweet-body">
             <div className="sf-tweet-meta">@{handle} · {tweetAge}</div>
-            <div className="sf-tweet-status">✓ #gascoin detected · Public · Posted {tweetAge}</div>
+            <div className="sf-tweet-status">✓ #gascoin / $GASCOIN detected · Public · Posted {tweetAge}</div>
           </div>
         </div>
       )}
@@ -449,7 +440,7 @@ function StepReview({ wallet, tweetUrl, handle, file, onSubmit, onBack }: {
       </div>
 
       <p className="sf-fine-print">
-        Refunds are subject to passing all 10 verification gates. Processing time varies.
+        Refunds are subject to passing all {GATE_COUNT} verification gates. Processing time varies.
       </p>
 
       <div className="sf-nav-buttons">
