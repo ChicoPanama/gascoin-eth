@@ -10,9 +10,9 @@ import {
   useState,
   type ReactNode,
 } from 'react';
+import { PumpSvg, type PumpRegion } from '../../components/welcome/PumpSvg';
 
 type Props = {
-  pumpSvg: string;
   gateCount: number;
   treasuryUsd: string;
   testersRedeemed: number;
@@ -21,7 +21,6 @@ type Props = {
 };
 
 type PopoverKind = 'enter' | 'manifesto' | 'howitworks' | 'roadmap';
-type Region = 'handle' | 'display' | 'body' | 'nozzle' | 'base';
 
 type PopoverState = {
   kind: PopoverKind;
@@ -29,12 +28,12 @@ type PopoverState = {
 } | null;
 
 type HoverState = {
-  region: Region;
+  region: PumpRegion;
   labelX: number;
   labelY: number;
 } | null;
 
-const REGION_LABELS: Record<Region, string> = {
+const REGION_LABELS: Record<PumpRegion, string> = {
   handle: 'DOCS ↗',
   display: 'ENTER',
   body: 'MANIFESTO',
@@ -43,194 +42,94 @@ const REGION_LABELS: Record<Region, string> = {
 };
 
 /**
- * /welcome — PR #44 rewrite.
+ * /welcome — PR #45 rewrite.
  *
- * Three big changes from PR #43:
+ * Major changes from PR #44:
  *
- * 1. **Ref-based armAction** (fixes dead clicks). The previous version wrapped
- *    armAction in useCallback with `[flashing]` as a dep. Every click set
- *    flashing=true, which recreated armAction, which re-ran the click-listener
- *    effect mid-flight, which tore down and re-attached DOM listeners during
- *    an in-flight event. The result was click events silently dying in the
- *    race. Now armAction reads `flashingRef.current` instead of closure
- *    state, is wrapped with `[]` deps, and never changes identity.
+ * 1. **Splash screen DELETED.** The pump IS the page from load. No more
+ *    full-screen "ENTER THE STATION" gate. The pump display pulses every
+ *    few seconds to draw attention as the real entry point. On page load,
+ *    the pump scales in with a subtle entry animation.
  *
- * 2. **Event delegation on the pump container**. Instead of per-region
- *    addEventListener calls (one per hotspot), a single click listener on
- *    the pump div uses `event.target.closest('g.pump-region')` to find the
- *    hit region and dispatch. One listener, attached once, never re-attached.
+ * 2. **SVG is now a React component (PumpSvg)**, not an HTML-injected
+ *    asset. Every hotspot <g> has real React onClick + onMouseEnter
+ *    + onMouseLeave props, routed through React's synthetic event system.
+ *    Clicks are guaranteed to fire — no addEventListener race, no
+ *    dependency churn, no stale closures.
  *
- * 3. **Anchored Popover replaces full-screen Modal**. When a region is
- *    clicked, we capture its getBoundingClientRect and pass it to the
- *    Popover. The Popover places itself near the clicked region (right,
- *    left, or above depending on viewport fit). On mobile (≤ 768px), CSS
- *    flips it to a full-screen sheet.
+ * 3. **Simplified click pipeline**: click → playFlash() (DOM class
+ *    re-application, pure visual) → dispatch action immediately. No
+ *    setTimeout, no armAction guard, no useCallback dep tracking.
+ *
+ * 4. **Status LED restored** inside the pump body (SVG <animate>).
  */
 export function WelcomeClient({
-  pumpSvg,
   gateCount,
   testersRedeemed,
   isDryRun,
 }: Props) {
   const router = useRouter();
-  const [splashGone, setSplashGone] = useState(false);
   const [popover, setPopover] = useState<PopoverState>(null);
   const [hover, setHover] = useState<HoverState>(null);
-  const [flashing, setFlashing] = useState(false);
-
-  const pumpRef = useRef<HTMLDivElement>(null);
   const stageRef = useRef<HTMLElement>(null);
+  const flashRef = useRef<HTMLDivElement>(null);
 
-  // Ref-based "currently flashing" guard — decoupled from React state so
-  // event listeners can read the latest value without re-attaching.
-  const flashingRef = useRef(false);
-
-  /**
-   * Stable click-action arming. Reads the LATEST flashing state via ref,
-   * not via closure. useCallback deps are empty so identity is stable
-   * across renders.
-   */
-  const armAction = useCallback((action: () => void) => {
-    if (flashingRef.current) return;
-    flashingRef.current = true;
-    setFlashing(true);
-
-    const prefersReduce =
-      typeof window !== 'undefined' &&
-      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const delay = prefersReduce ? 0 : 120;
-
-    window.setTimeout(() => {
-      flashingRef.current = false;
-      setFlashing(false);
-      action();
-    }, delay);
+  /** Replay the CRT flash by yanking and re-adding the animation class. */
+  const playFlash = useCallback(() => {
+    const el = flashRef.current;
+    if (!el) return;
+    el.classList.remove('is-flashing');
+    // Force a reflow so the animation restarts on the next tick
+    void el.offsetWidth;
+    el.classList.add('is-flashing');
   }, []);
 
-  // Event delegation on the pump container — attach once, tear down once.
-  useEffect(() => {
-    const root = pumpRef.current;
-    const stage = stageRef.current;
-    if (!root || !stage) return;
-
-    // Verify the injected SVG mounted before we try to wire it up.
-    const regions = Array.from(
-      root.querySelectorAll<SVGGElement>('g.pump-region')
-    );
-    if (regions.length === 0) {
+  /** Hotspot click dispatch — called directly from PumpSvg onClick handlers. */
+  const onHotspotClick = useCallback(
+    (region: PumpRegion, rect: DOMRect) => {
       // eslint-disable-next-line no-console
-      console.warn('[welcome] no pump-region groups found in SVG');
-      return;
-    }
-    // eslint-disable-next-line no-console
-    console.log(`[welcome] attached to ${regions.length} pump regions`);
-
-    // Per-region affordance — set once, never touched again
-    for (const el of regions) {
-      el.style.cursor = 'pointer';
-      el.setAttribute('role', 'button');
-    }
-
-    const regionForId = (id: string): Region | null => {
-      switch (id) {
-        case 'pump-handle': return 'handle';
-        case 'pump-display': return 'display';
-        case 'pump-body': return 'body';
-        case 'pump-nozzle': return 'nozzle';
-        case 'pump-base': return 'base';
-        default: return null;
+      console.log(`[welcome] click → ${region}`);
+      playFlash();
+      switch (region) {
+        case 'handle':
+          router.push('/docs');
+          break;
+        case 'display':
+          setPopover({ kind: 'enter', rect });
+          break;
+        case 'body':
+          setPopover({ kind: 'manifesto', rect });
+          break;
+        case 'nozzle':
+          setPopover({ kind: 'howitworks', rect });
+          break;
+        case 'base':
+          setPopover({ kind: 'roadmap', rect });
+          break;
       }
-    };
+    },
+    [playFlash, router]
+  );
 
-    const actionForId = (id: string, rect: DOMRect): (() => void) | null => {
-      switch (id) {
-        case 'pump-handle':  return () => router.push('/docs');
-        case 'pump-display': return () => setPopover({ kind: 'enter', rect });
-        case 'pump-body':    return () => setPopover({ kind: 'manifesto', rect });
-        case 'pump-nozzle':  return () => setPopover({ kind: 'howitworks', rect });
-        case 'pump-base':    return () => setPopover({ kind: 'roadmap', rect });
-        default: return null;
+  /** Hotspot hover dispatch — tracks the rect so the floating label
+   *  can position directly above the hovered region. */
+  const onHotspotHover = useCallback(
+    (region: PumpRegion | null, rect: DOMRect | null) => {
+      if (!region || !rect) {
+        setHover(null);
+        return;
       }
-    };
-
-    const findRegion = (target: EventTarget | null): SVGGElement | null => {
-      if (!(target instanceof Element)) return null;
-      return target.closest<SVGGElement>('g.pump-region');
-    };
-
-    const onClick = (e: MouseEvent) => {
-      const el = findRegion(e.target);
-      if (!el) return;
-      e.preventDefault();
-      e.stopPropagation();
-      const rect = el.getBoundingClientRect();
-      const action = actionForId(el.id, rect);
-      if (!action) return;
-      armAction(action);
-    };
-
-    const onMouseOver = (e: MouseEvent) => {
-      const el = findRegion(e.target);
-      if (!el) return;
-      const key = regionForId(el.id);
-      if (!key) return;
+      const stage = stageRef.current;
+      if (!stage) return;
       const stageRect = stage.getBoundingClientRect();
-      const rect = el.getBoundingClientRect();
       setHover({
-        region: key,
+        region,
         labelX: rect.left - stageRect.left + rect.width / 2,
         labelY: rect.top - stageRect.top - 36,
       });
-    };
-
-    const onMouseOut = (e: MouseEvent) => {
-      // Only clear when leaving to something OUTSIDE the current region
-      const el = findRegion(e.target);
-      if (!el) return;
-      const related = findRegion(e.relatedTarget);
-      if (related === el) return;
-      setHover(null);
-    };
-
-    const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key !== 'Enter' && e.key !== ' ') return;
-      const el = findRegion(e.target);
-      if (!el) return;
-      e.preventDefault();
-      const rect = el.getBoundingClientRect();
-      const action = actionForId(el.id, rect);
-      if (!action) return;
-      armAction(action);
-    };
-
-    root.addEventListener('click', onClick);
-    root.addEventListener('mouseover', onMouseOver);
-    root.addEventListener('mouseout', onMouseOut);
-    root.addEventListener('keydown', onKeyDown);
-
-    return () => {
-      root.removeEventListener('click', onClick);
-      root.removeEventListener('mouseover', onMouseOver);
-      root.removeEventListener('mouseout', onMouseOut);
-      root.removeEventListener('keydown', onKeyDown);
-    };
-  }, [armAction, router]);
-
-  // Apply hover class to SVG root for CSS-driven per-region anims
-  useEffect(() => {
-    const root = pumpRef.current;
-    if (!root) return;
-    const svg = root.querySelector('svg');
-    if (!svg) return;
-    svg.classList.remove(
-      'is-hover-handle',
-      'is-hover-display',
-      'is-hover-body',
-      'is-hover-nozzle',
-      'is-hover-base'
-    );
-    if (hover) svg.classList.add(`is-hover-${hover.region}`);
-  }, [hover]);
+    },
+    []
+  );
 
   // ESC closes popover
   useEffect(() => {
@@ -241,45 +140,19 @@ export function WelcomeClient({
     return () => window.removeEventListener('keydown', onKey);
   }, []);
 
-  const handleEnterSplash = useCallback(() => setSplashGone(true), []);
-
+  // Lock body scroll while a popover is open on mobile
   useEffect(() => {
-    if (splashGone) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Enter' || e.key === ' ') {
-        e.preventDefault();
-        handleEnterSplash();
-      }
-    };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [splashGone, handleEnterSplash]);
+    if (popover) {
+      const prev = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.body.style.overflow = prev;
+      };
+    }
+  }, [popover]);
 
   return (
     <div className="wlc-root" data-theme="dark">
-      {!splashGone && (
-        <button
-          type="button"
-          className="wlc-splash"
-          onClick={handleEnterSplash}
-          aria-label="Enter the station"
-        >
-          <div className="wlc-splash-scanline" aria-hidden />
-          <div className="wlc-splash-noise" aria-hidden />
-          <div className="wlc-splash-inner">
-            <div className="wlc-splash-kicker">&gt; INITIALIZING_</div>
-            <div className="wlc-splash-brand">GASCOIN</div>
-            <div className="wlc-splash-sub">SOLANA · SEASON 1 · BETA</div>
-            <div className="wlc-splash-cta">
-              <span className="wlc-splash-bracket">[</span>
-              <span className="wlc-splash-cta-text">ENTER THE STATION</span>
-              <span className="wlc-splash-bracket">]</span>
-            </div>
-            <div className="wlc-splash-hint">click anywhere · or press ENTER</div>
-          </div>
-        </button>
-      )}
-
       <div className="wlc-grain" aria-hidden />
 
       <header className="wlc-topstrip">
@@ -311,23 +184,21 @@ export function WelcomeClient({
           </div>
         )}
 
-        {/*
-          The pump SVG is a repo-committed static asset at
-          public/welcome/pump.svg — not user input, safe to inject.
-        */}
-        <div
-          ref={pumpRef}
-          className={`wlc-pump${splashGone ? ' wlc-pump--live' : ''}`}
-          // eslint-disable-next-line react/no-danger
-          dangerouslySetInnerHTML={{ __html: pumpSvg }}
-        />
+        <div className="wlc-pump wlc-pump--live">
+          <PumpSvg
+            hoverRegion={hover?.region ?? null}
+            onHotspotClick={onHotspotClick}
+            onHotspotHover={onHotspotHover}
+          />
+        </div>
 
         <div className="wlc-nudge">
           <span className="wlc-nudge-dot" />
-          CLICK ANY PART OF THE PUMP
+          CLICK THE GASCOIN SCREEN TO ENTER
         </div>
 
-        {flashing && <div className="wlc-click-flash" aria-hidden />}
+        {/* Click-flash overlay — always present, animates when .is-flashing */}
+        <div ref={flashRef} className="wlc-click-flash" aria-hidden />
       </main>
 
       <footer className="wlc-botstrip">
@@ -368,11 +239,6 @@ export function WelcomeClient({
 }
 
 // ─── Popover shell ────────────────────────────────────────────────────
-//
-// Anchors itself to a DOMRect (the clicked region's bounding rect). On
-// desktop, positions to the right / left / above / below the anchor
-// depending on viewport fit. On mobile (≤ 768px), CSS overrides it to
-// fill the viewport as a sheet.
 
 function Popover({
   anchor,
@@ -391,7 +257,6 @@ function Popover({
   }));
   const [placed, setPlaced] = useState(false);
 
-  // Position after mount — measure actual popover size and place
   useLayoutEffect(() => {
     const el = popRef.current;
     if (!el) return;
@@ -408,23 +273,19 @@ function Popover({
     const vh = window.innerHeight;
     const pad = 16;
 
-    // Preferred: right of the anchor, vertically centered
     let left = anchor.right + pad;
     let top = anchor.top + anchor.height / 2 - ph / 2;
     let side: 'right' | 'left' | 'below' = 'right';
 
-    // If overflow right, flip to left
     if (left + pw > vw - pad) {
       left = anchor.left - pw - pad;
       side = 'left';
     }
-    // If still overflow (very wide popover), place below the anchor
     if (left < pad) {
       left = Math.max(pad, Math.min(vw - pw - pad, anchor.left + anchor.width / 2 - pw / 2));
       top = anchor.bottom + pad;
       side = 'below';
     }
-    // Clamp vertically
     if (top < pad) top = pad;
     if (top + ph > vh - pad) top = vh - ph - pad;
 
@@ -432,8 +293,6 @@ function Popover({
     setPlaced(true);
   }, [anchor]);
 
-  // Outside-click dismiss (delayed one tick so the click that opened the
-  // popover doesn't immediately close it)
   useEffect(() => {
     const onDoc = (e: MouseEvent) => {
       const el = popRef.current;
@@ -474,7 +333,7 @@ function Popover({
   );
 }
 
-// ─── Popover contents (tight, popover-sized) ─────────────────────────
+// ─── Popover contents ────────────────────────────────────────────────
 
 function EnterPopover({ testersRedeemed }: { testersRedeemed: number }) {
   return (

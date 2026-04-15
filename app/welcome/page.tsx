@@ -1,6 +1,4 @@
 import type { Metadata } from 'next';
-import fs from 'node:fs/promises';
-import path from 'node:path';
 import { GATE_COUNT } from '../../lib/policy';
 import { WelcomeClient } from './welcome-client';
 
@@ -22,22 +20,15 @@ export const revalidate = 60;
 /**
  * /welcome — single-viewport interactive pump landing page.
  *
- * The pump IS the page. No below-the-fold marketing. Click the display
- * screen to enter the protocol (routes to /submit where the existing
- * InviteGate handles Privy X auth + GC-XXXX-XXXX code redemption).
+ * The pump is rendered as a React SVG component (components/welcome/PumpSvg)
+ * with native onClick props on every hotspot, so click events route through
+ * React's synthetic event system and are guaranteed to fire. No more
+ * server-side SVG file reading + innerHTML injection.
  *
- * The pump is a hand-authored SVG at public/welcome/pump.svg. We read
- * it server-side and pass the raw string to the client. The SVG is a
- * repo-committed static asset authored by us (not user input), so
- * injecting it is safe.
- *
- * Live stats (treasury + beta counter) come from the same sources as
- * app/page.tsx so nothing is hallucinated.
+ * Live stats (treasury + beta counter + claims count) come from the same
+ * sources as app/page.tsx so nothing is hallucinated.
  */
 export default async function Welcome() {
-  const svgPath = path.join(process.cwd(), 'public', 'welcome', 'pump.svg');
-  const pumpSvg = await fs.readFile(svgPath, 'utf-8');
-
   let treasuryUsd = '—';
   let testersRedeemed = 0;
   let claimsSubmitted = 0;
@@ -75,7 +66,6 @@ export default async function Welcome() {
 
   return (
     <WelcomeClient
-      pumpSvg={pumpSvg}
       gateCount={GATE_COUNT}
       treasuryUsd={treasuryUsd}
       testersRedeemed={testersRedeemed}
