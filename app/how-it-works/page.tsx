@@ -119,7 +119,7 @@ const STEPS: Step[] = [
     title: 'Post on X',
     time: '1 min',
     bullets: [
-      'Post a tweet on X with both #gascoin (hashtag) and $GASCOIN (cashtag). The $GASCOIN cashtag unlocks X\'s price chart overlay on your post — required for max reach. Either alone is enough to pass the gate, both together is the recommended move.',
+      'Post a tweet on X that tags @GasCoinApp and includes both #gascoin (hashtag) and $GASCOIN (cashtag). The @GasCoinApp tag helps new users find the official profile. The $GASCOIN cashtag unlocks X\'s price chart overlay on your post. Either tag/hashtag/cashtag alone is enough to pass the gate — all three together is the recommended move.',
       'Original videos earn 3x points — record yourself, share your story, show your receipt at the pump. Reposts earn almost nothing.',
       'Keep the tweet up. If you delete it, your submission will fail verification.',
       'Copy the URL of your tweet — you\'ll paste it in the next step.',

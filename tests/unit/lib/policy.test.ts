@@ -5,7 +5,7 @@ import { GATES } from '@/lib/gates';
 function validInput(overrides: Partial<ClaimInput> = {}): ClaimInput {
   return {
     xVerified: true, followsGascoin: true,
-    tweetUrl: 'https://x.com/user/status/123', tweetHasGascoin: true,
+    tweetUrl: 'https://x.com/user/status/123', tweetHasGascoin: true, tweetMentionsGascoinApp: true,
     tweetLive: true, connectedWallet: 'GAsWallet123', walletOnReceipt: 'GAsWallet123',
     receiptHasGascoin: true, gascoinTokenBalance: 100, aiScore: 0.1, tamperScore: 0.1,
     duplicateHash: false, duplicatePhash: false, cooldownOk: true, amountUsd: 50,
@@ -23,8 +23,8 @@ describe('GATE_DEFS / GATE_COUNT alignment', () => {
     expect(GATE_COUNT).toBe(GATE_DEFS.length);
   });
 
-  it('GATE_DEFS has 14 entries', () => {
-    expect(GATE_DEFS.length).toBe(14);
+  it('GATE_DEFS has 15 entries', () => {
+    expect(GATE_DEFS.length).toBe(15);
   });
 
   it('lib/gates.ts GATES has the same number of entries as GATE_DEFS', () => {
@@ -62,6 +62,17 @@ describe('evaluateClaim', () => {
   it('passes gate follows_gascoin when user follows @GasCoinApp', () => {
     const r = evaluateClaim(validInput({ followsGascoin: true }));
     expect(r.failed.some((g) => g.gate === 'follows_gascoin')).toBe(false);
+  });
+
+  // Gate: tweet_mentions_gascoinapp
+  it('fails gate tweet_mentions_gascoinapp when tweet does not tag @GasCoinApp', () => {
+    const r = evaluateClaim(validInput({ tweetMentionsGascoinApp: false }));
+    expect(r.failed.some((g) => g.gate === 'tweet_mentions_gascoinapp')).toBe(true);
+  });
+
+  it('passes gate tweet_mentions_gascoinapp when tweet tags @GasCoinApp', () => {
+    const r = evaluateClaim(validInput({ tweetMentionsGascoinApp: true }));
+    expect(r.failed.some((g) => g.gate === 'tweet_mentions_gascoinapp')).toBe(false);
   });
 
   // Gate 2: tweet_hashtag

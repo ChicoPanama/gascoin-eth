@@ -180,12 +180,12 @@ export const DOC_CATEGORIES: DocCategory[] = [
         categorySlug: "submitting",
         category: "Submitting",
         description: "",
-        content: `<p>Step 2 requires you to post a tweet on X (Twitter) containing the hashtag #gascoin and paste the URL of that tweet into the submission portal. The system automatically checks the tweet against 4 verification criteria.</p>
+        content: `<p>Step 2 requires you to post a tweet on X (Twitter) tagging @GasCoinApp and containing the hashtag #gascoin or the $GASCOIN cashtag, then paste the URL of that tweet into the submission portal. The system automatically checks the tweet against 4 verification criteria. The @GasCoinApp tag helps new users find the official profile, and the $GASCOIN cashtag unlocks X's price chart overlay on your post.</p>
 <h3>How to post your tweet</h3>
 <ol>
 <li>Open X (Twitter) in a new tab</li>
 <li>Make sure your account is set to public. Private accounts cannot be verified</li>
-<li>Compose a new tweet. The tweet must contain the text #gascoin anywhere in the body. Any other content is acceptable</li>
+<li>Compose a new tweet. Tag @GasCoinApp and include either #gascoin (hashtag) or $GASCOIN (cashtag) — both together is the recommended move. Any other content is acceptable</li>
 <li>Post the tweet</li>
 <li>Click the Share button on your tweet and copy the tweet URL. The URL format is: https://x.com/yourhandle/status/1234567890123456789</li>
 <li>Return to the GASCOIN submit page and paste this URL into the tweet URL input field</li>
@@ -193,7 +193,7 @@ export const DOC_CATEGORIES: DocCategory[] = [
 <h3>What the system checks automatically</h3>
 <p>After you paste the tweet URL and wait approximately 2-8 seconds, the system runs 4 checks automatically:</p>
 <h3>What you see after verification</h3>
-<p>If all 4 tweet checks pass, a preview card appears below the input showing your handle, how long ago the tweet was posted, and confirmation that #gascoin was detected. Step 2 advances automatically.</p>
+<p>If all 4 tweet checks pass, a preview card appears below the input showing your handle, how long ago the tweet was posted, and confirmation that #gascoin or $GASCOIN was detected. Step 2 advances automatically.</p>
 <p>If any check fails, a specific error message appears telling you exactly which check failed and why. You must fix the issue and paste the URL again. You do not need to start over from Step 1.</p>`,
         order: 7,
       },
@@ -364,7 +364,7 @@ export const DOC_CATEGORIES: DocCategory[] = [
         category: "Verification Gates",
         description: "",
         content: `<h3>What this gate checks</h3>
-<p>Gate 3 verifies that the tweet body contains the exact hashtag #gascoin. The check is case-insensitive, so #GASCOIN and #Gascoin also pass. The hashtag must be a standalone word in the tweet — not embedded in a URL or concatenated with another word.</p>
+<p>Gate 3 verifies that the tweet body contains either the hashtag #gascoin or the cashtag $GASCOIN. The check is case-insensitive, so #GASCOIN, #Gascoin, $gascoin, and $GASCOIN all pass. Either symbol must be a standalone token in the tweet — not embedded in a URL or concatenated with another word. We also strongly recommend tagging @GasCoinApp in the same tweet so new users can find the profile.</p>
 <h3>Common failure reasons</h3>
 <ul>
 <li>Hashtag misspelled: #gas_coin, #gasCoin (with capital C), #gasc0in</li>
@@ -372,7 +372,7 @@ export const DOC_CATEGORIES: DocCategory[] = [
 <li>The hashtag is embedded inside a URL</li>
 </ul>
 <h3>How to ensure Gate 3 passes</h3>
-<p>Type #gascoin as a standalone word in your tweet before posting. Any capitalization variation is accepted. Do not use underscores or spaces within the hashtag.</p>`,
+<p>Type #gascoin or $GASCOIN as a standalone token in your tweet before posting, and tag @GasCoinApp for discovery. Any capitalization variation is accepted. Do not use underscores or spaces within the hashtag/cashtag.</p>`,
         order: 14,
       },
       {
@@ -2166,7 +2166,7 @@ Inputs(wallet,tweet,receipt)
 </ul>
 
 <h3>Support channel</h3>
-<p>For support, reach out on X by tagging @gascoin or sending a direct message.</p>
+<p>For support, reach out on X by tagging @GasCoinApp or sending a direct message.</p>
 
 <h3>Operator note</h3>
 <p>Submissions cannot be edited after final submit. Corrections require new compliant input or admin intervention when appropriate.</p>`,

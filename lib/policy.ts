@@ -11,20 +11,21 @@
  * tests/unit/lib/policy.test.ts which asserts result.gates.length === GATE_COUNT.
  */
 export const GATE_DEFS = [
-  { id: 'x_verified',       label: 'X Verified' },
-  { id: 'follows_gascoin',  label: 'Follows @GasCoinApp' },
-  { id: 'tweet_hashtag',    label: 'Tweet #gascoin / $GASCOIN' },
-  { id: 'tweet_live',       label: 'Tweet Live' },
-  { id: 'receipt_hashtag',  label: 'Receipt Hashtag' },
-  { id: 'wallet_match',     label: 'Wallet Match on Receipt' },
-  { id: 'gascoin_min_hold', label: 'GASCOIN Min Hold' },
-  { id: 'not_duplicate',    label: 'Not a Duplicate' },
-  { id: 'ai_image_check',   label: 'Not AI-Generated' },
-  { id: 'tamper_check',     label: 'Not Tampered' },
-  { id: 'cooldown',         label: 'Cooldown Expired' },
-  { id: 'min_amount',       label: 'Min $5 Receipt' },
-  { id: 'min_followers',    label: 'Min 100 Followers' },
-  { id: 'account_quality',  label: 'Account Quality' },
+  { id: 'x_verified',                 label: 'X Verified' },
+  { id: 'follows_gascoin',            label: 'Follows @GasCoinApp' },
+  { id: 'tweet_hashtag',              label: 'Tweet #gascoin / $GASCOIN' },
+  { id: 'tweet_mentions_gascoinapp',  label: 'Tweet Tags @GasCoinApp' },
+  { id: 'tweet_live',                 label: 'Tweet Live' },
+  { id: 'receipt_hashtag',            label: 'Receipt Hashtag' },
+  { id: 'wallet_match',               label: 'Wallet Match on Receipt' },
+  { id: 'gascoin_min_hold',           label: 'GASCOIN Min Hold' },
+  { id: 'not_duplicate',              label: 'Not a Duplicate' },
+  { id: 'ai_image_check',             label: 'Not AI-Generated' },
+  { id: 'tamper_check',               label: 'Not Tampered' },
+  { id: 'cooldown',                   label: 'Cooldown Expired' },
+  { id: 'min_amount',                 label: 'Min $5 Receipt' },
+  { id: 'min_followers',              label: 'Min 100 Followers' },
+  { id: 'account_quality',            label: 'Account Quality' },
 ] as const;
 
 export const GATE_COUNT = GATE_DEFS.length;
@@ -35,6 +36,7 @@ export type ClaimInput = {
   followsGascoin: boolean;
   tweetUrl: string;
   tweetHasGascoin: boolean;
+  tweetMentionsGascoinApp: boolean;
   tweetLive: boolean;
   connectedWallet: string;
   walletOnReceipt: string;
@@ -63,7 +65,8 @@ export function evaluateClaim(c: ClaimInput){
     // Return retry_later so user can resubmit without penalty
     gates.push({ gate:'x_verified', passed:c.xVerified, reason:'X must be verified' });
     gates.push({ gate:'follows_gascoin', passed:false, reason:'X API unavailable — retry later' });
-    gates.push({ gate:'tweet_hashtag', passed:c.tweetHasGascoin, reason:'Tweet must include #gascoin' });
+    gates.push({ gate:'tweet_hashtag', passed:c.tweetHasGascoin, reason:'Tweet must include #gascoin or $GASCOIN' });
+    gates.push({ gate:'tweet_mentions_gascoinapp', passed:c.tweetMentionsGascoinApp, reason:'Tweet must tag @GasCoinApp' });
     gates.push({ gate:'tweet_live', passed:c.tweetLive, reason:'Tweet must remain live' });
     gates.push({ gate:'receipt_hashtag', passed:c.receiptHasGascoin, reason:'Receipt must include #gascoin' });
     gates.push({ gate:'wallet_match', passed:!!c.walletOnReceipt && c.connectedWallet.slice(-4).toLowerCase()===c.walletOnReceipt.slice(-4).toLowerCase(), reason:'Last 4 characters on receipt must match connected wallet' });
@@ -81,7 +84,8 @@ export function evaluateClaim(c: ClaimInput){
 
   gates.push({ gate:'x_verified', passed:c.xVerified, reason:'X must be verified' });
   gates.push({ gate:'follows_gascoin', passed:c.followsGascoin, reason:'You must follow @GasCoinApp on X before submitting' });
-  gates.push({ gate:'tweet_hashtag', passed:c.tweetHasGascoin, reason:'Tweet must include #gascoin' });
+  gates.push({ gate:'tweet_hashtag', passed:c.tweetHasGascoin, reason:'Tweet must include #gascoin or $GASCOIN' });
+  gates.push({ gate:'tweet_mentions_gascoinapp', passed:c.tweetMentionsGascoinApp, reason:'Tweet must tag @GasCoinApp' });
   gates.push({ gate:'tweet_live', passed:c.tweetLive, reason:'Tweet must remain live' });
   gates.push({ gate:'receipt_hashtag', passed:c.receiptHasGascoin, reason:'Receipt must include #gascoin' });
   gates.push({ gate:'wallet_match', passed:!!c.walletOnReceipt && c.connectedWallet.slice(-4).toLowerCase()===c.walletOnReceipt.slice(-4).toLowerCase(), reason:'Last 4 characters on receipt must match connected wallet' });

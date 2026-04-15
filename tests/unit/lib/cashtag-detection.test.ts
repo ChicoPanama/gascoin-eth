@@ -63,3 +63,68 @@ describe('cashtag-aware tweet detection regex', () => {
     expect(HASHTAG_OR_CASHTAG.test('')).toBe(false);
   });
 });
+
+/**
+ * Verifies the @GasCoinApp mention regex used in lib/integrations/x.ts.
+ * The mention gate requires every submitted tweet to tag @GasCoinApp so
+ * new readers can find the official profile — it's the primary organic
+ * growth vector for the brand.
+ */
+const GASCOINAPP_MENTION = /@gascoinapp\b/i;
+
+describe('@GasCoinApp mention regex', () => {
+  it('accepts @GasCoinApp canonical casing', () => {
+    expect(GASCOINAPP_MENTION.test('Hey @GasCoinApp, just submitted my receipt')).toBe(true);
+  });
+
+  it('accepts @gascoinapp lowercase', () => {
+    expect(GASCOINAPP_MENTION.test('gm @gascoinapp')).toBe(true);
+  });
+
+  it('accepts @GASCOINAPP uppercase', () => {
+    expect(GASCOINAPP_MENTION.test('@GASCOINAPP season 1')).toBe(true);
+  });
+
+  it('accepts mention at the start of the tweet', () => {
+    expect(GASCOINAPP_MENTION.test('@GasCoinApp let\'s go')).toBe(true);
+  });
+
+  it('accepts mention at the end of the tweet', () => {
+    expect(GASCOINAPP_MENTION.test('Just posted my proof — check @GasCoinApp')).toBe(true);
+  });
+
+  it('accepts mention followed by punctuation', () => {
+    expect(GASCOINAPP_MENTION.test('Thanks @GasCoinApp!')).toBe(true);
+  });
+
+  it('rejects @gascoinappbot (word boundary must stop substring match)', () => {
+    expect(GASCOINAPP_MENTION.test('Hey @gascoinappbot')).toBe(false);
+  });
+
+  it('rejects @gascoinapp_fan (word boundary must stop underscore continuation)', () => {
+    // \b doesn't treat _ as a boundary in JS regex, so @gascoinapp_fan
+    // does contain a word boundary between "gascoinapp" and "_fan"... wait,
+    // no — \b only matches between \w and \W. _ is \w, so \b does NOT
+    // match between "gascoinapp" and "_". The regex should therefore
+    // REJECT @gascoinapp_fan.
+    expect(GASCOINAPP_MENTION.test('@gascoinapp_fan')).toBe(false);
+  });
+
+  it('rejects gascoinapp without @ prefix', () => {
+    expect(GASCOINAPP_MENTION.test('I love gascoinapp')).toBe(false);
+  });
+
+  it('rejects @gascoin (different handle)', () => {
+    expect(GASCOINAPP_MENTION.test('Hey @gascoin')).toBe(false);
+  });
+
+  it('rejects an empty string', () => {
+    expect(GASCOINAPP_MENTION.test('')).toBe(false);
+  });
+
+  it('accepts a realistic full tweet that tags, hashtags, and cashtags', () => {
+    const tweet = 'Just submitted my gas receipt @GasCoinApp! Check out this new protocol $GASCOIN #gascoin';
+    expect(GASCOINAPP_MENTION.test(tweet)).toBe(true);
+    expect(HASHTAG_OR_CASHTAG.test(tweet)).toBe(true);
+  });
+});

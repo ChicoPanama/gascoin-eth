@@ -279,6 +279,7 @@ export async function POST(req: Request){
     followsGascoin: followsGascoinCheck.ok,
     tweetUrl,
     tweetHasGascoin: !!tweet.containsGascoin,
+    tweetMentionsGascoinApp: !!tweet.mentionsGascoinApp,
     tweetLive: !!tweet.live,
     connectedWallet: wallet,
     walletOnReceipt,

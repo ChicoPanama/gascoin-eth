@@ -39,7 +39,7 @@ function validClaim(overrides: Partial<ClaimInput> = {}): ClaimInput {
     xVerified: true,
     followsGascoin: true,
     tweetUrl: 'https://x.com/user/status/123',
-    tweetHasGascoin: true,
+    tweetHasGascoin: true, tweetMentionsGascoinApp: true,
     tweetLive: true,
     connectedWallet: 'ABC123XYZ9abcd',
     walletOnReceipt: 'XXXXX9abcd',
@@ -88,7 +88,7 @@ describe('CATEGORY 1: Policy Engine Gate Bypass Attempts', () => {
     // WHY: Confirms the happy path works end-to-end. If this fails, everything is broken.
     const result = evaluateClaim(validClaim());
 
-    expect(result.gates).toHaveLength(14);
+    expect(result.gates).toHaveLength(15);
     expect(result.failed).toHaveLength(0);
     expect(result.decision).toBe('ready_for_dispatch');
     expect(result.riskScore).toBeLessThan(0.35);
@@ -136,24 +136,24 @@ describe('CATEGORY 1: Policy Engine Gate Bypass Attempts', () => {
     // WHY: Fraud attempts often fail multiple gates at once. The risk formula adds
     // 0.09 per failed gate + weighted AI/tamper scores. We verify the math.
     const input = validClaim({
-      xVerified: false,       // gate 1 fails
-      tweetHasGascoin: false, // gate 2 fails
-      aiScore: 0.7,           // gate 3 fails (>= 0.65)
-      tamperScore: 0.6,       // gate 4 fails (>= 0.55)
+      xVerified: false,                                      // x_verified fails
+      tweetHasGascoin: false, tweetMentionsGascoinApp: false, // tweet_hashtag + tweet_mentions_gascoinapp fail
+      aiScore: 0.7,                                           // ai_image_check fails (>= 0.65)
+      tamperScore: 0.6,                                       // tamper_check fails (>= 0.55)
     });
     const result = evaluateClaim(input);
 
-    expect(result.failed).toHaveLength(4);
+    expect(result.failed).toHaveLength(5);
 
     // Manual calculation:
-    // failed.length=4 => 4*0.09 = 0.36
+    // failed.length=5 => 5*0.09 = 0.45
     // aiScore contribution => 0.7*0.35 = 0.245
     // tamperScore contribution => 0.6*0.25 = 0.15
     // amountUsd=50 (<= 200) => 0
-    // Total = 0.36 + 0.245 + 0.15 = 0.755, capped at min(1, 0.755) = 0.755
-    const expected = +(0.36 + 0.245 + 0.15).toFixed(4);
+    // Total = 0.45 + 0.245 + 0.15 = 0.845, capped at min(1, 0.845) = 0.845
+    const expected = +(0.45 + 0.245 + 0.15).toFixed(4);
     expect(result.riskScore).toBeCloseTo(expected, 3);
-    expect(result.decision).toBe('rejected'); // 0.755 >= 0.6
+    expect(result.decision).toBe('rejected'); // 0.845 >= 0.6
   });
 
   it('Test 7: All gates fail — should be rejected (not just needs_review)', () => {
@@ -163,7 +163,7 @@ describe('CATEGORY 1: Policy Engine Gate Bypass Attempts', () => {
       xVerified: false,
       followsGascoin: false,
       tweetUrl: '',
-      tweetHasGascoin: false,
+      tweetHasGascoin: false, tweetMentionsGascoinApp: false,
       tweetLive: false,
       connectedWallet: 'AAAA1111',
       walletOnReceipt: 'ZZZZ9999', // last 4 mismatch
@@ -181,8 +181,8 @@ describe('CATEGORY 1: Policy Engine Gate Bypass Attempts', () => {
     };
     const result = evaluateClaim(input);
 
-    // In dry-run mode, gascoin_min_hold is bypassed, so 13 of 14 gates fail
-    // (or 14 if ENABLE_LIVE_PAYOUT=true). Either way, the risk is extreme.
+    // In dry-run mode, gascoin_min_hold is bypassed, so 14 of 15 gates fail
+    // (or 15 if ENABLE_LIVE_PAYOUT=true). Either way, the risk is extreme.
     expect(result.failed.length).toBeGreaterThanOrEqual(11);
     expect(result.decision).toBe('rejected');
     expect(result.riskScore).toBeGreaterThanOrEqual(0.6);
@@ -546,13 +546,16 @@ describe('CATEGORY 5: Risk Score Math & Decision Logic', () => {
     //
     // Let's just verify the behavior near 0.6 instead of hitting it exactly.
     // 6 fails * 0.09 = 0.54, ai=0.1*0.35=0.035, tamper=0.1*0.25=0.025, total=0.6
+    // Keep exactly 6 failed gates to land on risk score 0.6. The default
+    // validClaim() has tweetMentionsGascoinApp: true so setting it false
+    // here would make 7 fails — we let it stay true and fail 6 others.
     const input = validClaim({
-      xVerified: false,       // fail 1
-      tweetHasGascoin: false, // fail 2
-      tweetLive: false,       // fail 3
+      xVerified: false,         // fail 1
+      tweetHasGascoin: false,   // fail 2
+      tweetLive: false,         // fail 3
       receiptHasGascoin: false, // fail 4
-      cooldownOk: false,      // fail 5
-      followerCount: 50,      // fail 6 (< 100)
+      cooldownOk: false,        // fail 5
+      followerCount: 50,        // fail 6 (< 100)
       aiScore: 0.1,
       tamperScore: 0.1,
       amountUsd: 50,
@@ -670,7 +673,7 @@ describe('CATEGORY 7: Pipeline Depth Tests — Pass Gates, Test Scoring', () => 
       tamperScore: 0.54,
     }));
 
-    // All 14 gates pass
+    // All 15 gates pass
     expect(result.failed).toHaveLength(0);
 
     // But the risk score is elevated

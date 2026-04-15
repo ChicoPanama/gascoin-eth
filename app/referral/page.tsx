@@ -51,9 +51,9 @@ export default function ReferralPage() {
 
   const shareLink = () => {
     if (navigator.share) {
-      navigator.share({ title: 'GASCOIN', text: 'Get your gas money back. Submit a receipt $GASCOIN #gascoin', url: referralUrl });
+      navigator.share({ title: 'GASCOIN', text: 'Get your gas money back. Submit a receipt @GasCoinApp $GASCOIN #gascoin', url: referralUrl });
     } else {
-      window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent('Get your gas money back. Submit a receipt $GASCOIN #gascoin → ' + referralUrl)}`, '_blank');
+      window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent('Get your gas money back. Submit a receipt @GasCoinApp $GASCOIN #gascoin → ' + referralUrl)}`, '_blank');
     }
   };
 

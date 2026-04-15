@@ -213,7 +213,7 @@ function StepTweet({ onVerified, onBack, initialUrl, loggedInHandle }: {
   return (
     <div className="sf-step">
       <h2 className="sf-headline">Verify Your Tweet</h2>
-      <p className="sf-sub">Paste the URL of your tweet. Must include <strong>#gascoin</strong> or <strong>$GASCOIN</strong>, be public, and posted within the last 48 hours.</p>
+      <p className="sf-sub">Paste the URL of your tweet. Must tag <strong>@GasCoinApp</strong> and include <strong>#gascoin</strong> or <strong>$GASCOIN</strong>, be public, and posted within the last 48 hours.</p>
 
       <input
         type="text"

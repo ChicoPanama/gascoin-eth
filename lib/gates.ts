@@ -107,7 +107,7 @@ export const GATES: GateDefinition[] = [
     checklist_label: 'My X account has a bio, posting history, and is at least 30 days old',
   },
 
-  // ─── TWEET (2) ─────────────────────────────────────────────────
+  // ─── TWEET (3) ─────────────────────────────────────────────────
   {
     id: 6, slug: 'tweet-hashtag', policyGate: 'tweet_hashtag', name: 'Tweet #gascoin / $GASCOIN', category: 'tweet',
     description: 'The tweet body must contain either the #gascoin hashtag OR the $GASCOIN cashtag (case-insensitive). $GASCOIN unlocks the X price chart overlay — recommended for max reach.',
@@ -118,12 +118,25 @@ export const GATES: GateDefinition[] = [
       '#gascoin in a reply to your tweet, not in the original post',
       'Used a different cashtag like $GAS instead of $GASCOIN',
     ],
-    how_to_pass: 'Type both #gascoin and $GASCOIN into your tweet, separated by a space. Either alone is enough to pass, both together unlock X\'s price chart overlay.',
+    how_to_pass: 'Type both #gascoin and $GASCOIN into your tweet, and tag @GasCoinApp. Either the hashtag or cashtag alone is enough to pass, the @GasCoinApp tag helps new users find the official profile, and $GASCOIN unlocks X\'s price chart overlay. Recommended move: include all three.',
     estimated_time_seconds: 3, is_blocking: true,
     checklist_label: 'My tweet contains #gascoin or $GASCOIN',
   },
   {
-    id: 7, slug: 'tweet-live', policyGate: 'tweet_live', name: 'Tweet Live & Public', category: 'tweet',
+    id: 7, slug: 'tweet-mentions-gascoinapp', policyGate: 'tweet_mentions_gascoinapp', name: 'Tweet Tags @GasCoinApp', category: 'tweet',
+    description: 'The tweet must tag @GasCoinApp so new readers can find the official profile and follow it. This is the primary organic growth vector for the brand.',
+    what_we_check: 'Case-insensitive regex `@gascoinapp\\b` against the tweet text from the X API (primary) plus text-fallback check of the oEmbed HTML. The word boundary prevents false matches like @gascoinappbot.',
+    common_failures: [
+      'Forgot to type @GasCoinApp in the tweet',
+      'Typed @gascoin instead of @GasCoinApp',
+      'Tag embedded inside a URL or another word',
+    ],
+    how_to_pass: 'Type @GasCoinApp as a standalone token in your tweet. X autocomplete will suggest it — tap the suggestion so X links the mention as a proper profile tag, not just text.',
+    estimated_time_seconds: 3, is_blocking: true,
+    checklist_label: 'My tweet tags @GasCoinApp',
+  },
+  {
+    id: 8, slug: 'tweet-live', policyGate: 'tweet_live', name: 'Tweet Live & Public', category: 'tweet',
     description: 'The tweet must be publicly visible at the time of verification — not deleted, not from a private account, not visibility-limited.',
     what_we_check: 'Tweet URL is fetched fresh via the X API. The tweet must exist, the author account must be public, and the tweet must not be flagged as visibility-limited.',
     common_failures: [
@@ -139,7 +152,7 @@ export const GATES: GateDefinition[] = [
 
   // ─── RECEIPT (5) ───────────────────────────────────────────────
   {
-    id: 8, slug: 'receipt-hashtag', policyGate: 'receipt_hashtag', name: 'Receipt Hashtag', category: 'receipt',
+    id: 9, slug: 'receipt-hashtag', policyGate: 'receipt_hashtag', name: 'Receipt Hashtag', category: 'receipt',
     description: 'The receipt photo must include #gascoin written or visible somewhere in the image.',
     what_we_check: 'OCR scan of the uploaded receipt searches for the literal text "#gascoin" anywhere in the extracted text.',
     common_failures: [
@@ -152,7 +165,7 @@ export const GATES: GateDefinition[] = [
     checklist_label: '#gascoin is written on the receipt photo',
   },
   {
-    id: 9, slug: 'wallet-match', policyGate: 'wallet_match', name: 'Wallet Match on Receipt', category: 'wallet',
+    id: 10, slug: 'wallet-match', policyGate: 'wallet_match', name: 'Wallet Match on Receipt', category: 'wallet',
     description: 'The last 4 characters of your connected Solana wallet must be written on the receipt and visible in the photo.',
     what_we_check: 'OCR extracts text from the receipt image and searches for the last 4 characters of your connected wallet (case-insensitive). The extracted characters must match exactly.',
     common_failures: [
@@ -166,7 +179,7 @@ export const GATES: GateDefinition[] = [
     checklist_label: 'The last 4 characters of my wallet are written on the receipt',
   },
   {
-    id: 10, slug: 'not-duplicate', policyGate: 'not_duplicate', name: 'Not a Duplicate', category: 'receipt',
+    id: 11, slug: 'not-duplicate', policyGate: 'not_duplicate', name: 'Not a Duplicate', category: 'receipt',
     description: 'The same gas receipt may never be submitted twice regardless of which wallet uploads it.',
     what_we_check: 'Both an exact SHA-256 hash and a perceptual phash of the uploaded image are compared against every previously submitted receipt. Either match triggers a duplicate failure.',
     common_failures: [
@@ -180,7 +193,7 @@ export const GATES: GateDefinition[] = [
     checklist_label: 'This specific receipt has never been submitted before',
   },
   {
-    id: 11, slug: 'ai-image-check', policyGate: 'ai_image_check', name: 'Not AI-Generated', category: 'receipt',
+    id: 12, slug: 'ai-image-check', policyGate: 'ai_image_check', name: 'Not AI-Generated', category: 'receipt',
     description: 'The receipt image must not be generated by an AI image model.',
     what_we_check: 'A vision model (Gemini) scores the image for AI-generation probability on a 0–1 scale. Scores at or above 0.65 fail. Lower is better.',
     common_failures: [
@@ -193,7 +206,7 @@ export const GATES: GateDefinition[] = [
     checklist_label: 'My receipt is a photo of a real physical receipt, not AI-generated',
   },
   {
-    id: 12, slug: 'tamper-check', policyGate: 'tamper_check', name: 'Not Tampered', category: 'receipt',
+    id: 13, slug: 'tamper-check', policyGate: 'tamper_check', name: 'Not Tampered', category: 'receipt',
     description: 'The receipt image must not show signs of digital manipulation — edited totals, pasted dates, photoshopped text.',
     what_we_check: 'Image forensics scoring on a 0–1 scale: edge inconsistencies, copy-move artifacts, double-JPEG compression patterns. Scores at or above 0.55 fail.',
     common_failures: [
@@ -206,7 +219,7 @@ export const GATES: GateDefinition[] = [
     checklist_label: 'My receipt photo is unedited and untampered',
   },
   {
-    id: 13, slug: 'min-amount', policyGate: 'min_amount', name: 'Min $5 Receipt', category: 'receipt',
+    id: 14, slug: 'min-amount', policyGate: 'min_amount', name: 'Min $5 Receipt', category: 'receipt',
     description: 'The receipt total must be at least $5 USD to prevent streak/submission gaming with trivial purchases.',
     what_we_check: 'OCR-extracted total amount converted to USD via the receipt currency. Must be $5.00 or greater.',
     common_failures: [
@@ -221,7 +234,7 @@ export const GATES: GateDefinition[] = [
 
   // ─── WALLET (1) ────────────────────────────────────────────────
   {
-    id: 14, slug: 'gascoin-min-hold', policyGate: 'gascoin_min_hold', name: 'GASCOIN Min Hold', category: 'wallet',
+    id: 15, slug: 'gascoin-min-hold', policyGate: 'gascoin_min_hold', name: 'GASCOIN Min Hold', category: 'wallet',
     description: 'Your connected wallet must hold at least 1 GASCOIN token at the time of submission. In Season 1 dry-run mode this gate is bypassed so testers can participate without holding the token.',
     what_we_check: 'On-chain SPL token balance of your connected wallet against the GASCOIN mint. During Season 1 (ENABLE_LIVE_PAYOUT=false) this check auto-passes.',
     common_failures: [
@@ -237,7 +250,7 @@ export const GATES: GateDefinition[] = [
 
 export const GATE_CATEGORIES = {
   identity: { label: 'Identity Verification', count: 5 },
-  tweet:    { label: 'Tweet Verification',    count: 2 },
+  tweet:    { label: 'Tweet Verification',    count: 3 },
   receipt:  { label: 'Receipt Verification',  count: 5 },
   wallet:   { label: 'Wallet Verification',   count: 2 },
   treasury: { label: 'Treasury Check',        count: 0 }, // reserved for future

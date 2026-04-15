@@ -362,7 +362,7 @@ describe('Gate Verification → Points Integration', () => {
     return {
       xVerified: true, followsGascoin: true,
       tweetUrl: 'https://x.com/user/status/123',
-      tweetHasGascoin: true, tweetLive: true,
+      tweetHasGascoin: true, tweetMentionsGascoinApp: true, tweetLive: true,
       connectedWallet: 'GAsWallet123', walletOnReceipt: 'GAsWallet123',
       receiptHasGascoin: true, gascoinTokenBalance: 100,
       aiScore: 0.1, tamperScore: 0.1,
@@ -391,9 +391,9 @@ describe('Gate Verification → Points Integration', () => {
     // Rejected → no points
   });
 
-  it('all 14 gates evaluate correctly for a valid submission', () => {
+  it('all 15 gates evaluate correctly for a valid submission', () => {
     const result = evaluateClaim(validClaim());
-    expect(result.gates).toHaveLength(14);
+    expect(result.gates).toHaveLength(15);
     expect(result.failed).toHaveLength(0);
   });
 });

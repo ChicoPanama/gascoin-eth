@@ -21,7 +21,7 @@ export const metadata: Metadata = {
   description: 'Community gas refunds on Solana. Post $GASCOIN or #gascoin, submit a receipt, get SOL back.',
   openGraph: {
     title: 'GASCOIN — Community Gas Refunds on Solana',
-    description: 'Post $GASCOIN or #gascoin on X, submit your gas receipt, and receive SOL directly to your wallet. 14 automated verification gates. No middlemen.',
+    description: 'Post $GASCOIN or #gascoin on X, submit your gas receipt, and receive SOL directly to your wallet. 15 automated verification gates. No middlemen.',
     siteName: 'GASCOIN',
     type: 'website',
     url: process.env.NEXT_PUBLIC_BASE_URL || 'https://gascoin.app',

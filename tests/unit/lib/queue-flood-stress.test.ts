@@ -36,7 +36,7 @@ function validClaim(overrides: Partial<ClaimInput> = {}): ClaimInput {
     xVerified: true,
     followsGascoin: true,
     tweetUrl: 'https://x.com/user/status/123',
-    tweetHasGascoin: true,
+    tweetHasGascoin: true, tweetMentionsGascoinApp: true,
     tweetLive: true,
     connectedWallet: 'ABC123XYZ9abcd',
     walletOnReceipt: 'XXXXX9abcd',
@@ -339,16 +339,17 @@ describe('Category 2: Score Distribution Analysis', () => {
     // needs_review (0.35): ceil(0.35 / 0.09) = 4 failed gates
     // rejected (0.6): ceil(0.6 / 0.09) = 7 failed gates
 
-    // 4 failed gates should reach needs_review
+    // 4 failed gates should reach needs_review. Note: we explicitly keep
+    // tweetMentionsGascoinApp: true so only the 4 gates we select fail.
     const fourFailed = evaluateClaim(
       validClaim({
         aiScore: 0,
         tamperScore: 0,
         amountUsd: 50,
-        xVerified: false,       // fail 1
-        tweetHasGascoin: false,  // fail 2
-        tweetLive: false,        // fail 3
-        cooldownOk: false,       // fail 4
+        xVerified: false,                                       // fail 1
+        tweetHasGascoin: false, tweetMentionsGascoinApp: true,  // fail 2 (only hashtag)
+        tweetLive: false,                                       // fail 3
+        cooldownOk: false,                                      // fail 4
       }),
     );
     // 4 * 0.09 = 0.36 > 0.35 => needs_review
@@ -365,7 +366,7 @@ describe('Category 2: Score Distribution Analysis', () => {
         tamperScore: 0,
         amountUsd: 50,
         xVerified: false,
-        tweetHasGascoin: false,
+        tweetHasGascoin: false, tweetMentionsGascoinApp: true,
         tweetLive: false,
       }),
     );
@@ -380,7 +381,7 @@ describe('Category 2: Score Distribution Analysis', () => {
         tamperScore: 0,
         amountUsd: 50,
         xVerified: false,
-        tweetHasGascoin: false,
+        tweetHasGascoin: false, tweetMentionsGascoinApp: false,
         tweetLive: false,
         cooldownOk: false,
         receiptHasGascoin: false,
@@ -425,7 +426,7 @@ describe('Category 2: Score Distribution Analysis', () => {
         tamperScore: 1.0,
         amountUsd: 250,
         xVerified: false,
-        tweetHasGascoin: false,
+        tweetHasGascoin: false, tweetMentionsGascoinApp: false,
         tweetLive: false,
         receiptHasGascoin: false,
         connectedWallet: 'AAAA',

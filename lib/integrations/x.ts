@@ -3,8 +3,13 @@ export type TweetProofResult = {
   reason?: string;
   authorHandle?: string;
   containsGascoin?: boolean;
+  mentionsGascoinApp?: boolean;
   live?: boolean;
 };
+
+/** Case-insensitive check that a tweet mentions @GasCoinApp. Word-boundary
+ * guards against matches like @GasCoinAppBot or @gascoinapp_fan. */
+const GASCOINAPP_MENTION = /@gascoinapp\b/i;
 
 function parseTweetId(url: string): string | null {
   const m = url.match(/status\/(\d+)/i);
@@ -60,13 +65,18 @@ async function verifyViaXApi(tweetId: string, expectedHandle: string): Promise<T
   // Cashtag-aware: accepts #gascoin (hashtag) OR $gascoin (X cashtag,
   // April 2026). Character class [#$] matches either token prefix.
   const containsGascoin = /[#$]gascoin\b/i.test(text);
+  const mentionsGascoinApp = GASCOINAPP_MENTION.test(text);
   const authorMatch = !!expected && username === expected;
 
   return {
-    ok: containsGascoin && authorMatch,
-    reason: !containsGascoin ? 'missing_hashtag' : (authorMatch ? undefined : 'author_mismatch'),
+    ok: containsGascoin && mentionsGascoinApp && authorMatch,
+    reason:
+      !containsGascoin ? 'missing_hashtag' :
+      !mentionsGascoinApp ? 'missing_gascoinapp_mention' :
+      authorMatch ? undefined : 'author_mismatch',
     authorHandle: username ? `@${username}` : undefined,
     containsGascoin,
+    mentionsGascoinApp,
     live: true
   };
 }
@@ -82,15 +92,20 @@ async function verifyViaOEmbed(tweetUrl: string, expectedHandle: string): Promis
   const html = String(j?.html || '');
   // Cashtag-aware — mirrors the X API path above
   const containsGascoin = /[#$]gascoin\b/i.test(html);
+  const mentionsGascoinApp = GASCOINAPP_MENTION.test(html);
   const handleMatch = html.match(/twitter\.com\/([A-Za-z0-9_]+)/i);
   const found = handleMatch?.[1] ? `@${handleMatch[1]}` : undefined;
   const authorMatch = !!found && found.toLowerCase() === expectedHandle.toLowerCase();
 
   return {
-    ok: containsGascoin && authorMatch,
-    reason: !containsGascoin ? 'missing_hashtag' : (authorMatch ? undefined : 'author_mismatch'),
+    ok: containsGascoin && mentionsGascoinApp && authorMatch,
+    reason:
+      !containsGascoin ? 'missing_hashtag' :
+      !mentionsGascoinApp ? 'missing_gascoinapp_mention' :
+      authorMatch ? undefined : 'author_mismatch',
     authorHandle: found,
     containsGascoin,
+    mentionsGascoinApp,
     live: true
   };
 }
