@@ -1,4 +1,6 @@
 import type { Metadata } from 'next';
+import fs from 'node:fs/promises';
+import path from 'node:path';
 import { GATE_COUNT } from '../../lib/policy';
 import { WelcomeClient } from './welcome-client';
 
@@ -11,37 +13,31 @@ export const metadata: Metadata = {
     description:
       'A community-funded Solana protocol that refunds real gas receipts in SOL. Verified by 15 automated gates and a three-AI review pipeline.',
     url: 'https://gascoin.app/welcome',
-    images: ['/welcome/pump.png'],
+    images: ['/welcome/pump.svg'],
   },
 };
 
-export const revalidate = 60; // refresh live stats every minute
+export const revalidate = 60;
 
 /**
- * /welcome — pre-entry landing page
+ * /welcome — single-viewport interactive pump landing page.
  *
- * Interactive gas-pump hero. Five hotspots mapped to:
- *   top handle   → Docs (direct link to /docs)
- *   display      → Enter the protocol (→ /submit, invite gate lives there)
- *   pump body    → Manifesto modal
- *   nozzle       → How It Works modal
- *   base         → Roadmap modal
+ * The pump IS the page. No below-the-fold marketing. Click the display
+ * screen to enter the protocol (routes to /submit where the existing
+ * InviteGate handles Privy X auth + GC-XXXX-XXXX code redemption).
  *
- * No new backend — all interactive flows route to existing routes. Invite
- * redemption is handled by the existing InviteGate component at /submit
- * (see components/SubmitFlow.tsx::InviteGate) so we don't duplicate Privy
- * auth or /api/invites/redeem wiring on this page.
+ * The pump is a hand-authored SVG at public/welcome/pump.svg. We read
+ * it server-side and pass the raw string to the client. The SVG is a
+ * repo-committed static asset authored by us (not user input), so
+ * injecting it is safe.
  *
- * All copy is grounded in the real engine:
- *   - 15 gates from lib/policy.ts::GATE_COUNT
- *   - Tier facts from lib/token-tiers.ts
- *   - AI pipeline from lib/prompts.ts and app/api/workers/pre-payout-verify
- *
- * Live stats (treasury, beta testers, claims submitted) come from the
- * same sources as app/page.tsx so the welcome page stays in sync with the
- * main site without duplicating fetch logic.
+ * Live stats (treasury + beta counter) come from the same sources as
+ * app/page.tsx so nothing is hallucinated.
  */
 export default async function Welcome() {
+  const svgPath = path.join(process.cwd(), 'public', 'welcome', 'pump.svg');
+  const pumpSvg = await fs.readFile(svgPath, 'utf-8');
+
   let treasuryUsd = '—';
   let testersRedeemed = 0;
   let claimsSubmitted = 0;
@@ -79,6 +75,7 @@ export default async function Welcome() {
 
   return (
     <WelcomeClient
+      pumpSvg={pumpSvg}
       gateCount={GATE_COUNT}
       treasuryUsd={treasuryUsd}
       testersRedeemed={testersRedeemed}
