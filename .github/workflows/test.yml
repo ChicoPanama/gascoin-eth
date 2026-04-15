@@ -35,9 +35,12 @@ jobs:
       - run: npm ci
       - run: npm run build
         env:
-          NEXT_PUBLIC_SUPABASE_URL: placeholder
-          NEXT_PUBLIC_SUPABASE_ANON_KEY: placeholder
-          SUPABASE_SERVICE_ROLE_KEY: placeholder
+          # URL-shaped placeholders: any code that eagerly validates URL
+          # format (e.g. Supabase createClient) must not crash the build.
+          # Real creds come from Vercel env at deploy time.
+          NEXT_PUBLIC_SUPABASE_URL: https://placeholder.supabase.co
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: placeholder-anon-key
+          SUPABASE_SERVICE_ROLE_KEY: placeholder-service-role-key
           NEXT_PUBLIC_SOLANA_RPC_URL: https://api.mainnet-beta.solana.com
           NEXT_PUBLIC_GASCOIN_MINT_ADDRESS: placeholder
           GASCOIN_TREASURY_WALLET: placeholder
