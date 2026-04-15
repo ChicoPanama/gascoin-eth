@@ -4,6 +4,7 @@ import { verifyAdminSession, destroyAdminSession } from '../actions/admin-auth';
 
 const NAV_SECTIONS = [
   { label: 'OPERATIONS', links: [
+    { href: '/admin/activity', label: 'Live Activity' },
     { href: '/admin/submissions', label: 'Submissions' },
     { href: '/admin/referrals', label: 'Referral Rewards' },
     { href: '/admin/treasury', label: 'Treasury' },
