@@ -1,51 +1,171 @@
+import { DOC_CATEGORIES, type DocCategory } from '../../lib/docs-content';
+import { GATE_COUNT } from '../../lib/policy';
+import { DocsScroller } from '../../components/docs/DocsScroller';
 import Link from 'next/link';
-import type { CSSProperties } from 'react';
 
-export default function DocsIndex() {
-  return (
-    <article style={{ maxWidth: 980, margin: '0 auto', padding: '24px 24px 48px' }}>
-      <h1 style={{ fontSize: 34, marginBottom: 10 }}>GASCOIN Documentation</h1>
-      <p style={{ opacity: 0.9, marginBottom: 24 }}>
-        Choose your path: quick onboarding for new users, or deep technical architecture for builders and reviewers.
-      </p>
+export const metadata = {
+  title: 'GASCOIN — The Complete Protocol Manual',
+  description: `Single-page documentation for GASCOIN: ${GATE_COUNT} verification gates, 3-AI pipeline, Solana payouts, and the full Season 1 beta manual.`,
+};
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 14, marginBottom: 24 }}>
-        <Link href="/docs/core-concept-in-plain-english" style={cardStyle}>
-          <strong>New Here</strong>
-          <span>Start with the plain-English flow and first submission steps.</span>
-        </Link>
-        <Link href="/docs/the-submission-process-complete-step-by-step-guide" style={cardStyle}>
-          <strong>Submit a Claim</strong>
-          <span>Follow the end-to-end submission process and gate progress flow.</span>
-        </Link>
-        <Link href="/docs/end-to-end-architecture-map" style={cardStyle}>
-          <strong>Technical Architecture</strong>
-          <span>Open the full AI, gate, retry, and payout pipeline map.</span>
-        </Link>
-      </div>
+const CHAPTER_ORDER = [
+  'overview',
+  'submitting',
+  'verification',
+  'technology',
+  'platform',
+  'security',
+  'help',
+] as const;
 
-      <h2 style={{ fontSize: 20, marginBottom: 8 }}>Core References</h2>
-      <ul style={{ lineHeight: 1.9 }}>
-        <li><Link href="/docs/the-10-verification-gates-complete-reference">10 Verification Gates Reference</Link></li>
-        <li><Link href="/docs/ai-system-overview">AI System Overview (Flow Paths)</Link></li>
-        <li><Link href="/docs/ai-engine-architecture">AI Engine Architecture &amp; Cost Defense</Link></li>
-        <li><Link href="/docs/memory-intelligence">Memory Intelligence (mem0 Pro)</Link></li>
-        <li><Link href="/docs/receipt-intelligence-pipeline">Receipt Intelligence Pipeline</Link></li>
-        <li><Link href="/docs/gate-decision-and-retry-paths">Gate Decision and Retry Paths</Link></li>
-        <li><Link href="/docs/support-and-contact">Support and Contact</Link></li>
-      </ul>
-    </article>
-  );
+const CHAPTER_META: Record<string, { label: string; kicker: string; roman: string }> = {
+  overview:     { label: 'The Protocol',        kicker: 'What GASCOIN is and why it exists',                        roman: 'I' },
+  submitting:   { label: 'The Submission',      kicker: 'Step-by-step flow from receipt to SOL refund',             roman: 'II' },
+  verification: { label: 'The Gates',           kicker: `All ${GATE_COUNT} automated verification checks, in order`, roman: 'III' },
+  technology:   { label: 'The Machine Room',    kicker: '3 AI engines, 15 gates, 9 cron workers, 4-layer cache',    roman: 'IV' },
+  platform:     { label: 'The Surfaces',        kicker: 'Every page on gascoin.app and what it does',               roman: 'V' },
+  security:     { label: 'Admin & Anti-Fraud',  kicker: 'How we keep treasuries honest and submissions real',       roman: 'VI' },
+  help:         { label: 'Troubleshooting',     kicker: 'Why your submission got blocked — and the fix',            roman: 'VII' },
+};
+
+function chapterSort(a: DocCategory, b: DocCategory) {
+  return CHAPTER_ORDER.indexOf(a.slug as typeof CHAPTER_ORDER[number]) -
+         CHAPTER_ORDER.indexOf(b.slug as typeof CHAPTER_ORDER[number]);
 }
 
-const cardStyle: CSSProperties = {
-  display: 'flex',
-  flexDirection: 'column',
-  gap: 8,
-  padding: '14px 16px',
-  borderRadius: 12,
-  border: '1px solid rgba(255,255,255,0.12)',
-  background: 'rgba(255,255,255,0.03)',
-  color: 'inherit',
-  textDecoration: 'none',
-};
+// Note: section.content is author-controlled static HTML from lib/docs-content.ts
+// (committed to the repo, not user input). Safe to render inline.
+export default function DocsSinglePage() {
+  const chapters = [...DOC_CATEGORIES]
+    .sort(chapterSort)
+    .map((cat) => ({
+      ...cat,
+      sections: cat.sections.filter((s) => !s.navHidden),
+    }))
+    .filter((cat) => cat.sections.length > 0);
+
+  const totalSections = chapters.reduce((n, c) => n + c.sections.length, 0);
+
+  return (
+    <DocsScroller
+      chapters={chapters.map((c) => ({
+        slug: c.slug,
+        label: CHAPTER_META[c.slug]?.label ?? c.label,
+        kicker: CHAPTER_META[c.slug]?.kicker ?? '',
+        roman: CHAPTER_META[c.slug]?.roman ?? '',
+        sections: c.sections.map((s) => ({ slug: s.slug, title: s.title })),
+      }))}
+      totalSections={totalSections}
+      gateCount={GATE_COUNT}
+    >
+      <section className="gcdocs-hero" id="top">
+        <div className="gcdocs-hero-rule">
+          <span>DOCUMENTATION</span>
+          <span>SEASON 1 BETA · LAST UPDATED 2026-04-13</span>
+        </div>
+        <h1 className="gcdocs-hero-title">
+          The Complete<br />GASCOIN<br />Manual.
+        </h1>
+        <p className="gcdocs-hero-lede">
+          Every gate. Every AI engine. Every decision. One page, one source of truth.
+          Everything the protocol does is documented here and generated directly from the code that runs in production.
+        </p>
+        <div className="gcdocs-hero-stats">
+          <div className="gcdocs-hero-stat">
+            <div className="gcdocs-hero-stat-n">{GATE_COUNT}</div>
+            <div className="gcdocs-hero-stat-l">Verification Gates</div>
+          </div>
+          <div className="gcdocs-hero-stat">
+            <div className="gcdocs-hero-stat-n">3</div>
+            <div className="gcdocs-hero-stat-l">AI Engines</div>
+          </div>
+          <div className="gcdocs-hero-stat">
+            <div className="gcdocs-hero-stat-n">{chapters.length}</div>
+            <div className="gcdocs-hero-stat-l">Chapters</div>
+          </div>
+          <div className="gcdocs-hero-stat">
+            <div className="gcdocs-hero-stat-n">{totalSections}</div>
+            <div className="gcdocs-hero-stat-l">Sections</div>
+          </div>
+        </div>
+        <div className="gcdocs-hero-cta">
+          <a href="#ch-overview" className="gcdocs-hero-btn gcdocs-hero-btn--primary">Start Reading →</a>
+          <Link href="/submit" className="gcdocs-hero-btn">Submit Receipt</Link>
+        </div>
+        <pre className="gcdocs-hero-ascii">
+{`  BUY GAS  ──→  WRITE LAST 4  ──→  TWEET $GASCOIN  ──→  SUBMIT  ──→  ${GATE_COUNT} GATES  ──→  SOL REFUND
+  (any station)    (on receipt)      (public post)      (upload)   (auto-verify)    (to wallet)`}
+        </pre>
+      </section>
+
+      {chapters.map((cat) => {
+        const meta = CHAPTER_META[cat.slug];
+        return (
+          <section key={cat.slug} id={`ch-${cat.slug}`} className="gcdocs-chapter">
+            <header className="gcdocs-chapter-head">
+              <div className="gcdocs-chapter-roman">{meta?.roman}</div>
+              <div>
+                <div className="gcdocs-chapter-kicker">CHAPTER {meta?.roman}</div>
+                <h2 className="gcdocs-chapter-title">{meta?.label ?? cat.label}</h2>
+                {meta?.kicker && <p className="gcdocs-chapter-lede">{meta.kicker}</p>}
+              </div>
+            </header>
+
+            {cat.sections.map((section, i) => (
+              <article
+                key={section.slug}
+                id={section.slug}
+                data-chapter={cat.slug}
+                className="gcdocs-section"
+              >
+                <header className="gcdocs-section-head">
+                  <div className="gcdocs-section-index">
+                    {meta?.roman}.{String(i + 1).padStart(2, '0')}
+                  </div>
+                  <h3 className="gcdocs-section-title">
+                    <a href={`#${section.slug}`} className="gcdocs-section-anchor" aria-label="Link to this section">
+                      {section.title}
+                    </a>
+                  </h3>
+                </header>
+                {section.description && <p className="gcdocs-section-desc">{section.description}</p>}
+                <div
+                  className="doc-content gcdocs-section-body"
+                  // Author-controlled static HTML from lib/docs-content.ts, safe.
+                  dangerouslySetInnerHTML={{ __html: section.content }}
+                />
+              </article>
+            ))}
+          </section>
+        );
+      })}
+
+      <section className="gcdocs-footer">
+        <div className="gcdocs-footer-rule" />
+        <div className="gcdocs-footer-grid">
+          <div>
+            <div className="gcdocs-footer-kicker">THE END OF THE MANUAL</div>
+            <h2 className="gcdocs-footer-title">Ready to submit?</h2>
+            <p className="gcdocs-footer-lede">
+              You've read the full protocol. If your receipt has the last 4 of your wallet written on it,
+              your tweet mentions <code>$GASCOIN</code> or <code>#gascoin</code> and tags{' '}
+              <code>@GasCoinApp</code>, and your X account is verified with 100+ followers — you're ready.
+            </p>
+            <div className="gcdocs-footer-cta">
+              <Link href="/submit" className="gcdocs-hero-btn gcdocs-hero-btn--primary">Submit Receipt →</Link>
+              <Link href="/gates" className="gcdocs-hero-btn">Pre-Flight Checklist</Link>
+            </div>
+          </div>
+          <div className="gcdocs-footer-meta">
+            <div><span>Source</span><code>lib/docs-content.ts</code></div>
+            <div><span>Gate engine</span><code>lib/policy.ts · GATE_DEFS</code></div>
+            <div><span>Gates aligned</span><code>{GATE_COUNT} / {GATE_COUNT}</code></div>
+            <div><span>Mode</span><code>SEASON 1 · DRY-RUN</code></div>
+            <div><span>Changelog</span><code>GitHub commits</code></div>
+            <div><span>Contact</span><code>@chico_panama</code></div>
+          </div>
+        </div>
+      </section>
+    </DocsScroller>
+  );
+}

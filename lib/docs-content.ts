@@ -28,9 +28,9 @@ export const DOC_CATEGORIES: DocCategory[] = [
         description: "",
         content: `<h3>What this is</h3>
 <p>GASCOIN is a Solana (a fast, low-cost cryptocurrency network) protocol that refunds verified real-world fuel purchases in SOL.</p>
-<p>All claims pass through a deterministic 14-gate pipeline before payout is released.</p>
+<p>All claims pass through a deterministic 15-gate pipeline before payout is released.</p>
 <pre class="doc-ascii">
-  BUY GAS ──→ WRITE LAST 4 ──→ TWEET $GASCOIN/#GASCOIN ──→ SUBMIT ──→ 14 GATES ──→ SOL REFUND
+  BUY GAS ──→ WRITE LAST 4 ──→ TWEET $GASCOIN/#GASCOIN ──→ SUBMIT ──→ 15 GATES ──→ SOL REFUND
   (any station)  (on receipt)     (public post)     (upload)   (auto-verify)  (to wallet)
 </pre>
 
@@ -66,8 +66,8 @@ export const DOC_CATEGORIES: DocCategory[] = [
 <li>You post a tweet on X (formerly Twitter) containing the hashtag #gascoin</li>
 <li>You visit gascoin.com and click Submit</li>
 <li>You connect your Solana wallet, paste your tweet URL, and upload a photo of your receipt</li>
-<li>The system automatically runs 14 verification checks on your submission</li>
-<li>If all 14 checks pass, SOL is sent directly to your wallet within 24-48 hours</li>
+<li>The system automatically runs 15 verification checks on your submission</li>
+<li>If all 15 checks pass, SOL is sent directly to your wallet within 24-48 hours</li>
 </ul>`,
         order: 2,
       },
@@ -274,12 +274,12 @@ export const DOC_CATEGORIES: DocCategory[] = [
         categorySlug: "submitting",
         category: "Submitting",
         description: "",
-        content: `<p>Step 5 is the verification monitoring screen. It shows your submission progressing through all 14 verification gates in real time. This is the system automatically checking every aspect of your submission.</p>
+        content: `<p>Step 5 is the verification monitoring screen. It shows your submission progressing through all 15 verification gates in real time. This is the system automatically checking every aspect of your submission.</p>
 <h3>Reading the gate progress screen</h3>
-<p>Each of the 14 gates is listed vertically. Each gate shows a status icon:</p>
+<p>Each of the 15 gates is listed vertically. Each gate shows a status icon:</p>
 <h3>How long verification takes</h3>
 <p>Most gates complete in under 10 seconds. Gate 5 (Wallet on Receipt) involves OCR image processing and can take up to 45 seconds. The entire verification process typically completes within 2-5 minutes for a passing submission.</p>
-<h3>If all 14 gates pass</h3>
+<h3>If all 15 gates pass</h3>
 <p>The screen displays SUBMISSION APPROVED. Your SOL refund will be dispatched to your wallet within 24-48 hours. You can track your submission status at any time using the Wallet Tracker page at /wallet.</p>
 <h3>If a gate fails</h3>
 <p>The screen displays SUBMISSION INCOMPLETE. The failed gate is highlighted and a specific failure reason is shown explaining exactly what went wrong. Gates that come after the failed gate show the dash icon — they were not run because a previous gate blocked progress.</p>
@@ -621,7 +621,7 @@ export const DOC_CATEGORIES: DocCategory[] = [
 <ul>
 <li>Signal ingestion (wallet, X, receipt payloads)</li>
 <li>Receipt intelligence (Gemini OCR + tamper scoring + duplicate checks)</li>
-<li>Deterministic gate/policy engine (14 gates)</li>
+<li>Deterministic gate/policy engine (15 gates)</li>
 <li>Cross-signal fraud reasoning via Grok</li>
 <li>Final oversight review via Claude with cached rulebook context</li>
 <li>Persistent memory layer (mem0) with distilled profile compression</li>
@@ -950,7 +950,7 @@ Inputs(wallet,tweet,receipt)
 <li><strong>Pre-payout re-verification</strong> — Before every SOL dispatch, the system re-checks: tweet still live, follower count still valid, account quality still passing, token balance still held</li>
 <li><strong>Admin review layer</strong> — Every submission is reviewed by a human admin before funds are released. The admin has full visibility into all gate results, AI scores, and fraud signals</li>
 <li><strong>Immutable audit log</strong> — Every action on the platform is permanently recorded. Nothing can be done silently</li>
-<li><strong>Claude oversight with memory</strong> — Every claim is reviewed by AI manager before SOL moves. Claude receives all 14 gate results, fraud scores, cross-validation signals, plus the wallet's full behavioral history from mem0 and relevant institutional rules from the knowledge base. A wallet with a declining trust trajectory and cross-pipeline flags gets extra scrutiny</li>
+<li><strong>Claude oversight with memory</strong> — Every claim is reviewed by AI manager before SOL moves. Claude receives all 15 gate results, fraud scores, cross-validation signals, plus the wallet's full behavioral history from mem0 and relevant institutional rules from the knowledge base. A wallet with a declining trust trajectory and cross-pipeline flags gets extra scrutiny</li>
 <li><strong>Cross-pipeline memory</strong> — Every pipeline writes signals to persistent memory. A referral ring detected at 10am blocks the pending payout at 10:05am. Engagement spam flagged on Monday informs Claude's review on Tuesday. Nothing is forgotten</li>
 <li><strong>Payout cross-pipeline guard</strong> — Before SOL is dispatched, the payout worker checks for flags from other pipelines. A wallet flagged for ring activity, auto-banned, or showing declining trust is blocked even if the claim was already approved</li>
 <li><strong>API fault tolerance</strong> — If X API fails, user gets retry_later (503), not a rejection. No legitimate claim is penalized for upstream outages</li>
@@ -972,7 +972,7 @@ Inputs(wallet,tweet,receipt)
 <h3>How it works</h3>
 <p>After the policy engine auto-approves a claim, Claude receives the complete verification payload plus cross-pipeline intelligence:</p>
 <ul>
-<li>All 14 gate results (pass/fail + metadata)</li>
+<li>All 15 gate results (pass/fail + metadata)</li>
 <li>Fraud scores from Gemini and Grok</li>
 <li>Cross-validation signals between receipt, tweet, and wallet</li>
 <li>Submission metadata and fraud flags</li>
@@ -1466,7 +1466,7 @@ Inputs(wallet,tweet,receipt)
 <li>How It Works section: 3-step visual summary of the submission process</li>
 <li>Live treasury teaser section with real-time SOL balance</li>
 <li>Community receipt feed teaser showing the 4 most recent approved receipts</li>
-<li>Gate transparency teaser showing all 14 gate names with live pass rates</li>
+<li>Gate transparency teaser showing all 15 gate names with live pass rates</li>
 <li>Wallet Tracker teaser with a static gate progress illustration</li>
 <li>Referral engine teaser with platform-wide conversion statistics</li>
 </ul>
@@ -1498,7 +1498,7 @@ Inputs(wallet,tweet,receipt)
         categorySlug: "platform",
         category: "Platform Pages",
         description: "",
-        content: `<p>The Community page is the public proof-of-payout wall. Every approved gas receipt submission that passes all 14 gates appears as a card on this page. It exists to demonstrate that the platform works and real people receive real refunds.</p>
+        content: `<p>The Community page is the public proof-of-payout wall. Every approved gas receipt submission that passes all 15 gates appears as a card on this page. It exists to demonstrate that the platform works and real people receive real refunds.</p>
 <h3>What each receipt card shows</h3>
 <ul>
 <li>Location: the city and state where the gas was purchased (e.g., Austin, TX)</li>
@@ -1553,7 +1553,7 @@ Inputs(wallet,tweet,receipt)
 <p>In Connected Mode, if your account is within the cooldown period following a submission, a countdown timer shows how much time remains before you can submit again. Cooldown duration depends on your tier.</p>
 <p>When the countdown reaches zero, the cooldown block automatically transitions to show Submit Receipt with a link to the submission portal.</p>
 <h3>Gate progress tracker</h3>
-<p>If you have a pending submission (one that has been submitted but not yet approved or rejected), the gate progress tracker appears. It shows all 14 gates with their current status updating live as each gate is processed. This is the same display as Step 5 of the submission portal but accessible at any time from /wallet.</p>
+<p>If you have a pending submission (one that has been submitted but not yet approved or rejected), the gate progress tracker appears. It shows all 15 gates with their current status updating live as each gate is processed. This is the same display as Step 5 of the submission portal but accessible at any time from /wallet.</p>
 <h3>URL deep linking</h3>
 <p>The Wallet Tracker supports URL parameters. Visiting /wallet?address=SOLANA_ADDRESS_HERE automatically loads that address in Lookup Mode without requiring the user to paste the address. This link format is used by the leaderboard View buttons.</p>`,
         order: 27,
@@ -1575,7 +1575,7 @@ Inputs(wallet,tweet,receipt)
 <li>Someone clicks your referral link</li>
 <li>Their browser stores your referral code for 7 days (the attribution window)</li>
 <li>They submit a gas receipt using the platform</li>
-<li>Their submission passes all 14 verification gates and is approved</li>
+<li>Their submission passes all 15 verification gates and is approved</li>
 <li>The system detects your referral code on their submission and checks eligibility</li>
 <li>If eligible, a 100-point welcome bonus is awarded to your wallet. You also begin earning 2% passive income from their future points</li>
 <li>Points are credited automatically. No admin action needed for referral points</li>
@@ -1625,7 +1625,7 @@ Inputs(wallet,tweet,receipt)
 <tr><td>Referrer not approved</td><td>You had no approved submissions when the conversion occurred</td><td>No — permanent</td></tr>
 <tr><td>Monthly cap reached</td><td>You hit 20 conversions in the rolling 30-day window</td><td>Resets after 30 days</td></tr>
 <tr><td>Monthly points cap reached</td><td>You hit 10,000 points in referral rewards this window</td><td>Resets after 30 days</td></tr></tbody></table>
-<p>→ See also: Gates page — all 14 gates must pass for a conversion to count</p>`,
+<p>→ See also: Gates page — all 15 gates must pass for a conversion to count</p>`,
         order: 28,
       },
       {
@@ -1674,18 +1674,18 @@ Inputs(wallet,tweet,receipt)
         categorySlug: "platform",
         category: "Platform Pages",
         description: "",
-        content: `<p>The Gates page is the full public documentation of GASCOIN's 14 verification gates. It is the reference page for understanding exactly what the system checks before approving a submission.</p>
+        content: `<p>The Gates page is the full public documentation of GASCOIN's 15 verification gates. It is the reference page for understanding exactly what the system checks before approving a submission.</p>
 <h3>Sections on the Gates page</h3>
 <ul>
 <li>Live system statistics: total submissions processed, overall pass rate, average processing time, most frequently failed gate</li>
 <li>Category filters: view gates by category (ALL, TWEET, RECEIPT, WALLET, TREASURY)</li>
 <li>Pre-submission checklist: 10 interactive checkboxes you can complete before submitting to verify you meet all requirements</li>
-<li>Gate cards: all 14 gates with live pass rate statistics, descriptions, and expandable detail panels</li>
+<li>Gate cards: all 15 gates with live pass rate statistics, descriptions, and expandable detail panels</li>
 <li>FAQ section: 6 common questions with detailed answers</li>
 </ul>
 <h3>The pre-flight checklist</h3>
-<p>The pre-flight checklist is the most important self-service tool on the platform. Before submitting, visit /gates and check all 14 boxes. The checklist saves your progress in your browser — if you navigate away and return, your checked boxes are preserved. When all 10 are checked, a Submit Receipt button appears that takes you directly to the submission portal.</p>
-<p>The 14 pre-flight checks correspond directly to the 14 verification gates. Completing the checklist means you have self-verified that your tweet, receipt, and wallet meet all requirements before the automated system checks them.</p>
+<p>The pre-flight checklist is the most important self-service tool on the platform. Before submitting, visit /gates and check all 15 boxes. The checklist saves your progress in your browser — if you navigate away and return, your checked boxes are preserved. When all 15 are checked, a Submit Receipt button appears that takes you directly to the submission portal.</p>
+<p>The 15 pre-flight checks correspond directly to the 15 verification gates. Completing the checklist means you have self-verified that your tweet, receipt, and wallet meet all requirements before the automated system checks them.</p>
 <h3>Gate detail panels</h3>
 <p>Clicking VIEW FULL DETAILS on any gate card opens an expanded panel showing three columns: What We Check (the exact system logic), Common Failures (real occurrence data from the database), and How To Pass (step-by-step guidance). Only one gate detail panel can be open at a time.</p>`,
         order: 31,
@@ -1811,7 +1811,7 @@ Inputs(wallet,tweet,receipt)
         categorySlug: "security",
         category: "Security & Admin",
         description: "",
-        content: `<p>The 14-gate sequential system is the primary fraud prevention mechanism. No submission can receive a refund without passing all 14 automated checks. Gates 1-9 are fully automated with no human input. Gate 10 is a final treasury solvency check. No gate can be individually disabled by a user.</p>`,
+        content: `<p>The 15-gate sequential system is the primary fraud prevention mechanism. No submission can receive a refund without passing all 15 automated checks. Gates 1-14 are fully automated with no human input. Gate 15 is a final treasury solvency check. No gate can be individually disabled by a user.</p>`,
         order: 49,
         navHidden: true,
       },
@@ -1870,7 +1870,7 @@ Inputs(wallet,tweet,receipt)
         categorySlug: "security",
         category: "Security & Admin",
         description: "",
-        content: `<p>The referral system blocks self-referrals at the database level via a SQL constraint. Referral rewards are capped at 20 conversions and 10,000 points per 30 days per referrer to prevent farming. The referrer must themselves have an approved submission before their referral code is valid. Referral conversion only occurs when the referred user's submission passes all 14 gates.</p>`,
+        content: `<p>The referral system blocks self-referrals at the database level via a SQL constraint. Referral rewards are capped at 20 conversions and 10,000 points per 30 days per referrer to prevent farming. The referrer must themselves have an approved submission before their referral code is valid. Referral conversion only occurs when the referred user's submission passes all 15 gates.</p>`,
         order: 55,
       },
     ],
