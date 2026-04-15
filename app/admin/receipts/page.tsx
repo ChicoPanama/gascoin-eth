@@ -133,15 +133,15 @@ export default async function ReceiptsPage({
   return (
     <div style={{ padding: '32px 40px' }}>
       {/* Header */}
-      <div style={{ marginBottom: 32, borderBottom: '1px solid rgba(255,255,255,0.08)', paddingBottom: 24 }}>
-        <div style={{ fontFamily: 'IBM Plex Mono', fontSize: 10, color: 'rgba(255,255,255,0.3)', letterSpacing: '0.3em', textTransform: 'uppercase', marginBottom: 8 }}>
+      <div style={{ marginBottom: 32, borderBottom: '1px solid rgba(var(--fg-rgb),0.08)', paddingBottom: 24 }}>
+        <div style={{ fontFamily: 'IBM Plex Mono', fontSize: 10, color: 'rgba(var(--fg-rgb),0.3)', letterSpacing: '0.3em', textTransform: 'uppercase', marginBottom: 8 }}>
           ADMIN / MODERATION
         </div>
         <div style={{ fontFamily: 'Bebas Neue', fontSize: 32, letterSpacing: '0.05em' }}>
           RECEIPT REVIEW
         </div>
         {claimFilter && (
-          <div style={{ fontFamily: 'IBM Plex Mono', fontSize: 11, color: 'rgba(255,255,255,0.4)', marginTop: 8 }}>
+          <div style={{ fontFamily: 'IBM Plex Mono', fontSize: 11, color: 'rgba(var(--fg-rgb),0.4)', marginTop: 8 }}>
             Filtered to claim: {claimFilter}
           </div>
         )}

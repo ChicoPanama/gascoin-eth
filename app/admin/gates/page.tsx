@@ -27,8 +27,8 @@ export default async function GatesPage({
   return (
     <div style={{ padding: '32px 40px' }}>
       {/* Header */}
-      <div style={{ marginBottom: 32, borderBottom: '1px solid rgba(255,255,255,0.08)', paddingBottom: 24 }}>
-        <div style={{ fontFamily: 'IBM Plex Mono', fontSize: 10, color: 'rgba(255,255,255,0.3)', letterSpacing: '0.3em', textTransform: 'uppercase', marginBottom: 8 }}>
+      <div style={{ marginBottom: 32, borderBottom: '1px solid rgba(var(--fg-rgb),0.08)', paddingBottom: 24 }}>
+        <div style={{ fontFamily: 'IBM Plex Mono', fontSize: 10, color: 'rgba(var(--fg-rgb),0.3)', letterSpacing: '0.3em', textTransform: 'uppercase', marginBottom: 8 }}>
           ADMIN / MODERATION
         </div>
         <div style={{ fontFamily: 'Bebas Neue', fontSize: 32, letterSpacing: '0.05em' }}>
@@ -37,8 +37,8 @@ export default async function GatesPage({
       </div>
 
       {/* Override form */}
-      <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', padding: 32, marginBottom: 40 }}>
-        <div style={{ fontFamily: 'IBM Plex Mono', fontSize: 10, color: 'rgba(255,255,255,0.3)', letterSpacing: '0.3em', textTransform: 'uppercase', marginBottom: 24 }}>
+      <div style={{ background: 'rgba(var(--fg-rgb),0.03)', border: '1px solid rgba(var(--fg-rgb),0.08)', padding: 32, marginBottom: 40 }}>
+        <div style={{ fontFamily: 'IBM Plex Mono', fontSize: 10, color: 'rgba(var(--fg-rgb),0.3)', letterSpacing: '0.3em', textTransform: 'uppercase', marginBottom: 24 }}>
           MANUAL GATE OVERRIDE
         </div>
         <form action={async (fd: FormData) => {
@@ -64,8 +64,8 @@ export default async function GatesPage({
                   width: '100%',
                   fontFamily: 'IBM Plex Mono',
                   fontSize: 12,
-                  background: 'rgba(255,255,255,0.04)',
-                  border: '1px solid rgba(255,255,255,0.12)',
+                  background: 'rgba(var(--fg-rgb),0.04)',
+                  border: '1px solid rgba(var(--fg-rgb),0.12)',
                   color: 'var(--fg)',
                   padding: '10px 14px',
                   boxSizing: 'border-box',
@@ -82,7 +82,7 @@ export default async function GatesPage({
                   fontFamily: 'IBM Plex Mono',
                   fontSize: 12,
                   background: 'rgba(20,20,20,1)',
-                  border: '1px solid rgba(255,255,255,0.12)',
+                  border: '1px solid rgba(var(--fg-rgb),0.12)',
                   color: 'var(--fg)',
                   padding: '10px 14px',
                   boxSizing: 'border-box',
@@ -113,7 +113,7 @@ export default async function GatesPage({
                   fontFamily: 'IBM Plex Mono',
                   fontSize: 12,
                   background: 'rgba(20,20,20,1)',
-                  border: '1px solid rgba(255,255,255,0.12)',
+                  border: '1px solid rgba(var(--fg-rgb),0.12)',
                   color: 'var(--fg)',
                   padding: '10px 14px',
                   boxSizing: 'border-box',
@@ -134,8 +134,8 @@ export default async function GatesPage({
                   width: '100%',
                   fontFamily: 'IBM Plex Mono',
                   fontSize: 12,
-                  background: 'rgba(255,255,255,0.04)',
-                  border: '1px solid rgba(255,255,255,0.12)',
+                  background: 'rgba(var(--fg-rgb),0.04)',
+                  border: '1px solid rgba(var(--fg-rgb),0.12)',
                   color: 'var(--fg)',
                   padding: '10px 14px',
                   boxSizing: 'border-box',
@@ -150,7 +150,7 @@ export default async function GatesPage({
       </div>
 
       {/* Gate results history */}
-      <div style={{ fontFamily: 'IBM Plex Mono', fontSize: 10, color: 'rgba(255,255,255,0.3)', letterSpacing: '0.3em', textTransform: 'uppercase', marginBottom: 16 }}>
+      <div style={{ fontFamily: 'IBM Plex Mono', fontSize: 10, color: 'rgba(var(--fg-rgb),0.3)', letterSpacing: '0.3em', textTransform: 'uppercase', marginBottom: 16 }}>
         GATE RESULT HISTORY
       </div>
 
@@ -169,7 +169,7 @@ export default async function GatesPage({
           <tbody>
             {!history || history.length === 0 ? (
               <tr className="lb-table-row">
-                <td colSpan={6} style={{ padding: '32px 16px', fontFamily: 'IBM Plex Mono', fontSize: 12, color: 'rgba(255,255,255,0.25)', textAlign: 'center' }}>
+                <td colSpan={6} style={{ padding: '32px 16px', fontFamily: 'IBM Plex Mono', fontSize: 12, color: 'rgba(var(--fg-rgb),0.25)', textAlign: 'center' }}>
                   No gate results recorded.
                 </td>
               </tr>

@@ -25,7 +25,7 @@ const FILTER_MAP: Record<string, string[]> = {
 
 function statusColor(status: string): string {
   const map: Record<string, string> = {
-    submitted: 'rgba(255,255,255,0.4)',
+    submitted: 'rgba(var(--fg-rgb),0.4)',
     auto_review: 'rgba(255,200,80,0.8)',
     ready_for_dispatch: 'rgba(100,220,120,0.9)',
     needs_review: 'rgba(255,120,60,0.9)',
@@ -33,7 +33,7 @@ function statusColor(status: string): string {
     rejected: 'rgba(255,80,80,0.8)',
     paid: 'rgba(100,220,120,0.9)',
   };
-  return map[status] || 'rgba(255,255,255,0.4)';
+  return map[status] || 'rgba(var(--fg-rgb),0.4)';
 }
 
 function riskColor(score: number): string {
@@ -268,7 +268,7 @@ export default async function SubmissionsPage(props: { searchParams: Promise<{ f
                     {STATUS_LABELS[c.status] || c.status}
                   </span>
                 </td>
-                <td style={{ fontFamily: 'IBM Plex Mono', fontSize: 11, color: 'rgba(255,255,255,0.4)' }}>
+                <td style={{ fontFamily: 'IBM Plex Mono', fontSize: 11, color: 'rgba(var(--fg-rgb),0.4)' }}>
                   {Number(c.risk_score || 0).toFixed(2)}
                 </td>
                 <td>
@@ -326,7 +326,7 @@ export default async function SubmissionsPage(props: { searchParams: Promise<{ f
                     </form>
                   )}
                   {!canDispatch && (
-                    <span style={{ fontFamily: 'IBM Plex Mono', fontSize: 9, color: 'rgba(255,255,255,0.2)' }}>
+                    <span style={{ fontFamily: 'IBM Plex Mono', fontSize: 9, color: 'rgba(var(--fg-rgb),0.2)' }}>
                       {c.status === 'approved' ? 'Dispatched' : c.status === 'paid' ? 'Paid' : '—'}
                     </span>
                   )}
@@ -346,7 +346,7 @@ export default async function SubmissionsPage(props: { searchParams: Promise<{ f
 
       {/* Pipeline flags for ready_for_dispatch claims */}
       {activeFilter === 'DISPATCH' && (claims || []).length > 0 && (
-        <div style={{ marginTop: 24, fontFamily: 'IBM Plex Mono', fontSize: 10, color: 'rgba(255,255,255,0.25)' }}>
+        <div style={{ marginTop: 24, fontFamily: 'IBM Plex Mono', fontSize: 10, color: 'rgba(var(--fg-rgb),0.25)' }}>
           Auth Score: EXIF (20%) + Dimensions (10%) + Model confidence (25%) + Physical receipt (15%) + Gas station (10%) + Not manipulated (10%) + Handwriting (5%) + Wallet found (5%)
         </div>
       )}

@@ -2312,19 +2312,23 @@ button.docs-footer-link {
 }
 
 /* ─── ADMIN ─── */
-.admin-layout { display: flex; min-height: 100vh; background: #030303; }
+/* Admin shell — follows theme tokens. Previously hardcoded to #030303
+   which made the entire admin page unreadable in light mode (dark text
+   on dark background). var(--bg) flips to pure white in light mode
+   and stays pure black in dark mode. */
+.admin-layout { display: flex; min-height: 100vh; background: var(--bg); }
 .admin-sidebar {
   width: 240px;
   position: fixed;
   top: 0;
   left: 0;
   bottom: 0;
-  border-right: 1px solid rgba(var(--fg-rgb),0.08);
+  border-right: 1px solid var(--line);
   padding: 24px 0;
   display: flex;
   flex-direction: column;
   overflow-y: auto;
-  background: #030303;
+  background: var(--bg);
   z-index: 50;
 }
 .admin-sidebar-top { padding: 0 20px 20px; border-bottom: 1px solid rgba(var(--fg-rgb),0.06); margin-bottom: 16px; }
@@ -2351,8 +2355,8 @@ button.docs-footer-link {
 .admin-login { display: flex; align-items: center; justify-content: center; min-height: 100vh; }
 .admin-login-panel {
   width: min(440px, 92vw);
-  background: #000;
-  border: 1px solid rgba(var(--fg-rgb),0.1);
+  background: var(--bg);
+  border: 1px solid var(--line);
   padding: 48px;
 }
 .admin-login-header { display: flex; align-items: baseline; gap: 4px; }

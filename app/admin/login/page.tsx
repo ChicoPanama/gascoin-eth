@@ -90,7 +90,7 @@ export default function AdminLoginPage() {
           <span className="admin-sidebar-brand">GASCOIN</span>
           <span className="admin-sidebar-label" style={{ marginLeft: 12 }}>ADMIN ACCESS</span>
         </div>
-        <div style={{ borderBottom: '1px solid rgba(255,255,255,0.08)', margin: '24px 0' }} />
+        <div style={{ borderBottom: '1px solid rgba(var(--fg-rgb),0.08)', margin: '24px 0' }} />
 
         {/* Option 1: Privy / X Login */}
         <div className="wt-input-label" style={{ marginBottom: 12 }}>SIGN IN WITH X</div>
@@ -106,8 +106,8 @@ export default function AdminLoginPage() {
           </button>
         )}
 
-        <div style={{ borderBottom: '1px solid rgba(255,255,255,0.08)', margin: '24px 0', position: 'relative' }}>
-          <span style={{ position: 'absolute', top: -8, left: '50%', transform: 'translateX(-50%)', background: '#0a0a0a', padding: '0 12px', fontFamily: 'IBM Plex Mono', fontSize: 9, color: 'rgba(255,255,255,0.2)' }}>OR</span>
+        <div style={{ borderBottom: '1px solid rgba(var(--fg-rgb),0.08)', margin: '24px 0', position: 'relative' }}>
+          <span style={{ position: 'absolute', top: -8, left: '50%', transform: 'translateX(-50%)', background: 'var(--bg)', padding: '0 12px', fontFamily: 'IBM Plex Mono', fontSize: 9, color: 'rgba(var(--fg-rgb),0.2)' }}>OR</span>
         </div>
 
         {/* Option 2: Wallet Login */}
@@ -116,7 +116,7 @@ export default function AdminLoginPage() {
           <WalletButton />
         ) : (
           <>
-            <div style={{ fontFamily: 'IBM Plex Mono', fontSize: 11, color: 'rgba(255,255,255,0.5)', marginBottom: 16 }}>
+            <div style={{ fontFamily: 'IBM Plex Mono', fontSize: 11, color: 'rgba(var(--fg-rgb),0.5)', marginBottom: 16 }}>
               Wallet: {publicKey?.toBase58().slice(0, 8)}...
             </div>
             <button type="button" className="sf-btn-ghost" style={{ width: '100%' }} onClick={handleSign} disabled={status === 'signing'}>
@@ -131,7 +131,7 @@ export default function AdminLoginPage() {
           </div>
         )}
 
-        <div style={{ fontFamily: 'IBM Plex Mono', fontSize: 9, color: 'rgba(255,255,255,0.2)', marginTop: 24 }}>
+        <div style={{ fontFamily: 'IBM Plex Mono', fontSize: 9, color: 'rgba(var(--fg-rgb),0.2)', marginTop: 24 }}>
           Session expires in 8 hours
         </div>
       </div>

@@ -57,24 +57,24 @@ export default async function SettingsPage() {
   return (
     <div style={{ padding: '32px 40px' }}>
       {/* Header */}
-      <div style={{ marginBottom: 32, borderBottom: '1px solid rgba(255,255,255,0.08)', paddingBottom: 24 }}>
-        <div style={{ fontFamily: 'IBM Plex Mono', fontSize: 10, color: 'rgba(255,255,255,0.3)', letterSpacing: '0.3em', textTransform: 'uppercase', marginBottom: 8 }}>
+      <div style={{ marginBottom: 32, borderBottom: '1px solid rgba(var(--fg-rgb),0.08)', paddingBottom: 24 }}>
+        <div style={{ fontFamily: 'IBM Plex Mono', fontSize: 10, color: 'rgba(var(--fg-rgb),0.3)', letterSpacing: '0.3em', textTransform: 'uppercase', marginBottom: 8 }}>
           ADMIN / SYSTEM
         </div>
         <div style={{ fontFamily: 'Bebas Neue', fontSize: 32, letterSpacing: '0.05em' }}>
           SETTINGS
         </div>
-        <div style={{ fontFamily: 'IBM Plex Mono', fontSize: 11, color: 'rgba(255,255,255,0.3)', marginTop: 8 }}>
+        <div style={{ fontFamily: 'IBM Plex Mono', fontSize: 11, color: 'rgba(var(--fg-rgb),0.3)', marginTop: 8 }}>
           Read-only. Environment variable values are never shown — only presence is checked.
         </div>
       </div>
 
       {/* REFERRAL_CONFIG */}
       <section style={{ marginBottom: 48 }}>
-        <div style={{ fontFamily: 'IBM Plex Mono', fontSize: 10, color: 'rgba(255,255,255,0.3)', letterSpacing: '0.3em', textTransform: 'uppercase', marginBottom: 16 }}>
+        <div style={{ fontFamily: 'IBM Plex Mono', fontSize: 10, color: 'rgba(var(--fg-rgb),0.3)', letterSpacing: '0.3em', textTransform: 'uppercase', marginBottom: 16 }}>
           REFERRAL CONFIG
         </div>
-        <div style={{ border: '1px solid rgba(255,255,255,0.08)' }}>
+        <div style={{ border: '1px solid rgba(var(--fg-rgb),0.08)' }}>
           {referralEntries.map(([key, value], i) => (
             <div
               key={key}
@@ -82,11 +82,11 @@ export default async function SettingsPage() {
                 display: 'flex',
                 alignItems: 'center',
                 padding: '14px 20px',
-                borderBottom: i < referralEntries.length - 1 ? '1px solid rgba(255,255,255,0.06)' : 'none',
+                borderBottom: i < referralEntries.length - 1 ? '1px solid rgba(var(--fg-rgb),0.06)' : 'none',
                 gap: 24,
               }}
             >
-              <div style={{ fontFamily: 'IBM Plex Mono', fontSize: 11, color: 'rgba(255,255,255,0.45)', minWidth: 280 }}>
+              <div style={{ fontFamily: 'IBM Plex Mono', fontSize: 11, color: 'rgba(var(--fg-rgb),0.45)', minWidth: 280 }}>
                 {key}
               </div>
               <div style={{ fontFamily: 'IBM Plex Mono', fontSize: 12, color: 'var(--fg)' }}>
@@ -99,7 +99,7 @@ export default async function SettingsPage() {
 
       {/* GATES list */}
       <section style={{ marginBottom: 48 }}>
-        <div style={{ fontFamily: 'IBM Plex Mono', fontSize: 10, color: 'rgba(255,255,255,0.3)', letterSpacing: '0.3em', textTransform: 'uppercase', marginBottom: 16 }}>
+        <div style={{ fontFamily: 'IBM Plex Mono', fontSize: 10, color: 'rgba(var(--fg-rgb),0.3)', letterSpacing: '0.3em', textTransform: 'uppercase', marginBottom: 16 }}>
           GATES ({GATES.length} configured)
         </div>
         <div className="lb-table-wrap" style={{ marginTop: 0 }}>
@@ -125,7 +125,7 @@ export default async function SettingsPage() {
                     {gate.is_blocking ? (
                       <span style={{ color: 'rgba(255,80,80,0.8)' }}>YES</span>
                     ) : (
-                      <span style={{ color: 'rgba(255,255,255,0.3)' }}>NO</span>
+                      <span style={{ color: 'rgba(var(--fg-rgb),0.3)' }}>NO</span>
                     )}
                   </td>
                   <td className="lb-table-time">{gate.estimated_time_seconds}s</td>
@@ -138,10 +138,10 @@ export default async function SettingsPage() {
 
       {/* Environment variable presence check */}
       <section>
-        <div style={{ fontFamily: 'IBM Plex Mono', fontSize: 10, color: 'rgba(255,255,255,0.3)', letterSpacing: '0.3em', textTransform: 'uppercase', marginBottom: 16 }}>
+        <div style={{ fontFamily: 'IBM Plex Mono', fontSize: 10, color: 'rgba(var(--fg-rgb),0.3)', letterSpacing: '0.3em', textTransform: 'uppercase', marginBottom: 16 }}>
           ENVIRONMENT VARIABLES
         </div>
-        <div style={{ border: '1px solid rgba(255,255,255,0.08)' }}>
+        <div style={{ border: '1px solid rgba(var(--fg-rgb),0.08)' }}>
           {ENV_KEYS.map((key, i) => {
             const present = envPresent(key);
             return (
@@ -151,7 +151,7 @@ export default async function SettingsPage() {
                   display: 'flex',
                   alignItems: 'center',
                   padding: '12px 20px',
-                  borderBottom: i < ENV_KEYS.length - 1 ? '1px solid rgba(255,255,255,0.06)' : 'none',
+                  borderBottom: i < ENV_KEYS.length - 1 ? '1px solid rgba(var(--fg-rgb),0.06)' : 'none',
                   gap: 16,
                 }}
               >
@@ -164,10 +164,10 @@ export default async function SettingsPage() {
                     background: present ? 'rgba(100,220,120,0.8)' : 'rgba(255,80,80,0.7)',
                   }}
                 />
-                <div style={{ fontFamily: 'IBM Plex Mono', fontSize: 11, color: 'rgba(255,255,255,0.5)', minWidth: 280 }}>
+                <div style={{ fontFamily: 'IBM Plex Mono', fontSize: 11, color: 'rgba(var(--fg-rgb),0.5)', minWidth: 280 }}>
                   {key}
                 </div>
-                <div style={{ fontFamily: 'IBM Plex Mono', fontSize: 11, color: present ? 'rgba(255,255,255,0.35)' : 'rgba(255,80,80,0.6)' }}>
+                <div style={{ fontFamily: 'IBM Plex Mono', fontSize: 11, color: present ? 'rgba(var(--fg-rgb),0.35)' : 'rgba(255,80,80,0.6)' }}>
                   {safeDisplay(key)}
                 </div>
                 {!present && (

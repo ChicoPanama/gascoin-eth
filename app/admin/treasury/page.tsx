@@ -56,15 +56,15 @@ export default async function TreasuryPage() {
   return (
     <div style={{ padding: '32px 40px' }}>
       {/* Header */}
-      <div style={{ marginBottom: 32, borderBottom: '1px solid rgba(255,255,255,0.08)', paddingBottom: 24 }}>
-        <div style={{ fontFamily: 'IBM Plex Mono', fontSize: 10, color: 'rgba(255,255,255,0.3)', letterSpacing: '0.3em', textTransform: 'uppercase', marginBottom: 8 }}>
+      <div style={{ marginBottom: 32, borderBottom: '1px solid rgba(var(--fg-rgb),0.08)', paddingBottom: 24 }}>
+        <div style={{ fontFamily: 'IBM Plex Mono', fontSize: 10, color: 'rgba(var(--fg-rgb),0.3)', letterSpacing: '0.3em', textTransform: 'uppercase', marginBottom: 8 }}>
           ADMIN / OPERATIONS
         </div>
         <div style={{ fontFamily: 'Bebas Neue', fontSize: 32, letterSpacing: '0.05em' }}>
           TREASURY
         </div>
         {treasuryWallet && (
-          <div style={{ fontFamily: 'IBM Plex Mono', fontSize: 11, color: 'rgba(255,255,255,0.3)', marginTop: 8 }}>
+          <div style={{ fontFamily: 'IBM Plex Mono', fontSize: 11, color: 'rgba(var(--fg-rgb),0.3)', marginTop: 8 }}>
             {treasuryWallet.slice(0, 8)}…{treasuryWallet.slice(-8)}
           </div>
         )}
@@ -212,7 +212,7 @@ export default async function TreasuryPage() {
           <tbody>
             {!recentPayouts || recentPayouts.length === 0 ? (
               <tr className="lb-table-row">
-                <td colSpan={5} style={{ padding: '32px 16px', fontFamily: 'IBM Plex Mono', fontSize: 12, color: 'rgba(255,255,255,0.25)', textAlign: 'center' }}>
+                <td colSpan={5} style={{ padding: '32px 16px', fontFamily: 'IBM Plex Mono', fontSize: 12, color: 'rgba(var(--fg-rgb),0.25)', textAlign: 'center' }}>
                   No payout jobs found.
                 </td>
               </tr>
@@ -222,7 +222,7 @@ export default async function TreasuryPage() {
                   job.status === 'completed' ? 'rgba(100,220,120,0.9)'
                   : job.status === 'queued' ? 'rgba(255,200,80,0.8)'
                   : job.status === 'failed' ? 'rgba(255,80,80,0.8)'
-                  : 'rgba(255,255,255,0.4)';
+                  : 'rgba(var(--fg-rgb),0.4)';
                 return (
                   <tr key={job.id} className="lb-table-row">
                     <td className="lb-table-time" style={{ fontFamily: 'IBM Plex Mono', fontSize: 11, padding: '14px 16px' }}>

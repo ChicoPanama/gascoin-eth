@@ -69,10 +69,10 @@ export default async function StatsPage() {
       </div>
 
       <h3 style={{ fontFamily: 'Bebas Neue', fontSize: 28, marginBottom: 16 }}>Claims by Status</h3>
-      <div style={{ display: 'flex', gap: 1, background: 'rgba(255,255,255,0.06)', marginBottom: 40 }}>
+      <div style={{ display: 'flex', gap: 1, background: 'rgba(var(--fg-rgb),0.06)', marginBottom: 40 }}>
         {statuses.map((s) => (
-          <div key={s} style={{ flex: 1, background: '#030303', padding: 24, textAlign: 'center' }}>
-            <div style={{ fontFamily: 'IBM Plex Mono', fontSize: 9, color: 'rgba(255,255,255,0.3)', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: 8 }}>
+          <div key={s} style={{ flex: 1, background: 'var(--card)', padding: 24, textAlign: 'center' }}>
+            <div style={{ fontFamily: 'IBM Plex Mono', fontSize: 9, color: 'rgba(var(--fg-rgb),0.3)', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: 8 }}>
               {s.replace(/_/g, ' ')}
             </div>
             <div style={{ fontFamily: 'Bebas Neue', fontSize: 36, lineHeight: 1 }}>{statusCounts[s] || 0}</div>
@@ -126,7 +126,7 @@ export default async function StatsPage() {
             </tr>
           ))}
           {topWallets.length === 0 && (
-            <tr><td colSpan={4} style={{ textAlign: 'center', padding: 32, color: 'rgba(255,255,255,0.3)' }}>No payouts yet</td></tr>
+            <tr><td colSpan={4} style={{ textAlign: 'center', padding: 32, color: 'rgba(var(--fg-rgb),0.3)' }}>No payouts yet</td></tr>
           )}
         </tbody>
       </table>

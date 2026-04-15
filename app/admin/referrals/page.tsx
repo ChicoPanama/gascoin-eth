@@ -95,7 +95,7 @@ export default async function ReferralsPage(props: { searchParams: Promise<{ tab
         </thead>
         <tbody>
           {(!conversions || conversions.length === 0) ? (
-            <tr><td colSpan={6} style={{ textAlign: 'center', padding: 48, color: 'rgba(255,255,255,0.3)', fontFamily: 'IBM Plex Mono', fontSize: 12 }}>
+            <tr><td colSpan={6} style={{ textAlign: 'center', padding: 48, color: 'rgba(var(--fg-rgb),0.3)', fontFamily: 'IBM Plex Mono', fontSize: 12 }}>
               {tab === 'DISPATCH' ? 'No referral rewards ready for dispatch' : 'No conversions match this filter'}
             </td></tr>
           ) : conversions.map((c: any) => {
@@ -113,11 +113,11 @@ export default async function ReferralsPage(props: { searchParams: Promise<{ tab
                 <td className="lb-table-wallet">{truncateWallet(c.referred_wallet)}</td>
                 <td className="lb-table-sol">{REFERRAL_CONFIG.POINTS_PER_CONVERSION} PTS</td>
                 <td>
-                  <span style={{ fontFamily: 'IBM Plex Mono', fontSize: 9, fontWeight: 600, padding: '3px 8px', border: `1px solid ${statusColors[c.reward_status] || 'rgba(255,255,255,0.2)'}`, color: statusColors[c.reward_status] || 'rgba(255,255,255,0.4)' }}>
+                  <span style={{ fontFamily: 'IBM Plex Mono', fontSize: 9, fontWeight: 600, padding: '3px 8px', border: `1px solid ${statusColors[c.reward_status] || 'rgba(var(--fg-rgb),0.2)'}`, color: statusColors[c.reward_status] || 'rgba(var(--fg-rgb),0.4)' }}>
                     {c.reward_status === 'ready_for_dispatch' ? 'READY' : c.reward_status.toUpperCase()}
                   </span>
                   {c.skip_reason && (
-                    <div style={{ fontFamily: 'IBM Plex Mono', fontSize: 9, color: 'rgba(255,255,255,0.25)', marginTop: 4 }}>
+                    <div style={{ fontFamily: 'IBM Plex Mono', fontSize: 9, color: 'rgba(var(--fg-rgb),0.25)', marginTop: 4 }}>
                       {SKIP_REASON_LABELS[c.skip_reason] || c.skip_reason}
                     </div>
                   )}
@@ -144,7 +144,7 @@ export default async function ReferralsPage(props: { searchParams: Promise<{ tab
                   )}
                   {c.reward_status === 'dispatched' && c.reward_tx_signature && (
                     <a href={`https://solscan.io/tx/${c.reward_tx_signature}`} target="_blank" rel="noopener"
-                      style={{ fontFamily: 'IBM Plex Mono', fontSize: 9, color: 'rgba(255,255,255,0.4)' }}>
+                      style={{ fontFamily: 'IBM Plex Mono', fontSize: 9, color: 'rgba(var(--fg-rgb),0.4)' }}>
                       View TX →
                     </a>
                   )}
@@ -155,7 +155,7 @@ export default async function ReferralsPage(props: { searchParams: Promise<{ tab
         </tbody>
       </table>
 
-      <div style={{ marginTop: 24, fontFamily: 'IBM Plex Mono', fontSize: 10, color: 'rgba(255,255,255,0.2)' }}>
+      <div style={{ marginTop: 24, fontFamily: 'IBM Plex Mono', fontSize: 10, color: 'rgba(var(--fg-rgb),0.2)' }}>
         Pipeline: Referral click → referred user approved → worker verifies eligibility → AI ring detection → points awarded
       </div>
     </div>

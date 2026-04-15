@@ -20,14 +20,14 @@ export default async function AuditPage() {
   return (
     <div style={{ padding: '32px 40px' }}>
       {/* Header */}
-      <div style={{ marginBottom: 32, borderBottom: '1px solid rgba(255,255,255,0.08)', paddingBottom: 24 }}>
-        <div style={{ fontFamily: 'IBM Plex Mono', fontSize: 10, color: 'rgba(255,255,255,0.3)', letterSpacing: '0.3em', textTransform: 'uppercase', marginBottom: 8 }}>
+      <div style={{ marginBottom: 32, borderBottom: '1px solid rgba(var(--fg-rgb),0.08)', paddingBottom: 24 }}>
+        <div style={{ fontFamily: 'IBM Plex Mono', fontSize: 10, color: 'rgba(var(--fg-rgb),0.3)', letterSpacing: '0.3em', textTransform: 'uppercase', marginBottom: 8 }}>
           ADMIN / ANALYTICS
         </div>
         <div style={{ fontFamily: 'Bebas Neue', fontSize: 32, letterSpacing: '0.05em' }}>
           AUDIT LOG
         </div>
-        <div style={{ fontFamily: 'IBM Plex Mono', fontSize: 11, color: 'rgba(255,255,255,0.3)', marginTop: 8 }}>
+        <div style={{ fontFamily: 'IBM Plex Mono', fontSize: 11, color: 'rgba(var(--fg-rgb),0.3)', marginTop: 8 }}>
           {sortedLogs.length} entries (most recent 200) — chronological, newest first
         </div>
       </div>
@@ -47,7 +47,7 @@ export default async function AuditPage() {
           <tbody>
             {sortedLogs.length === 0 ? (
               <tr className="lb-table-row">
-                <td colSpan={6} style={{ padding: '32px 16px', fontFamily: 'IBM Plex Mono', fontSize: 12, color: 'rgba(255,255,255,0.25)', textAlign: 'center' }}>
+                <td colSpan={6} style={{ padding: '32px 16px', fontFamily: 'IBM Plex Mono', fontSize: 12, color: 'rgba(var(--fg-rgb),0.25)', textAlign: 'center' }}>
                   No audit log entries.
                 </td>
               </tr>
@@ -67,7 +67,7 @@ export default async function AuditPage() {
                     </td>
                     <td
                       className="lb-table-wallet"
-                      style={{ fontSize: 11, color: 'rgba(255,255,255,0.7)' }}
+                      style={{ fontSize: 11, color: 'rgba(var(--fg-rgb),0.7)' }}
                     >
                       {log.action ?? '—'}
                     </td>
@@ -82,16 +82,16 @@ export default async function AuditPage() {
                     <td className="lb-table-action">
                       {payloadStr ? (
                         <details>
-                          <summary style={{ fontFamily: 'IBM Plex Mono', fontSize: 10, color: 'rgba(255,255,255,0.4)', cursor: 'pointer', userSelect: 'none' }}>
+                          <summary style={{ fontFamily: 'IBM Plex Mono', fontSize: 10, color: 'rgba(var(--fg-rgb),0.4)', cursor: 'pointer', userSelect: 'none' }}>
                             VIEW JSON
                           </summary>
                           <pre
                             style={{
                               fontFamily: 'IBM Plex Mono',
                               fontSize: 10,
-                              color: 'rgba(255,255,255,0.6)',
-                              background: 'rgba(255,255,255,0.04)',
-                              border: '1px solid rgba(255,255,255,0.08)',
+                              color: 'rgba(var(--fg-rgb),0.6)',
+                              background: 'rgba(var(--fg-rgb),0.04)',
+                              border: '1px solid rgba(var(--fg-rgb),0.08)',
                               padding: 12,
                               marginTop: 8,
                               maxWidth: 400,
@@ -105,7 +105,7 @@ export default async function AuditPage() {
                           </pre>
                         </details>
                       ) : (
-                        <span style={{ color: 'rgba(255,255,255,0.2)' }}>—</span>
+                        <span style={{ color: 'rgba(var(--fg-rgb),0.2)' }}>—</span>
                       )}
                     </td>
                   </tr>
