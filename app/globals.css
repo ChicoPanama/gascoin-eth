@@ -6823,12 +6823,12 @@ button.docs-footer-link {
      flips them to black silhouettes without touching the source files.
      Scoped tightly by filename suffix so photographic assets like
      /logo/gascoin-g.jpg (which already has its own light background) are
-     untouched. Layer 03 xai-icon.jpg is a colored JPEG — including it in
-     the invert rule gives it a color-inverted appearance in light mode
-     rather than being incorrect-as-dark-in-dark-mode. */
+     untouched. Also covers /icons/brands/x.svg (X social network mark
+     used in AI-stack Layer 3) which is white-filled and invisible on
+     white bg otherwise. */
   .gc-tech-layer-icon-img,
   img[src$="-bw.svg"],
-  img[src="/icons/xai-icon.jpg"] {
+  img[src="/icons/brands/x.svg"] {
     filter: invert(1);
   }
 

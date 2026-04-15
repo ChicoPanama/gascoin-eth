@@ -30,7 +30,17 @@ export default async function Home() {
   let treasuryUsd = '—';
   let marketCap = '—';
   let volume = '—';
+  let testersRedeemed = 0;
+  let claimsSubmitted = 0;
   const gates = String(GATE_COUNT);
+
+  // Season 1 dry-run check — controls which stats the hero surfaces.
+  // In dry-run the token hasn't launched, so Market Cap + 24h Volume are
+  // meaningless (always '—'). Replace them with live Season 1 metrics
+  // (testers redeemed, claims submitted) pulled from Supabase. Flip
+  // ENABLE_LIVE_PAYOUT=true in Vercel and the hero auto-swaps back to
+  // market metrics — no code change at token launch.
+  const isDryRun = process.env.ENABLE_LIVE_PAYOUT !== 'true';
 
   try {
     const { getTreasuryBalances } = await import('../lib/integrations/solana');
@@ -41,26 +51,43 @@ export default async function Home() {
     }
   } catch {}
 
-  try {
-    const { getMarketSnapshot } = await import('../lib/integrations/pricing');
-    const m = await getMarketSnapshot();
-    const mc = Number(m.marketCapUsd);
-    const vol = Number(m.volume24hUsd);
-    if (mc > 0) marketCap = mc >= 1_000_000 ? `$${(mc / 1_000_000).toFixed(1)}M` : `$${mc.toLocaleString()}`;
-    if (vol > 0) volume = vol >= 1_000_000 ? `$${(vol / 1_000_000).toFixed(1)}M` : vol >= 1_000 ? `$${(vol / 1_000).toFixed(0)}K` : `$${vol.toLocaleString()}`;
-  } catch {}
+  if (isDryRun) {
+    // Live Season 1 beta metrics — pulled fresh per request
+    try {
+      const { getSupabaseAdmin } = await import('../lib/supabase');
+      const supabase = getSupabaseAdmin();
+      const [invitesRes, claimsRes] = await Promise.all([
+        supabase
+          .from('invite_codes')
+          .select('id', { count: 'exact', head: true })
+          .not('used_by_x_user_id', 'is', null),
+        supabase
+          .from('claims')
+          .select('id', { count: 'exact', head: true }),
+      ]);
+      testersRedeemed = invitesRes.count ?? 0;
+      claimsSubmitted = claimsRes.count ?? 0;
+    } catch {}
+  } else {
+    try {
+      const { getMarketSnapshot } = await import('../lib/integrations/pricing');
+      const m = await getMarketSnapshot();
+      const mc = Number(m.marketCapUsd);
+      const vol = Number(m.volume24hUsd);
+      if (mc > 0) marketCap = mc >= 1_000_000 ? `$${(mc / 1_000_000).toFixed(1)}M` : `$${mc.toLocaleString()}`;
+      if (vol > 0) volume = vol >= 1_000_000 ? `$${(vol / 1_000_000).toFixed(1)}M` : vol >= 1_000 ? `$${(vol / 1_000).toFixed(0)}K` : `$${vol.toLocaleString()}`;
+    } catch {}
+  }
 
-  // Demo data fallback — yields to real data when treasury/market are live
+  // Demo data fallback — yields to real data when treasury/market are live.
+  // During dry-run we intentionally DON'T fall back to demo market data
+  // because we're showing beta metrics instead.
   treasuryUsd = fallback(treasuryUsd, DEMO_TREASURY_DISPLAY.treasuryUsd);
-  marketCap = fallback(marketCap, DEMO_TREASURY_DISPLAY.marketCap);
-  volume = fallback(volume, DEMO_TREASURY_DISPLAY.volume);
+  if (!isDryRun) {
+    marketCap = fallback(marketCap, DEMO_TREASURY_DISPLAY.marketCap);
+    volume = fallback(volume, DEMO_TREASURY_DISPLAY.volume);
+  }
   const isDemo = treasuryUsd === DEMO_TREASURY_DISPLAY.treasuryUsd;
-
-  // Season 1 banner — only renders when ENABLE_LIVE_PAYOUT !== 'true'.
-  // First-thing visitors see, so they know the platform is in dry-run /
-  // points-only mode for beta. Auto-disappears the moment we flip
-  // ENABLE_LIVE_PAYOUT=true in Vercel — no code change needed at launch.
-  const isDryRun = process.env.ENABLE_LIVE_PAYOUT !== 'true';
 
   return (
     <>
@@ -138,7 +165,7 @@ export default async function Home() {
                   Gas prices are crushing everyday people. GASCOIN is a community-funded
                   movement on Solana that gives real money back for real gas purchases.
                   Post proof on X, submit your receipt, and receive SOL directly to your
-                  wallet. No middlemen. No delays. Just people helping people.
+                  wallet. No middlemen. No custodians. Just people helping people.
                 </p>
               </HeroItem>
               <HeroItem>
@@ -165,25 +192,42 @@ export default async function Home() {
                 <span className="gc-inline-token"><UsdcIcon />USDC</span> + <span className="gc-inline-token"><GascoinTokenIcon />GASCOIN</span> · {isDemo ? 'Simulated' : 'Live'}
               </div>
             </div>
-            <div className="gc-stat">
-              <div className="gc-stat-label">Market Cap</div>
-              <div className="gc-stat-value">{marketCap}</div>
-              <div className="gc-stat-sub">Fully Diluted</div>
-            </div>
-            <div className="gc-stat">
-              <div className="gc-stat-label">24h Volume</div>
-              <div className="gc-stat-value">{volume}</div>
-              <div className="gc-stat-sub">Trading Volume</div>
-            </div>
+            {isDryRun ? (
+              <>
+                <div className="gc-stat">
+                  <div className="gc-stat-label">Beta Testers</div>
+                  <div className="gc-stat-value">{testersRedeemed}</div>
+                  <div className="gc-stat-sub">Invite codes redeemed</div>
+                </div>
+                <div className="gc-stat">
+                  <div className="gc-stat-label">Claims Submitted</div>
+                  <div className="gc-stat-value">{claimsSubmitted}</div>
+                  <div className="gc-stat-sub">Season 1 · points-only</div>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="gc-stat">
+                  <div className="gc-stat-label">Market Cap</div>
+                  <div className="gc-stat-value">{marketCap}</div>
+                  <div className="gc-stat-sub">Fully Diluted</div>
+                </div>
+                <div className="gc-stat">
+                  <div className="gc-stat-label">24h Volume</div>
+                  <div className="gc-stat-value">{volume}</div>
+                  <div className="gc-stat-sub">Trading Volume</div>
+                </div>
+              </>
+            )}
             <div className="gc-stat">
               <div className="gc-stat-label">Gates</div>
               <div className="gc-stat-value">{gates}</div>
               <div className="gc-stat-sub">Verification Steps</div>
             </div>
           </div>
-          {isDemo && (
+          {isDryRun && (
             <div style={{ padding: '12px 48px', textAlign: 'center', fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.2em', textTransform: 'uppercase' as const, color: 'var(--muted-deep)' }}>
-              Pre-Launch · Demo Data · Real Payouts Coming Soon
+              Season 1 Beta · Token Not Yet Launched · Market Metrics Activate At Token Launch
             </div>
           )}
         </section>
@@ -219,7 +263,7 @@ export default async function Home() {
               <div className="gc-step-title">Submit Your Receipt</div>
               <p className="gc-step-desc">
                 Upload a photo of your gas receipt with your wallet address written
-                on it. Our system runs 10 automated verification gates against
+                on it. Our system runs {gates} automated verification gates against
                 every submission.
               </p>
             </div>
@@ -305,11 +349,11 @@ export default async function Home() {
 
               <div className="gc-tech-connector" />
 
-              {/* Layer 3 — X API v2 */}
+              {/* Layer 3 — X API v2 (the social network, not xAI the company) */}
               <div className="gc-tech-layer">
                 <div className="gc-tech-layer-num">03</div>
                 <div className="gc-tech-layer-icon">
-                  <img src="/icons/xai-icon.jpg" alt="xAI" className="gc-tech-layer-icon-img" />
+                  <img src="/icons/brands/x.svg" alt="X" className="gc-tech-layer-icon-img" />
                 </div>
                 <div className="gc-tech-layer-content">
                   <div className="gc-tech-layer-title">X API v2 Intelligence</div>
@@ -396,7 +440,7 @@ export default async function Home() {
                   <div className="gc-tech-layer-tag">CLAUDE OPUS · ANTHROPIC · FINAL REVIEW</div>
                   <p className="gc-tech-layer-desc">
                     Before SOL leaves the treasury, Claude reviews the complete submission package —
-                    all 12 gate results, fraud scores, X account metrics,
+                    all {gates} gate results, fraud scores, X account metrics,
                     submission history, and full mem0 intelligence profile.
                     Returns a verdict with a written audit narrative.
                     The manager that signs off before money moves.
@@ -411,28 +455,30 @@ export default async function Home() {
               </div>
             </div>
 
-            {/* Bottom stats */}
+            {/* Bottom stats — facts tied to real code, no stale hardcoded
+                numbers. Gate count reads from GATE_COUNT so it auto-updates
+                on every gate addition. */}
             <div className="gc-tech-stats">
               <div className="gc-tech-stat">
-                <div className="gc-tech-stat-value">5</div>
+                <div className="gc-tech-stat-value">3</div>
                 <div className="gc-tech-stat-label">AI Engines</div>
               </div>
               <div className="gc-tech-stat">
-                <div className="gc-tech-stat-value">12</div>
+                <div className="gc-tech-stat-value">{gates}</div>
                 <div className="gc-tech-stat-label">Automated Gates</div>
               </div>
               <div className="gc-tech-stat">
-                <div className="gc-tech-stat-value">7</div>
-                <div className="gc-tech-stat-label">Verification Layers</div>
+                <div className="gc-tech-stat-value">4</div>
+                <div className="gc-tech-stat-label">Gate Categories</div>
               </div>
               <div className="gc-tech-stat">
-                <div className="gc-tech-stat-value">258</div>
-                <div className="gc-tech-stat-label">Stress Tests</div>
+                <div className="gc-tech-stat-value">9</div>
+                <div className="gc-tech-stat-label">Cron Workers</div>
               </div>
             </div>
 
             <div className="gc-tech-footer">
-              <Link href="/gates" className="gc-teaser-link">See all 10 verification gates</Link>
+              <Link href="/gates" className="gc-teaser-link">See all {gates} verification gates</Link>
             </div>
           </div>
         </section>
@@ -467,7 +513,7 @@ export default async function Home() {
           <section className="gc-teaser glass-card glass-card--glow" style={{ padding: '48px' }}>
             <div className="gc-section-num">09</div>
             <h2 className="gc-section-title">Live Treasury</h2>
-            <p style={{ color: 'rgba(255,255,255,0.45)', fontWeight: 300, fontSize: 15, maxWidth: 500, lineHeight: 1.75, marginTop: 16 }}>
+            <p style={{ color: 'var(--muted)', fontSize: 15, maxWidth: 500, lineHeight: 1.75, marginTop: 16 }}>
               On-chain treasury balance updated in real time. Every refund, every
               transaction — fully transparent.
             </p>
