@@ -8490,3 +8490,301 @@ button.docs-footer-link {
   }
   .wlc-pump { opacity: 1; transform: none; }
 }
+
+/* ═══ POPOVER (PR #44 — replaces full-screen modal on desktop) ═══════ */
+/* Anchored popover that appears near the clicked pump region. On mobile
+   (≤ 768px) CSS flips it into a full-screen sheet since popovers don't
+   work in small viewports. */
+
+.wlc-popover-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 499;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  pointer-events: none;
+  animation: wlc-popover-scrim-in 220ms ease;
+}
+@keyframes wlc-popover-scrim-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.wlc-popover {
+  position: fixed;
+  z-index: 500;
+  width: 360px;
+  max-width: calc(100vw - 32px);
+  background: var(--wlc-bg);
+  border: 1px solid var(--wlc-ink);
+  box-shadow:
+    0 24px 60px rgba(0, 0, 0, 0.8),
+    0 0 40px rgba(231, 233, 234, 0.12),
+    var(--wlc-glow-soft);
+  animation: wlc-popover-in 260ms cubic-bezier(0.16, 1, 0.3, 1);
+  color: var(--wlc-ink);
+  font-family: var(--font-body, 'IBM Plex Mono', monospace);
+}
+@keyframes wlc-popover-in {
+  from { opacity: 0; transform: translateY(6px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0)  scale(1); }
+}
+
+.wlc-popover-inner {
+  padding: 28px 24px 24px;
+  max-height: 75vh;
+  overflow-y: auto;
+}
+
+.wlc-popover-close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 28px;
+  height: 28px;
+  background: transparent;
+  border: 1px solid var(--wlc-line);
+  color: var(--wlc-ink-dim);
+  font-family: var(--font-mono, 'IBM Plex Mono', monospace);
+  font-size: 12px;
+  cursor: pointer;
+  transition: color 150ms, border-color 150ms;
+  z-index: 10;
+}
+.wlc-popover-close:hover {
+  color: var(--wlc-ink);
+  border-color: var(--wlc-ink);
+}
+
+/* Connector arrow pointing back at the anchor (desktop only) */
+.wlc-popover::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  width: 10px;
+  height: 10px;
+  background: var(--wlc-bg);
+  border: 1px solid var(--wlc-ink);
+  transform: translateY(-50%) rotate(45deg);
+}
+.wlc-popover--right::before {
+  left: -6px;
+  border-top: 0;
+  border-right: 0;
+}
+.wlc-popover--left::before {
+  right: -6px;
+  border-bottom: 0;
+  border-left: 0;
+}
+.wlc-popover--below::before {
+  top: -6px;
+  left: 50%;
+  transform: translateX(-50%) rotate(45deg);
+  border-right: 0;
+  border-bottom: 0;
+}
+
+/* ── Popover content styles ────────────────────────────────────────── */
+.wlc-pop-kicker {
+  font-family: var(--font-mono, 'IBM Plex Mono', monospace);
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  color: var(--wlc-ink-dim);
+  margin-bottom: 12px;
+}
+.wlc-pop-title {
+  font-family: var(--font-mono, 'IBM Plex Mono', monospace);
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.005em;
+  color: var(--wlc-ink);
+  line-height: 1.1;
+  margin: 0 0 14px;
+}
+.wlc-pop-body {
+  font-family: var(--font-body, 'IBM Plex Mono', monospace);
+  font-size: 12px;
+  line-height: 1.65;
+  color: rgba(231, 233, 234, 0.85);
+  margin: 0 0 12px;
+}
+.wlc-pop-body--muted {
+  color: var(--wlc-ink-dim);
+  font-size: 11px;
+}
+.wlc-pop-body code {
+  font-family: var(--font-mono, 'IBM Plex Mono', monospace);
+  font-size: 11px;
+  border: 1px solid var(--wlc-line);
+  padding: 0 5px;
+  color: var(--wlc-ink);
+}
+
+.wlc-pop-traction {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 10px 14px;
+  margin: 6px 0 14px;
+  border: 1px solid var(--wlc-ink);
+  box-shadow: var(--wlc-glow-soft);
+}
+.wlc-pop-traction-num {
+  font-family: var(--font-mono, 'IBM Plex Mono', monospace);
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--wlc-ink);
+  line-height: 1;
+  text-shadow: var(--wlc-glow-soft);
+}
+.wlc-pop-traction-label {
+  font-family: var(--font-mono, 'IBM Plex Mono', monospace);
+  font-size: 9px;
+  letter-spacing: 0.16em;
+  color: var(--wlc-ink-dim);
+  text-transform: uppercase;
+}
+
+.wlc-pop-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 18px;
+}
+.wlc-pop-btn {
+  font-family: var(--font-mono, 'IBM Plex Mono', monospace);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  color: var(--wlc-ink);
+  background: transparent;
+  border: 1px solid var(--wlc-line);
+  padding: 10px 16px;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 150ms;
+  font-weight: 700;
+}
+.wlc-pop-btn:hover {
+  border-color: var(--wlc-ink);
+  box-shadow: var(--wlc-glow-soft);
+}
+.wlc-pop-btn--primary {
+  background: var(--wlc-ink);
+  color: var(--wlc-bg);
+  border-color: var(--wlc-ink);
+}
+.wlc-pop-btn--primary:hover {
+  background: var(--wlc-bg);
+  color: var(--wlc-ink);
+  box-shadow: var(--wlc-glow);
+}
+
+/* How-it-works step list */
+.wlc-pop-steps {
+  list-style: none;
+  padding: 0;
+  margin: 8px 0 14px;
+  counter-reset: none;
+}
+.wlc-pop-steps li {
+  display: grid;
+  grid-template-columns: 28px 1fr;
+  gap: 10px;
+  align-items: baseline;
+  padding: 6px 0;
+  font-family: var(--font-body, 'IBM Plex Mono', monospace);
+  font-size: 11px;
+  line-height: 1.45;
+  color: rgba(231, 233, 234, 0.85);
+  border-bottom: 1px solid rgba(231, 233, 234, 0.05);
+}
+.wlc-pop-steps li:last-child { border-bottom: 0; }
+.wlc-pop-steps li > span {
+  font-family: var(--font-mono, 'IBM Plex Mono', monospace);
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--wlc-ink);
+  text-shadow: var(--wlc-glow-soft);
+}
+
+/* Roadmap list */
+.wlc-pop-roadmap {
+  list-style: none;
+  padding: 0;
+  margin: 8px 0 14px;
+  border: 1px solid var(--wlc-line);
+}
+.wlc-pop-roadmap li {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+  padding: 8px 12px;
+  font-family: var(--font-mono, 'IBM Plex Mono', monospace);
+  font-size: 11px;
+  color: rgba(231, 233, 234, 0.75);
+  border-bottom: 1px solid var(--wlc-line);
+}
+.wlc-pop-roadmap li:last-child { border-bottom: 0; }
+.wlc-pop-roadmap-status {
+  color: var(--wlc-ink-dim);
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-align: right;
+  align-self: center;
+}
+.wlc-pop-roadmap li.is-done .wlc-pop-roadmap-item  { color: var(--wlc-ink); }
+.wlc-pop-roadmap li.is-done .wlc-pop-roadmap-status {
+  color: var(--wlc-ink);
+  font-weight: 700;
+}
+
+/* ── Mobile: flip to full-screen sheet ─────────────────────────────── */
+@media (max-width: 768px) {
+  .wlc-popover-scrim {
+    background: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+  .wlc-popover {
+    inset: 0 !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100vw;
+    max-width: 100vw;
+    height: 100svh;
+    box-shadow: none;
+    animation: wlc-popover-sheet-in 320ms cubic-bezier(0.16, 1, 0.3, 1);
+    display: flex;
+    flex-direction: column;
+  }
+  @keyframes wlc-popover-sheet-in {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .wlc-popover::before { display: none; }
+  .wlc-popover-inner {
+    padding: 56px 24px 32px;
+    max-height: none;
+    flex: 1;
+  }
+  .wlc-popover-close {
+    top: 16px;
+    right: 16px;
+    width: 36px;
+    height: 36px;
+    font-size: 14px;
+  }
+  .wlc-pop-title { font-size: 28px; }
+  .wlc-pop-body  { font-size: 13px; }
+  .wlc-pop-btn   { padding: 14px 20px; font-size: 11px; }
+}
+
+/* Respect prefers-reduced-motion on popover */
+@media (prefers-reduced-motion: reduce) {
+  .wlc-popover,
+  .wlc-popover-scrim {
+    animation: none !important;
+  }
+}
