@@ -1,321 +1,302 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  GASCOIN interactive pump — hand-authored SVG.
+  GASCOIN interactive pump — v4.
 
-  Coordinate system: viewBox 0 0 1000 1320 (portrait, 5:6.6 aspect).
-  Every interactive region is a <g id="pump-*"> so the welcome-client can
-  attach click handlers directly to the group instead of guessing
-  percentage rectangles over a raster.
+  Blend: the v2 pump's rich detail (rivets, panel lines, brand plate,
+  serial strip, status LED, rim lighting, gradients) + v3's tighter,
+  near-square proportions that match the user's reference image more
+  closely. viewBox 1000x1100.
 
-  Brand tokens (from app/globals.css X.com Lights Out palette):
-    --fg:    #E7E9EA   (bone white ink)
-    --muted: #71767B   (mid gray)
-    --line:  #2F3336   (hairline gray)
-    --bg:    #000000   (void)
+  Interactive groups:
+    #pump-handle   top cap with DOCS stamp
+    #pump-display  central screen (the door → /submit)
+    #pump-body     main rounded body (rivets, panel lines, brand plate,
+                   serial strip, pulsing status LED)
+    #pump-nozzle   compact hose + grip hanging close to the body
+    #pump-base     thin slab with rivets and STATION · 01 text
 -->
 <svg
   xmlns="http://www.w3.org/2000/svg"
-  viewBox="0 0 1000 1320"
+  viewBox="0 0 1000 1100"
   preserveAspectRatio="xMidYMid meet"
   role="img"
   aria-label="GASCOIN gas pump"
 >
   <defs>
-    <!-- Main body metallic gradient: darkest at bottom, slight sheen at top -->
     <linearGradient id="body-grad" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0"    stop-color="#1a1a1d"/>
-      <stop offset="0.12" stop-color="#151517"/>
+      <stop offset="0"    stop-color="#1c1c1f"/>
+      <stop offset="0.08" stop-color="#141417"/>
       <stop offset="0.5"  stop-color="#0a0a0b"/>
       <stop offset="1"    stop-color="#030304"/>
     </linearGradient>
 
-    <!-- Rim light gradient for highlighting the top edge of parts -->
     <linearGradient id="rim-light" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0"    stop-color="rgba(231,233,234,0.18)"/>
-      <stop offset="0.08" stop-color="rgba(231,233,234,0.02)"/>
+      <stop offset="0"    stop-color="rgba(231,233,234,0.22)"/>
+      <stop offset="0.1"  stop-color="rgba(231,233,234,0.02)"/>
       <stop offset="1"    stop-color="transparent"/>
     </linearGradient>
 
-    <!-- Display screen surface (the white GASCOIN face) -->
     <linearGradient id="screen-grad" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0"    stop-color="#f5f6f2"/>
-      <stop offset="0.5"  stop-color="#e8eae4"/>
-      <stop offset="1"    stop-color="#d6d8d2"/>
+      <stop offset="0"    stop-color="#f7f8f4"/>
+      <stop offset="0.5"  stop-color="#eaeae4"/>
+      <stop offset="1"    stop-color="#d4d6d0"/>
     </linearGradient>
 
-    <!-- Nozzle grip gradient (darker than body, more contrast) -->
     <linearGradient id="nozzle-grad" x1="0" y1="0" x2="1" y2="0">
-      <stop offset="0" stop-color="#0d0d0f"/>
-      <stop offset="1" stop-color="#1f1f22"/>
+      <stop offset="0" stop-color="#0c0c0e"/>
+      <stop offset="1" stop-color="#1e1e21"/>
     </linearGradient>
 
-    <!-- Halo glow around the whole pump, used by welcome-client -->
     <radialGradient id="halo-grad" cx="50%" cy="50%" r="50%">
-      <stop offset="0"   stop-color="rgba(231,233,234,0.18)"/>
-      <stop offset="0.4" stop-color="rgba(231,233,234,0.06)"/>
+      <stop offset="0"   stop-color="rgba(231,233,234,0.14)"/>
+      <stop offset="0.5" stop-color="rgba(231,233,234,0.04)"/>
       <stop offset="1"   stop-color="rgba(231,233,234,0)"/>
     </radialGradient>
 
-    <!-- Display screen scanline mask (repeating 2px lines) -->
+    <!-- LCD grid pattern for the display -->
+    <pattern id="lcd-grid" x="0" y="0" width="32" height="32" patternUnits="userSpaceOnUse">
+      <path d="M 32 0 L 0 0 0 32" fill="none" stroke="rgba(0,0,0,0.04)" stroke-width="1"/>
+    </pattern>
+
+    <!-- Scanline overlay (2px repeating lines) -->
     <pattern id="scanlines" x="0" y="0" width="4" height="4" patternUnits="userSpaceOnUse">
       <rect x="0" y="0" width="4" height="4" fill="transparent"/>
       <line x1="0" y1="2" x2="4" y2="2" stroke="rgba(0,0,0,0.06)" stroke-width="1"/>
     </pattern>
 
-    <!-- LCD grid pattern for old-monitor feel inside the screen -->
-    <pattern id="lcd-grid" x="0" y="0" width="32" height="32" patternUnits="userSpaceOnUse">
-      <path d="M 32 0 L 0 0 0 32" fill="none" stroke="rgba(0,0,0,0.04)" stroke-width="1"/>
-    </pattern>
-
-    <!-- Subtle panel-line pattern (for lower body plates) -->
+    <!-- Panel hatch for texture on lower body + base -->
     <pattern id="panel-hatch" x="0" y="0" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
-      <line x1="0" y1="0" x2="0" y2="6" stroke="rgba(231,233,234,0.015)" stroke-width="1"/>
+      <line x1="0" y1="0" x2="0" y2="6" stroke="rgba(231,233,234,0.018)" stroke-width="1"/>
     </pattern>
 
-    <!-- Glow filter for hover highlights -->
-    <filter id="soft-glow" x="-40%" y="-40%" width="180%" height="180%">
-      <feGaussianBlur stdDeviation="6" result="blurred"/>
-      <feMerge>
-        <feMergeNode in="blurred"/>
-        <feMergeNode in="SourceGraphic"/>
-      </feMerge>
+    <!-- Soft-blur for the ground shadow -->
+    <filter id="soft-blur" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="6"/>
     </filter>
   </defs>
 
   <!-- ═══ GROUND SHADOW ═══════════════════════════════════════════════ -->
   <g id="pump-ground">
-    <ellipse cx="500" cy="1260" rx="380" ry="24" fill="rgba(231,233,234,0.09)" filter="url(#soft-glow)"/>
-    <ellipse cx="500" cy="1260" rx="280" ry="14" fill="rgba(231,233,234,0.15)"/>
+    <ellipse cx="500" cy="1020" rx="360" ry="18"
+             fill="rgba(231,233,234,0.08)" filter="url(#soft-blur)"/>
+    <ellipse cx="500" cy="1020" rx="260" ry="10"
+             fill="rgba(231,233,234,0.14)"/>
   </g>
 
-  <!-- ═══ HALO (used for hover glow, hidden by default) ═══════════════ -->
-  <ellipse
-    id="pump-halo"
-    cx="500" cy="700" rx="520" ry="620"
-    fill="url(#halo-grad)"
-    opacity="0.55"
-  />
+  <!-- ═══ HALO ═══════════════════════════════════════════════════════ -->
+  <ellipse id="pump-halo" cx="500" cy="560" rx="480" ry="540"
+           fill="url(#halo-grad)" opacity="0.6"/>
 
-  <!-- ═══ BASE (bottom block) ════════════════════════════════════════ -->
+  <!-- ═══ BASE (thin slab, richer than v3) ═══════════════════════════ -->
   <g id="pump-base" class="pump-region" tabindex="0">
+    <!-- Upper lip where body meets base -->
+    <rect x="188" y="868" width="624" height="14" rx="2"
+          fill="#0a0a0b" stroke="#2F3336" stroke-width="1"/>
     <!-- Main base slab -->
-    <rect x="180" y="1060" width="640" height="170" rx="6"
+    <rect x="170" y="880" width="660" height="110" rx="4"
           fill="url(#body-grad)" stroke="#2F3336" stroke-width="2"/>
-    <!-- Rim-light highlight along the top edge -->
-    <rect x="182" y="1060" width="636" height="28" rx="6" fill="url(#rim-light)"/>
-    <!-- Upper lip (like a step where the body meets the base) -->
-    <rect x="196" y="1048" width="608" height="14" rx="2" fill="#0a0a0b" stroke="#2F3336" stroke-width="1"/>
-    <!-- Lower step detail (a thinner stripe near the bottom) -->
-    <rect x="220" y="1180" width="560" height="34" rx="3"
-          fill="#030304" stroke="#1a1a1d" stroke-width="1"/>
-    <!-- Panel hatch fill for texture -->
-    <rect x="220" y="1180" width="560" height="34" rx="3" fill="url(#panel-hatch)"/>
-    <!-- Model plate -->
-    <rect x="400" y="1100" width="200" height="28" rx="2"
+    <!-- Rim light on the top edge -->
+    <rect x="172" y="880" width="656" height="20" rx="4" fill="url(#rim-light)"/>
+    <!-- Panel hatch for texture -->
+    <rect x="170" y="880" width="660" height="110" rx="4" fill="url(#panel-hatch)"/>
+    <!-- STATION · 01 plate -->
+    <rect x="410" y="912" width="180" height="26" rx="2"
           fill="none" stroke="rgba(231,233,234,0.18)" stroke-width="1"/>
-    <text x="500" y="1120" text-anchor="middle"
-          fill="rgba(231,233,234,0.35)"
+    <text x="500" y="930" text-anchor="middle"
+          fill="rgba(231,233,234,0.38)"
           font-family="ui-monospace, 'IBM Plex Mono', monospace"
-          font-size="14" letter-spacing="4">STATION · 01</text>
-    <!-- Small rivets on corners -->
-    <circle cx="206" cy="1086" r="3" fill="#1a1a1d" stroke="#2F3336" stroke-width="0.6"/>
-    <circle cx="794" cy="1086" r="3" fill="#1a1a1d" stroke="#2F3336" stroke-width="0.6"/>
-    <circle cx="206" cy="1204" r="3" fill="#1a1a1d" stroke="#2F3336" stroke-width="0.6"/>
-    <circle cx="794" cy="1204" r="3" fill="#1a1a1d" stroke="#2F3336" stroke-width="0.6"/>
+          font-size="13" letter-spacing="4">STATION · 01</text>
+    <!-- Bottom step detail -->
+    <rect x="200" y="960" width="600" height="24" rx="2"
+          fill="#030304" stroke="#1a1a1d" stroke-width="1"/>
+    <!-- Corner rivets -->
+    <circle cx="192" cy="898" r="3" fill="#1a1a1d" stroke="#2F3336" stroke-width="0.6"/>
+    <circle cx="808" cy="898" r="3" fill="#1a1a1d" stroke="#2F3336" stroke-width="0.6"/>
+    <circle cx="192" cy="974" r="3" fill="#1a1a1d" stroke="#2F3336" stroke-width="0.6"/>
+    <circle cx="808" cy="974" r="3" fill="#1a1a1d" stroke="#2F3336" stroke-width="0.6"/>
   </g>
 
-  <!-- ═══ MAIN PUMP BODY ═════════════════════════════════════════════ -->
+  <!-- ═══ MAIN BODY (rounded rectangle, near-square) ═════════════════ -->
   <g id="pump-body" class="pump-region" tabindex="0">
-    <!-- Main body slab (rounded rectangle, tall) -->
-    <rect x="200" y="260" width="560" height="800" rx="32"
+    <!-- Main body slab — 560 × 660, nearly square instead of v2's tall -->
+    <rect x="200" y="230" width="560" height="660" rx="28"
           fill="url(#body-grad)" stroke="#2F3336" stroke-width="2.5"/>
     <!-- Rim-light highlight on the top curve -->
-    <rect x="202" y="262" width="556" height="90" rx="32" fill="url(#rim-light)"/>
-    <!-- Subtle panel hatch for texture over the lower body area -->
-    <rect x="200" y="640" width="560" height="420" rx="0" fill="url(#panel-hatch)"/>
-    <!-- Horizontal panel lines (three subtle dividers) -->
-    <line x1="220" y1="760" x2="740" y2="760" stroke="#2F3336" stroke-width="1"/>
-    <line x1="220" y1="880" x2="740" y2="880" stroke="#2F3336" stroke-width="1"/>
-    <line x1="220" y1="990" x2="740" y2="990" stroke="#2F3336" stroke-width="1"/>
-    <!-- Rivets on the sides -->
-    <circle cx="214" cy="780" r="3.5" fill="#1a1a1d" stroke="#2F3336" stroke-width="0.6"/>
-    <circle cx="746" cy="780" r="3.5" fill="#1a1a1d" stroke="#2F3336" stroke-width="0.6"/>
-    <circle cx="214" cy="900" r="3.5" fill="#1a1a1d" stroke="#2F3336" stroke-width="0.6"/>
-    <circle cx="746" cy="900" r="3.5" fill="#1a1a1d" stroke="#2F3336" stroke-width="0.6"/>
-    <circle cx="214" cy="1010" r="3.5" fill="#1a1a1d" stroke="#2F3336" stroke-width="0.6"/>
-    <circle cx="746" cy="1010" r="3.5" fill="#1a1a1d" stroke="#2F3336" stroke-width="0.6"/>
+    <rect x="202" y="232" width="556" height="84" rx="28" fill="url(#rim-light)"/>
+    <!-- Subtle panel hatch for texture on the lower body -->
+    <rect x="200" y="600" width="560" height="290" rx="0" fill="url(#panel-hatch)"/>
+
+    <!-- Horizontal panel-line dividers (tightened spacing vs v2) -->
+    <line x1="220" y1="640" x2="740" y2="640" stroke="#2F3336" stroke-width="1"/>
+    <line x1="220" y1="750" x2="740" y2="750" stroke="#2F3336" stroke-width="1"/>
+    <line x1="220" y1="840" x2="740" y2="840" stroke="#2F3336" stroke-width="1"/>
+
+    <!-- Side rivets — 3 pairs -->
+    <circle cx="214" cy="660" r="3.5" fill="#1a1a1d" stroke="#2F3336" stroke-width="0.6"/>
+    <circle cx="746" cy="660" r="3.5" fill="#1a1a1d" stroke="#2F3336" stroke-width="0.6"/>
+    <circle cx="214" cy="770" r="3.5" fill="#1a1a1d" stroke="#2F3336" stroke-width="0.6"/>
+    <circle cx="746" cy="770" r="3.5" fill="#1a1a1d" stroke="#2F3336" stroke-width="0.6"/>
+    <circle cx="214" cy="860" r="3.5" fill="#1a1a1d" stroke="#2F3336" stroke-width="0.6"/>
+    <circle cx="746" cy="860" r="3.5" fill="#1a1a1d" stroke="#2F3336" stroke-width="0.6"/>
+
     <!-- Brand mark plate in the middle of the body -->
-    <rect x="340" y="800" width="280" height="64" rx="4"
-          fill="none" stroke="rgba(231,233,234,0.18)" stroke-width="1"/>
-    <text x="480" y="844" text-anchor="middle"
-          fill="rgba(231,233,234,0.55)"
+    <rect x="340" y="668" width="280" height="58" rx="4"
+          fill="none" stroke="rgba(231,233,234,0.2)" stroke-width="1"/>
+    <text x="480" y="706" text-anchor="middle"
+          fill="rgba(231,233,234,0.6)"
           font-family="ui-monospace, 'IBM Plex Mono', monospace"
           font-weight="700" font-size="26" letter-spacing="6">GASCOIN</text>
+
     <!-- Serial number strip -->
-    <rect x="380" y="920" width="200" height="22" rx="2"
+    <rect x="380" y="762" width="200" height="22" rx="2"
           fill="#030304" stroke="#1a1a1d" stroke-width="1"/>
-    <text x="480" y="936" text-anchor="middle"
-          fill="rgba(231,233,234,0.3)"
+    <text x="480" y="778" text-anchor="middle"
+          fill="rgba(231,233,234,0.32)"
           font-family="ui-monospace, 'IBM Plex Mono', monospace"
           font-size="11" letter-spacing="2">SN · 0x2ykSTA · PANAMA</text>
-    <!-- Status LED (always on, glows) -->
-    <circle cx="480" cy="1020" r="5" fill="#E7E9EA">
+
+    <!-- Pulsing status LED -->
+    <circle cx="480" cy="812" r="5" fill="#E7E9EA">
       <animate attributeName="opacity"
                values="0.4;1;0.4"
                dur="2.2s"
                repeatCount="indefinite"/>
     </circle>
+
+    <!-- Reflection highlight strip on the left edge -->
+    <rect x="200" y="300" width="3" height="560" fill="rgba(231,233,234,0.06)"/>
   </g>
 
-  <!-- ═══ DISPLAY SCREEN (the GASCOIN face) ══════════════════════════ -->
+  <!-- ═══ DISPLAY SCREEN ═════════════════════════════════════════════ -->
   <g id="pump-display" class="pump-region" tabindex="0">
-    <!-- Bezel (black frame around the screen) -->
-    <rect x="236" y="324" width="488" height="294" rx="10"
+    <!-- Bezel (black frame) -->
+    <rect x="252" y="290" width="456" height="284" rx="12"
           fill="#000" stroke="#2F3336" stroke-width="2"/>
-    <!-- Display face -->
-    <rect x="248" y="336" width="464" height="270" rx="6"
+    <!-- Inner display face -->
+    <rect x="264" y="302" width="432" height="260" rx="6"
           fill="url(#screen-grad)"/>
     <!-- LCD subpixel grid -->
-    <rect x="248" y="336" width="464" height="270" rx="6"
+    <rect x="264" y="302" width="432" height="260" rx="6"
           fill="url(#lcd-grid)"/>
-    <!-- Scanline overlay (drawn above grid, below text) -->
-    <rect x="248" y="336" width="464" height="270" rx="6"
+    <!-- Scanline overlay -->
+    <rect x="264" y="302" width="432" height="260" rx="6"
           fill="url(#scanlines)"/>
 
-    <!-- [G] logo mark on the left of the screen -->
-    <g transform="translate(282, 386)">
-      <!-- Black rounded square with white G -->
-      <rect x="0" y="0" width="88" height="88" rx="6" fill="#0a0a0b"/>
-      <text x="44" y="68" text-anchor="middle"
-            fill="#f5f6f2"
+    <!-- [G] logo square on the left -->
+    <g transform="translate(296, 340)">
+      <rect x="0" y="0" width="96" height="96" rx="8" fill="#0a0a0b"/>
+      <text x="48" y="76" text-anchor="middle"
+            fill="#f7f8f4"
             font-family="ui-monospace, 'IBM Plex Mono', monospace"
-            font-weight="800" font-size="70">G</text>
-      <!-- Tiny pixel grid on the G mark for texture -->
-      <rect x="0" y="0" width="88" height="88" rx="6" fill="url(#lcd-grid)"/>
+            font-weight="800" font-size="78">G</text>
+      <rect x="0" y="0" width="96" height="96" rx="8" fill="url(#lcd-grid)"/>
     </g>
 
-    <!-- Main wordmark: "ASCOIN" next to the [G] -->
-    <text x="388" y="452"
+    <!-- "ASCOIN" wordmark to the right of the [G] -->
+    <text x="406" y="412"
           fill="#0a0a0b"
           font-family="ui-monospace, 'IBM Plex Mono', monospace"
-          font-weight="800" font-size="58" letter-spacing="3">ASCOIN</text>
+          font-weight="800" font-size="62" letter-spacing="2">ASCOIN</text>
 
-    <!-- Tagline -->
-    <text x="700" y="540" text-anchor="end"
-          fill="#3a3a3d"
+    <!-- "Gas. Paid Back..." tagline bottom-right -->
+    <text x="684" y="532" text-anchor="end"
+          fill="#2a2a2d"
           font-family="ui-monospace, 'IBM Plex Mono', monospace"
-          font-size="14" font-style="italic" letter-spacing="1">Gas. Paid Back.</text>
+          font-size="16" font-style="italic" letter-spacing="1">Gas. Paid Back...</text>
 
-    <!-- CRT-style terminal cursor (blinks via CSS) -->
-    <rect id="pump-display-cursor"
-          x="714" y="526" width="12" height="18"
-          fill="#0a0a0b"/>
+    <!-- On-screen indicator LEDs -->
+    <circle cx="276" cy="548" r="2.5" fill="rgba(0,0,0,0.55)"/>
+    <circle cx="288" cy="548" r="2.5" fill="rgba(0,0,0,0.28)"/>
+    <circle cx="300" cy="548" r="2.5" fill="rgba(0,0,0,0.28)"/>
 
-    <!-- Alt-reality "> ENTER_" prompt shown on hover (hidden by default) -->
+    <!-- Alt "> ENTER_" hover prompt (hidden by default) -->
     <g id="pump-display-hover-prompt" opacity="0">
-      <rect x="248" y="336" width="464" height="270" rx="6" fill="#f5f6f2"/>
-      <rect x="248" y="336" width="464" height="270" rx="6" fill="url(#lcd-grid)"/>
-      <rect x="248" y="336" width="464" height="270" rx="6" fill="url(#scanlines)"/>
-      <text x="268" y="418"
+      <rect x="264" y="302" width="432" height="260" rx="6" fill="#f7f8f4"/>
+      <rect x="264" y="302" width="432" height="260" rx="6" fill="url(#lcd-grid)"/>
+      <rect x="264" y="302" width="432" height="260" rx="6" fill="url(#scanlines)"/>
+      <text x="286" y="380"
             fill="#0a0a0b"
             font-family="ui-monospace, 'IBM Plex Mono', monospace"
-            font-weight="700" font-size="26" letter-spacing="2">&gt; BOOT</text>
-      <text x="268" y="458"
+            font-weight="800" font-size="30" letter-spacing="2">&gt; BOOT</text>
+      <text x="286" y="422"
             fill="#0a0a0b"
             font-family="ui-monospace, 'IBM Plex Mono', monospace"
-            font-size="20" letter-spacing="1">GASCOIN PROTOCOL</text>
-      <text x="268" y="496"
+            font-size="22" letter-spacing="1">GASCOIN PROTOCOL</text>
+      <text x="286" y="458"
             fill="#0a0a0b"
             font-family="ui-monospace, 'IBM Plex Mono', monospace"
             font-size="16" letter-spacing="1">SEASON 1 · INVITE REQ</text>
-      <text x="268" y="560"
+      <text x="286" y="528"
             fill="#0a0a0b"
             font-family="ui-monospace, 'IBM Plex Mono', monospace"
-            font-weight="700" font-size="28" letter-spacing="3">&gt; ENTER_</text>
+            font-weight="800" font-size="32" letter-spacing="3">&gt; ENTER_</text>
+      <rect id="pump-display-cursor"
+            x="498" y="500" width="14" height="30"
+            fill="#0a0a0b"/>
     </g>
   </g>
 
-  <!-- ═══ TOP HANDLE (the small block on top of the pump) ════════════ -->
+  <!-- ═══ TOP HANDLE (with DOCS stamp) ═══════════════════════════════ -->
   <g id="pump-handle" class="pump-region" tabindex="0">
-    <!-- Main handle slab -->
-    <rect x="340" y="198" width="280" height="64" rx="10"
+    <rect x="356" y="188" width="288" height="48" rx="8"
           fill="url(#body-grad)" stroke="#2F3336" stroke-width="2"/>
-    <!-- Rim light on top edge -->
-    <rect x="342" y="200" width="276" height="22" rx="10" fill="url(#rim-light)"/>
+    <rect x="358" y="190" width="284" height="16" rx="8" fill="url(#rim-light)"/>
     <!-- Grip lines -->
-    <line x1="370" y1="222" x2="590" y2="222" stroke="rgba(231,233,234,0.08)" stroke-width="1"/>
-    <line x1="370" y1="232" x2="590" y2="232" stroke="rgba(231,233,234,0.08)" stroke-width="1"/>
-    <line x1="370" y1="242" x2="590" y2="242" stroke="rgba(231,233,234,0.08)" stroke-width="1"/>
-    <!-- Tiny "DOCS" marker label stamped on the handle -->
-    <text x="480" y="251" text-anchor="middle"
-          fill="rgba(231,233,234,0.28)"
+    <line x1="380" y1="214" x2="620" y2="214" stroke="rgba(231,233,234,0.08)" stroke-width="1"/>
+    <line x1="380" y1="222" x2="620" y2="222" stroke="rgba(231,233,234,0.08)" stroke-width="1"/>
+    <!-- DOCS stamp -->
+    <text x="500" y="232" text-anchor="middle"
+          fill="rgba(231,233,234,0.32)"
           font-family="ui-monospace, 'IBM Plex Mono', monospace"
           font-size="10" letter-spacing="3">DOCS</text>
   </g>
 
-  <!-- ═══ NOZZLE (hanging on the right side) ═════════════════════════ -->
+  <!-- ═══ NOZZLE (compact, hangs close to the body) ══════════════════ -->
   <g id="pump-nozzle" class="pump-region" tabindex="0">
-    <!-- Hose: curved path from pump right side down to nozzle grip -->
-    <path d="M 760 460
-             C 840 460, 880 500, 880 580
-             L 880 760
-             C 880 800, 860 820, 820 820
-             L 800 820"
-          stroke="#2F3336" stroke-width="18" fill="none" stroke-linecap="round"/>
-    <!-- Inner hose line (makes it look thicker / 3D) -->
-    <path d="M 760 460
-             C 840 460, 880 500, 880 580
-             L 880 760
-             C 880 800, 860 820, 820 820
-             L 800 820"
-          stroke="#0a0a0b" stroke-width="10" fill="none" stroke-linecap="round"/>
-    <!-- Connector at pump side -->
-    <rect x="754" y="446" width="24" height="28" rx="3" fill="#1a1a1d" stroke="#2F3336" stroke-width="1.5"/>
+    <!-- Connector on body right side -->
+    <rect x="756" y="380" width="22" height="28" rx="3"
+          fill="#1a1a1d" stroke="#2F3336" stroke-width="1.5"/>
 
-    <!-- Nozzle grip (the gun body hanging from the hose) -->
-    <g transform="translate(748, 792)">
-      <!-- Connector to hose -->
-      <rect x="20" y="0" width="34" height="24" rx="2" fill="#1a1a1d" stroke="#2F3336" stroke-width="1"/>
-      <!-- Main handle block -->
-      <rect x="0" y="22" width="90" height="140" rx="8"
-            fill="url(#nozzle-grad)" stroke="#2F3336" stroke-width="2"/>
-      <!-- Rim light -->
-      <rect x="2" y="24" width="86" height="22" rx="8" fill="url(#rim-light)"/>
-      <!-- Trigger guard curve -->
-      <path d="M 10 90
-               Q -14 100, -14 124
-               Q -14 148, 14 148
-               L 40 148"
-            fill="none" stroke="#2F3336" stroke-width="3"
-            stroke-linecap="round" stroke-linejoin="round"/>
-      <!-- Trigger -->
-      <rect x="12" y="108" width="22" height="14" rx="2" fill="#0a0a0b" stroke="#2F3336" stroke-width="0.8"/>
-      <!-- Side grip lines -->
-      <line x1="12" y1="60" x2="78" y2="60" stroke="rgba(231,233,234,0.08)" stroke-width="1"/>
-      <line x1="12" y1="70" x2="78" y2="70" stroke="rgba(231,233,234,0.08)" stroke-width="1"/>
-      <line x1="12" y1="80" x2="78" y2="80" stroke="rgba(231,233,234,0.08)" stroke-width="1"/>
-      <!-- Spout (the thin part that actually dispenses) -->
-      <rect x="34" y="162" width="22" height="54" rx="1"
+    <!-- Hose (outer + inner for 3D feel) -->
+    <path d="M 778 394
+             C 830 394, 856 430, 856 490
+             C 856 540, 844 560, 820 560"
+          stroke="#2F3336" stroke-width="14" fill="none" stroke-linecap="round"/>
+    <path d="M 778 394
+             C 830 394, 856 430, 856 490
+             C 856 540, 844 560, 820 560"
+          stroke="#0a0a0b" stroke-width="8" fill="none" stroke-linecap="round"/>
+
+    <!-- Nozzle grip -->
+    <g transform="translate(756, 548)">
+      <rect x="28" y="0" width="28" height="18" rx="2"
             fill="#1a1a1d" stroke="#2F3336" stroke-width="1"/>
-      <rect x="32" y="212" width="26" height="8" rx="1" fill="#0a0a0b"/>
-      <!-- Opening at the tip -->
-      <rect x="36" y="218" width="18" height="4" fill="#000"/>
+      <rect x="0" y="16" width="84" height="96" rx="8"
+            fill="url(#nozzle-grad)" stroke="#2F3336" stroke-width="2"/>
+      <rect x="2" y="18" width="80" height="16" rx="8" fill="url(#rim-light)"/>
+      <!-- Grip lines -->
+      <line x1="10" y1="48" x2="74" y2="48" stroke="rgba(231,233,234,0.08)" stroke-width="1"/>
+      <line x1="10" y1="58" x2="74" y2="58" stroke="rgba(231,233,234,0.08)" stroke-width="1"/>
+      <!-- Trigger guard -->
+      <path d="M 10 70
+               Q -10 80, -10 98
+               Q -10 116, 14 116
+               L 38 116"
+            fill="none" stroke="#2F3336" stroke-width="2.5"
+            stroke-linecap="round" stroke-linejoin="round"/>
+      <rect x="12" y="82" width="20" height="10" rx="2"
+            fill="#0a0a0b" stroke="#2F3336" stroke-width="0.8"/>
+      <!-- Spout -->
+      <rect x="30" y="112" width="22" height="42" rx="1"
+            fill="#1a1a1d" stroke="#2F3336" stroke-width="1"/>
+      <rect x="28" y="150" width="26" height="8" rx="1" fill="#0a0a0b"/>
+      <rect x="32" y="156" width="18" height="4" fill="#000"/>
 
-      <!-- Drip (animated) — fades and falls when hovering -->
+      <!-- Animated drip -->
       <circle id="pump-nozzle-drip"
-              cx="45" cy="230" r="4"
-              fill="rgba(231,233,234,0.85)"
+              cx="41" cy="166" r="4"
+              fill="rgba(231,233,234,0.9)"
               opacity="0"/>
     </g>
-  </g>
-
-  <!-- ═══ FINE DETAILS layered on top ════════════════════════════════ -->
-  <g id="pump-details" pointer-events="none">
-    <!-- Tiny on-screen indicator LEDs beside the display -->
-    <circle cx="256" cy="596" r="2.5" fill="rgba(231,233,234,0.5)"/>
-    <circle cx="268" cy="596" r="2.5" fill="rgba(231,233,234,0.25)"/>
-    <circle cx="280" cy="596" r="2.5" fill="rgba(231,233,234,0.25)"/>
-    <!-- Reflection highlight strip on the pump body's left edge -->
-    <rect x="200" y="330" width="3" height="700" fill="rgba(231,233,234,0.06)"/>
   </g>
 </svg>

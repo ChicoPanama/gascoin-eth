@@ -1,7 +1,14 @@
 'use client';
 
 import Link from 'next/link';
-import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
+import { useRouter } from 'next/navigation';
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type ReactNode,
+} from 'react';
 
 type Props = {
   pumpSvg: string;
@@ -23,72 +30,88 @@ const REGION_LABELS: Record<Region, string> = {
   base: 'ROADMAP',
 };
 
+type HoverState = {
+  region: Region;
+  labelX: number;
+  labelY: number;
+} | null;
+
 /**
- * /welcome page.
+ * /welcome — single-viewport interactive pump landing page (v3).
  *
- * Single-viewport pump-is-the-page layout:
- *   [ thin top bar ]
- *   [     PUMP     ]  ← fills the remaining space
- *   [ thin bottom  ]
- *
- * The pump SVG is a static repo-committed asset authored by us
- * (public/welcome/pump.svg) and read server-side before being passed to
- * this client component. Injecting it with dangerouslySetInnerHTML is
- * safe because the source is not user input.
- *
- * After mount, we attach event listeners to every <g class="pump-region">
- * inside the injected SVG for React-level control over click + hover
- * without converting the SVG to JSX. Each region has its own
- * micro-animation class applied on hover via CSS selectors.
- *
- * Modals (Manifesto / How-It-Works / Roadmap / Enter) are preserved from
- * the previous /welcome version. Stats, AI cards, email capture, and the
- * scrolling marketing footer have been deleted — the pump IS the page.
+ * PR #43 audit fixes:
+ *   - Click feedback via a 120ms CRT flash overlay
+ *   - Soft nav with next/navigation router.push for the handle hotspot
+ *   - Hover labels tracked via getBoundingClientRect so they appear near
+ *     the actual hovered region instead of hardcoded positions
+ *   - Centered modals (was bottom-anchored)
+ *   - Simplified strips (top: LIVE · GATES only; bottom: X / label / ENTER)
+ *   - Tester count moved into the Enter modal as proof of traction
+ *   - treasuryUsd + claimsSubmitted accepted but not displayed on this page
+ *     to keep the top bar uncluttered and the data honest (dry-run state
+ *     makes both display as "—" / 0 which looks broken)
+ *   - prefers-reduced-motion disables click flash + pump animations
  */
 export function WelcomeClient({
   pumpSvg,
   gateCount,
-  treasuryUsd,
   testersRedeemed,
   isDryRun,
 }: Props) {
+  const router = useRouter();
   const [splashGone, setSplashGone] = useState(false);
   const [openModal, setOpenModal] = useState<HotspotKey | null>(null);
-  const [hovered, setHovered] = useState<Region | null>(null);
+  const [hover, setHover] = useState<HoverState>(null);
+  const [flashing, setFlashing] = useState(false);
   const pumpRef = useRef<HTMLDivElement>(null);
+  const stageRef = useRef<HTMLElement>(null);
 
+  /** Trigger the click flash, then run `action` after 120ms. */
+  const armAction = useCallback(
+    (action: () => void) => {
+      if (flashing) return;
+      setFlashing(true);
+      const prefersReduce = typeof window !== 'undefined'
+        && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const delay = prefersReduce ? 0 : 120;
+      window.setTimeout(() => {
+        setFlashing(false);
+        action();
+      }, delay);
+    },
+    [flashing]
+  );
+
+  // Wire up the injected SVG's pump-region groups
   useEffect(() => {
     const root = pumpRef.current;
-    if (!root) return;
+    const stage = stageRef.current;
+    if (!root || !stage) return;
     const regions = Array.from(
       root.querySelectorAll<SVGGElement>('g.pump-region')
     );
     if (regions.length === 0) return;
 
-    const click: Record<string, () => void> = {
-      'pump-handle': () => { window.location.href = '/docs'; },
+    const actions: Record<string, () => void> = {
+      'pump-handle': () => router.push('/docs'),
       'pump-display': () => setOpenModal('enter'),
       'pump-body': () => setOpenModal('manifesto'),
       'pump-nozzle': () => setOpenModal('howitworks'),
       'pump-base': () => setOpenModal('roadmap'),
     };
-
-    const regionKey = (id: string): Region | null => {
-      switch (id) {
-        case 'pump-handle': return 'handle';
-        case 'pump-display': return 'display';
-        case 'pump-body': return 'body';
-        case 'pump-nozzle': return 'nozzle';
-        case 'pump-base': return 'base';
-        default: return null;
-      }
+    const keys: Record<string, Region> = {
+      'pump-handle': 'handle',
+      'pump-display': 'display',
+      'pump-body': 'body',
+      'pump-nozzle': 'nozzle',
+      'pump-base': 'base',
     };
 
     const listeners: Array<{ el: SVGGElement; type: string; fn: EventListener }> = [];
     for (const el of regions) {
       const id = el.id;
-      const action = click[id];
-      const key = regionKey(id);
+      const action = actions[id];
+      const key = keys[id];
       if (!action || !key) continue;
 
       el.style.cursor = 'pointer';
@@ -97,15 +120,23 @@ export function WelcomeClient({
       const onClick: EventListener = (e) => {
         e.preventDefault();
         e.stopPropagation();
-        action();
+        armAction(action);
       };
-      const onEnter: EventListener = () => setHovered(key);
-      const onLeave: EventListener = () => setHovered(null);
+      const onEnter: EventListener = () => {
+        const stageRect = stage.getBoundingClientRect();
+        const rect = el.getBoundingClientRect();
+        setHover({
+          region: key,
+          labelX: rect.left - stageRect.left + rect.width / 2,
+          labelY: rect.top - stageRect.top - 36,
+        });
+      };
+      const onLeave: EventListener = () => setHover(null);
       const onKey: EventListener = (e) => {
         const ke = e as KeyboardEvent;
         if (ke.key === 'Enter' || ke.key === ' ') {
           ke.preventDefault();
-          action();
+          armAction(action);
         }
       };
 
@@ -124,9 +155,9 @@ export function WelcomeClient({
     return () => {
       for (const l of listeners) l.el.removeEventListener(l.type, l.fn);
     };
-  }, []);
+  }, [armAction, router]);
 
-  // Apply a hover class to the root SVG so CSS can drive per-region anims
+  // Apply the hover class to the root SVG so CSS drives per-region anims
   useEffect(() => {
     const root = pumpRef.current;
     if (!root) return;
@@ -139,9 +170,10 @@ export function WelcomeClient({
       'is-hover-nozzle',
       'is-hover-base'
     );
-    if (hovered) svg.classList.add(`is-hover-${hovered}`);
-  }, [hovered]);
+    if (hover) svg.classList.add(`is-hover-${hover.region}`);
+  }, [hover]);
 
+  // ESC closes modals
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') setOpenModal(null);
@@ -150,6 +182,7 @@ export function WelcomeClient({
     return () => window.removeEventListener('keydown', onKey);
   }, []);
 
+  // Lock body scroll while a modal is open
   useEffect(() => {
     if (openModal) {
       document.body.style.overflow = 'hidden';
@@ -157,9 +190,7 @@ export function WelcomeClient({
     }
   }, [openModal]);
 
-  const handleEnterSplash = useCallback(() => {
-    setSplashGone(true);
-  }, []);
+  const handleEnterSplash = useCallback(() => setSplashGone(true), []);
 
   useEffect(() => {
     if (splashGone) return;
@@ -172,8 +203,6 @@ export function WelcomeClient({
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, [splashGone, handleEnterSplash]);
-
-  const hoverLabel = hovered ? REGION_LABELS[hovered] : null;
 
   return (
     <div className="wlc-root" data-theme="dark">
@@ -206,34 +235,34 @@ export function WelcomeClient({
         <Link href="/" className="wlc-topstrip-brand">
           <span className="wlc-topstrip-mark">[G]</span>
           <span className="wlc-topstrip-word">GASCOIN</span>
-          <span className="wlc-topstrip-sep">·</span>
-          <span className="wlc-topstrip-tag">SOLANA · SEASON 1 BETA</span>
         </Link>
         <div className="wlc-topstrip-meta">
           <span className="wlc-topstrip-live">
-            <span className="wlc-topstrip-live-dot" /> LIVE · TREASURY {treasuryUsd}
+            <span className="wlc-topstrip-live-dot" /> LIVE
           </span>
-          <span className="wlc-topstrip-sep">·</span>
-          <span>{testersRedeemed} TESTERS</span>
           <span className="wlc-topstrip-sep">·</span>
           <span>{gateCount} GATES</span>
         </div>
       </header>
 
-      <main className="wlc-stage">
+      <main className="wlc-stage" ref={stageRef}>
         <div className="wlc-stage-halo" aria-hidden />
 
-        {hoverLabel && (
-          <div className={`wlc-hover-label wlc-hover-label--${hovered}`}>
-            [ {hoverLabel} ]
+        {hover && (
+          <div
+            className={`wlc-hover-label wlc-hover-label--${hover.region}`}
+            style={{
+              left: `${hover.labelX}px`,
+              top: `${hover.labelY}px`,
+            }}
+          >
+            [ {REGION_LABELS[hover.region]} ]
           </div>
         )}
 
         {/*
           The pump SVG is a repo-committed static asset authored by us at
-          public/welcome/pump.svg. It is NOT user input. It is read
-          server-side in app/welcome/page.tsx and passed to this client
-          component. Injecting it this way is safe.
+          public/welcome/pump.svg. Not user input. Safe to inject.
         */}
         <div
           ref={pumpRef}
@@ -244,31 +273,26 @@ export function WelcomeClient({
 
         <div className="wlc-nudge">
           <span className="wlc-nudge-dot" />
-          CLICK THE <strong>DISPLAY</strong> TO ENTER · HOVER OTHER PARTS TO EXPLORE
+          CLICK THE <strong>DISPLAY</strong> TO ENTER
         </div>
+
+        {/* Click-flash overlay — brief white CRT flash before action fires */}
+        {flashing && <div className="wlc-click-flash" aria-hidden />}
       </main>
 
       <footer className="wlc-botstrip">
-        <div className="wlc-botstrip-social">
-          <a
-            href="https://x.com/GasCoinApp"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="wlc-botstrip-link"
-          >
-            @GasCoinApp ↗
-          </a>
-          <span className="wlc-topstrip-sep">·</span>
-          <Link href="/docs" className="wlc-botstrip-link">/DOCS</Link>
-          <span className="wlc-topstrip-sep">·</span>
-          <Link href="/gates" className="wlc-botstrip-link">/GATES</Link>
-          <span className="wlc-topstrip-sep">·</span>
-          <Link href="/community" className="wlc-botstrip-link">/COMMUNITY</Link>
-        </div>
+        <a
+          href="https://x.com/GasCoinApp"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="wlc-botstrip-link"
+        >
+          @GasCoinApp ↗
+        </a>
         <div className="wlc-botstrip-legal">
           {isDryRun
-            ? 'SEASON 1 · DRY-RUN · POINTS ONLY · LIVE SOL AT TOKEN LAUNCH'
-            : 'SEASON 1 · LIVE SOL PAYOUTS ACTIVE'}
+            ? 'SEASON 1 · DRY-RUN · POINTS ONLY'
+            : 'SEASON 1 · LIVE SOL PAYOUTS'}
         </div>
         <Link href="/submit" className="wlc-botstrip-enter">
           ENTER →
@@ -277,7 +301,7 @@ export function WelcomeClient({
 
       {openModal && (
         <Modal onClose={() => setOpenModal(null)}>
-          {openModal === 'enter' && <EnterModal />}
+          {openModal === 'enter' && <EnterModal testersRedeemed={testersRedeemed} />}
           {openModal === 'manifesto' && <ManifestoModal gateCount={gateCount} />}
           {openModal === 'howitworks' && <HowItWorksModal gateCount={gateCount} />}
           {openModal === 'roadmap' && <RoadmapModal />}
@@ -305,11 +329,11 @@ function Modal({ children, onClose }: { children: ReactNode; onClose: () => void
   );
 }
 
-function EnterModal() {
+function EnterModal({ testersRedeemed }: { testersRedeemed: number }) {
   return (
     <>
       <div className="wlc-modal-kicker">[ SEASON 1 · INVITE REQUIRED ]</div>
-      <h2 className="wlc-modal-title">Entering the protocol.</h2>
+      <h2 className="wlc-modal-title">Enter the protocol</h2>
       <p className="wlc-modal-body">
         Entering GASCOIN requires a single-use beta invite code. You&apos;ll sign in
         with your verified X account first, then enter your <code>GC-XXXX-XXXX</code>{' '}
@@ -319,6 +343,16 @@ function EnterModal() {
         Browsing the docs, gates, and community stays public — the code is only
         required to submit a receipt.
       </p>
+
+      {testersRedeemed > 0 && (
+        <div className="wlc-modal-traction">
+          <span className="wlc-modal-traction-num">{testersRedeemed}</span>
+          <span className="wlc-modal-traction-label">
+            TESTERS ALREADY IN · SEASON 1 IS ACTIVE
+          </span>
+        </div>
+      )}
+
       <div className="wlc-modal-callout">
         <div className="wlc-modal-callout-label">WHAT YOU&apos;LL NEED</div>
         <ul className="wlc-modal-list">
@@ -420,7 +454,7 @@ function HowItWorksModal({ gateCount }: { gateCount: number }) {
 }
 
 function RoadmapModal() {
-  const rows = [
+  const rows: Array<{ item: string; status: string; done?: boolean }> = [
     { item: '15-gate verification engine', status: 'SHIPPED', done: true },
     { item: 'Gemini + Grok + Claude pipeline', status: 'SHIPPED', done: true },
     { item: 'mem0 entity memory + trust graph', status: 'SHIPPED', done: true },
@@ -436,27 +470,27 @@ function RoadmapModal() {
     <>
       <div className="wlc-modal-kicker">[ ROADMAP · STATION #01 ]</div>
       <h2 className="wlc-modal-title wlc-modal-title--big">What ships next.</h2>
+
       <div className="wlc-receipt">
         <div className="wlc-receipt-head">
-{`════════════════════════════
-  GASCOIN · ROADMAP RECEIPT
-  STATION #01 · GASCOIN.APP
-════════════════════════════`}
+          <div className="wlc-receipt-head-title">GASCOIN · ROADMAP RECEIPT</div>
+          <div className="wlc-receipt-head-sub">STATION #01 · GASCOIN.APP</div>
         </div>
         <div className="wlc-receipt-cols"><span>ITEM</span><span>STATUS</span></div>
-        <div className="wlc-receipt-sep">── ──────────────── ──────────</div>
+        <div className="wlc-receipt-rule" />
         {rows.map((r, i) => (
-          <div key={i} className={`wlc-receipt-row${r.done ? ' wlc-receipt-row--done' : ''}`}>
+          <div
+            key={i}
+            className={`wlc-receipt-row${r.done ? ' wlc-receipt-row--done' : ''}`}
+          >
             <span className="wlc-receipt-item">{r.item}</span>
             <span className="wlc-receipt-status">{r.status}</span>
           </div>
         ))}
-        <div className="wlc-receipt-foot">
-{`────────────────────────────
-  RECEIPT AUTHENTIC · ON CHAIN
-════════════════════════════`}
-        </div>
+        <div className="wlc-receipt-rule" />
+        <div className="wlc-receipt-foot">RECEIPT AUTHENTIC · ON CHAIN</div>
       </div>
+
       <p className="wlc-modal-body wlc-modal-body--muted">
         Dates omitted on purpose. Ship first, schedule later.
       </p>
