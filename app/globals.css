@@ -9132,3 +9132,195 @@ button.docs-footer-link {
   .chat-agent-fab--right { bottom: 16px; right: 16px; }
   .chat-agent-fab--left  { bottom: 16px; left: 16px; }
 }
+
+/* ── Chat attach button ── */
+.chat-agent-attach {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1rem;
+  padding: 0 4px;
+  opacity: 0.6;
+  transition: opacity 0.15s;
+  flex-shrink: 0;
+}
+.chat-agent-attach:hover:not(:disabled) { opacity: 1; }
+.chat-agent-attach:disabled { opacity: 0.3; cursor: default; }
+
+/* ── File preview strip ── */
+.chat-file-preview {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  background: rgba(255,255,255,0.04);
+  border-top: 1px solid rgba(255,255,255,0.08);
+}
+.chat-file-thumb {
+  width: 36px;
+  height: 36px;
+  object-fit: cover;
+  border-radius: 4px;
+  border: 1px solid rgba(255,255,255,0.15);
+}
+.chat-file-name {
+  font-size: 0.7rem;
+  opacity: 0.7;
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.chat-file-remove {
+  background: none;
+  border: none;
+  cursor: pointer;
+  opacity: 0.5;
+  font-size: 0.75rem;
+  padding: 2px 4px;
+}
+.chat-file-remove:hover { opacity: 1; }
+
+/* ── Tool loading indicator ── */
+.chat-tool-loading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.75rem;
+  opacity: 0.6;
+  padding: 6px 12px;
+  font-style: italic;
+}
+.chat-tool-spinner {
+  width: 10px;
+  height: 10px;
+  border: 1.5px solid rgba(255,255,255,0.3);
+  border-top-color: rgba(255,255,255,0.9);
+  border-radius: 50%;
+  animation: chat-spin 0.7s linear infinite;
+  flex-shrink: 0;
+}
+@keyframes chat-spin { to { transform: rotate(360deg); } }
+
+/* ── Tool result cards ── */
+.chat-tool-result { padding: 4px 8px 8px; }
+
+.chat-card {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 0.75rem;
+  margin: 2px 0;
+}
+.chat-card--error  { border-color: rgba(255, 80, 80, 0.4);  background: rgba(255,80,80,0.06); }
+.chat-card--pass   { border-color: rgba(80, 220, 120, 0.4); background: rgba(80,220,120,0.05); }
+.chat-card--wait   { border-color: rgba(255,180, 50, 0.4);  background: rgba(255,180,50,0.05); }
+.chat-card--info   { border-color: rgba(255,255,255,0.1); }
+.chat-card--tweet  { border-color: rgba(29,161,242,0.35); }
+.chat-card--claim  { border-color: rgba(255,255,255,0.15); }
+.chat-card--tier   { border-color: rgba(180,130,255,0.35); }
+.chat-card--cooldown { }
+
+.chat-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-weight: 600;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  opacity: 0.7;
+  margin-bottom: 8px;
+}
+
+.chat-card-sub {
+  font-size: 0.7rem;
+  opacity: 0.55;
+  margin-top: 4px;
+  line-height: 1.5;
+}
+
+/* Gate rows */
+.chat-card-gate {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 4px 0;
+  border-top: 1px solid rgba(255,255,255,0.06);
+}
+.chat-card-gate:first-child { border-top: none; }
+.chat-card-gate--pass .chat-card-gate-icon { color: #4dcc78; }
+.chat-card-gate--fail .chat-card-gate-icon { color: #ff5050; }
+.chat-card-gate-icon { font-size: 0.75rem; flex-shrink: 0; margin-top: 1px; }
+.chat-card-gate-label { font-size: 0.75rem; line-height: 1.4; }
+.chat-card-gate-fix {
+  font-size: 0.68rem;
+  opacity: 0.7;
+  margin-top: 3px;
+  line-height: 1.4;
+}
+.chat-card-all-pass { font-size: 0.75rem; color: #4dcc78; margin-top: 4px; }
+
+/* Status badge */
+.chat-card-status-badge {
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 1px 6px;
+  border-radius: 20px;
+  background: rgba(255,255,255,0.08);
+}
+.chat-card-status-badge--approved,
+.chat-card-status-badge--ready-for-dispatch { background: rgba(80,220,120,0.2); color: #4dcc78; }
+.chat-card-status-badge--rejected           { background: rgba(255,80,80,0.2);  color: #ff7070; }
+.chat-card-status-badge--processing,
+.chat-card-status-badge--pending            { background: rgba(255,180,50,0.2); color: #ffb832; }
+
+/* Cooldown card */
+.chat-card-cooldown-status {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 0.78rem;
+  line-height: 1.5;
+}
+
+/* Tier card */
+.chat-card-tier-row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+.chat-card-tier-name { font-weight: 700; font-size: 0.85rem; }
+.chat-card-tier-balance { font-size: 0.7rem; opacity: 0.6; }
+
+/* ── Escalation card ── */
+.chat-escalate {
+  margin: 8px;
+  padding: 10px 12px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 8px;
+  text-align: center;
+}
+.chat-escalate-text {
+  font-size: 0.72rem;
+  opacity: 0.6;
+  margin-bottom: 8px;
+}
+.chat-escalate-btn {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 6px 14px;
+  background: rgba(29,161,242,0.15);
+  border: 1px solid rgba(29,161,242,0.4);
+  border-radius: 20px;
+  color: inherit;
+  text-decoration: none;
+  transition: background 0.15s;
+}
+.chat-escalate-btn:hover { background: rgba(29,161,242,0.28); }

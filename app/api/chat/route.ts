@@ -10,11 +10,18 @@ import {
   saveConvMemory,
   extractLastUserText,
 } from '../../../lib/chat-context';
+import {
+  getFAQResponse,
+  classifyTier,
+  faqStreamResponse,
+  MINI_SYSTEM_PROMPT,
+} from '../../../lib/chat-intent';
+import { buildChatTools } from '../../../lib/chat-tools';
 
 export const runtime = 'nodejs';
 export const maxDuration = 30;
 
-const SYSTEM_PROMPT = `You are the GASCOIN Refund Assistant — knowledgeable, direct, and friendly. You have a complete understanding of how GASCOIN works. Keep replies to 2–4 sentences unless the user asks for a full walkthrough or step-by-step guide. Use plain English. If someone is lost, give them the single next action to take. Never reveal internal fraud scoring weights, detection thresholds, or algorithm specifics.
+const SYSTEM_PROMPT = `You are the GASCOIN Refund Assistant — knowledgeable, direct, and friendly. You have a complete understanding of how GASCOIN works. Keep replies to 2–4 sentences unless the user asks for a full walkthrough or step-by-step guide. Use plain English. If someone is lost, give them the single next action to take. Never reveal internal fraud scoring weights, detection thresholds, or algorithm specifics. Detect the user's language and reply in that same language.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 WHAT GASCOIN IS
@@ -456,16 +463,37 @@ export async function POST(req: Request) {
   try {
     const body = await (req.json() as Promise<{ messages: ModelMessage[]; wallet?: string }>);
     messages = body.messages;
-    // Use wallet from body if provided; fall back to privy-verified wallet
     wallet = (body.wallet || session.wallet || '').trim();
   } catch {
     return new Response('Bad request', { status: 400 });
   }
 
-  // Extract last user message text for RAG + memory (best-effort, empty string on failure)
   const lastUserText = extractLastUserText(messages as unknown[]);
+  if (!lastUserText) return new Response('Bad request', { status: 400 });
 
-  // Fetch all dynamic context in parallel — each returns '' on failure
+  // ── Tier 0: Static FAQ — zero LLM tokens ─────────────────────────────
+  const faqAnswer = getFAQResponse(lastUserText);
+  if (faqAnswer) return faqStreamResponse(faqAnswer);
+
+  // Count prior user↔assistant exchanges to help tier classification
+  const priorExchanges = Math.floor(
+    (messages as unknown[]).filter((m: unknown) => (m as Record<string,unknown>).role === 'user').length / 2
+  );
+  const tier = classifyTier(lastUserText, priorExchanges);
+
+  // ── Tier 1: Simple — Haiku, mini prompt, no dynamic context ──────────
+  if (tier === 1) {
+    const result = streamText({
+      model: gateway('anthropic/claude-haiku-4.5'),
+      system: MINI_SYSTEM_PROMPT,
+      messages,
+      maxOutputTokens: 180,
+      onError: ({ error }) => console.error('[chat/haiku] error', error),
+    });
+    return result.toUIMessageStreamResponse();
+  }
+
+  // ── Tier 2 + 3: Sonnet — fetch context in parallel ───────────────────
   const [kbContext, walletContext, memoryContext] = await Promise.all([
     buildKBContext(lastUserText),
     wallet ? buildWalletContext(wallet) : Promise.resolve(''),
@@ -474,17 +502,18 @@ export async function POST(req: Request) {
 
   const dynamicSystem = SYSTEM_PROMPT + memoryContext + walletContext + kbContext;
 
+  // Tier 3: include tools only when intent signals tool use
+  const tools = tier === 3 ? buildChatTools(wallet) : undefined;
+
   const result = streamText({
     model: gateway('anthropic/claude-sonnet-4.6'),
     system: dynamicSystem,
     messages,
-    maxOutputTokens: 400,
-    onError: ({ error }) => {
-      console.error('[chat] streamText error', error);
-    },
+    ...(tools && { tools }),
+    maxOutputTokens: tier === 3 ? 500 : 400,
+    onError: ({ error }) => console.error('[chat/sonnet] error', error),
     onFinish: ({ text }) => {
       if (wallet && lastUserText && text) {
-        // Fire-and-forget within the function lifetime (nodejs runtime, streaming kept alive)
         saveConvMemory(wallet, lastUserText, text).catch(() => {});
       }
     },
