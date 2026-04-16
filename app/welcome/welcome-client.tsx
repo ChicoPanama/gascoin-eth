@@ -579,38 +579,38 @@ function RoadmapPopover() {
   const acts = [
     {
       numeral: 'I',
-      name: 'BUILT THE ENGINE',
-      status: 'DONE',
+      name: 'INFRASTRUCTURE',
+      status: 'SHIPPED',
       state: 'done' as const,
-      prose: 'We built an automated system that verifies every gas claim — 15 checks covering your receipt, your tweet, and your wallet. Three AI models review each submission. No manual approval needed.',
+      prose: 'Solana payout rails. A 15-gate verification pipeline using computer vision and AI to authenticate receipts, tweet proofs, and wallet identity — automatically, with no human in the loop.',
     },
     {
       numeral: 'II',
-      name: 'BETA IS LIVE',
-      status: 'NOW',
+      name: 'SEASON 1 BETA',
+      status: 'LIVE',
       state: 'live' as const,
-      prose: 'Real users, real receipts, real wallets. We\'re running claims through the system, working out the kinks, and making sure everything holds up before we open to everyone.',
+      prose: 'Invite-only access. X (Twitter) sign-in + Solana wallet linking. Real claims running through the pipeline. First SOL payouts hitting real wallets. Stress-testing before we open the doors.',
     },
     {
       numeral: 'III',
-      name: 'OPEN TO EVERYONE',
+      name: 'PUBLIC LAUNCH',
       status: 'NEXT',
       state: 'next' as const,
-      prose: 'Anyone can participate. Submit a gas receipt, connect your Solana wallet, and get SOL back directly. Fill up more often and you unlock higher tiers with better refund rates.',
+      prose: 'Open to any Solana wallet. Live SOL payouts on every approved claim. $GASCOIN token tiers unlock better rates and more frequent submissions. Referral rewards for bringing others in.',
     },
     {
       numeral: 'IV',
-      name: 'THE LONG GAME',
+      name: 'TOKEN + GOVERNANCE',
       status: 'HORIZON',
       state: 'future' as const,
-      prose: 'Token staking, community governance, and more ways to earn. We\'re building this to last — not a one-time promotion, but a platform drivers actually want to be part of.',
+      prose: '$GASCOIN staking, community governance over protocol parameters, and expansion to new regions. Token holders get a real voice in where this goes.',
     },
   ];
 
   return (
     <>
-      <div className="wlc-pop-kicker">[ WHERE WE ARE ]</div>
-      <h2 className="wlc-pop-title">The roadmap.</h2>
+      <div className="wlc-pop-kicker">[ ROADMAP ]</div>
+      <h2 className="wlc-pop-title">The journey.</h2>
       <div className="wlc-roadmap">
         {acts.map((act, i) => (
           <div key={i} className={`wlc-roadmap-act wlc-roadmap-act--${act.state}`}>
