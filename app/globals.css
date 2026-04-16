@@ -7772,10 +7772,20 @@ button.docs-footer-link {
 }
 .wlc-topstrip-brand {
   display: flex;
-  align-items: baseline;
-  gap: 8px;
+  align-items: center;
+  gap: 10px;
   text-decoration: none;
   color: var(--wlc-ink);
+  transition: opacity 150ms;
+}
+.wlc-topstrip-brand:hover {
+  opacity: 0.75;
+}
+.wlc-topstrip-logo {
+  display: block;
+  width: 24px;
+  height: 24px;
+  filter: drop-shadow(0 0 8px rgba(231, 233, 234, 0.25));
 }
 .wlc-topstrip-mark {
   font-size: 13px;
@@ -7995,10 +8005,39 @@ button.docs-footer-link {
   from { opacity: 0; transform: translateY(4px); }
   to   { opacity: 1; transform: translateY(0); }
 }
-/* Hover label position is set by JS (left/top inline style via getBoundingClientRect).
-   The transform centers the label horizontally over the hover point. */
+/* Hover label — position set by JS (left/top via computeCallout).
+   Label floats OUTSIDE the pump; a dashed SVG line connects it back
+   to the hotspot (rendered separately as .wlc-callout-svg). */
 .wlc-hover-label {
-  transform: translateX(-50%);
+  transform: translate(-50%, -50%);
+  white-space: nowrap;
+}
+
+/* Callout SVG overlay — draws the dashed connecting line from the
+   hotspot region edge back to the floating label */
+.wlc-callout-svg {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  pointer-events: none;
+  animation: wlc-callout-in 180ms ease-out;
+}
+@keyframes wlc-callout-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* Display ticker — rotating country price shown when idle */
+.wlc-pump svg #pump-display-ticker {
+  animation: wlc-ticker-fade 400ms ease-out;
+}
+.wlc-pump svg.is-hover-display #pump-display-ticker {
+  opacity: 0;
+  animation: none;
+}
+@keyframes wlc-ticker-fade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
 }
 
 /* ═══ CLICK FLASH — always mounted, animates only when .is-flashing ══ */
@@ -8081,11 +8120,35 @@ button.docs-footer-link {
   color: var(--wlc-ink);
   text-decoration: none;
   transition: opacity 150ms;
+  font-size: 11px;
+  letter-spacing: 0.08em;
 }
 .wlc-botstrip-link:hover {
-  opacity: 0.6;
-  text-decoration: underline;
-  text-underline-offset: 3px;
+  opacity: 0.7;
+}
+/* X social link with embedded icon */
+.wlc-botstrip-x {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  border: 1px solid var(--wlc-line);
+  transition: border-color 150ms, box-shadow 150ms, opacity 150ms;
+}
+.wlc-botstrip-x:hover {
+  border-color: var(--wlc-ink);
+  box-shadow: var(--wlc-glow-soft);
+  opacity: 1;
+}
+.wlc-botstrip-x-icon {
+  display: block;
+  width: 12px;
+  height: 12px;
+  flex-shrink: 0;
+}
+.wlc-botstrip-x-arrow {
+  color: var(--wlc-ink-dim);
+  font-size: 10px;
 }
 .wlc-botstrip-legal {
   font-size: 9px;
