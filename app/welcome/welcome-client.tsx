@@ -573,30 +573,75 @@ function HowItWorksPopover({ gateCount }: { gateCount: number }) {
 }
 
 function RoadmapPopover() {
-  const rows = [
-    { item: '15-gate engine', status: 'SHIPPED', done: true },
-    { item: 'Gemini + Grok + Claude', status: 'SHIPPED', done: true },
-    { item: 'Invite-code beta', status: 'LIVE', done: true },
-    { item: 'Docs monolith', status: 'SHIPPED', done: true },
-    { item: 'Dry-run payouts', status: 'SEASON 1', done: false },
-    { item: 'Live SOL refunds', status: 'AT LAUNCH', done: false },
-    { item: 'Tier perks', status: 'POST-LAUNCH', done: false },
+  const phases = [
+    {
+      name: 'FOUNDATION',
+      tag: 'COMPLETE',
+      done: true,
+      items: [
+        'RPC proxy + CSP hardening',
+        'Redis SDK + single-flight cache',
+        'AI Gateway — Gemini sees, Grok thinks, Claude decides',
+        'mem0 Pro — graph memory + 13 category extraction',
+        '15-gate automated verification engine',
+      ],
+    },
+    {
+      name: 'SEASON 1 · BETA',
+      tag: 'LIVE NOW',
+      done: true,
+      items: [
+        'Invite-code gated access',
+        'X OAuth + wallet linking via Privy',
+        '@GasCoinApp follow + mention required',
+        'Receipt OCR + AI scoring pipeline',
+        'Admin cockpit — activity, moderation, intelligence',
+        '95-page docs monolith',
+      ],
+    },
+    {
+      name: 'SEASON 1 · LAUNCH',
+      tag: 'NEXT',
+      done: false,
+      items: [
+        'Live SOL refunds to connected wallets',
+        'Token tiers — Commuter / Road Warrior / Fleet',
+        'Cooldown scaling by tier',
+        'Engagement scoring + leaderboard',
+        'Referral engine with chain tracking',
+      ],
+    },
+    {
+      name: 'BEYOND',
+      tag: 'HORIZON',
+      done: false,
+      items: [
+        'Manifesto drops on X',
+        'Station network — multi-region expansion',
+        '$GASCOIN token utility + staking',
+        'Community governance',
+      ],
+    },
   ];
   return (
     <>
-      <div className="wlc-pop-kicker">[ ROADMAP · STATION #01 ]</div>
-      <h2 className="wlc-pop-title">What ships next</h2>
-      <ul className="wlc-pop-roadmap">
-        {rows.map((r, i) => (
-          <li key={i} className={r.done ? 'is-done' : ''}>
-            <span className="wlc-pop-roadmap-item">{r.item}</span>
-            <span className="wlc-pop-roadmap-status">{r.status}</span>
-          </li>
+      <div className="wlc-pop-kicker">[ ROADMAP ]</div>
+      <h2 className="wlc-pop-title">The build</h2>
+      <div className="wlc-pop-phases">
+        {phases.map((p, pi) => (
+          <div key={pi} className={`wlc-pop-phase ${p.done ? 'is-done' : ''}`}>
+            <div className="wlc-pop-phase-header">
+              <span className="wlc-pop-phase-name">{p.name}</span>
+              <span className="wlc-pop-phase-tag">{p.tag}</span>
+            </div>
+            <ul className="wlc-pop-phase-items">
+              {p.items.map((item, ii) => (
+                <li key={ii}>{item}</li>
+              ))}
+            </ul>
+          </div>
         ))}
-      </ul>
-      <p className="wlc-pop-body wlc-pop-body--muted">
-        Ship first, schedule later.
-      </p>
+      </div>
     </>
   );
 }
