@@ -2,14 +2,11 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '../../../../lib/supabase';
 import { validateReferralCode, generateReferralCode } from '../../../../lib/referral-code';
 import { checkRateLimit } from '../../../../lib/rate-limit';
-
-function clientIp(req: NextRequest): string {
-  return req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || req.headers.get('x-real-ip') || 'unknown';
-}
+import { getClientIp } from '../../../../lib/ip';
 
 export async function POST(req: NextRequest) {
   // Rate limit: 10 clicks per minute per IP
-  const rl = await checkRateLimit(`referral_click:${clientIp(req)}`, 10, 60);
+  const rl = await checkRateLimit(`referral_click:${getClientIp(req)}`, 10, 60);
   if (!rl.ok) {
     return NextResponse.json({ error: 'rate_limited', retryAfterSec: rl.resetSec }, { status: 429 });
   }
@@ -49,8 +46,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Referrer not found' }, { status: 404 });
     }
 
-    // Fingerprint for dedup
-    const ip = req.headers.get('x-forwarded-for')?.split('.').slice(0, 3).join('.') ?? 'unknown';
+    // Fingerprint for dedup — use /24 subnet prefix of the real IP
+    const ip = getClientIp(req).split('.').slice(0, 3).join('.');
     const ua = req.headers.get('user-agent') ?? 'unknown';
     const fingerprint = Buffer.from(`${ip}:${ua}`).toString('base64').slice(0, 32);
 

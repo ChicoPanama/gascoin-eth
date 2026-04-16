@@ -4,6 +4,7 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { checkRateLimit } from './lib/rate-limit';
 import { verifyGateCookie, GATE_COOKIE_NAME } from './lib/gate-cookie';
+import { getClientIp } from './lib/ip';
 
 // ── Rate limiting for /api/* ────────────────────────────────────────
 const GLOBAL_API_LIMIT = 60;
@@ -25,14 +26,6 @@ const GATE_BYPASS_EXACT = new Set([
   '/sitemap.xml',
   '/manifest.json',
 ]);
-
-function clientIp(req: NextRequest): string {
-  return (
-    req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
-    req.headers.get('x-real-ip') ||
-    'unknown'
-  );
-}
 
 /**
  * Check if the visitor's IP is in the admin bypass list.
@@ -59,7 +52,7 @@ function shouldBypassGate(pathname: string): boolean {
 
 export async function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl;
-  const ip = clientIp(req);
+  const ip = getClientIp(req);
 
   // ── Site gate check (only when SITE_GATE_ENABLED=true) ───────────
   // Flip this env var to "false" or remove it entirely to open the site.

@@ -103,6 +103,14 @@ export async function sendSolPayout(wallet: string, amountSol: number): Promise<
 
     const secret = bs58.decode(b58);
     const payer = Keypair.fromSecretKey(secret);
+
+    // C5: Guard against key/wallet env var mismatch — keypair must match the
+    // declared treasury wallet. A mismatch means either the wrong key was
+    // configured or the env vars are out of sync; refuse to sign in either case.
+    const declaredWallet = process.env.GASCOIN_TREASURY_WALLET;
+    if (declaredWallet && payer.publicKey.toBase58() !== declaredWallet) {
+      return { ok: false, error: 'treasury_key_wallet_mismatch' };
+    }
     const to = new PublicKey(wallet);
     const lamports = Math.floor(amountSol * LAMPORTS_PER_SOL);
     if (lamports <= 0) return { ok: false, error: 'invalid_amount' };

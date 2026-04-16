@@ -2,14 +2,11 @@ import { NextResponse } from 'next/server';
 import { verifyPrivySession } from '../../../../lib/integrations/privy';
 import { getSupabaseAdmin } from '../../../../lib/supabase';
 import { checkRateLimit } from '../../../../lib/rate-limit';
-
-function clientIp(req: Request): string {
-  return req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown';
-}
+import { getClientIp } from '../../../../lib/ip';
 
 export async function POST(req: Request) {
   // SECURITY: Rate limit auth sync to prevent brute force
-  const rl = await checkRateLimit(`auth_sync:${clientIp(req)}`, 20, 60);
+  const rl = await checkRateLimit(`auth_sync:${getClientIp(req)}`, 20, 60);
   if (!rl.ok) {
     return NextResponse.json({ ok: false, error: 'rate_limited' }, { status: 429 });
   }

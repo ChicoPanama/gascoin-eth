@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { checkRateLimit } from '../../../lib/rate-limit';
+import { getClientIp } from '../../../lib/ip';
 
 // Server-side only. Never fall through to NEXT_PUBLIC_* — that would defeat the proxy.
 // Fallback chain matches lib/integrations/solana.ts:7 — explicit URL first, then
@@ -26,13 +27,9 @@ const ALLOWED_METHODS = new Set([
   'getRecentPrioritizationFees',
 ]);
 
-function clientIp(req: Request): string {
-  return req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown';
-}
-
 export async function POST(req: Request) {
   // Rate limit: 100 requests per minute per IP (per security hardening spec)
-  const rl = await checkRateLimit(`rpc:${clientIp(req)}`, 100, 60);
+  const rl = await checkRateLimit(`rpc:${getClientIp(req)}`, 100, 60);
   if (!rl.ok) {
     return NextResponse.json(
       {

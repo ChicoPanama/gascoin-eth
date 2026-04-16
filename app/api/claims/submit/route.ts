@@ -14,10 +14,12 @@ import { checkAndAutoBan } from '../../../../lib/auto-ban';
 import { getSupabaseAdmin } from '../../../../lib/supabase';
 import { hashRequestBody, resolveIdempotencyKey } from '../../../../lib/idempotency';
 import { checkRateLimit } from '../../../../lib/rate-limit';
+import { parseTweetUrl } from '../../../../lib/tweet-parser';
 import { persistMetricsSnapshot } from '../../../../lib/metrics-snapshot';
 import { bustBalanceCache } from '../../../../lib/integrations/solana';
 import { recordGasPrice, detectStationPattern, getTypicalGasPrice } from '../../../../lib/data-intelligence';
 import { getCachedFlags, addMemory, writeFraudSignal, writeAccountQuality, writePipelineAnomaly } from '../../../../lib/mem0';
+import { getClientIp } from '../../../../lib/ip';
 
 // Fraud + OCR + AI calls can take 30s+; bump function timeout to 60s
 export const maxDuration = 60;
@@ -44,13 +46,8 @@ async function checkCooldown(supabase: any, xUserId: string, cooldownDays: numbe
   }
 }
 
-function clientIp(req: Request): string {
-  const xff = req.headers.get('x-forwarded-for') || '';
-  return xff.split(',')[0]?.trim() || req.headers.get('x-real-ip') || 'unknown';
-}
-
 export async function POST(req: Request){
-  const ip = clientIp(req);
+  const ip = getClientIp(req);
   const ipCountry = req.headers.get('x-vercel-ip-country') || req.headers.get('cf-ipcountry') || null;
   const rl = await checkRateLimit(`submit:${ip}`, SUBMIT_MAX_PER_WINDOW, SUBMIT_WINDOW_SEC);
   if (!rl.ok) {
@@ -97,6 +94,13 @@ export async function POST(req: Request){
 
   const form = await req.formData();
   const tweetUrl = String(form.get('tweetUrl')||'');
+
+  // S7: Validate tweet URL format before any expensive downstream work.
+  const parsedTweet = parseTweetUrl(tweetUrl);
+  if (!parsedTweet.isValid) {
+    return NextResponse.json({ ok: false, error: 'invalid_tweet_url' }, { status: 400 });
+  }
+
   const walletInput = String(form.get('wallet')||'').trim();
   const wallet = session.wallet;
   if (!wallet) {

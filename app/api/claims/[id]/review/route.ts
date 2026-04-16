@@ -10,8 +10,16 @@ function nextStatus(action: ReviewAction) {
   return 'rejected';
 }
 
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 export async function POST(req: Request, ctx: { params: Promise<{ id: string }> }) {
   const { id } = await ctx.params;
+
+  // S10: Validate claim ID is a well-formed UUID before hitting the DB.
+  if (!UUID_RE.test(id)) {
+    return NextResponse.json({ ok: false, error: 'invalid_claim_id' }, { status: 400 });
+  }
+
   let body: any = {};
   const ct = req.headers.get('content-type') || '';
   if (ct.includes('application/json')) {
@@ -41,6 +49,10 @@ export async function POST(req: Request, ctx: { params: Promise<{ id: string }> 
   }
   if ((action === 'reject' || action === 'ban') && !reason) {
     return NextResponse.json({ ok: false, error: 'reason_required' }, { status: 400 });
+  }
+  // S2: Ban is an admin-only action — reviewers can approve/reject but not ban.
+  if (action === 'ban' && reviewer.role !== 'admin') {
+    return NextResponse.json({ ok: false, error: 'admin_role_required_for_ban' }, { status: 403 });
   }
 
   let supabase;

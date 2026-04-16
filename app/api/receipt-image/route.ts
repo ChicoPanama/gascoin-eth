@@ -1,16 +1,19 @@
 import { NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '../../../lib/supabase';
+import { requireReviewer } from '../../../lib/reviewer-auth';
 import { checkRateLimit } from '../../../lib/rate-limit';
-
-function clientIp(req: Request): string {
-  return req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown';
-}
+import { getClientIp } from '../../../lib/ip';
 
 export async function GET(req: Request) {
   // Rate limit: 30 image requests per minute per IP
-  const rl = await checkRateLimit(`receipt_image:${clientIp(req)}`, 30, 60);
+  const rl = await checkRateLimit(`receipt_image:${getClientIp(req)}`, 30, 60);
   if (!rl.ok) {
     return NextResponse.json({ error: 'rate_limited' }, { status: 429 });
+  }
+
+  const reviewer = await requireReviewer(req);
+  if (!reviewer) {
+    return NextResponse.json({ error: 'unauthorized' }, { status: 401 });
   }
 
   const { searchParams } = new URL(req.url);

@@ -3,6 +3,7 @@ import { verifyPrivySession } from '../../../../lib/integrations/privy';
 import { getSupabaseAdmin } from '../../../../lib/supabase';
 import { checkRateLimit } from '../../../../lib/rate-limit';
 import { signGateCookie, GATE_COOKIE_NAME, GATE_COOKIE_MAX_AGE_SECONDS } from '../../../../lib/gate-cookie';
+import { getClientIp } from '../../../../lib/ip';
 
 /**
  * POST /api/invites/redeem — Season 1 beta invite redemption
@@ -29,14 +30,9 @@ export const dynamic = 'force-dynamic';
 const REDEEM_WINDOW_SEC = 300;
 const REDEEM_MAX = 10;
 
-function clientIp(req: Request): string {
-  const xff = req.headers.get('x-forwarded-for') || '';
-  return xff.split(',')[0]?.trim() || req.headers.get('x-real-ip') || 'unknown';
-}
-
 export async function POST(req: Request) {
   // Rate limit by IP — brute-forcing protection
-  const ip = clientIp(req);
+  const ip = getClientIp(req);
   const rl = await checkRateLimit(`invite-redeem:${ip}`, REDEEM_MAX, REDEEM_WINDOW_SEC);
   if (!rl.ok) {
     return NextResponse.json(

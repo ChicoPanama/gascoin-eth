@@ -1,5 +1,8 @@
 import { streamText, type ModelMessage } from 'ai';
 import { gateway } from '@ai-sdk/gateway';
+import { verifyPrivySession } from '../../../lib/integrations/privy';
+import { checkRateLimit } from '../../../lib/rate-limit';
+import { getClientIp } from '../../../lib/ip';
 
 export const runtime = 'nodejs';
 export const maxDuration = 30;
@@ -422,6 +425,25 @@ What if I'm having trouble and this assistant can't help?
   Visit gascoin.app/docs for full documentation, or DM @GasCoinApp on X for direct support.`;
 
 export async function POST(req: Request) {
+  const rl = await checkRateLimit(`chat:${getClientIp(req)}`, 20, 60);
+  if (!rl.ok) {
+    return new Response('Rate limited', { status: 429 });
+  }
+
+  const auth = req.headers.get('authorization');
+  const session = await verifyPrivySession(
+    auth,
+    {
+      xId: req.headers.get('x-privy-user-id') || '',
+      xHandle: req.headers.get('x-privy-handle') || '',
+      wallet: req.headers.get('x-privy-wallet') || '',
+    },
+    req.headers.get('cookie'),
+  );
+  if (!session || !session.xId) {
+    return new Response('Unauthorized', { status: 401 });
+  }
+
   let messages: ModelMessage[];
   try {
     ({ messages } = await (req.json() as Promise<{ messages: ModelMessage[] }>));

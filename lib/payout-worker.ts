@@ -1,4 +1,5 @@
 import { hasMinimumGascoin, sendSolPayout } from './integrations/solana';
+import { getTierForBalance } from './token-tiers';
 import { verifyTweetProof, getFollowerCount } from './integrations/x';
 import { getUserByUsername } from './x-api';
 import { scoreAccountQuality } from './account-quality';
@@ -152,7 +153,31 @@ export async function processQueuedPayout(claimId: string) {
     return { ok: false, error: 'min_gascoin_not_met', tokenBalance: gate.tokenBalance };
   }
 
-  const sent = await sendSolPayout(job.wallet, Number(job.amount_sol));
+  // T2: Cross-validate payout amount against the wallet's current tier cap.
+  // Protects against tampered payout_jobs rows and catches edge cases where
+  // the job was created with an inflated amount.
+  const currentTier = getTierForBalance(gate.tokenBalance);
+  const requestedAmount = Number(job.amount_sol);
+  if (requestedAmount > currentTier.max_sol_refund + 0.0001) {
+    await supabase.from('payout_jobs').update({
+      status: 'blocked',
+      last_error: `amount_exceeds_tier_cap:${currentTier.slug}:max=${currentTier.max_sol_refund}:requested=${requestedAmount}`,
+      updated_at: new Date().toISOString()
+    }).eq('id', job.id);
+
+    await supabase.from('audit_logs').insert({
+      actor_type: 'system',
+      actor_id: 'payout_worker',
+      action: 'payout_blocked_amount_exceeds_tier',
+      target_type: 'claim',
+      target_id: claimId,
+      payload_json: { wallet: job.wallet, requestedAmount, tierSlug: currentTier.slug, maxAllowed: currentTier.max_sol_refund },
+    });
+
+    return { ok: false, error: 'amount_exceeds_tier_cap', requestedAmount, tierSlug: currentTier.slug, maxAllowed: currentTier.max_sol_refund };
+  }
+
+  const sent = await sendSolPayout(job.wallet, requestedAmount);
   if (!sent.ok) {
     const attempts = Number(job.attempts || 0) + 1;
     const exhausted = attempts >= Number(job.max_attempts || 5);
@@ -176,6 +201,19 @@ export async function processQueuedPayout(claimId: string) {
     });
 
     return { ok: false, error: sent.error || 'payout_failed', attempts, exhausted };
+  }
+
+  // O1: Detect DRYRUN hashes — ENABLE_LIVE_PAYOUT is not 'true' in production.
+  // Write a critical audit entry immediately so the admin feed surfaces it.
+  if (sent.txHash?.startsWith('DRYRUN_')) {
+    await supabase.from('audit_logs').insert({
+      actor_type: 'system',
+      actor_id: 'payout_worker',
+      action: 'dryrun_payout_detected',
+      target_type: 'claim',
+      target_id: claimId,
+      payload_json: { wallet: job.wallet, amountSol: requestedAmount, txHash: sent.txHash, reason: 'ENABLE_LIVE_PAYOUT is not true — no SOL was transferred' },
+    });
   }
 
   await supabase.from('payouts').insert({
