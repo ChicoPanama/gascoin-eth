@@ -579,38 +579,38 @@ function RoadmapPopover() {
   const acts = [
     {
       numeral: 'I',
-      name: 'THE MACHINE IS BUILT',
-      status: 'BUILT',
+      name: 'BUILT THE ENGINE',
+      status: 'DONE',
       state: 'done' as const,
-      prose: 'Fifteen gates. Three AIs that cross-examine every claim. Infrastructure that does not ask for days off. We built it from nothing — then broke it until it stopped breaking.',
+      prose: 'We built an automated system that verifies every gas claim — 15 checks covering your receipt, your tweet, and your wallet. Three AI models review each submission. No manual approval needed.',
     },
     {
       numeral: 'II',
-      name: 'THE DOOR OPENS',
-      status: 'LIVE',
+      name: 'BETA IS LIVE',
+      status: 'NOW',
       state: 'live' as const,
-      prose: 'Beta is running. First wallets are connected. First receipts scanned and verified. This is no longer a theory.',
+      prose: 'Real users, real receipts, real wallets. We\'re running claims through the system, working out the kinks, and making sure everything holds up before we open to everyone.',
     },
     {
       numeral: 'III',
-      name: 'THE WORLD FINDS OUT',
+      name: 'OPEN TO EVERYONE',
       status: 'NEXT',
       state: 'next' as const,
-      prose: 'Open to everyone. Live SOL to real wallets. The more you drive, the more you earn. No middleman. No waiting on a company to decide.',
+      prose: 'Anyone can participate. Submit a gas receipt, connect your Solana wallet, and get SOL back directly. Fill up more often and you unlock higher tiers with better refund rates.',
     },
     {
       numeral: 'IV',
-      name: 'SOMETHING LARGER',
+      name: 'THE LONG GAME',
       status: 'HORIZON',
       state: 'future' as const,
-      prose: 'A manifesto. A community. A token with a purpose beyond speculation. GASCOIN becomes a statement about who owns the road.',
+      prose: 'Token staking, community governance, and more ways to earn. We\'re building this to last — not a one-time promotion, but a platform drivers actually want to be part of.',
     },
   ];
 
   return (
     <>
-      <div className="wlc-pop-kicker">[ THE STORY SO FAR ]</div>
-      <h2 className="wlc-pop-title">Four acts.</h2>
+      <div className="wlc-pop-kicker">[ WHERE WE ARE ]</div>
+      <h2 className="wlc-pop-title">The roadmap.</h2>
       <div className="wlc-roadmap">
         {acts.map((act, i) => (
           <div key={i} className={`wlc-roadmap-act wlc-roadmap-act--${act.state}`}>
