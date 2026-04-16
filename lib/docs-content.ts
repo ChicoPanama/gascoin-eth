@@ -638,6 +638,65 @@ Inputs(wallet,tweet,receipt)
         order: 27,
       },
       {
+        slug: "how-we-know-its-real",
+        title: "How We Know Your Receipt Is Real",
+        categorySlug: "technology",
+        category: "Technology",
+        description: "Plain-language explanation of what Gemini Vision checks, what can be faked, and what can't.",
+        content: `<p>The most common question we get: <em>"How do you know someone didn't just use AI to generate a fake receipt?"</em> Here's a plain-language answer.</p>
+
+<h3>What Gemini Vision actually does</h3>
+<p>When you upload a receipt photo, it goes to Google's Gemini Vision model — an AI that looks at images the way a trained investigator would, not just a text scanner. It doesn't just read the words on the receipt. It asks:</p>
+<ul>
+<li>Is this image a photo of real thermal paper, or does it look like something generated on a computer?</li>
+<li>Is the handwriting natural? Does it look like a human wrote those characters, or is it suspiciously perfect?</li>
+<li>Does the photo have camera metadata (the hidden data every phone photo carries) — or is that data missing, which is a sign of a generated image?</li>
+<li>Are the image dimensions consistent with a real phone photo, or do they match the square sizes that AI image generators typically produce?</li>
+<li>Does the station name, date, and amount make internal sense as a real gas receipt?</li>
+</ul>
+<p>It also checks for editing software signatures in the image file. A photo opened in Photoshop or GIMP and re-saved leaves a fingerprint. Gemini finds it.</p>
+
+<h3>What the handwriting requirement adds</h3>
+<p>The most important gate: your last 4 wallet characters must be <em>handwritten on the physical receipt</em>. This is specifically designed to defeat AI image generation. Here's why it works:</p>
+<ul>
+<li>AI image generators can produce a convincing-looking receipt — but they cannot reliably produce a receipt with a <em>specific sequence of characters handwritten on it</em></li>
+<li>Even if a generated image passes the visual check, Gemini Vision reads the handwritten characters and compares them to your actual wallet address. They must match exactly</li>
+<li>The handwriting must look like handwriting — natural pen strokes on thermal paper. Typed or printed characters fail</li>
+</ul>
+<p>This single requirement makes AI-generated receipts functionally useless for fraud. The attacker would need to generate an image with correct handwriting of a specific unknown string — and then have that handwriting pass an AI vision model that was specifically trained to distinguish real human handwriting from generated text.</p>
+
+<h3>What can be faked — and why it still fails</h3>
+<div class="doc-callout doc-callout--warn">
+<p><strong>Partial fakes are caught by other layers.</strong> The receipt check is one of 15 gates. Even if someone got past the image check, they'd still need a live X account with 100+ real followers, a valid tweet posted within 48 hours, and a wallet holding GASCOIN tokens.</p>
+</div>
+<table class="doc-table">
+<thead><tr><th>Attack</th><th>Why it fails</th></tr></thead>
+<tbody>
+<tr><td>AI-generated receipt image</td><td>Missing phone EXIF data. Square dimensions. No real thermal paper texture. Fails is_physical_receipt check (score threshold: 0.65)</td></tr>
+<tr><td>Screenshot of a real receipt</td><td>Screenshot pixel dimensions are recognized (exact widths: 750, 1080, 1170, 1284, 1290 px). PNG format instead of JPEG. No camera model in EXIF. Score penalty applied</td></tr>
+<tr><td>Photoshopped receipt</td><td>Editing software writes its name into the image file's hidden metadata. Adobe, Photoshop, GIMP, Canva, and Midjourney signatures trigger an automatic score penalty of −0.30</td></tr>
+<tr><td>Real receipt, wrong wallet chars</td><td>Gemini reads the handwritten characters. Gate 5 does a case-insensitive exact match against your connected wallet's last 4. Mismatch = hard rejection</td></tr>
+<tr><td>Real receipt, reused photo</td><td>Every image is fingerprinted with a perceptual hash (dHash) and SHA-256. The same photo — even with minor edits — matches a previous submission and is rejected</td></tr>
+<tr><td>Real receipt, characters not on it</td><td>Gemini's has_handwriting and wallet_address fields both come back empty. Gate 5 fails. No match possible</td></tr>
+</tbody>
+</table>
+
+<h3>The confidence score</h3>
+<p>Gemini doesn't just return a yes/no. It returns a composite authenticity score from 0 to 1, weighted across six signals:</p>
+<pre class="doc-ascii">
+  EXIF data quality      20%  ← phone metadata, camera model, timestamp
+  OCR confidence         25%  ← how clearly it read the receipt text
+  Physical receipt flag  15%  ← is this real paper, not a screen?
+  Gas station flag       10%  ← is this from a gas station?
+  Not manipulated flag   10%  ← no editing software, no pixel tampering
+  Handwriting present     5%  ← human ink on physical paper
+  Wallet chars found      5%  ← the handwritten wallet ID is visible
+  Image dimensions       10%  ← real phone photo, not AI square format
+</pre>
+<p>A score below 0.65 means the system believes the receipt is likely not authentic. The submission is automatically rejected. The threshold is not adjustable by users and is not publicly exploitable — small variations in image quality don't push a fake receipt over the line.</p>`,
+        order: 27.5,
+      },
+      {
         slug: "gate-decision-and-retry-paths",
         title: "Gate Decision and Retry Paths",
         categorySlug: "technology",
@@ -683,16 +742,15 @@ Inputs(wallet,tweet,receipt)
         categorySlug: "technology",
         category: "Technology",
         description: "",
-        content: `<p>Grok — built by xAI — is the reasoning engine behind GASCOIN's fraud detection and quality scoring. It powers four critical systems.</p>
+        content: `<p>Grok — built by xAI — is the reasoning engine behind GASCOIN's fraud detection and quality scoring. It powers three critical systems.</p>
 <div class="doc-callout doc-callout--warn"><p><strong>Important:</strong> Grok does not directly release funds. Treasury release and final state transitions are controlled by deterministic policy and gate execution logic.</p></div>
-<h3>Receipt Analysis</h3>
-<p>Every uploaded receipt passes through Grok-powered OCR that extracts structured data: total amount, date, station name, and handwritten wallet characters. Unlike traditional OCR, Grok understands context — it can distinguish a gas station receipt from a restaurant bill, detect inconsistencies between printed and handwritten text, and flag anomalies that suggest digital manipulation.</p>
-<h3>AI Image Detection</h3>
-<p>Grok evaluates every receipt image for signs of AI generation or digital manipulation. The system produces an AI probability score (0-1 scale). Submissions scoring above 0.65 are automatically rejected. This catches AI-generated receipts, Photoshopped images, and digitally altered documents.</p>
-<h3>Tamper Scoring</h3>
-<p>A separate tamper analysis examines EXIF metadata, image dimensions, compression artifacts, and pixel-level inconsistencies. The tamper score (0-1 scale) catches receipts that have been cropped, spliced, or edited after the original photo was taken. Threshold: 0.55.</p>
-<h3>Adaptive Learning</h3>
-<p>Unlike static rule-based fraud systems, Grok continuously processes submission patterns across the entire platform. New fraud vectors are identified and countered without manual rule updates. The system gets smarter with every submission — legitimate or fraudulent.</p>`,
+<div class="doc-callout doc-callout--info"><p><strong>Note on roles:</strong> Receipt image reading (OCR, AI detection, tamper scoring) is handled by <strong>Google Gemini Vision</strong> — not Grok. Grok runs <em>after</em> Gemini and reasons across all signals for cross-validation and fraud pattern detection.</p></div>
+<h3>Cross-Signal Validation</h3>
+<p>After Gemini extracts receipt data, Grok performs cross-validation: does the receipt date match the tweet timestamp? Does the station name make sense for the submitter's region? Are there inconsistencies between the printed receipt text and the handwritten wallet characters? Grok catches contradictions that pass individual gate checks but fail when considered together.</p>
+<h3>Fraud Pattern Reasoning</h3>
+<p>Grok evaluates high-risk submissions for coordinated fraud signals: velocity anomalies, submission timing clusters, address reuse patterns, and behavioral fingerprints that suggest organized fraud. This layer catches sophisticated forgeries that pass visual inspection and individual gate checks.</p>
+<h3>Account Quality Scoring</h3>
+<p>The submitter's X account is scored across engagement patterns, follower network quality, posting history, and behavioral consistency. xAI-powered scoring identifies bot accounts, purchased followers, and coordinated networks — making it economically infeasible to create fake accounts at scale.</p>`,
         order: 29,
       },
       {
@@ -796,10 +854,10 @@ Inputs(wallet,tweet,receipt)
         description: "",
         content: `<p>GASCOIN is designed so that the cost of fabricating a valid submission always exceeds the value of the refund. Here's why:</p>
 <ul>
-<li><strong>Physical receipt required</strong> — You need a real paper receipt from a real gas station. Digital, email, and app receipts are rejected. AI-generated receipt images are caught by Grok's image analysis</li>
+<li><strong>Physical receipt required</strong> — You need a real paper receipt from a real gas station. Digital, email, and app receipts are rejected. AI-generated receipt images are caught by Gemini Vision's AI detection scoring</li>
 <li><strong>Handwritten wallet ID</strong> — The last 4 characters of your wallet must be physically written on the receipt in pen. This ties the receipt to a specific wallet at a specific moment in time</li>
 <li><strong>Live tweet verification</strong> — Your tweet must exist, be public, contain #gascoin, and be posted within 48 hours. Deleting the tweet after submission fails re-verification at payout time</li>
-<li><strong>AI image analysis</strong> — Grok scores every receipt for AI generation probability and digital tampering. Two independent scores must both pass</li>
+<li><strong>AI image analysis</strong> — Gemini Vision scores every receipt for AI generation probability and digital tampering. Two independent scores must both pass</li>
 <li><strong>Perceptual hashing</strong> — Every receipt is fingerprinted and compared against all previous submissions. The same receipt cannot be submitted twice, even if edited</li>
 <li><strong>Social graph scoring</strong> — Your X account must have 100+ real followers, posting history, and pass account quality checks. Bot accounts and purchased followers are detected</li>
 <li><strong>Referral ring detection</strong> — AI graph analysis identifies and blocks circular referral schemes</li>
@@ -815,7 +873,7 @@ Inputs(wallet,tweet,receipt)
 <li><strong>Signal decay</strong> — Historical penalties weaken over time (30% weight at 180+ days) — prevents false positives from legitimate X purges</li>
 <li><strong>Score clamping</strong> — Anomalous upstream values (AI score=999) are clamped and logged for audit. No single signal can produce an out-of-range result</li>
 </ul>
-<p>To successfully game GASCOIN, an attacker would need to: physically obtain a gas receipt, write a wallet ID on it by hand, photograph it convincingly enough to fool Grok's AI analysis, maintain a legitimate X account with real followers and activity, post a public tweet, hold GASCOIN tokens, and pass admin review. The cost of doing this at scale makes it economically irrational.</p>`,
+<p>To successfully game GASCOIN, an attacker would need to: physically obtain a gas receipt, write a wallet ID on it by hand, photograph it convincingly enough to fool Gemini Vision's AI detection, maintain a legitimate X account with real followers and activity, post a public tweet, hold GASCOIN tokens, and pass admin review. The cost of doing this at scale makes it economically irrational.</p>`,
         order: 34,
       },
       {

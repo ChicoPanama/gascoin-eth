@@ -82,16 +82,23 @@ export default async function AdminIntelligencePage({
     query = query.eq('acknowledged', true);
   }
 
-  const { data: entries } = await query;
+  // Run entries query and severity-count RPC in parallel
+  const [{ data: entries }, severityRes] = await Promise.all([
+    query,
+    // One GROUP BY query instead of four COUNT queries
+    supabase.rpc('get_intelligence_severity_counts'),
+  ]);
   const rows = entries || [];
 
-  // Pull aggregate stats (independent of filter) for the header cards
-  const [critRes, highRes, medRes, pendingRes] = await Promise.all([
-    supabase.from('intelligence_entries').select('id', { count: 'exact', head: true }).eq('severity', 'critical').eq('acknowledged', false),
-    supabase.from('intelligence_entries').select('id', { count: 'exact', head: true }).eq('severity', 'high').eq('acknowledged', false),
-    supabase.from('intelligence_entries').select('id', { count: 'exact', head: true }).eq('severity', 'medium').eq('acknowledged', false),
-    supabase.from('intelligence_entries').select('id', { count: 'exact', head: true }).eq('acknowledged', false),
-  ]);
+  // Extract per-severity counts from the single RPC result
+  const sevCounts: Record<string, number> = {};
+  for (const row of severityRes.data || []) {
+    sevCounts[row.severity] = Number(row.cnt);
+  }
+  const critCount = sevCounts['critical'] || 0;
+  const highCount = sevCounts['high'] || 0;
+  const medCount  = sevCounts['medium'] || 0;
+  const totalPending = Object.values(sevCounts).reduce((s, n) => s + n, 0);
 
   return (
     <div>
@@ -103,23 +110,23 @@ export default async function AdminIntelligencePage({
         <div className="gc-stats-grid">
           <div className="gc-stat">
             <div className="gc-stat-label">Critical · Pending</div>
-            <div className="gc-stat-value" style={{ color: (critRes.count || 0) > 0 ? 'var(--status-fail)' : 'var(--text-secondary)' }}>
-              {critRes.count ?? 0}
+            <div className="gc-stat-value" style={{ color: critCount > 0 ? 'var(--status-fail)' : 'var(--text-secondary)' }}>
+              {critCount}
             </div>
           </div>
           <div className="gc-stat">
             <div className="gc-stat-label">High · Pending</div>
-            <div className="gc-stat-value" style={{ color: (highRes.count || 0) > 0 ? 'var(--status-warn)' : 'var(--text-secondary)' }}>
-              {highRes.count ?? 0}
+            <div className="gc-stat-value" style={{ color: highCount > 0 ? 'var(--status-warn)' : 'var(--text-secondary)' }}>
+              {highCount}
             </div>
           </div>
           <div className="gc-stat">
             <div className="gc-stat-label">Medium · Pending</div>
-            <div className="gc-stat-value">{medRes.count ?? 0}</div>
+            <div className="gc-stat-value">{medCount}</div>
           </div>
           <div className="gc-stat">
             <div className="gc-stat-label">Total Pending</div>
-            <div className="gc-stat-value">{pendingRes.count ?? 0}</div>
+            <div className="gc-stat-value">{totalPending}</div>
           </div>
         </div>
       </div>

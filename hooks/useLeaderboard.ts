@@ -5,43 +5,9 @@ import { supabaseBrowser } from "../lib/supabase-client";
 import type { LeaderboardEntry, LeaderboardStats } from "../types/leaderboard";
 import { DEMO_LEADERBOARD } from "../lib/demo-data";
 
-const RPC_URL = '/api/rpc';
-const GASCOIN_MINT = process.env.NEXT_PUBLIC_GASCOIN_MINT || '';
-
-// Fetch GASCOIN token balance for a wallet via JSON-RPC
-async function fetchGascoinBalance(wallet: string): Promise<number> {
-  if (!GASCOIN_MINT) return 0;
-  try {
-    const res = await fetch(RPC_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        jsonrpc: '2.0', id: 1,
-        method: 'getTokenAccountsByOwner',
-        params: [wallet, { mint: GASCOIN_MINT }, { encoding: 'jsonParsed' }]
-      }),
-    });
-    const json = await res.json();
-    let total = 0;
-    for (const acc of json?.result?.value || []) {
-      total += Number(acc?.account?.data?.parsed?.info?.tokenAmount?.uiAmount || 0);
-    }
-    return total;
-  } catch {
-    return 0;
-  }
-}
-
 // Composite score: 55% Holdings points + 25% Engagement + 20% Referrals
 // Holdings-dominant: whales hold the price, they ARE the ecosystem.
-// Engagement supplements. Referrals reward growth.
-// SOL earned is NOT a factor — points only. SOL is for receipts only.
-function computeCompositeScore(solEarned: number, gascoinHoldings: number, referrals: number, engagement: number, holdingsPoints: number = 0): number {
-  // Holdings-dominant: whales hold the price, they ARE the ecosystem.
-  // holdingsPoints = accumulated daily bonus points from holding GASCOIN.
-  // Fleet (10M tokens) earns 5,000pts/day = 150K/month.
-  // engagement = tweet + submission + streak + referral_passive points.
-  // referrals = welcome bonus points from verified conversions.
+function computeCompositeScore(holdingsPoints: number, engagement: number, referrals: number): number {
   return (holdingsPoints * 0.55) + (engagement * 0.25) + (referrals * 0.20);
 }
 
@@ -54,15 +20,15 @@ export function useLeaderboard() {
 
   const fetchLeaderboard = useCallback(async () => {
     try {
-      // Query payouts table directly — no views needed
-      const { data: payouts, error: payErr } = await supabaseBrowser
-        .from("payouts")
-        .select("wallet, amount_sol, created_at, status")
-        .eq("status", "paid");
+      // ── 1. Server-side aggregation — no full table scan ───────────
+      // get_leaderboard_data() does GROUP BY wallet on the DB, returning
+      // one row per wallet instead of one row per payout.
+      const { data: leaderRows, error: lbErr } = await supabaseBrowser
+        .rpc('get_leaderboard_data', { lim: 100 });
 
-      if (payErr) throw payErr;
+      if (lbErr) throw lbErr;
 
-      if (!payouts || payouts.length === 0) {
+      if (!leaderRows || leaderRows.length === 0) {
         setEntries(DEMO_LEADERBOARD.map((d: any) => ({
           wallet_address: d.wallet_address,
           total_submissions: d.total_submissions ?? 1,
@@ -85,103 +51,67 @@ export function useLeaderboard() {
         return;
       }
 
-      // Aggregate by wallet
-      const walletMap = new Map<string, {
-        total_sol: number;
-        count: number;
-        last_at: string;
-      }>();
+      const wallets = leaderRows.map((r: any) => r.wallet as string);
 
-      let totalPaid = 0;
-      let largest = 0;
-
-      for (const p of payouts) {
-        const amt = Number(p.amount_sol || 0);
-        totalPaid += amt;
-        if (amt > largest) largest = amt;
-
-        const existing = walletMap.get(p.wallet);
-        if (existing) {
-          existing.total_sol += amt;
-          existing.count += 1;
-          if (p.created_at > existing.last_at) existing.last_at = p.created_at;
-        } else {
-          walletMap.set(p.wallet, { total_sol: amt, count: 1, last_at: p.created_at });
-        }
-      }
-
-      // Fetch GASCOIN holdings for all wallets (batch, with concurrency limit)
-      const wallets = Array.from(walletMap.keys());
+      // ── 2. GASCOIN balances from cache — replaces N live Helius calls ──
+      // wallet_token_cache is updated by the payout worker and the
+      // token-tier check on submission. One query instead of N RPC calls.
       const holdingsMap = new Map<string, number>();
+      try {
+        const { data: cacheRows } = await supabaseBrowser
+          .from('wallet_token_cache')
+          .select('wallet_address, gascoin_balance')
+          .in('wallet_address', wallets);
+        for (const row of cacheRows || []) {
+          holdingsMap.set(row.wallet_address, Number(row.gascoin_balance || 0));
+        }
+      } catch {}
 
-      // Fetch in batches of 5 to avoid rate limits
-      for (let i = 0; i < wallets.length; i += 5) {
-        const batch = wallets.slice(i, i + 5);
-        const results = await Promise.all(batch.map(fetchGascoinBalance));
-        batch.forEach((w, idx) => holdingsMap.set(w, results[idx]));
-      }
-
-      // Fetch points data from engagement_points table (the single source of truth)
+      // ── 3. Engagement points — single query, split in JS ──────────
+      // All point sources in one round-trip; we split by source category below.
       const refMap = new Map<string, number>();
       const engMap = new Map<string, number>();
-
-      try {
-        // Referral points from engagement_points
-        const { data: refPoints } = await supabaseBrowser
-          .from('engagement_points')
-          .select('wallet, points')
-          .eq('source', 'referral_conversion');
-        for (const r of refPoints || []) {
-          refMap.set(r.wallet, (refMap.get(r.wallet) || 0) + Number(r.points || 0));
-        }
-      } catch {}
-
       const holdingsPointsMap = new Map<string, number>();
       try {
-        // Engagement points = tweet + submission + streak (NOT holdings — counted separately)
-        const { data: engPoints } = await supabaseBrowser
+        const ALL_SOURCES = [
+          'referral_conversion',
+          'tweet_engagement',
+          'submission_approved',
+          'streak_bonus',
+          'referral_passive',
+          'holdings_bonus',
+        ];
+        const { data: allPoints } = await supabaseBrowser
           .from('engagement_points')
           .select('wallet, points, source')
-          .in('source', ['tweet_engagement', 'submission_approved', 'streak_bonus', 'referral_passive']);
-        for (const e of engPoints || []) {
-          engMap.set(e.wallet, (engMap.get(e.wallet) || 0) + Number(e.points || 0));
-        }
-        // Holdings bonus points tracked separately for composite weighting
-        const { data: holdPoints } = await supabaseBrowser
-          .from('engagement_points')
-          .select('wallet, points')
-          .eq('source', 'holdings_bonus');
-        for (const h of holdPoints || []) {
-          holdingsPointsMap.set(h.wallet, (holdingsPointsMap.get(h.wallet) || 0) + Number(h.points || 0));
-        }
-      } catch {}
+          .in('source', ALL_SOURCES)
+          .in('wallet', wallets);
 
-      // Also check legacy referral_counts view as fallback
-      try {
-        const { data: legacyRef } = await supabaseBrowser
-          .from('referral_counts')
-          .select('wallet, verified_referrals');
-        for (const r of legacyRef || []) {
-          if (!refMap.has(r.wallet)) {
-            refMap.set(r.wallet, Number(r.verified_referrals || 0) * 500); // Convert count to points
+        for (const row of allPoints || []) {
+          const pts = Number(row.points || 0);
+          if (row.source === 'referral_conversion') {
+            refMap.set(row.wallet, (refMap.get(row.wallet) || 0) + pts);
+          } else if (row.source === 'holdings_bonus') {
+            holdingsPointsMap.set(row.wallet, (holdingsPointsMap.get(row.wallet) || 0) + pts);
+          } else {
+            // tweet_engagement, submission_approved, streak_bonus, referral_passive
+            engMap.set(row.wallet, (engMap.get(row.wallet) || 0) + pts);
           }
         }
       } catch {}
 
-      // Build entries with composite score
-      const raw: LeaderboardEntry[] = wallets.map((w) => {
-        const d = walletMap.get(w)!;
-        const gc = holdingsMap.get(w) || 0;
-        const referrals = refMap.get(w) || 0;
-        const engagement = engMap.get(w) || 0;
-        const holdingsPts = holdingsPointsMap.get(w) || 0;
-        const score = computeCompositeScore(d.total_sol, gc, referrals, engagement, holdingsPts);
-
+      // ── 4. Build entries ───────────────────────────────────────────
+      const raw: LeaderboardEntry[] = leaderRows.map((r: any) => {
+        const gc = holdingsMap.get(r.wallet) || 0;
+        const referrals = refMap.get(r.wallet) || 0;
+        const engagement = engMap.get(r.wallet) || 0;
+        const holdingsPts = holdingsPointsMap.get(r.wallet) || 0;
+        const score = computeCompositeScore(holdingsPts, engagement, referrals);
         return {
-          wallet_address: w,
-          total_submissions: d.count,
-          total_sol_earned: d.total_sol,
-          last_submission_at: d.last_at,
+          wallet_address: r.wallet as string,
+          total_submissions: Number(r.payout_count),
+          total_sol_earned: Number(r.total_sol),
+          last_submission_at: r.last_at as string,
           rank: 0,
           gascoin_holdings: gc,
           composite_score: score,
@@ -190,36 +120,40 @@ export function useLeaderboard() {
         };
       });
 
-      // Sort by composite score descending, assign ranks
       raw.sort((a, b) => b.composite_score - a.composite_score);
       raw.forEach((e, i) => { e.rank = i + 1; });
 
-      // Fetch X handles + PFPs from wallet_x_links
+      // ── 5. X handles + PFPs ────────────────────────────────────────
       try {
         const { data: xLinks } = await supabaseBrowser
           .from('wallet_x_links')
           .select('wallet, x_handle, profile_image_url')
           .eq('is_active', true)
           .in('wallet', wallets);
-        for (const link of xLinks || []) {
-          const entry = raw.find((e) => e.wallet_address === link.wallet);
-          if (entry) {
+        const xMap = new Map(xLinks?.map((l: any) => [l.wallet, l]) || []);
+        for (const entry of raw) {
+          const link = xMap.get(entry.wallet_address) as any;
+          if (link) {
             entry.x_handle = link.x_handle || undefined;
             entry.profile_image_url = link.profile_image_url || undefined;
           }
         }
       } catch {}
 
+      // ── 6. Stats ───────────────────────────────────────────────────
+      const totalPaid = leaderRows.reduce((s: number, r: any) => s + Number(r.total_sol || 0), 0);
+      const totalApproved = leaderRows.reduce((s: number, r: any) => s + Number(r.payout_count || 0), 0);
+      const largestWallet = Math.max(...leaderRows.map((r: any) => Number(r.total_sol || 0)));
       const totalGc = Array.from(holdingsMap.values()).reduce((s, v) => s + v, 0);
       const totalRefs = Array.from(refMap.values()).reduce((s, v) => s + v, 0);
 
       setEntries(raw);
       setStats({
-        total_earners: walletMap.size,
+        total_earners: leaderRows.length,
         total_sol_paid: totalPaid,
-        total_approved: payouts.length,
-        largest_single_refund: largest,
-        avg_refund_amount: payouts.length > 0 ? totalPaid / payouts.length : 0,
+        total_approved: totalApproved,
+        largest_single_refund: largestWallet,
+        avg_refund_amount: totalApproved > 0 ? totalPaid / totalApproved : 0,
         total_gascoin_held: totalGc,
         total_referrals: totalRefs,
       });

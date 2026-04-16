@@ -232,6 +232,33 @@ export const GATES: GateDefinition[] = [
     checklist_label: 'My receipt total is at least $5 USD',
   },
 
+  {
+    id: 16, slug: 'receipt-date-valid', policyGate: 'receipt_date_valid', name: 'Receipt Date Valid', category: 'receipt',
+    description: 'The gas purchase must have occurred within 7 days before your submission date.',
+    what_we_check: 'Gemini Vision OCR extracts the printed date from the receipt. That date is compared against the submission timestamp. Future-dated receipts and receipts older than 7 days fail.',
+    common_failures: [
+      'Receipt older than 7 days from the submission date',
+      'Date field obscured, folded, or illegible in the photo',
+      'Photographed a receipt from a much earlier purchase',
+    ],
+    how_to_pass: 'Submit receipts from gas purchases made within the last 7 days. Photograph the receipt on the same day you buy gas.',
+    estimated_time_seconds: 5, is_blocking: true,
+    checklist_label: 'My gas purchase was made within the last 7 days',
+  },
+  {
+    id: 17, slug: 'amount-verified', policyGate: 'amount_verified', name: 'OCR Amount Verified', category: 'receipt',
+    description: 'The amount you claim must match what our AI reads on your receipt. You may not claim more than 125% of the printed total.',
+    what_we_check: 'Gemini Vision extracts the receipt total. Your submitted amount is compared to that OCR-detected total. If you claim more than 25% above what the receipt shows, this gate fails.',
+    common_failures: [
+      'Entered an amount higher than what is printed on the receipt',
+      'Receipt total was digitally altered before photographing',
+      'OCR misread the total (small font, smudged) — resubmit with a clearer photo',
+    ],
+    how_to_pass: 'Enter the exact amount shown on your receipt. Do not round up or inflate the total.',
+    estimated_time_seconds: 5, is_blocking: true,
+    checklist_label: 'My claimed amount matches the printed total on my receipt',
+  },
+
   // ─── WALLET (1) ────────────────────────────────────────────────
   {
     id: 15, slug: 'gascoin-min-hold', policyGate: 'gascoin_min_hold', name: 'GASCOIN Min Hold', category: 'wallet',

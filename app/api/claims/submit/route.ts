@@ -220,7 +220,19 @@ export async function POST(req: Request){
     wallet,
   });
 
-  const walletOnReceipt = walletOnReceiptInput || ocr.walletOnReceipt || '';
+  // OCR-extracted chars are authoritative; user-provided is the fallback if OCR couldn't read them.
+  // This prevents bypassing the physical handwriting requirement by typing chars into the form.
+  const walletOnReceipt = ocr.walletOnReceipt || walletOnReceiptInput || '';
+
+  // Flag if user-provided chars disagree with what OCR read — high signal for manual review
+  const walletConflict = !!(
+    ocr.walletOnReceipt &&
+    walletOnReceiptInput &&
+    ocr.walletOnReceipt.slice(-4).toLowerCase() !== walletOnReceiptInput.slice(-4).toLowerCase()
+  );
+
+  const receiptDateOcr = ocr.pipeline?.extraction?.receipt_date ?? null;
+  const ocrAmountDetected = ocr.amountUsd ?? null;
 
   const { data: dupRows, error: dupErr } = await supabase
     .from('claim_receipts')
@@ -235,6 +247,32 @@ export async function POST(req: Request){
 
   const duplicateHash = !!dupRows?.some((r:any) => r.hash_sha256 === fraudBase.hashSha256);
   const duplicatePhash = !!dupRows?.some((r:any) => r.phash === fraudBase.pHash);
+
+  // Content fingerprint: detect same physical receipt submitted by a different wallet.
+  // SHA-256 and pHash both change with camera angle/crop — this catches that case.
+  // Non-blocking: stored as a flag so Claude and admin see it, but not a hard gate.
+  let contentFingerprintDuplicate = false;
+  if (receiptDateOcr && ocrAmountDetected && ocrAmountDetected > 0) {
+    try {
+      const amountLow = ocrAmountDetected * 0.90;
+      const amountHigh = ocrAmountDetected * 1.10;
+      const { data: contentDups } = await supabase
+        .from('claim_receipts')
+        .select('claim_id, claims!inner(wallet)')
+        .eq('metadata_json->>receiptDate', receiptDateOcr)
+        .neq('claims.wallet', wallet)
+        .limit(3);
+      if (contentDups && contentDups.length > 0) {
+        // Check amount proximity in JS to avoid a slow JSONB cast
+        contentFingerprintDuplicate = contentDups.some((row: any) => {
+          const amt = Number(row.metadata_json?.amountUsdDetected ?? 0);
+          return amt >= amountLow && amt <= amountHigh;
+        });
+      }
+    } catch {
+      // Non-blocking — never fail the submission on a fingerprint query error
+    }
+  }
 
   // Determine tier from token balance for tier-based cooldown
   const userTier = getTierForBalance(minHold.tokenBalance ?? 0);
@@ -291,6 +329,8 @@ export async function POST(req: Request){
     duplicatePhash,
     cooldownOk,
     amountUsd,
+    ocrAmount: ocrAmountDetected,
+    receiptDate: receiptDateOcr,
     followerCount,
     accountQualityScore: accountQuality.score,
     accountQualityPassed: accountQuality.passed,
@@ -400,9 +440,11 @@ export async function POST(req: Request){
       metadata_json: {
         receiptHasGascoin: ocr.receiptHasGascoin,
         walletOnReceipt,
-        amountUsdDetected: ocr.amountUsd,
+        amountUsdDetected: ocrAmountDetected,
         duplicateHash,
         duplicatePhash,
+        contentFingerprintDuplicate,
+        walletConflict,
         // Pipeline fraud signals
         authenticityScore: fraudBase.authenticityScore,
         fraudRisk: fraudBase.fraudRisk,
@@ -411,7 +453,7 @@ export async function POST(req: Request){
         dimensionScore: fraudBase.dimensionScore,
         // Privacy-first: country only, no station name/city/state
         country: ocr.pipeline?.extraction?.station_country ?? null,
-        receiptDate: ocr.pipeline?.extraction?.receipt_date ?? null,
+        receiptDate: receiptDateOcr,
         isPhysicalReceipt: ocr.pipeline?.extraction?.is_physical_receipt ?? null,
         isDigitallyManipulated: ocr.pipeline?.extraction?.is_digitally_manipulated ?? null,
         fraudNotes: ocr.pipeline?.extraction?.fraud_notes ?? null,
@@ -462,6 +504,8 @@ export async function POST(req: Request){
       decision: result.decision,
       duplicateHash,
       duplicatePhash,
+      ...(contentFingerprintDuplicate ? { contentFingerprintDuplicate: true } : {}),
+      ...(walletConflict ? { walletConflict: true } : {}),
       ...(result.clampFlags ? { clampFlags: result.clampFlags } : {}),
       ...(mem0Flags ? { mem0Flags: mem0Flags.riskFlags, mem0Trust: mem0Flags.trustLevel } : {}),
     }

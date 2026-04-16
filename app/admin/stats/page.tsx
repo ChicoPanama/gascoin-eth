@@ -9,32 +9,30 @@ export default async function StatsPage() {
 
   const supabase = getSupabaseAdmin();
 
-  const [claimsRes, payoutsRes, refRes, gateStatsRes] = await Promise.all([
-    supabase.from('claims').select('status'),
-    supabase.from('payouts').select('wallet, amount_sol').eq('status', 'paid'),
+  // All queries run in parallel. No full table scans:
+  // get_claims_status_counts() → GROUP BY status (replaces SELECT status FROM claims)
+  // get_payouts_by_wallet()    → GROUP BY wallet ORDER BY total_sol LIMIT 10
+  // referral_conversions       → COUNT only (head:true, no rows transferred)
+  // gate_stats_view            → small view, already aggregated
+  const [claimsCountRes, walletRes, refRes, gateStatsRes] = await Promise.all([
+    supabase.rpc('get_claims_status_counts'),
+    supabase.rpc('get_payouts_by_wallet', { lim: 10 }),
     supabase.from('referral_conversions').select('*', { count: 'exact', head: true }),
     supabase.from('gate_stats_view').select('gate_id, total, passed, pass_rate_pct'),
   ]);
 
-  const claims = claimsRes.data || [];
-  const payouts = payoutsRes.data || [];
-
   const statusCounts: Record<string, number> = {};
-  for (const c of claims) statusCounts[c.status] = (statusCounts[c.status] ?? 0) + 1;
-
-  const totalSol = payouts.reduce((s: number, p: any) => s + Number(p.amount_sol || 0), 0);
-
-  // Top wallets
-  const walletMap: Record<string, { sol: number; count: number }> = {};
-  for (const p of payouts) {
-    if (!walletMap[p.wallet]) walletMap[p.wallet] = { sol: 0, count: 0 };
-    walletMap[p.wallet].sol += Number(p.amount_sol || 0);
-    walletMap[p.wallet].count += 1;
+  for (const row of claimsCountRes.data || []) {
+    statusCounts[row.status] = Number(row.cnt);
   }
-  const topWallets = Object.entries(walletMap)
-    .map(([w, v]) => ({ wallet: w, ...v }))
-    .sort((a, b) => b.sol - a.sol)
-    .slice(0, 10);
+  const totalClaims = Object.values(statusCounts).reduce((s, n) => s + n, 0);
+
+  const topWallets = (walletRes.data || []).map((r: any) => ({
+    wallet: r.wallet as string,
+    sol: Number(r.total_sol),
+    count: Number(r.payout_count),
+  }));
+  const totalSol = topWallets.reduce((s: number, w: any) => s + w.sol, 0);
 
   const statuses = ['submitted', 'auto_review', 'needs_manual_review', 'approved', 'rejected'];
 
@@ -49,7 +47,7 @@ export default async function StatsPage() {
         <div className="gc-stats-grid">
           <div className="gc-stat">
             <div className="gc-stat-label">Total Claims</div>
-            <div className="gc-stat-value">{claims.length}</div>
+            <div className="gc-stat-value">{totalClaims}</div>
           </div>
           <div className="gc-stat">
             <div className="gc-stat-label">Total SOL Paid</div>
@@ -62,7 +60,7 @@ export default async function StatsPage() {
           <div className="gc-stat">
             <div className="gc-stat-label">Approval Rate</div>
             <div className="gc-stat-value">
-              {claims.length > 0 ? `${(((statusCounts['approved'] || 0) / claims.length) * 100).toFixed(1)}%` : '—'}
+              {totalClaims > 0 ? `${(((statusCounts['approved'] || 0) / totalClaims) * 100).toFixed(1)}%` : '—'}
             </div>
           </div>
         </div>
@@ -117,7 +115,7 @@ export default async function StatsPage() {
       <table className="lb-table">
         <thead><tr><th>#</th><th>Wallet</th><th>SOL</th><th>Claims</th></tr></thead>
         <tbody>
-          {topWallets.map((w, i) => (
+          {topWallets.map((w: any, i: number) => (
             <tr key={w.wallet} className="lb-table-row">
               <td className="lb-table-rank">{i + 1}</td>
               <td className="lb-table-wallet">{truncateWallet(w.wallet)}</td>

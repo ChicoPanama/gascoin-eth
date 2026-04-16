@@ -26,6 +26,8 @@ export const GATE_DEFS = [
   { id: 'min_amount',                 label: 'Min $5 Receipt' },
   { id: 'min_followers',              label: 'Min 100 Followers' },
   { id: 'account_quality',            label: 'Account Quality' },
+  { id: 'receipt_date_valid',         label: 'Receipt Date Valid' },
+  { id: 'amount_verified',            label: 'OCR Amount Verified' },
 ] as const;
 
 export const GATE_COUNT = GATE_DEFS.length;
@@ -48,6 +50,8 @@ export type ClaimInput = {
   duplicatePhash: boolean;
   cooldownOk: boolean;
   amountUsd: number;
+  ocrAmount: number | null;    // USD total from Gemini Vision; null if OCR didn't extract it
+  receiptDate: string | null;  // YYYY-MM-DD from Gemini Vision; null if not extracted
   followerCount: number;
   accountQualityScore: number;
   accountQualityPassed: boolean;
@@ -78,6 +82,9 @@ export function evaluateClaim(c: ClaimInput){
     gates.push({ gate:'cooldown', passed:c.cooldownOk, reason:'Submission cooldown has not expired' });
     gates.push({ gate:'min_followers', passed:false, score:c.followerCount, reason:'X API unavailable — retry later' });
     gates.push({ gate:'account_quality', passed:false, score:0, reason:'Cannot score account — X API unavailable' });
+    // Receipt date and amount checks — pass with benefit-of-doubt on retry path
+    gates.push({ gate:'receipt_date_valid', passed:true, reason:'API failure retry — date check deferred' });
+    gates.push({ gate:'amount_verified', passed:true, reason:'API failure retry — amount check deferred' });
 
     return { gates, failed: gates.filter(g=>!g.passed), riskScore: 0, decision: 'retry_later' as ClaimDecision };
   }
@@ -98,6 +105,28 @@ export function evaluateClaim(c: ClaimInput){
   gates.push({ gate:'min_amount', passed:c.amountUsd >= 5, score:c.amountUsd, reason:'Receipt must be at least $5.00 to prevent streak/submission gaming' });
   gates.push({ gate:'min_followers', passed:c.followerCount >= 100, score:c.followerCount, reason:'Account must have at least 100 followers' });
   gates.push({ gate:'account_quality', passed:c.accountQualityPassed, score:c.accountQualityScore, reason:'Account does not meet quality threshold (age, activity, profile completeness)' });
+
+  // Gate: receipt_date_valid — OCR date must be within last 7 days and not future
+  if (c.receiptDate) {
+    const parsed = new Date(c.receiptDate);
+    const nowMs = Date.now();
+    const diffDays = (nowMs - parsed.getTime()) / 86400000;
+    const dateValid = !isNaN(parsed.getTime()) && diffDays >= 0 && diffDays <= 7;
+    gates.push({ gate:'receipt_date_valid', passed:dateValid, reason: dateValid ? 'Receipt date within 7-day window' : `Receipt dated ${c.receiptDate} is outside the 7-day submission window` });
+  } else {
+    // OCR couldn't read date — pass but log; Claude will see no date in fraud signals
+    gates.push({ gate:'receipt_date_valid', passed:true, reason:'Receipt date not extractable by OCR — manual review recommended' });
+  }
+
+  // Gate: amount_verified — claimed amount must not exceed OCR-detected by more than 25%
+  if (c.ocrAmount != null && c.ocrAmount > 0) {
+    const maxAllowed = c.ocrAmount * 1.25;
+    const amountOk = c.amountUsd <= maxAllowed;
+    gates.push({ gate:'amount_verified', passed:amountOk, score:c.amountUsd, reason: amountOk ? 'Claimed amount matches OCR' : `Claimed $${c.amountUsd} exceeds OCR-detected $${c.ocrAmount.toFixed(2)} by more than 25%` });
+  } else {
+    // OCR returned no amount — pass; other gates (min_amount) already provide a floor
+    gates.push({ gate:'amount_verified', passed:true, reason:'OCR amount not detected — amount gate deferred to manual review' });
+  }
 
   const failed = gates.filter(g=>!g.passed);
 
