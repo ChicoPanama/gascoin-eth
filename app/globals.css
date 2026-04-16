@@ -7907,24 +7907,17 @@ button.docs-footer-link {
   filter: drop-shadow(0 0 12px rgba(231,233,234,0.7)) brightness(0.95);
 }
 
-/* ── Display screen: the ENTER prompt flashes on idle AND on hover ── */
+/* ── Display screen: the ENTER prompt shows ONLY on hover ──────────── */
+/* PR #47: removed the 4.2s idle-flash pulse. It was competing with the
+   country price ticker rotation (PR #46) and making the display flicker
+   between GASCOIN/ticker and ENTER_ every few seconds. The ticker +
+   idle bezel pulse already draw attention to the screen as the entry. */
 .wlc-pump svg #pump-display-hover-prompt {
   transition: opacity 240ms ease;
   pointer-events: none;
+  opacity: 0;
 }
-/* Idle flash: every 4.2s the display briefly flips to "> ENTER_" as a
-   CTA pulse (replaces the old full-screen splash). This runs only when
-   the display is NOT hovered so the hover behavior fully overrides. */
-.wlc-pump svg:not(.is-hover-display) #pump-display-hover-prompt {
-  animation: wlc-display-idle-flash 4.2s ease-in-out infinite;
-}
-@keyframes wlc-display-idle-flash {
-  0%, 82%, 100% { opacity: 0; }
-  86%, 96%       { opacity: 1; }
-}
-/* On hover, pin the prompt visible (overrides idle-flash) */
 .wlc-pump svg.is-hover-display #pump-display-hover-prompt {
-  animation: none;
   opacity: 1;
 }
 .wlc-pump svg #pump-display-cursor {
