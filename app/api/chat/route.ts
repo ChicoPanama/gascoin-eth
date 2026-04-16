@@ -456,6 +456,9 @@ export async function POST(req: Request) {
     return new Response('Rate limited', { status: 429 });
   }
 
+  // Auth is optional — the chat agent is a public support widget.
+  // Authenticated users get wallet-specific context and tool access.
+  // Unauthenticated users get FAQ + general answers.
   const auth = req.headers.get('authorization');
   const session = await verifyPrivySession(
     auth,
@@ -465,17 +468,14 @@ export async function POST(req: Request) {
       wallet: req.headers.get('x-privy-wallet') || '',
     },
     req.headers.get('cookie'),
-  );
-  if (!session || !session.xId) {
-    return new Response('Unauthorized', { status: 401 });
-  }
+  ).catch(() => null);
 
   let messages: ModelMessage[];
   let wallet = '';
   try {
     const body = await (req.json() as Promise<{ messages: ModelMessage[]; wallet?: string }>);
     messages = body.messages;
-    wallet = (body.wallet || session.wallet || '').trim();
+    wallet = (body.wallet || session?.wallet || '').trim();
   } catch {
     return new Response('Bad request', { status: 400 });
   }
