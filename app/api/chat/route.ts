@@ -3,6 +3,13 @@ import { gateway } from '@ai-sdk/gateway';
 import { verifyPrivySession } from '../../../lib/integrations/privy';
 import { checkRateLimit } from '../../../lib/rate-limit';
 import { getClientIp } from '../../../lib/ip';
+import {
+  buildKBContext,
+  buildWalletContext,
+  loadConvMemory,
+  saveConvMemory,
+  extractLastUserText,
+} from '../../../lib/chat-context';
 
 export const runtime = 'nodejs';
 export const maxDuration = 30;
@@ -445,19 +452,41 @@ export async function POST(req: Request) {
   }
 
   let messages: ModelMessage[];
+  let wallet = '';
   try {
-    ({ messages } = await (req.json() as Promise<{ messages: ModelMessage[] }>));
+    const body = await (req.json() as Promise<{ messages: ModelMessage[]; wallet?: string }>);
+    messages = body.messages;
+    // Use wallet from body if provided; fall back to privy-verified wallet
+    wallet = (body.wallet || session.wallet || '').trim();
   } catch {
     return new Response('Bad request', { status: 400 });
   }
 
+  // Extract last user message text for RAG + memory (best-effort, empty string on failure)
+  const lastUserText = extractLastUserText(messages as unknown[]);
+
+  // Fetch all dynamic context in parallel — each returns '' on failure
+  const [kbContext, walletContext, memoryContext] = await Promise.all([
+    buildKBContext(lastUserText),
+    wallet ? buildWalletContext(wallet) : Promise.resolve(''),
+    wallet ? loadConvMemory(wallet) : Promise.resolve(''),
+  ]);
+
+  const dynamicSystem = SYSTEM_PROMPT + memoryContext + walletContext + kbContext;
+
   const result = streamText({
     model: gateway('anthropic/claude-sonnet-4.6'),
-    system: SYSTEM_PROMPT,
+    system: dynamicSystem,
     messages,
     maxOutputTokens: 400,
     onError: ({ error }) => {
       console.error('[chat] streamText error', error);
+    },
+    onFinish: ({ text }) => {
+      if (wallet && lastUserText && text) {
+        // Fire-and-forget within the function lifetime (nodejs runtime, streaming kept alive)
+        saveConvMemory(wallet, lastUserText, text).catch(() => {});
+      }
     },
   });
 

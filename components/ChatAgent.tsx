@@ -10,15 +10,20 @@ const WELCOME =
 export function ChatAgent({
   autoOpen = false,
   align = 'right',
+  wallet,
 }: {
   autoOpen?: boolean;
   align?: 'left' | 'right';
+  wallet?: string;
 }) {
   const [open, setOpen] = useState(autoOpen);
   const [input, setInput] = useState('');
 
   const { messages, sendMessage, status } = useChat({
-    transport: new DefaultChatTransport({ api: '/api/chat' }),
+    transport: new DefaultChatTransport({
+      api: '/api/chat',
+      body: wallet ? { wallet } : {},
+    }),
     messages: [
       { id: 'welcome', role: 'assistant', parts: [{ type: 'text', text: WELCOME }] },
     ],
