@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { verifyPrivySession } from '../../../../lib/integrations/privy';
 import { getSupabaseAdmin } from '../../../../lib/supabase';
 import { checkRateLimit } from '../../../../lib/rate-limit';
+import { signGateCookie, GATE_COOKIE_NAME, GATE_COOKIE_MAX_AGE_SECONDS } from '../../../../lib/gate-cookie';
 
 /**
  * POST /api/invites/redeem — Season 1 beta invite redemption
@@ -81,12 +82,21 @@ export async function POST(req: Request) {
     .maybeSingle();
 
   if (existing) {
-    return NextResponse.json({
+    const gateCookie = await signGateCookie({ days: 90 });
+    const res = NextResponse.json({
       ok: true,
       code: existing.code,
       alreadyRedeemed: true,
       message: 'You already have beta access.',
     });
+    res.cookies.set(GATE_COOKIE_NAME, gateCookie, {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'lax',
+      path: '/',
+      maxAge: GATE_COOKIE_MAX_AGE_SECONDS,
+    });
+    return res;
   }
 
   // Does the code exist?
@@ -131,11 +141,20 @@ export async function POST(req: Request) {
     );
   }
 
-  return NextResponse.json({
+  const gateCookie = await signGateCookie({ days: 90 });
+  const res = NextResponse.json({
     ok: true,
     code: updated.code,
     message: 'Beta access unlocked. You can now submit receipts.',
   });
+  res.cookies.set(GATE_COOKIE_NAME, gateCookie, {
+    httpOnly: true,
+    secure: true,
+    sameSite: 'lax',
+    path: '/',
+    maxAge: GATE_COOKIE_MAX_AGE_SECONDS,
+  });
+  return res;
 }
 
 // GET returns the current caller's invite status — used by the submit
