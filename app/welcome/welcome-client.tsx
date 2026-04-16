@@ -12,6 +12,7 @@ import {
   type ReactNode,
 } from 'react';
 import { PumpSvg, type PumpRegion } from '../../components/welcome/PumpSvg';
+import { ChatAgent } from '../../components/ChatAgent';
 import { GLOBAL_GAS_PRICES } from '../../lib/gas-prices-global';
 
 type Props = {
@@ -401,6 +402,8 @@ export function WelcomeClient({
           {popover.kind === 'roadmap' && <RoadmapPopover />}
         </Popover>
       )}
+
+      <ChatAgent />
     </div>
   );
 }
