@@ -576,72 +576,56 @@ function HowItWorksPopover({ gateCount }: { gateCount: number }) {
 }
 
 function RoadmapPopover() {
-  const phases = [
+  const acts = [
     {
-      name: 'FOUNDATION',
-      tag: 'COMPLETE',
-      done: true,
-      items: [
-        'RPC proxy + CSP hardening',
-        'Redis SDK + single-flight cache',
-        'AI Gateway — Gemini sees, Grok thinks, Claude decides',
-        'mem0 Pro — graph memory + 13 category extraction',
-        '15-gate automated verification engine',
-      ],
+      numeral: 'I',
+      name: 'THE MACHINE IS BUILT',
+      status: 'BUILT',
+      state: 'done' as const,
+      prose: 'Fifteen gates. Three AIs that cross-examine every claim. Infrastructure that does not ask for days off. We built it from nothing — then broke it until it stopped breaking.',
     },
     {
-      name: 'SEASON 1 · BETA',
-      tag: 'LIVE NOW',
-      done: true,
-      items: [
-        'Invite-code gated access',
-        'X OAuth + wallet linking via Privy',
-        '@GasCoinApp follow + mention required',
-        'Receipt OCR + AI scoring pipeline',
-        'Admin cockpit — activity, moderation, intelligence',
-        '95-page docs monolith',
-      ],
+      numeral: 'II',
+      name: 'THE DOOR OPENS',
+      status: 'LIVE',
+      state: 'live' as const,
+      prose: 'Beta is running. First wallets are connected. First receipts scanned and verified. This is no longer a theory.',
     },
     {
-      name: 'SEASON 1 · LAUNCH',
-      tag: 'NEXT',
-      done: false,
-      items: [
-        'Live SOL refunds to connected wallets',
-        'Token tiers — Commuter / Road Warrior / Fleet',
-        'Cooldown scaling by tier',
-        'Engagement scoring + leaderboard',
-        'Referral engine with chain tracking',
-      ],
+      numeral: 'III',
+      name: 'THE WORLD FINDS OUT',
+      status: 'NEXT',
+      state: 'next' as const,
+      prose: 'Open to everyone. Live SOL to real wallets. The more you drive, the more you earn. No middleman. No waiting on a company to decide.',
     },
     {
-      name: 'BEYOND',
-      tag: 'HORIZON',
-      done: false,
-      items: [
-        'Manifesto drops on X',
-        'Station network — multi-region expansion',
-        '$GASCOIN token utility + staking',
-        'Community governance',
-      ],
+      numeral: 'IV',
+      name: 'SOMETHING LARGER',
+      status: 'HORIZON',
+      state: 'future' as const,
+      prose: 'A manifesto. A community. A token with a purpose beyond speculation. GASCOIN becomes a statement about who owns the road.',
     },
   ];
+
   return (
     <>
-      <div className="wlc-pop-kicker">[ ROADMAP ]</div>
-      <h2 className="wlc-pop-title">The build</h2>
-      <div className="wlc-pop-phases">
-        {phases.map((p, pi) => (
-          <div key={pi} className={`wlc-pop-phase ${p.done ? 'is-done' : ''}`}>
-            <div className="wlc-pop-phase-header">
-              <span className="wlc-pop-phase-name">{p.name}</span>
-              <span className="wlc-pop-phase-tag">{p.tag}</span>
+      <div className="wlc-pop-kicker">[ THE STORY SO FAR ]</div>
+      <h2 className="wlc-pop-title">Four acts.</h2>
+      <div className="wlc-roadmap">
+        {acts.map((act, i) => (
+          <div key={i} className={`wlc-roadmap-act wlc-roadmap-act--${act.state}`}>
+            <div className="wlc-roadmap-spine-col" aria-hidden>
+              <div className="wlc-roadmap-node" />
+              {i < acts.length - 1 && <div className="wlc-roadmap-line" />}
             </div>
-            <ul className="wlc-pop-phase-items">
-              {p.items.map((item, ii) => (
-                <li key={ii}>{item}</li>
-              ))}
-            </ul>
+            <div className="wlc-roadmap-body">
+              <div className="wlc-roadmap-header">
+                <span className="wlc-roadmap-numeral">{act.numeral}</span>
+                <span className="wlc-roadmap-name">{act.name}</span>
+                <span className="wlc-roadmap-status">{act.status}</span>
+              </div>
+              <p className="wlc-roadmap-prose">{act.prose}</p>
+            </div>
           </div>
         ))}
       </div>

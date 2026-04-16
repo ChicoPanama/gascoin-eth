@@ -73,6 +73,50 @@ export const DOC_CATEGORIES: DocCategory[] = [
     label: "Overview",
     sections: [
       {
+        slug: "quick-start",
+        title: "Quick Start — 5 Steps",
+        categorySlug: "overview",
+        category: "Overview",
+        description: "",
+        order: 0,
+        content: `<p><strong>Gas = real gasoline at a pump.</strong> Not crypto transaction fees. You fill up your car, you get SOL back. That's it.</p>
+
+<pre class="doc-ascii">
+  ┌──────────────┐   ┌──────────────┐   ┌──────────────┐   ┌──────────────┐   ┌──────────────┐
+  │   STEP 1     │──→│   STEP 2     │──→│   STEP 3     │──→│   STEP 4     │──→│   STEP 5     │
+  │              │   │              │   │              │   │              │   │              │
+  │  Fill up at  │   │  Write last  │   │  Post tweet  │   │  Submit at   │   │  SOL lands   │
+  │  any gas     │   │  4 chars of  │   │  on X with   │   │  gascoin.app │   │  in your     │
+  │  station     │   │  wallet on   │   │  #GasCoin    │   │  /submit     │   │  wallet      │
+  │              │   │  receipt     │   │  + receipt   │   │              │   │              │
+  └──────────────┘   └──────────────┘   └──────────────┘   └──────────────┘   └──────────────┘
+</pre>
+
+<h3>Step 1 — Buy gas</h3>
+<p>Fill up at any gas station. Keep the paper receipt — you'll need it. Purchase must be within the last 7 days.</p>
+
+<h3>Step 2 — Write your wallet ID on the receipt</h3>
+<p>Using a pen, write the <strong>last 4 characters</strong> of your Solana wallet address on the receipt. This links the receipt to your wallet so the system can verify it's yours. No pen? No payout — this is required.</p>
+
+<h3>Step 3 — Post on X</h3>
+<p>Take a clear photo of the receipt and post it on X (Twitter). Your tweet must include the hashtag <strong>#GasCoin</strong> and tag <strong>@GasCoinApp</strong>. The tweet must be public. Copy the tweet URL — you'll need it in the next step.</p>
+
+<h3>Step 4 — Submit at gascoin.app/submit</h3>
+<p>Go to <strong>gascoin.app/submit</strong>, connect your Solana wallet, paste your tweet URL, and upload your receipt photo. The system runs 15 automated checks — takes about 2 minutes.</p>
+
+<h3>Step 5 — Receive SOL</h3>
+<p>If all checks pass, SOL is sent directly to your connected wallet within 24–48 hours. No action needed on your end.</p>
+
+<h3>Before you start — quick checklist</h3>
+<ul>
+<li>Solana wallet installed (Phantom, Solflare, or Backpack — all free)</li>
+<li>X (Twitter) account that is public and verified (blue checkmark)</li>
+<li>You follow <a href="https://x.com/GasCoinApp" target="_blank" rel="noopener">@GasCoinApp</a> on X</li>
+<li>Gas receipt dated within the last 7 days</li>
+<li>A pen</li>
+</ul>`,
+      },
+      {
         slug: "what-is-gascoin",
         title: "What Is GASCOIN",
         categorySlug: "overview",
