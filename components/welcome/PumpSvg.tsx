@@ -211,22 +211,26 @@ export function PumpSvg({
           AMBIENT: outer halo, horizon hairline, ground shadow layers
           ═══════════════════════════════════════════════════════════════ */}
 
-      {/* Outer atmospheric halo */}
-      <ellipse cx="500" cy="640" rx="560" ry="620" fill="url(#halo-grad)" opacity="0.35" />
+      {/* Outer atmospheric halo — centered on pump axis */}
+      <ellipse cx="480" cy="640" rx="560" ry="620" fill="url(#halo-grad)" opacity="0.35" />
       {/* Inner halo — tighter, brighter */}
-      <ellipse cx="500" cy="600" rx="460" ry="520" fill="url(#halo-grad)" opacity="0.55" />
+      <ellipse cx="480" cy="600" rx="460" ry="520" fill="url(#halo-grad)" opacity="0.55" />
 
-      {/* Horizon hairline — the pump sits in space */}
-      <line x1="80" y1="1040" x2="920" y2="1040" stroke="rgba(231,233,234,0.08)" strokeWidth="1" strokeDasharray="2 6" />
+      {/* Horizon hairline — centered on pump axis */}
+      <line x1="60" y1="1040" x2="900" y2="1040" stroke="rgba(231,233,234,0.06)" strokeWidth="0.5" strokeDasharray="1 8" />
 
-      {/* Ground shadow — 4 layers for depth */}
+      {/* Ground shadow — dark realistic contact shadow, not a glow */}
       <g id="pump-ground">
-        <ellipse cx="500" cy="1060" rx="420" ry="42" fill="rgba(231,233,234,0.04)" filter="url(#ground-blur)" />
-        <ellipse cx="500" cy="1060" rx="340" ry="28" fill="rgba(231,233,234,0.08)" filter="url(#ground-blur)" />
-        <ellipse cx="500" cy="1058" rx="250" ry="16" fill="rgba(231,233,234,0.14)" />
-        <ellipse cx="500" cy="1058" rx="170" ry="8"  fill="rgba(231,233,234,0.20)" />
-        {/* Reflected glow */}
-        <ellipse cx="500" cy="1050" rx="280" ry="10" fill="url(#ground-glow)" opacity="0.6" />
+        {/* Broad ambient occlusion — very subtle darkening */}
+        <ellipse cx="480" cy="1038" rx="320" ry="18" fill="rgba(0,0,0,0.35)" filter="url(#ground-blur)" />
+        {/* Medium contact penumbra */}
+        <ellipse cx="480" cy="1034" rx="240" ry="10" fill="rgba(0,0,0,0.5)" filter="url(#ground-blur)" />
+        {/* Tight contact shadow — darkest at the base */}
+        <ellipse cx="480" cy="1028" rx="160" ry="5" fill="rgba(0,0,0,0.7)" />
+        {/* Hard contact line — where metal meets ground */}
+        <ellipse cx="480" cy="1024" rx="130" ry="2" fill="rgba(0,0,0,0.9)" />
+        {/* Faint reflected ambient light — very subtle, not a spotlight */}
+        <ellipse cx="480" cy="1042" rx="200" ry="6" fill="rgba(231,233,234,0.03)" />
       </g>
 
       {/* ═══════════════════════════════════════════════════════════════
@@ -234,26 +238,27 @@ export function PumpSvg({
           ═══════════════════════════════════════════════════════════════ */}
 
       <g {...regionProps('base')}>
-        {/* Upper lip (chamfered shelf where body meets base) */}
-        <rect x="178" y="892" width="644" height="12" fill="#0a0a0b" stroke="#2F3336" strokeWidth="1" />
-        {/* Top-edge catch on the lip */}
-        <line x1="180" y1="893" x2="820" y2="893" stroke="rgba(231,233,234,0.06)" strokeWidth="0.5" />
+        {/* Upper lip — centered at x=480, 608px wide */}
+        <rect x="176" y="892" width="608" height="12" fill="#0a0a0b" stroke="#2F3336" strokeWidth="1" />
+        <line x1="178" y1="893" x2="782" y2="893" stroke="rgba(231,233,234,0.06)" strokeWidth="0.5" />
 
-        {/* Main plinth */}
-        <rect x="170" y="904" width="660" height="116" fill="url(#body-grad)" stroke="#2F3336" strokeWidth="1.5" />
-        {/* Inner ambient fill */}
-        <rect x="172" y="906" width="6" height="112" fill="url(#edge-fill)" />
+        {/* Main plinth — centered at x=480, 600px wide */}
+        <rect x="180" y="904" width="600" height="116" fill="url(#body-grad)" stroke="#2F3336" strokeWidth="1.5" />
+        {/* Left ambient fill */}
+        <rect x="182" y="906" width="6" height="112" fill="url(#edge-fill)" />
+        {/* Right ambient fill — symmetric */}
+        <rect x="772" y="906" width="6" height="112" fill="url(#edge-fill)" style={{ transform: 'scaleX(-1)', transformOrigin: '775px 962px' }} />
         {/* Top-edge rim light */}
-        <rect x="172" y="906" width="656" height="14" fill="url(#rim-light)" />
+        <rect x="182" y="906" width="596" height="14" fill="url(#rim-light)" />
 
         {/* Horizontal panel line */}
-        <line x1="170" y1="960" x2="830" y2="960" stroke="#2F3336" strokeWidth="0.8" />
+        <line x1="180" y1="960" x2="780" y2="960" stroke="#2F3336" strokeWidth="0.8" />
 
-        {/* Manufacturer plate — double-bordered */}
-        <rect x="340" y="924" width="320" height="28" fill="none" stroke="rgba(231,233,234,0.25)" strokeWidth="1" />
-        <rect x="344" y="928" width="312" height="20" fill="none" stroke="rgba(231,233,234,0.08)" strokeWidth="0.8" />
+        {/* Manufacturer plate — centered at 480, 280px wide */}
+        <rect x="340" y="924" width="280" height="28" fill="none" stroke="rgba(231,233,234,0.25)" strokeWidth="1" />
+        <rect x="344" y="928" width="272" height="20" fill="none" stroke="rgba(231,233,234,0.08)" strokeWidth="0.8" />
         <text
-          x="500" y="942" textAnchor="middle"
+          x="480" y="942" textAnchor="middle"
           fill="rgba(231,233,234,0.48)"
           fontFamily="ui-monospace, 'IBM Plex Mono', monospace"
           fontSize="11" fontWeight="700" letterSpacing="4"
@@ -263,7 +268,7 @@ export function PumpSvg({
 
         {/* Sub-label */}
         <text
-          x="500" y="984" textAnchor="middle"
+          x="480" y="984" textAnchor="middle"
           fill="rgba(231,233,234,0.28)"
           fontFamily="ui-monospace, 'IBM Plex Mono', monospace"
           fontSize="9" letterSpacing="3"
@@ -271,17 +276,17 @@ export function PumpSvg({
           SEASON 01 · BETA RELEASE · MFG 2026
         </text>
 
-        {/* Lower step */}
-        <rect x="194" y="996" width="612" height="20" fill="#030305" stroke="#1a1a1d" strokeWidth="1" />
+        {/* Lower step — centered at 480, 564px wide */}
+        <rect x="198" y="996" width="564" height="20" fill="#030305" stroke="#1a1a1d" strokeWidth="1" />
 
         {/* Ground contact shadow line */}
-        <line x1="180" y1="1020" x2="820" y2="1020" stroke="rgba(0,0,0,0.8)" strokeWidth="2" />
+        <line x1="186" y1="1020" x2="774" y2="1020" stroke="rgba(0,0,0,0.8)" strokeWidth="2" />
 
-        {/* 4 corner bolts */}
-        <circle cx="190" cy="918" r="2.5" fill="#1a1a1d" stroke="#2F3336" strokeWidth="0.6" />
-        <circle cx="810" cy="918" r="2.5" fill="#1a1a1d" stroke="#2F3336" strokeWidth="0.6" />
-        <circle cx="190" cy="1008" r="2.5" fill="#1a1a1d" stroke="#2F3336" strokeWidth="0.6" />
-        <circle cx="810" cy="1008" r="2.5" fill="#1a1a1d" stroke="#2F3336" strokeWidth="0.6" />
+        {/* 4 corner bolts — symmetric about 480 */}
+        <circle cx="196" cy="918" r="2.5" fill="#1a1a1d" stroke="#2F3336" strokeWidth="0.6" />
+        <circle cx="764" cy="918" r="2.5" fill="#1a1a1d" stroke="#2F3336" strokeWidth="0.6" />
+        <circle cx="196" cy="1008" r="2.5" fill="#1a1a1d" stroke="#2F3336" strokeWidth="0.6" />
+        <circle cx="764" cy="1008" r="2.5" fill="#1a1a1d" stroke="#2F3336" strokeWidth="0.6" />
       </g>
 
       {/* ═══════════════════════════════════════════════════════════════
@@ -301,11 +306,15 @@ export function PumpSvg({
         {/* Left-edge ambient fill */}
         <rect x="200" y="230" width="10" height="660" fill="url(#edge-fill)" />
 
-        {/* Right-edge vertical reflection strip */}
-        <rect x="757" y="260" width="1.5" height="610" fill="rgba(231,233,234,0.09)" />
+        {/* Left-edge vertical reflection strip */}
+        <rect x="202" y="260" width="1.5" height="610" fill="rgba(231,233,234,0.05)" />
+        {/* Right-edge vertical reflection strip — symmetric */}
+        <rect x="757" y="260" width="1.5" height="610" fill="rgba(231,233,234,0.05)" />
 
         {/* Left vertical seam */}
         <line x1="228" y1="260" x2="228" y2="870" stroke="#2F3336" strokeWidth="0.8" />
+        {/* Right vertical seam — symmetric */}
+        <line x1="732" y1="260" x2="732" y2="870" stroke="#2F3336" strokeWidth="0.8" />
 
         {/* Horizontal panel breaks */}
         <line x1="202" y1="546" x2="758" y2="546" stroke="#2F3336" strokeWidth="0.8" />
@@ -665,10 +674,10 @@ export function PumpSvg({
           REFUND · NODE · 001
         </text>
 
-        {/* ── VENT GRILLE ── */}
+        {/* ── VENT GRILLE — centered at 480 ── */}
         {(() => {
           const slits: React.ReactElement[] = [];
-          const startX = 450;
+          const startX = 425;
           const startY = 872;
           const slitW = 110;
           const slitH = 1.4;
@@ -685,7 +694,7 @@ export function PumpSvg({
           }
           return slits;
         })()}
-        <text x="424" y="885"
+        <text x="400" y="885"
           textAnchor="end"
           fill="rgba(231,233,234,0.35)"
           fontFamily="ui-monospace, 'IBM Plex Mono', monospace"
@@ -911,15 +920,15 @@ export function PumpSvg({
           <animate attributeName="opacity" values="0.4;0;0.4" dur="2.6s" repeatCount="indefinite" />
         </circle>
 
-        {/* Main handle slab */}
-        <rect x="340" y="186" width="320" height="44" fill="url(#body-grad)" stroke="#2F3336" strokeWidth="1.5" />
+        {/* Main handle slab — centered at 480, 320px wide */}
+        <rect x="320" y="186" width="320" height="44" fill="url(#body-grad)" stroke="#2F3336" strokeWidth="1.5" />
         {/* Top edge highlight */}
-        <rect x="342" y="188" width="316" height="12" fill="url(#rim-light)" />
+        <rect x="322" y="188" width="316" height="12" fill="url(#rim-light)" />
 
-        {/* Grip lines */}
-        <line x1="360" y1="208" x2="640" y2="208" stroke="rgba(231,233,234,0.08)" strokeWidth="1" />
-        <line x1="360" y1="214" x2="640" y2="214" stroke="rgba(231,233,234,0.08)" strokeWidth="1" />
-        <line x1="360" y1="220" x2="640" y2="220" stroke="rgba(231,233,234,0.08)" strokeWidth="1" />
+        {/* Grip lines — centered */}
+        <line x1="340" y1="208" x2="620" y2="208" stroke="rgba(231,233,234,0.08)" strokeWidth="1" />
+        <line x1="340" y1="214" x2="620" y2="214" stroke="rgba(231,233,234,0.08)" strokeWidth="1" />
+        <line x1="340" y1="220" x2="620" y2="220" stroke="rgba(231,233,234,0.08)" strokeWidth="1" />
       </g>
 
       {/* ═══════════════════════════════════════════════════════════════
