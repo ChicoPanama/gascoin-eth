@@ -7913,12 +7913,13 @@ button.docs-footer-link {
    between GASCOIN/ticker and ENTER_ every few seconds. The ticker +
    idle bezel pulse already draw attention to the screen as the entry. */
 .wlc-pump svg #pump-display-hover-prompt {
-  transition: opacity 240ms ease;
+  transition: opacity 160ms ease-out;
   pointer-events: none;
   opacity: 0;
 }
 .wlc-pump svg.is-hover-display #pump-display-hover-prompt {
   opacity: 1;
+  transition-delay: 0ms;
 }
 .wlc-pump svg #pump-display-cursor {
   animation: wlc-display-cursor-blink 1s steps(2) infinite;
@@ -7980,6 +7981,9 @@ button.docs-footer-link {
 }
 
 /* ═══ FLOATING HOVER LABEL (HTML overlay) ════════════════════════════ */
+/* Floating hover label — position set by JS via computeCallout().
+   Centered on the target point with translate(-50%,-50%).
+   Fade-in only — no translateY that conflicts with centering. */
 .wlc-hover-label {
   position: absolute;
   z-index: 5;
@@ -7992,28 +7996,22 @@ button.docs-footer-link {
   padding: 6px 12px;
   pointer-events: none;
   box-shadow: var(--wlc-glow-soft);
-  animation: wlc-label-in 180ms ease;
-}
-@keyframes wlc-label-in {
-  from { opacity: 0; transform: translateY(4px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-/* Hover label — position set by JS (left/top via computeCallout).
-   Label floats OUTSIDE the pump; a dashed SVG line connects it back
-   to the hotspot (rendered separately as .wlc-callout-svg). */
-.wlc-hover-label {
   transform: translate(-50%, -50%);
   white-space: nowrap;
+  animation: wlc-label-in 200ms ease-out;
+}
+@keyframes wlc-label-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
 }
 
-/* Callout SVG overlay — draws the dashed connecting line from the
-   hotspot region edge back to the floating label */
+/* Callout SVG overlay — dashed line from hotspot to label */
 .wlc-callout-svg {
   position: absolute;
   inset: 0;
   z-index: 4;
   pointer-events: none;
-  animation: wlc-callout-in 180ms ease-out;
+  animation: wlc-callout-in 200ms ease-out;
 }
 @keyframes wlc-callout-in {
   from { opacity: 0; }
@@ -8023,6 +8021,9 @@ button.docs-footer-link {
 /* Display ticker — rotating country price shown when idle */
 .wlc-pump svg #pump-display-ticker {
   animation: wlc-ticker-fade 400ms ease-out;
+}
+.wlc-pump svg #pump-display-ticker {
+  transition: opacity 120ms ease-out;
 }
 .wlc-pump svg.is-hover-display #pump-display-ticker {
   opacity: 0;
