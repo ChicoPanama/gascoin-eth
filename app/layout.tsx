@@ -5,6 +5,7 @@ import type { Metadata, Viewport } from 'next';
 import Script from 'next/script';
 import { Providers } from './providers';
 import { GlobalFooter } from '../components/GlobalFooter';
+import { GlobalChatAgent } from '../components/GlobalChatAgent';
 import { THEME_INIT_SCRIPT } from '../components/ThemeProvider';
 
 export const viewport: Viewport = {
@@ -59,6 +60,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <Providers>
           {children}
           <GlobalFooter />
+          <GlobalChatAgent />
         </Providers>
       </body>
     </html>
