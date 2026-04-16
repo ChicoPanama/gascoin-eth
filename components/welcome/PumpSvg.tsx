@@ -166,6 +166,45 @@ export function PumpSvg({
         <filter id="soft-glow" x="-40%" y="-40%" width="180%" height="180%">
           <feGaussianBlur stdDeviation="3" />
         </filter>
+
+        {/* Inset shadow — pressed-in bevel for keypad cells and slots */}
+        <filter id="inset-bevel" x="-10%" y="-10%" width="120%" height="120%">
+          <feFlood floodColor="#000" floodOpacity="0.6" result="shadow" />
+          <feComposite in="shadow" in2="SourceGraphic" operator="in" result="clipped" />
+          <feGaussianBlur in="clipped" stdDeviation="1.5" result="blur" />
+          <feOffset dx="0" dy="1" result="offset" />
+          <feComposite in="offset" in2="SourceGraphic" operator="out" result="inner" />
+          <feMerge>
+            <feMergeNode in="SourceGraphic" />
+            <feMergeNode in="inner" />
+          </feMerge>
+        </filter>
+
+        {/* Recessed panel — deeper inset for sub-display and brand plate */}
+        <filter id="recess" x="-5%" y="-5%" width="110%" height="110%">
+          <feDropShadow dx="0" dy="1" stdDeviation="2" floodColor="#000" floodOpacity="0.5" />
+        </filter>
+
+        {/* Emboss highlight — top-edge specular for raised elements */}
+        <linearGradient id="btn-bevel-top" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0"    stopColor="rgba(231,233,234,0.18)" />
+          <stop offset="0.3"  stopColor="rgba(231,233,234,0.04)" />
+          <stop offset="1"    stopColor="rgba(0,0,0,0.12)" />
+        </linearGradient>
+
+        {/* Deep slot — for card reader */}
+        <linearGradient id="slot-depth" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0"   stopColor="#000" />
+          <stop offset="0.4" stopColor="#050506" />
+          <stop offset="1"   stopColor="#0a0a0b" />
+        </linearGradient>
+
+        {/* NFC pad subtle radial glow */}
+        <radialGradient id="nfc-glow" cx="50%" cy="50%" r="50%">
+          <stop offset="0"   stopColor="rgba(231,233,234,0.06)" />
+          <stop offset="0.6" stopColor="rgba(231,233,234,0.02)" />
+          <stop offset="1"   stopColor="rgba(231,233,234,0)" />
+        </radialGradient>
       </defs>
 
       {/* ═══════════════════════════════════════════════════════════════
@@ -278,23 +317,30 @@ export function PumpSvg({
         <circle cx="214" cy="876" r="2.2" fill="#1a1a1d" stroke="#2F3336" strokeWidth="0.5" />
         <circle cx="746" cy="876" r="2.2" fill="#1a1a1d" stroke="#2F3336" strokeWidth="0.5" />
 
-        {/* ── SUB-DISPLAY PANEL (GAL / USD) ── */}
-        <rect x="220" y="562" width="520" height="78" fill="none" stroke="#2F3336" strokeWidth="1" />
-        <rect x="220" y="562" width="520" height="78" fill="url(#hatch)" />
-        {/* Inner top-edge highlight */}
-        <line x1="220" y1="563" x2="740" y2="563" stroke="rgba(231,233,234,0.06)" strokeWidth="1" />
-        {/* Mid divider */}
-        <line x1="220" y1="601" x2="740" y2="601" stroke="#2F3336" strokeWidth="0.6" />
+        {/* ── SUB-DISPLAY PANEL (GAL / USD) — recessed LCD strip ── */}
+        {/* Outer bezel — the panel is inset into the body */}
+        <rect x="218" y="560" width="524" height="82" fill="#050506" stroke="#1a1a1d" strokeWidth="1" />
+        {/* Inner face — dark recessed cavity */}
+        <rect x="222" y="564" width="516" height="74" fill="#020203" stroke="#2F3336" strokeWidth="0.8" />
+        {/* Top shadow edge — sells the recess */}
+        <line x1="222" y1="564" x2="738" y2="564" stroke="#000" strokeWidth="1.5" />
+        {/* Bottom highlight edge — light catching the lower lip */}
+        <line x1="222" y1="638" x2="738" y2="638" stroke="rgba(231,233,234,0.06)" strokeWidth="0.8" />
+        {/* Hatch texture */}
+        <rect x="222" y="564" width="516" height="74" fill="url(#hatch)" />
+        {/* Mid divider — etched groove */}
+        <line x1="224" y1="601" x2="736" y2="601" stroke="#000" strokeWidth="1" />
+        <line x1="224" y1="602" x2="736" y2="602" stroke="rgba(231,233,234,0.04)" strokeWidth="0.5" />
 
         {/* GAL row */}
-        <text x="234" y="590"
-          fill="rgba(231,233,234,0.45)"
+        <text x="236" y="590"
+          fill="rgba(231,233,234,0.55)"
           fontFamily="ui-monospace, 'IBM Plex Mono', monospace"
-          fontSize="10" letterSpacing="3"
+          fontSize="10" fontWeight="600" letterSpacing="3"
         >
-          GAL<tspan fill="rgba(231,233,234,0.25)" fontSize="8" letterSpacing="2"> · DISPENSED</tspan>
+          GAL<tspan fill="rgba(231,233,234,0.3)" fontSize="8" letterSpacing="2"> · DISPENSED</tspan>
         </text>
-        <text x="728" y="592" textAnchor="end"
+        <text x="726" y="592" textAnchor="end"
           fill="#E7E9EA"
           fontFamily="ui-monospace, 'IBM Plex Mono', monospace"
           fontSize="24" fontWeight="700" letterSpacing="3"
@@ -303,14 +349,14 @@ export function PumpSvg({
         </text>
 
         {/* USD row */}
-        <text x="234" y="628"
-          fill="rgba(231,233,234,0.45)"
+        <text x="236" y="628"
+          fill="rgba(231,233,234,0.55)"
           fontFamily="ui-monospace, 'IBM Plex Mono', monospace"
-          fontSize="10" letterSpacing="3"
+          fontSize="10" fontWeight="600" letterSpacing="3"
         >
-          USD<tspan fill="rgba(231,233,234,0.25)" fontSize="8" letterSpacing="2"> · TOTAL DUE</tspan>
+          USD<tspan fill="rgba(231,233,234,0.3)" fontSize="8" letterSpacing="2"> · TOTAL DUE</tspan>
         </text>
-        <text x="728" y="630" textAnchor="end"
+        <text x="726" y="630" textAnchor="end"
           fill="#E7E9EA"
           fontFamily="ui-monospace, 'IBM Plex Mono', monospace"
           fontSize="24" fontWeight="700" letterSpacing="3"
@@ -342,7 +388,10 @@ export function PumpSvg({
           TRANSACTION
         </text>
 
-        {/* ── KEYPAD (3 cols x 4 rows, sharp 1px borders, no fills) ── */}
+        {/* ── KEYPAD (3 cols x 4 rows, beveled pressed-metal buttons) ── */}
+        {/* Recessed keypad housing */}
+        <rect x="218" y="678" width="120" height="114" fill="#050506" stroke="#1a1a1d" strokeWidth="0.8" />
+        <line x1="218" y1="678" x2="338" y2="678" stroke="#000" strokeWidth="1" />
         {(() => {
           const cells: React.ReactElement[] = [];
           const labels = [
@@ -351,23 +400,44 @@ export function PumpSvg({
             ['7', '8', '9'],
             ['*', '0', '#'],
           ];
-          const startX = 222;
-          const startY = 682;
-          const w = 34;
-          const h = 24;
+          const startX = 224;
+          const startY = 684;
+          const w = 32;
+          const h = 23;
           const gx = 4;
-          const gy = 4;
+          const gy = 3;
           for (let r = 0; r < 4; r++) {
             for (let c = 0; c < 3; c++) {
               const x = startX + c * (w + gx);
               const y = startY + r * (h + gy);
+              {/* Button face — raised from the recess */}
               cells.push(
                 <rect
-                  key={`key-${r}-${c}`}
+                  key={`key-bg-${r}-${c}`}
                   x={x} y={y} width={w} height={h}
-                  fill="none"
+                  fill="#0e0e10"
                   stroke="#2F3336"
                   strokeWidth="1"
+                />
+              );
+              {/* Top bevel highlight — light catching the raised edge */}
+              cells.push(
+                <line
+                  key={`key-hi-${r}-${c}`}
+                  x1={x + 1} y1={y + 1}
+                  x2={x + w - 1} y2={y + 1}
+                  stroke="rgba(231,233,234,0.14)"
+                  strokeWidth="0.8"
+                />
+              );
+              {/* Bottom shadow — underside of the raised button */}
+              cells.push(
+                <line
+                  key={`key-sh-${r}-${c}`}
+                  x1={x + 1} y1={y + h - 1}
+                  x2={x + w - 1} y2={y + h - 1}
+                  stroke="rgba(0,0,0,0.4)"
+                  strokeWidth="0.8"
                 />
               );
               cells.push(
@@ -375,9 +445,9 @@ export function PumpSvg({
                   key={`keyt-${r}-${c}`}
                   x={x + w / 2} y={y + h - 7}
                   textAnchor="middle"
-                  fill="rgba(231,233,234,0.55)"
+                  fill="rgba(231,233,234,0.7)"
                   fontFamily="ui-monospace, 'IBM Plex Mono', monospace"
-                  fontSize="11" fontWeight="600"
+                  fontSize="11" fontWeight="700"
                 >
                   {labels[r][c]}
                 </text>
@@ -387,143 +457,200 @@ export function PumpSvg({
           return cells;
         })()}
 
-        {/* ── GRADE SELECTOR (3 sharp rows, transparent fills) ── */}
+        {/* ── GRADE SELECTOR (3 beveled panels with material depth) ── */}
+        {/* Grade housing recess */}
+        <rect x="348" y="678" width="172" height="114" fill="#050506" stroke="#1a1a1d" strokeWidth="0.8" />
+        <line x1="348" y1="678" x2="520" y2="678" stroke="#000" strokeWidth="1" />
         {(() => {
           const grades = [
-            { octane: '87', type: 'REGULAR' },
-            { octane: '89', type: 'PLUS' },
-            { octane: '93', type: 'PREMIUM' },
+            { octane: '87', type: 'REGULAR', price: '3.42' },
+            { octane: '89', type: 'PLUS', price: '3.68' },
+            { octane: '93', type: 'PREMIUM', price: '3.92' },
           ];
           const els: React.ReactElement[] = [];
-          const gx = 356;
-          const gy = 682;
+          const gx = 354;
+          const gy = 684;
           const gw = 160;
-          const gh = 36;
-          const gap = 6;
+          const gh = 32;
+          const gap = 4;
           for (let i = 0; i < 3; i++) {
             const y = gy + i * (gh + gap);
+            {/* Button face — raised panel */}
             els.push(
               <rect
                 key={`gr-${i}`}
                 x={gx} y={y} width={gw} height={gh}
-                fill="none"
+                fill="#0e0e10"
                 stroke="#2F3336"
                 strokeWidth="1"
               />
             );
-            {/* Left vertical separator */}
+            {/* Top bevel highlight */}
             els.push(
               <line
-                key={`gr-div-${i}`}
-                x1={gx + 30} y1={y + 4}
-                x2={gx + 30} y2={y + gh - 4}
-                stroke="#2F3336"
+                key={`gr-hi-${i}`}
+                x1={gx + 1} y1={y + 1}
+                x2={gx + gw - 1} y2={y + 1}
+                stroke="rgba(231,233,234,0.12)"
                 strokeWidth="0.8"
               />
             );
-            {/* Octane number (left of separator) */}
+            {/* Bottom shadow edge */}
+            els.push(
+              <line
+                key={`gr-sh-${i}`}
+                x1={gx + 1} y1={y + gh - 1}
+                x2={gx + gw - 1} y2={y + gh - 1}
+                stroke="rgba(0,0,0,0.5)"
+                strokeWidth="0.8"
+              />
+            );
+            {/* Left octane badge — darker inset square */}
+            els.push(
+              <rect
+                key={`gr-badge-${i}`}
+                x={gx + 3} y={y + 3} width="28" height={gh - 6}
+                fill="#020203"
+                stroke="#2F3336"
+                strokeWidth="0.6"
+              />
+            );
+            {/* Octane number inside the badge */}
             els.push(
               <text
                 key={`gr-oct-${i}`}
-                x={gx + 15} y={y + gh / 2 + 5}
+                x={gx + 17} y={y + gh / 2 + 5}
                 textAnchor="middle"
                 fill="#E7E9EA"
                 fontFamily="ui-monospace, 'IBM Plex Mono', monospace"
-                fontSize="14" fontWeight="700"
+                fontSize="14" fontWeight="800"
               >
                 {grades[i].octane}
               </text>
             );
-            {/* Type label (right of separator, top) */}
+            {/* Type label */}
             els.push(
               <text
                 key={`gr-type-${i}`}
-                x={gx + 42} y={y + 15}
-                fill="rgba(231,233,234,0.5)"
+                x={gx + 40} y={y + 14}
+                fill="rgba(231,233,234,0.6)"
                 fontFamily="ui-monospace, 'IBM Plex Mono', monospace"
-                fontSize="8" letterSpacing="2"
+                fontSize="8" fontWeight="600" letterSpacing="2"
               >
                 {grades[i].type}
               </text>
             );
-            {/* Price (right of separator, bottom) */}
+            {/* Price */}
             els.push(
               <text
                 key={`gr-p-${i}`}
-                x={gx + gw - 10} y={y + gh - 9}
+                x={gx + gw - 8} y={y + gh - 8}
                 textAnchor="end"
-                fill="rgba(231,233,234,0.55)"
+                fill="rgba(231,233,234,0.7)"
                 fontFamily="ui-monospace, 'IBM Plex Mono', monospace"
                 fontSize="11" fontWeight="700" letterSpacing="1"
               >
-                {i === 0 ? '3.42' : i === 1 ? '3.68' : '3.92'}
+                {grades[i].price}
               </text>
             );
           }
           return els;
         })()}
 
-        {/* ── CARD READER + RECEIPT VENT + NFC PAD ── */}
-        <rect x="540" y="682" width="200" height="104" fill="none" stroke="#2F3336" strokeWidth="0.8" />
+        {/* ── TRANSACTION COLUMN — receipt, card reader, NFC ── */}
+        {/* Column housing recess */}
+        <rect x="530" y="678" width="210" height="114" fill="#050506" stroke="#1a1a1d" strokeWidth="0.8" />
+        <line x1="530" y1="678" x2="740" y2="678" stroke="#000" strokeWidth="1" />
 
-        {/* Receipt printer vent */}
-        <rect x="550" y="692" width="180" height="6" fill="#000" stroke="#2F3336" strokeWidth="0.8" />
-        <text x="550" y="688"
-          fill="rgba(231,233,234,0.4)"
+        {/* Receipt printer vent — deep slot */}
+        <text x="544" y="690"
+          fill="rgba(231,233,234,0.5)"
           fontFamily="ui-monospace, 'IBM Plex Mono', monospace"
-          fontSize="7" letterSpacing="2"
+          fontSize="7" fontWeight="600" letterSpacing="2"
         >
           {'RECEIPT \u2191'}
         </text>
+        <rect x="544" y="694" width="186" height="8" fill="#000" stroke="#2F3336" strokeWidth="0.8" />
+        {/* Top shadow inside the slot */}
+        <line x1="546" y1="695" x2="728" y2="695" stroke="#000" strokeWidth="1.5" />
+        {/* Bottom highlight lip */}
+        <line x1="544" y1="702" x2="730" y2="702" stroke="rgba(231,233,234,0.05)" strokeWidth="0.5" />
 
         {/* Thermal paper serration */}
         <path
-          d="M 550 699 L 554 701 L 558 699 L 562 701 L 566 699 L 570 701 L 574 699 L 578 701 L 582 699 L 586 701 L 590 699 L 594 701 L 598 699 L 602 701 L 606 699 L 610 701 L 614 699 L 618 701 L 622 699 L 626 701 L 630 699"
+          d="M 544 703 L 548 705 L 552 703 L 556 705 L 560 703 L 564 705 L 568 703 L 572 705 L 576 703 L 580 705 L 584 703 L 588 705 L 592 703 L 596 705 L 600 703 L 604 705 L 608 703 L 612 705 L 616 703 L 620 705 L 624 703 L 628 705 L 632 703"
           fill="none"
-          stroke="rgba(231,233,234,0.15)"
+          stroke="rgba(231,233,234,0.12)"
           strokeWidth="0.6"
         />
 
-        {/* Card reader slot */}
-        <rect x="550" y="712" width="180" height="12" fill="#000" stroke="#2F3336" strokeWidth="1" />
-        <line x1="556" y1="718" x2="724" y2="718" stroke="rgba(231,233,234,0.1)" strokeWidth="0.6" />
-        <text x="550" y="708"
-          fill="rgba(231,233,234,0.4)"
+        {/* Card reader slot — deep recessed cavity */}
+        <text x="544" y="716"
+          fill="rgba(231,233,234,0.5)"
           fontFamily="ui-monospace, 'IBM Plex Mono', monospace"
-          fontSize="7" letterSpacing="2"
+          fontSize="7" fontWeight="600" letterSpacing="2"
         >
           INSERT · CREDIT · DEBIT
         </text>
+        <rect x="544" y="720" width="186" height="14" fill="url(#slot-depth)" stroke="#2F3336" strokeWidth="1" />
+        {/* Slot inner shadow */}
+        <line x1="546" y1="721" x2="728" y2="721" stroke="#000" strokeWidth="2" />
+        {/* Slot inner midline guide */}
+        <line x1="560" y1="727" x2="716" y2="727" stroke="rgba(231,233,234,0.06)" strokeWidth="0.5" />
+        {/* Slot bottom highlight */}
+        <line x1="544" y1="734" x2="730" y2="734" stroke="rgba(231,233,234,0.04)" strokeWidth="0.5" />
 
-        {/* NFC contactless pad */}
-        <circle cx="640" cy="758" r="20" fill="none" stroke="rgba(231,233,234,0.28)" strokeWidth="1" />
-        <circle cx="640" cy="758" r="14" fill="none" stroke="rgba(231,233,234,0.22)" strokeWidth="0.8" />
-        <circle cx="640" cy="758" r="8"  fill="none" stroke="rgba(231,233,234,0.18)" strokeWidth="0.8" />
-        <circle cx="640" cy="758" r="2"  fill="rgba(231,233,234,0.8)" />
-        <text x="640" y="784" textAnchor="middle"
-          fill="rgba(231,233,234,0.4)"
+        {/* NFC contactless pad — recessed circular area with glow */}
+        <circle cx="640" cy="762" r="24" fill="url(#nfc-glow)" />
+        <circle cx="640" cy="762" r="22" fill="none" stroke="rgba(231,233,234,0.12)" strokeWidth="0.5" />
+        <circle cx="640" cy="762" r="16" fill="none" stroke="rgba(231,233,234,0.25)" strokeWidth="1" />
+        <circle cx="640" cy="762" r="10" fill="none" stroke="rgba(231,233,234,0.20)" strokeWidth="0.8" />
+        <circle cx="640" cy="762" r="4"  fill="none" stroke="rgba(231,233,234,0.16)" strokeWidth="0.6" />
+        <circle cx="640" cy="762" r="1.5" fill="rgba(231,233,234,0.9)" />
+        <text x="640" y="788" textAnchor="middle"
+          fill="rgba(231,233,234,0.45)"
           fontFamily="ui-monospace, 'IBM Plex Mono', monospace"
-          fontSize="7" letterSpacing="2"
+          fontSize="7" fontWeight="600" letterSpacing="2"
         >
           CONTACTLESS
         </text>
-        <text x="576" y="762"
-          fill="rgba(231,233,234,0.35)"
+        <text x="572" y="766"
+          fill="rgba(231,233,234,0.4)"
           fontFamily="ui-monospace, 'IBM Plex Mono', monospace"
-          fontSize="9" letterSpacing="1"
+          fontSize="9" fontWeight="600" letterSpacing="1"
         >
           TAP
         </text>
+        {/* NFC icon — small phone silhouette hint */}
+        <rect x="700" y="752" width="12" height="18" fill="none" stroke="rgba(231,233,234,0.2)" strokeWidth="0.8" />
+        <line x1="702" y1="754" x2="710" y2="754" stroke="rgba(231,233,234,0.15)" strokeWidth="0.5" />
 
-        {/* ── BRAND PLATE ── */}
-        <rect x="240" y="812" width="480" height="52" fill="none" stroke="rgba(231,233,234,0.28)" strokeWidth="1" />
-        <rect x="244" y="816" width="472" height="44" fill="none" stroke="rgba(231,233,234,0.1)" strokeWidth="0.6" />
-        {/* Bracket decorations */}
-        <line x1="250" y1="838" x2="258" y2="838" stroke="rgba(231,233,234,0.45)" strokeWidth="1.5" />
-        <line x1="702" y1="838" x2="710" y2="838" stroke="rgba(231,233,234,0.45)" strokeWidth="1.5" />
+        {/* ── BRAND PLATE — embossed raised panel ── */}
+        {/* Shadow behind the plate (sits proud of the body) */}
+        <rect x="242" y="814" width="480" height="52" fill="rgba(0,0,0,0.4)" />
+        {/* Outer bezel */}
+        <rect x="240" y="812" width="480" height="52" fill="#0a0a0c" stroke="rgba(231,233,234,0.28)" strokeWidth="1.2" />
+        {/* Top bevel catch */}
+        <line x1="241" y1="813" x2="719" y2="813" stroke="rgba(231,233,234,0.14)" strokeWidth="0.8" />
+        {/* Bottom shadow edge */}
+        <line x1="241" y1="863" x2="719" y2="863" stroke="rgba(0,0,0,0.6)" strokeWidth="1" />
+        {/* Inner recessed field */}
+        <rect x="248" y="818" width="464" height="40" fill="#050506" stroke="rgba(231,233,234,0.08)" strokeWidth="0.6" />
+        {/* Inner top shadow */}
+        <line x1="249" y1="819" x2="711" y2="819" stroke="#000" strokeWidth="1" />
+        {/* Inner bottom highlight */}
+        <line x1="249" y1="857" x2="711" y2="857" stroke="rgba(231,233,234,0.04)" strokeWidth="0.5" />
+        {/* Bracket decorations — thicker, more present */}
+        <line x1="256" y1="838" x2="268" y2="838" stroke="rgba(231,233,234,0.5)" strokeWidth="2" />
+        <line x1="692" y1="838" x2="704" y2="838" stroke="rgba(231,233,234,0.5)" strokeWidth="2" />
+        {/* Corner tacks */}
+        <circle cx="254" cy="824" r="1.2" fill="rgba(231,233,234,0.25)" />
+        <circle cx="706" cy="824" r="1.2" fill="rgba(231,233,234,0.25)" />
+        <circle cx="254" cy="852" r="1.2" fill="rgba(231,233,234,0.25)" />
+        <circle cx="706" cy="852" r="1.2" fill="rgba(231,233,234,0.25)" />
         <text
           x="480" y="846" textAnchor="middle"
-          fill="rgba(231,233,234,0.78)"
+          fill="rgba(231,233,234,0.85)"
           fontFamily="ui-monospace, 'IBM Plex Mono', monospace"
           fontWeight="800" fontSize="24" letterSpacing="10"
         >
@@ -531,7 +658,7 @@ export function PumpSvg({
         </text>
         <text
           x="480" y="860" textAnchor="middle"
-          fill="rgba(231,233,234,0.32)"
+          fill="rgba(231,233,234,0.35)"
           fontFamily="ui-monospace, 'IBM Plex Mono', monospace"
           fontSize="7" letterSpacing="4"
         >
