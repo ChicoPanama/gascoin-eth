@@ -8962,6 +8962,56 @@ button.docs-footer-link {
 }
 .wlc-roadmap-act--live .wlc-roadmap-prose   { color: rgba(231, 233, 234, 0.75); }
 
+/* Roadmap item lists */
+.wlc-roadmap-items {
+  list-style: none;
+  padding: 0;
+  margin: 6px 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.wlc-roadmap-item {
+  font-family: var(--font-mono, 'IBM Plex Mono', monospace);
+  font-size: 10px;
+  line-height: 1.5;
+  color: rgba(231, 233, 234, 0.3);
+  padding-left: 14px;
+  position: relative;
+}
+.wlc-roadmap-item::before {
+  content: '○';
+  position: absolute;
+  left: 0;
+  font-size: 8px;
+  line-height: 1.7;
+  color: rgba(231, 233, 234, 0.2);
+}
+.wlc-roadmap-act--done .wlc-roadmap-item {
+  color: rgba(231, 233, 234, 0.6);
+}
+.wlc-roadmap-act--done .wlc-roadmap-item::before {
+  content: '✓';
+  color: var(--wlc-ink);
+  font-size: 9px;
+  line-height: 1.55;
+}
+.wlc-roadmap-act--live .wlc-roadmap-item {
+  color: rgba(231, 233, 234, 0.7);
+}
+.wlc-roadmap-act--live .wlc-roadmap-item::before {
+  content: '●';
+  color: var(--wlc-ink);
+  font-size: 6px;
+  line-height: 1.9;
+}
+.wlc-roadmap-act--next .wlc-roadmap-item {
+  color: rgba(231, 233, 234, 0.45);
+}
+.wlc-roadmap-act--next .wlc-roadmap-item::before {
+  color: rgba(231, 233, 234, 0.25);
+}
+
 /* Next act — slightly brighter than future */
 .wlc-roadmap-act--next .wlc-roadmap-node   { border-color: rgba(231, 233, 234, 0.35); }
 .wlc-roadmap-act--next .wlc-roadmap-name   { color: rgba(231, 233, 234, 0.55); }

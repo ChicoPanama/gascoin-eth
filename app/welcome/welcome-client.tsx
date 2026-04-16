@@ -582,28 +582,60 @@ function RoadmapPopover() {
       name: 'INFRASTRUCTURE',
       status: 'SHIPPED',
       state: 'done' as const,
-      prose: 'Solana payout rails. A 15-gate verification pipeline using computer vision and AI to authenticate receipts, tweet proofs, and wallet identity — automatically, with no human in the loop.',
+      prose: 'The foundation the whole protocol runs on — built, tested, and hardened.',
+      items: [
+        'Solana payout rails',
+        '15-gate automated verification engine',
+        'AI receipt scanning with computer vision',
+        'Tweet proof + wallet identity checks',
+        'Fraud detection and rate limiting',
+        'Admin dashboard and audit logs',
+      ],
     },
     {
       numeral: 'II',
       name: 'SEASON 1 BETA',
       status: 'LIVE',
       state: 'live' as const,
-      prose: 'Invite-only access. X (Twitter) sign-in + Solana wallet linking. Real claims running through the pipeline. First SOL payouts hitting real wallets. Stress-testing before we open the doors.',
+      prose: 'Invite-only. Real users, real receipts, real SOL payouts hitting real wallets.',
+      items: [
+        'Sign in with X (Twitter)',
+        'Solana wallet linking (Phantom, Backpack, Solflare)',
+        'Gas receipt upload and AI review',
+        'Live SOL payouts on approval',
+        'Claims history and status tracking',
+        'Invite code system for early access',
+      ],
     },
     {
       numeral: 'III',
       name: 'PUBLIC LAUNCH',
       status: 'NEXT',
       state: 'next' as const,
-      prose: 'Open to any Solana wallet. Live SOL payouts on every approved claim. $GASCOIN token tiers unlock better rates and more frequent submissions. Referral rewards for bringing others in.',
+      prose: 'Doors open to everyone. The more $GASCOIN you hold, the more you earn.',
+      items: [
+        'Open access — no invite needed',
+        '$GASCOIN token tiers (Commuter, Road Warrior, Fleet)',
+        'Faster submission cooldowns per tier',
+        'Referral rewards with on-chain tracking',
+        'Engagement leaderboard',
+        'Public claims explorer',
+      ],
     },
     {
       numeral: 'IV',
       name: 'TOKEN + GOVERNANCE',
       status: 'HORIZON',
       state: 'future' as const,
-      prose: '$GASCOIN staking, community governance over protocol parameters, and expansion to new regions. Token holders get a real voice in where this goes.',
+      prose: 'Token holders shape the protocol. The community decides where it goes next.',
+      items: [
+        '$GASCOIN staking rewards',
+        'Governance votes on protocol parameters',
+        'DAO treasury for community grants',
+        'Multi-region expansion',
+        'Additional fuel type support',
+        'Long-term token utility roadmap',
+      ],
     },
   ];
 
@@ -625,6 +657,11 @@ function RoadmapPopover() {
                 <span className="wlc-roadmap-status">{act.status}</span>
               </div>
               <p className="wlc-roadmap-prose">{act.prose}</p>
+              <ul className="wlc-roadmap-items">
+                {act.items.map((item, ii) => (
+                  <li key={ii} className="wlc-roadmap-item">{item}</li>
+                ))}
+              </ul>
             </div>
           </div>
         ))}
