@@ -583,7 +583,7 @@ function RoadmapPopover() {
       prose: 'The foundation the whole protocol runs on — built, tested, and hardened.',
       items: [
         'Solana payout rails',
-        '15-gate automated verification engine',
+        '17-gate automated verification engine',
         'AI receipt scanning with computer vision',
         'Tweet proof + wallet identity checks',
         'Fraud detection and rate limiting',
