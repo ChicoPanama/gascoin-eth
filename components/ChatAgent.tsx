@@ -7,7 +7,13 @@ import { useState } from 'react';
 const WELCOME =
   'Hey! Ready to get your gas money back?\n\nYour checklist:\n1. Connect wallet\n2. Post proof on X\n3. Submit at /submit\n4. Wait for AI review (~2 min)\n5. SOL in wallet\n\nWhat step are you on, or do you have a question?';
 
-export function ChatAgent({ autoOpen = false }: { autoOpen?: boolean }) {
+export function ChatAgent({
+  autoOpen = false,
+  align = 'right',
+}: {
+  autoOpen?: boolean;
+  align?: 'left' | 'right';
+}) {
   const [open, setOpen] = useState(autoOpen);
   const [input, setInput] = useState('');
 
@@ -30,7 +36,7 @@ export function ChatAgent({ autoOpen = false }: { autoOpen?: boolean }) {
   return (
     <>
       <button
-        className="chat-agent-fab"
+        className={`chat-agent-fab chat-agent-fab--${align}`}
         onClick={() => setOpen((o) => !o)}
         aria-label="Refund assistant"
       >
@@ -38,7 +44,7 @@ export function ChatAgent({ autoOpen = false }: { autoOpen?: boolean }) {
       </button>
 
       {open && (
-        <div className="chat-agent-panel">
+        <div className={`chat-agent-panel chat-agent-panel--${align}`}>
           <div className="chat-agent-header">
             <span className="chat-agent-title">REFUND ASSISTANT</span>
             <button className="chat-agent-close" onClick={() => setOpen(false)}>✕</button>

@@ -403,7 +403,7 @@ export function WelcomeClient({
         </Popover>
       )}
 
-      <ChatAgent />
+      <ChatAgent align="left" />
     </div>
   );
 }
