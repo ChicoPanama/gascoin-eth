@@ -8,7 +8,7 @@ import {
 } from './receipt-pipeline';
 import { getSystemPrompt, PROMPT_KEYS } from '../prompts';
 import { generateAIJson, isAiGatewayAvailable, AI_MODELS } from './ai-gateway';
-import { writeFraudSignal } from '../mem0';
+import { writeFraudSignal, addMemory, MEM0_CATEGORIES, MEM0_AGENTS, MEM0_APPS } from '../mem0';
 
 export type FraudSignals = {
   aiScore: number;
@@ -174,6 +174,16 @@ function recordFraudSignalsToMem0(
       detail: signals.crossValidation.reasoning.slice(0, 180),
       claimId,
     }).catch(() => {});
+    // Write to WALLET_TRUST_TRAJECTORY so repeated Grok overrides surface
+    // in Claude's entity profile as a trust-level decline signal.
+    addMemory('wallet', wallet,
+      `grok_score_elevation | confidence=${signals.crossValidation.confidence.toFixed(2)} | ${signals.crossValidation.reasoning.slice(0, 100)}`,
+      {
+        category: MEM0_CATEGORIES.WALLET_TRUST_TRAJECTORY,
+        agentId: MEM0_AGENTS.GROK_FRAUD,
+        appId: MEM0_APPS.SUBMIT,
+        metadata: { pipeline: 'grok_fraud', signal: 'score_elevation', severity: 'high' },
+      }).catch(() => {});
   }
 }
 
@@ -182,7 +192,7 @@ export async function runFraudChecks(raw: ArrayBuffer, pipeline?: PipelineResult
 
   // Use pipeline data if available (already computed in OCR step)
   const exactHash = pipeline?.exactHash ?? computeExactHash(buf);
-  const pHash = pipeline?.perceptualHash ?? computePerceptualHash(buf);
+  const pHash = pipeline?.perceptualHash ?? await computePerceptualHash(buf);
   const exif = pipeline?.exif ?? checkExifMetadata(buf);
   const dims = pipeline?.dimensions ?? checkImageDimensions(buf);
 

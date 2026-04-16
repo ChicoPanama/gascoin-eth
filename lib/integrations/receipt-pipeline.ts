@@ -1,4 +1,5 @@
 import crypto from 'crypto';
+import sharp from 'sharp';
 import { z } from 'zod';
 import { generateAIJsonVision, isAiGatewayAvailable, AI_MODELS } from './ai-gateway';
 import { cacheGetOrFetch } from '../cache';
@@ -182,44 +183,49 @@ export function checkImageDimensions(buf: Buffer): DimensionCheckResult {
 
 // ─── STEP 3: Perceptual Hash (dHash) ───
 
-// Simplified dHash: converts image to a low-res grayscale representation
-// and computes difference hash. Two photos of the same receipt will have
-// similar dHashes even if taken from slightly different angles.
-export function computePerceptualHash(buf: Buffer): string {
-  // Sample evenly spaced bytes across the image data (skip headers)
-  const dataStart = Math.min(1024, Math.floor(buf.length * 0.05));
-  const dataEnd = buf.length;
-  const sampleSize = 64; // 8x8 grid
-  const step = Math.max(1, Math.floor((dataEnd - dataStart) / sampleSize));
+// dHash: resize to 9×8 grayscale, compare each pixel to its right neighbour.
+// 8 columns × 8 rows = 64 bits → 16-char hex.
+// Two photos of the same receipt hash to values with low Hamming distance
+// even if taken at slightly different angles or with minor crops.
+export async function computePerceptualHash(buf: Buffer): Promise<string> {
+  try {
+    const { data } = await sharp(buf)
+      .resize(9, 8, { fit: 'fill' })
+      .grayscale()
+      .raw()
+      .toBuffer({ resolveWithObject: true });
 
-  const samples: number[] = [];
-  for (let i = 0; i < sampleSize && dataStart + i * step < dataEnd; i++) {
-    samples.push(buf[dataStart + i * step]);
+    let bits = '';
+    for (let row = 0; row < 8; row++) {
+      for (let col = 0; col < 8; col++) {
+        const idx = row * 9 + col;
+        bits += data[idx] < data[idx + 1] ? '1' : '0';
+      }
+    }
+
+    let hex = '';
+    for (let i = 0; i < 64; i += 4) {
+      hex += parseInt(bits.slice(i, i + 4), 2).toString(16);
+    }
+    return hex;
+  } catch {
+    return '0'.repeat(16);
   }
-
-  // Compute difference hash: compare adjacent samples
-  let hash = '';
-  for (let i = 0; i < samples.length - 1; i++) {
-    hash += samples[i] < samples[i + 1] ? '1' : '0';
-  }
-
-  // Convert binary string to hex
-  let hex = '';
-  for (let i = 0; i < hash.length; i += 4) {
-    hex += parseInt(hash.substring(i, i + 4).padEnd(4, '0'), 2).toString(16);
-  }
-
-  return hex;
 }
 
-// Compare two perceptual hashes — returns similarity 0-1
+// Bit-count lookup for 4-bit values (nibbles)
+const POPCOUNT4 = [0, 1, 1, 2, 1, 2, 2, 3, 1, 2, 2, 3, 2, 3, 3, 4];
+
+// Compare two 16-char hex dHashes — returns similarity 0-1 using Hamming distance.
+// 1.0 = identical image content; 0.0 = completely different.
 export function comparePerceptualHashes(hash1: string, hash2: string): number {
-  if (hash1.length !== hash2.length) return 0;
-  let same = 0;
+  if (hash1.length !== hash2.length || hash1.length === 0) return 0;
+  let distance = 0;
   for (let i = 0; i < hash1.length; i++) {
-    if (hash1[i] === hash2[i]) same++;
+    const xor = parseInt(hash1[i], 16) ^ parseInt(hash2[i], 16);
+    distance += POPCOUNT4[xor];
   }
-  return same / hash1.length;
+  return 1 - distance / (hash1.length * 4);
 }
 
 // Also compute SHA-256 for exact duplicate detection
@@ -246,6 +252,9 @@ export interface ReceiptExtraction {
   fraud_notes: string;
   // Raw text
   raw_text: string;
+  // Set to true when Gemini was unavailable and heuristics-only fallback fired.
+  // Callers check this to distinguish "OCR failed" from "OCR ran but low confidence".
+  ocr_fallback?: boolean;
 }
 
 // Zod schema — the AI Gateway enforces this structure via Output.object().
@@ -269,6 +278,9 @@ const ReceiptSchema = z.object({
   raw_text: z.string().describe('all readable text on the receipt'),
 });
 
+// Gemini Vision timeout — fall back to heuristics-only if the call hangs.
+const GEMINI_TIMEOUT_MS = 30_000;
+
 async function doReceiptExtraction(buf: Buffer, mimeType: string): Promise<ReceiptExtraction> {
   if (!isAiGatewayAvailable()) {
     return fallbackExtraction();
@@ -278,7 +290,11 @@ async function doReceiptExtraction(buf: Buffer, mimeType: string): Promise<Recei
   // redeploy. Falls back to bundled default from lib/prompts.ts.
   const systemPrompt = await getSystemPrompt(PROMPT_KEYS.GEMINI_RECEIPT);
 
-  const result = await generateAIJsonVision(ReceiptSchema, {
+  const timeoutFallback = new Promise<ReceiptExtraction>((resolve) =>
+    setTimeout(() => resolve(fallbackExtraction()), GEMINI_TIMEOUT_MS),
+  );
+
+  const extraction = generateAIJsonVision(ReceiptSchema, {
     model: AI_MODELS.GEMINI_VISION,
     system: systemPrompt,
     prompt:
@@ -289,14 +305,15 @@ async function doReceiptExtraction(buf: Buffer, mimeType: string): Promise<Recei
     temperature: 0,
     fallbackModels: [AI_MODELS.GEMINI_FAST, 'google/gemini-2.5-flash'],
     tags: ['feature:receipt-ocr', 'pipeline:submit'],
+  }).then((result) => {
+    if (!result.ok) {
+      console.error('Receipt extraction failed:', result.error);
+      return fallbackExtraction();
+    }
+    return result.data;
   });
 
-  if (!result.ok) {
-    console.error('Receipt extraction failed:', result.error);
-    return fallbackExtraction();
-  }
-
-  return result.data;
+  return Promise.race([extraction, timeoutFallback]);
 }
 
 export async function extractAndScoreReceipt(buf: Buffer, mimeType: string): Promise<ReceiptExtraction> {
@@ -311,7 +328,7 @@ export async function extractAndScoreReceipt(buf: Buffer, mimeType: string): Pro
   );
 }
 
-function fallbackExtraction(): ReceiptExtraction {
+export function fallbackExtraction(): ReceiptExtraction {
   return {
     station_country: null, receipt_date: null,
     total_amount: null, currency: 'USD', wallet_address: null,
@@ -320,6 +337,7 @@ function fallbackExtraction(): ReceiptExtraction {
     is_digitally_manipulated: false, confidence: 0,
     fraud_notes: 'API unavailable — manual review required',
     raw_text: '',
+    ocr_fallback: true,
   };
 }
 
@@ -341,8 +359,10 @@ export async function processReceipt(buf: Buffer, mimeType: string): Promise<Pip
   // Steps 1-3: Free, instant, local
   const exif = checkExifMetadata(buf);
   const dimensions = checkImageDimensions(buf);
-  const perceptualHash = computePerceptualHash(buf);
-  const exactHash = computeExactHash(buf);
+  const [perceptualHash, exactHash] = await Promise.all([
+    computePerceptualHash(buf),
+    Promise.resolve(computeExactHash(buf)),
+  ]);
 
   // Step 4: Gemini Vision (one API call)
   const extraction = await extractAndScoreReceipt(buf, mimeType);

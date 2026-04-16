@@ -10,7 +10,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { evaluateClaim, type ClaimInput } from '@/lib/policy';
+import { evaluateClaim, GATE_COUNT, type ClaimInput } from '@/lib/policy';
 import { scoreAccountQuality, type HistoricalSignals } from '@/lib/account-quality';
 import type { XUser } from '@/lib/x-api';
 import {
@@ -51,6 +51,8 @@ function validClaim(overrides: Partial<ClaimInput> = {}): ClaimInput {
     duplicatePhash: false,
     cooldownOk: true,
     amountUsd: 50,
+    ocrAmount: 52,
+    receiptDate: new Date().toISOString().slice(0, 10),
     followerCount: 500,
     accountQualityScore: 70,
     accountQualityPassed: true,
@@ -88,7 +90,7 @@ describe('CATEGORY 1: Policy Engine Gate Bypass Attempts', () => {
     // WHY: Confirms the happy path works end-to-end. If this fails, everything is broken.
     const result = evaluateClaim(validClaim());
 
-    expect(result.gates).toHaveLength(15);
+    expect(result.gates).toHaveLength(GATE_COUNT);
     expect(result.failed).toHaveLength(0);
     expect(result.decision).toBe('ready_for_dispatch');
     expect(result.riskScore).toBeLessThan(0.35);
@@ -175,6 +177,8 @@ describe('CATEGORY 1: Policy Engine Gate Bypass Attempts', () => {
       duplicatePhash: true,
       cooldownOk: false,
       amountUsd: 300,
+      ocrAmount: null,
+      receiptDate: null,
       followerCount: 5,
       accountQualityScore: 10,
       accountQualityPassed: false,
@@ -571,8 +575,8 @@ describe('CATEGORY 5: Risk Score Math & Decision Logic', () => {
   it('Test 27: High amount (>$200) adds 0.08 to risk', () => {
     // WHY: Large refund claims are higher risk. The $200 threshold adds 0.08.
     // Fraudsters target big amounts for maximum payout per attempt.
-    const lowAmount = evaluateClaim(validClaim({ amountUsd: 200 }));
-    const highAmount = evaluateClaim(validClaim({ amountUsd: 200.01 }));
+    const lowAmount = evaluateClaim(validClaim({ amountUsd: 200, ocrAmount: 220 }));
+    const highAmount = evaluateClaim(validClaim({ amountUsd: 200.01, ocrAmount: 220 }));
 
     expect(highAmount.riskScore - lowAmount.riskScore).toBeCloseTo(0.08, 3);
   });
@@ -693,8 +697,8 @@ describe('CATEGORY 7: Pipeline Depth Tests — Pass Gates, Test Scoring', () => 
     // Compare to amount=200 (no surcharge):
     //   0 + 0.035 + 0.025 + 0 = 0.06
     // The difference must be exactly 0.08.
-    const lowAmount = evaluateClaim(validClaim({ amountUsd: 200 }));
-    const highAmount = evaluateClaim(validClaim({ amountUsd: 250 }));
+    const lowAmount = evaluateClaim(validClaim({ amountUsd: 200, ocrAmount: 220 }));
+    const highAmount = evaluateClaim(validClaim({ amountUsd: 250, ocrAmount: 280 }));
 
     expect(lowAmount.failed).toHaveLength(0);
     expect(highAmount.failed).toHaveLength(0);

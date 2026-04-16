@@ -21,15 +21,50 @@ export async function recordGasPrice(
 
   try {
     await supabase.from('gas_city_prices').insert({
-      city: null, // OCR doesn't reliably extract city
+      city: null,
       country: data.country,
       currency: data.currency || 'USD',
       price_per_liter: null,
       price_per_gallon_usd: null,
+      amount_usd: data.amountUsd,
       source: 'submission_ocr',
     });
   } catch {
     // Non-blocking
+  }
+}
+
+/**
+ * Query median receipt amount for a country.
+ * Returns null if fewer than 10 data points exist (not enough signal).
+ * Used to flag suspiciously large claims vs. what's typical in that market.
+ */
+export async function getTypicalGasPrice(
+  supabase: any,
+  country: string,
+): Promise<{ median: number | null; sampleSize: number }> {
+  try {
+    const { data, error } = await supabase
+      .from('gas_city_prices')
+      .select('amount_usd')
+      .eq('country', country)
+      .not('amount_usd', 'is', null)
+      .order('ts', { ascending: false })
+      .limit(200);
+
+    if (error || !data || data.length < 10) {
+      return { median: null, sampleSize: data?.length ?? 0 };
+    }
+
+    const amounts = data.map((r: any) => Number(r.amount_usd)).sort((a: number, b: number) => a - b);
+    const mid = Math.floor(amounts.length / 2);
+    const median = amounts.length % 2 === 0
+      ? (amounts[mid - 1] + amounts[mid]) / 2
+      : amounts[mid];
+
+    return { median, sampleSize: amounts.length };
+  } catch {
+    return { median: null, sampleSize: 0 };
   }
 }
 

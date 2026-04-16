@@ -573,6 +573,10 @@ export async function writeDistilledProfile(
   // Build a ~50-token compressed fingerprint that Claude/Grok can re-use.
   const line = `${summary.verdict} | tier=${summary.tier} | claims=${summary.claimCount} | risk=${summary.riskBucket}${summary.lastFlags.length ? ' | flags=' + summary.lastFlags.slice(0, 3).join(',') : ''} | ${summary.narrative.slice(0, 120)}`;
 
+  // Bust cache BEFORE writing so any concurrent reads after this call
+  // get fresh data from mem0 rather than the stale cached profile.
+  await bustEntityProfileCache('wallet', wallet);
+
   await addMemory('wallet', wallet, line, {
     category: MEM0_CATEGORIES.CLAIM_VERDICT,
     agentId: MEM0_AGENTS.CLAUDE_OVERSIGHT,
@@ -590,9 +594,6 @@ export async function writeDistilledProfile(
       claim_id: summary.claimId,
     },
   });
-
-  // Bust the Upstash profile cache so the next read gets the fresh distillation.
-  await bustEntityProfileCache('wallet', wallet);
 }
 
 /**
@@ -732,6 +733,66 @@ export async function writeBanState(
     },
   });
   await bustEntityProfileCache('wallet', wallet);
+}
+
+/**
+ * Record an account quality snapshot — score, pass/fail, and flags.
+ * Written on every submission so Claude can see quality trend over time
+ * (e.g. follower spike, bio spam added, account went private).
+ */
+export async function writeAccountQuality(
+  wallet: string,
+  quality: {
+    score: number;       // 0-100
+    passed: boolean;
+    flags: string[];
+    claimId?: string;
+  },
+): Promise<void> {
+  const line = `account_quality:${quality.passed ? 'pass' : 'fail'} | score=${quality.score}${quality.flags.length ? ' | flags=' + quality.flags.slice(0, 4).join(',') : ''}${quality.claimId ? ' | claim=' + quality.claimId : ''}`;
+  await addMemory('wallet', wallet, line, {
+    category: MEM0_CATEGORIES.ACCOUNT_QUALITY,
+    agentId: MEM0_AGENTS.SUBMIT_PIPELINE,
+    appId: MEM0_APPS.SUBMIT,
+    runId: quality.claimId ? `claim_${quality.claimId}_quality` : undefined,
+    metadata: {
+      pipeline: 'submission',
+      signal: 'account_quality',
+      severity: quality.passed ? 'info' : 'medium',
+      score: quality.score,
+      flags: quality.flags,
+      claim_id: quality.claimId,
+    },
+  });
+  await bustEntityProfileCache('wallet', wallet);
+}
+
+/**
+ * Record a pipeline anomaly — unexpected failures, fallbacks, or degraded
+ * service events. Decays after 30 days (diagnostic signals, not fraud evidence).
+ */
+export async function writePipelineAnomaly(
+  wallet: string,
+  anomaly: {
+    type: string;   // e.g. 'ocr_fallback', 'gateway_timeout', 'x_api_down'
+    detail?: string;
+    claimId?: string;
+  },
+): Promise<void> {
+  const line = `anomaly:${anomaly.type}${anomaly.detail ? ' | ' + anomaly.detail.slice(0, 120) : ''}${anomaly.claimId ? ' | claim=' + anomaly.claimId : ''}`;
+  await addMemory('wallet', wallet, line, {
+    category: MEM0_CATEGORIES.PIPELINE_ANOMALY,
+    agentId: MEM0_AGENTS.SUBMIT_PIPELINE,
+    appId: MEM0_APPS.SUBMIT,
+    runId: anomaly.claimId ? `claim_${anomaly.claimId}_anomaly` : undefined,
+    expirationDate: daysFromNow(30),
+    metadata: {
+      pipeline: 'submission',
+      signal: anomaly.type,
+      severity: 'low',
+      claim_id: anomaly.claimId,
+    },
+  });
 }
 
 // ---------------------------------------------------------------------------

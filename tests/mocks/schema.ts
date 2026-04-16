@@ -12,12 +12,14 @@ export const SCHEMA: Record<string, string[]> = {
     'claimed_amount', 'parsed_amount', 'claim_currency', 'risk_score',
     'decision_reason', 'created_at', 'updated_at', 'country',
     'referral_code', 'is_featured', 'ip_country',
+    'claude_confidence', 'account_quality_score',
   ],
 
   claim_receipts: [
     'id', 'claim_id', 'storage_path_private', 'hash_sha256', 'phash',
     'ocr_text', 'ocr_confidence', 'ai_score', 'tamper_score',
     'metadata_json', 'created_at', 'is_image_redacted',
+    'cross_validation_risk',
   ],
 
   gate_results: ['id', 'claim_id', 'gate_name', 'passed', 'score', 'reason_code', 'created_at'],

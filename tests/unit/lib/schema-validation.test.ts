@@ -140,6 +140,33 @@ describe('Schema: x_handle_history table', () => {
   });
 });
 
+describe('Schema: AI signal columns (migration 20260416_ai_signal_columns)', () => {
+  it('claims has claude_confidence column', () => {
+    expect(SCHEMA.claims).toContain('claude_confidence');
+  });
+
+  it('claims has account_quality_score column', () => {
+    expect(SCHEMA.claims).toContain('account_quality_score');
+  });
+
+  it('claim_receipts has cross_validation_risk column', () => {
+    expect(SCHEMA.claim_receipts).toContain('cross_validation_risk');
+  });
+
+  it('process-claims update select uses valid columns', () => {
+    const errors = validateSelect('claims', 'id, status, decision_reason, claude_confidence, account_quality_score, updated_at');
+    expect(errors).toEqual([]);
+  });
+
+  it('claim_receipts insert uses valid columns including cross_validation_risk', () => {
+    const errors = validateSelect(
+      'claim_receipts',
+      'id, claim_id, hash_sha256, phash, ocr_text, ocr_confidence, ai_score, tamper_score, metadata_json, cross_validation_risk, storage_path_private'
+    );
+    expect(errors).toEqual([]);
+  });
+});
+
 describe('validateSelect utility', () => {
   it('catches invalid columns', () => {
     const errors = validateSelect('payout_jobs', 'id, tx_signature, wallet');

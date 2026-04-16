@@ -26,6 +26,7 @@
 import { generateText, Output, APICallError, type ModelMessage } from 'ai';
 import type { SharedV3ProviderOptions } from '@ai-sdk/provider';
 import type { z, ZodTypeAny } from 'zod';
+import { writePipelineAnomaly } from '../mem0';
 
 // ── Config ────────────────────────────────────────────────────────────────
 
@@ -298,4 +299,19 @@ export async function generateAIJsonVision<T extends ZodTypeAny>(
   } catch (err) {
     return { ok: false, ...formatError(err) };
   }
+}
+
+// ── Fallback anomaly helper ────────────────────────────────────────────────
+// Callers invoke this when they detect a fallback model was used
+// (e.g. primary provider returned an error and the gateway retried).
+
+export async function writeFallbackAnomaly(
+  wallet: string,
+  info: { requestedModel: string; fallbackModel: string; reason?: string },
+): Promise<void> {
+  const detail = `requested=${info.requestedModel} | fallback=${info.fallbackModel}${info.reason ? ' | reason=' + info.reason : ''}`;
+  await writePipelineAnomaly(wallet, {
+    type: 'ai_gateway_fallback',
+    detail,
+  });
 }

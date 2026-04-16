@@ -3,12 +3,14 @@ import { evaluateClaim, GATE_DEFS, GATE_COUNT, type ClaimInput } from '@/lib/pol
 import { GATES } from '@/lib/gates';
 
 function validInput(overrides: Partial<ClaimInput> = {}): ClaimInput {
+  const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
   return {
     xVerified: true, followsGascoin: true,
     tweetUrl: 'https://x.com/user/status/123', tweetHasGascoin: true, tweetMentionsGascoinApp: true,
     tweetLive: true, connectedWallet: 'GAsWallet123', walletOnReceipt: 'GAsWallet123',
     receiptHasGascoin: true, gascoinTokenBalance: 100, aiScore: 0.1, tamperScore: 0.1,
     duplicateHash: false, duplicatePhash: false, cooldownOk: true, amountUsd: 50,
+    ocrAmount: 52, receiptDate: today,
     followerCount: 200, accountQualityScore: 60, accountQualityPassed: true, ...overrides,
   };
 }
@@ -23,8 +25,8 @@ describe('GATE_DEFS / GATE_COUNT alignment', () => {
     expect(GATE_COUNT).toBe(GATE_DEFS.length);
   });
 
-  it('GATE_DEFS has 15 entries', () => {
-    expect(GATE_DEFS.length).toBe(15);
+  it('GATE_DEFS has 17 entries', () => {
+    expect(GATE_DEFS.length).toBe(17);
   });
 
   it('lib/gates.ts GATES has the same number of entries as GATE_DEFS', () => {
@@ -217,5 +219,50 @@ describe('evaluateClaim', () => {
     const low = evaluateClaim(validInput({ amountUsd: 50 }));
     const high = evaluateClaim(validInput({ amountUsd: 250 }));
     expect(high.riskScore).toBeGreaterThan(low.riskScore);
+  });
+
+  // Gate 16: receipt_date_valid
+  it('fails receipt_date_valid when receipt is 8 days old', () => {
+    const old = new Date(Date.now() - 8 * 86400000).toISOString().slice(0, 10);
+    const r = evaluateClaim(validInput({ receiptDate: old }));
+    expect(r.failed.some((g) => g.gate === 'receipt_date_valid')).toBe(true);
+  });
+
+  it('fails receipt_date_valid when receipt is future-dated', () => {
+    const future = new Date(Date.now() + 2 * 86400000).toISOString().slice(0, 10);
+    const r = evaluateClaim(validInput({ receiptDate: future }));
+    expect(r.failed.some((g) => g.gate === 'receipt_date_valid')).toBe(true);
+  });
+
+  it('passes receipt_date_valid when receipt is today', () => {
+    const today = new Date().toISOString().slice(0, 10);
+    const r = evaluateClaim(validInput({ receiptDate: today }));
+    expect(r.failed.some((g) => g.gate === 'receipt_date_valid')).toBe(false);
+  });
+
+  it('passes receipt_date_valid when receiptDate is null (OCR could not read date)', () => {
+    const r = evaluateClaim(validInput({ receiptDate: null }));
+    expect(r.failed.some((g) => g.gate === 'receipt_date_valid')).toBe(false);
+  });
+
+  // Gate 17: amount_verified
+  it('fails amount_verified when claimed amount exceeds OCR by more than 25%', () => {
+    const r = evaluateClaim(validInput({ amountUsd: 100, ocrAmount: 40 }));
+    expect(r.failed.some((g) => g.gate === 'amount_verified')).toBe(true);
+  });
+
+  it('passes amount_verified when claimed amount is within 25% of OCR', () => {
+    const r = evaluateClaim(validInput({ amountUsd: 50, ocrAmount: 48 }));
+    expect(r.failed.some((g) => g.gate === 'amount_verified')).toBe(false);
+  });
+
+  it('passes amount_verified when ocrAmount is null (OCR could not read total)', () => {
+    const r = evaluateClaim(validInput({ ocrAmount: null }));
+    expect(r.failed.some((g) => g.gate === 'amount_verified')).toBe(false);
+  });
+
+  it('passes amount_verified when claimed amount equals OCR amount exactly', () => {
+    const r = evaluateClaim(validInput({ amountUsd: 52, ocrAmount: 52 }));
+    expect(r.failed.some((g) => g.gate === 'amount_verified')).toBe(false);
   });
 });

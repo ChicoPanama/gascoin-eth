@@ -96,6 +96,13 @@ BFS cycle detection runs up to 6 nodes. If any referral hit creates a cycle, the
 - Follower count <10 AND zero prior claims: flag for first submission caution.
 - Account age ≥90 days, follower count >50, prior approvals: strong approve signal.
 
+═══ TIER SCRUTINY WEIGHTS ═══
+The claim summary includes a tier scrutiny note. Apply it as a multiplier:
+- Standard (BASELINE): Minor soft signals alone are not enough to flag. Lean approve unless a signal is clearly bad.
+- Commuter (STANDARD): Normal thresholds apply. One soft signal = flag; two+ = consider reject.
+- Road Warrior (HIGH): Apply 1.5× weight to every soft signal. One soft signal = likely flag; a clean-but-tight case needs explicit approve reasoning.
+- Fleet (MAXIMUM): Apply 2× weight. The payout size justifies aggressive scrutiny. Flag on ANY ambiguity. A new concern that would be noise at Standard tier is a flag at Fleet tier.
+
 ═══ DECISION MATRIX ═══
 - **approve**: all signals consistent, fraud scores below threshold, trust stable or improving, history clean. Dispatch SOL.
 - **flag**: one or two soft concerns, ambiguous signals, or new account with high amount. Send to manual review queue — humans will decide.
@@ -148,6 +155,16 @@ COMMON FRAUD PATTERNS
 - AI-generated image: high aiScore, ai_typical_dimensions, no EXIF, perfect uniform text.
 - Photoshopped amount: isDigitallyManipulated=true, moderate aiScore, normal EXIF.
 - Reused receipt (someone else's): normal EXIF but would be caught by hash/phash dedup (not your concern here).
+- Printed fake receipt (hardest): physical paper photo but content is digitally fabricated. Look for:
+  • Inkjet/laser characteristics: regular paper, banding, perfectly uniform toner, no thermal paper texture.
+  • Wrong font: real POS printers use fixed-width monospace. Proportional or sans-serif fonts = suspect.
+  • Wrong dimensions: thermal receipts are tall/narrow (~2.25" wide). Wide or landscape = likely printed fake.
+
+MATH CONSISTENCY CHECK
+When ocrConfidence is above 0.5 and raw_text is available, check the internal math:
+- Fuel purchases: gallons × price_per_gallon ≈ subtotal (within 5% rounding tolerance).
+- If the numbers don't add up (e.g. 10.0 gal × $3.99 = $39.90 but total shows $89.90), flag isDigitallyManipulated is likely true even if the model didn't catch it.
+- Mismatched math is a strong edit signal — name it explicitly in concerns as "math_inconsistency".
 
 REASONING RULES
 1. A SINGLE strong negative signal (aiScore>0.65 OR tamperScore>0.55 OR isDigitallyManipulated=true) is enough to return "high".
@@ -192,6 +209,16 @@ COMMON FRAUD PATTERNS
 - Edited amount field (mismatched font, different kerning in total)
 - Copy-pasted wallet address from another submission
 - Receipt for a non-fuel purchase (car wash, snacks, oil change) — flag is_gas_station=false
+
+PRINTED FAKE RECEIPT ATTACK (hardest to detect — read carefully)
+A sophisticated attack prints a digitally-created receipt image on paper to bypass is_physical_receipt checks. Physical paper does not mean the content is authentic. Look for:
+- Thermal paper characteristics: real gas-station receipts are narrow format (≈2.25" wide), printed in monospace fixed-width font, often with faded top/bottom edges from heat exposure, and a clean cut at top/bottom from the roll. Inkjet or laser printouts on regular paper look different.
+- Font uniformity: real POS printers use fixed-width monospace. Proportional fonts, variable kerning, or sans-serif typefaces = suspect.
+- Inkjet artifacts: visible dot matrix pattern, color banding, ink bleeding at text edges, uneven density.
+- Laser printer evidence: perfectly uniform toner, crisp edges with zero texture, no paper grain visible through text.
+- Background texture mismatch: real thermal paper shows a subtle off-white or cream tone; bleached white paper = likely printed fake.
+- Unusual dimensions: thermal receipt photos are tall and narrow. If the image shows a wide receipt or landscape orientation, suspect a printed fake.
+When is_physical_receipt is false OR you suspect a printed fake, you MUST explain in fraud_notes exactly what visual cues led to that conclusion. "Looks like a screenshot" is insufficient — name the specific artifact (inkjet dots visible, wrong font type, etc.).
 
 PRIVACY
 - Do NOT extract or return any personally identifiable information beyond the country code.

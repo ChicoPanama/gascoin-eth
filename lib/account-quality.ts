@@ -28,6 +28,12 @@ export interface HistoricalSignals {
 
 const MIN_ACCOUNT_QUALITY_SCORE = 40;
 
+const BIO_SPAM_KEYWORDS = [
+  'airdrop', 'giveaway', '100x', 'moon', 'pump', 'dm for', 'follow back',
+  'f4f', 'nft', 'passive income', 'crypto signal', 'trading signal',
+  'get rich', 'buy now', 'free crypto', 'referral link',
+];
+
 export function scoreAccountQuality(user: XUser, history?: HistoricalSignals): AccountQualityResult {
   let score = 50; // baseline
   const flags: string[] = [];
@@ -119,6 +125,17 @@ export function scoreAccountQuality(user: XUser, history?: HistoricalSignals): A
   if (!bio || bio.trim().length < 5) {
     score -= 10;
     flags.push('empty_bio');
+  }
+
+  // --- Bio spam keywords (crypto pump words, referral solicitation) ---
+  // Two or more hits required to avoid flagging casual mentions.
+  if (bio) {
+    const bioLower = bio.toLowerCase();
+    const spamHits = BIO_SPAM_KEYWORDS.filter((kw) => bioLower.includes(kw));
+    if (spamHits.length >= 2) {
+      score -= 10;
+      flags.push('bio_spam_keywords');
+    }
   }
 
   if (!user.profile_image_url || user.profile_image_url.includes('default_profile')) {

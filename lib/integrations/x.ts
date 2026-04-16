@@ -110,7 +110,26 @@ async function verifyViaOEmbed(tweetUrl: string, expectedHandle: string): Promis
   };
 }
 
-import { cacheGetOrFetch } from '../cache';
+import { cacheGetOrFetch, cacheGet, cacheSet, cacheSetIsMember, cacheSetExists, cacheSetReplace } from '../cache';
+
+const X_API_FAIL_KEY = 'x_api:fail_count';
+const X_API_FAIL_WINDOW_SECONDS = 300; // 5 minutes
+const X_API_FAIL_THRESHOLD = 3;
+
+/**
+ * Increment the X API failure counter. Returns the new count.
+ * Used by the submit route to detect sustained outages and write PIPELINE_ANOMALY.
+ */
+export async function recordXApiFailure(): Promise<number> {
+  const current = await cacheGet<number>(X_API_FAIL_KEY);
+  const next = (typeof current === 'number' ? current : 0) + 1;
+  await cacheSet(X_API_FAIL_KEY, next, X_API_FAIL_WINDOW_SECONDS);
+  return next;
+}
+
+export function isXApiSustainedFailure(count: number): boolean {
+  return count >= X_API_FAIL_THRESHOLD;
+}
 
 async function fetchFollowerCount(handle: string): Promise<number> {
   const token = process.env.X_BEARER_TOKEN;
@@ -159,7 +178,6 @@ export async function getFollowerCount(handle: string): Promise<number> {
 // `GasCoinApp`) so it's changeable without code deploys if we ever rebrand.
 
 import { getUserByUsername, getUserFollowers } from '../x-api';
-import { cacheSetIsMember, cacheSetExists, cacheSetReplace, cacheGet, cacheSet } from '../cache';
 
 const FOLLOWERS_SET_KEY = 'gascoin:x_followers';
 const FOLLOWERS_SET_TTL_SECONDS = 60 * 60 * 6; // 6h — worker refreshes every 30m

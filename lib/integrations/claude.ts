@@ -112,11 +112,19 @@ ENTITY INTELLIGENCE:
 
   const kbSection = kbContext ? `\nINSTITUTIONAL CONTEXT:\n${kbContext}\n` : '';
 
+  const tierScrutiny: Record<string, string> = {
+    Fleet: 'MAXIMUM scrutiny — 10M+ tokens, largest payouts. Any ambiguity → flag.',
+    'Road Warrior': 'HIGH scrutiny — 5M+ tokens, premium payouts. Soft signals matter more.',
+    Commuter: 'STANDARD scrutiny — 100K+ tokens, enhanced refunds. Normal review.',
+    Standard: 'BASELINE scrutiny — entry tier, weekly cap. Lean toward approve on weak signals.',
+  };
+  const scrutinyNote = tierScrutiny[context.tier] || 'STANDARD scrutiny.';
+
   const userPrompt = `CLAIM SUMMARY:
 - Claim ID: ${context.claimId}
 - Wallet: ${context.wallet}
 - X Handle: @${context.xHandle}
-- Tier: ${context.tier}
+- Tier: ${context.tier} — ${scrutinyNote}
 - Payout amount: ${context.amountSol} SOL
 - Risk score: ${context.riskScore}
 
@@ -155,15 +163,15 @@ Return your verdict as JSON matching the required schema.`;
     maxTokens: 400,
     temperature: 0.1,
     enableAnthropicCache: true,
-    fallbackModels: ['anthropic/claude-sonnet-4.5', AI_MODELS.GROK],
+    fallbackModels: ['anthropic/claude-sonnet-4.5'],
     tags: ['feature:claude-oversight', 'pipeline:process-claims'],
   });
 
   if (!result.ok) {
     return {
-      verdict: 'approve',
-      confidence: 0.5,
-      narrative: `Claude oversight errored (${result.error}) — defaulting to policy engine decision`,
+      verdict: 'flag',
+      confidence: 0,
+      narrative: `Claude oversight errored (${result.error}) — sent to manual review queue`,
       concerns: ['claude_error'],
     };
   }

@@ -1,5 +1,5 @@
 import { getSupabaseAdmin } from './supabase';
-import { addMemory } from './mem0';
+import { writeBanState } from './mem0';
 
 /**
  * Auto-ban system — catches sybil attackers and serial fraudsters.
@@ -95,12 +95,13 @@ export async function checkAndAutoBan(
     },
   });
 
-  // Record ban in mem0 for cross-pipeline intelligence
+  // Record ban in mem0 under INTELLIGENCE_AGGREGATOR agent for clean audit trail
   if (wallet) {
-    addMemory('wallet', wallet,
-      `AUTO-BANNED: ${banReason}`,
-      { pipeline: 'auto_ban', signal: 'banned', severity: 'critical' },
-    ).catch(() => {});
+    writeBanState(wallet, {
+      state: 'banned',
+      reason: banReason,
+      triggeredBy: 'auto_ban_system',
+    }).catch(() => {});
   }
 
   return { banned: true, reason: banReason };

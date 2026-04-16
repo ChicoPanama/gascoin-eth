@@ -2,8 +2,9 @@ import crypto from 'crypto';
 import { NextResponse } from 'next/server';
 import { evaluateClaim } from '../../../../lib/policy';
 import { getTierForBalance } from '../../../../lib/token-tiers';
-import { verifyTweetProof, getFollowerCount, isFollowingGascoin } from '../../../../lib/integrations/x';
+import { verifyTweetProof, getFollowerCount, isFollowingGascoin, recordXApiFailure, isXApiSustainedFailure } from '../../../../lib/integrations/x';
 import { analyzeReceipt } from '../../../../lib/integrations/ocr';
+import { comparePerceptualHashes } from '../../../../lib/integrations/receipt-pipeline';
 import { runFraudChecks } from '../../../../lib/integrations/fraud';
 import { hasMinimumGascoin } from '../../../../lib/integrations/solana';
 import { verifyPrivySession } from '../../../../lib/integrations/privy';
@@ -15,8 +16,8 @@ import { hashRequestBody, resolveIdempotencyKey } from '../../../../lib/idempote
 import { checkRateLimit } from '../../../../lib/rate-limit';
 import { persistMetricsSnapshot } from '../../../../lib/metrics-snapshot';
 import { bustBalanceCache } from '../../../../lib/integrations/solana';
-import { recordGasPrice, detectStationPattern } from '../../../../lib/data-intelligence';
-import { getCachedFlags, addMemory } from '../../../../lib/mem0';
+import { recordGasPrice, detectStationPattern, getTypicalGasPrice } from '../../../../lib/data-intelligence';
+import { getCachedFlags, addMemory, writeFraudSignal, writeAccountQuality, writePipelineAnomaly } from '../../../../lib/mem0';
 
 // Fraud + OCR + AI calls can take 30s+; bump function timeout to 60s
 export const maxDuration = 60;
@@ -234,19 +235,32 @@ export async function POST(req: Request){
   const receiptDateOcr = ocr.pipeline?.extraction?.receipt_date ?? null;
   const ocrAmountDetected = ocr.amountUsd ?? null;
 
-  const { data: dupRows, error: dupErr } = await supabase
+  // SHA-256: exact-match dedup via DB index (O(1))
+  const { data: sha256Rows, error: dupErr } = await supabase
     .from('claim_receipts')
-    .select('claim_id,hash_sha256,phash')
-    .or(`hash_sha256.eq.${fraudBase.hashSha256},phash.eq.${fraudBase.pHash}`)
-    .limit(5);
+    .select('claim_id,hash_sha256')
+    .eq('hash_sha256', fraudBase.hashSha256)
+    .limit(1);
 
   if (dupErr) {
     // SECURITY: Do not leak DB error details to client
     return NextResponse.json({ ok:false, error:'duplicate_lookup_failed' }, { status: 500 });
   }
 
-  const duplicateHash = !!dupRows?.some((r:any) => r.hash_sha256 === fraudBase.hashSha256);
-  const duplicatePhash = !!dupRows?.some((r:any) => r.phash === fraudBase.pHash);
+  const duplicateHash = !!sha256Rows?.length;
+
+  // pHash: Hamming-distance scan of the 1000 most-recent hashes (in-memory).
+  // Exact string match would miss near-duplicates from re-cropped or re-compressed photos.
+  const { data: recentHashes } = await supabase
+    .from('claim_receipts')
+    .select('phash')
+    .not('phash', 'is', null)
+    .order('created_at', { ascending: false })
+    .limit(1000);
+
+  const duplicatePhash = !!(recentHashes?.some(
+    (r: any) => r.phash && comparePerceptualHashes(fraudBase.pHash, r.phash) >= 0.90
+  ));
 
   // Content fingerprint: detect same physical receipt submitted by a different wallet.
   // SHA-256 and pHash both change with camera angle/crop — this catches that case.
@@ -304,6 +318,14 @@ export async function POST(req: Request){
   // retry_later instead of failing the user. Matches the pattern used for
   // min_followers / account_quality on X API outages.
   if (followsGascoinCheck.apiFailure) {
+    recordXApiFailure().then((count) => {
+      if (isXApiSustainedFailure(count)) {
+        writePipelineAnomaly(wallet, {
+          type: 'x_api_sustained_failure',
+          detail: `X API failed ${count}+ times in 5 minutes — social verification blocked`,
+        }).catch(() => {});
+      }
+    }).catch(() => {});
     return NextResponse.json({
       ok: false,
       error: 'api_unavailable',
@@ -392,7 +414,8 @@ export async function POST(req: Request){
       claim_currency: 'USD',
       risk_score: result.riskScore,
       decision_reason: result.failed.map(f => f.gate).join(',') || 'auto_approved',
-      ip_country: ipCountry
+      ip_country: ipCountry,
+      account_quality_score: accountQuality.score,
     })
     .select('id,status')
     .single();
@@ -437,6 +460,7 @@ export async function POST(req: Request){
       ocr_confidence: ocr.confidence,
       ai_score: fraudBase.aiScore,
       tamper_score: fraudBase.tamperScore,
+      cross_validation_risk: fraudBase.crossValidation?.fraudRiskLevel ?? null,
       metadata_json: {
         receiptHasGascoin: ocr.receiptHasGascoin,
         walletOnReceipt,
@@ -518,6 +542,34 @@ export async function POST(req: Request){
     { pipeline: 'submission', decision: result.decision, riskScore: result.riskScore },
   ).catch(() => {});
 
+  // Account quality snapshot — builds trend data Claude reads on next claim
+  writeAccountQuality(wallet, {
+    score: accountQuality.score,
+    passed: accountQuality.passed,
+    flags: accountQuality.flags,
+    claimId,
+  }).catch(() => {});
+
+  // Content fingerprint match → fraud signal (same physical receipt, different wallet)
+  if (contentFingerprintDuplicate) {
+    writeFraudSignal(wallet, {
+      name: 'content_fingerprint_duplicate',
+      source: 'heuristic',
+      severity: 'high',
+      detail: `Receipt date+amount matches another wallet's recent claim`,
+      claimId,
+    }).catch(() => {});
+  }
+
+  // OCR fallback fired (Gemini unavailable) — log so Claude knows context was degraded
+  if (ocr.confidence === 0) {
+    writePipelineAnomaly(wallet, {
+      type: 'ocr_fallback',
+      detail: 'Gemini Vision unavailable — receipt scored with heuristics only',
+      claimId,
+    }).catch(() => {});
+  }
+
   // Snapshot metrics for historical tracking (non-blocking)
   if (userRow?.id) {
     persistMetricsSnapshot(supabase, {
@@ -540,6 +592,34 @@ export async function POST(req: Request){
     currency: (ocr.pipeline?.extraction as any)?.currency ?? null,
     amountUsd,
   }).catch(() => {});
+
+  // Station pattern: detect fraud rings (same station, multiple wallets, 7-day window)
+  detectStationPattern(supabase, wallet, ocr.text ?? null).then((pattern) => {
+    if (pattern.suspicious) {
+      writeFraudSignal(wallet, {
+        name: 'station_pattern_ring',
+        source: 'heuristic',
+        severity: 'high',
+        detail: `${pattern.signal} — ${pattern.matchCount} wallets at same station`,
+        claimId,
+      }).catch(() => {});
+    }
+  }).catch(() => {});
+
+  // Gas price sanity: flag if claimed amount is >3× median for that country
+  if (ocr.country) {
+    getTypicalGasPrice(supabase, ocr.country).then(({ median, sampleSize }) => {
+      if (median !== null && sampleSize >= 10 && amountUsd > median * 3) {
+        writeFraudSignal(wallet, {
+          name: 'gas_amount_outlier',
+          source: 'heuristic',
+          severity: 'medium',
+          detail: `Claimed $${amountUsd} vs. median $${median.toFixed(2)} (n=${sampleSize}) in ${ocr.country}`,
+          claimId,
+        }).catch(() => {});
+      }
+    }).catch(() => {});
+  }
 
   // Bust balance cache so next lookup gets fresh data
   bustBalanceCache(wallet).catch(() => {});

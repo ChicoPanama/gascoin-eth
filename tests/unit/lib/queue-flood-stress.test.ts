@@ -48,6 +48,8 @@ function validClaim(overrides: Partial<ClaimInput> = {}): ClaimInput {
     duplicatePhash: false,
     cooldownOk: true,
     amountUsd: 50,
+    ocrAmount: null,
+    receiptDate: null,
     followerCount: 500,
     accountQualityScore: 70,
     accountQualityPassed: true,

@@ -116,6 +116,12 @@ export async function POST(req: Request) {
       previousRejections: (prevClaims || []).filter((c: any) => c.status === 'rejected').length,
     });
 
+    // Persist Claude's confidence score as a discrete column for trend analysis
+    await supabase.from('claims').update({
+      claude_confidence: claudeVerdict.confidence,
+      updated_at: nowIso,
+    }).eq('id', claim.id);
+
     // Log Claude's verdict to audit trail
     await supabase.from('audit_logs').insert({
       actor_type: 'system',

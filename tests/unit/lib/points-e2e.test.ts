@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { calculateEngagementPoints, calculateStreakBonus, calculateFullBreakdown, POINTS_CONFIG } from '@/lib/engagement-rewards';
 import { scoreTweetQuality, detectReferralRing, calculateWalletTrust } from '@/lib/ai-points-engine';
-import { evaluateClaim, type ClaimInput } from '@/lib/policy';
+import { evaluateClaim, GATE_COUNT, type ClaimInput } from '@/lib/policy';
 import { getTierForBalance } from '@/lib/token-tiers';
 import { fakeWallet } from '../../factories';
 
@@ -367,8 +367,9 @@ describe('Gate Verification → Points Integration', () => {
       receiptHasGascoin: true, gascoinTokenBalance: 100,
       aiScore: 0.1, tamperScore: 0.1,
       duplicateHash: false, duplicatePhash: false,
-      cooldownOk: true, amountUsd: 50, followerCount: 200,
-      accountQualityScore: 60, accountQualityPassed: true,
+      cooldownOk: true, amountUsd: 50,
+      ocrAmount: 52, receiptDate: new Date().toISOString().slice(0, 10),
+      followerCount: 200, accountQualityScore: 60, accountQualityPassed: true,
     };
   }
 
@@ -393,7 +394,7 @@ describe('Gate Verification → Points Integration', () => {
 
   it('all 15 gates evaluate correctly for a valid submission', () => {
     const result = evaluateClaim(validClaim());
-    expect(result.gates).toHaveLength(15);
+    expect(result.gates).toHaveLength(GATE_COUNT);
     expect(result.failed).toHaveLength(0);
   });
 });

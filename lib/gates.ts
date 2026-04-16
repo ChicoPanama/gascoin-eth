@@ -233,7 +233,7 @@ export const GATES: GateDefinition[] = [
   },
 
   {
-    id: 16, slug: 'receipt-date-valid', policyGate: 'receipt_date_valid', name: 'Receipt Date Valid', category: 'receipt',
+    id: 15, slug: 'receipt-date-valid', policyGate: 'receipt_date_valid', name: 'Receipt Date Valid', category: 'receipt',
     description: 'The gas purchase must have occurred within 7 days before your submission date.',
     what_we_check: 'Gemini Vision OCR extracts the printed date from the receipt. That date is compared against the submission timestamp. Future-dated receipts and receipts older than 7 days fail.',
     common_failures: [
@@ -246,7 +246,7 @@ export const GATES: GateDefinition[] = [
     checklist_label: 'My gas purchase was made within the last 7 days',
   },
   {
-    id: 17, slug: 'amount-verified', policyGate: 'amount_verified', name: 'OCR Amount Verified', category: 'receipt',
+    id: 16, slug: 'amount-verified', policyGate: 'amount_verified', name: 'OCR Amount Verified', category: 'receipt',
     description: 'The amount you claim must match what our AI reads on your receipt. You may not claim more than 125% of the printed total.',
     what_we_check: 'Gemini Vision extracts the receipt total. Your submitted amount is compared to that OCR-detected total. If you claim more than 25% above what the receipt shows, this gate fails.',
     common_failures: [
@@ -261,7 +261,7 @@ export const GATES: GateDefinition[] = [
 
   // ─── WALLET (1) ────────────────────────────────────────────────
   {
-    id: 15, slug: 'gascoin-min-hold', policyGate: 'gascoin_min_hold', name: 'GASCOIN Min Hold', category: 'wallet',
+    id: 17, slug: 'gascoin-min-hold', policyGate: 'gascoin_min_hold', name: 'GASCOIN Min Hold', category: 'wallet',
     description: 'Your connected wallet must hold at least 1 GASCOIN token at the time of submission. In Season 1 dry-run mode this gate is bypassed so testers can participate without holding the token.',
     what_we_check: 'On-chain SPL token balance of your connected wallet against the GASCOIN mint. During Season 1 (ENABLE_LIVE_PAYOUT=false) this check auto-passes.',
     common_failures: [
@@ -278,7 +278,7 @@ export const GATES: GateDefinition[] = [
 export const GATE_CATEGORIES = {
   identity: { label: 'Identity Verification', count: 5 },
   tweet:    { label: 'Tweet Verification',    count: 3 },
-  receipt:  { label: 'Receipt Verification',  count: 5 },
+  receipt:  { label: 'Receipt Verification',  count: 7 },
   wallet:   { label: 'Wallet Verification',   count: 2 },
   treasury: { label: 'Treasury Check',        count: 0 }, // reserved for future
 } as const;
