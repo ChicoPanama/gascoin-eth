@@ -27,6 +27,12 @@ export const maxDuration = 60;
 const SUBMIT_WINDOW_SEC = 60;
 const SUBMIT_MAX_PER_WINDOW = 12;
 
+// Global AI budget cap — shared across all IPs. Prevents a coordinated burst
+// from 50 different IPs each at 1 req/min exhausting Gemini Vision quota.
+// Override via GLOBAL_AI_SUBMIT_MAX env var (default 30/min).
+const AI_GLOBAL_WINDOW_SEC = 60;
+const AI_GLOBAL_MAX = parseInt(process.env.GLOBAL_AI_SUBMIT_MAX || '30', 10);
+
 // Check rolling cooldown per X account — returns true if eligible
 async function checkCooldown(supabase: any, xUserId: string, cooldownDays: number): Promise<boolean> {
   try {
@@ -52,6 +58,11 @@ export async function POST(req: Request){
   const rl = await checkRateLimit(`submit:${ip}`, SUBMIT_MAX_PER_WINDOW, SUBMIT_WINDOW_SEC);
   if (!rl.ok) {
     return NextResponse.json({ ok:false, error:'rate_limited', mode: rl.mode, retryAfterSec: rl.resetSec }, { status: 429 });
+  }
+
+  const aiRl = await checkRateLimit('gc:global:ai-submit', AI_GLOBAL_MAX, AI_GLOBAL_WINDOW_SEC);
+  if (!aiRl.ok) {
+    return NextResponse.json({ ok: false, error: 'ai_capacity_limited', retryAfterSec: aiRl.resetSec }, { status: 429 });
   }
 
   const auth = req.headers.get('authorization');

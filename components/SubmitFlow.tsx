@@ -5,6 +5,7 @@ import { usePrivy } from '@privy-io/react-auth';
 import { generateReferralCodeClient } from '../lib/referral-code-client';
 import { GATE_DEFS, GATE_COUNT } from '../lib/policy';
 import { ViralShareCard } from './shared/ViralShareCard';
+import { getGateMessage, getApiErrorMessage, type GateMessage } from '../lib/gate-messages';
 
 // ─── Types ───
 type Step = 1 | 2 | 3 | 4 | 5;
@@ -410,7 +411,7 @@ function StepReview({ wallet, tweetUrl, handle, file, onSubmit, onBack }: {
   tweetUrl: string;
   handle: string;
   file: File | null;
-  onSubmit: () => void;
+  onSubmit: () => Promise<void>;
   onBack: () => void;
 }) {
   const [submitting, setSubmitting] = useState(false);
@@ -418,16 +419,16 @@ function StepReview({ wallet, tweetUrl, handle, file, onSubmit, onBack }: {
   const [slowHint, setSlowHint] = useState(false);
   const slowTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const doSubmit = () => {
+  const doSubmit = async () => {
     setSubmitting(true);
     setSlowHint(false);
-    // Start the 30s slow-response timer
     slowTimerRef.current = setTimeout(() => setSlowHint(true), 30_000);
-    // Kick off the real submission (parent handles the API call and advances step)
-    setTimeout(() => {
-      onSubmit();
+    try {
+      await onSubmit();
+    } finally {
       if (slowTimerRef.current) clearTimeout(slowTimerRef.current);
-    }, 2000);
+      setSubmitting(false);
+    }
   };
 
   // Clean up timer if the component unmounts
@@ -488,8 +489,9 @@ function StepReview({ wallet, tweetUrl, handle, file, onSubmit, onBack }: {
 // ═══════════════════════════════════════════
 // STEP 5 — Gate Progress
 // ═══════════════════════════════════════════
-function StepGates({ failGate, onReset, onResubmit, referralCode }: {
+function StepGates({ failGate, failGateMessage, onReset, onResubmit, referralCode }: {
   failGate: number | null;
+  failGateMessage: GateMessage | null;
   onReset: () => void;
   onResubmit: () => void;
   referralCode: string;
@@ -573,20 +575,29 @@ function StepGates({ failGate, onReset, onResubmit, referralCode }: {
       {failed && (
         <div className="sf-result">
           <div className="sf-fail-reason">
-            {gates.find((g) => g.status === 'failed')?.reason}
+            {failGateMessage?.headline ?? gates.find((g) => g.status === 'failed')?.reason}
           </div>
-          <button
-            type="button"
-            className="sf-btn-ghost"
-            onClick={() => setShowFix(!showFix)}
-          >
-            {showFix ? 'Hide details' : 'What to fix →'}
-          </button>
-          {showFix && (
-            <div className="sf-fix-details">
-              Ensure the failed verification requirement is met and resubmit your receipt.
-              Double-check that all information is clearly visible on the receipt photo.
+          {failGateMessage?.fix && (
+            <div className="sf-fix-details" style={{ marginTop: 12 }}>
+              {failGateMessage.fix}
             </div>
+          )}
+          {!failGateMessage && (
+            <>
+              <button
+                type="button"
+                className="sf-btn-ghost"
+                onClick={() => setShowFix(!showFix)}
+              >
+                {showFix ? 'Hide details' : 'What to fix →'}
+              </button>
+              {showFix && (
+                <div className="sf-fix-details">
+                  Ensure the failed verification requirement is met and resubmit your receipt.
+                  Double-check that all information is clearly visible on the receipt photo.
+                </div>
+              )}
+            </>
           )}
           <div className="sf-nav-buttons" style={{ marginTop: 24 }}>
             <button type="button" className="sf-btn-solid" onClick={onResubmit}>Resubmit</button>
@@ -841,6 +852,7 @@ export function SubmitFlow() {
   const [handle, setHandle] = useState('');
   const [file, setFile] = useState<File | null>(null);
   const [failGate, setFailGate] = useState<number | null>(null);
+  const [failGateMessage, setFailGateMessage] = useState<GateMessage | null>(null);
   const [referralCode, setReferralCode] = useState('');
   const loggedInHandle = usePrivyHandle();
 
@@ -848,7 +860,7 @@ export function SubmitFlow() {
   // mid-form (step 2–5), reset to step 1 so the form doesn't attempt to
   // submit with no wallet attached. InviteGate catches !authenticated but
   // doesn't reset form state; this hook does.
-  const { authenticated } = usePrivy();
+  const { authenticated, getAccessToken, user } = usePrivy();
   useEffect(() => {
     if (!authenticated && step > 1) {
       setStep(1);
@@ -858,6 +870,7 @@ export function SubmitFlow() {
       setHandle('');
       setFile(null);
       setFailGate(null);
+      setFailGateMessage(null);
     }
   }, [authenticated, step]);
 
@@ -874,7 +887,71 @@ export function SubmitFlow() {
     setHandle('');
     setFile(null);
     setFailGate(null);
+    setFailGateMessage(null);
   };
+
+  const handleSubmit = useCallback(async () => {
+    const token = await getAccessToken();
+    if (!token) {
+      setFailGate(0);
+      setFailGateMessage({ headline: 'Sign-in required', fix: 'Your session expired. Sign in again and resubmit.' });
+      goTo(5);
+      return;
+    }
+
+    // Ensure a minimum 1.5s loading state so the animation reads naturally
+    const minWait = new Promise<void>((r) => setTimeout(r, 1500));
+
+    try {
+      const fd = new FormData();
+      fd.append('tweetUrl', tweetUrl);
+      fd.append('wallet', wallet);
+      fd.append('walletOnReceipt', '');
+      fd.append('amountUsd', '');
+      if (file) fd.append('receipt', file);
+
+      const res = await fetch('/api/claims/submit', {
+        method: 'POST',
+        headers: {
+          authorization: `Bearer ${token}`,
+          'x-privy-user-id': String((user as any)?.id || ''),
+          'x-privy-handle': handle || loggedInHandle,
+          'x-privy-wallet': wallet,
+        },
+        body: fd,
+      });
+
+      const json = await res.json();
+
+      if (!res.ok) {
+        const msg = getApiErrorMessage(json?.error || 'submit_failed');
+        setFailGate(0);
+        setFailGateMessage({ headline: msg, fix: '' });
+        await minWait;
+        goTo(5);
+        return;
+      }
+
+      // Find the first failed gate and map it to a user-facing message
+      const failedGateResult = (json.gates as Array<{ gate: string; passed: boolean }> | undefined)
+        ?.find((g) => !g.passed);
+
+      if (failedGateResult) {
+        const idx = GATE_DEFS.findIndex((d) => d.id === failedGateResult.gate);
+        setFailGate(idx >= 0 ? idx : 0);
+        setFailGateMessage(getGateMessage(failedGateResult.gate));
+      } else {
+        setFailGate(null);
+        setFailGateMessage(null);
+      }
+    } catch {
+      setFailGate(0);
+      setFailGateMessage({ headline: 'Submission failed', fix: 'Network error. Check your connection and resubmit.' });
+    }
+
+    await minWait;
+    goTo(5);
+  }, [wallet, tweetUrl, handle, loggedInHandle, file, getAccessToken, user]);
 
   // SECURITY: Window globals removed — were exploitable even with NODE_ENV guard.
   // Hardened 2026-04-06 — use React DevTools or proper test harness instead.
@@ -918,7 +995,7 @@ export function SubmitFlow() {
           tweetUrl={tweetUrl}
           handle={handle}
           file={file}
-          onSubmit={() => goTo(5)}
+          onSubmit={handleSubmit}
           onBack={() => setStep(3)}
         />
       )}
@@ -926,6 +1003,7 @@ export function SubmitFlow() {
       {step === 5 && (
         <StepGates
           failGate={failGate}
+          failGateMessage={failGateMessage}
           onReset={reset}
           onResubmit={() => { setFile(null); goTo(3); }}
           referralCode={referralCode}

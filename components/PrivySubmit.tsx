@@ -1,6 +1,7 @@
 'use client';
 
 import React, { FormEvent, useMemo, useState } from 'react';
+import { getApiErrorMessage } from '../lib/gate-messages';
 import { usePrivy } from '@privy-io/react-auth';
 
 function readWallet(user: any): string {
@@ -54,7 +55,7 @@ function PrivySubmitForm() {
       });
       const json = await res.json();
       if (!res.ok) {
-        setError(json?.error || 'submit_failed');
+        setError(getApiErrorMessage(json?.error || 'submit_failed'));
         return;
       }
       setOkText(`Submitted. Claim ID: ${json?.claimId}`);
