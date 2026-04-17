@@ -23,10 +23,10 @@ import { getChatCache, setChatCache } from '../../../lib/chat-cache';
 export const runtime = 'nodejs';
 export const maxDuration = 30;
 
-// Model selection — free models via OpenRouter when key present, Gateway fallback.
-//   T1  → gemma-4-26b-a4b-it:free  (26B MoE, 4B active — fast for simple Q&A)
-//   T2/3 → hermes-3-llama-3.1-405b:free  (405B — deep reasoning, tool use)
-// Nemotron was tried but leaks its reasoning chain into content, unusable.
+// Model selection — Nemotron via OpenRouter when key present, Gateway fallback.
+//   All tiers → nvidia/nemotron-3-super-120b-a12b:free (120B total, 12B active MoE)
+//   Reasoning tokens are separated in streaming mode — AI SDK reads content only.
+//   maxOutputTokens must be ≥400 to leave room after reasoning token budget.
 // Without key: Haiku (T1) + Sonnet (T2/T3) via Vercel AI Gateway.
 const openRouter = process.env.OPENROUTER_API_KEY
   ? createOpenAI({
@@ -39,8 +39,8 @@ const openRouter = process.env.OPENROUTER_API_KEY
     })
   : null;
 
-const TIER1_MODEL  = openRouter ? openRouter.chat('google/gemma-4-26b-a4b-it:free') : gateway('anthropic/claude-haiku-4.5');
-const TIER23_MODEL = openRouter ? openRouter.chat('nousresearch/hermes-3-llama-3.1-405b:free') : gateway('anthropic/claude-sonnet-4.6');
+const TIER1_MODEL  = openRouter ? openRouter.chat('nvidia/nemotron-3-super-120b-a12b:free') : gateway('anthropic/claude-haiku-4.5');
+const TIER23_MODEL = openRouter ? openRouter.chat('nvidia/nemotron-3-super-120b-a12b:free') : gateway('anthropic/claude-sonnet-4.6');
 
 const SYSTEM_PROMPT = `You are the GASCOIN Refund Assistant — knowledgeable, direct, and friendly. You have a complete understanding of how GASCOIN works. Keep replies to 2–4 sentences unless the user asks for a full walkthrough or step-by-step guide. Use plain English. If someone is lost, give them the single next action to take. Never reveal internal fraud scoring weights, detection thresholds, or algorithm specifics. Detect the user's language and reply in that same language.
 
@@ -520,7 +520,7 @@ export async function POST(req: Request) {
       model: TIER1_MODEL,
       system: MINI_SYSTEM_PROMPT,
       messages,
-      maxOutputTokens: 180,
+      maxOutputTokens: 512,
       onError: ({ error }) => console.error('[chat/t1] error', (error as Error)?.name, (error as Error)?.message, JSON.stringify(error)),
       onFinish: ({ text }) => {
         if (text) setChatCache(lastUserText, text, 1).catch(() => {});
@@ -546,7 +546,7 @@ export async function POST(req: Request) {
     system: dynamicSystem,
     messages,
     ...(tools && { tools }),
-    maxOutputTokens: tier === 3 ? 500 : 400,
+    maxOutputTokens: tier === 3 ? 768 : 640,
     onError: ({ error }) => console.error('[chat/t23] error', (error as Error)?.name, (error as Error)?.message, JSON.stringify(error)),
     onFinish: ({ text }) => {
       if (wallet && lastUserText && text) {
