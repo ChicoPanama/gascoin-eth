@@ -342,6 +342,19 @@ export function ChatAgent({
               return (
                 <div key={m.id}>
                   {parts.map((part, idx) => {
+                    if (part.type === 'reasoning') {
+                      const text = (part.text as string) || '';
+                      if (!text) return null;
+                      return (
+                        <div key={idx} className="chat-reasoning">
+                          <details className="chat-reasoning-details">
+                            <summary className="chat-reasoning-summary">Thinking…</summary>
+                            <div className="chat-reasoning-text">{text}</div>
+                          </details>
+                        </div>
+                      );
+                    }
+
                     if (part.type === 'text') {
                       const text = (part.text as string) || '';
                       if (!text) return null;

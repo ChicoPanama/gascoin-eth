@@ -1,4 +1,4 @@
-import { streamText, convertToModelMessages, type ModelMessage, type UIMessage } from 'ai';
+import { streamText, convertToModelMessages, extractReasoningMiddleware, wrapLanguageModel, type ModelMessage, type UIMessage } from 'ai';
 import { gateway } from '@ai-sdk/gateway';
 import { createOpenAI } from '@ai-sdk/openai';
 import { verifyPrivySession } from '../../../lib/integrations/privy';
@@ -19,14 +19,15 @@ import {
 } from '../../../lib/chat-intent';
 import { buildChatTools } from '../../../lib/chat-tools';
 import { getChatCache, setChatCache } from '../../../lib/chat-cache';
+import { withReasoningFetch } from '../../../lib/openrouter-reasoning';
 
 export const runtime = 'nodejs';
 export const maxDuration = 30;
 
 // Model selection — Nemotron via OpenRouter when key present, Gateway fallback.
 //   All tiers → nvidia/nemotron-3-super-120b-a12b:free (120B total, 12B active MoE)
-//   Reasoning tokens are separated in streaming mode — AI SDK reads content only.
-//   maxOutputTokens must be ≥400 to leave room after reasoning token budget.
+//   Custom fetch rewrites delta.reasoning → <think> tags in delta.content.
+//   extractReasoningMiddleware then emits proper reasoning-start/delta/end events.
 // Without key: Haiku (T1) + Sonnet (T2/T3) via Vercel AI Gateway.
 const openRouter = process.env.OPENROUTER_API_KEY
   ? createOpenAI({
@@ -36,11 +37,18 @@ const openRouter = process.env.OPENROUTER_API_KEY
         'HTTP-Referer': 'https://gascoin.app',
         'X-Title': 'GASCOIN',
       },
+      fetch: withReasoningFetch(),
     })
   : null;
 
-const TIER1_MODEL  = openRouter ? openRouter.chat('nvidia/nemotron-3-super-120b-a12b:free') : gateway('anthropic/claude-haiku-4.5');
-const TIER23_MODEL = openRouter ? openRouter.chat('nvidia/nemotron-3-super-120b-a12b:free') : gateway('anthropic/claude-sonnet-4.6');
+const reasoningMiddleware = extractReasoningMiddleware({ tagName: 'think' });
+
+const TIER1_MODEL  = openRouter
+  ? wrapLanguageModel({ model: openRouter.chat('nvidia/nemotron-3-super-120b-a12b:free'), middleware: reasoningMiddleware })
+  : gateway('anthropic/claude-haiku-4.5');
+const TIER23_MODEL = openRouter
+  ? wrapLanguageModel({ model: openRouter.chat('nvidia/nemotron-3-super-120b-a12b:free'), middleware: reasoningMiddleware })
+  : gateway('anthropic/claude-sonnet-4.6');
 
 const SYSTEM_PROMPT = `You are the GASCOIN Refund Assistant — knowledgeable, direct, and friendly. You have a complete understanding of how GASCOIN works. Keep replies to 2–4 sentences unless the user asks for a full walkthrough or step-by-step guide. Use plain English. If someone is lost, give them the single next action to take. Never reveal internal fraud scoring weights, detection thresholds, or algorithm specifics. Detect the user's language and reply in that same language.
 

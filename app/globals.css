@@ -9113,6 +9113,22 @@ button.docs-footer-link {
 .chat-msg--loading { opacity: 0.5; animation: chat-pulse 1s ease infinite; }
 @keyframes chat-pulse { 0%,100% { opacity: 0.3; } 50% { opacity: 0.7; } }
 
+/* ── Reasoning (collapsible thinking block) ── */
+.chat-reasoning { align-self: flex-start; width: 100%; }
+.chat-reasoning-details {
+  margin: 4px 0; border-left: 2px solid #2F3336;
+  padding-left: 10px; font-size: 11px; color: #71767B;
+}
+.chat-reasoning-summary {
+  cursor: pointer; user-select: none; font-size: 11px;
+  color: #71767B; letter-spacing: 0.02em;
+}
+.chat-reasoning-summary:hover { color: #E7E9EA; }
+.chat-reasoning-text {
+  margin-top: 6px; white-space: pre-wrap; line-height: 1.5;
+  font-family: 'SF Mono', 'Menlo', monospace; font-size: 10.5px;
+}
+
 .chat-agent-form { border-top: 1px solid #2F3336; display: flex; }
 .chat-agent-input {
   flex: 1; background: transparent; border: none;
