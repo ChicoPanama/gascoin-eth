@@ -19,3 +19,4 @@ coverage/
 .turbo/
 *.tsbuildinfo
 .env*.local
+pnpm-lock.yaml
