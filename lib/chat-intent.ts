@@ -115,6 +115,100 @@ const FAQ_MAP: [RegExp, string][] = [
   // Support
   [/(dm|message|contact|reach).{0,15}support|get.{0,10}help|talk.{0,10}human/i,
     "For issues this assistant can't resolve, DM @GasCoinApp on X or visit gascoin.app/docs for full documentation."],
+
+  // ── Promoted from cache seed (high-frequency, zero-LLM tier) ──
+
+  // What is GASCOIN
+  [/what.{0,5}(is|does).{0,5}gascoin|purpose.{0,10}gascoin|gascoin.{0,10}(about|mean)/i,
+    "GASCOIN refunds real gasoline purchases in SOL cryptocurrency. Buy gas, post proof on X with #gascoin @GasCoinApp, submit your receipt at gascoin.app/submit, and receive SOL in your wallet within 2–6 hours."],
+
+  // How does it work
+  [/how.{0,5}(does|do).{0,10}(gascoin|it|this).{0,5}work/i,
+    "Buy gas at any station, keep the receipt. Write your wallet's last 4 characters + #gascoin on it in dark pen. Post a photo on X with #gascoin @GasCoinApp. Submit at gascoin.app/submit. SOL arrives in 2–6 hours after 17 automated gates verify your claim."],
+
+  // How to get started
+  [/how.{0,10}(get|to).{0,5}start|where.{0,10}(start|begin)|first.{0,5}step/i,
+    "Set up a free Solana wallet (Phantom, Solflare, or Backpack), get a verified X account with 100+ followers, buy at least 1 $GASCOIN token on Jupiter (jup.ag), then fill up your car and follow the 5-step submission flow at gascoin.app/submit."],
+
+  // Unsupported wallets
+  [/\b(metamask|trust.wallet|coinbase.wallet|ledger|trezor)\b/i,
+    "Only Phantom, Solflare, and Backpack wallets are supported. MetaMask, Trust Wallet, Coinbase Wallet, and hardware wallets are not compatible — GASCOIN runs on Solana, not Ethereum."],
+
+  // Do I need crypto experience
+  [/need.{0,10}(crypto|blockchain).{0,10}(experience|knowledge|know)|crypto.{0,10}experience/i,
+    "No crypto experience needed. Download Phantom (free), follow the 11-step guide at gascoin.app/how-it-works, and the whole process takes about 15 minutes from zero to first submission."],
+
+  // How many submissions per week
+  [/how.{0,10}(many|often).{0,15}(submit|claim|time)|submit.{0,10}per.{0,5}week/i,
+    "Standard & Commuter: 1×/week. Road Warrior: 2×/week. Fleet: 4×/week. Higher tiers require more $GASCOIN tokens but unlock more frequent submissions and larger refund caps."],
+
+  // What happens after I submit
+  [/what.{0,10}happen.{0,15}(submit|after)|after.{0,10}(submit|submission)/i,
+    "17 verification gates run automatically in 2–5 minutes — watch progress in real time on the results screen. If all pass, SOL is dispatched to your wallet within 2–6 hours. Track status anytime at gascoin.app/wallet."],
+
+  // Points basics
+  [/how.{0,10}(do|does).{0,10}point|what.{0,5}(are|is).{0,5}point|point.{0,10}(work|system|earn)/i,
+    "Earn points from: approved receipts (1,000 pts), tweet engagement (quote 500, reply 300, bookmark 250, retweet 50, like 25), daily holdings bonus (100–5,000/day by tier), streaks (500/window, up to 5×), and referrals. Original videos earn 3× points. See the full breakdown at gascoin.app/points."],
+
+  // Viral tweet strategy
+  [/viral|maximize.{0,10}point|more.{0,10}point|best.{0,10}tweet|tweet.{0,10}(tip|strategy|advice)/i,
+    "Record an original video at the pump (3× points, maximum reach). Original images get 1.5×. Text posts get 1×. Avoid reposting others' content (0.1×, X kills 90% of reach). Consistent daily posting beats one viral moment — caps are 5K/tweet, 10K/day, 50K/month."],
+
+  // Leaderboard
+  [/leaderboard.{0,10}(work|rank|how|what)|how.{0,10}rank|ranking.{0,10}work/i,
+    "Leaderboard rank is a composite score: Holdings points 55%, Engagement points 25%, Referral points 20%. Holding GASCOIN tokens is the strongest factor — whales who also create content and refer users dominate. See rankings at gascoin.app/leaderboard."],
+
+  // SOL refund caps
+  [/how.{0,10}much.{0,10}(sol|refund|get.{0,5}back)|refund.{0,10}(cap|max|amount|size)/i,
+    "SOL refund caps per tier: Standard 0.10 SOL · Commuter 0.25 SOL · Road Warrior 0.50 SOL · Fleet 1.0 SOL. Higher tiers also get priority in the payout queue."],
+
+  // Can my account be private
+  [/private.{0,10}(account|profile|twitter|x\b)|account.{0,10}private/i,
+    "No — your X account must be public. Private/protected accounts fail Gate 8 (tweet must be publicly accessible). Keep your account public until SOL arrives."],
+
+  // What are gates
+  [/what.{0,5}(are|is).{0,10}(gate|verification.gate)|how.{0,5}many.{0,5}gate/i,
+    "17 automated verification gates check every submission: 5 identity gates (verified X, followers, cooldown, quality), 3 tweet gates (hashtag, tag, live), 7 receipt gates (OCR, duplicate, AI check, amount, date), and 2 wallet gates (amount match, token hold). Gates 1–16 are blocking; Gate 17 is informational."],
+
+  // Is gate 17 blocking
+  [/gate.{0,5}17.{0,15}(block|require|need|fail|pass)/i,
+    "Gate 17 (GASCOIN token hold) is non-blocking in Season 1. It checks your token balance and assigns your tier but does NOT reject your claim if you hold zero tokens."],
+
+  // Can I edit my submission
+  [/edit.{0,10}(submission|claim|after)|change.{0,10}(after|submission)|modify.{0,10}claim/i,
+    "Submissions can't be edited after Step 4. If something is wrong, wait for the claim to finish processing (it will fail the relevant gate), then fix the issue and resubmit."],
+
+  // What does retry later mean
+  [/retry.{0,5}later|what.{0,10}retry|status.{0,10}retry/i,
+    "Retry later means the X API was temporarily unavailable during your submission. Your cooldown is NOT consumed — resubmit when the API recovers. This is penalty-free."],
+
+  // Is my information safe / privacy
+  [/information.{0,10}safe|data.{0,10}(collect|privacy|safe)|privacy|personal.{0,10}(info|data)/i,
+    "GASCOIN never stores your X password, wallet private key, or credit card number. Receipt photos are securely stored and auto-deleted after 90 days. Only your city/state appears on the community feed — never your name, address, or card details."],
+
+  // How is gascoin different
+  [/different.{0,10}(from|than)|compare|vs|versus|cash.?back.{0,5}app|getupside|gas.?buddy/i,
+    "Unlike cashback apps, GASCOIN pays in SOL cryptocurrency directly to your wallet — no middleman, no bank account needed, verifiable on-chain. Works at any gas station worldwide, not just partner stations."],
+
+  // Streak bonus
+  [/streak.{0,10}(bonus|work|how|what)|what.{0,5}(is|are).{0,5}streak/i,
+    "Submit consistently across back-to-back 30-day windows to earn streak bonuses: 500 points per consecutive window, up to 5× multiplier. Missing a window resets your streak."],
+
+  // What is solscan
+  [/solscan|verify.{0,10}(transaction|payout|on.chain)/i,
+    "Solscan is a Solana blockchain explorer — every GASCOIN payout creates a verifiable on-chain transaction. Your Wallet Tracker at gascoin.app/wallet shows a clickable Solscan link for each completed payout."],
+
+  // Referral basics
+  [/referral.{0,10}(program|work|how|earn)|how.{0,10}refer/i,
+    "Get your referral link at gascoin.app/referral (requires 1 approved claim). Earn 100 points per conversion + 2% of all points your referred users earn (up to 10,000/month). Max 20 referrals per 30 days. Share on X, YouTube, anywhere."],
+
+  // Fee / cost
+  [/gascoin.{0,10}(fee|cost|charge|free)|fee.{0,5}(for|to)|is.{0,5}(it|gascoin).{0,5}free/i,
+    "GASCOIN does not charge any fees. The only cost is the gas you buy ($5 minimum) and holding at least 1 $GASCOIN token (~fractions of a cent). SOL refunds are sent directly to your wallet with no deductions."],
+
+  // Season 1 / beta
+  [/season.{0,3}1|beta.{0,10}(mean|what|when)|when.{0,10}(public|open)|open.{0,10}access/i,
+    "Season 1 is the current invite-only beta. Live SOL payouts are active. Public access (Season 2) is on the roadmap — follow @GasCoinApp on X for announcements."],
 ];
 
 // ---------------------------------------------------------------------------
