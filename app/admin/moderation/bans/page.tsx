@@ -32,10 +32,12 @@ async function unbanUser(formData: FormData) {
 
   // Audit trail — who unbanned whom and when
   await supabase.from('audit_logs').insert({
-    actor: session.walletAddress || 'admin',
+    actor_type: 'admin',
+    actor_id: session.walletAddress || 'admin',
     action: 'user_unban',
-    target: String(id),
-    payload: { unbanned_at: new Date().toISOString() },
+    target_type: 'user_ban',
+    target_id: String(id),
+    payload_json: { unbanned_at: new Date().toISOString() },
   });
 
   revalidatePath('/admin/moderation/bans');

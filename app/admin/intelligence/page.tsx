@@ -38,10 +38,12 @@ async function acknowledgeEntry(formData: FormData) {
     .eq('id', id);
 
   await supabase.from('audit_logs').insert({
-    actor: session.walletAddress || 'admin',
+    actor_type: 'admin',
+    actor_id: session.walletAddress || 'admin',
     action: 'intelligence_ack',
-    target: String(id),
-    payload: { acked_at: new Date().toISOString() },
+    target_type: 'intelligence_entry',
+    target_id: String(id),
+    payload_json: { acked_at: new Date().toISOString() },
   });
 
   revalidatePath('/admin/intelligence');
