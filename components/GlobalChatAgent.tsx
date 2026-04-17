@@ -1,8 +1,9 @@
 'use client';
 
 import { usePathname } from 'next/navigation';
+import { useState, useEffect } from 'react';
 import { ChatAgent } from './ChatAgent';
-import type { ChatPageHint } from './ChatAgent';
+import type { ChatPageHint, ChatUserProfile } from './ChatAgent';
 
 const PAGE_HINTS: Record<string, ChatPageHint> = {
   '/submit':       'submit',
@@ -23,6 +24,15 @@ const HIDDEN_PREFIXES = ['/admin'];
 
 export function GlobalChatAgent() {
   const pathname = usePathname();
+  const [profile, setProfile] = useState<ChatUserProfile | null>(null);
+
+  // Fetch user profile once on mount (requires Privy session)
+  useEffect(() => {
+    fetch('/api/chat/profile', { credentials: 'include' })
+      .then(r => r.ok ? r.json() : null)
+      .then(data => { if (data && !data.isNewUser) setProfile(data); })
+      .catch(() => {}); // silent — profile is optional
+  }, []);
 
   if (HIDDEN_PREFIXES.some(p => pathname.startsWith(p))) return null;
 
@@ -32,5 +42,5 @@ export function GlobalChatAgent() {
   const autoOpen = AUTO_OPEN_PATHS.has(base);
   const align: 'left' | 'right' = ALIGN_LEFT_PATHS.has(base) ? 'left' : 'right';
 
-  return <ChatAgent pageHint={pageHint} autoOpen={autoOpen} align={align} />;
+  return <ChatAgent pageHint={pageHint} autoOpen={autoOpen} align={align} userProfile={profile} />;
 }

@@ -21,6 +21,7 @@ import {
 import { buildChatTools } from '../../../lib/chat-tools';
 import { getChatCache, setChatCache } from '../../../lib/chat-cache';
 import { addMemory, MEM0_CATEGORIES, MEM0_APPS } from '../../../lib/mem0';
+import { getUserChatProfile, saveUserPreferences } from '../../../lib/chat-user-profile';
 
 export const runtime = 'nodejs';
 export const maxDuration = 60;
@@ -540,14 +541,30 @@ export async function POST(req: Request) {
   }
 
   // ── Tier 2 + 3: Full model — fetch context in parallel ───────────────
-  const [kbContext, walletContext, memoryContext, mem0Context] = await Promise.all([
+  const [kbContext, walletContext, memoryContext, mem0Context, userProfile] = await Promise.all([
     buildKBContext(lastUserText),
     wallet ? buildWalletContext(wallet) : Promise.resolve(''),
     wallet ? loadConvMemory(wallet) : Promise.resolve(''),
     wallet ? buildMem0Context(wallet) : Promise.resolve(''),
+    wallet ? getUserChatProfile(wallet) : Promise.resolve(null),
   ]);
 
-  const dynamicSystem = SYSTEM_PROMPT + memoryContext + walletContext + mem0Context + kbContext;
+  // Build user profile context block for the system prompt
+  let profileContext = '';
+  if (userProfile && !userProfile.isNewUser) {
+    const p = userProfile;
+    const lines = ['\n\n[USER PROFILE]'];
+    lines.push(`Wallet: ${p.walletShort} · Tier: ${p.tier || 'None'} · Claims: ${p.totalClaims}`);
+    if (p.streakCount >= 2) lines.push(`Streak: ${p.streakCount} consecutive approvals`);
+    if (p.cooldownHoursLeft > 0) lines.push(`Cooldown: ${p.cooldownHoursLeft}h remaining`);
+    else if (p.lastClaimStatus) lines.push('Cooldown: clear — eligible to submit');
+    if (p.lastClaimStatus === 'rejected') lines.push('Last claim: rejected');
+    if (p.preferredLanguage) lines.push(`Language preference: ${p.preferredLanguage}`);
+    if (p.recentTopics.length > 0) lines.push(`Past questions about: ${p.recentTopics.join(', ')}`);
+    profileContext = lines.join('\n');
+  }
+
+  const dynamicSystem = SYSTEM_PROMPT + profileContext + memoryContext + walletContext + mem0Context + kbContext;
 
   // Tier 3: include tools only when intent signals tool use
   const tools = tier === 3 ? buildChatTools(wallet) : undefined;
@@ -577,6 +594,11 @@ export async function POST(req: Request) {
             { category: MEM0_CATEGORIES.MISC, appId: MEM0_APPS.SUBMIT },
           ).catch(() => {});
         }
+      }
+      // Save user preferences to mem0 on the first exchange of the session.
+      // Detects language, frequent topics. Rate-limited to first message only.
+      if (priorExchanges === 0) {
+        saveUserPreferences(wallet, lastUserText, text).catch(() => {});
       }
       // Cache Tier 2 responses when there's no wallet context (not personalized)
       if (tier === 2 && !wallet && text) {

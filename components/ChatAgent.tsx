@@ -17,6 +17,16 @@ export interface ChatClaimContext {
   cooldownHoursLeft?: number;
 }
 
+export interface ChatUserProfile {
+  walletShort: string;
+  tier: string | null;
+  totalClaims: number;
+  streakCount: number;
+  lastClaimStatus: string | null;
+  cooldownHoursLeft: number;
+  isNewUser: boolean;
+}
+
 // ---------------------------------------------------------------------------
 // Opening message — contextual, based on page + wallet state
 // ---------------------------------------------------------------------------
@@ -27,7 +37,9 @@ const DEFAULT_WELCOME =
 function buildOpeningMessage(
   pageHint?: ChatPageHint,
   claimCtx?: ChatClaimContext,
+  profile?: ChatUserProfile | null,
 ): string {
+  // Page-specific overrides first
   if (pageHint === 'submit') {
     return 'Ready to submit? I can:\n• Check if your tweet URL passes gates\n• Confirm what to write on your receipt\n• Walk through any step\n\nWhat do you need?';
   }
@@ -37,6 +49,8 @@ function buildOpeningMessage(
   if (pageHint === 'docs') {
     return "Have a question about the docs? I can explain anything on this page or walk you through specific steps.\n\nWhat would you like to know?";
   }
+
+  // Wallet-page context (claim status)
   if (pageHint === 'wallet' && claimCtx) {
     if (claimCtx.status === 'rejected' && claimCtx.failedGates?.length) {
       return `I see your recent claim was rejected — ${claimCtx.failedGates.join(', ')} failed.\n\nWant me to walk you through fixing it? Or ask me anything.`;
@@ -44,13 +58,31 @@ function buildOpeningMessage(
     if (claimCtx.status === 'pending' || claimCtx.status === 'processing') {
       return "Your claim is processing — I can explain what's happening at each gate or answer any questions while you wait.";
     }
-    if (claimCtx.cooldownHoursLeft && claimCtx.cooldownHoursLeft > 0) {
-      return `Cooldown active — ${claimCtx.cooldownHoursLeft}h left before you can submit again.\n\nNeed help with anything while you wait?`;
-    }
-    if (claimCtx.streakCount && claimCtx.streakCount >= 2) {
-      return `You're on a ${claimCtx.streakCount}-claim streak 🔥 Keep it up — each submission in your next window earns streak bonus points.\n\nAnything I can help with?`;
-    }
   }
+
+  // Personalized welcome for returning authenticated users
+  if (profile && !profile.isNewUser) {
+    const parts: string[] = [];
+    parts.push(`Welcome back${profile.walletShort ? ` (${profile.walletShort})` : ''}!`);
+
+    if (profile.tier) {
+      parts.push(`${profile.tier} tier · ${profile.totalClaims} approved claim${profile.totalClaims !== 1 ? 's' : ''}`);
+    }
+    if (profile.streakCount >= 2) {
+      parts.push(`${profile.streakCount}-claim streak`);
+    }
+    if (profile.cooldownHoursLeft > 0) {
+      parts.push(`Cooldown: ${profile.cooldownHoursLeft}h left`);
+    } else if (profile.lastClaimStatus) {
+      parts.push('Cooldown clear — ready to submit');
+    }
+    if (profile.lastClaimStatus === 'rejected') {
+      parts.push('\nYour last claim was rejected — want me to help fix it?');
+    }
+    parts.push('\nWhat can I help with?');
+    return parts.join(' · ').replace(' · \n', '\n');
+  }
+
   return DEFAULT_WELCOME;
 }
 
@@ -229,12 +261,14 @@ export function ChatAgent({
   wallet,
   pageHint,
   claimContext,
+  userProfile,
 }: {
   autoOpen?: boolean;
   align?: 'left' | 'right';
   wallet?: string;
   pageHint?: ChatPageHint;
   claimContext?: ChatClaimContext;
+  userProfile?: ChatUserProfile | null;
 }) {
   const [open, setOpen] = useState(autoOpen);
   const [input, setInput] = useState('');
@@ -244,7 +278,7 @@ export function ChatAgent({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const openingMessage = buildOpeningMessage(pageHint, claimContext);
+  const openingMessage = buildOpeningMessage(pageHint, claimContext, userProfile);
 
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
