@@ -155,23 +155,31 @@ export function classifyTier(text: string, priorExchangeCount: number): IntentTi
 }
 
 /**
- * Synthetic AI SDK data-stream response for Tier 0 FAQ answers.
- * Returns the answer in the same wire format as `streamText().toUIMessageStreamResponse()`
- * so the client `useChat` hook handles it identically — but no LLM call is made.
+ * Synthetic UI message stream response for Tier 0 FAQ answers.
+ * Emits the same SSE wire format as `streamText().toUIMessageStreamResponse()`
+ * so the client `useChat` / `DefaultChatTransport` handles it identically —
+ * but no LLM call is made.
  */
 export function faqStreamResponse(text: string): Response {
-  const messageId = `faq-${Date.now()}`;
-  const body = [
-    `f:${JSON.stringify({ messageId })}\n`,
-    `0:${JSON.stringify(text)}\n`,
-    `d:${JSON.stringify({ finishReason: 'stop', usage: { promptTokens: 0, completionTokens: 0 } })}\n`,
-  ].join('');
+  const events = [
+    `data: ${JSON.stringify({ type: 'start' })}`,
+    `data: ${JSON.stringify({ type: 'start-step' })}`,
+    `data: ${JSON.stringify({ type: 'text-start', id: '0' })}`,
+    `data: ${JSON.stringify({ type: 'text-delta', id: '0', delta: text })}`,
+    `data: ${JSON.stringify({ type: 'text-end', id: '0' })}`,
+    `data: ${JSON.stringify({ type: 'finish-step' })}`,
+    `data: ${JSON.stringify({ type: 'finish', finishReason: 'stop' })}`,
+    'data: [DONE]',
+  ].join('\n\n') + '\n\n';
 
-  return new Response(body, {
+  return new Response(events, {
     status: 200,
     headers: {
-      'Content-Type': 'text/plain; charset=utf-8',
-      'x-vercel-ai-data-stream': 'v1',
+      'Content-Type': 'text/event-stream',
+      'Cache-Control': 'no-cache',
+      Connection: 'keep-alive',
+      'X-Accel-Buffering': 'no',
+      'x-vercel-ai-ui-message-stream': 'v1',
     },
   });
 }

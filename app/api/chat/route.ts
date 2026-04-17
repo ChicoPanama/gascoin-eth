@@ -21,7 +21,7 @@ import { buildChatTools } from '../../../lib/chat-tools';
 import { getChatCache, setChatCache } from '../../../lib/chat-cache';
 
 export const runtime = 'nodejs';
-export const maxDuration = 30;
+export const maxDuration = 60;
 
 // Model selection — Nemotron via OpenRouter when key present, Gateway fallback.
 //   All tiers → nvidia/nemotron-3-super-120b-a12b:free (120B total, 12B active MoE)
@@ -459,10 +459,16 @@ Is GASCOIN legit?
 What if I'm having trouble and this assistant can't help?
   Visit gascoin.app/docs for full documentation, or DM @GasCoinApp on X for direct support.`;
 
+/** Return an error as a valid UI message SSE stream so the client can display it. */
+function errorStreamResponse(msg: string): Response {
+  return faqStreamResponse(`Sorry, something went wrong: ${msg}. Please try again.`);
+}
+
 export async function POST(req: Request) {
+ try {
   const rl = await checkRateLimit(`chat:${getClientIp(req)}`, 20, 60);
   if (!rl.ok) {
-    return new Response('Rate limited', { status: 429 });
+    return errorStreamResponse('Too many requests — please wait a moment');
   }
 
   // Auth is optional — the chat agent is a public support widget.
@@ -560,4 +566,8 @@ export async function POST(req: Request) {
   });
 
   return result.toUIMessageStreamResponse();
+ } catch (err) {
+  console.error('[chat] unhandled', err);
+  return errorStreamResponse((err as Error).message || 'Internal error');
+ }
 }
