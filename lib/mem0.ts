@@ -610,10 +610,6 @@ export async function writeDistilledProfile(
   // Build a ~50-token compressed fingerprint that Claude/Grok can re-use.
   const line = `${summary.verdict} | tier=${summary.tier} | claims=${summary.claimCount} | risk=${summary.riskBucket}${summary.lastFlags.length ? ' | flags=' + summary.lastFlags.slice(0, 3).join(',') : ''} | ${summary.narrative.slice(0, 120)}`;
 
-  // Bust cache BEFORE writing so any concurrent reads after this call
-  // get fresh data from mem0 rather than the stale cached profile.
-  await bustEntityProfileCache('wallet', wallet);
-
   await addMemory('wallet', wallet, line, {
     category: MEM0_CATEGORIES.CLAIM_VERDICT,
     agentId: MEM0_AGENTS.CLAUDE_OVERSIGHT,
@@ -631,6 +627,8 @@ export async function writeDistilledProfile(
       claim_id: summary.claimId,
     },
   });
+  // Bust after a successful write so stale cache isn't cleared on write failure.
+  await bustEntityProfileCache('wallet', wallet);
 }
 
 /**

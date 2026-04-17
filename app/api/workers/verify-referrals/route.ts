@@ -3,7 +3,7 @@ import { getSupabaseAdmin } from '../../../../lib/supabase';
 import { REFERRAL_CONFIG } from '../../../../lib/referral-config';
 import { calculateWalletTrust, detectReferralRing, awardVerifiedPoints } from '../../../../lib/ai-points-engine';
 import { isAuthorizedCron as isAuthorized } from '../../../../lib/cron-auth';
-import { addMemory, writeReferralRingFlag } from '../../../../lib/mem0';
+import { writeReferralRingFlag } from '../../../../lib/mem0';
 import { writeIntelligence } from '../../../../lib/knowledge-base';
 
 // Worker: auto-verify referrals + award POINTS (not SOL)
