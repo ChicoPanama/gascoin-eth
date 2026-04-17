@@ -787,7 +787,7 @@ function InviteGate({ children }: { children: React.ReactNode }) {
               autoFocus
               autoComplete="off"
               spellCheck={false}
-              maxLength={11}
+              maxLength={12}
               style={{
                 width: '100%',
                 padding: '14px 18px',
