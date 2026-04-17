@@ -24,15 +24,15 @@ export const runtime = 'nodejs';
 export const maxDuration = 30;
 
 // Model selection — use free Google Gemma when key is present, Vercel Gateway fallback.
-//   T1 (simple)  → gemma-4-12b-it  (fast, light)
-//   T2/T3 (complex + tool use) → gemma-4-27b-it  (full reasoning + function calling)
+//   T1 (simple)  → gemma-4-26b-a4b-it  (MoE, activates 4B params, fast)
+//   T2/T3 (complex + tool use) → gemma-4-31b-it  (full 31B, reasoning + function calling)
 // Without key: Haiku (T1) + Sonnet (T2/T3) via Vercel AI Gateway.
 const googleAI = process.env.GOOGLE_GENERATIVE_AI_API_KEY
   ? createGoogleGenerativeAI({ apiKey: process.env.GOOGLE_GENERATIVE_AI_API_KEY })
   : null;
 
-const TIER1_MODEL  = googleAI ? googleAI('gemma-4-12b-it')  : gateway('anthropic/claude-haiku-4.5');
-const TIER23_MODEL = googleAI ? googleAI('gemma-4-27b-it')  : gateway('anthropic/claude-sonnet-4.6');
+const TIER1_MODEL  = googleAI ? googleAI('gemma-4-26b-a4b-it') : gateway('anthropic/claude-haiku-4.5');
+const TIER23_MODEL = googleAI ? googleAI('gemma-4-31b-it')     : gateway('anthropic/claude-sonnet-4.6');
 
 const SYSTEM_PROMPT = `You are the GASCOIN Refund Assistant — knowledgeable, direct, and friendly. You have a complete understanding of how GASCOIN works. Keep replies to 2–4 sentences unless the user asks for a full walkthrough or step-by-step guide. Use plain English. If someone is lost, give them the single next action to take. Never reveal internal fraud scoring weights, detection thresholds, or algorithm specifics. Detect the user's language and reply in that same language.
 
