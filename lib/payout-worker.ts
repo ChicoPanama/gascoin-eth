@@ -200,11 +200,24 @@ export async function processQueuedPayout(claimId: string) {
       payload_json: { wallet: job.wallet, amountSol: job.amount_sol, error: sent.error, attempts, nextRetryAt }
     });
 
+    // O2: Surface exhausted payout failures in admin intelligence feed
+    if (exhausted) {
+      await supabase.from('intelligence_entries').insert({
+        entry_type: 'payout_failed_exhausted',
+        entity_type: 'wallet',
+        entity_id: job.wallet,
+        summary: `Payout failed after ${attempts} attempts: ${sent.error || 'unknown error'}`,
+        detail_json: { claimId, wallet: job.wallet, amountSol: job.amount_sol, error: sent.error, attempts },
+        severity: 'high',
+        pipeline_source: 'payout_worker',
+      }).catch(() => {});
+    }
+
     return { ok: false, error: sent.error || 'payout_failed', attempts, exhausted };
   }
 
   // O1: Detect DRYRUN hashes — ENABLE_LIVE_PAYOUT is not 'true' in production.
-  // Write a critical audit entry immediately so the admin feed surfaces it.
+  // Write to both audit_logs and intelligence_entries so admin dashboard alerts.
   if (sent.txHash?.startsWith('DRYRUN_')) {
     await supabase.from('audit_logs').insert({
       actor_type: 'system',
@@ -214,6 +227,34 @@ export async function processQueuedPayout(claimId: string) {
       target_id: claimId,
       payload_json: { wallet: job.wallet, amountSol: requestedAmount, txHash: sent.txHash, reason: 'ENABLE_LIVE_PAYOUT is not true — no SOL was transferred' },
     });
+    await supabase.from('intelligence_entries').insert({
+      entry_type: 'dryrun_payout_detected',
+      entity_type: 'wallet',
+      entity_id: job.wallet,
+      summary: `DRYRUN payout detected — ENABLE_LIVE_PAYOUT is not set. Claim ${claimId} marked paid but no SOL transferred.`,
+      detail_json: { claimId, wallet: job.wallet, amountSol: requestedAmount, txHash: sent.txHash },
+      severity: 'critical',
+      pipeline_source: 'payout_worker',
+    }).catch(() => {});
+  }
+
+  // O3: Treasury SOL threshold alert — warn when balance drops below 1 SOL
+  try {
+    const { getTreasuryBalances } = await import('./integrations/solana');
+    const balances = await getTreasuryBalances();
+    if (balances.solBalance < 1) {
+      await supabase.from('intelligence_entries').insert({
+        entry_type: 'treasury_low_sol',
+        entity_type: 'system',
+        entity_id: 'treasury',
+        summary: `Treasury SOL balance is critically low: ${balances.solBalance.toFixed(4)} SOL`,
+        detail_json: { solBalance: balances.solBalance, solUsd: balances.solUsd, threshold: 1 },
+        severity: balances.solBalance < 0.1 ? 'critical' : 'high',
+        pipeline_source: 'payout_worker',
+      }).catch(() => {});
+    }
+  } catch {
+    // Non-blocking — balance check failure must not interrupt payout flow
   }
 
   await supabase.from('payouts').insert({

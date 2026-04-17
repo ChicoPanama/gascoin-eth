@@ -1,10 +1,16 @@
 import { NextResponse } from 'next/server';
 import { promises as fs } from 'fs';
 import path from 'path';
+import { checkRateLimit } from '../../../../../lib/rate-limit';
+import { getClientIp } from '../../../../../lib/ip';
 
 export const runtime = 'nodejs';
 
-export async function GET() {
+export async function GET(req: Request) {
+  const rl = await checkRateLimit(`pub_memory_ctx:${getClientIp(req)}`, 20, 60);
+  if (!rl.ok) {
+    return NextResponse.json({ error: 'rate_limited' }, { status: 429 });
+  }
   try {
     const filePath = path.join(process.cwd(), 'public', 'memory-unified-context.json');
     const raw = await fs.readFile(filePath, 'utf8');

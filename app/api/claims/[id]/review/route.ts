@@ -50,6 +50,9 @@ export async function POST(req: Request, ctx: { params: Promise<{ id: string }> 
   if ((action === 'reject' || action === 'ban') && !reason) {
     return NextResponse.json({ ok: false, error: 'reason_required' }, { status: 400 });
   }
+  if (reason.length > 1000) {
+    return NextResponse.json({ ok: false, error: 'reason_too_long' }, { status: 400 });
+  }
   // S2: Ban is an admin-only action — reviewers can approve/reject but not ban.
   if (action === 'ban' && reviewer.role !== 'admin') {
     return NextResponse.json({ ok: false, error: 'admin_role_required_for_ban' }, { status: 403 });

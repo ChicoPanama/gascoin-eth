@@ -99,6 +99,26 @@ class QueryBuilder {
     this.filters.push((r) => re.test(String(r[col] || '')));
     return this;
   }
+  contains(col: string, val: any) {
+    // JSON containment check — col holds a JSON object; val is the expected partial match
+    this.filters.push((r) => {
+      const cell = r[col];
+      if (!cell || typeof cell !== 'object') return false;
+      return Object.entries(val).every(([k, v]) => cell[k] === v);
+    });
+    return this;
+  }
+
+  overlaps(col: string, vals: any[]) {
+    // Array overlap — col holds an array; vals are the elements to check for overlap
+    this.filters.push((r) => {
+      const cell = r[col];
+      if (!Array.isArray(cell)) return false;
+      return vals.some((v) => cell.includes(v));
+    });
+    return this;
+  }
+
   or(expr: string) {
     // Simple OR parser: "col1.eq.val1,col2.eq.val2"
     const parts = expr.split(',').map((p) => {

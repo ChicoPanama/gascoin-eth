@@ -1,10 +1,16 @@
 import { NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '../../../../lib/supabase';
 import { isValidSolanaAddress } from '../../../../lib/validate-wallet';
+import { checkRateLimit } from '../../../../lib/rate-limit';
+import { getClientIp } from '../../../../lib/ip';
 
 // GET — fetch complete engagement data for a wallet
 // Queries scored_tweets (per-tweet metrics) + engagement_points (all point sources)
 export async function GET(req: Request) {
+  const rl = await checkRateLimit(`pub_engagement:${getClientIp(req)}`, 20, 60);
+  if (!rl.ok) {
+    return NextResponse.json({ error: 'rate_limited' }, { status: 429 });
+  }
   const { searchParams } = new URL(req.url);
   const wallet = searchParams.get('wallet');
 

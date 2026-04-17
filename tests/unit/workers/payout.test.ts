@@ -18,6 +18,35 @@ vi.mock('@/lib/idempotency', () => ({
   resolveIdempotencyKey: vi.fn().mockReturnValue('idem-key-1'),
 }));
 
+// Mocks required by the real processQueuedPayout implementation
+vi.mock('@/lib/integrations/solana', () => ({
+  hasMinimumGascoin: vi.fn().mockResolvedValue({ ok: true, tokenBalance: 100_000 }),
+  sendSolPayout: vi.fn().mockResolvedValue({ ok: true, txHash: 'tx-race-test-001' }),
+}));
+
+vi.mock('@/lib/token-tiers', () => ({
+  getTierForBalance: vi.fn().mockReturnValue({ slug: 'commuter', max_sol_refund: 0.1 }),
+}));
+
+vi.mock('@/lib/integrations/x', () => ({
+  verifyTweetProof: vi.fn().mockResolvedValue({ ok: true }),
+  getFollowerCount: vi.fn().mockResolvedValue(500),
+}));
+
+vi.mock('@/lib/x-api', () => ({
+  getUserByUsername: vi.fn().mockResolvedValue({ user: null }),
+}));
+
+vi.mock('@/lib/account-quality', () => ({
+  scoreAccountQuality: vi.fn().mockReturnValue({ passed: true, score: 80, flags: [] }),
+}));
+
+vi.mock('@/lib/mem0', () => ({
+  getCachedFlags: vi.fn().mockResolvedValue(null),
+  addMemory: vi.fn().mockResolvedValue(undefined),
+  writePayoutEvent: vi.fn().mockResolvedValue(undefined),
+}));
+
 // ── Import handler after mocks ────────────────────────────────────────────────
 
 import { POST } from '@/app/api/workers/payout/route';
@@ -126,5 +155,129 @@ describe('POST /api/workers/payout', () => {
     const json = await res.json();
     expect(json.ok).toBe(false);
     expect(json.error).toBe('min_gascoin_not_met');
+  });
+});
+
+// ── T8: Double-payout race condition ─────────────────────────────────────────
+// Two sequential processQueuedPayout calls for the same claim_id must result
+// in exactly one payout. The payout_jobs.status='paid' guard short-circuits
+// the second call before sendSolPayout is ever invoked.
+//
+// Note: In a true multi-process scenario, concurrent callers could both pass
+// the status check before either writes 'paid' — this is a known gap requiring
+// a DB-level advisory lock or SELECT FOR UPDATE. These tests verify the guard
+// works for the sequential/retry case (most common in production).
+
+describe('T8 — double-payout race: processQueuedPayout idempotency guard', () => {
+  let realProcessQueuedPayout: typeof processQueuedPayout;
+  let sendSolPayout: ReturnType<typeof vi.fn>;
+
+  beforeEach(async () => {
+    mockStore.clear();
+    vi.clearAllMocks();
+
+    // Grab the real function (bypasses the vi.mock above for the route handler)
+    const module = await vi.importActual<typeof import('@/lib/payout-worker')>('@/lib/payout-worker');
+    realProcessQueuedPayout = module.processQueuedPayout;
+
+    // Get the mocked sendSolPayout reference
+    const solana = await import('@/lib/integrations/solana');
+    sendSolPayout = vi.mocked(solana.sendSolPayout);
+  });
+
+  it('second call to already-paid claim returns ok:true reused:true without re-sending (idempotency guard)', async () => {
+    // Pre-seed a paid job — simulates the state after first payout succeeded
+    mockStore.seed('payout_jobs', [
+      {
+        id: 'job-paid-1',
+        claim_id: 'claim-already-paid',
+        wallet: 'walletPaid',
+        amount_sol: 0.01,
+        status: 'paid',
+        attempts: 1,
+        max_attempts: 5,
+        next_retry_at: null,
+        last_error: null,
+      },
+    ]);
+
+    mockStore.seed('claims', [
+      {
+        id: 'claim-already-paid',
+        user_id: 'user-paid',
+        status: 'paid',
+        tweet_url: null,
+      },
+    ]);
+
+    mockStore.seed('payouts', [
+      {
+        id: 'payout-existing',
+        claim_id: 'claim-already-paid',
+        wallet: 'walletPaid',
+        tx_hash: 'tx-already-done-abc',
+        status: 'paid',
+      },
+    ]);
+
+    const result = await realProcessQueuedPayout('claim-already-paid');
+
+    // Idempotency guard: must NOT send another payout
+    expect(sendSolPayout).not.toHaveBeenCalled();
+
+    // Must return the existing tx hash — idempotent result
+    expect(result.ok).toBe(true);
+    expect((result as any).reused).toBe(true);
+    expect((result as any).txHash).toBe('tx-already-done-abc');
+  });
+
+  it('sequential re-invocation: first call succeeds, second call is idempotent', async () => {
+    // Seed an approved claim and queued job
+    mockStore.seed('payout_jobs', [
+      {
+        id: 'job-seq-1',
+        claim_id: 'claim-seq-1',
+        wallet: 'walletSeqTest',
+        amount_sol: 0.01,
+        status: 'queued',
+        attempts: 0,
+        max_attempts: 5,
+        next_retry_at: null,
+        last_error: null,
+      },
+    ]);
+
+    mockStore.seed('claims', [
+      {
+        id: 'claim-seq-1',
+        user_id: 'user-seq-1',
+        status: 'approved',
+        tweet_url: null,
+      },
+    ]);
+
+    mockStore.seed('payouts', []);
+
+    // First call: should succeed and dispatch the payout
+    const result1 = await realProcessQueuedPayout('claim-seq-1');
+    expect(result1.ok).toBe(true);
+    expect((result1 as any).reused).toBe(false);
+    expect(sendSolPayout).toHaveBeenCalledTimes(1);
+
+    // After first call, payout_jobs.status is now 'paid' in mockStore
+    const jobAfterFirst = mockStore.getTable('payout_jobs').find((j) => j.claim_id === 'claim-seq-1');
+    expect(jobAfterFirst?.status).toBe('paid');
+
+    // Second call (retry scenario): payout_jobs.status='paid' guard fires
+    const result2 = await realProcessQueuedPayout('claim-seq-1');
+    expect(result2.ok).toBe(true);
+    expect((result2 as any).reused).toBe(true);
+
+    // sendSolPayout must still have been called only once total
+    expect(sendSolPayout).toHaveBeenCalledTimes(1);
+
+    // Only one payout row should exist
+    const payouts = mockStore.getTable('payouts');
+    expect(payouts).toHaveLength(1);
   });
 });

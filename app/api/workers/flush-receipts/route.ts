@@ -49,10 +49,10 @@ export async function POST(req: Request) {
         continue;
       }
 
-      // Nullify storage path in DB
+      // Nullify storage path and mark as redacted (D1: is_image_redacted was never set)
       await supabase
         .from('claim_receipts')
-        .update({ storage_path_private: null })
+        .update({ storage_path_private: null, is_image_redacted: true })
         .eq('id', receipt.id);
 
       deleted++;

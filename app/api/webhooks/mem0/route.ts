@@ -20,6 +20,7 @@
 
 import { NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '../../../../lib/supabase';
+import { cacheGet, cacheSet } from '../../../../lib/cache';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -86,12 +87,35 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: false, error: 'unauthorized' }, { status: 401 });
   }
 
+  // S16: Require JSON content-type
+  const ct = req.headers.get('content-type') || '';
+  if (!ct.includes('application/json')) {
+    return NextResponse.json({ ok: false, error: 'content_type_must_be_json' }, { status: 415 });
+  }
+
+  // S14: Reject oversized payloads (1 MB hard limit)
+  const contentLength = Number(req.headers.get('content-length') || 0);
+  if (contentLength > 1_048_576) {
+    return NextResponse.json({ ok: false, error: 'payload_too_large' }, { status: 413 });
+  }
+
   // Parse payload
   let payload: Mem0WebhookPayload;
   try {
     payload = (await req.json()) as Mem0WebhookPayload;
   } catch {
     return NextResponse.json({ ok: false, error: 'invalid_json' }, { status: 400 });
+  }
+
+  // S15: Idempotency — deduplicate on webhook_id using Redis (1-hour window)
+  const webhookId = payload.webhook_id;
+  if (webhookId) {
+    const dedupKey = `mem0_wh:${webhookId}`;
+    const alreadySeen = await cacheGet<string>(dedupKey);
+    if (alreadySeen) {
+      return NextResponse.json({ ok: true, acknowledged: payload.event_type || 'unknown', duplicate: true });
+    }
+    await cacheSet(dedupKey, '1', 3600);
   }
 
   const eventType = payload.event_type || 'unknown';

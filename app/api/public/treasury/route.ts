@@ -1,9 +1,15 @@
 import { NextResponse } from 'next/server';
 import { getTreasuryBalances } from '../../../../lib/integrations/solana';
+import { checkRateLimit } from '../../../../lib/rate-limit';
+import { getClientIp } from '../../../../lib/ip';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET() {
+export async function GET(req: Request) {
+  const rl = await checkRateLimit(`pub_treasury:${getClientIp(req)}`, 10, 60);
+  if (!rl.ok) {
+    return NextResponse.json({ error: 'rate_limited' }, { status: 429 });
+  }
   try {
     const t = await getTreasuryBalances();
     const avgPayoutSol = 0.05;
