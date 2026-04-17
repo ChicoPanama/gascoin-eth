@@ -185,7 +185,7 @@ export function buildChatTools(sessionWallet: string) {
           const supabase = getSupabaseAdmin();
           const { data: claims } = await supabase
             .from('claims')
-            .select('id, status, created_at, decision_reason, amount_usd, risk_score')
+            .select('id, status, created_at, decision_reason, amount_usd')
             .eq('wallet', target)
             .order('created_at', { ascending: false })
             .limit(1);
@@ -196,7 +196,7 @@ export function buildChatTools(sessionWallet: string) {
 
           const claim = claims[0] as {
             id: string; status: string; created_at: string;
-            decision_reason?: string; amount_usd?: number; risk_score?: number;
+            decision_reason?: string; amount_usd?: number;
           };
 
           const { data: gates } = await supabase

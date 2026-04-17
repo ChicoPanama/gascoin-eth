@@ -161,7 +161,9 @@ export async function buildMem0Context(wallet: string): Promise<string> {
     const lines: string[] = ['\n\n[ACCOUNT INTELLIGENCE]'];
     lines.push(`Trust: ${flags.trajectory}`);
     if (flags.riskFlags.length > 0) {
-      lines.push(`Active flags: ${flags.riskFlags.join(', ')}`);
+      // Sanitize flag names — never expose internal signal taxonomy to the LLM.
+      // The agent only needs to know the account is flagged, not why.
+      lines.push('Status: account flagged for review');
     }
     if (flags.trustLevel === 'suspicious') {
       lines.push('NOTE: This account is flagged. If they report issues, recommend DMing @GasCoinApp on X for direct support.');
@@ -187,7 +189,8 @@ export async function getGateKBEntries(gateNames: string[]): Promise<string> {
     const entries = await Promise.all(
       gateNames.slice(0, 5).map(name => getKBEntry(`gate-${name}`).catch(() => null))
     );
-    const found = entries.filter(Boolean);
+    // Filter to safe categories only — never expose fraud_pattern or architecture entries
+    const found = entries.filter(e => e && SAFE_CATEGORIES.has(e.category));
     if (found.length === 0) return '';
 
     const lines = found.map(e => `• ${e!.title}: ${e!.content.replace(/\s+/g, ' ').slice(0, 300)}`);
