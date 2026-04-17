@@ -18,6 +18,7 @@ import {
   MINI_SYSTEM_PROMPT,
 } from '../../../lib/chat-intent';
 import { buildChatTools } from '../../../lib/chat-tools';
+import { getChatCache, setChatCache } from '../../../lib/chat-cache';
 
 export const runtime = 'nodejs';
 export const maxDuration = 30;
@@ -493,19 +494,31 @@ export async function POST(req: Request) {
   );
   const tier = classifyTier(lastUserText, priorExchanges);
 
-  // ── Tier 1: Simple — Haiku, mini prompt, no dynamic context ──────────
+  // ── Tier 0.5: Redis response cache — zero LLM tokens on hit ──────────
+  // Only check cache for non-personalized tiers (1 and wallet-less 2).
+  // Tier 3 always bypasses — tool responses are real-time data.
+  const isCacheable = tier === 1 || (tier === 2 && !wallet);
+  if (isCacheable) {
+    const cached = await getChatCache(lastUserText);
+    if (cached) return faqStreamResponse(cached);
+  }
+
+  // ── Tier 1: Simple — light model, mini prompt, no dynamic context ─────
   if (tier === 1) {
     const result = streamText({
       model: TIER1_MODEL,
       system: MINI_SYSTEM_PROMPT,
       messages,
       maxOutputTokens: 180,
-      onError: ({ error }) => console.error('[chat/haiku] error', error),
+      onError: ({ error }) => console.error('[chat/t1] error', error),
+      onFinish: ({ text }) => {
+        if (text) setChatCache(lastUserText, text, 1).catch(() => {});
+      },
     });
     return result.toUIMessageStreamResponse();
   }
 
-  // ── Tier 2 + 3: Sonnet — fetch context in parallel ───────────────────
+  // ── Tier 2 + 3: Full model — fetch context in parallel ───────────────
   const [kbContext, walletContext, memoryContext] = await Promise.all([
     buildKBContext(lastUserText),
     wallet ? buildWalletContext(wallet) : Promise.resolve(''),
@@ -523,10 +536,14 @@ export async function POST(req: Request) {
     messages,
     ...(tools && { tools }),
     maxOutputTokens: tier === 3 ? 500 : 400,
-    onError: ({ error }) => console.error('[chat/sonnet] error', error),
+    onError: ({ error }) => console.error('[chat/t23] error', error),
     onFinish: ({ text }) => {
       if (wallet && lastUserText && text) {
         saveConvMemory(wallet, lastUserText, text).catch(() => {});
+      }
+      // Cache Tier 2 responses when there's no wallet context (not personalized)
+      if (tier === 2 && !wallet && text) {
+        setChatCache(lastUserText, text, 2).catch(() => {});
       }
     },
   });
