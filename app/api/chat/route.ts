@@ -7,6 +7,7 @@ import { getClientIp } from '../../../lib/ip';
 import {
   buildKBContext,
   buildWalletContext,
+  buildMem0Context,
   loadConvMemory,
   saveConvMemory,
   extractLastUserText,
@@ -19,6 +20,7 @@ import {
 } from '../../../lib/chat-intent';
 import { buildChatTools } from '../../../lib/chat-tools';
 import { getChatCache, setChatCache } from '../../../lib/chat-cache';
+import { addMemory, MEM0_CATEGORIES, MEM0_APPS } from '../../../lib/mem0';
 
 export const runtime = 'nodejs';
 export const maxDuration = 60;
@@ -537,13 +539,14 @@ export async function POST(req: Request) {
   }
 
   // ── Tier 2 + 3: Full model — fetch context in parallel ───────────────
-  const [kbContext, walletContext, memoryContext] = await Promise.all([
+  const [kbContext, walletContext, memoryContext, mem0Context] = await Promise.all([
     buildKBContext(lastUserText),
     wallet ? buildWalletContext(wallet) : Promise.resolve(''),
     wallet ? loadConvMemory(wallet) : Promise.resolve(''),
+    wallet ? buildMem0Context(wallet) : Promise.resolve(''),
   ]);
 
-  const dynamicSystem = SYSTEM_PROMPT + memoryContext + walletContext + kbContext;
+  const dynamicSystem = SYSTEM_PROMPT + memoryContext + walletContext + mem0Context + kbContext;
 
   // Tier 3: include tools only when intent signals tool use
   const tools = tier === 3 ? buildChatTools(wallet) : undefined;
@@ -558,6 +561,19 @@ export async function POST(req: Request) {
     onFinish: ({ text }) => {
       if (wallet && lastUserText && text) {
         saveConvMemory(wallet, lastUserText, text).catch(() => {});
+
+        // Persist notable support interactions to mem0 so Claude oversight
+        // sees "user reported Gate X failure" or "user expressed frustration"
+        // during their next claim review. Fire-and-forget.
+        const isGateIssue = /gate.{0,5}\d|reject|fail|block/i.test(lastUserText);
+        const isFrustrated = /not.{0,5}work|broken|give.{0,5}up|still.{0,5}(fail|same)/i.test(lastUserText);
+        if (isGateIssue || isFrustrated) {
+          const tag = isFrustrated ? 'support:frustrated' : 'support:gate_issue';
+          addMemory('wallet', wallet,
+            `${tag} | Q: ${lastUserText.slice(0, 100)} | A: ${text.slice(0, 150)}`,
+            { category: MEM0_CATEGORIES.MISC, appId: MEM0_APPS.SUBMIT },
+          ).catch(() => {});
+        }
       }
       // Cache Tier 2 responses when there's no wallet context (not personalized)
       if (tier === 2 && !wallet && text) {

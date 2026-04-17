@@ -16,6 +16,7 @@ import { z } from 'zod';
 import { getSupabaseAdmin } from './supabase';
 import { getTweet } from './x-api';
 import { getTokenBalanceServer } from './token-balance';
+import { getGateKBEntries } from './chat-context';
 
 // Tier thresholds (mirrors lib/policy.ts GATE_DEFS + evaluateClaim logic)
 const TIER_THRESHOLDS = [
@@ -206,6 +207,11 @@ export function buildChatTools(sessionWallet: string) {
           const allGates = (gates || []) as Array<{ gate_name: string; passed: boolean; reason_code?: string }>;
           const failedGates = allGates.filter(g => !g.passed);
 
+          // Fetch targeted fix instructions from KB for each failed gate
+          const kbFixes = failedGates.length > 0
+            ? await getGateKBEntries(failedGates.map(g => g.gate_name)).catch(() => '')
+            : '';
+
           return {
             status: claim.status,
             submittedAt: new Date(claim.created_at).toLocaleString('en-US', {
@@ -219,6 +225,7 @@ export function buildChatTools(sessionWallet: string) {
               reason: g.reason_code || 'gate failed',
             })),
             allPassed: failedGates.length === 0,
+            ...(kbFixes ? { fixInstructions: kbFixes } : {}),
           };
         } catch (err) {
           console.error('[chat-tools] getClaimStatus error', err);

@@ -11,13 +11,15 @@
  * excluded (SAFE_CATEGORIES filter).
  */
 
-import { searchKB } from './knowledge-base';
+import { searchKB, getKBEntry } from './knowledge-base';
 import { cacheGet, cacheSet } from './cache';
 import { getSupabaseAdmin } from './supabase';
+import { getCachedFlags, type CachedFlags } from './mem0';
 
 // KB categories safe to surface in the user-facing chat agent.
+// Includes treasury so the agent can answer payout queue questions.
 // Excludes: fraud_pattern, architecture, intelligence_report (contain detection internals).
-const SAFE_CATEGORIES = new Set(['policy', 'gate_rule', 'decision']);
+const SAFE_CATEGORIES = new Set(['policy', 'gate_rule', 'decision', 'treasury']);
 
 // ── 1. RAG ────────────────────────────────────────────────────────────────────
 
@@ -135,6 +137,63 @@ export async function saveConvMemory(
     await cacheSet(`chat:conv:${wallet}`, updated, MEMORY_TTL);
   } catch {
     // best-effort — never block
+  }
+}
+
+// ── 4. mem0 entity profile ────────────────────────────────────────────────────
+
+/**
+ * Inject user's mem0 profile summary (trust trajectory, active flags) into
+ * the system prompt. Uses getCachedFlags which reads from Redis (15-min TTL,
+ * populated by the intelligence aggregator worker). Zero mem0 API calls.
+ *
+ * Never exposes fraud algorithm internals — only surfaces:
+ *   - Trust trajectory (improving/stable/declining/new)
+ *   - Active risk flags (ban state, ring flags) — so the agent knows
+ *     to escalate to DM support instead of troubleshooting a banned user
+ */
+export async function buildMem0Context(wallet: string): Promise<string> {
+  if (!wallet) return '';
+  try {
+    const flags: CachedFlags | null = await getCachedFlags(wallet);
+    if (!flags) return ''; // no cached profile = new user or cold cache
+
+    const lines: string[] = ['\n\n[ACCOUNT INTELLIGENCE]'];
+    lines.push(`Trust: ${flags.trajectory}`);
+    if (flags.riskFlags.length > 0) {
+      lines.push(`Active flags: ${flags.riskFlags.join(', ')}`);
+    }
+    if (flags.trustLevel === 'suspicious') {
+      lines.push('NOTE: This account is flagged. If they report issues, recommend DMing @GasCoinApp on X for direct support.');
+    }
+    return lines.join('\n');
+  } catch {
+    return '';
+  }
+}
+
+// ── 5. Gate-specific KB enrichment ────────────────────────────────────────────
+
+/**
+ * Fetch targeted KB entries for specific failed gates.
+ * Used by the getClaimStatus tool to inject precise fix instructions
+ * into the tool result rather than relying on the model's static knowledge.
+ */
+export async function getGateKBEntries(gateNames: string[]): Promise<string> {
+  if (gateNames.length === 0) return '';
+  try {
+    // Gate names in DB are like "wallet_chars", "receipt_hashtag", etc.
+    // KB slugs follow the pattern "gate-{name}" or just the gate name.
+    const entries = await Promise.all(
+      gateNames.slice(0, 5).map(name => getKBEntry(`gate-${name}`).catch(() => null))
+    );
+    const found = entries.filter(Boolean);
+    if (found.length === 0) return '';
+
+    const lines = found.map(e => `• ${e!.title}: ${e!.content.replace(/\s+/g, ' ').slice(0, 300)}`);
+    return '\n\n[FIX INSTRUCTIONS]\n' + lines.join('\n');
+  } catch {
+    return '';
   }
 }
 
