@@ -66,7 +66,9 @@ export async function verifyPrivySession(
   const token = parseBearer(authHeader) || parseCookieToken(cookieHeader);
   if (!token) return null;
 
-  if (process.env.DEV_ALLOW_MOCK_AUTH === 'true' && token === 'mock-dev-token') {
+  // S1: Mock auth is a development-only escape hatch. Refuse in production even
+  // if DEV_ALLOW_MOCK_AUTH is accidentally set to 'true' on the Vercel project.
+  if (process.env.DEV_ALLOW_MOCK_AUTH === 'true' && process.env.NODE_ENV !== 'production' && token === 'mock-dev-token') {
     return {
       xId: 'x_mock_001',
       xHandle: 'mockuser',

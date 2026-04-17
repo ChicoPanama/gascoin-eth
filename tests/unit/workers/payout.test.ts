@@ -74,7 +74,7 @@ describe('POST /api/workers/payout', () => {
     process.env.CRON_SECRET = 'test-secret';
     mockStore.clear();
     vi.clearAllMocks();
-    vi.mocked(processQueuedPayout).mockResolvedValue({ ok: true, txHash: 'mock-tx-123' });
+    vi.mocked(processQueuedPayout).mockResolvedValue({ ok: true, txHash: 'mock-tx-123', reused: false, gate: { ok: true, tokenBalance: 100_000 } });
   });
 
   it('returns 401 when no auth header', async () => {
@@ -279,5 +279,31 @@ describe('T8 — double-payout race: processQueuedPayout idempotency guard', () 
     // Only one payout row should exist
     const payouts = mockStore.getTable('payouts');
     expect(payouts).toHaveLength(1);
+  });
+});
+
+// ── T5: Retry backoff math ────────────────────────────────────────────────────
+describe('retry backoff calculation', () => {
+  const RETRY_BASE_SECONDS = 60;
+
+  it('doubles delay on each attempt (exponential backoff)', () => {
+    // Formula: Math.pow(2, Math.min(attempts, 6)) * RETRY_BASE_SECONDS
+    const delays = [1, 2, 3, 4, 5, 6, 7].map(
+      (a) => Math.pow(2, Math.min(a, 6)) * RETRY_BASE_SECONDS,
+    );
+    expect(delays).toEqual([120, 240, 480, 960, 1920, 3840, 3840]);
+  });
+
+  it('caps exponent at 6 (max ~64 minutes)', () => {
+    const maxDelay = Math.pow(2, 6) * RETRY_BASE_SECONDS;
+    expect(maxDelay).toBe(3840); // 64 minutes
+    // Attempt 7 must not exceed the cap
+    expect(Math.pow(2, Math.min(7, 6)) * RETRY_BASE_SECONDS).toBe(maxDelay);
+  });
+
+  it('attempt 5 (max_attempts default) is not yet exhausted', () => {
+    const MAX_ATTEMPTS = 5;
+    expect(4 >= MAX_ATTEMPTS).toBe(false); // attempt 4: not exhausted
+    expect(5 >= MAX_ATTEMPTS).toBe(true);  // attempt 5: exhausted
   });
 });

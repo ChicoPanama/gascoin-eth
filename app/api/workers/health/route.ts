@@ -23,6 +23,7 @@
 
 import { NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '../../../../lib/supabase';
+import { validateGascoinMint } from '../../../../lib/integrations/solana';
 
 // Expected run intervals in seconds (sourced from vercel.json cron schedules)
 const WORKERS: Array<{
@@ -111,9 +112,24 @@ export async function GET() {
   const errorCount = workers.filter((w) => w.status === 'error').length;
   const noDataCount = workers.filter((w) => w.status === 'no_data').length;
 
+  // T1: Flag if live payouts are disabled — DRYRUN mode silently marks claims
+  // paid without transferring SOL. Surface this in the health feed.
+  const livePayoutEnabled = process.env.ENABLE_LIVE_PAYOUT === 'true';
+
+  // C4: Validate GASCOIN_MINT format at health-check time.
+  const mintCheck = validateGascoinMint();
+
   return NextResponse.json({
     ok: true,
     checked_at: new Date().toISOString(),
+    config: {
+      live_payout_enabled: livePayoutEnabled,
+      gascoin_mint_valid: mintCheck.ok,
+      gascoin_mint_error: mintCheck.error ?? null,
+      mock_auth_guard: process.env.NODE_ENV === 'production'
+        ? 'active — DEV_ALLOW_MOCK_AUTH is blocked in production'
+        : process.env.DEV_ALLOW_MOCK_AUTH === 'true' ? 'mock_auth_enabled (dev only)' : 'ok',
+    },
     summary: {
       total: workers.length,
       ok: workers.filter((w) => w.status === 'ok').length,

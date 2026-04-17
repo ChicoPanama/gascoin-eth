@@ -11,6 +11,31 @@ function connection() {
   return new Connection(getRpcUrl(), 'confirmed');
 }
 
+// C4: GASCOIN_MINT must be a valid base58 Solana public key (32–44 chars, base58 charset).
+// A wrong mint silently makes all tier gates check the wrong token.
+export function validateGascoinMint(): { ok: boolean; error?: string } {
+  const mint = process.env.GASCOIN_MINT;
+  if (!mint) return { ok: false, error: 'GASCOIN_MINT not set' };
+  if (!/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(mint)) {
+    return { ok: false, error: `GASCOIN_MINT looks invalid: ${mint.slice(0, 8)}...` };
+  }
+  try {
+    new PublicKey(mint);
+    return { ok: true };
+  } catch {
+    return { ok: false, error: `GASCOIN_MINT is not a valid Solana public key` };
+  }
+}
+
+// T4: TREASURY_PRIVATE_KEY_B58 rotation runbook:
+//   1. Generate new keypair: `solana-keygen new --no-passphrase -o new-treasury.json`
+//   2. Fund new wallet with ≥1 SOL before switching
+//   3. Set TREASURY_PRIVATE_KEY_B58 + GASCOIN_TREASURY_WALLET on Vercel (production)
+//   4. Verify keys match: decoded keypair pubkey === GASCOIN_TREASURY_WALLET
+//   5. Redeploy — payout worker checks mismatch at line 111 and returns error before any tx
+//   6. Transfer remaining SOL from old wallet to new
+//   7. Revoke/archive old private key material
+
 async function fetchWalletGascoinBalance(wallet: string): Promise<number> {
   const mint = process.env.GASCOIN_MINT;
   if (!mint) return 0;
