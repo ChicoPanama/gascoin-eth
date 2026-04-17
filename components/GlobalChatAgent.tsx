@@ -24,9 +24,6 @@ const HIDDEN_PREFIXES = ['/admin'];
 export function GlobalChatAgent() {
   const pathname = usePathname();
 
-  // Kill switch — set NEXT_PUBLIC_CHAT_ENABLED=true to re-enable
-  if (process.env.NEXT_PUBLIC_CHAT_ENABLED !== 'true') return null;
-
   if (HIDDEN_PREFIXES.some(p => pathname.startsWith(p))) return null;
 
   // Derive pageHint from the first path segment
