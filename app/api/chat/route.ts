@@ -68,11 +68,13 @@ Using a black pen, write TWO things clearly on the physical receipt:
   (b) The hashtag #gascoin
 Write both large enough to read in a photo. These are scanned by OCR — if illegible, your claim will be rejected.
 
-STEP 3 — TWEET WITH PROOF
-Take a clear, flat, well-lit photo of the receipt (full receipt visible, no cropping, no angle). Post it publicly on X (Twitter) from your verified account. Your tweet must include:
-  - Hashtag #gascoin (also recommended: cashtag $GASCOIN — X shows a live price chart for cashtag posts)
-  - Tag @GasCoinApp
-Keep this tweet live and your account public until your SOL arrives. The system re-checks your tweet before dispatching payout.
+STEP 3 — TWEET WITH PROOF (go viral for max points!)
+Post publicly on X from your verified account. Your tweet must include #gascoin (or $GASCOIN) and tag @GasCoinApp. But HOW you post matters for points:
+  BEST: Record an original video at the pump showing your receipt — 3x points, maximum reach
+  GOOD: Take an original photo of the receipt — 1.5x points
+  OK: Write a text post telling your refund story — 1.0x points
+  AVOID: Reposting someone else's content — only 0.1x points, X kills your reach
+Keep this tweet live and your account public until your SOL arrives. The system re-checks before payout.
 
 STEP 4 — SUBMIT AT GASCOIN.APP/SUBMIT
   1. Sign in with your X (Twitter) account
@@ -334,63 +336,133 @@ AMOUNT MISMATCH (Gate 16)
   Fix: Enter the exact amount printed on your receipt. Don't estimate or round.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-POINTS, STREAKS & LEADERBOARD
+HOW TO GO VIRAL — TWEET STRATEGY (from gascoin.app/points)
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Points are earned alongside SOL refunds — they're separate rewards.
+X rewards original content — so does GASCOIN. Your tweet earns points based on what TYPE of content it is:
 
-EARNING POINTS:
-  Approved submissions: 1,000 base points each
-  Submission streaks: submit consistently across back-to-back 30-day windows to earn bonuses (up to +2,500 per submission at a 5+ window streak)
-  Tweet engagement: points for likes, retweets, replies, quote tweets, bookmarks on your #gascoin tweets — tracked every 6 hours. Daily and monthly caps apply.
-  Token holdings: daily points based on your tier:
-    Standard: 100 pts/day
-    Commuter: 500 pts/day
-    Road Warrior: 1,500 pts/day
-    Fleet: 5,000 pts/day
-  Referrals: 100 pts when a referred user gets their first approval, plus 2% of all their future points (capped per month)
+CONTENT TYPE MULTIPLIERS:
+  Original video (record yourself, show the pump, tell your story):  3.0x points
+  Original image (your own photo):                                   1.5x points
+  Text post (your own words):                                        1.0x points
+  Quote tweet:                                                        0.5x points
+  External link:                                                      0.3x points (X deprioritizes these)
+  Repost/retweet someone else's content:                              0.1x points (90% impression loss)
 
-LEADERBOARD: Weighted toward token holdings (the biggest factor), referral activity, and platform engagement. Not purely based on SOL refunds. See gascoin.app/leaderboard.
+DO — Maximum Reach & Points:
+  Record original video with your voiceover (3x points)
+  Share your real gas receipt story at the pump
+  Create original images and photos (1.5x)
+  Write genuine text posts with your own take
+
+DON'T — Crushed by the Algorithm:
+  Repost other people's content (0.1x, 90% impression loss)
+  Cross-post from other platforms
+  Paste external links (0.3x, deprioritized)
+  Spam hashtags on unrelated content (AI flags it)
+  Use clickbait (X assigns permanent deductions)
+
+X is building tools to identify original creators and reward them with revenue sharing. Create original #gascoin content and you're building toward X payouts too.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-REFERRAL SYSTEM
+POINTS SYSTEM — COMPLETE REFERENCE (from gascoin.app/points)
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-You need at least 1 approved submission to generate your referral link at gascoin.app/wallet.
+Points are earned alongside SOL refunds — they're separate rewards that drive your leaderboard rank.
+
+ENGAGEMENT POINTS (from your #gascoin tweets):
+  Quote tweet:  500 pts
+  Reply:        300 pts
+  Bookmark:     250 pts
+  Retweet:       50 pts
+  Like:          25 pts
+  Impression:     1 pt
+  Tracked every 6 hours. We weight engagement that X rewards — replies, bookmarks, and quotes earn the most.
+
+CAPS:
+  5,000 pts max per tweet
+  10,000 pts max per day
+  50,000 pts max per month
+  Consistent daily content beats one viral moment.
+
+OTHER WAYS TO EARN:
+  Approved gas receipt submission:  1,000 pts
+  Submission streak (per 30-day window, up to 5x):  500 pts per window
+  Referral welcome bonus:  100 pts
+  Referral passive income:  2% of referred users' points (up to 10,000/month)
+  Daily token holdings bonus:
+    Standard: 100 pts/day · Commuter: 500 pts/day · Road Warrior: 1,500 pts/day · Fleet: 5,000 pts/day
+
+QUALITY & TRUST:
+  AI scores your tweet quality. Genuine original content = up to 1.5x bonus. Spam/bot engagement = 0.1–0.3x penalty. Your wallet builds a trust score over time — veterans with clean records earn 1.2x on everything.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+LEADERBOARD RANKING (from gascoin.app/points)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Your leaderboard rank is a composite score weighted toward long-term commitment:
+  Holdings bonus points (daily reward for holding GASCOIN):  55%
+  Engagement points (tweets, submissions, streaks, referral passive):  25%
+  Referral points (welcome bonuses from verified conversions):  20%
+
+Holding GASCOIN is the strongest signal. Whales who also create content and refer users are untouchable on the leaderboard.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+TOKEN TIER PERKS (from gascoin.app/perks)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+STANDARD (1+ token):       0.10 SOL max refund · 1×/week · Queue priority #4
+COMMUTER (100K+ tokens):   0.25 SOL max refund · 1×/week · Queue priority #3
+ROAD WARRIOR (5M+ tokens): 0.50 SOL max refund · 2×/week · Queue priority #2 · Featured on community feed
+FLEET (10M+ tokens):       1.0 SOL max refund  · 4×/week · Queue priority #1 · Always featured · Early access to new features
+
+Buy tokens on Jupiter (jup.ag), Raydium, or Meteora.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+REFERRAL SYSTEM (from gascoin.app/referral)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+You need at least 1 approved submission to generate your referral link at gascoin.app/referral.
 
 WHAT YOU EARN:
   100 points when your referred user gets their first approved claim
-  2% of all points your referred users earn going forward (monthly cap applies)
+  2% of all points your referred users earn going forward (up to 10,000 pts/month)
 
 RULES:
-  No self-referrals
-  Referred wallet must be at least 7 days old before the welcome bonus counts
+  No self-referrals (detected and blocked)
+  Referred wallet must be at least 7 days old
   Max 20 successful referrals per 30-day window
-  Max 2,000 welcome points from referrals per 30 days
+  7-day attribution window from click to conversion
+  Refer real creators, not bots — quality over quantity
+
+Your referral dashboard shows: clicks, conversions, conversion rate, monthly cap meters, and skip reasons if a referral didn't count.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 PAYOUT DETAILS
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-SOL is sent directly to the Solana wallet you connected at submission. The exact refund amount is set by admin at approval time, within your tier's cap. No fixed USD amounts are published because SOL price changes daily.
+SOL refund caps per tier: Standard 0.10 SOL · Commuter 0.25 SOL · Road Warrior 0.50 SOL · Fleet 1.0 SOL.
+SOL is sent directly to the wallet you connected at submission.
 
 If approved but not yet paid: the treasury may be queued. Your claim auto-retries every 6 hours. Status shows "pending queue" at gascoin.app/wallet. No action needed.
 
-Once paid: the Wallet Tracker shows a clickable Solscan transaction link where you can verify the exact amount and timestamp on-chain.
+Once paid: the Wallet Tracker shows a clickable Solscan transaction link to verify on-chain.
 
-SELLING SOL: SOL can be swapped to USD on Coinbase, Kraken, Binance, or any major exchange. It's real cryptocurrency.
+SELLING SOL: Swap to USD on Coinbase, Kraken, Binance, Bybit, OKX, Bitget, Gate.io, MEXC, or Moonpay.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+COMMUNITY FEED (gascoin.app/community)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Live feed of approved receipts from all users. Shows: gas station name, city/state, refund amount. Filter by all claims or your own. Sort newest or oldest. Stats at top: total verified receipts, total USD paid, countries represented, average refund.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 SITE PAGES — WHAT EACH ONE IS FOR
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-gascoin.app/submit       — The submission portal. 5-step claim flow. Start here.
+gascoin.app/submit       — The submission portal. 5-step claim flow.
 gascoin.app/wallet       — Wallet Tracker. Claim status, cooldown timer, transaction history, referral link.
-gascoin.app/how-it-works — Full 11-step visual guide from Phantom setup through cash-out.
-gascoin.app/gates        — Every gate listed with live pass rates, timing stats, and fix guides. Pre-submission checklist.
+gascoin.app/how-it-works — Full 11-step visual guide from wallet setup through cash-out on exchanges.
+gascoin.app/gates        — Every gate with live pass rates, timing stats, fix guides, pre-submission checklist.
 gascoin.app/docs         — Full documentation (overview, submission, verification, technology, security).
-gascoin.app/leaderboard  — Rankings by earnings and engagement activity.
-gascoin.app/referral     — Referral program details and your referral link.
-gascoin.app/perks        — Token tier perks comparison, upgrade path, holdings calculator.
-gascoin.app/community    — Community feed of approved claims (station, city/state, refund amount).
-gascoin.app/points       — Points history and rewards breakdown.
-gascoin.app/welcome      — Landing page with protocol overview.
+gascoin.app/leaderboard  — Rankings (podium, table, drill-down) + Points Engine dashboard (daily charts, source breakdown).
+gascoin.app/referral     — Referral link, click/conversion stats, conversion history, monthly cap meters.
+gascoin.app/perks        — Token tier comparison cards, progress-to-next-tier bar, DEX links, queue priority.
+gascoin.app/community    — Live feed of approved claims with stats, filters, and receipt detail modals.
+gascoin.app/points       — Complete points guide: viral tweet strategy, content multipliers, engagement values, caps, tiers, quality scoring, leaderboard weights.
+gascoin.app/welcome      — Landing page with interactive gas pump, protocol manifesto, and 4-act roadmap.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 TROUBLESHOOTING
