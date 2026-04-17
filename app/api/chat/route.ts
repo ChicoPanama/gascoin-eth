@@ -534,7 +534,81 @@ Is GASCOIN legit?
   Yes. Every approved payout has a verifiable on-chain transaction viewable on Solscan. SOL is real cryptocurrency. The protocol has been running since Season 1 beta launch.
 
 What if I'm having trouble and this assistant can't help?
-  Visit gascoin.app/docs for full documentation, or DM @GasCoinApp on X for direct support.`;
+  Visit gascoin.app/docs for full documentation, or DM @GasCoinApp on X for direct support.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+THE 11-STEP GUIDE (from gascoin.app/how-it-works)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Step 0: What is GASCOIN? Buy gas, post proof on X, get real money to your wallet. Funded by the GASCOIN community treasury on Solana.
+Step 1: Set Up a Solana Wallet (5 min). Download Phantom (free). Save your 12-word seed phrase on paper. Never share it.
+Step 2: Set Up X (2 min). Verified account, follow @GasCoinApp, 100+ followers, public, bio filled in.
+Step 3: Get SOL (5 min). Buy inside Phantom with debit card, or via Coinbase, Binance, Bybit, OKX, Bitget, Gate.io, MEXC, or Moonpay.
+Step 4: Get GASCOIN Tokens (3 min). Swap SOL for GASCOIN on Jupiter (jup.ag), Raydium, or Meteora. Only 1 token needed for Standard tier.
+Step 5: Buy Gas. Any gas station worldwide. Get a paper receipt.
+Step 6: Write on Receipt (30 sec). Write last 4 wallet characters + #gascoin in black pen, large and clear.
+Step 7: Post on X (1 min). Tag @GasCoinApp, include #gascoin and $GASCOIN. Original videos earn 3x points — record yourself, share your story. Keep tweet live.
+Step 8: Submit at gascoin.app/submit (3 min). Connect wallet, sign in with X, paste tweet URL, upload receipt, check 3 boxes, hit Submit.
+Step 9: Wait for Verification. 17 automated gates run in 2–5 minutes. Track progress in real time. SOL dispatched within 2–6 hours (48h max).
+Step 10: Cash Out (optional). SOL is already in Phantom. Send to Coinbase/Binance/Kraken to sell for USD. Or use Moonpay to bank account. Submit again after your cooldown expires.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SUBMISSION FLOW DETAIL (5 steps at gascoin.app/submit)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Step 1 — Connect Wallet: Click Connect Wallet, choose Phantom/Solflare/Backpack. Read-only — no transaction authorized. Shows truncated address and current tier.
+Step 2 — Verify Tweet: Paste tweet URL. System checks hashtag, @GasCoinApp tag, public visibility, and author match. Runs in 2–8 seconds. Preview card shows handle and confirmation.
+Step 3 — Upload Receipt: Upload photo (JPG/PNG/HEIC/WEBP, max 15MB). Three checkboxes required: receipt shows total, date visible, last 4 wallet characters written. Take photo directly in browser on mobile.
+Step 4 — Review & Submit: Summary of wallet, tweet, receipt, estimated refund (~0.05 SOL). Hit Submit. If it takes >30 seconds, the AI pipeline is busy — wait.
+Step 5 — Gate Progress: Watch all 17 gates flip from pending → passed/failed in real time. OCR gates take up to 45 seconds. On success: "SUBMISSION APPROVED — SOL refund within 24-48 hours." On failure: specific gate name + fix instruction shown.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+RECEIPT PHOTO TIPS (critical for passing Gates 9, 10, 14)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+DO: Use black ballpoint pen · Write characters 3-4mm tall · Place receipt flat on white/light surface · Photograph from directly overhead · Use natural overhead light · On mobile, take the photo directly in the browser
+DON'T: Use pencil, gel pen, or light ink · Photograph on dark surface · Fold, crumple, or tear receipt · Shoot at an angle · Use direct flash (causes glare on thermal paper) · Submit if ANY character is unclear
+Accepted formats: JPG, PNG, HEIC, HEIF, WEBP, PDF. Max 15 MB.
+Physical paper receipts only — digital, email, app receipts, and screenshots are all rejected.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+WALLETS & EXCHANGES — COMPLETE LIST
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SUPPORTED WALLETS: Phantom (phantom.app), Solflare (solflare.com), Backpack (backpack.app) — all free
+BUY SOL: Phantom (in-app with debit card), Coinbase, Binance, Bybit, OKX, Bitget, Gate.io, MEXC, Moonpay
+BUY GASCOIN: Jupiter (jup.ag), Raydium (raydium.io), Meteora (meteora.ag)
+SELL SOL FOR CASH: Coinbase, Binance, Bybit, OKX, Bitget, Gate.io, MEXC, Kraken, Moonpay (to bank account)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ROADMAP (from gascoin.app/welcome)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Act I — INFRASTRUCTURE (shipped): Solana payout rails, 17-gate verification, AI receipt scanning, tweet proof + wallet identity, admin dashboard.
+Act II — SEASON 1 BETA (live now): Sign in with X, wallet linking, receipt upload + AI review, live SOL payouts, claims history, invite codes.
+Act III — PUBLIC LAUNCH (next): Open access, token tiers, faster cooldowns, referral rewards, engagement leaderboard, public claims explorer.
+Act IV — TOKEN + GOVERNANCE (horizon): Staking rewards, governance votes, DAO treasury for grants, multi-region expansion, additional fuel types.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+GATE FAILURE QUICK REFERENCE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+x_verified → Upgrade X subscription
+follows_gascoin → Follow @GasCoinApp, wait 60s
+tweet_hashtag → Post new tweet with #gascoin
+tweet_mentions_gascoinapp → Include @GasCoinApp in tweet
+tweet_live → Keep tweet public, don't delete
+receipt_hashtag → Write #gascoin on physical receipt in pen
+wallet_match → Write last 4 wallet chars larger, retake photo
+not_duplicate → Use a different receipt (each one can only be claimed once)
+ai_image_check → Take fresh photo of real receipt (no AI generation, no screenshots)
+tamper_check → Submit original unmodified photo
+cooldown → Wait for cooldown to expire at gascoin.app/wallet
+min_amount → Receipt must be $5+ USD
+min_followers → Need 100+ real X followers
+account_quality → Complete X profile, maintain genuine activity
+receipt_date_valid → Receipt must be within last 7 days
+amount_verified → Retake photo with better lighting so OCR can read the amount
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PRE-SUBMISSION CHECKLIST (from gascoin.app/gates)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Before submitting, verify: X account verified ✓ Following @GasCoinApp ✓ Cooldown expired ✓ 100+ followers ✓ Account quality OK ✓ Tweet has #gascoin ✓ Tweet tags @GasCoinApp ✓ Tweet is live & public ✓ #gascoin written on receipt ✓ Last 4 wallet chars on receipt ✓ Receipt is original (not duplicate) ✓ Receipt is a real photo ✓ Receipt is unedited ✓ Receipt is $5+ ✓ Receipt within 7 days ✓ Entered amount matches receipt ✓ Holding 1+ GASCOIN token ✓
+The gates page at gascoin.app/gates has an interactive checklist — check all 17 items before submitting.`;
 
 /** Return an error as a valid UI message SSE stream so the client can display it. */
 function errorStreamResponse(msg: string): Response {
