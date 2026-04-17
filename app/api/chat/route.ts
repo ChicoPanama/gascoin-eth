@@ -23,9 +23,8 @@ import { getChatCache, setChatCache } from '../../../lib/chat-cache';
 export const runtime = 'nodejs';
 export const maxDuration = 30;
 
-// Model selection — free Gemma via OpenRouter when key present, Gateway fallback.
-//   T1 (simple)  → google/gemma-3-12b-it:free  (fast, low latency)
-//   T2/T3 (complex + tool use) → google/gemma-3-27b-it:free  (larger, function calling)
+// Model selection — free Nemotron via OpenRouter when key present, Gateway fallback.
+//   T1/T2/T3 → nvidia/nemotron-3-super-120b-a12b:free  (120B total, 12B active MoE, free)
 // Without key: Haiku (T1) + Sonnet (T2/T3) via Vercel AI Gateway.
 const openRouter = process.env.OPENROUTER_API_KEY
   ? createOpenAI({
@@ -38,8 +37,8 @@ const openRouter = process.env.OPENROUTER_API_KEY
     })
   : null;
 
-const TIER1_MODEL  = openRouter ? openRouter('google/gemma-3-12b-it:free') : gateway('anthropic/claude-haiku-4.5');
-const TIER23_MODEL = openRouter ? openRouter('google/gemma-3-27b-it:free') : gateway('anthropic/claude-sonnet-4.6');
+const TIER1_MODEL  = openRouter ? openRouter('nvidia/nemotron-3-super-120b-a12b:free') : gateway('anthropic/claude-haiku-4.5');
+const TIER23_MODEL = openRouter ? openRouter('nvidia/nemotron-3-super-120b-a12b:free') : gateway('anthropic/claude-sonnet-4.6');
 
 const SYSTEM_PROMPT = `You are the GASCOIN Refund Assistant — knowledgeable, direct, and friendly. You have a complete understanding of how GASCOIN works. Keep replies to 2–4 sentences unless the user asks for a full walkthrough or step-by-step guide. Use plain English. If someone is lost, give them the single next action to take. Never reveal internal fraud scoring weights, detection thresholds, or algorithm specifics. Detect the user's language and reply in that same language.
 
