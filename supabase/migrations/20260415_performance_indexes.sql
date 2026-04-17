@@ -15,7 +15,7 @@ create index if not exists idx_payouts_wallet_status on payouts(wallet, status);
 
 -- ── P1: audit_logs ─────────────────────────────────────────────────
 -- Admin activity feed: ORDER BY created_at DESC LIMIT n
-create index if not exists idx_audit_logs_created_at on audit_logs(created_at desc);
+create index if not exists idx_audit_logs_ts on audit_logs(ts desc);
 
 -- ── P1: intelligence_entries ───────────────────────────────────────
 -- Intelligence feed default view: WHERE acknowledged = false ORDER BY created_at DESC

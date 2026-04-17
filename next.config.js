@@ -1,4 +1,21 @@
 const path = require('path');
+const fs = require('fs');
+
+// Resolve the physical @solana/kit path so shims work on npm (Vercel) and pnpm (local).
+// We can't use the bare specifier in the shim or the webpack alias creates an infinite loop.
+const solanaKitDir = path.dirname(require.resolve('@solana/kit/package.json'));
+const solanaKitNodeEntry = path.join(solanaKitDir, 'dist/index.node.mjs');
+const solanaKitBrowserEntry = path.join(solanaKitDir, 'dist/index.browser.mjs');
+const toUnixPath = (p) => p.replace(/\\/g, '/');
+
+fs.writeFileSync(
+  path.join(__dirname, 'shims/solana-kit-compat.node.mjs'),
+  `export * from '${toUnixPath(solanaKitNodeEntry)}';\nexport function sequentialInstructionPlan(plans) { return plans; }\n`,
+);
+fs.writeFileSync(
+  path.join(__dirname, 'shims/solana-kit-compat.browser.mjs'),
+  `// Compat shim: re-exports @solana/kit and adds sequentialInstructionPlan\n// which was removed in 2.3.0 but is still imported by @solana-program/token@0.9.0.\n// Physical path avoids circular alias resolution.\nexport * from '${toUnixPath(solanaKitBrowserEntry)}';\nexport function sequentialInstructionPlan(plans) { return plans; }\n`,
+);
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
