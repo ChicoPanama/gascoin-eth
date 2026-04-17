@@ -1,11 +1,11 @@
 const path = require('path');
 const fs = require('fs');
 
-// Resolve the physical @solana/kit path so shims work on npm (Vercel) and pnpm (local).
-// We can't use the bare specifier in the shim or the webpack alias creates an infinite loop.
-const solanaKitDir = path.dirname(require.resolve('@solana/kit/package.json'));
-const solanaKitNodeEntry = path.join(solanaKitDir, 'dist/index.node.mjs');
-const solanaKitBrowserEntry = path.join(solanaKitDir, 'dist/index.browser.mjs');
+// Resolve the physical @solana/kit dist directory so shims work on npm (Vercel) and pnpm (local).
+// require.resolve('@solana/kit') returns a file inside dist/, so dirname gives us dist/.
+const solanaKitDist = path.dirname(require.resolve('@solana/kit'));
+const solanaKitNodeEntry = path.join(solanaKitDist, 'index.node.mjs');
+const solanaKitBrowserEntry = path.join(solanaKitDist, 'index.browser.mjs');
 const toUnixPath = (p) => p.replace(/\\/g, '/');
 
 fs.writeFileSync(
