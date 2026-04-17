@@ -28,6 +28,24 @@ import type { SharedV3ProviderOptions } from '@ai-sdk/provider';
 import type { z, ZodTypeAny } from 'zod';
 import { writePipelineAnomaly } from '../mem0';
 
+// ── O7: Budget alerts ────────────────────────────────────────────────────
+//
+// Hard spend caps and per-user rate limits are configured in the Vercel
+// dashboard — they are NOT enforced in code. You must set them manually:
+//
+//   Vercel Dashboard → Project → AI → Gateway → Budget & Limits
+//   https://vercel.com/dashboard/project/gascoin-platform/ai/gateway
+//
+// Recommended settings:
+//   - Monthly budget cap:      set a hard USD limit (e.g. $50/month)
+//   - Per-user rate limit:     tie to `userId` tag passed in AICallOptions
+//   - Alert threshold:         80% of budget triggers an email alert
+//   - Provider fallback order: Gemini → Claude → Grok (fastest → smartest)
+//
+// Without a budget cap configured in the dashboard, a runaway AI call loop
+// (e.g. a cron worker bug) can exhaust an uncapped spend. Check the dashboard
+// after every production deploy.
+
 // ── Config ────────────────────────────────────────────────────────────────
 
 export const AI_MODELS = {

@@ -73,6 +73,29 @@ export function isMem0Available(): boolean {
   return getConfig() !== null;
 }
 
+/**
+ * O5 — Report a mem0 API key expiry to the admin intelligence feed.
+ * Called whenever a mem0 API call returns HTTP 401 or 403.
+ * Fire-and-forget — never throws, never blocks a pipeline.
+ */
+async function reportMem0KeyExpired(status: number, caller: string): Promise<void> {
+  try {
+    const { getSupabaseAdmin } = await import('./supabase');
+    const supabase = getSupabaseAdmin();
+    await supabase.from('intelligence_entries').insert({
+      entry_type: 'mem0_key_expired',
+      entity_type: 'system',
+      entity_id: 'mem0_integration',
+      summary: `mem0 API returned ${status} — MEM0_API_KEY may be expired or invalid`,
+      detail_json: { http_status: status, caller, ts: new Date().toISOString() },
+      severity: 'critical',
+      pipeline_source: 'mem0_integration',
+    });
+  } catch {
+    // Silent — never block on observability writes
+  }
+}
+
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
@@ -204,7 +227,13 @@ export async function searchMemories(
       cache: 'no-store',
     });
 
-    if (!res.ok) return [];
+    if (!res.ok) {
+      // O5: API key expiry — 401/403 means the MEM0_API_KEY is invalid or expired
+      if (res.status === 401 || res.status === 403) {
+        reportMem0KeyExpired(res.status, 'searchMemories').catch(() => {});
+      }
+      return [];
+    }
     const json = (await res.json()) as any;
     return Array.isArray(json?.results) ? json.results : (Array.isArray(json) ? json : []);
   } catch {
@@ -238,7 +267,12 @@ export async function listMemoriesForEntity(
       headers: { Authorization: `Token ${cfg.apiKey}` },
       cache: 'no-store',
     });
-    if (!res.ok) return [];
+    if (!res.ok) {
+      if (res.status === 401 || res.status === 403) {
+        reportMem0KeyExpired(res.status, 'listMemoriesForEntity').catch(() => {});
+      }
+      return [];
+    }
     const json = (await res.json()) as any;
     if (Array.isArray(json)) return json as Mem0Memory[];
     if (Array.isArray(json?.results)) return json.results as Mem0Memory[];
@@ -364,7 +398,7 @@ export async function addMemory(
   if (options?.expirationDate) body.expiration_date = options.expirationDate;
 
   try {
-    await fetch(`${MEM0_API_HOST}/v1/memories/`, {
+    const res = await fetch(`${MEM0_API_HOST}/v1/memories/`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -373,6 +407,9 @@ export async function addMemory(
       body: JSON.stringify(body),
       cache: 'no-store',
     });
+    if (!res.ok && (res.status === 401 || res.status === 403)) {
+      reportMem0KeyExpired(res.status, 'addMemory').catch(() => {});
+    }
   } catch {
     // Silent failure — never block a pipeline
   }

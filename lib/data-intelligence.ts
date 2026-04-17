@@ -36,8 +36,20 @@ export async function recordGasPrice(
 
 /**
  * Query median receipt amount for a country.
- * Returns null if fewer than 10 data points exist (not enough signal).
- * Used to flag suspiciously large claims vs. what's typical in that market.
+ *
+ * COLD-START BEHAVIOUR: Returns { median: null } until at least 10 OCR-sourced
+ * receipts have been recorded for the requested country in gas_city_prices.
+ * This is intentional — fewer than 10 samples don't provide a statistically
+ * meaningful baseline and would produce noisy outlier signals.
+ *
+ * Callers MUST handle median: null gracefully (skip the outlier check rather
+ * than blocking the submission). The signal activates automatically once the
+ * 10-sample threshold is crossed for a given country; no code change needed.
+ *
+ * AI2 NOTE: This signal is inactive for new/low-volume countries until
+ * sufficient real-world data accumulates. Log a warning if the absence of this
+ * signal is relevant to a fraud decision so auditors know the check was skipped
+ * due to cold-start, not because the signal passed.
  */
 export async function getTypicalGasPrice(
   supabase: any,
@@ -53,6 +65,14 @@ export async function getTypicalGasPrice(
       .limit(200);
 
     if (error || !data || data.length < 10) {
+      // Cold-start: not enough samples yet for this country. Returning null is
+      // correct — callers must skip the outlier check when median is null.
+      // This is NOT a silent null; it is a documented, expected return value.
+      if (process.env.NODE_ENV === 'development' && data && data.length < 10 && data.length > 0) {
+        console.warn(
+          `[data-intelligence] getTypicalGasPrice cold-start: country="${country}" has only ${data.length}/10 required samples. Gas price outlier check is inactive.`,
+        );
+      }
       return { median: null, sampleSize: data?.length ?? 0 };
     }
 

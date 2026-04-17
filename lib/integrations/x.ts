@@ -26,6 +26,11 @@ async function fetchWithRetry(url: string, init: RequestInit, retries = 3): Prom
     try {
       const r = await fetch(url, init);
       if (r.status >= 500 || r.status === 429) {
+        const isLastAttempt = i === retries - 1;
+        if (r.status === 429 && isLastAttempt) {
+          // O4: Surface quota exhaustion in admin dashboard intelligence feed
+          reportXApiQuotaExhausted(url).catch(() => {});
+        }
         const wait = Number(r.headers.get('retry-after') || 0) * 1000 || (300 * Math.pow(2, i));
         await sleep(wait);
       }
@@ -36,6 +41,28 @@ async function fetchWithRetry(url: string, init: RequestInit, retries = 3): Prom
     }
   }
   throw lastErr || new Error('x_fetch_failed');
+}
+
+/**
+ * O4 — Write an intelligence_entries row when X API returns 429 and all
+ * retries are exhausted. Fire-and-forget — never blocks a pipeline.
+ */
+async function reportXApiQuotaExhausted(endpoint: string): Promise<void> {
+  try {
+    const { getSupabaseAdmin } = await import('../supabase');
+    const supabase = getSupabaseAdmin();
+    await supabase.from('intelligence_entries').insert({
+      entry_type: 'x_api_quota_exhausted',
+      entity_type: 'system',
+      entity_id: 'x_integration',
+      summary: 'X API rate limit (429) hit and all retries exhausted',
+      detail_json: { endpoint: endpoint.split('?')[0], ts: new Date().toISOString() },
+      severity: 'high',
+      pipeline_source: 'x_integration',
+    });
+  } catch {
+    // Silent — never block a pipeline on observability writes
+  }
 }
 
 async function verifyViaXApi(tweetId: string, expectedHandle: string): Promise<TweetProofResult> {

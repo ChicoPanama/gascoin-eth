@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation';
 import { verifyAdminSession } from '../../actions/admin-auth';
 import { getSupabaseAdmin } from '../../../lib/supabase';
+import { Redis } from '@upstash/redis';
 
 // ═══════════════════════════════════════════
 // Admin / System Health
@@ -50,6 +51,149 @@ const EXPECTED_ENV = [
   { key: 'REVIEWER_API_TOKEN', group: 'Admin' },
 ];
 
+// ─── F4: Real connectivity probes ────────────────────────────────────────
+// Each probe runs with a hard 3-second AbortSignal timeout. Returns a
+// ConnectResult so the page can render a live status matrix rather than
+// just checking env var presence.
+
+type ConnectResult = { ok: boolean; latencyMs: number; detail?: string };
+
+function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
+  const abort = AbortSignal.timeout(ms);
+  return Promise.race([
+    promise,
+    new Promise<T>((_, reject) => {
+      abort.addEventListener('abort', () => reject(new Error('timeout')), { once: true });
+    }),
+  ]);
+}
+
+async function probeSupabase(): Promise<ConnectResult> {
+  const start = Date.now();
+  try {
+    const sb = getSupabaseAdmin();
+    // Wrap in an explicit Promise so withTimeout gets a real thenable
+    await withTimeout(
+      Promise.resolve(sb.from('audit_logs').select('id').limit(1).maybeSingle()),
+      3000,
+    );
+    return { ok: true, latencyMs: Date.now() - start };
+  } catch (e: any) {
+    return { ok: false, latencyMs: Date.now() - start, detail: e?.message?.slice(0, 80) };
+  }
+}
+
+async function probeRedis(): Promise<ConnectResult> {
+  const start = Date.now();
+  const url = (process.env.UPSTASH_REDIS_REST_URL || '').trim();
+  const token = (process.env.UPSTASH_REDIS_REST_TOKEN || '').trim();
+  if (!url || !token) return { ok: false, latencyMs: 0, detail: 'env vars missing' };
+  try {
+    const redis = new Redis({ url, token });
+    const key = `health:probe:${Date.now()}`;
+    await withTimeout(
+      (async () => {
+        await redis.set(key, '1', { ex: 10 });
+        const v = await redis.get(key);
+        if (v !== '1') throw new Error('round-trip mismatch');
+        await redis.del(key);
+      })(),
+      3000,
+    );
+    return { ok: true, latencyMs: Date.now() - start };
+  } catch (e: any) {
+    return { ok: false, latencyMs: Date.now() - start, detail: e?.message?.slice(0, 80) };
+  }
+}
+
+async function probeSolana(): Promise<ConnectResult> {
+  const start = Date.now();
+  const apiKey = (process.env.HELIUS_API_KEY || '').trim();
+  if (!apiKey) return { ok: false, latencyMs: 0, detail: 'HELIUS_API_KEY missing' };
+  try {
+    const res = await withTimeout(
+      fetch(`https://mainnet.helius-rpc.com/?api-key=${apiKey}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'getHealth' }),
+        cache: 'no-store',
+      }),
+      3000,
+    );
+    const json = (await res.json()) as any;
+    const ok = res.ok && (json?.result === 'ok' || json?.result != null);
+    return { ok, latencyMs: Date.now() - start, detail: ok ? undefined : `result=${JSON.stringify(json?.result)}` };
+  } catch (e: any) {
+    return { ok: false, latencyMs: Date.now() - start, detail: e?.message?.slice(0, 80) };
+  }
+}
+
+async function probeMem0(): Promise<ConnectResult> {
+  const start = Date.now();
+  const apiKey = (process.env.MEM0_API_KEY || '').trim();
+  const orgId = (process.env.MEM0_ORG_ID || '').trim();
+  if (!apiKey || !orgId) return { ok: false, latencyMs: 0, detail: 'MEM0_API_KEY or MEM0_ORG_ID missing' };
+  try {
+    const res = await withTimeout(
+      fetch(`https://api.mem0.ai/v1/memories/?org_id=${orgId}&limit=1`, {
+        headers: { Authorization: `Token ${apiKey}` },
+        cache: 'no-store',
+      }),
+      3000,
+    );
+    if (res.status === 401 || res.status === 403) {
+      return { ok: false, latencyMs: Date.now() - start, detail: `HTTP ${res.status} — key expired or invalid` };
+    }
+    return { ok: res.ok, latencyMs: Date.now() - start, detail: res.ok ? undefined : `HTTP ${res.status}` };
+  } catch (e: any) {
+    return { ok: false, latencyMs: Date.now() - start, detail: e?.message?.slice(0, 80) };
+  }
+}
+
+async function probeXApi(): Promise<ConnectResult> {
+  const start = Date.now();
+  const token = (process.env.X_BEARER_TOKEN || '').trim();
+  if (!token) return { ok: false, latencyMs: 0, detail: 'X_BEARER_TOKEN missing' };
+  try {
+    // Lightweight endpoint: rate_limit_status returns 200 without consuming quota
+    const res = await withTimeout(
+      fetch('https://api.x.com/2/users/me', {
+        headers: { Authorization: `Bearer ${token}` },
+        cache: 'no-store',
+      }),
+      3000,
+    );
+    // 401 = invalid token, 403 = forbidden — both mean config problem
+    if (res.status === 401 || res.status === 403) {
+      return { ok: false, latencyMs: Date.now() - start, detail: `HTTP ${res.status} — token invalid` };
+    }
+    // 429 means rate limited but the token itself is valid
+    const ok = res.ok || res.status === 429;
+    return { ok, latencyMs: Date.now() - start, detail: ok ? (res.status === 429 ? 'rate limited (token valid)' : undefined) : `HTTP ${res.status}` };
+  } catch (e: any) {
+    return { ok: false, latencyMs: Date.now() - start, detail: e?.message?.slice(0, 80) };
+  }
+}
+
+async function probeAiGateway(): Promise<ConnectResult> {
+  const start = Date.now();
+  const hasOidc = !!(process.env.VERCEL_OIDC_TOKEN || process.env.VERCEL);
+  if (!hasOidc) return { ok: false, latencyMs: 0, detail: 'VERCEL_OIDC_TOKEN not present (local dev: run vercel env pull)' };
+  // We confirm the gateway URL is reachable without spending tokens
+  try {
+    const res = await withTimeout(
+      fetch('https://ai-gateway.vercel.sh/v1/models', {
+        headers: { Authorization: `Bearer ${process.env.VERCEL_OIDC_TOKEN || ''}` },
+        cache: 'no-store',
+      }),
+      3000,
+    );
+    return { ok: res.ok, latencyMs: Date.now() - start, detail: res.ok ? undefined : `HTTP ${res.status}` };
+  } catch (e: any) {
+    return { ok: false, latencyMs: Date.now() - start, detail: e?.message?.slice(0, 80) };
+  }
+}
+
 export default async function AdminHealthPage() {
   const session = await verifyAdminSession();
   if (!session.valid) redirect('/admin/login');
@@ -98,6 +242,26 @@ export default async function AdminHealthPage() {
     if (!envByGroup.has(item.group)) envByGroup.set(item.group, []);
     envByGroup.get(item.group)!.push({ key: item.key, present });
   }
+
+  // F4: Real connectivity checks — all run in parallel, each capped at 3s
+  const [connSupabase, connRedis, connSolana, connMem0, connXApi, connAiGateway] =
+    await Promise.all([
+      probeSupabase(),
+      probeRedis(),
+      probeSolana(),
+      probeMem0(),
+      probeXApi(),
+      probeAiGateway(),
+    ]);
+
+  const connectivityChecks = [
+    { label: 'Supabase',    result: connSupabase },
+    { label: 'Redis',       result: connRedis },
+    { label: 'Solana RPC',  result: connSolana },
+    { label: 'mem0',        result: connMem0 },
+    { label: 'X API',       result: connXApi },
+    { label: 'AI Gateway',  result: connAiGateway },
+  ];
 
   return (
     <div>
@@ -199,6 +363,65 @@ export default async function AdminHealthPage() {
         </div>
         <p style={{ marginTop: 8, fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--text-tertiary)' }}>
           &quot;Last run&quot; is read from audit_logs. Workers that don&apos;t write audit entries show &quot;NO DATA&quot; even if they&apos;re running.
+        </p>
+      </div>
+
+      {/* ── F4: Live connectivity checks ── */}
+      <div style={{ marginBottom: 32 }}>
+        <h2
+          style={{
+            fontFamily: 'var(--font-mono)',
+            fontSize: 12,
+            letterSpacing: '0.15em',
+            textTransform: 'uppercase',
+            color: 'var(--text-secondary)',
+            marginBottom: 12,
+          }}
+        >
+          Service Connectivity
+        </h2>
+        <div style={{ border: '1px solid var(--line)', overflow: 'auto' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontFamily: 'var(--font-mono)', fontSize: 12 }}>
+            <thead>
+              <tr style={{ background: 'rgba(var(--fg-rgb), 0.04)', borderBottom: '1px solid var(--line)' }}>
+                <th style={thStyle}>Service</th>
+                <th style={thStyle}>Status</th>
+                <th style={thStyle}>Latency</th>
+                <th style={thStyle}>Detail</th>
+              </tr>
+            </thead>
+            <tbody>
+              {connectivityChecks.map(({ label, result }) => (
+                <tr key={label} style={{ borderBottom: '1px solid var(--line)' }}>
+                  <td style={tdStyle}>{label}</td>
+                  <td style={tdStyle}>
+                    <span
+                      style={{
+                        display: 'inline-block',
+                        padding: '2px 8px',
+                        fontSize: 10,
+                        fontWeight: 700,
+                        letterSpacing: '0.1em',
+                        background: result.ok ? 'var(--status-pass)' : 'var(--status-fail)',
+                        color: '#FFFFFF',
+                      }}
+                    >
+                      {result.ok ? 'OK' : 'FAIL'}
+                    </span>
+                  </td>
+                  <td style={{ ...tdStyle, color: 'var(--text-secondary)' }}>
+                    {result.latencyMs > 0 ? `${result.latencyMs}ms` : '—'}
+                  </td>
+                  <td style={{ ...tdStyle, color: 'var(--text-tertiary)', fontSize: 11 }}>
+                    {result.detail || '—'}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <p style={{ marginTop: 8, fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--text-tertiary)' }}>
+          Each probe runs a real request with a 3-second timeout on every page load.
         </p>
       </div>
 

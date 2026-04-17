@@ -187,6 +187,12 @@ function recordFraudSignalsToMem0(
   }
 }
 
+// ── Fraud thresholds — configurable via env so they can be tuned without a redeploy ──
+// Defaults match the original hardcoded values; override in .env / Vercel dashboard.
+const AI_SCORE_THRESHOLD = Number(process.env.AI_SCORE_THRESHOLD ?? 0.3);
+const TAMPER_SCORE_THRESHOLD = Number(process.env.TAMPER_SCORE_THRESHOLD ?? 0.3);
+const FLAGS_THRESHOLD = Number(process.env.FLAGS_THRESHOLD ?? 2);
+
 export async function runFraudChecks(raw: ArrayBuffer, pipeline?: PipelineResult, context?: { wallet?: string; claimId?: string }): Promise<FraudSignals> {
   const buf = Buffer.from(raw);
 
@@ -226,7 +232,7 @@ export async function runFraudChecks(raw: ArrayBuffer, pipeline?: PipelineResult
 
   // Run AI cross-validation for non-trivial cases
   let crossValidation: CrossValidationResult | null = null;
-  if (aiScore > 0.3 || tamperScore > 0.3 || flags.length > 2) {
+  if (aiScore > AI_SCORE_THRESHOLD || tamperScore > TAMPER_SCORE_THRESHOLD || flags.length > FLAGS_THRESHOLD) {
     crossValidation = await aiFraudAnalysis({
       aiScore,
       tamperScore,

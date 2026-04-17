@@ -270,8 +270,10 @@ function StepReceipt({ onNext, onBack, initialFile }: {
   const [shake, setShake] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const VALID_TYPES = ['image/jpeg', 'image/png', 'image/heic', 'application/pdf'];
-  const MAX_SIZE = 10 * 1024 * 1024;
+  // F1: Must match server validation in app/api/claims/submit/route.ts
+  // Server accepts: image/jpeg, image/png, image/heic, image/heif, image/webp, application/pdf · max 15 MB
+  const VALID_TYPES = ['image/jpeg', 'image/png', 'image/heic', 'image/heif', 'image/webp', 'application/pdf'];
+  const MAX_SIZE = 15 * 1024 * 1024;
 
   useEffect(() => {
     if (initialFile) {
@@ -283,12 +285,12 @@ function StepReceipt({ onNext, onBack, initialFile }: {
 
   const handleFile = (f: File) => {
     setError('');
-    if (!VALID_TYPES.includes(f.type) && !f.name.toLowerCase().endsWith('.heic')) {
-      setError('Only JPG, PNG, HEIC, and PDF accepted');
+    if (!VALID_TYPES.includes(f.type) && !f.name.toLowerCase().endsWith('.heic') && !f.name.toLowerCase().endsWith('.heif')) {
+      setError('Only JPG, PNG, HEIC, HEIF, WEBP, and PDF accepted');
       return;
     }
     if (f.size > MAX_SIZE) {
-      setError('File exceeds 10MB limit');
+      setError('File exceeds 15MB limit');
       return;
     }
     setFile(f);
@@ -361,12 +363,12 @@ function StepReceipt({ onNext, onBack, initialFile }: {
         <input
           ref={inputRef}
           type="file"
-          accept=".jpg,.jpeg,.png,.heic,.pdf"
+          accept=".jpg,.jpeg,.png,.heic,.heif,.webp,.pdf"
           style={{ display: 'none' }}
           onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])}
         />
       </div>
-      <div className="sf-upload-formats">Accepted: JPG, PNG, HEIC, PDF · Max 10MB</div>
+      <div className="sf-upload-formats">Accepted: JPG, PNG, HEIC, HEIF, WEBP, PDF · Max 15MB</div>
 
       {error && <div className="sf-error">{error}</div>}
 
@@ -412,11 +414,26 @@ function StepReview({ wallet, tweetUrl, handle, file, onSubmit, onBack }: {
   onBack: () => void;
 }) {
   const [submitting, setSubmitting] = useState(false);
+  // F3: Show a "taking longer than usual" hint after 30 seconds
+  const [slowHint, setSlowHint] = useState(false);
+  const slowTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const doSubmit = () => {
     setSubmitting(true);
-    setTimeout(() => onSubmit(), 2000);
+    setSlowHint(false);
+    // Start the 30s slow-response timer
+    slowTimerRef.current = setTimeout(() => setSlowHint(true), 30_000);
+    // Kick off the real submission (parent handles the API call and advances step)
+    setTimeout(() => {
+      onSubmit();
+      if (slowTimerRef.current) clearTimeout(slowTimerRef.current);
+    }, 2000);
   };
+
+  // Clean up timer if the component unmounts
+  useEffect(() => {
+    return () => { if (slowTimerRef.current) clearTimeout(slowTimerRef.current); };
+  }, []);
 
   const rows = [
     { label: 'Wallet', value: wallet },
@@ -442,6 +459,16 @@ function StepReview({ wallet, tweetUrl, handle, file, onSubmit, onBack }: {
       <p className="sf-fine-print">
         Refunds are subject to passing all {GATE_COUNT} verification gates. Processing time varies.
       </p>
+
+      {/* F3: Loading state + slow-response hint */}
+      {submitting && (
+        <div style={{ marginTop: 16, fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--text-secondary)', textAlign: 'center' }}>
+          <span className="sf-spinner" style={{ display: 'inline-block', marginRight: 8 }} />
+          {slowHint
+            ? 'This is taking longer than usual\u2014AI pipeline is busy. Please wait\u2026'
+            : 'Running verification\u2026'}
+        </div>
+      )}
 
       <div className="sf-nav-buttons">
         <button type="button" className="sf-btn-ghost" onClick={onBack} disabled={submitting}>&larr; Back</button>
@@ -816,6 +843,23 @@ export function SubmitFlow() {
   const [failGate, setFailGate] = useState<number | null>(null);
   const [referralCode, setReferralCode] = useState('');
   const loggedInHandle = usePrivyHandle();
+
+  // F5: Wallet disconnect guard — if Privy auth drops while the user is
+  // mid-form (step 2–5), reset to step 1 so the form doesn't attempt to
+  // submit with no wallet attached. InviteGate catches !authenticated but
+  // doesn't reset form state; this hook does.
+  const { authenticated } = usePrivy();
+  useEffect(() => {
+    if (!authenticated && step > 1) {
+      setStep(1);
+      setMaxStep(1);
+      setWallet('');
+      setTweetUrl('');
+      setHandle('');
+      setFile(null);
+      setFailGate(null);
+    }
+  }, [authenticated, step]);
 
   const goTo = (s: Step) => {
     setStep(s);
