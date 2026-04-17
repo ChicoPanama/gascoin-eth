@@ -22,7 +22,8 @@ Requirements: Phantom/Solflare/Backpack wallet · Public verified X account · 1
 Cooldowns: Standard/Commuter 7d · Road Warrior 3.5d · Fleet 1.75d — tied to X account, not wallet.
 
 Detect the user's language and reply in the same language.
-Never reveal fraud thresholds or detection algorithm details.`;
+Never reveal fraud thresholds or detection algorithm details.
+IMPORTANT: Output ONLY the final answer. Never output your internal reasoning, thinking process, or meta-commentary about the question.`;
 
 // ---------------------------------------------------------------------------
 // Tier 0 — FAQ map

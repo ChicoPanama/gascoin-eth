@@ -1,4 +1,4 @@
-import { streamText, convertToModelMessages, type ModelMessage, type UIMessage } from 'ai';
+import { streamText, convertToModelMessages, stepCountIs, type ModelMessage, type UIMessage } from 'ai';
 import { gateway } from '@ai-sdk/gateway';
 import { createOpenAI } from '@ai-sdk/openai';
 import { verifyPrivySession } from '../../../lib/integrations/privy';
@@ -43,6 +43,7 @@ const TIER1_MODEL  = openRouter ? openRouter.chat('nvidia/nemotron-3-super-120b-
 const TIER23_MODEL = openRouter ? openRouter.chat('nvidia/nemotron-3-super-120b-a12b:free') : gateway('anthropic/claude-sonnet-4.6');
 
 const SYSTEM_PROMPT = `You are the GASCOIN Refund Assistant — knowledgeable, direct, and friendly. You have a complete understanding of how GASCOIN works. Keep replies to 2–4 sentences unless the user asks for a full walkthrough or step-by-step guide. Use plain English. If someone is lost, give them the single next action to take. Never reveal internal fraud scoring weights, detection thresholds, or algorithm specifics. Detect the user's language and reply in that same language.
+IMPORTANT: Output ONLY the final answer. Never output your internal reasoning, thinking process, or meta-commentary about the question.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 WHAT GASCOIN IS
@@ -551,7 +552,7 @@ export async function POST(req: Request) {
     model: TIER23_MODEL,
     system: dynamicSystem,
     messages,
-    ...(tools && { tools }),
+    ...(tools && { tools, stopWhen: stepCountIs(3) }),
     maxOutputTokens: tier === 3 ? 768 : 640,
     onError: ({ error }) => console.error('[chat/t23] error', (error as Error)?.name, (error as Error)?.message, JSON.stringify(error)),
     onFinish: ({ text }) => {

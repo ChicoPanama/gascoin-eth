@@ -246,6 +246,8 @@ export function ChatAgent({
 
   const openingMessage = buildOpeningMessage(pageHint, claimContext);
 
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
   const { messages, sendMessage, status } = useChat({
     transport: new DefaultChatTransport({
       api: '/api/chat',
@@ -254,9 +256,18 @@ export function ChatAgent({
     messages: [
       { id: 'welcome', role: 'assistant', parts: [{ type: 'text', text: openingMessage }] },
     ],
+    onError: (err) => {
+      console.error('[chat] client error', err);
+      setErrorMsg(err.message || 'Something went wrong. Please try again.');
+    },
   });
 
   const busy = status === 'streaming' || status === 'submitted';
+
+  // Clear error when user sends a new message
+  useEffect(() => {
+    if (busy) setErrorMsg(null);
+  }, [busy]);
 
   // Auto-scroll
   useEffect(() => {
@@ -377,6 +388,14 @@ export function ChatAgent({
                         </div>
                       );
                     }
+                    // Surface error parts so the user sees something instead of blank
+                    if (part.type === 'error') {
+                      return (
+                        <div key={idx} className="chat-msg chat-msg--error">
+                          {(part.errorText as string) || 'Something went wrong. Please try again.'}
+                        </div>
+                      );
+                    }
                     return null;
                   })}
                 </div>
@@ -385,6 +404,10 @@ export function ChatAgent({
 
             {busy && (
               <div className="chat-msg chat-msg--assistant chat-msg--loading">…</div>
+            )}
+
+            {errorMsg && !busy && (
+              <div className="chat-msg chat-msg--error">{errorMsg}</div>
             )}
 
             {showEscalation && !busy && (

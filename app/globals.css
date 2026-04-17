@@ -9110,6 +9110,11 @@ button.docs-footer-link {
   border-radius: 12px 12px 2px 12px;
 }
 .chat-msg--assistant { align-self: flex-start; color: #E7E9EA; }
+.chat-msg--error {
+  align-self: flex-start; color: #F4212E; font-size: 12px;
+  background: rgba(244, 33, 46, 0.08); border: 1px solid rgba(244, 33, 46, 0.2);
+  padding: 8px 12px; border-radius: 8px;
+}
 .chat-msg--loading { opacity: 0.5; animation: chat-pulse 1s ease infinite; }
 @keyframes chat-pulse { 0%,100% { opacity: 0.3; } 50% { opacity: 0.7; } }
 
