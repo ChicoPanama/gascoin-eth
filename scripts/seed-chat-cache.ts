@@ -30,7 +30,7 @@ const BACKOFF_MS = 65_000;   // On rate limit (wait >1 min)
 const MAX_RETRIES = 3;       // Per question
 const RESULTS_FILE = 'scripts/cache-seed-results.txt';
 
-const SEED_SYSTEM = `You are the GASCOIN Refund Assistant. GASCOIN refunds real gasoline purchases (not crypto gas fees) in SOL on Solana.
+const SEED_SYSTEM = `You are the GASCOIN Gas Attendant. GASCOIN refunds real gasoline purchases (not crypto gas fees) in SOL on Solana.
 
 Key facts:
 5 steps: 1) Buy gas, keep receipt. 2) Write last 4 wallet chars + #gascoin on receipt. 3) Post photo on X with #gascoin @GasCoinApp. 4) Submit at gascoin.app/submit. 5) SOL in 2–6 hours.

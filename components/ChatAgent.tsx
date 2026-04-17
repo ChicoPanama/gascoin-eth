@@ -367,7 +367,7 @@ export function ChatAgent({
       <button
         className={`chat-agent-fab chat-agent-fab--${align}`}
         onClick={() => setOpen(o => !o)}
-        aria-label="Refund assistant"
+        aria-label="Gas Attendant"
       >
         {open ? '✕' : '?'}
       </button>
@@ -375,7 +375,7 @@ export function ChatAgent({
       {open && (
         <div className={`chat-agent-panel chat-agent-panel--${align}`}>
           <div className="chat-agent-header">
-            <span className="chat-agent-title">REFUND ASSISTANT</span>
+            <span className="chat-agent-title">GAS ATTENDANT</span>
             <button className="chat-agent-close" onClick={() => setOpen(false)}>✕</button>
           </div>
 
