@@ -365,7 +365,9 @@ export async function POST(req: Request){
     duplicateHash,
     duplicatePhash,
     cooldownOk,
-    amountUsd,
+    // 5-step submit flow passes amountUsd=0; fall back to OCR-detected value so
+    // min_amount gate isn't trivially failed when the user didn't type an amount.
+    amountUsd: amountUsd > 0 ? amountUsd : (ocrAmountDetected ?? 0),
     ocrAmount: ocrAmountDetected,
     receiptDate: receiptDateOcr,
     followerCount,
