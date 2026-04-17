@@ -23,10 +23,11 @@ import { getChatCache, setChatCache } from '../../../lib/chat-cache';
 export const runtime = 'nodejs';
 export const maxDuration = 30;
 
-// Model selection — free Nemotron via OpenRouter when key present, Gateway fallback.
-//   T1/T2/T3 → nvidia/nemotron-3-super-120b-a12b:free  (120B total, 12B active MoE, free)
+// Model selection — free models via OpenRouter when key present, Gateway fallback.
+//   T1  → gemma-4-26b-a4b-it:free  (26B MoE, 4B active — fast for simple Q&A)
+//   T2/3 → hermes-3-llama-3.1-405b:free  (405B — deep reasoning, tool use)
+// Nemotron was tried but leaks its reasoning chain into content, unusable.
 // Without key: Haiku (T1) + Sonnet (T2/T3) via Vercel AI Gateway.
-console.log('[chat/init] OPENROUTER_API_KEY present:', !!process.env.OPENROUTER_API_KEY);
 const openRouter = process.env.OPENROUTER_API_KEY
   ? createOpenAI({
       baseURL: 'https://openrouter.ai/api/v1',
@@ -38,8 +39,8 @@ const openRouter = process.env.OPENROUTER_API_KEY
     })
   : null;
 
-const TIER1_MODEL  = openRouter ? openRouter.chat('nvidia/nemotron-3-super-120b-a12b:free') : gateway('anthropic/claude-haiku-4.5');
-const TIER23_MODEL = openRouter ? openRouter.chat('nvidia/nemotron-3-super-120b-a12b:free') : gateway('anthropic/claude-sonnet-4.6');
+const TIER1_MODEL  = openRouter ? openRouter.chat('google/gemma-4-26b-a4b-it:free') : gateway('anthropic/claude-haiku-4.5');
+const TIER23_MODEL = openRouter ? openRouter.chat('nousresearch/hermes-3-llama-3.1-405b:free') : gateway('anthropic/claude-sonnet-4.6');
 
 const SYSTEM_PROMPT = `You are the GASCOIN Refund Assistant — knowledgeable, direct, and friendly. You have a complete understanding of how GASCOIN works. Keep replies to 2–4 sentences unless the user asks for a full walkthrough or step-by-step guide. Use plain English. If someone is lost, give them the single next action to take. Never reveal internal fraud scoring weights, detection thresholds, or algorithm specifics. Detect the user's language and reply in that same language.
 
