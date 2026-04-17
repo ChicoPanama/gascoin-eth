@@ -89,18 +89,12 @@ export async function POST(req: Request) {
 
   if (claimIds.length > 0) {
     // 1. Delete claim_receipts
-    const { data: deletedReceipts } = await supabase
-      .from('claim_receipts')
-      .delete()
-      .in('claim_id', claimIds);
-    erased.receipts = Array.isArray(deletedReceipts) ? deletedReceipts.length : claimIds.length;
+    await supabase.from('claim_receipts').delete().in('claim_id', claimIds);
+    erased.receipts = claimIds.length;
 
     // 2. Delete gate_results
-    const { data: deletedGates } = await supabase
-      .from('gate_results')
-      .delete()
-      .in('claim_id', claimIds);
-    erased.gate_results = Array.isArray(deletedGates) ? deletedGates.length : claimIds.length;
+    await supabase.from('gate_results').delete().in('claim_id', claimIds);
+    erased.gate_results = claimIds.length;
   }
 
   // ── Step 3: Anonymize claims ────────────────────────────────────────────────
@@ -122,33 +116,21 @@ export async function POST(req: Request) {
   // ── Steps 4–7: wallet-based deletions ──────────────────────────────────────
   if (resolvedWallet) {
     // 4. engagement_points
-    const { data: pts } = await supabase
-      .from('engagement_points')
-      .delete()
-      .eq('wallet', resolvedWallet);
-    erased.engagement_points = Array.isArray(pts) ? pts.length : 0;
+    await supabase.from('engagement_points').delete().eq('wallet', resolvedWallet);
+    erased.engagement_points = 1;
 
     // 5. scored_tweets
-    const { data: tweets } = await supabase
-      .from('scored_tweets')
-      .delete()
-      .eq('wallet', resolvedWallet);
-    erased.scored_tweets = Array.isArray(tweets) ? tweets.length : 0;
+    await supabase.from('scored_tweets').delete().eq('wallet', resolvedWallet);
+    erased.scored_tweets = 1;
 
     // 6. wallet_x_links
-    const { data: links } = await supabase
-      .from('wallet_x_links')
-      .delete()
-      .eq('wallet', resolvedWallet);
-    erased.wallet_x_links = Array.isArray(links) ? links.length : 0;
+    await supabase.from('wallet_x_links').delete().eq('wallet', resolvedWallet);
+    erased.wallet_x_links = 1;
   }
 
   // 7. user_bans
-  const { data: bans } = await supabase
-    .from('user_bans')
-    .delete()
-    .eq('user_id', user_id);
-  erased.user_bans = Array.isArray(bans) ? bans.length : 0;
+  await supabase.from('user_bans').delete().eq('user_id', user_id);
+  erased.user_bans = 1;
 
   // ── Step 8: Anonymize users row ─────────────────────────────────────────────
   await supabase
@@ -162,24 +144,13 @@ export async function POST(req: Request) {
   erased.users = 1;
 
   // ── Step 9: referrals (referrer + referred) ─────────────────────────────────
-  const { data: referralRows1 } = await supabase
-    .from('referrals')
-    .delete()
-    .eq('referrer_user_id', user_id);
-  const { data: referralRows2 } = await supabase
-    .from('referrals')
-    .delete()
-    .eq('referred_user_id', user_id);
-  erased.referrals =
-    (Array.isArray(referralRows1) ? referralRows1.length : 0) +
-    (Array.isArray(referralRows2) ? referralRows2.length : 0);
+  await supabase.from('referrals').delete().eq('referrer_user_id', user_id);
+  await supabase.from('referrals').delete().eq('referred_user_id', user_id);
+  erased.referrals = 1;
 
   // ── Step 10: referral_conversions ───────────────────────────────────────────
-  const { data: conversions } = await supabase
-    .from('referral_conversions')
-    .delete()
-    .eq('user_id', user_id);
-  erased.referral_conversions = Array.isArray(conversions) ? conversions.length : 0;
+  await supabase.from('referral_conversions').delete().eq('user_id', user_id);
+  erased.referral_conversions = 1;
 
   // ── Audit log ───────────────────────────────────────────────────────────────
   await supabase.from('audit_logs').insert({
