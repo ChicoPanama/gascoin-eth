@@ -1,3 +1,5 @@
+const path = require('path');
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   experimental: {
@@ -90,6 +92,12 @@ const nextConfig = {
       path: false,
       crypto: false,
     };
+    // Shim @solana/kit@2.3.0 to add sequentialInstructionPlan removed in 2.3.0
+    // but still imported by @solana-program/token@0.9.0 (via @privy-io/react-auth).
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      '@solana/kit': path.resolve(__dirname, 'shims/solana-kit-compat.node.mjs'),
+    };
     return config;
   },
 
@@ -99,6 +107,10 @@ const nextConfig = {
       os: { browser: './empty-module.js' },
       path: { browser: './empty-module.js' },
       crypto: { browser: './empty-module.js' },
+      '@solana/kit': {
+        browser: './shims/solana-kit-compat.browser.mjs',
+        default: './shims/solana-kit-compat.node.mjs',
+      },
     },
   },
 };
