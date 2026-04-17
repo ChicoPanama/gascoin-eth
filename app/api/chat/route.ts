@@ -38,8 +38,8 @@ const openRouter = process.env.OPENROUTER_API_KEY
     })
   : null;
 
-const TIER1_MODEL  = openRouter ? openRouter('nvidia/nemotron-3-super-120b-a12b:free') : gateway('anthropic/claude-haiku-4.5');
-const TIER23_MODEL = openRouter ? openRouter('nvidia/nemotron-3-super-120b-a12b:free') : gateway('anthropic/claude-sonnet-4.6');
+const TIER1_MODEL  = openRouter ? openRouter.chat('nvidia/nemotron-3-super-120b-a12b:free') : gateway('anthropic/claude-haiku-4.5');
+const TIER23_MODEL = openRouter ? openRouter.chat('nvidia/nemotron-3-super-120b-a12b:free') : gateway('anthropic/claude-sonnet-4.6');
 
 const SYSTEM_PROMPT = `You are the GASCOIN Refund Assistant — knowledgeable, direct, and friendly. You have a complete understanding of how GASCOIN works. Keep replies to 2–4 sentences unless the user asks for a full walkthrough or step-by-step guide. Use plain English. If someone is lost, give them the single next action to take. Never reveal internal fraud scoring weights, detection thresholds, or algorithm specifics. Detect the user's language and reply in that same language.
 
