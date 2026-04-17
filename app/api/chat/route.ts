@@ -1,4 +1,4 @@
-import { streamText, type ModelMessage } from 'ai';
+import { streamText, convertToModelMessages, type ModelMessage, type UIMessage } from 'ai';
 import { gateway } from '@ai-sdk/gateway';
 import { createOpenAI } from '@ai-sdk/openai';
 import { verifyPrivySession } from '../../../lib/integrations/privy';
@@ -478,17 +478,17 @@ export async function POST(req: Request) {
     req.headers.get('cookie'),
   ).catch(() => null);
 
-  let messages: ModelMessage[];
+  let uiMessages: UIMessage[];
   let wallet = '';
   try {
-    const body = await (req.json() as Promise<{ messages: ModelMessage[]; wallet?: string }>);
-    messages = body.messages;
+    const body = await (req.json() as Promise<{ messages: UIMessage[]; wallet?: string }>);
+    uiMessages = body.messages;
     wallet = (body.wallet || session?.wallet || '').trim();
   } catch {
     return new Response('Bad request', { status: 400 });
   }
 
-  const lastUserText = extractLastUserText(messages as unknown[]);
+  const lastUserText = extractLastUserText(uiMessages as unknown[]);
   if (!lastUserText) return new Response('Bad request', { status: 400 });
 
   // ── Tier 0: Static FAQ — zero LLM tokens ─────────────────────────────
@@ -497,9 +497,12 @@ export async function POST(req: Request) {
 
   // Count prior user↔assistant exchanges to help tier classification
   const priorExchanges = Math.floor(
-    (messages as unknown[]).filter((m: unknown) => (m as Record<string,unknown>).role === 'user').length / 2
+    (uiMessages as unknown[]).filter((m: unknown) => (m as Record<string,unknown>).role === 'user').length / 2
   );
   const tier = classifyTier(lastUserText, priorExchanges);
+
+  // Convert UIMessages (parts[]) → ModelMessages (content[]) required by streamText
+  const messages: ModelMessage[] = await convertToModelMessages(uiMessages);
 
   // ── Tier 0.5: Redis response cache — zero LLM tokens on hit ──────────
   // Only check cache for non-personalized tiers (1 and wallet-less 2).
