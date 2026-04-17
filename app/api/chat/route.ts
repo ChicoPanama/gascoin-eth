@@ -26,6 +26,7 @@ export const maxDuration = 30;
 // Model selection — free Nemotron via OpenRouter when key present, Gateway fallback.
 //   T1/T2/T3 → nvidia/nemotron-3-super-120b-a12b:free  (120B total, 12B active MoE, free)
 // Without key: Haiku (T1) + Sonnet (T2/T3) via Vercel AI Gateway.
+console.log('[chat/init] OPENROUTER_API_KEY present:', !!process.env.OPENROUTER_API_KEY);
 const openRouter = process.env.OPENROUTER_API_KEY
   ? createOpenAI({
       baseURL: 'https://openrouter.ai/api/v1',
@@ -516,7 +517,7 @@ export async function POST(req: Request) {
       system: MINI_SYSTEM_PROMPT,
       messages,
       maxOutputTokens: 180,
-      onError: ({ error }) => console.error('[chat/t1] error', error),
+      onError: ({ error }) => console.error('[chat/t1] error', (error as Error)?.name, (error as Error)?.message, JSON.stringify(error)),
       onFinish: ({ text }) => {
         if (text) setChatCache(lastUserText, text, 1).catch(() => {});
       },
@@ -542,7 +543,7 @@ export async function POST(req: Request) {
     messages,
     ...(tools && { tools }),
     maxOutputTokens: tier === 3 ? 500 : 400,
-    onError: ({ error }) => console.error('[chat/t23] error', error),
+    onError: ({ error }) => console.error('[chat/t23] error', (error as Error)?.name, (error as Error)?.message, JSON.stringify(error)),
     onFinish: ({ text }) => {
       if (wallet && lastUserText && text) {
         saveConvMemory(wallet, lastUserText, text).catch(() => {});
