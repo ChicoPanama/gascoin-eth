@@ -38,10 +38,15 @@ vi.mock('@/lib/mem0', () => ({
   MEM0_APPS: { SUBMIT: 'gascoin-submit' },
 }));
 
+vi.mock('@/lib/knowledge-base', () => ({
+  writeIntelligence: vi.fn().mockResolvedValue(undefined),
+}));
+
 import { runFraudChecks } from '@/lib/integrations/fraud';
 import { isAiGatewayAvailable, generateAIJson } from '@/lib/integrations/ai-gateway';
 import { checkExifMetadata, checkImageDimensions, type PipelineResult } from '@/lib/integrations/receipt-pipeline';
 import { writeFraudSignal, addMemory } from '@/lib/mem0';
+import { writeIntelligence } from '@/lib/knowledge-base';
 
 // ─── Fixtures ────────────────────────────────────────────────────────────────
 
@@ -392,5 +397,92 @@ describe('runFraudChecks — return shape', () => {
     expect(result.flags).toContain('no_make');
     expect(result.flags).toContain('screen_res');
     expect(result.flags).toContain('low_confidence');
+  });
+});
+
+// ─── P3-B: 2-flag boundary (>= FLAGS_THRESHOLD fix) ──────────────────────────
+
+describe('runFraudChecks — 2-flag boundary triggers Grok', () => {
+  beforeEach(() => { vi.clearAllMocks(); });
+
+  it('triggers Grok when flags.length === 2 (canonical screenshot pattern)', async () => {
+    vi.mocked(checkExifMetadata).mockReturnValueOnce({ score: 0.9, flags: ['no_exif_data', 'screen_dimensions'] } as any);
+    await runFraudChecks(DUMMY_BUF);
+    expect(generateAIJson).toHaveBeenCalledOnce();
+  });
+
+  it('does NOT trigger Grok when flags.length === 1 (below threshold)', async () => {
+    vi.mocked(checkExifMetadata).mockReturnValueOnce({ score: 0.9, flags: ['no_exif_data'] } as any);
+    await runFraudChecks(DUMMY_BUF);
+    expect(generateAIJson).not.toHaveBeenCalled();
+  });
+});
+
+// ─── P3-C: Grok low verdict must not downgrade heuristic high ────────────────
+
+describe('runFraudChecks — Grok low verdict does not downgrade heuristic high', () => {
+  beforeEach(() => { vi.clearAllMocks(); });
+
+  it('keeps fraudRisk=high when Grok returns low but heuristic is high', async () => {
+    mockGrok({ fraudRiskLevel: 'low', confidence: 0.9 });
+    // is_digitally_manipulated → aiScore=0.8 → Grok triggered; heuristic fraudRisk='high' from pipeline
+    const pipeline = { ...makePipeline({ is_digitally_manipulated: true }), fraudRisk: 'high' as const };
+    const result = await runFraudChecks(DUMMY_BUF, pipeline as any);
+    expect(result.fraudRisk).toBe('high');
+  });
+
+  it('does NOT keep high when Grok returns high on a low heuristic (Grok elevates)', async () => {
+    mockGrok({ fraudRiskLevel: 'high', confidence: 0.9 });
+    const result = await runFraudChecks(DUMMY_BUF, makePipeline({ is_digitally_manipulated: true }));
+    expect(result.fraudRisk).toBe('high');
+  });
+});
+
+// ─── P3-A: raw_text included in Grok prompt ──────────────────────────────────
+
+describe('runFraudChecks — raw_text included in Grok prompt for math check', () => {
+  beforeEach(() => { vi.clearAllMocks(); });
+
+  it('passes raw_text to generateAIJson when ocrConfidence > 0.5 and raw_text exists', async () => {
+    const pipeline = makePipeline({ is_digitally_manipulated: true, raw_text: '10.0 gal $3.99 total $89.90' });
+    await runFraudChecks(DUMMY_BUF, pipeline);
+    const call = vi.mocked(generateAIJson).mock.calls[0];
+    expect(call[1].prompt).toContain('10.0 gal');
+  });
+
+  it('shows "not available" in prompt when raw_text is absent', async () => {
+    const pipeline = makePipeline({ is_digitally_manipulated: true });
+    await runFraudChecks(DUMMY_BUF, pipeline);
+    const call = vi.mocked(generateAIJson).mock.calls[0];
+    expect(call[1].prompt).toContain('not available');
+  });
+});
+
+// ─── P3-D: writeIntelligence called for high-confidence Grok verdicts ────────
+
+describe('runFraudChecks — writeIntelligence for high-confidence Grok verdicts', () => {
+  beforeEach(() => { vi.clearAllMocks(); });
+
+  it('calls writeIntelligence with grok_fraud_high when Grok returns high + confidence > 0.7', async () => {
+    mockGrok({ fraudRiskLevel: 'high', confidence: 0.85, reasoning: 'Suspicious signals detected' });
+    await runFraudChecks(DUMMY_BUF, makePipeline({ is_digitally_manipulated: true }), { wallet: WALLET, claimId: CLAIM_ID });
+    const calls = vi.mocked(writeIntelligence).mock.calls;
+    const call = calls.find(c => c[0].entry_type === 'grok_fraud_high');
+    expect(call).toBeDefined();
+    expect(call![0].severity).toBe('critical');
+    expect(call![0].entity_id).toBe(WALLET);
+    expect(call![0].detail_json).toMatchObject({ claimId: CLAIM_ID });
+  });
+
+  it('does NOT call writeIntelligence when Grok confidence <= 0.7', async () => {
+    mockGrok({ fraudRiskLevel: 'high', confidence: 0.65 });
+    await runFraudChecks(DUMMY_BUF, makePipeline({ is_digitally_manipulated: true }), { wallet: WALLET });
+    expect(vi.mocked(writeIntelligence).mock.calls.some(c => c[0].entry_type === 'grok_fraud_high')).toBe(false);
+  });
+
+  it('does NOT call writeIntelligence when no wallet in context', async () => {
+    mockGrok({ fraudRiskLevel: 'high', confidence: 0.85 });
+    await runFraudChecks(DUMMY_BUF, makePipeline({ is_digitally_manipulated: true }));
+    expect(writeIntelligence).not.toHaveBeenCalled();
   });
 });

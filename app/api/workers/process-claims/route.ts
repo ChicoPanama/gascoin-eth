@@ -94,14 +94,24 @@ export async function POST(req: Request) {
 
     const { data: prevClaims } = await supabase
       .from('claims')
-      .select('status')
+      .select('status, created_at')
       .eq('wallet', claim.wallet);
+
+    const sevenDaysAgo = new Date(Date.now() - 7 * 86400000).toISOString();
+    const recentRejections7d = (prevClaims || []).filter(
+      (c: any) => c.status === 'rejected' && c.created_at > sevenDaysAgo,
+    ).length;
+    const recentFlags7d = (prevClaims || []).filter(
+      (c: any) => c.status === 'needs_review' && c.created_at > sevenDaysAgo,
+    ).length;
 
     const claudeVerdict = await reviewClaim({
       claimId: claim.id,
       wallet: claim.wallet,
       xHandle: (claim as any).users?.x_handle || '',
-      tier: tier.slug,
+      // Use tier.name ('Fleet', 'Road Warrior', etc.) — must match TIER_MIN_CONFIDENCE
+      // keys in claude.ts. tier.slug ('fleet', 'road-warrior') would bypass tier floors.
+      tier: tier.name,
       amountSol: solAmount,
       gateResults: (gateRows || []).map((g: any) => ({ gate: g.gate_name, passed: g.passed, score: g.score, reason: g.reason_code })),
       riskScore: claim.risk_score ?? 0,
@@ -109,11 +119,14 @@ export async function POST(req: Request) {
       tamperScore: receiptMeta?.tamper_score ?? 0,
       fraudRisk: receiptMeta?.metadata_json?.fraudRisk ?? 'unknown',
       crossValidation: receiptMeta?.metadata_json?.crossValidation ?? null,
+      flags: receiptMeta?.metadata_json?.flags ?? [],
       ipCountry: (claim as any).ip_country,
       ocrCountry: receiptMeta?.metadata_json?.country ?? null,
       previousSubmissions: (prevClaims || []).length,
       previousApprovals: (prevClaims || []).filter((c: any) => ['approved', 'paid'].includes(c.status)).length,
       previousRejections: (prevClaims || []).filter((c: any) => c.status === 'rejected').length,
+      recentRejections7d,
+      recentFlags7d,
     });
 
     // Persist Claude's confidence score as a discrete column for trend analysis

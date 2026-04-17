@@ -6,9 +6,14 @@ vi.mock('@/lib/cache', () => ({
   cacheGetOrFetch: vi.fn(),
   cacheGet: vi.fn().mockResolvedValue(null),
   cacheSet: vi.fn().mockResolvedValue(true),
+  cacheIncr: vi.fn().mockResolvedValue(1),
   cacheSetIsMember: vi.fn().mockResolvedValue(false),
   cacheSetExists: vi.fn().mockResolvedValue(false),
   cacheSetReplace: vi.fn().mockResolvedValue(10),
+}));
+
+vi.mock('@/lib/knowledge-base', () => ({
+  writeIntelligence: vi.fn().mockResolvedValue(undefined),
 }));
 
 vi.mock('@/lib/x-api', () => ({
@@ -30,11 +35,13 @@ import {
   cacheGetOrFetch,
   cacheGet,
   cacheSet,
+  cacheIncr,
   cacheSetIsMember,
   cacheSetExists,
   cacheSetReplace,
 } from '@/lib/cache';
 import { getUserByUsername, getUserFollowers } from '@/lib/x-api';
+import { writeIntelligence } from '@/lib/knowledge-base';
 
 // ─── HTTP fetch mock ──────────────────────────────────────────────────────────
 
@@ -173,9 +180,19 @@ describe('getFollowerCount', () => {
     expect(count).toBe(500);
   });
 
-  it('returns -1 on cache miss when X_BEARER_TOKEN is missing', async () => {
-    delete process.env.X_BEARER_TOKEN;
+  it('returns follower count from getUserByUsername on cache miss', async () => {
     vi.mocked(cacheGetOrFetch).mockImplementationOnce(async (_key, fn) => fn());
+    vi.mocked(getUserByUsername).mockResolvedValueOnce({
+      user: { id: 'uid1', public_metrics: { followers_count: 42000 } } as any,
+      error: undefined,
+    });
+    const count = await getFollowerCount('@alice');
+    expect(count).toBe(42000);
+  });
+
+  it('returns -1 when getUserByUsername returns no user', async () => {
+    vi.mocked(cacheGetOrFetch).mockImplementationOnce(async (_key, fn) => fn());
+    vi.mocked(getUserByUsername).mockResolvedValueOnce({ user: null, error: 'not_found' } as any);
     const count = await getFollowerCount('@alice');
     expect(count).toBe(-1);
   });
@@ -262,18 +279,24 @@ describe('isFollowingGascoin — cold cache rebuild', () => {
 describe('recordXApiFailure', () => {
   beforeEach(() => { vi.clearAllMocks(); });
 
-  it('returns 1 on first failure (no prior count)', async () => {
-    vi.mocked(cacheGet).mockResolvedValueOnce(null);
+  it('uses cacheIncr for atomic increment', async () => {
+    vi.mocked(cacheIncr).mockResolvedValueOnce(1);
     const count = await recordXApiFailure();
+    expect(cacheIncr).toHaveBeenCalledWith('x_api:fail_count', 300);
     expect(count).toBe(1);
-    expect(cacheSet).toHaveBeenCalledWith('x_api:fail_count', 1, 300);
   });
 
-  it('increments existing count', async () => {
-    vi.mocked(cacheGet).mockResolvedValueOnce(2);
+  it('returns the incremented count from cacheIncr', async () => {
+    vi.mocked(cacheIncr).mockResolvedValueOnce(3);
     const count = await recordXApiFailure();
     expect(count).toBe(3);
-    expect(cacheSet).toHaveBeenCalledWith('x_api:fail_count', 3, 300);
+  });
+
+  it('does not call cacheGet or cacheSet (no race condition)', async () => {
+    vi.mocked(cacheIncr).mockResolvedValueOnce(2);
+    await recordXApiFailure();
+    expect(cacheGet).not.toHaveBeenCalled();
+    expect(cacheSet).not.toHaveBeenCalled();
   });
 });
 
@@ -359,5 +382,54 @@ describe('refreshGascoinFollowersCache', () => {
     const result = await refreshGascoinFollowersCache();
     expect(result.count).toBe(-1);
     expect(result.error).toBe('x_api_error');
+  });
+});
+
+// ─── fetchWithRetry — retry loop correctness ────────────────────────────────
+
+describe('fetchWithRetry (via verifyTweetProof)', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    process.env.X_BEARER_TOKEN = 'test-token';
+    process.env.X_STRICT_MODE = 'true';
+  });
+
+  it('retries on 503 and succeeds on second attempt', async () => {
+    vi.useFakeTimers();
+    let calls = 0;
+    global.fetch = vi.fn().mockImplementation(async () => {
+      calls++;
+      if (calls === 1) {
+        return { ok: false, status: 503, headers: { get: () => null }, json: vi.fn() };
+      }
+      return {
+        ok: true, status: 200,
+        headers: { get: () => null },
+        json: vi.fn().mockResolvedValue({
+          data: { text: '#gascoin @GasCoinApp filled up' },
+          includes: { users: [{ username: 'alice' }] },
+        }),
+      };
+    });
+    const p = verifyTweetProof('https://x.com/alice/status/999', '@alice');
+    await vi.runAllTimersAsync();
+    const result = await p;
+    vi.useRealTimers();
+    expect(calls).toBeGreaterThanOrEqual(2);
+    expect(result.ok).toBe(true);
+  });
+
+  it('calls writeIntelligence on 429 at last retry', async () => {
+    vi.useFakeTimers();
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: false, status: 429, headers: { get: () => null }, json: vi.fn(),
+    });
+    const p = verifyTweetProof('https://x.com/alice/status/999', '@alice');
+    await vi.runAllTimersAsync();
+    await p;
+    vi.useRealTimers();
+    expect(writeIntelligence).toHaveBeenCalledWith(
+      expect.objectContaining({ entry_type: 'x_api_quota_exhausted' }),
+    );
   });
 });

@@ -96,6 +96,24 @@ export async function cacheDel(key: string): Promise<boolean> {
 }
 
 /**
+ * Atomically increment a counter key and return the new value.
+ * Sets TTL on first increment (INCR creates the key if absent).
+ * Returns -1 on Redis failure — callers treat -1 as "not tracked".
+ */
+export async function cacheIncr(key: string, ttlSeconds: number): Promise<number> {
+  const client = getRedis();
+  if (!client) return -1;
+  const prefixed = `gc:${key}`;
+  try {
+    const next = await client.incr(prefixed);
+    if (next === 1) await client.expire(prefixed, ttlSeconds);
+    return next;
+  } catch {
+    return -1;
+  }
+}
+
+/**
  * Batch-fetch multiple cache keys in one round-trip (MGET).
  * Returns array parallel to input keys, with null for missing/unparseable entries.
  */

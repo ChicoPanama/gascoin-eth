@@ -1,14 +1,12 @@
 /**
  * xAI Grok Integration (via Vercel AI Gateway)
  *
- * Grok handles fraud reasoning across pre-computed signals (from Gemini vision
- * + X account checks + gate heuristics). Routed through the AI Gateway so we
- * get automatic prompt caching, failover to Gemini on outage, and unified
- * cost attribution via tags.
+ * `callGrok` is a general-purpose text wrapper used by the aggregate-intelligence
+ * worker for weekly narrative generation. The fraud cross-validation path
+ * (fraud.ts) calls generateAIJson directly for structured JSON output.
  *
- * The public API (callGrok, callGrokVision, isGrokAvailable, GrokResponse) is
- * preserved so existing call sites in fraud.ts and ai-points-engine.ts keep
- * working without changes — they're migrated separately.
+ * Routed through the AI Gateway for automatic failover to Gemini on xAI outage
+ * and unified cost attribution via tags.
  */
 
 import { generateAIText, isAiGatewayAvailable, AI_MODELS } from './ai-gateway';

@@ -256,13 +256,16 @@ export async function getSystemPrompt(key: PromptKey): Promise<string> {
     const exists = await has(key);
     if (exists) {
       const value = await get<string>(key);
-      if (typeof value === 'string' && value.length > 0) {
+      // Reject truncated or empty overrides — a prompt shorter than 500 chars
+      // is almost certainly incomplete and would degrade Claude's decisions.
+      if (typeof value === 'string' && value.length > 500) {
         warmCache.set(key, value);
         return value;
       }
     }
-  } catch {
-    // Silent — fall through to default
+  } catch (err) {
+    console.error(JSON.stringify({ event: 'edge_config_prompt_fail', key, error: String(err) }));
+    // Fall through to bundled default
   }
 
   const def = DEFAULTS[key];

@@ -110,7 +110,7 @@ export async function searchKB(tags: string[]): Promise<KBEntry[]> {
 // Claude context builder
 // ---------------------------------------------------------------------------
 
-const MAX_CONTEXT_CHARS = 1200; // ~300 tokens
+const MAX_CONTEXT_CHARS = 2000; // ~500 tokens — increased to fit Fleet-tier claims with 5+ failed gates
 
 /**
  * Build compressed Claude context from the knowledge base.
@@ -144,10 +144,12 @@ async function buildClaudeKBContextImpl(signals: {
   const sections: string[] = [];
   let charBudget = MAX_CONTEXT_CHARS;
 
+  const t0 = Date.now();
+
   // Always fetch policy thresholds (small, foundational)
   const policyEntries = await getKBEntries('policy');
   for (const entry of policyEntries.slice(0, 2)) {
-    const line = `[${entry.title}] ${entry.content.slice(0, 150)}`;
+    const line = `[${entry.title}] ${entry.content.slice(0, 200)}`;
     if (line.length <= charBudget) {
       sections.push(line);
       charBudget -= line.length;
@@ -158,7 +160,7 @@ async function buildClaudeKBContextImpl(signals: {
   if ((signals.riskScore > 0.5 || signals.fraudRisk === 'high') && charBudget > 100) {
     const fraudEntries = await getKBEntries('fraud_pattern');
     for (const entry of fraudEntries.slice(0, 2)) {
-      const line = `[FRAUD: ${entry.title}] ${entry.content.slice(0, 150)}`;
+      const line = `[FRAUD: ${entry.title}] ${entry.content.slice(0, 200)}`;
       if (line.length <= charBudget) {
         sections.push(line);
         charBudget -= line.length;
@@ -172,7 +174,7 @@ async function buildClaudeKBContextImpl(signals: {
       const slug = `gates/${gate.replace(/_/g, '-')}`;
       const entry = await getKBEntry(slug);
       if (entry) {
-        const line = `[Gate: ${entry.title}] ${entry.content.slice(0, 120)}`;
+        const line = `[Gate: ${entry.title}] ${entry.content.slice(0, 160)}`;
         if (line.length <= charBudget) {
           sections.push(line);
           charBudget -= line.length;
@@ -185,13 +187,20 @@ async function buildClaudeKBContextImpl(signals: {
   if (signals.hasReferralFlags && charBudget > 100) {
     const ringEntries = await searchKB(['referral', 'ring']);
     for (const entry of ringEntries.slice(0, 1)) {
-      const line = `[Referral: ${entry.title}] ${entry.content.slice(0, 150)}`;
+      const line = `[Referral: ${entry.title}] ${entry.content.slice(0, 200)}`;
       if (line.length <= charBudget) {
         sections.push(line);
         charBudget -= line.length;
       }
     }
   }
+
+  console.log(JSON.stringify({
+    event: 'kb_context_built',
+    durationMs: Date.now() - t0,
+    sections: sections.length,
+    charsUsed: MAX_CONTEXT_CHARS - charBudget,
+  }));
 
   return sections.join('\n');
 }

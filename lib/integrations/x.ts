@@ -21,52 +21,44 @@ function sleep(ms: number) {
 }
 
 async function fetchWithRetry(url: string, init: RequestInit, retries = 3): Promise<Response> {
-  let lastErr: any;
+  let lastErr: unknown;
   for (let i = 0; i < retries; i++) {
     try {
       const r = await fetch(url, init);
-      if (r.status >= 500 || r.status === 429) {
-        const isLastAttempt = i === retries - 1;
-        if (r.status === 429 && isLastAttempt) {
-          // O4: Surface quota exhaustion in admin dashboard intelligence feed
-          reportXApiQuotaExhausted(url).catch(() => {});
-        }
-        const wait = Number(r.headers.get('retry-after') || 0) * 1000 || (300 * Math.pow(2, i));
-        await sleep(wait);
+      // Success: return immediately. Only 5xx and 429 are retryable.
+      if (r.status < 500 && r.status !== 429) return r;
+      if (i === retries - 1) {
+        if (r.status === 429) reportXApiQuotaExhausted(url).catch(() => {});
+        return r;
       }
-      return r;
+      const wait = Number(r.headers.get('retry-after') || 0) * 1000 || (300 * Math.pow(2, i));
+      await sleep(wait);
     } catch (e) {
       lastErr = e;
-      await sleep(300 * Math.pow(2, i));
+      if (i < retries - 1) await sleep(300 * Math.pow(2, i));
     }
   }
-  throw lastErr || new Error('x_fetch_failed');
+  throw lastErr ?? new Error('x_fetch_failed');
 }
 
 /**
- * O4 — Write an intelligence_entries row when X API returns 429 and all
- * retries are exhausted. Fire-and-forget — never blocks a pipeline.
+ * Write an intelligence_entries row when X API returns 429 and all retries
+ * are exhausted. Fire-and-forget — never blocks a pipeline.
  */
-async function reportXApiQuotaExhausted(endpoint: string): Promise<void> {
-  try {
-    const { getSupabaseAdmin } = await import('../supabase');
-    const supabase = getSupabaseAdmin();
-    await supabase.from('intelligence_entries').insert({
-      entry_type: 'x_api_quota_exhausted',
-      entity_type: 'system',
-      entity_id: 'x_integration',
-      summary: 'X API rate limit (429) hit and all retries exhausted',
-      detail_json: { endpoint: endpoint.split('?')[0], ts: new Date().toISOString() },
-      severity: 'high',
-      pipeline_source: 'x_integration',
-    });
-  } catch {
-    // Silent — never block a pipeline on observability writes
-  }
+function reportXApiQuotaExhausted(endpoint: string): Promise<void> {
+  return writeIntelligence({
+    entry_type: 'x_api_quota_exhausted',
+    entity_type: 'system',
+    entity_id: 'x_integration',
+    summary: 'X API rate limit (429) hit and all retries exhausted',
+    detail_json: { endpoint: endpoint.split('?')[0], ts: new Date().toISOString() },
+    severity: 'high',
+    pipeline_source: 'x_integration',
+  });
 }
 
 async function verifyViaXApi(tweetId: string, expectedHandle: string): Promise<TweetProofResult> {
-  const token = process.env.X_BEARER_TOKEN;
+  const token = process.env.X_API_BEARER_TOKEN || process.env.X_BEARER_TOKEN;
   if (!token) return { ok: false, reason: 'x_token_missing' };
 
   const endpoint = new URL(`https://api.x.com/2/tweets/${tweetId}`);
@@ -137,21 +129,19 @@ async function verifyViaOEmbed(tweetUrl: string, expectedHandle: string): Promis
   };
 }
 
-import { cacheGetOrFetch, cacheGet, cacheSet, cacheSetIsMember, cacheSetExists, cacheSetReplace } from '../cache';
+import { cacheGetOrFetch, cacheGet, cacheSet, cacheIncr, cacheSetIsMember, cacheSetExists, cacheSetReplace } from '../cache';
+import { writeIntelligence } from '../knowledge-base';
 
 const X_API_FAIL_KEY = 'x_api:fail_count';
 const X_API_FAIL_WINDOW_SECONDS = 300; // 5 minutes
 const X_API_FAIL_THRESHOLD = 3;
 
 /**
- * Increment the X API failure counter. Returns the new count.
+ * Atomically increment the X API failure counter. Returns the new count.
  * Used by the submit route to detect sustained outages and write PIPELINE_ANOMALY.
  */
 export async function recordXApiFailure(): Promise<number> {
-  const current = await cacheGet<number>(X_API_FAIL_KEY);
-  const next = (typeof current === 'number' ? current : 0) + 1;
-  await cacheSet(X_API_FAIL_KEY, next, X_API_FAIL_WINDOW_SECONDS);
-  return next;
+  return cacheIncr(X_API_FAIL_KEY, X_API_FAIL_WINDOW_SECONDS);
 }
 
 export function isXApiSustainedFailure(count: number): boolean {
@@ -159,24 +149,8 @@ export function isXApiSustainedFailure(count: number): boolean {
 }
 
 async function fetchFollowerCount(handle: string): Promise<number> {
-  const token = process.env.X_BEARER_TOKEN;
-  if (!token) return -1;
-
-  const username = handle.replace(/^@/, '');
-  const endpoint = new URL(`https://api.x.com/2/users/by/username/${username}`);
-  endpoint.searchParams.set('user.fields', 'public_metrics');
-
-  try {
-    const r = await fetchWithRetry(endpoint.toString(), {
-      headers: { authorization: `Bearer ${token}` },
-      cache: 'no-store'
-    }, 2);
-    if (!r.ok) return -1;
-    const j = (await r.json()) as any;
-    return Number(j?.data?.public_metrics?.followers_count ?? -1);
-  } catch {
-    return -1;
-  }
+  const lookup = await getUserByUsername(handle.replace(/^@/, ''));
+  return Number(lookup.user?.public_metrics?.followers_count ?? -1);
 }
 
 export async function getFollowerCount(handle: string): Promise<number> {

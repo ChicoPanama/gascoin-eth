@@ -9,6 +9,7 @@ import {
 import { getSystemPrompt, PROMPT_KEYS } from '../prompts';
 import { generateAIJson, isAiGatewayAvailable, AI_MODELS } from './ai-gateway';
 import { writeFraudSignal, addMemory, MEM0_CATEGORIES, MEM0_AGENTS, MEM0_APPS } from '../mem0';
+import { writeIntelligence } from '../knowledge-base';
 
 export type FraudSignals = {
   aiScore: number;
@@ -18,7 +19,7 @@ export type FraudSignals = {
   hashSha256: string;
   pHash: string;
   authenticityScore: number;
-  fraudRisk: string;
+  fraudRisk: 'low' | 'medium' | 'high' | 'critical'; // C2: typed union, not string
   exifScore: number;
   dimensionScore: number;
   flags: string[];
@@ -39,6 +40,7 @@ const FraudResultSchema = z.object({
   concerns: z.array(z.string()),
 });
 
+// C1: raw_text added so Grok can perform math consistency checks
 function buildFraudUserPrompt(signals: {
   aiScore: number;
   tamperScore: number;
@@ -49,6 +51,7 @@ function buildFraudUserPrompt(signals: {
   isPhysicalReceipt?: boolean;
   isDigitallyManipulated?: boolean;
   country?: string;
+  raw_text?: string;
 }): string {
   return `Analyze these signals for one submission:
 
@@ -61,10 +64,12 @@ function buildFraudUserPrompt(signals: {
 - Digitally manipulated: ${signals.isDigitallyManipulated ?? 'unknown'}
 - Country: ${signals.country ?? 'unknown'}
 - Flags: ${signals.flags.length > 0 ? signals.flags.join(', ') : 'none'}
+- Raw text (for math consistency check): ${signals.raw_text ? signals.raw_text.slice(0, 500) : 'not available'}
 
 Return the verdict JSON.`;
 }
 
+// P1-C: userId threaded through for Gateway per-user attribution + rate limiting
 async function aiFraudAnalysis(signals: {
   aiScore: number;
   tamperScore: number;
@@ -75,7 +80,8 @@ async function aiFraudAnalysis(signals: {
   isPhysicalReceipt?: boolean;
   isDigitallyManipulated?: boolean;
   country?: string;
-}): Promise<CrossValidationResult> {
+  raw_text?: string;
+}, userId?: string): Promise<CrossValidationResult> {
   if (!isAiGatewayAvailable()) {
     return {
       fraudRiskLevel: 'medium',
@@ -92,9 +98,12 @@ async function aiFraudAnalysis(signals: {
     prompt: buildFraudUserPrompt(signals),
     maxTokens: 300,
     temperature: 0.1,
-    enableAnthropicCache: true, // safe no-op on non-anthropic, future-proofs migration
+    // P1-D: removed enableAnthropicCache (no-op on Grok); added gateway edge cache
+    // for identical signal combos during submission bursts
+    gatewayCacheSeconds: 30,
     fallbackModels: [AI_MODELS.GEMINI_FAST, 'google/gemini-2.5-flash'],
     tags: ['feature:fraud-reasoning', 'pipeline:submit'],
+    userId,
   });
 
   if (!result.ok) {
@@ -184,14 +193,29 @@ function recordFraudSignalsToMem0(
         appId: MEM0_APPS.SUBMIT,
         metadata: { pipeline: 'grok_fraud', signal: 'score_elevation', severity: 'high' },
       }).catch(() => {});
+    // P1-B: write to intelligence_entries so the aggregate-intelligence worker
+    // and Claude's prior intel query both see this high-confidence Grok verdict.
+    writeIntelligence({
+      entry_type: 'grok_fraud_high',
+      entity_type: 'wallet',
+      entity_id: wallet,
+      summary: `Grok cross-validation: HIGH fraud (confidence=${signals.crossValidation.confidence.toFixed(2)}) — ${signals.crossValidation.reasoning.slice(0, 120)}`,
+      detail_json: { claimId, confidence: signals.crossValidation.confidence, concerns: signals.crossValidation.concerns },
+      severity: 'critical',
+      pipeline_source: 'grok_fraud',
+    }).catch(() => {});
   }
 }
 
-// ── Fraud thresholds — configurable via env so they can be tuned without a redeploy ──
-// Defaults match the original hardcoded values; override in .env / Vercel dashboard.
+// ── Fraud thresholds — configurable via env; require redeployment (or new cold
+// start) to take effect. For live tuning without a redeploy, move these keys
+// into Edge Config (the EDGE_CONFIG env var is already wired for prompts). ──
 const AI_SCORE_THRESHOLD = Number(process.env.AI_SCORE_THRESHOLD ?? 0.3);
 const TAMPER_SCORE_THRESHOLD = Number(process.env.TAMPER_SCORE_THRESHOLD ?? 0.3);
 const FLAGS_THRESHOLD = Number(process.env.FLAGS_THRESHOLD ?? 2);
+
+// Risk rank for no-downgrade merge (higher rank wins)
+const RISK_RANK: Record<string, number> = { low: 0, medium: 1, high: 2, critical: 3 };
 
 export async function runFraudChecks(raw: ArrayBuffer, pipeline?: PipelineResult, context?: { wallet?: string; claimId?: string }): Promise<FraudSignals> {
   const buf = Buffer.from(raw);
@@ -227,12 +251,18 @@ export async function runFraudChecks(raw: ArrayBuffer, pipeline?: PipelineResult
   tamperScore = Math.max(0, Math.min(1, tamperScore));
 
   const authenticityScore = pipeline?.authenticityScore ?? ((exif.score + dims.score) / 2);
-  const fraudRisk = pipeline?.fraudRisk ?? (authenticityScore > 0.6 ? 'low' : authenticityScore > 0.4 ? 'medium' : 'high');
+  const heuristicRisk = pipeline?.fraudRisk ?? (authenticityScore > 0.6 ? 'low' : authenticityScore > 0.4 ? 'medium' : 'high') as 'low' | 'medium' | 'high' | 'critical';
   const flags = [...(exif.flags || []), ...(dims.flags || []), ...(pipeline?.flags || [])];
 
-  // Run AI cross-validation for non-trivial cases
+  // When Gemini was unavailable the extraction is heuristic-only — surface this
+  // so Grok and Claude know the signals are degraded, not indicative of fraud.
+  if (pipeline?.extraction?.ocr_fallback) flags.push('ocr_unavailable');
+
+  // Run AI cross-validation for non-trivial cases.
+  // P1-A: use >= FLAGS_THRESHOLD (was >) so 2 flags (e.g. no_exif + screen_dims)
+  // trigger Grok — the canonical 2-signal screenshot pattern was being skipped.
   let crossValidation: CrossValidationResult | null = null;
-  if (aiScore > AI_SCORE_THRESHOLD || tamperScore > TAMPER_SCORE_THRESHOLD || flags.length > FLAGS_THRESHOLD) {
+  if (aiScore > AI_SCORE_THRESHOLD || tamperScore > TAMPER_SCORE_THRESHOLD || flags.length >= FLAGS_THRESHOLD) {
     crossValidation = await aiFraudAnalysis({
       aiScore,
       tamperScore,
@@ -243,7 +273,8 @@ export async function runFraudChecks(raw: ArrayBuffer, pipeline?: PipelineResult
       isPhysicalReceipt: pipeline?.extraction?.is_physical_receipt,
       isDigitallyManipulated: pipeline?.extraction?.is_digitally_manipulated,
       country: pipeline?.extraction?.station_country ?? undefined,
-    });
+      raw_text: pipeline?.extraction?.raw_text, // C1: enables math consistency check
+    }, context?.wallet); // P1-C: wallet as userId for Gateway attribution
 
     // AI cross-validation can elevate risk if it detects something heuristics missed
     if (crossValidation.fraudRiskLevel === 'high' && crossValidation.confidence > 0.7) {
@@ -264,6 +295,12 @@ export async function runFraudChecks(raw: ArrayBuffer, pipeline?: PipelineResult
     crossValidation,
   });
 
+  // P2-C: never let Grok downgrade a heuristic 'high'/'critical' to 'low'/'medium'.
+  // Take the higher-ranked label between heuristic and Grok verdict.
+  const hRank = RISK_RANK[heuristicRisk] ?? 0;
+  const gRank = crossValidation ? (RISK_RANK[crossValidation.fraudRiskLevel] ?? 0) : -1;
+  const fraudRisk = (gRank >= hRank ? crossValidation!.fraudRiskLevel : heuristicRisk) as 'low' | 'medium' | 'high' | 'critical';
+
   return {
     aiScore,
     tamperScore,
@@ -272,7 +309,7 @@ export async function runFraudChecks(raw: ArrayBuffer, pipeline?: PipelineResult
     hashSha256: exactHash,
     pHash,
     authenticityScore,
-    fraudRisk: crossValidation?.fraudRiskLevel ?? fraudRisk,
+    fraudRisk,
     exifScore: exif.score,
     dimensionScore: dims.score,
     flags,

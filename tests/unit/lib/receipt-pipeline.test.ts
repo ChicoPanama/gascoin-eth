@@ -11,7 +11,12 @@ vi.mock('@/lib/integrations/ai-gateway', () => ({
 }));
 
 vi.mock('@/lib/cache', () => ({
-  cacheGetOrFetch: vi.fn().mockImplementation(async (_key: string, fn: () => unknown) => fn()),
+  cacheGet: vi.fn().mockResolvedValue(null),
+  cacheSet: vi.fn().mockResolvedValue(true),
+}));
+
+vi.mock('@/lib/knowledge-base', () => ({
+  writeIntelligence: vi.fn().mockResolvedValue(undefined),
 }));
 
 vi.mock('@/lib/prompts', () => ({
@@ -214,5 +219,117 @@ describe('processReceipt — AI path (gateway available)', () => {
     const result = await processReceipt(fakeReceiptBuffer(), 'image/jpeg');
     expect(result.flags).toContain('not_physical_receipt');
     expect(result.fraudRisk).not.toBe('low');
+  });
+
+  it('does not double-penalise is_digitally_manipulated=true', async () => {
+    const { isAiGatewayAvailable, generateAIJsonVision } = await import('@/lib/integrations/ai-gateway');
+    vi.mocked(isAiGatewayAvailable).mockReturnValueOnce(true);
+    vi.mocked(generateAIJsonVision).mockResolvedValueOnce({
+      ok: true,
+      data: {
+        station_country: 'US', receipt_date: '2026-04-17', total_amount: 50, currency: 'USD',
+        wallet_address: 'GAsWallet1', has_handwriting: true, has_gascoin_hashtag: true,
+        is_physical_receipt: true, is_gas_station: true,
+        is_digitally_manipulated: true, confidence: 0.9,
+        fraud_notes: '', raw_text: 'SHELL Total $50',
+      },
+    } as any);
+
+    const manipulatedResult = await processReceipt(fakeReceiptBuffer(), 'image/jpeg');
+
+    // Re-run with identical extraction but is_digitally_manipulated=false for comparison
+    vi.mocked(isAiGatewayAvailable).mockReturnValueOnce(true);
+    vi.mocked(generateAIJsonVision).mockResolvedValueOnce({
+      ok: true,
+      data: {
+        station_country: 'US', receipt_date: '2026-04-17', total_amount: 50, currency: 'USD',
+        wallet_address: 'GAsWallet1', has_handwriting: true, has_gascoin_hashtag: true,
+        is_physical_receipt: true, is_gas_station: true,
+        is_digitally_manipulated: false, confidence: 0.9,
+        fraud_notes: '', raw_text: 'SHELL Total $50',
+      },
+    } as any);
+    const { cacheGet } = await import('@/lib/cache');
+    vi.mocked(cacheGet).mockResolvedValue(null);
+    const cleanResult = await processReceipt(fakeReceiptBuffer(), 'image/jpeg');
+
+    // Manipulation should reduce score by exactly 0.10 (missing the +0.10 bonus), not 0.25
+    const scoreDiff = cleanResult.authenticityScore - manipulatedResult.authenticityScore;
+    expect(scoreDiff).toBeCloseTo(0.10, 5);
+    expect(manipulatedResult.flags).toContain('digitally_manipulated');
+  });
+
+  it('adds no_gascoin_hashtag flag when has_gascoin_hashtag is false', async () => {
+    const { isAiGatewayAvailable, generateAIJsonVision } = await import('@/lib/integrations/ai-gateway');
+    vi.mocked(isAiGatewayAvailable).mockReturnValueOnce(true);
+    vi.mocked(generateAIJsonVision).mockResolvedValueOnce({
+      ok: true,
+      data: {
+        station_country: 'US', receipt_date: '2026-04-17', total_amount: 50, currency: 'USD',
+        wallet_address: 'GAsWallet1', has_handwriting: true, has_gascoin_hashtag: false,
+        is_physical_receipt: true, is_gas_station: true,
+        is_digitally_manipulated: false, confidence: 0.9,
+        fraud_notes: '', raw_text: 'SHELL Total $50',
+      },
+    } as any);
+    const result = await processReceipt(fakeReceiptBuffer(), 'image/jpeg');
+    expect(result.flags).toContain('no_gascoin_hashtag');
+  });
+
+  it('does not add no_gascoin_hashtag flag when has_gascoin_hashtag is true', async () => {
+    const { isAiGatewayAvailable, generateAIJsonVision } = await import('@/lib/integrations/ai-gateway');
+    vi.mocked(isAiGatewayAvailable).mockReturnValueOnce(true);
+    vi.mocked(generateAIJsonVision).mockResolvedValueOnce({
+      ok: true,
+      data: {
+        station_country: 'US', receipt_date: '2026-04-17', total_amount: 50, currency: 'USD',
+        wallet_address: 'GAsWallet1', has_handwriting: true, has_gascoin_hashtag: true,
+        is_physical_receipt: true, is_gas_station: true,
+        is_digitally_manipulated: false, confidence: 0.9,
+        fraud_notes: '', raw_text: 'SHELL Total $50',
+      },
+    } as any);
+    const result = await processReceipt(fakeReceiptBuffer(), 'image/jpeg');
+    expect(result.flags).not.toContain('no_gascoin_hashtag');
+  });
+});
+
+// ─── extractAndScoreReceipt — cache behaviour ────────────────────────────────
+
+describe('extractAndScoreReceipt — fallback not cached', () => {
+  beforeEach(() => { vi.clearAllMocks(); });
+
+  it('does not call cacheSet when extraction returns ocr_fallback=true', async () => {
+    const { isAiGatewayAvailable } = await import('@/lib/integrations/ai-gateway');
+    const { extractAndScoreReceipt } = await import('@/lib/integrations/receipt-pipeline');
+    const { cacheGet, cacheSet } = await import('@/lib/cache');
+    vi.mocked(isAiGatewayAvailable).mockReturnValueOnce(false); // forces fallback
+    vi.mocked(cacheGet).mockResolvedValue(null); // cold cache
+
+    await extractAndScoreReceipt(fakeReceiptBuffer(), 'image/jpeg');
+    expect(cacheSet).not.toHaveBeenCalled();
+  });
+
+  it('calls cacheSet when extraction succeeds (no ocr_fallback)', async () => {
+    const { isAiGatewayAvailable, generateAIJsonVision } = await import('@/lib/integrations/ai-gateway');
+    const { extractAndScoreReceipt } = await import('@/lib/integrations/receipt-pipeline');
+    const { cacheGet, cacheSet } = await import('@/lib/cache');
+    vi.mocked(isAiGatewayAvailable).mockReturnValueOnce(true);
+    vi.mocked(cacheGet).mockResolvedValue(null);
+    vi.mocked(generateAIJsonVision).mockResolvedValueOnce({
+      ok: true,
+      data: {
+        station_country: 'US', receipt_date: '2026-04-17', total_amount: 50, currency: 'USD',
+        wallet_address: null, has_handwriting: false, has_gascoin_hashtag: true,
+        is_physical_receipt: true, is_gas_station: true,
+        is_digitally_manipulated: false, confidence: 0.85,
+        fraud_notes: '', raw_text: 'SHELL Total $50',
+      },
+    } as any);
+
+    await extractAndScoreReceipt(fakeReceiptBuffer(), 'image/jpeg');
+    // Allow the fire-and-forget cacheSet to resolve
+    await Promise.resolve();
+    expect(cacheSet).toHaveBeenCalled();
   });
 });

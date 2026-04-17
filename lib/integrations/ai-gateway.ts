@@ -169,10 +169,32 @@ function buildMessages(opts: AICallOptions): ModelMessage[] {
 
 function formatError(err: unknown): { error: string; code?: number } {
   if (APICallError.isInstance(err)) {
-    return { error: `AI Gateway ${err.statusCode}: ${err.message.slice(0, 200)}`, code: err.statusCode };
+    return { error: `AI Gateway ${err.statusCode}: ${err.message.slice(0, 400)}`, code: err.statusCode };
   }
-  if (err instanceof Error) return { error: err.message.slice(0, 300) };
+  if (err instanceof Error) return { error: err.message.slice(0, 400) };
   return { error: 'Unknown AI Gateway error' };
+}
+
+// Exponential backoff retry for 429 rate-limit responses.
+// Delays: 5s, 10s, 20s (capped at 60s). Only retries on 429 — all other
+// errors propagate immediately so callers can return a 'flag' verdict.
+async function withRetry<T>(fn: () => Promise<T>): Promise<T> {
+  const MAX_RETRIES = 3;
+  let lastErr: unknown;
+  for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+    try {
+      return await fn();
+    } catch (err) {
+      const is429 = APICallError.isInstance(err) && err.statusCode === 429;
+      if (is429 && attempt < MAX_RETRIES) {
+        await new Promise<void>((r) => setTimeout(r, Math.min(Math.pow(2, attempt) * 5000, 60000)));
+        continue;
+      }
+      lastErr = err;
+      break;
+    }
+  }
+  throw lastErr;
 }
 
 // ── Public API: plain text ────────────────────────────────────────────────
@@ -185,14 +207,14 @@ export async function generateAIText(opts: AICallOptions): Promise<AITextResult>
   const model = opts.model || AI_MODELS.GEMINI_FAST;
 
   try {
-    const result = await generateText({
+    const result = await withRetry(() => generateText({
       model,
       messages: buildMessages(opts),
       maxOutputTokens: opts.maxTokens ?? 500,
       temperature: opts.temperature ?? 0,
       providerOptions: buildProviderOptions(opts),
       abortSignal: opts.signal,
-    });
+    }));
 
     return {
       ok: true,
@@ -223,7 +245,7 @@ export async function generateAIJson<T extends ZodTypeAny>(
   const model = opts.model || AI_MODELS.GEMINI_FAST;
 
   try {
-    const result = await generateText({
+    const result = await withRetry(() => generateText({
       model,
       messages: buildMessages(opts),
       maxOutputTokens: opts.maxTokens ?? 500,
@@ -231,7 +253,7 @@ export async function generateAIJson<T extends ZodTypeAny>(
       output: Output.object({ schema }),
       providerOptions: buildProviderOptions(opts),
       abortSignal: opts.signal,
-    });
+    }));
 
     const data = result.output as z.infer<T>;
     return {
@@ -293,7 +315,7 @@ export async function generateAIJsonVision<T extends ZodTypeAny>(
   });
 
   try {
-    const result = await generateText({
+    const result = await withRetry(() => generateText({
       model,
       messages,
       maxOutputTokens: opts.maxTokens ?? 1000,
@@ -301,7 +323,7 @@ export async function generateAIJsonVision<T extends ZodTypeAny>(
       output: Output.object({ schema }),
       providerOptions: buildProviderOptions(opts),
       abortSignal: opts.signal,
-    });
+    }));
 
     return {
       ok: true,

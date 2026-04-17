@@ -2,8 +2,9 @@ import crypto from 'crypto';
 import sharp from 'sharp';
 import { z } from 'zod';
 import { generateAIJsonVision, isAiGatewayAvailable, AI_MODELS } from './ai-gateway';
-import { cacheGetOrFetch } from '../cache';
+import { cacheGet, cacheSet } from '../cache';
 import { getSystemPrompt, PROMPT_KEYS } from '../prompts';
+import { writeIntelligence } from '../knowledge-base';
 
 // ═══════════════════════════════════════════
 // GASCOIN Receipt Processing Pipeline
@@ -290,42 +291,85 @@ async function doReceiptExtraction(buf: Buffer, mimeType: string): Promise<Recei
   // redeploy. Falls back to bundled default from lib/prompts.ts.
   const systemPrompt = await getSystemPrompt(PROMPT_KEYS.GEMINI_RECEIPT);
 
-  const timeoutFallback = new Promise<ReceiptExtraction>((resolve) =>
-    setTimeout(() => resolve(fallbackExtraction()), GEMINI_TIMEOUT_MS),
-  );
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), GEMINI_TIMEOUT_MS);
 
-  const extraction = generateAIJsonVision(ReceiptSchema, {
-    model: AI_MODELS.GEMINI_VISION,
-    system: systemPrompt,
-    prompt:
-      'Extract structured data from this gas-station receipt and detect fraud signals. Return the JSON object only.',
-    image: buf,
-    mimeType: mimeType || 'image/jpeg',
-    maxTokens: 1200,
-    temperature: 0,
-    fallbackModels: [AI_MODELS.GEMINI_FAST, 'google/gemini-2.5-flash'],
-    tags: ['feature:receipt-ocr', 'pipeline:submit'],
-  }).then((result) => {
+  try {
+    const result = await generateAIJsonVision(ReceiptSchema, {
+      model: AI_MODELS.GEMINI_VISION,
+      system: systemPrompt,
+      prompt:
+        'Extract structured data from this gas-station receipt and detect fraud signals. Return the JSON object only.',
+      image: buf,
+      mimeType: mimeType || 'image/jpeg',
+      maxTokens: 1200,
+      temperature: 0,
+      fallbackModels: [AI_MODELS.GEMINI_FAST, 'google/gemini-2.5-flash'],
+      tags: ['feature:receipt-ocr', 'pipeline:submit'],
+      signal: controller.signal,
+    });
+    clearTimeout(timeoutId);
     if (!result.ok) {
-      console.error('Receipt extraction failed:', result.error);
+      writeIntelligence({
+        entry_type: 'gemini_vision_error',
+        entity_type: 'system',
+        entity_id: 'receipt_pipeline',
+        summary: `Gemini Vision extraction failed: ${(result.error ?? '').slice(0, 200)}`,
+        detail_json: { mimeType },
+        severity: 'high',
+        pipeline_source: 'receipt_pipeline',
+      }).catch(() => {});
       return fallbackExtraction();
     }
     return result.data;
-  });
-
-  return Promise.race([extraction, timeoutFallback]);
+  } catch (err) {
+    clearTimeout(timeoutId);
+    if (controller.signal.aborted) {
+      writeIntelligence({
+        entry_type: 'gemini_vision_timeout',
+        entity_type: 'system',
+        entity_id: 'receipt_pipeline',
+        summary: `Gemini Vision timed out after ${GEMINI_TIMEOUT_MS}ms`,
+        detail_json: { mimeType },
+        severity: 'high',
+        pipeline_source: 'receipt_pipeline',
+      }).catch(() => {});
+    } else {
+      writeIntelligence({
+        entry_type: 'gemini_vision_error',
+        entity_type: 'system',
+        entity_id: 'receipt_pipeline',
+        summary: `Gemini Vision threw: ${String(err instanceof Error ? err.message : err).slice(0, 200)}`,
+        detail_json: { mimeType },
+        severity: 'high',
+        pipeline_source: 'receipt_pipeline',
+      }).catch(() => {});
+    }
+    return fallbackExtraction();
+  }
 }
 
-export async function extractAndScoreReceipt(buf: Buffer, mimeType: string): Promise<ReceiptExtraction> {
+export async function extractAndScoreReceipt(
+  buf: Buffer,
+  mimeType: string,
+  sha256?: string,
+): Promise<ReceiptExtraction> {
   // Upstash exact-match dedup by SHA256: identical uploads skip the AI call
-  // entirely (7d TTL). Single-flight coalescing in cacheGetOrFetch also
-  // collapses concurrent duplicate uploads within the same warm instance.
-  const sha256 = crypto.createHash('sha256').update(buf).digest('hex');
-  return cacheGetOrFetch(
-    `receipt:extract:${sha256}`,
-    () => doReceiptExtraction(buf, mimeType),
-    7 * 24 * 60 * 60, // 7 days
-  );
+  // entirely (7d TTL). sha256 may be passed in from processReceipt to avoid
+  // computing it twice.
+  const hash = sha256 ?? computeExactHash(buf);
+  const key = `receipt:extract:${hash}`;
+
+  const cached = await cacheGet<ReceiptExtraction>(key);
+  if (cached !== null) return cached;
+
+  const result = await doReceiptExtraction(buf, mimeType);
+  // Never cache fallback results — a 7-day cache of ocr_fallback:true would
+  // permanently degrade that image hash during an outage window.
+  if (!result.ocr_fallback) {
+    cacheSet(key, result, 7 * 24 * 60 * 60).catch(() => {});
+  }
+  return result;
 }
 
 export function fallbackExtraction(): ReceiptExtraction {
@@ -359,13 +403,12 @@ export async function processReceipt(buf: Buffer, mimeType: string): Promise<Pip
   // Steps 1-3: Free, instant, local
   const exif = checkExifMetadata(buf);
   const dimensions = checkImageDimensions(buf);
-  const [perceptualHash, exactHash] = await Promise.all([
-    computePerceptualHash(buf),
-    Promise.resolve(computeExactHash(buf)),
-  ]);
+  const exactHash = computeExactHash(buf);
+  const perceptualHash = await computePerceptualHash(buf);
 
-  // Step 4: Gemini Vision (one API call)
-  const extraction = await extractAndScoreReceipt(buf, mimeType);
+  // Step 4: Gemini Vision (one API call). Pass pre-computed hash to avoid
+  // computing SHA-256 a second time inside extractAndScoreReceipt.
+  const extraction = await extractAndScoreReceipt(buf, mimeType, exactHash);
 
   // Combine all signals into authenticity score
   const allFlags = [...exif.flags, ...dimensions.flags];
@@ -384,14 +427,19 @@ export async function processReceipt(buf: Buffer, mimeType: string): Promise<Pip
   if (extraction.is_gas_station) authenticityScore += 0.10;
   else allFlags.push('not_gas_station');
 
+  // Award +0.10 for unmanipulated images; manipulation is already captured as
+  // a flag and weighed down via reduced authenticityScore contributions above —
+  // no additional score deduction here to avoid double-penalising a single signal.
   if (!extraction.is_digitally_manipulated) authenticityScore += 0.10;
-  else { authenticityScore -= 0.15; allFlags.push('digitally_manipulated'); }
+  else allFlags.push('digitally_manipulated');
 
   if (extraction.has_handwriting) authenticityScore += 0.05;
   else allFlags.push('no_handwriting_detected');
 
   if (extraction.wallet_address) authenticityScore += 0.05;
   else allFlags.push('no_wallet_address_found');
+
+  if (!extraction.has_gascoin_hashtag) allFlags.push('no_gascoin_hashtag');
 
   authenticityScore = Math.max(0, Math.min(1, authenticityScore));
 

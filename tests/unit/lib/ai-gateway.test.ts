@@ -116,8 +116,14 @@ describe('generateAIText', () => {
   });
 
   it('includes status code for APICallError', async () => {
-    vi.mocked(generateText).mockRejectedValueOnce(makeApiError(429));
-    const result = await generateAIText({ prompt: 'hello' });
+    vi.useFakeTimers();
+    // All retry attempts fail with 429 so the final result propagates the status code
+    vi.mocked(generateText).mockRejectedValue(makeApiError(429));
+    const resultPromise = generateAIText({ prompt: 'hello' });
+    // Advance through all retry backoff delays (5s, 10s, 20s)
+    await vi.runAllTimersAsync();
+    const result = await resultPromise;
+    vi.useRealTimers();
     expect(result.ok).toBe(false);
     if (!result.ok) expect(result.code).toBe(429);
   });
