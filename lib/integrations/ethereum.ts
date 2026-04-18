@@ -52,7 +52,7 @@ export async function getWalletGascoinBalance(walletAddress: string): Promise<nu
       functionName: 'balanceOf',
       args: [walletAddress as Address],
     });
-    return Number(raw / SCALE);
+    return Number(raw) / Number(SCALE);
   } catch {
     return 0;
   }
