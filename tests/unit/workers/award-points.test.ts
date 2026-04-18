@@ -57,8 +57,8 @@ vi.mock('@/lib/token-tiers', () => ({
   }),
 }));
 
-// Solana integration — used inside the dynamic import in the worker for on-chain balance verification
-vi.mock('@/lib/integrations/solana', () => ({
+// Ethereum integration — used inside the dynamic import in the worker for on-chain balance verification
+vi.mock('@/lib/integrations/ethereum', () => ({
   getWalletGascoinBalance: vi.fn().mockResolvedValue(1),
   hasMinimumGascoin: vi.fn().mockResolvedValue({ ok: true, tokenBalance: 1 }),
 }));

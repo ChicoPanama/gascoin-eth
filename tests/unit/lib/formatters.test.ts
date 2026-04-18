@@ -3,8 +3,8 @@ import { truncateWallet, formatSol, timeAgo, formatRank } from '@/lib/formatters
 
 describe('truncateWallet', () => {
   it('truncates to 4 chars each side', () => {
-    const r = truncateWallet('GAsxK92TestWalletAddress1234567890abcdef12345');
-    expect(r).toMatch(/^.{4}\.\.\..{4}$/);
+    const r = truncateWallet('0x742d35Cc6634C0532925a3b844Bc454e4438f44e');
+    expect(r).toBe('0x742d...f44e');
   });
   it('returns short address unchanged', () => { expect(truncateWallet('short')).toBe('short'); });
 });

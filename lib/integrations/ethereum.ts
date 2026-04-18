@@ -12,12 +12,6 @@ import {
 import { privateKeyToAccount } from 'viem/accounts';
 import { mainnet } from 'viem/chains';
 
-// Validate contract address at module load
-const CONTRACT_ADDRESS = process.env.GASCOIN_CONTRACT_ADDRESS as Address;
-if (!CONTRACT_ADDRESS || !isAddress(CONTRACT_ADDRESS)) {
-  throw new Error('GASCOIN_CONTRACT_ADDRESS is missing or not a valid Ethereum address');
-}
-
 const DECIMALS = parseInt(process.env.GASCOIN_DECIMALS || '18', 10);
 const SCALE = BigInt(10) ** BigInt(DECIMALS);
 
@@ -33,21 +27,51 @@ function getRpcUrl(): string {
   return 'https://eth.llamarpc.com';
 }
 
-const publicClient = createPublicClient({
-  chain: mainnet,
-  transport: http(getRpcUrl()),
-});
+/** Lazy getter — avoids module-load-time throw when env is empty */
+function getContractAddress(): Address {
+  const addr = process.env.GASCOIN_CONTRACT_ADDRESS;
+  if (!addr || !isAddress(addr)) {
+    throw new Error('GASCOIN_CONTRACT_ADDRESS is missing or not a valid Ethereum address');
+  }
+  return addr as Address;
+}
+
+/** Lazy getter — defers publicClient creation until first use */
+function getPublicClient() {
+  return createPublicClient({
+    chain: mainnet,
+    transport: http(getRpcUrl()),
+  });
+}
 
 export function isValidEthereumAddress(address: string): boolean {
   return isAddress(address);
+}
+
+/** Validates GASCOIN_CONTRACT_ADDRESS format — used by health worker */
+export function validateGascoinMint(): { ok: boolean; error?: string } {
+  const addr = process.env.GASCOIN_CONTRACT_ADDRESS;
+  if (!addr) return { ok: false, error: 'GASCOIN_CONTRACT_ADDRESS is not set' };
+  if (!isAddress(addr)) return { ok: false, error: 'GASCOIN_CONTRACT_ADDRESS is not a valid Ethereum address' };
+  return { ok: true };
+}
+
+/** Clears the treasury balance cache — call after a payout is sent */
+export async function bustTreasuryCache(): Promise<void> {
+  _treasuryCache = null;
+}
+
+/** Clears the treasury balance cache for a given wallet (wallet arg kept for API compatibility) */
+export async function bustBalanceCache(_wallet?: string): Promise<void> {
+  _treasuryCache = null;
 }
 
 /** Raw token balance divided by decimals = whole token count */
 export async function getWalletGascoinBalance(walletAddress: string): Promise<number> {
   if (!isAddress(walletAddress)) return 0;
   try {
-    const raw = await publicClient.readContract({
-      address: CONTRACT_ADDRESS,
+    const raw = await getPublicClient().readContract({
+      address: getContractAddress(),
       abi: ERC20_ABI,
       functionName: 'balanceOf',
       args: [walletAddress as Address],
@@ -58,9 +82,12 @@ export async function getWalletGascoinBalance(walletAddress: string): Promise<nu
   }
 }
 
-export async function hasMinimumGascoin(walletAddress: string, minTokens: number): Promise<boolean> {
-  const balance = await getWalletGascoinBalance(walletAddress);
-  return balance >= minTokens;
+export async function hasMinimumGascoin(
+  walletAddress: string,
+  minTokens: number,
+): Promise<{ ok: boolean; tokenBalance: number }> {
+  const tokenBalance = await getWalletGascoinBalance(walletAddress);
+  return { ok: tokenBalance >= minTokens, tokenBalance };
 }
 
 export interface TreasuryBalances {
@@ -83,10 +110,12 @@ export async function getTreasuryBalances(): Promise<TreasuryBalances> {
     return { ethBalance: 0, ethUsd: 0, gascoinBalance: 0, gascoinUsd: 0 };
   }
 
+  const client = getPublicClient();
+  const contractAddress = getContractAddress();
   const [ethRaw, gascoinRaw] = await Promise.all([
-    publicClient.getBalance({ address: treasuryWallet }),
-    publicClient.readContract({
-      address: CONTRACT_ADDRESS,
+    client.getBalance({ address: treasuryWallet }),
+    client.readContract({
+      address: contractAddress,
       abi: ERC20_ABI,
       functionName: 'balanceOf',
       args: [treasuryWallet],
@@ -117,33 +146,41 @@ export async function getTreasuryBalances(): Promise<TreasuryBalances> {
 }
 
 export interface PayoutResult {
-  txHash: string;
-  isDryRun: boolean;
+  ok: boolean;
+  txHash?: string;
+  isDryRun?: boolean;
+  error?: string;
 }
 
 export async function sendEthPayout(toAddress: string, amountEth: number): Promise<PayoutResult> {
   if (process.env.ENABLE_LIVE_PAYOUT !== 'true') {
-    return { txHash: `DRYRUN_${Date.now()}`, isDryRun: true };
+    return { ok: true, txHash: `DRYRUN_${Date.now()}`, isDryRun: true };
   }
 
-  if (!isAddress(toAddress)) throw new Error(`Invalid Ethereum address: ${toAddress}`);
+  if (!isAddress(toAddress)) {
+    return { ok: false, error: `Invalid Ethereum address: ${toAddress}` };
+  }
 
   const privateKey = process.env.TREASURY_PRIVATE_KEY as `0x${string}`;
   if (!privateKey || !privateKey.startsWith('0x')) {
-    throw new Error('TREASURY_PRIVATE_KEY is missing or invalid');
+    return { ok: false, error: 'TREASURY_PRIVATE_KEY is missing or invalid' };
   }
 
-  const account = privateKeyToAccount(privateKey);
-  const walletClient = createWalletClient({
-    account,
-    chain: mainnet,
-    transport: http(getRpcUrl()),
-  });
+  try {
+    const account = privateKeyToAccount(privateKey);
+    const walletClient = createWalletClient({
+      account,
+      chain: mainnet,
+      transport: http(getRpcUrl()),
+    });
 
-  const txHash = await walletClient.sendTransaction({
-    to: toAddress as Address,
-    value: parseEther(amountEth.toFixed(18)),
-  });
+    const txHash = await walletClient.sendTransaction({
+      to: toAddress as Address,
+      value: parseEther(amountEth.toFixed(18)),
+    });
 
-  return { txHash, isDryRun: false };
+    return { ok: true, txHash, isDryRun: false };
+  } catch (err: unknown) {
+    return { ok: false, error: err instanceof Error ? err.message : String(err) };
+  }
 }

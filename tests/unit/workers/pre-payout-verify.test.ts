@@ -29,7 +29,7 @@ vi.mock('@/lib/metrics-snapshot', () => ({
   persistMetricsSnapshot: vi.fn().mockResolvedValue(undefined),
 }));
 
-vi.mock('@/lib/integrations/solana', () => ({
+vi.mock('@/lib/integrations/ethereum', () => ({
   hasMinimumGascoin: vi.fn().mockResolvedValue({ ok: true, tokenBalance: 1 }),
 }));
 

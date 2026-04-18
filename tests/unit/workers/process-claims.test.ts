@@ -13,10 +13,10 @@ vi.mock('@/lib/supabase', () => ({
   },
 }));
 
-vi.mock('@/lib/integrations/solana', () => ({
+vi.mock('@/lib/integrations/ethereum', () => ({
   hasMinimumGascoin: vi.fn().mockResolvedValue({ ok: true, tokenBalance: 1000000 }),
   bustTreasuryCache: vi.fn().mockResolvedValue(undefined),
-  getTreasuryBalances: vi.fn().mockResolvedValue({ sol: 10 }),
+  getTreasuryBalances: vi.fn().mockResolvedValue({ ethBalance: 10, ethUsd: 30000, gascoinBalance: 0, gascoinUsd: 0 }),
 }));
 
 vi.mock('@/lib/integrations/claude', () => ({

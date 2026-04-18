@@ -7,7 +7,7 @@ import { scoreAccountQuality } from '../../../../lib/account-quality';
 import { isAuthorizedCron as isAuthorized } from '../../../../lib/cron-auth';
 import { addMemory } from '../../../../lib/mem0';
 import { persistMetricsSnapshot } from '../../../../lib/metrics-snapshot';
-import { hasMinimumGascoin } from '../../../../lib/integrations/solana';
+import { hasMinimumGascoin } from '../../../../lib/integrations/ethereum';
 import { getTierForBalance } from '../../../../lib/token-tiers';
 
 const MIN_FOLLOWERS = 100;

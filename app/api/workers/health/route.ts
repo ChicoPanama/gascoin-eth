@@ -23,7 +23,7 @@
 
 import { NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '../../../../lib/supabase';
-import { validateGascoinMint } from '../../../../lib/integrations/solana';
+import { validateGascoinMint } from '../../../../lib/integrations/ethereum';
 
 // Expected run intervals in seconds (sourced from vercel.json cron schedules)
 const WORKERS: Array<{

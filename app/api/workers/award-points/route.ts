@@ -215,7 +215,7 @@ export async function POST(req: Request) {
       // Prevents flash-loan attack: borrow tokens → cache tier → return → earn bonus
       let verifiedPoints = tierPointsMap[cached.tier_id] || 0;
       try {
-        const { getWalletGascoinBalance } = await import('../../../../lib/integrations/solana');
+        const { getWalletGascoinBalance } = await import('../../../../lib/integrations/ethereum');
         const { getTierForBalance } = await import('../../../../lib/token-tiers');
         const freshBalance = await getWalletGascoinBalance(cached.wallet_address);
         const freshTier = getTierForBalance(freshBalance);

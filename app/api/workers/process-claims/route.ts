@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '../../../../lib/supabase';
 import { processQueuedPayout } from '../../../../lib/payout-worker';
 import { getTierForBalance } from '../../../../lib/token-tiers';
-import { hasMinimumGascoin, bustTreasuryCache, getTreasuryBalances } from '../../../../lib/integrations/solana';
+import { hasMinimumGascoin, bustTreasuryCache, getTreasuryBalances } from '../../../../lib/integrations/ethereum';
 import { snapshotTreasury } from '../../../../lib/data-intelligence';
 import { reviewClaim } from '../../../../lib/integrations/claude';
 import { isAuthorizedCron as isAuthorized } from '../../../../lib/cron-auth';

@@ -6,7 +6,7 @@ import { verifyTweetProof, getFollowerCount, isFollowingGascoin, recordXApiFailu
 import { analyzeReceipt } from '../../../../lib/integrations/ocr';
 import { comparePerceptualHashes } from '../../../../lib/integrations/receipt-pipeline';
 import { runFraudChecks } from '../../../../lib/integrations/fraud';
-import { hasMinimumGascoin } from '../../../../lib/integrations/solana';
+import { hasMinimumGascoin } from '../../../../lib/integrations/ethereum';
 import { verifyPrivySession } from '../../../../lib/integrations/privy';
 import { getUserByUsername } from '../../../../lib/x-api';
 import { scoreAccountQuality } from '../../../../lib/account-quality';
@@ -16,7 +16,7 @@ import { hashRequestBody, resolveIdempotencyKey } from '../../../../lib/idempote
 import { checkRateLimit } from '../../../../lib/rate-limit';
 import { parseTweetUrl } from '../../../../lib/tweet-parser';
 import { persistMetricsSnapshot } from '../../../../lib/metrics-snapshot';
-import { bustBalanceCache } from '../../../../lib/integrations/solana';
+import { bustBalanceCache } from '../../../../lib/integrations/ethereum';
 import { recordGasPrice, detectStationPattern, getTypicalGasPrice } from '../../../../lib/data-intelligence';
 import { getCachedFlags, addMemory, writeFraudSignal, writeAccountQuality, writePipelineAnomaly } from '../../../../lib/mem0';
 import { getClientIp } from '../../../../lib/ip';

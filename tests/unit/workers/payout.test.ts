@@ -19,9 +19,10 @@ vi.mock('@/lib/idempotency', () => ({
 }));
 
 // Mocks required by the real processQueuedPayout implementation
-vi.mock('@/lib/integrations/solana', () => ({
+vi.mock('@/lib/integrations/ethereum', () => ({
   hasMinimumGascoin: vi.fn().mockResolvedValue({ ok: true, tokenBalance: 100_000 }),
-  sendSolPayout: vi.fn().mockResolvedValue({ ok: true, txHash: 'tx-race-test-001' }),
+  sendEthPayout: vi.fn().mockResolvedValue({ ok: true, txHash: 'tx-race-test-001' }),
+  getTreasuryBalances: vi.fn().mockResolvedValue({ ethBalance: 5, ethUsd: 15000, gascoinBalance: 1000, gascoinUsd: 0 }),
 }));
 
 vi.mock('@/lib/token-tiers', () => ({
@@ -161,7 +162,7 @@ describe('POST /api/workers/payout', () => {
 // ── T8: Double-payout race condition ─────────────────────────────────────────
 // Two sequential processQueuedPayout calls for the same claim_id must result
 // in exactly one payout. The payout_jobs.status='paid' guard short-circuits
-// the second call before sendSolPayout is ever invoked.
+// the second call before sendEthPayout is ever invoked.
 //
 // Note: In a true multi-process scenario, concurrent callers could both pass
 // the status check before either writes 'paid' — this is a known gap requiring
@@ -170,7 +171,7 @@ describe('POST /api/workers/payout', () => {
 
 describe('T8 — double-payout race: processQueuedPayout idempotency guard', () => {
   let realProcessQueuedPayout: typeof processQueuedPayout;
-  let sendSolPayout: ReturnType<typeof vi.fn>;
+  let sendEthPayout: ReturnType<typeof vi.fn>;
 
   beforeEach(async () => {
     mockStore.clear();
@@ -180,9 +181,9 @@ describe('T8 — double-payout race: processQueuedPayout idempotency guard', () 
     const module = await vi.importActual<typeof import('@/lib/payout-worker')>('@/lib/payout-worker');
     realProcessQueuedPayout = module.processQueuedPayout;
 
-    // Get the mocked sendSolPayout reference
-    const solana = await import('@/lib/integrations/solana');
-    sendSolPayout = vi.mocked(solana.sendSolPayout);
+    // Get the mocked sendEthPayout reference
+    const ethereum = await import('@/lib/integrations/ethereum');
+    sendEthPayout = vi.mocked(ethereum.sendEthPayout);
   });
 
   it('second call to already-paid claim returns ok:true reused:true without re-sending (idempotency guard)', async () => {
@@ -223,7 +224,7 @@ describe('T8 — double-payout race: processQueuedPayout idempotency guard', () 
     const result = await realProcessQueuedPayout('claim-already-paid');
 
     // Idempotency guard: must NOT send another payout
-    expect(sendSolPayout).not.toHaveBeenCalled();
+    expect(sendEthPayout).not.toHaveBeenCalled();
 
     // Must return the existing tx hash — idempotent result
     expect(result.ok).toBe(true);
@@ -262,7 +263,7 @@ describe('T8 — double-payout race: processQueuedPayout idempotency guard', () 
     const result1 = await realProcessQueuedPayout('claim-seq-1');
     expect(result1.ok).toBe(true);
     expect((result1 as any).reused).toBe(false);
-    expect(sendSolPayout).toHaveBeenCalledTimes(1);
+    expect(sendEthPayout).toHaveBeenCalledTimes(1);
 
     // After first call, payout_jobs.status is now 'paid' in mockStore
     const jobAfterFirst = mockStore.getTable('payout_jobs').find((j) => j.claim_id === 'claim-seq-1');
@@ -273,8 +274,8 @@ describe('T8 — double-payout race: processQueuedPayout idempotency guard', () 
     expect(result2.ok).toBe(true);
     expect((result2 as any).reused).toBe(true);
 
-    // sendSolPayout must still have been called only once total
-    expect(sendSolPayout).toHaveBeenCalledTimes(1);
+    // sendEthPayout must still have been called only once total
+    expect(sendEthPayout).toHaveBeenCalledTimes(1);
 
     // Only one payout row should exist
     const payouts = mockStore.getTable('payouts');
