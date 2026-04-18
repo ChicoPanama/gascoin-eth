@@ -561,7 +561,7 @@ function HowItWorksPopover({ gateCount }: { gateCount: number }) {
         <li><span>II</span> Write your wallet last-4 on the receipt</li>
         <li><span>III</span> Post a tweet tagging @GasCoinApp</li>
         <li><span>IV</span> Submit · sign in · upload receipt</li>
-        <li><span>V</span> {gateCount} gates + 3 AIs verify → SOL to your wallet</li>
+        <li><span>V</span> {gateCount} gates + 3 AIs verify → CRYPTO to your wallet</li>
       </ol>
       <div className="wlc-pop-actions">
         <Link href="/how-it-works" className="wlc-pop-btn wlc-pop-btn--primary">
