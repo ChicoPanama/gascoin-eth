@@ -18,7 +18,7 @@
 
 import { createOpenAI } from '@ai-sdk/openai';
 import { streamText } from 'ai';
-import { getFAQResponse, classifyTier, MINI_SYSTEM_PROMPT } from '../lib/chat-intent';
+import { classifyTier, MINI_SYSTEM_PROMPT } from '../lib/chat-intent';
 import { setChatCache } from '../lib/chat-cache';
 import { QUESTIONS_1000 } from './questions-1000';
 import { writeFileSync, appendFileSync, existsSync } from 'fs';
@@ -73,8 +73,6 @@ async function main() {
   const questions = QUESTIONS_1000;
   console.log(`\n  GASCOIN Cache Seed — ${questions.length} questions (starting at ${startIdx})\n`);
 
-  // Count FAQ hits
-  let faqHits = 0;
   let cached = 0;
   let errors = 0;
   let skipped = 0;
@@ -86,12 +84,6 @@ async function main() {
 
   for (let i = startIdx; i < questions.length; i++) {
     const q = questions[i];
-
-    // Skip FAQ hits — already instant
-    if (getFAQResponse(q)) {
-      faqHits++;
-      continue;
-    }
 
     const tier = classifyTier(q, 0);
     const systemPrompt = tier === 1 ? MINI_SYSTEM_PROMPT : SEED_SYSTEM;
@@ -149,14 +141,13 @@ async function main() {
 
   console.log(`\n  ════════════════════════════════════════`);
   console.log(`  Cached:      ${cached}`);
-  console.log(`  FAQ hits:    ${faqHits} (already instant)`);
   console.log(`  Empty:       ${skipped}`);
   console.log(`  Errors:      ${errors}`);
-  console.log(`  Coverage:    ${cached + faqHits}/${questions.length} instant responses`);
+  console.log(`  Coverage:    ${cached}/${questions.length} instant responses`);
   console.log(`  ════════════════════════════════════════\n`);
   console.log(`  Results: ${RESULTS_FILE}`);
   if (errors > 0) {
-    console.log(`  Resume:  npx tsx scripts/seed-chat-cache.ts --start=${startIdx + cached + faqHits + skipped + errors}`);
+    console.log(`  Resume:  npx tsx scripts/seed-chat-cache.ts --start=${startIdx + cached + skipped + errors}`);
   }
   console.log('');
 }

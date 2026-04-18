@@ -13,7 +13,6 @@ import {
   extractLastUserText,
 } from '../../../lib/chat-context';
 import {
-  getFAQResponse,
   classifyTier,
   faqStreamResponse,
   MINI_SYSTEM_PROMPT,
@@ -641,17 +640,15 @@ export async function POST(req: Request) {
   try {
     const body = await (req.json() as Promise<{ messages: UIMessage[]; wallet?: string }>);
     uiMessages = body.messages;
-    wallet = (body.wallet || session?.wallet || '').trim();
+    // wallet must come from the verified session — accepting body.wallet lets
+    // unauthenticated callers accumulate mem0 context under any wallet address.
+    wallet = (session?.wallet || '').trim();
   } catch {
     return new Response('Bad request', { status: 400 });
   }
 
   const lastUserText = extractLastUserText(uiMessages as unknown[]);
   if (!lastUserText) return new Response('Bad request', { status: 400 });
-
-  // ── Tier 0: Static FAQ — zero LLM tokens ─────────────────────────────
-  const faqAnswer = getFAQResponse(lastUserText);
-  if (faqAnswer) return faqStreamResponse(faqAnswer);
 
   // Count prior user↔assistant exchanges to help tier classification
   const priorExchanges = Math.floor(
