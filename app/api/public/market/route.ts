@@ -7,7 +7,7 @@ export async function GET(){
     gascoinPriceUsd: m.gascoinPriceUsd,
     marketCapUsd: m.marketCapUsd,
     volume24hUsd: m.volume24hUsd,
-    solPriceUsd: m.solPriceUsd,
+    ethPriceUsd: m.ethPriceUsd ?? 0,
     source: m.source,
     updatedAt: new Date().toISOString()
   });

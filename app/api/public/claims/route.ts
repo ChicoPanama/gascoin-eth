@@ -17,7 +17,7 @@ export async function GET(req: Request) {
 
   const { data, error } = await supabase
     .from('payouts')
-    .select('id,claim_id,wallet,amount_sol,tx_hash,status,created_at,claims(tweet_url,users(x_handle))')
+    .select('id,claim_id,wallet,amount_eth,tx_hash,status,created_at,claims(tweet_url,users(x_handle))')
     .order('created_at', { ascending: false })
     .limit(100);
 
@@ -30,9 +30,9 @@ export async function GET(req: Request) {
     xHandle: p.claims?.users?.x_handle || '@unknown',
     tweetUrl: p.claims?.tweet_url || '',
     amountUsd: null,
-    amountSol: Number(p.amount_sol || 0),
+    amountEth: Number(p.amount_eth || 0),
     txHash: p.tx_hash || '',
-    txUrl: p.tx_hash ? `https://solscan.io/tx/${p.tx_hash}` : '',
+    txUrl: p.tx_hash ? `https://etherscan.io/tx/${p.tx_hash}` : '',
     status: p.status || 'queued'
   }));
 

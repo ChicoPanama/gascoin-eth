@@ -1,4 +1,4 @@
-import { hasMinimumGascoin, sendSolPayout } from './integrations/solana';
+import { hasMinimumGascoin, sendEthPayout } from './integrations/ethereum';
 import { getTierForBalance } from './token-tiers';
 import { verifyTweetProof, getFollowerCount } from './integrations/x';
 import { getUserByUsername } from './x-api';
@@ -14,7 +14,7 @@ export async function processQueuedPayout(claimId: string) {
 
   const { data: job, error: jobErr } = await supabase
     .from('payout_jobs')
-    .select('id,claim_id,wallet,amount_sol,status,attempts,max_attempts,next_retry_at')
+    .select('id,claim_id,wallet,amount_eth,status,attempts,max_attempts,next_retry_at')
     .eq('claim_id', claimId)
     .single();
 
@@ -147,7 +147,7 @@ export async function processQueuedPayout(claimId: string) {
       action: 'payout_blocked_min_gascoin',
       target_type: 'claim',
       target_id: claimId,
-      payload_json: { wallet: job.wallet, tokenBalance: gate.tokenBalance, amountSol: job.amount_sol }
+      payload_json: { wallet: job.wallet, tokenBalance: gate.tokenBalance, amountEth: job.amount_eth }
     });
 
     return { ok: false, error: 'min_gascoin_not_met', tokenBalance: gate.tokenBalance };
@@ -157,7 +157,7 @@ export async function processQueuedPayout(claimId: string) {
   // Protects against tampered payout_jobs rows and catches edge cases where
   // the job was created with an inflated amount.
   const currentTier = getTierForBalance(gate.tokenBalance);
-  const requestedAmount = Number(job.amount_sol);
+  const requestedAmount = Number(job.amount_eth);
   if (requestedAmount > currentTier.max_sol_refund + 0.0001) {
     await supabase.from('payout_jobs').update({
       status: 'blocked',
@@ -177,25 +177,25 @@ export async function processQueuedPayout(claimId: string) {
     return { ok: false, error: 'amount_exceeds_tier_cap', requestedAmount, tierSlug: currentTier.slug, maxAllowed: currentTier.max_sol_refund };
   }
 
-  // Per-day spend cap — configurable via DAILY_PAYOUT_CAP_SOL (default 10 SOL).
+  // Per-day spend cap — configurable via DAILY_PAYOUT_CAP_ETH (default 10 ETH).
   // Prevents a single compromised session from draining the treasury in one batch.
-  // Default: 50 SOL/day (~500 Standard or ~50 Fleet payouts). Set
-  // DAILY_PAYOUT_CAP_SOL to ~15% of your treasury balance for right-sizing.
-  const dailyCapSol = Number(process.env.DAILY_PAYOUT_CAP_SOL ?? 50);
+  // Default: 50 ETH/day (~500 Standard or ~50 Fleet payouts). Set
+  // DAILY_PAYOUT_CAP_ETH to ~15% of your treasury balance for right-sizing.
+  const dailyCapSol = Number(process.env.DAILY_PAYOUT_CAP_ETH ?? 50);
   const todayUtc = new Date().toISOString().slice(0, 10); // 'YYYY-MM-DD'
   const { data: todayPayouts } = await supabase
     .from('payouts')
-    .select('amount_sol')
+    .select('amount_eth')
     .eq('status', 'paid')
     .gte('sent_at', `${todayUtc}T00:00:00.000Z`);
-  const todayTotal = (todayPayouts || []).reduce((s, p: any) => s + Number(p.amount_sol || 0), 0);
+  const todayTotal = (todayPayouts || []).reduce((s, p: any) => s + Number(p.amount_eth || 0), 0);
   if (todayTotal + requestedAmount > dailyCapSol) {
     try {
       await supabase.from('intelligence_entries').insert({
         entry_type: 'daily_payout_cap_reached',
         entity_type: 'wallet',
         entity_id: job.wallet,
-        summary: `Daily payout cap (${dailyCapSol} SOL) reached — claim ${claimId} queued for next day`,
+        summary: `Daily payout cap (${dailyCapSol} ETH) reached — claim ${claimId} queued for next day`,
         detail_json: { claimId, wallet: job.wallet, requestedAmount, todayTotal, dailyCapSol },
         severity: 'high',
         pipeline_source: 'payout_worker',
@@ -204,7 +204,7 @@ export async function processQueuedPayout(claimId: string) {
     return { ok: false, error: 'daily_payout_cap_reached', todayTotal, dailyCapSol };
   }
 
-  const sent = await sendSolPayout(job.wallet, requestedAmount);
+  const sent = await sendEthPayout(job.wallet, requestedAmount);
   if (!sent.ok) {
     const attempts = Number(job.attempts || 0) + 1;
     const exhausted = attempts >= Number(job.max_attempts || 5);
@@ -224,7 +224,7 @@ export async function processQueuedPayout(claimId: string) {
       action: exhausted ? 'payout_failed_exhausted' : 'payout_retry_scheduled',
       target_type: 'claim',
       target_id: claimId,
-      payload_json: { wallet: job.wallet, amountSol: job.amount_sol, error: sent.error, attempts, nextRetryAt }
+      payload_json: { wallet: job.wallet, amountEth: job.amount_eth, error: sent.error, attempts, nextRetryAt }
     });
 
     // O2: Surface exhausted payout failures in admin intelligence feed
@@ -235,7 +235,7 @@ export async function processQueuedPayout(claimId: string) {
           entity_type: 'wallet',
           entity_id: job.wallet,
           summary: `Payout failed after ${attempts} attempts: ${sent.error || 'unknown error'}`,
-          detail_json: { claimId, wallet: job.wallet, amountSol: job.amount_sol, error: sent.error, attempts },
+          detail_json: { claimId, wallet: job.wallet, amountEth: job.amount_eth, error: sent.error, attempts },
           severity: 'high',
           pipeline_source: 'payout_worker',
         });
@@ -254,33 +254,33 @@ export async function processQueuedPayout(claimId: string) {
       action: 'dryrun_payout_detected',
       target_type: 'claim',
       target_id: claimId,
-      payload_json: { wallet: job.wallet, amountSol: requestedAmount, txHash: sent.txHash, reason: 'ENABLE_LIVE_PAYOUT is not true — no SOL was transferred' },
+      payload_json: { wallet: job.wallet, amountEth: requestedAmount, txHash: sent.txHash, reason: 'ENABLE_LIVE_PAYOUT is not true — no ETH was transferred' },
     });
     try {
       await supabase.from('intelligence_entries').insert({
         entry_type: 'dryrun_payout_detected',
         entity_type: 'wallet',
         entity_id: job.wallet,
-        summary: `DRYRUN payout detected — ENABLE_LIVE_PAYOUT is not set. Claim ${claimId} marked paid but no SOL transferred.`,
-        detail_json: { claimId, wallet: job.wallet, amountSol: requestedAmount, txHash: sent.txHash },
+        summary: `DRYRUN payout detected — ENABLE_LIVE_PAYOUT is not set. Claim ${claimId} marked paid but no ETH transferred.`,
+        detail_json: { claimId, wallet: job.wallet, amountEth: requestedAmount, txHash: sent.txHash },
         severity: 'critical',
         pipeline_source: 'payout_worker',
       });
     } catch {}
   }
 
-  // O3: Treasury SOL threshold alert — warn when balance drops below 1 SOL
+  // O3: Treasury ETH threshold alert — warn when balance drops below 1 ETH
   try {
-    const { getTreasuryBalances } = await import('./integrations/solana');
+    const { getTreasuryBalances } = await import('./integrations/ethereum');
     const balances = await getTreasuryBalances();
-    if (balances.solBalance < 1) {
+    if (balances.ethBalance < 1) {
       await supabase.from('intelligence_entries').insert({
-        entry_type: 'treasury_low_sol',
+        entry_type: 'treasury_low_eth',
         entity_type: 'system',
         entity_id: 'treasury',
-        summary: `Treasury SOL balance is critically low: ${balances.solBalance.toFixed(4)} SOL`,
-        detail_json: { solBalance: balances.solBalance, solUsd: balances.solUsd, threshold: 1 },
-        severity: balances.solBalance < 0.1 ? 'critical' : 'high',
+        summary: `Treasury ETH balance is critically low: ${balances.ethBalance.toFixed(4)} ETH`,
+        detail_json: { ethBalance: balances.ethBalance, ethUsd: balances.ethUsd, threshold: 1 },
+        severity: balances.ethBalance < 0.1 ? 'critical' : 'high',
         pipeline_source: 'payout_worker',
       });
     }
@@ -291,7 +291,7 @@ export async function processQueuedPayout(claimId: string) {
   await supabase.from('payouts').insert({
     claim_id: claimId,
     wallet: job.wallet,
-    amount_sol: job.amount_sol,
+    amount_eth: job.amount_eth,
     tx_hash: sent.txHash,
     status: 'paid',
     sent_at: new Date().toISOString()
@@ -320,7 +320,7 @@ export async function processQueuedPayout(claimId: string) {
     action: 'payout_sent',
     target_type: 'claim',
     target_id: claimId,
-    payload_json: { wallet: job.wallet, amountSol: job.amount_sol, txHash: sent.txHash }
+    payload_json: { wallet: job.wallet, amountEth: job.amount_eth, txHash: sent.txHash }
   });
 
   // Record payout in mem0 as an immutable on-chain event — typed helper
@@ -328,7 +328,7 @@ export async function processQueuedPayout(claimId: string) {
   // memory immutable (permanent audit record that cannot be overwritten).
   writePayoutEvent(job.wallet, {
     claimId,
-    amountSol: job.amount_sol,
+    amountEth: job.amount_eth,
     txHash: sent.txHash || 'unknown',
     status: 'dispatched',
   }).catch(() => {});

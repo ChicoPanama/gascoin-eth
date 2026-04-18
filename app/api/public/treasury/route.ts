@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getTreasuryBalances } from '../../../../lib/integrations/solana';
+import { getTreasuryBalances } from '../../../../lib/integrations/ethereum';
 import { checkRateLimit } from '../../../../lib/rate-limit';
 import { getClientIp } from '../../../../lib/ip';
 
@@ -12,16 +12,16 @@ export async function GET(req: Request) {
   }
   try {
     const t = await getTreasuryBalances();
-    const avgPayoutSol = 0.05;
-    const capacity = avgPayoutSol > 0 ? Math.floor(t.solBalance / avgPayoutSol) : 0;
+    const avgPayoutEth = 0.005;
+    const capacity = avgPayoutEth > 0 ? Math.floor(t.ethBalance / avgPayoutEth) : 0;
 
     return NextResponse.json({
       live: true,
-      solBalance: +t.solBalance.toFixed(4),
-      solUsd: +t.solUsd.toFixed(2),
+      ethBalance: +t.ethBalance.toFixed(4),
+      ethUsd: +t.ethUsd.toFixed(2),
       gascoinBalance: +t.gascoinBalance.toFixed(2),
       gascoinUsd: +t.gascoinUsd.toFixed(2),
-      totalUsd: +(t.solUsd + t.gascoinUsd).toFixed(2),
+      totalUsd: +(t.ethUsd + t.gascoinUsd).toFixed(2),
       refundCapacity: capacity,
       wallet: process.env.GASCOIN_TREASURY_WALLET || null,
       fetchedAt: new Date().toISOString()
@@ -29,8 +29,8 @@ export async function GET(req: Request) {
   } catch {
     return NextResponse.json({
       live: false,
-      solBalance: 0,
-      solUsd: 0,
+      ethBalance: 0,
+      ethUsd: 0,
       gascoinBalance: 0,
       gascoinUsd: 0,
       totalUsd: 0,
