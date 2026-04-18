@@ -11,6 +11,7 @@ import {
   useState,
   type ReactNode,
 } from 'react';
+import { usePrivy } from '@privy-io/react-auth';
 import { PumpSvg, type PumpRegion } from '../../components/welcome/PumpSvg';
 import { GLOBAL_GAS_PRICES } from '../../lib/gas-prices-global';
 
@@ -504,26 +505,165 @@ function Popover({
 // ─── Popover contents ────────────────────────────────────────────────
 
 function EnterPopover({ testersRedeemed }: { testersRedeemed: number }) {
+  const { ready, authenticated, login, getAccessToken, user } = usePrivy();
+  const router = useRouter();
+  const [code, setCode] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState('');
+  const [checking, setChecking] = useState(false);
+
+  const handle = ((user as any)?.twitter?.username || '').toString();
+
+  // When user signs in, check if they already have an invite → redirect immediately
+  useEffect(() => {
+    let cancelled = false;
+    if (!ready || !authenticated) return;
+    (async () => {
+      setChecking(true);
+      try {
+        const token = await getAccessToken();
+        if (!token) { setChecking(false); return; }
+        const res = await fetch('/api/invites/redeem', {
+          method: 'GET',
+          headers: {
+            authorization: `Bearer ${token}`,
+            'x-privy-user-id': String((user as any)?.id || ''),
+            'x-privy-handle': handle,
+          },
+        });
+        const data = await res.json();
+        if (!cancelled) {
+          if (data?.hasInvite) router.push('/submit');
+          setChecking(false);
+        }
+      } catch {
+        if (!cancelled) setChecking(false);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [ready, authenticated, getAccessToken, user, handle, router]);
+
+  async function redeem(e: React.FormEvent) {
+    e.preventDefault();
+    setError('');
+    const normalized = code.trim().toUpperCase();
+    if (!/^GC-[A-Z0-9]{4}-[A-Z0-9]{4}$/.test(normalized)) {
+      setError('Invalid format — expected GC-XXXX-XXXX.');
+      return;
+    }
+    setSubmitting(true);
+    try {
+      const token = await getAccessToken();
+      if (!token) { setError('Sign in required.'); setSubmitting(false); return; }
+      const res = await fetch('/api/invites/redeem', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          authorization: `Bearer ${token}`,
+          'x-privy-user-id': String((user as any)?.id || ''),
+          'x-privy-handle': handle,
+        },
+        body: JSON.stringify({ code: normalized }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data?.message || data?.error || 'Redemption failed.');
+        return;
+      }
+      router.push('/submit');
+    } catch (err: any) {
+      setError(err?.message || 'Redemption failed.');
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  if (!ready || checking) {
+    return (
+      <>
+        <div className="wlc-pop-kicker">[ SEASON 1 · INVITE REQUIRED ]</div>
+        <h2 className="wlc-pop-title">Enter the protocol</h2>
+        <p className="wlc-pop-body">Loading…</p>
+      </>
+    );
+  }
+
+  if (!authenticated) {
+    return (
+      <>
+        <div className="wlc-pop-kicker">[ SEASON 1 · INVITE REQUIRED ]</div>
+        <h2 className="wlc-pop-title">Enter the protocol</h2>
+        <p className="wlc-pop-body">
+          Single-use beta invite code required. Sign in with your verified X account,
+          then enter your <code>GC-XXXX-XXXX</code> code to unlock access.
+        </p>
+        {testersRedeemed > 0 && (
+          <div className="wlc-pop-traction">
+            <span className="wlc-pop-traction-num">{testersRedeemed}</span>
+            <span className="wlc-pop-traction-label">TESTERS ALREADY IN</span>
+          </div>
+        )}
+        <div className="wlc-pop-actions">
+          <button
+            type="button"
+            className="wlc-pop-btn wlc-pop-btn--primary"
+            onClick={() => login()}
+          >
+            SIGN IN WITH X →
+          </button>
+        </div>
+      </>
+    );
+  }
+
   return (
     <>
       <div className="wlc-pop-kicker">[ SEASON 1 · INVITE REQUIRED ]</div>
-      <h2 className="wlc-pop-title">Enter the protocol</h2>
+      <h2 className="wlc-pop-title">Enter your invite code</h2>
       <p className="wlc-pop-body">
-        Single-use beta invite code required. Verified X accounts only.
-        Sign in with X first, then enter your <code>GC-XXXX-XXXX</code> code.
+        Signed in as <strong>@{handle || 'user'}</strong>. Enter your single-use
+        beta code to unlock the protocol.
       </p>
-      {testersRedeemed > 0 && (
-        <div className="wlc-pop-traction">
-          <span className="wlc-pop-traction-num">{testersRedeemed}</span>
-          <span className="wlc-pop-traction-label">TESTERS ALREADY IN</span>
+      <form onSubmit={redeem} style={{ marginTop: 16 }}>
+        <input
+          type="text"
+          value={code}
+          onChange={(e) => setCode(e.target.value)}
+          placeholder="GC-XXXX-XXXX"
+          autoFocus
+          autoComplete="off"
+          spellCheck={false}
+          style={{
+            width: '100%',
+            fontFamily: 'var(--font-mono)',
+            fontSize: 15,
+            letterSpacing: '0.1em',
+            textTransform: 'uppercase',
+            padding: '10px 14px',
+            background: 'rgba(255,255,255,0.06)',
+            border: '1px solid rgba(255,255,255,0.18)',
+            borderRadius: 4,
+            color: 'inherit',
+            outline: 'none',
+            marginBottom: 12,
+            boxSizing: 'border-box',
+          }}
+        />
+        {error && (
+          <p style={{ color: '#ff6b6b', fontFamily: 'var(--font-mono)', fontSize: 12, marginBottom: 12, margin: '0 0 12px' }}>
+            {error}
+          </p>
+        )}
+        <div className="wlc-pop-actions">
+          <button
+            type="submit"
+            className="wlc-pop-btn wlc-pop-btn--primary"
+            disabled={submitting}
+          >
+            {submitting ? 'REDEEMING…' : 'UNLOCK →'}
+          </button>
         </div>
-      )}
-      <div className="wlc-pop-actions">
-        <Link href="/submit" className="wlc-pop-btn wlc-pop-btn--primary">
-          PROCEED →
-        </Link>
-        <Link href="/docs" className="wlc-pop-btn">DOCS</Link>
-      </div>
+      </form>
     </>
   );
 }
@@ -564,10 +704,14 @@ function HowItWorksPopover({ gateCount }: { gateCount: number }) {
         <li><span>V</span> {gateCount} gates + 3 AIs verify → CRYPTO to your wallet</li>
       </ol>
       <div className="wlc-pop-actions">
-        <Link href="/how-it-works" className="wlc-pop-btn wlc-pop-btn--primary">
-          FULL WALKTHROUGH →
-        </Link>
-        <Link href="/submit" className="wlc-pop-btn">START</Link>
+        <a
+          href="https://x.com/GasCoinApp"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="wlc-pop-btn wlc-pop-btn--primary"
+        >
+          FOLLOW @GasCoinApp →
+        </a>
       </div>
     </>
   );

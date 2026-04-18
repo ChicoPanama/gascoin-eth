@@ -14,12 +14,11 @@ const GLOBAL_API_WINDOW_SEC = 60;
 // These routes are accessible without a valid gate cookie.
 const GATE_BYPASS_PREFIXES = [
   '/welcome',
-  '/docs',
+  '/welcome/',
   '/api/',
   '/_next/',
   '/icons/',
   '/favicon',
-  '/welcome/',
 ];
 const GATE_BYPASS_EXACT = new Set([
   '/robots.txt',
