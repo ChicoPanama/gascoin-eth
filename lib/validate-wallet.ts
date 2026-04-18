@@ -1,16 +1,20 @@
-import bs58 from 'bs58';
+// lib/validate-wallet.ts
+import { isAddress, getAddress } from 'viem';
 
-/**
- * SECURITY: Validates that a string is a valid Solana wallet address (base58, 32-44 chars).
- * Use on all endpoints that accept wallet addresses to prevent injection.
- */
-export function isValidSolanaAddress(addr: string): boolean {
-  if (!addr || typeof addr !== 'string') return false;
-  if (addr.length < 32 || addr.length > 44) return false;
-  try {
-    const decoded = bs58.decode(addr);
-    return decoded.length === 32;
-  } catch {
-    return false;
-  }
+export function isValidEthereumAddress(address: string): boolean {
+  if (!address) return false;
+  return isAddress(address);
+}
+
+// Alias so existing imports of isValidSolanaAddress still compile during transition
+export { isValidEthereumAddress as isValidSolanaAddress };
+
+export function checksumAddress(address: string): string {
+  if (!isAddress(address)) throw new Error(`Invalid address: ${address}`);
+  return getAddress(address);
+}
+
+export function truncateEthAddress(address: string, chars = 4): string {
+  if (!address || address.length < 10) return address;
+  return `${address.slice(0, chars + 2)}...${address.slice(-chars)}`;
 }
