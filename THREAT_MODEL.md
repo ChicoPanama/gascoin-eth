@@ -70,7 +70,7 @@ Admin session obtained (wallet-based or Privy-based). `requireAdmin` level.
 Gains access to Vercel environment variables or Supabase service-role key. Highest privilege.
 
 **Capabilities:**
-- Read all secrets (including `TREASURY_PRIVATE_KEY_B58`)
+- Read all secrets (including `TREASURY_PRIVATE_KEY`)
 - Execute arbitrary DB operations
 - Drain treasury in a single transaction
 
@@ -291,14 +291,14 @@ Gains access to Vercel environment variables or Supabase service-role key. Highe
 
 ---
 
-### Chain 13 — Helius RPC Amplification (F12)
+### Chain 13 — Alchemy RPC Amplification (F12)
 **Actor:** A1 | **Severity:** P2 (medium) | **Status:** `[RESIDUAL]`
 
 **Pre-patch:** 100 calls/min/IP, no auth, `sendTransaction` proxied.
 
 **Post-patch:** `sendTransaction` now has a per-IP sub-limit of 10/min. Read methods remain open (by design — needed for wallet connection checks).
 
-**Residual attack:** An attacker with 10 rotating IPs can sustain 100 `sendTransaction` calls/min through the Helius proxy. Each call costs Helius compute units. At large scale, this is an operator-cost attack, not a user-fund attack. Acceptable residual risk for current traffic levels.
+**Residual attack:** An attacker with 10 rotating IPs can sustain 100 `sendTransaction` calls/min through the Alchemy proxy. Each call costs Alchemy compute units. At large scale, this is an operator-cost attack, not a user-fund attack. Acceptable residual risk for current traffic levels.
 
 **Upgrade path:** Consider requiring Privy session for `sendTransaction` — legitimate use cases (wallet connection) only need read methods without auth.
 
@@ -309,7 +309,7 @@ Gains access to Vercel environment variables or Supabase service-role key. Highe
 
 **Path:**
 1. Vercel secrets are encrypted at rest, but are decryptable by Vercel employees, accessible in build logs if accidentally printed, and exposed if a deployed function crashes and dumps env vars
-2. A supply-chain attack on any npm dependency (`@solana/web3.js`, `@noble/curves`, etc.) that exfiltrates `process.env.TREASURY_PRIVATE_KEY_B58` during a payout
+2. A supply-chain attack on any npm dependency (`@solana/web3.js`, `@noble/curves`, etc.) that exfiltrates `process.env.TREASURY_PRIVATE_KEY` during a payout
 3. Insider threat: developer with Vercel dashboard access
 4. OIDC token leak → Vercel API access → env var read
 
@@ -319,8 +319,8 @@ Gains access to Vercel environment variables or Supabase service-role key. Highe
 ```
 Cold wallet (multisig, Squads/Realms) → daily refill → hot wallet (≤ 5 SOL)
                                                               ↑
-                                                    TREASURY_PRIVATE_KEY_B58
-                                                    (only signs SystemProgram.transfer)
+                                                    TREASURY_PRIVATE_KEY
+                                                    (only signs ETH sendTransaction (viem))
 ```
 - Maintain hot wallet at ~5 SOL max (1 day's payout capacity)
 - Daily cron script (run by human, not auto) refills hot wallet from cold

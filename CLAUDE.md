@@ -1,12 +1,12 @@
 # GASCOIN Platform — Claude Code Context
 
 ## Project
-GASCOIN is a Solana-based community gas refund protocol. Users buy gas, post proof on X, submit receipts, and receive SOL refunds.
+GASCOIN is an Ethereum-based community gas refund protocol. Users buy gas, post proof on X, submit receipts, and receive ETH refunds.
 
 ## Stack
 - **Frontend**: Next.js 16 (App Router), deployed on Vercel
 - **Database**: Supabase (PostgreSQL + Storage)
-- **Blockchain**: Solana (Helius RPC), GASCOIN SPL token
+- **Blockchain**: Ethereum (Alchemy RPC, viem), GASCOIN ERC-20 token
 - **Auth**: Privy (X/Twitter OAuth + wallet linking)
 - **AI Engines**: Gemini Vision (OCR), Grok/xAI (reasoning), Claude (oversight)
 - **Cache**: Upstash Redis (mature-dingo-96190)
@@ -19,7 +19,7 @@ Always call search_memories with "GASCOIN" at the start of every session before 
 
 ### Save memories when you learn:
 - Smart contract addresses or program IDs
-- Solana program structure or account layouts
+- Ethereum contract structure or ABI layouts
 - Vercel deployment config or env var names
 - Supabase schema changes or table structures
 - Treasury dashboard logic or leaderboard rules
@@ -45,7 +45,7 @@ When in doubt, save it.
 ## Key Architecture
 
 ```
-Gemini Vision (sees) → Grok (thinks) → Claude (decides) → SOL Payout
+Gemini Vision (sees) → Grok (thinks) → Claude (decides) → ETH Payout
 
 12 automated gates · 5 verification layers · 225 stress tests
 Token tiers: Standard(1) · Commuter(100K) · Road Warrior(5M) · Fleet(10M)

@@ -28,25 +28,25 @@ const core = [
   'PRIVY_APP_SECRET',
   'X_BEARER_TOKEN',
   'X_STRICT_MODE',
-  'SOLANA_RPC_URL',
+  'ETH_RPC_URL',
   'UPSTASH_REDIS_REST_URL',
   'UPSTASH_REDIS_REST_TOKEN',
   'ENABLE_LIVE_PAYOUT'
 ];
 
-const tokenLive = ['GASCOIN_MINT', 'GASCOIN_TREASURY_WALLET'];
-const fullLive = ['TREASURY_PRIVATE_KEY_B58'];
+const tokenLive = ['GASCOIN_CONTRACT_ADDRESS', 'GASCOIN_TREASURY_WALLET'];
+const fullLive = ['TREASURY_PRIVATE_KEY'];
 
 const required = mode === 'full' ? [...core, ...tokenLive, ...fullLive] : [...core];
 const missing = required.filter((k) => !kv[k]);
 
 const warnings = [];
 if (mode === 'pretoken') {
-  if (!kv.GASCOIN_MINT) warnings.push('GASCOIN_MINT not set (expected pre-token launch)');
+  if (!kv.GASCOIN_CONTRACT_ADDRESS) warnings.push('GASCOIN_CONTRACT_ADDRESS not set (expected pre-token launch)');
   if (!kv.GASCOIN_TREASURY_WALLET) warnings.push('GASCOIN_TREASURY_WALLET not set (expected pre-token launch)');
 }
-if (String(kv.ENABLE_LIVE_PAYOUT).toLowerCase() === 'true' && !kv.TREASURY_PRIVATE_KEY_B58) {
-  warnings.push('ENABLE_LIVE_PAYOUT=true but TREASURY_PRIVATE_KEY_B58 missing');
+if (String(kv.ENABLE_LIVE_PAYOUT).toLowerCase() === 'true' && !kv.TREASURY_PRIVATE_KEY) {
+  warnings.push('ENABLE_LIVE_PAYOUT=true but TREASURY_PRIVATE_KEY missing');
 }
 
 const out = {

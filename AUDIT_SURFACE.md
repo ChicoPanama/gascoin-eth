@@ -123,9 +123,9 @@
 
 | Method | Path | Auth | RL | Notes |
 |--------|------|------|----|-------|
-| POST | `/api/rpc` | **NONE** | 100/min/IP | Proxies allowlisted methods (read + **sendTransaction**) through Helius |
+| POST | `/api/rpc` | **NONE** | 100/min/IP | Proxies allowlisted methods (read + **sendTransaction**) through Alchemy |
 
-**⚠ MEDIUM: `sendTransaction` is proxied.** Any user can submit arbitrary signed transactions to the blockchain through GASCOIN's paid Helius endpoint. Not a treasury-draining vector (requires caller's own private key), but allows unlimited Helius RPC cost-abuse within the 100/min rate limit.
+**⚠ MEDIUM: `sendTransaction` is proxied.** Any user can submit arbitrary signed transactions to the blockchain through GASCOIN's paid Alchemy endpoint. Not a treasury-draining vector (requires caller's own private key), but allows unlimited Alchemy RPC cost-abuse within the 100/min rate limit.
 
 ---
 
@@ -162,7 +162,7 @@ All use `isAuthorizedCron` (Bearer `CRON_SECRET`, timing-safe, fail-closed when 
 
 **⚠ INFO: `/api/workers/health`** — no auth. Returns cron schedules, `live_payout_enabled` flag, `gascoin_mint_valid`, worker last-run times. Useful attacker timing intel (e.g., schedule an attack in the 5-minute window between `pre-payout-verify` at 23:55 and `process-claims` at 00:00).
 
-**⚠ INFO: `/api/health`** — no auth. Returns Supabase/Redis/mem0/Helius health + latency + build SHA + region + `mode: 'dry-run'|'live'`.
+**⚠ INFO: `/api/health`** — no auth. Returns Supabase/Redis/mem0/Alchemy health + latency + build SHA + region + `mode: 'dry-run'|'live'`.
 
 ---
 
@@ -201,7 +201,7 @@ All server actions live under `app/actions/`.
 | `refreshTokenBalance(walletAddress)` | **NONE** | Forces Solana RPC balance fetch + Redis cache write for any wallet |
 | `getCachedTokenData(walletAddress)` | none | Read-only Redis lookup |
 
-**⚠ HIGH: `refreshTokenBalance` has no auth.** An attacker can trigger Solana/Helius RPC calls at will for arbitrary wallets. At 10k wallets the cost is 10k Helius read units; combined with the 0-auth surface this is a paid-RPC amplification attack. Also allows cache poisoning if there is any trust in cached tier data at submission time. (`app/actions/token-gating.ts:7`)
+**⚠ HIGH: `refreshTokenBalance` has no auth.** An attacker can trigger Solana/Alchemy RPC calls at will for arbitrary wallets. At 10k wallets the cost is 10k Alchemy read units; combined with the 0-auth surface this is a paid-RPC amplification attack. Also allows cache poisoning if there is any trust in cached tier data at submission time. (`app/actions/token-gating.ts:7`)
 
 ---
 
@@ -296,9 +296,9 @@ All guarded by `requireAdmin()`. Assuming that holds:
 
 | Component | Detail |
 |-----------|--------|
-| Treasury signer | Hot wallet via `TREASURY_PRIVATE_KEY_B58` env var; pubkey verified against `GASCOIN_TREASURY_WALLET` at startup |
-| RPC provider | `SOLANA_RPC_URL` → Helius (`HELIUS_API_KEY`) → `api.mainnet-beta.solana.com` |
-| Transaction type | `SystemProgram.transfer` only (SOL, not tokens) |
+| Treasury signer | Hot wallet via `TREASURY_PRIVATE_KEY` env var; pubkey verified against `GASCOIN_TREASURY_WALLET` at startup |
+| RPC provider | `ETH_RPC_URL` → Alchemy (`ALCHEMY_API_KEY`) → `eth-mainnet.g.alchemy.com` |
+| Transaction type | `ETH sendTransaction (viem)` only (SOL, not tokens) |
 | Dry-run switch | `ENABLE_LIVE_PAYOUT !== 'true'` → returns `DRYRUN_<timestamp>` hash silently |
 | Tier cap enforcement | Enforced in `processQueuedPayout`: `amount_sol ≤ tier.max_sol_refund + 0.0001` |
 | Balance floor alert | `< 1 SOL` triggers `intelligence_entries` high/critical |
@@ -306,7 +306,7 @@ All guarded by `requireAdmin()`. Assuming that holds:
 | Retry logic | Exponential backoff `60s × 2^min(attempts, 6)`; `max_attempts` per `payout_jobs` row |
 | Audit trail | `payouts` row + `audit_logs` entry + mem0 write per payout |
 
-**⚠ CRITICAL: single-signer hot wallet.** `TREASURY_PRIVATE_KEY_B58` in a single Vercel env var — one secret leak = full treasury drain. No multisig, no HSM, no cold-to-hot top-up architecture documented.
+**⚠ CRITICAL: single-signer hot wallet.** `TREASURY_PRIVATE_KEY` in a single Vercel env var — one secret leak = full treasury drain. No multisig, no HSM, no cold-to-hot top-up architecture documented.
 
 **⚠ HIGH: dry-run mode is a silent boolean.** If `ENABLE_LIVE_PAYOUT` is accidentally unset or set to anything other than `'true'`, the system marks claims `paid` and writes `DRYRUN_*` tx hashes to the DB. Intelligence entry fires after the fact, not before. No pre-flight assertion.
 
@@ -379,7 +379,7 @@ App Router        (auth per-route)      (auth per-action — GAPS)
           │              │              │                │
           ▼              ▼              ▼                ▼
      Supabase         Solana        X API v2          AI Gateway
-   (service-role)   (Helius RPC)  (Bearer token)  (Gemini/Grok/Claude)
+   (service-role)   (Alchemy RPC)  (Bearer token)  (Gemini/Grok/Claude)
           │
      ┌────┴──────────┐
      │               │
@@ -392,15 +392,15 @@ App Router        (auth per-route)      (auth per-action — GAPS)
 | Destination | Credential | Location | Trust Notes |
 |-------------|-----------|----------|-------------|
 | Supabase (DB + Storage) | `SUPABASE_SERVICE_ROLE_KEY` | Server-only | Bypasses RLS; all app bugs get service-role blast radius |
-| Solana RPC (read) | `HELIUS_API_KEY` | Server-only | Results trusted for balance/tier gating |
-| Solana RPC (write) | `TREASURY_PRIVATE_KEY_B58` | Server-only | Signs payouts; single point of compromise |
+| Solana RPC (read) | `ALCHEMY_API_KEY` | Server-only | Results trusted for balance/tier gating |
+| Solana RPC (write) | `TREASURY_PRIVATE_KEY` | Server-only | Signs payouts; single point of compromise |
 | X API v2 | `X_BEARER_TOKEN` | Server-only | Tweet proof trusted; follower count trusted |
 | AI Gateway | `VERCEL_OIDC_TOKEN` (auto) | Vercel platform | OIDC; 12h local TTL |
 | OpenRouter | `OPENROUTER_API_KEY` | Server-only | Chat only |
 | mem0 | `MEM0_API_KEY` | Server-only | Long-term wallet memory; inbound via `MEM0_WEBHOOK_SECRET` |
 | Upstash | `UPSTASH_REDIS_REST_URL` + token | Server-only | Fail-open to in-memory; rate limits degrade if Redis unavailable |
 | Privy | `PRIVY_APP_SECRET` | Server-only | Token verification; identity anchor |
-| Helius (payout) | `HELIUS_API_KEY` | Server-only | Same key for reads and `sendTransaction` proxy |
+| Alchemy (payout) | `ALCHEMY_API_KEY` | Server-only | Same key for reads and `sendTransaction` proxy |
 
 ---
 
@@ -420,11 +420,11 @@ All workers gated by `isAuthorizedCron` (Bearer `CRON_SECRET`, `timingSafeEqual`
 | `NEXT_PUBLIC_SUPABASE_URL` | Public (by design) | ❌ Client-exposed |
 | `PRIVY_APP_SECRET` | Secret | ✅ Yes |
 | `NEXT_PUBLIC_PRIVY_APP_ID` | Public (by design) | ❌ Client-exposed |
-| `TREASURY_PRIVATE_KEY_B58` | Critical secret | ✅ Yes |
+| `TREASURY_PRIVATE_KEY` | Critical secret | ✅ Yes |
 | `GASCOIN_TREASURY_WALLET` | Semi-public | ✅ Server-only |
 | `GASCOIN_MINT` | Semi-public | ✅ Server-only |
-| `HELIUS_API_KEY` | Secret | ✅ Yes |
-| `SOLANA_RPC_URL` | Secret | ✅ Yes |
+| `ALCHEMY_API_KEY` | Secret | ✅ Yes |
+| `ETH_RPC_URL` | Secret | ✅ Yes |
 | `X_BEARER_TOKEN` / `X_API_BEARER_TOKEN` | Secret | ✅ Yes |
 | `MEM0_API_KEY` | Secret | ✅ Yes |
 | `MEM0_WEBHOOK_SECRET` | Secret | ✅ Yes |
@@ -457,11 +457,11 @@ No critical secrets observed with `NEXT_PUBLIC_` prefix.
 | F05 | **CRITICAL** | Treasury | Single-signer hot wallet key in Vercel env — one secret leak = full drain |
 | F06 | **HIGH** | API Route | `POST /api/verify/tweet` — unauthenticated write to `gate_results` for any claim_id |
 | F07 | **HIGH** | API Route | `POST /api/link-x` — body-supplied X identity not validated against Privy session |
-| F08 | **HIGH** | Server Action | `refreshTokenBalance` — no auth; Helius RPC amplification + cache poisoning |
+| F08 | **HIGH** | Server Action | `refreshTokenBalance` — no auth; Alchemy RPC amplification + cache poisoning |
 | F09 | **HIGH** | Worker | `pre-payout-verify` skips re-check for any claim with `decision_reason` prefixed `admin_` |
 | F10 | **HIGH** | Treasury | `ENABLE_LIVE_PAYOUT` unset → silent dry-run; claims marked paid with fake tx hashes |
 | F11 | **HIGH** | API Route | `POST /api/public/referrals` — unauthenticated; pre-claim victim wallet referral slots |
-| F12 | **MEDIUM** | API Route | `POST /api/rpc` — no auth; `sendTransaction` proxied through Helius at cost to operator |
+| F12 | **MEDIUM** | API Route | `POST /api/rpc` — no auth; `sendTransaction` proxied through Alchemy at cost to operator |
 | F13 | **MEDIUM** | API Route | `GET /api/me` — O(n) leaderboard scan per call; no per-user rate limit |
 | F14 | **MEDIUM** | API Route | `POST /api/chat` — `body.wallet` used without session; cross-wallet chat context query |
 | F15 | **MEDIUM** | Admin | `approveSubmission` — no server-side SOL cap; typo allows 10× over-payout (worker catches) |

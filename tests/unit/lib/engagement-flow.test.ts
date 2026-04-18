@@ -116,7 +116,7 @@ describe('User Flow: Sign in → Tweet → Engagement Points', () => {
 
     it('veteran wallet gets 1.2x multiplier', async () => {
       const result = await verifyPointAward({
-        wallet: 'GAsVeteran11111111111111111111111111111111111',
+        wallet: '0x742d35Cc6634C0532925a3b844Bc454e4438f44e',
         source: 'tweet_engagement',
         rawPoints: 1000,
         metadata: {},
@@ -129,7 +129,7 @@ describe('User Flow: Sign in → Tweet → Engagement Points', () => {
 
     it('suspicious wallet with high value held for review', async () => {
       const result = await verifyPointAward({
-        wallet: 'GAsSuspicious111111111111111111111111111111111',
+        wallet: '0xAbCdEf1234567890AbCdEf1234567890AbCdEf12',
         source: 'tweet_engagement',
         rawPoints: 2000,
         metadata: {},
@@ -145,7 +145,7 @@ describe('User Flow: Sign in → Tweet → Engagement Points', () => {
 
     it('suspicious wallet with small value passes (not held)', async () => {
       const result = await verifyPointAward({
-        wallet: 'GAsSuspicious111111111111111111111111111111111',
+        wallet: '0xAbCdEf1234567890AbCdEf1234567890AbCdEf12',
         source: 'holdings_bonus',
         rawPoints: 25, // Standard tier daily
         metadata: {},
@@ -198,7 +198,7 @@ describe('User Flow: Sign in → Tweet → Engagement Points', () => {
 
     it('daily velocity >50K flags non-veteran', async () => {
       const result = await verifyPointAward({
-        wallet: 'GAsHighEarner111111111111111111111111111111111',
+        wallet: '0xAbCdEf1234567890AbCdEf1234567890AbCdEf34',
         source: 'tweet_engagement',
         rawPoints: 5000,
         metadata: {},
@@ -212,7 +212,7 @@ describe('User Flow: Sign in → Tweet → Engagement Points', () => {
 
     it('daily velocity >50K but below 200K cap does NOT flag or hold veteran', async () => {
       const result = await verifyPointAward({
-        wallet: 'GAsVeteranHigh11111111111111111111111111111111',
+        wallet: '0xAbCdEf1234567890AbCdEf1234567890AbCdEf56',
         source: 'tweet_engagement',
         rawPoints: 5000,
         metadata: {},
@@ -244,7 +244,7 @@ describe('User Flow: Sign in → Tweet → Engagement Points', () => {
 
       // Verification passes
       const verified = await verifyPointAward({
-        wallet: 'NewUser111111111111111111111111111111111111111',
+        wallet: '0xAbCdEf1234567890AbCdEf1234567890AbCdEf78',
         source: 'tweet_engagement',
         rawPoints: Math.round(rawPoints * quality.multiplier),
         metadata: {},
@@ -271,7 +271,7 @@ describe('User Flow: Sign in → Tweet → Engagement Points', () => {
       expect(quality.isBotEngagement).toBe(false);
 
       const verified = await verifyPointAward({
-        wallet: 'VeteranViral1111111111111111111111111111111111',
+        wallet: '0xAbCdEf1234567890AbCdEf1234567890AbCdEf9A',
         source: 'tweet_engagement',
         rawPoints: Math.round(rawPoints * quality.multiplier),
         metadata: {},
@@ -298,7 +298,7 @@ describe('User Flow: Sign in → Tweet → Engagement Points', () => {
       expect(quality.multiplier).toBeLessThanOrEqual(0.3);
 
       const verified = await verifyPointAward({
-        wallet: 'BotFarmer1111111111111111111111111111111111111',
+        wallet: '0xAbCdEf1234567890AbCdEf1234567890AbCdEfBC',
         source: 'tweet_engagement',
         rawPoints: Math.round(rawPoints * quality.multiplier),
         metadata: {},

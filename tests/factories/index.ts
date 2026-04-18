@@ -1,8 +1,9 @@
 import { faker } from '@faker-js/faker';
 
 export function fakeWallet(): string {
-  const chars = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
-  return Array.from({ length: 44 }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
+  const chars = '0123456789abcdef';
+  const hex = Array.from({ length: 40 }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
+  return `0x${hex}`;
 }
 
 export function fakeTweetUrl(): string {
