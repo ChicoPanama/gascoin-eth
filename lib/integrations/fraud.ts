@@ -6,7 +6,7 @@ import {
   checkImageDimensions,
   type PipelineResult,
 } from './receipt-pipeline';
-import { getSystemPrompt, PROMPT_KEYS } from '../prompts';
+import { getSystemPrompt, getThreshold, PROMPT_KEYS, THRESHOLD_KEYS } from '../prompts';
 import { generateAIJson, isAiGatewayAvailable, AI_MODELS } from './ai-gateway';
 import { writeFraudSignal, addMemory, MEM0_CATEGORIES, MEM0_AGENTS, MEM0_APPS } from '../mem0';
 import { writeIntelligence } from '../knowledge-base';
@@ -207,17 +207,17 @@ function recordFraudSignalsToMem0(
   }
 }
 
-// ── Fraud thresholds — configurable via env; require redeployment (or new cold
-// start) to take effect. For live tuning without a redeploy, move these keys
-// into Edge Config (the EDGE_CONFIG env var is already wired for prompts). ──
-const AI_SCORE_THRESHOLD = Number(process.env.AI_SCORE_THRESHOLD ?? 0.3);
-const TAMPER_SCORE_THRESHOLD = Number(process.env.TAMPER_SCORE_THRESHOLD ?? 0.3);
-const FLAGS_THRESHOLD = Number(process.env.FLAGS_THRESHOLD ?? 2);
-
 // Risk rank for no-downgrade merge (higher rank wins)
 const RISK_RANK: Record<string, number> = { low: 0, medium: 1, high: 2, critical: 3 };
 
 export async function runFraudChecks(raw: ArrayBuffer, pipeline?: PipelineResult, context?: { wallet?: string; claimId?: string }): Promise<FraudSignals> {
+  // Thresholds read from Edge Config at request time — tunable without redeployment.
+  const [AI_SCORE_THRESHOLD, TAMPER_SCORE_THRESHOLD, FLAGS_THRESHOLD] = await Promise.all([
+    getThreshold(THRESHOLD_KEYS.AI_SCORE, 0.3),
+    getThreshold(THRESHOLD_KEYS.TAMPER_SCORE, 0.3),
+    getThreshold(THRESHOLD_KEYS.FLAGS_COUNT, 2),
+  ]);
+
   const buf = Buffer.from(raw);
 
   // Use pipeline data if available (already computed in OCR step)
@@ -231,9 +231,12 @@ export async function runFraudChecks(raw: ArrayBuffer, pipeline?: PipelineResult
   const duplicatePhash = false;
 
   // AI score: combine EXIF + dimension signals + model judgment
-  // If pipeline has model data, use it; otherwise use heuristics only
+  // If pipeline has model data, use it; otherwise use heuristics only.
+  // Skip model-derived scoring when ocr_fallback is true — fallbackExtraction()
+  // returns is_physical_receipt:false by default, which would push aiScore to 0.7
+  // and trigger Grok on every Gemini outage despite having no real OCR data.
   let aiScore = 0.25; // default neutral
-  if (pipeline?.extraction) {
+  if (pipeline?.extraction && !pipeline.extraction.ocr_fallback) {
     // Model says it's manipulated
     if (pipeline.extraction.is_digitally_manipulated) aiScore = 0.8;
     // Model says it's not a physical receipt

@@ -30,6 +30,14 @@ export const PROMPT_KEYS = {
   GEMINI_RECEIPT: 'prompts_gemini_receipt_system',
 } as const;
 
+// ── Threshold keys (Edge Config — tunable without redeploy) ──────────────
+export const THRESHOLD_KEYS = {
+  AI_SCORE:    'threshold_ai_score',
+  TAMPER_SCORE:'threshold_tamper_score',
+  FLAGS_COUNT:  'threshold_flags_count',
+  MIN_QUALITY:  'threshold_min_account_quality',
+} as const;
+
 type PromptKey = (typeof PROMPT_KEYS)[keyof typeof PROMPT_KEYS];
 
 // ── Bundled defaults (source of truth) ────────────────────────────────────
@@ -67,8 +75,8 @@ Higher tiers get more scrutiny on outlier behavior because the payout size justi
 13. rate_limit — submission velocity within normal user range
 
 ═══ FRAUD SIGNAL TAXONOMY ═══
-- aiScore (0-1): likelihood the image is AI-generated. Threshold 0.65. Above that = reject.
-- tamperScore (0-1): digital manipulation signals. Threshold 0.55. Above that = reject.
+- aiScore (0-1): likelihood the image is AI-generated. Above the configured threshold = reject.
+- tamperScore (0-1): digital manipulation signals. Above the configured threshold = reject.
 - fraudRisk: composite label (low/medium/high/critical) from the pipeline.
 - crossValidation: secondary Grok/Gemini reasoning over all signals when heuristics are ambiguous.
 
@@ -106,7 +114,7 @@ The claim summary includes a tier scrutiny note. Apply it as a multiplier:
 ═══ DECISION MATRIX ═══
 - **approve**: all signals consistent, fraud scores below threshold, trust stable or improving, history clean. Dispatch SOL.
 - **flag**: one or two soft concerns, ambiguous signals, or new account with high amount. Send to manual review queue — humans will decide.
-- **reject**: clear fraud indicators: aiScore > 0.65, tamperScore > 0.55, referral ring hit, cross-pipeline block, OR multiple independent soft signals pointing the same direction.
+- **reject**: clear fraud indicators: AI or tamper score above threshold, referral ring hit, cross-pipeline block, OR multiple independent soft signals pointing the same direction.
 
 ═══ HARD REJECT TRIGGERS (ignore everything else) ═══
 - ringDetection flag of type "circular" or "chain" with confidence > 0.8
@@ -140,8 +148,8 @@ GASCOIN CONTEXT
 GASCOIN is a Solana-based gas refund protocol. Legitimate users photograph a real paper gas-station receipt with their Solana wallet handwritten on it, post proof on X with #gascoin, and receive a SOL payout scaled by their tier (Standard / Commuter / Road Warrior / Fleet). Fraudsters try to claim refunds for fake receipts, AI-generated images, screenshots of other people's receipts, or receipts that aren't for fuel.
 
 SIGNAL INTERPRETATION
-- aiScore (0-1): likelihood the image is AI-generated. 0.65+ is a strong reject signal.
-- tamperScore (0-1): digital manipulation signals (copy-paste, cloning, misaligned text). 0.55+ is strong reject.
+- aiScore (0-1): likelihood the image is AI-generated. Above the configured threshold = strong reject signal.
+- tamperScore (0-1): digital manipulation signals (copy-paste, cloning, misaligned text). Above the configured threshold = strong reject.
 - exifScore (0-1): 1 = real camera EXIF with device metadata, 0 = stripped or absent. Screenshots strip EXIF.
 - dimensionScore (0-1): 1 = typical phone-photo dimensions, 0 = suspicious AI-grid dimensions (1024x1024, 512x512).
 - ocrConfidence (0-1): vision model's confidence in its extraction.
@@ -167,7 +175,7 @@ When ocrConfidence is above 0.5 and raw_text is available, check the internal ma
 - Mismatched math is a strong edit signal — name it explicitly in concerns as "math_inconsistency".
 
 REASONING RULES
-1. A SINGLE strong negative signal (aiScore>0.65 OR tamperScore>0.55 OR isDigitallyManipulated=true) is enough to return "high".
+1. A SINGLE strong negative signal (AI or tamper score above threshold, OR isDigitallyManipulated=true) is enough to return "high".
 2. MULTIPLE weak signals pointing the same direction (no EXIF + screen dimensions + low confidence) = "high".
 3. One weak signal alone (low confidence OR missing EXIF but everything else clean) = "low" or "medium" based on overall posture.
 4. Never return "high" without naming the specific signal in concerns.
@@ -276,4 +284,41 @@ export async function getSystemPrompt(key: PromptKey): Promise<string> {
 /** Clear the warm cache — useful for tests or forced re-reads. */
 export function clearPromptWarmCache(): void {
   warmCache.clear();
+}
+
+// ── Threshold helpers ─────────────────────────────────────────────────────
+// Same warm-cache + Edge Config pattern as getSystemPrompt. Falls back to
+// the hardcoded default if Edge Config is unavailable or the key is missing.
+// Add these four keys to the Vercel Edge Config store to tune without redeploy:
+//   threshold_ai_score            → 0.3
+//   threshold_tamper_score        → 0.3
+//   threshold_flags_count         → 2
+//   threshold_min_account_quality → 40
+
+const thresholdCache = new Map<string, number>();
+
+export async function getThreshold(key: string, fallback: number): Promise<number> {
+  const cached = thresholdCache.get(key);
+  if (cached !== undefined) return cached;
+
+  if (!process.env.EDGE_CONFIG) {
+    thresholdCache.set(key, fallback);
+    return fallback;
+  }
+
+  try {
+    const exists = await has(key);
+    if (exists) {
+      const value = await get<number>(key);
+      if (typeof value === 'number' && isFinite(value)) {
+        thresholdCache.set(key, value);
+        return value;
+      }
+    }
+  } catch (err) {
+    console.error(JSON.stringify({ event: 'edge_config_threshold_fail', key, error: String(err) }));
+  }
+
+  thresholdCache.set(key, fallback);
+  return fallback;
 }

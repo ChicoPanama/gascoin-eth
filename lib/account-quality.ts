@@ -26,7 +26,7 @@ export interface HistoricalSignals {
   snapshotAge?: number | null; // days since snapshot
 }
 
-const MIN_ACCOUNT_QUALITY_SCORE = 40;
+const MIN_ACCOUNT_QUALITY_SCORE = Number(process.env.MIN_ACCOUNT_QUALITY_SCORE ?? 40);
 
 const BIO_SPAM_KEYWORDS = [
   'airdrop', 'giveaway', '100x', 'moon', 'pump', 'dm for', 'follow back',

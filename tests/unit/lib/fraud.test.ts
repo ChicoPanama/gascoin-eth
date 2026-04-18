@@ -118,6 +118,16 @@ describe('runFraudChecks — aiScore computation', () => {
     const result = await runFraudChecks(DUMMY_BUF, makePipeline({ confidence: 0.6, is_physical_receipt: true, is_digitally_manipulated: false }));
     expect(result.aiScore).toBeCloseTo(0.4, 5);
   });
+
+  it('stays at 0.25 neutral when ocr_fallback:true even though is_physical_receipt:false', async () => {
+    // fallbackExtraction() returns is_physical_receipt:false — without the guard
+    // this would push aiScore to 0.7 and trigger Grok on every Gemini outage.
+    const result = await runFraudChecks(
+      DUMMY_BUF,
+      makePipeline({ is_physical_receipt: false, is_digitally_manipulated: false, ocr_fallback: true }),
+    );
+    expect(result.aiScore).toBe(0.25);
+  });
 });
 
 // ─── tamperScore computation ──────────────────────────────────────────────────
@@ -177,6 +187,16 @@ describe('runFraudChecks — Grok trigger conditions', () => {
     vi.mocked(checkExifMetadata).mockReturnValueOnce({ score: 0.9, flags: ['f1', 'f2', 'f3'] } as any);
     await runFraudChecks(DUMMY_BUF);
     expect(generateAIJson).toHaveBeenCalledOnce();
+  });
+
+  it('does NOT trigger Grok when ocr_fallback:true (Gemini outage path)', async () => {
+    // fallbackExtraction() has is_physical_receipt:false — used to push aiScore to 0.7
+    // and trigger Grok. With the guard, aiScore stays at 0.25 neutral and Grok is skipped.
+    await runFraudChecks(
+      DUMMY_BUF,
+      makePipeline({ is_physical_receipt: false, is_digitally_manipulated: false, ocr_fallback: true }),
+    );
+    expect(generateAIJson).not.toHaveBeenCalled();
   });
 
   it('does NOT trigger Grok when gateway is unavailable', async () => {

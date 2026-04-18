@@ -20,6 +20,7 @@ import { bustBalanceCache } from '../../../../lib/integrations/solana';
 import { recordGasPrice, detectStationPattern, getTypicalGasPrice } from '../../../../lib/data-intelligence';
 import { getCachedFlags, addMemory, writeFraudSignal, writeAccountQuality, writePipelineAnomaly } from '../../../../lib/mem0';
 import { getClientIp } from '../../../../lib/ip';
+import { checkIpClaimVelocity } from '../../../../lib/ip-claim-velocity';
 
 // Fraud + OCR + AI calls can take 30s+; bump function timeout to 60s
 export const maxDuration = 60;
@@ -74,6 +75,14 @@ export async function POST(req: Request){
   if (!session) {
     return NextResponse.json({ ok:false, error:'unauthorized_privy_session_required' }, { status: 401 });
   }
+
+  // IP cross-account velocity fingerprint (IP/24 + UA, same pattern as referral clicks)
+  const ua = (req as Request).headers.get('user-agent') ?? 'unknown';
+  const ip24 = ip.split('.').slice(0, 3).join('.');
+  const ipFingerprint = Buffer.from(`${ip24}:${ua}`).toString('base64').slice(0, 32);
+  const ipVelocity = process.env.ENABLE_IP_CROSS_ACCOUNT === 'true'
+    ? await checkIpClaimVelocity(ipFingerprint, session.xId || session.xHandle)
+    : { suspicious: false, distinctAccounts: 0 };
 
   let supabase;
   try {
@@ -375,6 +384,13 @@ export async function POST(req: Request){
     accountQualityPassed: accountQuality.passed,
   });
 
+  // IP cross-account soft flag — adds +0.15 risk and routes to needs_review
+  // if another X account submitted from the same subnet within 7 days.
+  if (ipVelocity.suspicious) {
+    result.riskScore = Math.min(1, result.riskScore + 0.15);
+    if (result.decision === 'ready_for_dispatch') result.decision = 'needs_review';
+  }
+
   // If X API failed, tell user to retry — don't penalize them
   if (result.decision === 'retry_later') {
     return NextResponse.json({
@@ -549,6 +565,7 @@ export async function POST(req: Request){
       ...(walletConflict ? { walletConflict: true } : {}),
       ...(result.clampFlags ? { clampFlags: result.clampFlags } : {}),
       ...(mem0Flags ? { mem0Flags: mem0Flags.riskFlags, mem0Trust: mem0Flags.trustLevel } : {}),
+      ...(ipVelocity.suspicious ? { ipCrossAccountFlag: true, distinctIpAccounts: ipVelocity.distinctAccounts } : {}),
     }
   });
 
@@ -666,8 +683,8 @@ export async function POST(req: Request){
       parsedWallet: ocr.walletOnReceipt,
       tokenBalance: minHold.tokenBalance,
       tierSlug: userTier.slug,
-      hashSha256: fraudBase.hashSha256,
-      pHash: fraudBase.pHash
+      // hashSha256 and pHash intentionally omitted — returning these fingerprints
+      // would allow callers to enumerate DB duplicates and craft near-duplicates
     }
   };
 
