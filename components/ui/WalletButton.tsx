@@ -1,20 +1,21 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { useWallet } from "@solana/wallet-adapter-react";
+import { useAccount, useConnect, useDisconnect } from "wagmi";
 import { WalletConnectModal } from "../WalletConnectModal";
 
 const CONNECT_TIMEOUT_MS = 15000;
 
 export function WalletButton() {
-  const { connected, publicKey, disconnect, connecting, wallet } = useWallet();
+  const { address, isConnected, isConnecting } = useAccount();
+  const { disconnect } = useDisconnect();
   const [modalOpen, setModalOpen] = useState(false);
   const [timedOut, setTimedOut] = useState(false);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Connection timeout — reset to idle if wallet hangs
   useEffect(() => {
-    if (connecting) {
+    if (isConnecting) {
       setTimedOut(false);
       timerRef.current = setTimeout(() => setTimedOut(true), CONNECT_TIMEOUT_MS);
     } else {
@@ -24,20 +25,19 @@ export function WalletButton() {
     return () => {
       if (timerRef.current) clearTimeout(timerRef.current);
     };
-  }, [connecting]);
+  }, [isConnecting]);
 
-  const truncate = (key: string) =>
-    `${key.slice(0, 4)}...${key.slice(-4)}`;
+  const truncate = (addr: string) =>
+    `${addr.slice(0, 6)}...${addr.slice(-4)}`;
 
   // Timed out — let user retry
-  if (connecting && timedOut) {
+  if (isConnecting && timedOut) {
     return (
       <>
         <button
           className="wallet-btn"
           onClick={() => {
-            // Force disconnect to reset adapter state, then reopen modal
-            disconnect().catch(() => {});
+            disconnect();
             setTimeout(() => setModalOpen(true), 100);
           }}
         >
@@ -49,7 +49,7 @@ export function WalletButton() {
   }
 
   // Connecting — show loading state
-  if (connecting) {
+  if (isConnecting) {
     return (
       <button className="wallet-btn wallet-btn--loading" disabled>
         CONNECTING...
@@ -58,10 +58,10 @@ export function WalletButton() {
   }
 
   // Connected — show wallet address
-  if (connected && publicKey) {
+  if (isConnected && address) {
     return (
-      <button className="wallet-btn wallet-btn--connected" onClick={disconnect}>
-        {truncate(publicKey.toBase58())} ✕
+      <button className="wallet-btn wallet-btn--connected" onClick={() => disconnect()}>
+        {truncate(address)} ✕
       </button>
     );
   }

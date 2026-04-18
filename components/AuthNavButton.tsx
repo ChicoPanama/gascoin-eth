@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from 'react';
 import { usePrivy } from '@privy-io/react-auth';
-import { useWallet } from '@solana/wallet-adapter-react';
+import { useAccount } from 'wagmi';
 
 function readHandle(user: any): string {
   if (user?.twitter?.username) return String(user.twitter.username).replace(/^@/, '');
@@ -31,7 +31,7 @@ function readProfilePicture(user: any): string {
 
 export function AuthNavButton() {
   const { ready, authenticated, login, logout, user, getAccessToken } = usePrivy();
-  const { publicKey, connected } = useWallet();
+  const { address, isConnected } = useAccount();
   const linkedRef = useRef(false);
 
   const handle = readHandle(user as any);
@@ -42,9 +42,9 @@ export function AuthNavButton() {
 
   // Auto-link wallet ↔ X handle when both are connected
   useEffect(() => {
-    if (!authenticated || !connected || !publicKey || !handle) return;
+    if (!authenticated || !isConnected || !address || !handle) return;
 
-    const wallet = publicKey.toBase58();
+    const wallet = address;
 
     // Skip if already linked this exact wallet+handle combo
     if (linkedRef.current && lastLinkedWallet.current === wallet) return;
@@ -72,7 +72,7 @@ export function AuthNavButton() {
       linkedRef.current = false;
       lastLinkedWallet.current = null;
     });
-  }, [authenticated, connected, publicKey, handle, xUserId, getAccessToken]);
+  }, [authenticated, isConnected, address, handle, xUserId, getAccessToken]);
 
   // Loading — show placeholder so button never vanishes
   if (!ready) {
@@ -93,7 +93,7 @@ export function AuthNavButton() {
   }
 
   // Signed in — show unified identity
-  const walletAddr = connected && publicKey ? truncateWallet(publicKey.toBase58()) : null;
+  const walletAddr = isConnected && address ? truncateWallet(address) : null;
 
   return (
     <div className="auth-signed-in" style={{ display: 'flex', gap: 8, alignItems: 'center' }}>

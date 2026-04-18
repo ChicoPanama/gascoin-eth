@@ -432,7 +432,7 @@ export const DOC_CATEGORIES: DocCategory[] = [
         category: "Technology",
         description: "The full GASCOIN verification + AI cost-defense stack on one page.",
         content: `<h3>What this is</h3>
-<p>The real, end-to-end GASCOIN verification pipeline. Arrows always point in the direction data moves. The three AI providers are <strong>not peers</strong> — they form a pipeline where Gemini Vision runs first on the receipt image, Grok runs second (conditionally, on elevated risk signals) to reason across Gemini's output, and Claude runs last as the <strong>final reviewer</strong> of everything before a single lamport of SOL leaves the treasury.</p>
+<p>The real, end-to-end GASCOIN verification pipeline. Arrows always point in the direction data moves. The three AI providers are <strong>not peers</strong> — they form a pipeline where Gemini Vision runs first on the receipt image, Grok runs second (conditionally, on elevated risk signals) to reason across Gemini's output, and Claude runs last as the <strong>final reviewer</strong> of everything before a single wei of ETH leaves the treasury.</p>
 <pre class="doc-ascii">
   ┌──────────────────────────────────────────────────────────────────────────┐
   │                       GASCOIN VERIFICATION PIPELINE                      │
@@ -475,7 +475,7 @@ export const DOC_CATEGORIES: DocCategory[] = [
   │                      │   PAYOUT WORKER          │                   │    │
   │                      │  · re-verify X API       │                   │    │
   │                      │  · check mem0 ring flags │                   │    │
-  │                      │  · sendSolPayout (Helius)│                   │    │
+  │                      │  · sendEthPayout (Alchemy)│                  │    │
   │                      └──────────┬───────────────┘                   │    │
   │                                 │                                   │    │
   │                                 ▼                                   │    │
@@ -512,9 +512,9 @@ export const DOC_CATEGORIES: DocCategory[] = [
 
 <h3>How to read the diagram</h3>
 <ul>
-<li><strong>Top block (the real flow).</strong> A user submission fans out in parallel to the cheap signals (X API v2, Solana RPC) and the expensive signal (Gemini Vision receipt extraction). The fraud module conditionally escalates to Grok. The 13-gate policy engine consumes everything, persists the decision, and returns the user their response.</li>
-<li><strong>The async boundary.</strong> Claude does not run inside the submit request. Auto-approved claims are picked up by a cron worker, which is where Claude acts as the <em>final reviewer</em> — with the Gemini output, the Grok verdict (if it ran), the gate results, the mem0 entity profile, and the knowledge base rulebook all in front of it. No SOL moves until Claude has signed off.</li>
-<li><strong>The payout worker does a second verification pass.</strong> It re-hits the X API to confirm the tweet is still live and re-reads mem0 for referral-ring flags before calling <code>sendSolPayout</code>. This is why a referral ring detected <em>after</em> a claim was approved still blocks the payout.</li>
+<li><strong>Top block (the real flow).</strong> A user submission fans out in parallel to the cheap signals (X API v2, Ethereum RPC) and the expensive signal (Gemini Vision receipt extraction). The fraud module conditionally escalates to Grok. The 13-gate policy engine consumes everything, persists the decision, and returns the user their response.</li>
+<li><strong>The async boundary.</strong> Claude does not run inside the submit request. Auto-approved claims are picked up by a cron worker, which is where Claude acts as the <em>final reviewer</em> — with the Gemini output, the Grok verdict (if it ran), the gate results, the mem0 entity profile, and the knowledge base rulebook all in front of it. No ETH moves until Claude has signed off.</li>
+<li><strong>The payout worker does a second verification pass.</strong> It re-hits the X API to confirm the tweet is still live and re-reads mem0 for referral-ring flags before calling <code>sendEthPayout</code>. This is why a referral ring detected <em>after</em> a claim was approved still blocks the payout.</li>
 <li><strong>mem0 is a horizontal bus, not a sidebar.</strong> The submit pipeline, Claude oversight, the referral worker, and the engagement worker all write to it. Claude and the payout worker read from it. Nothing is floating — every block has arrows into and out of the rest of the system.</li>
 <li><strong>Bottom three rows are horizontal support layers.</strong> The AI Gateway routes every model call; the four-layer cache defense sits underneath; Fluid Compute with elastic concurrency is the runtime that makes the in-memory single-flight coalescing actually work.</li>
 </ul>
@@ -644,7 +644,7 @@ Inputs(wallet,tweet,receipt)
     -> Persist(DB + audit log + mem0 signals)
     -> [async boundary — cron worker]
     -> Oversight(Claude final reviewer + KB + mem0 profile)
-    -> Payout(re-verify X, re-check mem0 rings, sendSolPayout)
+    -> Payout(re-verify X, re-check mem0 rings, sendEthPayout)
     -> Audit(log every privileged/system action)
 </pre>`,
         order: 26,
@@ -1165,7 +1165,7 @@ Inputs(wallet,tweet,receipt)
      │        │   PAYOUT WORKER            │                │
      │        │   · re-verify X API        │                │
      │        │   · check mem0 ring flags  │                │
-     │        │   · sendSolPayout (Helius) │                │
+     │        │   · sendEthPayout (Alchemy) │               │
      │        └──────────┬─────────────────┘                │
      │                   │                                  │
      └───────────────────┴──────────────────────────────────┘

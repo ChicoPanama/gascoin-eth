@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation';
 import { verifyAdminSession } from '../../actions/admin-auth';
 import { getSupabaseAdmin } from '../../../lib/supabase';
-import { getTreasuryBalances } from '../../../lib/integrations/solana';
+import { getTreasuryBalances } from '../../../lib/integrations/ethereum';
 import { formatSol } from '../../../lib/formatters';
 
 export default async function TreasuryPage() {

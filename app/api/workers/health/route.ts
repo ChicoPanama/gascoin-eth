@@ -121,7 +121,7 @@ export async function GET(req: Request) {
   // paid without transferring SOL. Surface this in the health feed.
   const livePayoutEnabled = process.env.ENABLE_LIVE_PAYOUT === 'true';
 
-  // C4: Validate GASCOIN_MINT format at health-check time.
+  // C4: Validate GASCOIN_CONTRACT_ADDRESS format at health-check time.
   const mintCheck = validateGascoinMint();
 
   return NextResponse.json({

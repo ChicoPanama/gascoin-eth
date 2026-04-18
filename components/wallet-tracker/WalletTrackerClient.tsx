@@ -28,15 +28,14 @@ function useAnimVal(target: number, dur = 1000) {
   return v;
 }
 
-function isValidSolanaAddress(addr: string): boolean {
-  return /^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(addr);
+function isValidEthAddress(addr: string): boolean {
+  return /^0x[0-9a-fA-F]{40}$/.test(addr);
 }
 
 const PAGE_SIZE = 10;
 
 export function WalletTrackerClient({ initialLookupAddress }: { initialLookupAddress: string | null }) {
-  const { publicKey, solBalance, disconnect } = useGascoinWallet();
-  const connectedWallet = publicKey?.toBase58() ?? null;
+  const { address: connectedWallet } = useGascoinWallet();
 
   const [lookupInput, setLookupInput] = useState(initialLookupAddress || '');
   const [lookupAddress, setLookupAddress] = useState<string | null>(initialLookupAddress);
@@ -54,7 +53,7 @@ export function WalletTrackerClient({ initialLookupAddress }: { initialLookupAdd
   const aPending = useAnimVal(summary?.total_pending ?? 0);
   const aRejected = useAnimVal(summary?.total_rejected ?? 0);
 
-  const inputValid = isValidSolanaAddress(lookupInput);
+  const inputValid = isValidEthAddress(lookupInput);
 
   const doLookup = () => {
     if (!inputValid) return;

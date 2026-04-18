@@ -2,7 +2,7 @@ import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { verifyAdminSession } from '../../actions/admin-auth';
 import { getSupabaseAdmin } from '../../../lib/supabase';
-import { getTreasuryBalances } from '../../../lib/integrations/solana';
+import { getTreasuryBalances } from '../../../lib/integrations/ethereum';
 import { truncateWallet, formatSol, timeAgo } from '../../../lib/formatters';
 import { REFERRAL_CONFIG, SKIP_REASON_LABELS } from '../../../lib/referral-config';
 import { markReferralDispatched, skipReferralReward } from '../../actions/admin/referrals';

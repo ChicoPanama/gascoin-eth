@@ -42,7 +42,7 @@ export function GatesTeaser() {
           </h2>
           <p className="gt-teaser-sub">
             Every submission passes through {GATE_COUNT} sequential verification checks
-            before a single lamport leaves the treasury.
+            before a single wei leaves the treasury.
           </p>
           <Link href="/gates" className="gc-teaser-link">See all {GATE_COUNT} gates</Link>
         </div>

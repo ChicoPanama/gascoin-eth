@@ -48,9 +48,12 @@ export async function GET(req: Request) {
   // AbortSignal timeout so the route always returns within maxDuration.
   const supabaseUrl = (process.env.NEXT_PUBLIC_SUPABASE_URL || '').replace(/\/$/, '');
   const upstashUrl = (process.env.UPSTASH_REDIS_REST_URL || '').replace(/\/$/, '');
-  const heliusKey = process.env.HELIUS_API_KEY;
+  const alchemyKey = process.env.ALCHEMY_API_KEY;
+  const ethRpcUrl = alchemyKey
+    ? `https://eth-mainnet.g.alchemy.com/v2/${alchemyKey}`
+    : (process.env.ETH_RPC_URL || '');
 
-  const [supabase, upstash, mem0, helius] = await Promise.all([
+  const [supabase, upstash, mem0, ethereum] = await Promise.all([
     // Supabase REST ping using the service_role key. Server-side only.
     // Service role bypasses RLS and auth gates, so this is "can the platform
     // reach its own database with admin credentials". Both `/rest/v1/` OpenAPI
@@ -77,17 +80,17 @@ export async function GET(req: Request) {
           headers: { Authorization: `Token ${process.env.MEM0_API_KEY}` },
         })
       : Promise.resolve({ ok: false, error: 'not_configured' } as DepStatus),
-    // Helius RPC — getHealth
-    heliusKey
-      ? pingUrl(`https://mainnet.helius-rpc.com/?api-key=${heliusKey}`, {
+    // Ethereum RPC — eth_blockNumber
+    ethRpcUrl
+      ? pingUrl(ethRpcUrl, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'getHealth' }),
+          body: JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'eth_blockNumber', params: [] }),
         })
       : Promise.resolve({ ok: false, error: 'not_configured' } as DepStatus),
   ]);
 
-  const allOk = supabase.ok && upstash.ok && mem0.ok && helius.ok;
+  const allOk = supabase.ok && upstash.ok && mem0.ok && ethereum.ok;
 
   return NextResponse.json(
     {
@@ -101,7 +104,7 @@ export async function GET(req: Request) {
         supabase,
         upstash,
         mem0,
-        helius,
+        ethereum,
       },
       note: isDryRun
         ? 'Season 1 beta — submissions flow end-to-end but no SOL is dispatched.'

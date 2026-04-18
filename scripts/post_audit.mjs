@@ -53,7 +53,7 @@ const rateLimitLib = fs.readFileSync(path.join(root, 'lib/rate-limit.ts'), 'utf8
 const schema = fs.readFileSync(path.join(root, 'db/schema.sql'), 'utf8');
 const phase2Checks = {
   hasPrePayoutMinGascoinCheck: payoutLib.includes('hasMinimumGascoinUsd') && payoutLib.includes('min_gascoin_not_met'),
-  hasPayoutSenderHook: payoutLib.includes('sendSolPayout'),
+  hasPayoutSenderHook: payoutLib.includes('sendEthPayout'),
   persistsClaimsToSupabase: submitRoute.includes("from('claims')") && submitRoute.includes('.insert({') && submitRoute.includes("from('gate_results')"),
   persistsReceiptHashes: submitRoute.includes('hash_sha256') && submitRoute.includes('phash'),
   hasReviewActions: reviewRoute.includes('claim_approve') || (reviewRoute.includes('claim_') && reviewRoute.includes('ban')),

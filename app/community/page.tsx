@@ -105,11 +105,7 @@ export default function CommunityPage() {
   const aAvgUsd = useAnimVal(stats?.avg_refund_usdc ?? 0);
 
   const handleConnectWallet = () => {
-    // Trigger Ethereum wallet modal
-    try {
-      const { setVisible } = require('@solana/wallet-adapter-react-ui');
-      setVisible(true);
-    } catch {}
+    // Wallet connection is handled by Privy — no-op here
   };
 
   return (

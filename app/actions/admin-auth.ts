@@ -4,7 +4,6 @@ import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { randomBytes } from 'crypto';
 import { ed25519 } from '@noble/curves/ed25519';
-import { PublicKey } from '@solana/web3.js';
 import { isAdminWallet } from '../../lib/admin-auth';
 import { getSupabaseAdmin } from '../../lib/supabase';
 
@@ -17,7 +16,8 @@ export async function createAdminSession(walletAddress: string, timestamp: numbe
   try {
     const msgBytes = Buffer.from(`GASCOIN_ADMIN_AUTH:${timestamp}:${walletAddress}`);
     const sigBytes = Buffer.from(signatureHex, 'hex');
-    const pubkeyBytes = new PublicKey(walletAddress).toBytes();
+    // For Ethereum wallets, derive the raw public key from the hex address bytes
+    const pubkeyBytes = Buffer.from(walletAddress.replace(/^0x/, ''), 'hex');
     const valid = ed25519.verify(sigBytes, msgBytes, pubkeyBytes);
     if (!valid) return { success: false, error: 'Signature invalid' };
   } catch {

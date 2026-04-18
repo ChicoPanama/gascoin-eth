@@ -27,11 +27,12 @@ export const xApiHandlers = [
   }),
 ];
 
-export const solanaHandlers = [
-  http.post('https://api.mainnet-beta.solana.com', async ({ request }) => {
+export const ethereumHandlers = [
+  http.post('https://eth-mainnet.g.alchemy.com/v2/:apiKey', async ({ request }) => {
     const body = await request.json() as { method: string };
-    if (body.method === 'getBalance') return HttpResponse.json({ jsonrpc: '2.0', result: { context: { slot: 1 }, value: 5_000_000_000 }, id: 1 });
-    if (body.method === 'getParsedTokenAccountsByOwner') return HttpResponse.json({ jsonrpc: '2.0', id: 1, result: { context: { slot: 1 }, value: [{ account: { data: { parsed: { info: { tokenAmount: { amount: '500000000000', uiAmount: 500000, decimals: 6 } } } } } }] } });
+    if (body.method === 'eth_getBalance') return HttpResponse.json({ jsonrpc: '2.0', result: '0x4563918244F40000', id: 1 });
+    if (body.method === 'eth_call') return HttpResponse.json({ jsonrpc: '2.0', id: 1, result: '0x000000000000000000000000000000000000000000006765c793fa10079d000000' });
+    if (body.method === 'eth_blockNumber') return HttpResponse.json({ jsonrpc: '2.0', result: '0x1388', id: 1 });
     return HttpResponse.json({ jsonrpc: '2.0', result: null, id: 1 });
   }),
 ];
@@ -45,4 +46,4 @@ export const openRouterHandlers = [
   }),
 ];
 
-export const handlers = [...xApiHandlers, ...solanaHandlers, ...openRouterHandlers];
+export const handlers = [...xApiHandlers, ...ethereumHandlers, ...openRouterHandlers];

@@ -38,9 +38,9 @@ const EXPECTED_ENV = [
   { key: 'SUPABASE_SERVICE_ROLE_KEY', group: 'Supabase' },
   { key: 'UPSTASH_REDIS_REST_URL', group: 'Upstash' },
   { key: 'UPSTASH_REDIS_REST_TOKEN', group: 'Upstash' },
-  { key: 'HELIUS_API_KEY', group: 'Solana' },
-  { key: 'GASCOIN_MINT', group: 'Solana' },
-  { key: 'NEXT_PUBLIC_GASCOIN_MINT', group: 'Solana' },
+  { key: 'ALCHEMY_API_KEY', group: 'Ethereum' },
+  { key: 'GASCOIN_CONTRACT_ADDRESS', group: 'Ethereum' },
+  { key: 'NEXT_PUBLIC_GASCOIN_CONTRACT_ADDRESS', group: 'Ethereum' },
   { key: 'MEM0_API_KEY', group: 'mem0' },
   { key: 'MEM0_ORG_ID', group: 'mem0' },
   { key: 'NEXT_PUBLIC_PRIVY_APP_ID', group: 'Privy' },
@@ -106,22 +106,25 @@ async function probeRedis(): Promise<ConnectResult> {
   }
 }
 
-async function probeSolana(): Promise<ConnectResult> {
+async function probeEthereum(): Promise<ConnectResult> {
   const start = Date.now();
-  const apiKey = (process.env.HELIUS_API_KEY || '').trim();
-  if (!apiKey) return { ok: false, latencyMs: 0, detail: 'HELIUS_API_KEY missing' };
+  const apiKey = (process.env.ALCHEMY_API_KEY || '').trim();
+  const rpcUrl = apiKey
+    ? `https://eth-mainnet.g.alchemy.com/v2/${apiKey}`
+    : (process.env.ETH_RPC_URL || '').trim();
+  if (!rpcUrl) return { ok: false, latencyMs: 0, detail: 'ALCHEMY_API_KEY or ETH_RPC_URL missing' };
   try {
     const res = await withTimeout(
-      fetch(`https://mainnet.helius-rpc.com/?api-key=${apiKey}`, {
+      fetch(rpcUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'getHealth' }),
+        body: JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'eth_blockNumber', params: [] }),
         cache: 'no-store',
       }),
       3000,
     );
     const json = (await res.json()) as any;
-    const ok = res.ok && (json?.result === 'ok' || json?.result != null);
+    const ok = res.ok && !!json?.result;
     return { ok, latencyMs: Date.now() - start, detail: ok ? undefined : `result=${JSON.stringify(json?.result)}` };
   } catch (e: any) {
     return { ok: false, latencyMs: Date.now() - start, detail: e?.message?.slice(0, 80) };
@@ -244,23 +247,23 @@ export default async function AdminHealthPage() {
   }
 
   // F4: Real connectivity checks — all run in parallel, each capped at 3s
-  const [connSupabase, connRedis, connSolana, connMem0, connXApi, connAiGateway] =
+  const [connSupabase, connRedis, connEthereum, connMem0, connXApi, connAiGateway] =
     await Promise.all([
       probeSupabase(),
       probeRedis(),
-      probeSolana(),
+      probeEthereum(),
       probeMem0(),
       probeXApi(),
       probeAiGateway(),
     ]);
 
   const connectivityChecks = [
-    { label: 'Supabase',    result: connSupabase },
-    { label: 'Redis',       result: connRedis },
-    { label: 'Solana RPC',  result: connSolana },
-    { label: 'mem0',        result: connMem0 },
-    { label: 'X API',       result: connXApi },
-    { label: 'AI Gateway',  result: connAiGateway },
+    { label: 'Supabase',      result: connSupabase },
+    { label: 'Redis',         result: connRedis },
+    { label: 'Ethereum RPC',  result: connEthereum },
+    { label: 'mem0',          result: connMem0 },
+    { label: 'X API',         result: connXApi },
+    { label: 'AI Gateway',    result: connAiGateway },
   ];
 
   return (
