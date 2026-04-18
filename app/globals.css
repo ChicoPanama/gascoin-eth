@@ -9083,7 +9083,7 @@ button.docs-footer-link {
 .chat-agent-fab--right { right: 24px; }
 .chat-agent-fab--left  { left: 24px; }
 
-/* Clippy images — portrait crop fits into circle */
+/* Clippy — always black on white circle, both modes */
 .chat-fab-clippy {
   width: 100%; height: 100%;
   object-fit: cover; object-position: center 15%;
@@ -9091,20 +9091,9 @@ button.docs-footer-link {
   pointer-events: none;
   user-select: none;
 }
-/* Light mode: black Clippy */
-.chat-fab-clippy--dark  { display: none; }
-.chat-fab-clippy--light { display: block; }
-@media (prefers-color-scheme: dark) {
-  .chat-agent-fab { background: #1a1a1a; }
-  .chat-fab-clippy--light { display: none; }
-  .chat-fab-clippy--dark  { display: block; }
-}
-/* Close icon when panel open */
+/* Close icon */
 .chat-fab-close {
   color: #000; font-size: 18px; font-weight: 700; line-height: 1;
-}
-@media (prefers-color-scheme: dark) {
-  .chat-fab-close { color: #fff; }
 }
 
 .chat-agent-panel {
