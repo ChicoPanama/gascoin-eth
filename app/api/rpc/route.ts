@@ -2,54 +2,45 @@ import { NextResponse } from 'next/server';
 import { checkRateLimit } from '../../../lib/rate-limit';
 import { getClientIp } from '../../../lib/ip';
 
-// Server-side only. Never fall through to NEXT_PUBLIC_* — that would defeat the proxy.
-// Fallback chain matches lib/integrations/solana.ts:7 — explicit URL first, then
-// Helius via the API key, then public mainnet as last resort. Empty SOLANA_RPC_URL
-// in production no longer drops us straight to the rate-limited public endpoint.
-const RPC_URL = process.env.SOLANA_RPC_URL
-  || (process.env.HELIUS_API_KEY
-    ? `https://mainnet.helius-rpc.com/?api-key=${process.env.HELIUS_API_KEY}`
-    : 'https://api.mainnet-beta.solana.com');
+const RPC_URL =
+  process.env.ETH_RPC_URL ||
+  (process.env.ALCHEMY_API_KEY
+    ? `https://eth-mainnet.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`
+    : 'https://eth.llamarpc.com');
 
-// SECURITY: Only allow read methods + sendTransaction. Block admin/debug methods.
 const ALLOWED_METHODS = new Set([
-  'getBalance',
-  'getTokenAccountsByOwner',
-  'getAccountInfo',
-  'getMultipleAccounts',
-  'getLatestBlockhash',
-  'sendTransaction',
-  'getSignatureStatuses',
-  'getTransaction',
-  'getSlot',
-  'getBlockHeight',
-  'getMinimumBalanceForRentExemption',
-  'getRecentPrioritizationFees',
+  'eth_blockNumber',
+  'eth_getBalance',
+  'eth_call',
+  'eth_getTransactionCount',
+  'eth_getTransactionByHash',
+  'eth_getTransactionReceipt',
+  'eth_sendRawTransaction',
+  'eth_estimateGas',
+  'eth_gasPrice',
+  'eth_maxPriorityFeePerGas',
+  'eth_feeHistory',
+  'eth_getBlockByNumber',
+  'eth_getBlockByHash',
+  'eth_getLogs',
+  'net_version',
+  'eth_chainId',
 ]);
 
 export async function POST(req: Request) {
-  // Rate limit: 100 requests per minute per IP (per security hardening spec)
   const ip = getClientIp(req);
   const rl = await checkRateLimit(`rpc:${ip}`, 100, 60);
   if (!rl.ok) {
     return NextResponse.json(
-      {
-        jsonrpc: '2.0',
-        error: { code: -32000, message: 'Rate limit exceeded. Try again in a moment.' },
-        id: null,
-      },
+      { jsonrpc: '2.0', error: { code: -32000, message: 'Rate limit exceeded.' }, id: null },
       { status: 429, headers: { 'Retry-After': '60' } },
     );
   }
 
   try {
     const body = await req.text();
-
-    // SECURITY: Parse and validate the RPC method
     let parsed: any;
-    try {
-      parsed = JSON.parse(body);
-    } catch {
+    try { parsed = JSON.parse(body); } catch {
       return NextResponse.json(
         { jsonrpc: '2.0', error: { code: -32700, message: 'Parse error' }, id: null },
         { status: 400 },
@@ -64,13 +55,11 @@ export async function POST(req: Request) {
       );
     }
 
-    // Tighter limit for sendTransaction — 10/min/IP prevents relay abuse
-    // while still supporting normal wallet operations.
-    if (method === 'sendTransaction') {
+    if (method === 'eth_sendRawTransaction') {
       const stRl = await checkRateLimit(`rpc:sendtx:${ip}`, 10, 60);
       if (!stRl.ok) {
         return NextResponse.json(
-          { jsonrpc: '2.0', error: { code: -32000, message: 'sendTransaction rate limit exceeded.' }, id: parsed?.id ?? null },
+          { jsonrpc: '2.0', error: { code: -32000, message: 'sendRawTransaction rate limit exceeded.' }, id: parsed?.id ?? null },
           { status: 429, headers: { 'Retry-After': '60' } },
         );
       }
@@ -81,12 +70,8 @@ export async function POST(req: Request) {
       headers: { 'Content-Type': 'application/json' },
       body,
     });
-
     const data = await res.text();
-    return new NextResponse(data, {
-      status: res.status,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    return new NextResponse(data, { status: res.status, headers: { 'Content-Type': 'application/json' } });
   } catch {
     return NextResponse.json(
       { jsonrpc: '2.0', error: { code: -32000, message: 'RPC proxy error' }, id: null },

@@ -1,7 +1,7 @@
 'use client';
 
 import { PrivyProvider } from '@privy-io/react-auth';
-import { SolanaProvider } from '../components/providers/SolanaProvider';
+import { mainnet } from 'viem/chains';
 import { ThemeProvider, useTheme } from '../components/ThemeProvider';
 
 /**
@@ -14,10 +14,8 @@ function PrivyInner({ children }: { children: React.ReactNode }) {
   const { resolved } = useTheme();
   const appId = (process.env.NEXT_PUBLIC_PRIVY_APP_ID || '').trim();
 
-  const inner = <SolanaProvider>{children}</SolanaProvider>;
-
   if (!appId || appId.length < 10) {
-    return inner;
+    return <>{children}</>;
   }
 
   return (
@@ -26,9 +24,14 @@ function PrivyInner({ children }: { children: React.ReactNode }) {
       config={{
         loginMethods: ['twitter'],
         appearance: { theme: resolved },
+        defaultChain: mainnet,
+        supportedChains: [mainnet],
+        embeddedWallets: {
+          ethereum: { createOnLogin: 'users-without-wallets' },
+        },
       }}
     >
-      {inner}
+      {children}
     </PrivyProvider>
   );
 }
