@@ -20,3 +20,4 @@ coverage/
 *.tsbuildinfo
 .env*.local
 pnpm-lock.yaml
+.worktrees/
