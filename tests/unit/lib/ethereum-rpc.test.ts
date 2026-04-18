@@ -9,12 +9,14 @@ describe('ethereum RPC URL resolution', () => {
 
   it('falls back to Alchemy when only ALCHEMY_API_KEY is set', () => {
     const ALCHEMY_API_KEY = 'test-key';
-    const url = undefined || `https://eth-mainnet.g.alchemy.com/v2/${ALCHEMY_API_KEY}`;
+    const ETH_RPC_URL: string | undefined = undefined;
+    const url = ETH_RPC_URL || `https://eth-mainnet.g.alchemy.com/v2/${ALCHEMY_API_KEY}`;
     expect(url).toBe('https://eth-mainnet.g.alchemy.com/v2/test-key');
   });
 
   it('uses public fallback when no env vars set', () => {
-    const url = (undefined as string | undefined) || 'https://eth.llamarpc.com';
+    const ETH_RPC_URL: string | undefined = undefined;
+    const url = ETH_RPC_URL || 'https://eth.llamarpc.com';
     expect(url).toBe('https://eth.llamarpc.com');
   });
 });

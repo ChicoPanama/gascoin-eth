@@ -60,8 +60,8 @@ export default async function ReferralsPage(props: { searchParams: Promise<{ tab
           </div>
           <div className="gc-stat">
             <div className="gc-stat-label">Treasury</div>
-            <div className="gc-stat-value">{treasury.solBalance.toFixed(2)}</div>
-            <div className="gc-stat-sub">SOL available</div>
+            <div className="gc-stat-value">{treasury.ethBalance.toFixed(4)}</div>
+            <div className="gc-stat-sub">ETH available</div>
           </div>
           <div className="gc-stat">
             <div className="gc-stat-label">Reward Rate</div>

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { usePrivy } from '@privy-io/react-auth';
+import { usePrivy, useSignMessage } from '@privy-io/react-auth';
 import { WalletButton } from '../../../components/ui/WalletButton';
 import { useGascoinWallet } from '../../../hooks/useGascoinWallet';
 import { createAdminSession, createAdminSessionViaPrivy } from '../../actions/admin-auth';
@@ -24,8 +24,9 @@ function readXHandle(user: any): string {
 }
 
 export default function AdminLoginPage() {
-  const { publicKey, connected, signMessage } = useGascoinWallet();
+  const { address, isConnected } = useGascoinWallet();
   const { ready, authenticated, login, user } = usePrivy();
+  const { signMessage } = useSignMessage();
   const [status, setStatus] = useState<'idle' | 'signing' | 'error'>('idle');
   const [error, setError] = useState('');
   const router = useRouter();
@@ -35,18 +36,16 @@ export default function AdminLoginPage() {
 
   // Wallet-based admin login
   const handleSign = async () => {
-    if (!publicKey || !signMessage) return;
+    if (!address) return;
     setStatus('signing');
     setError('');
 
     try {
       const timestamp = Date.now();
-      const message = `GASCOIN_ADMIN_AUTH:${timestamp}:${publicKey.toBase58()}`;
-      const encoded = new TextEncoder().encode(message);
-      const sig = await signMessage(encoded);
-      const sigHex = Buffer.from(sig).toString('hex');
+      const message = `GASCOIN_ADMIN_AUTH:${timestamp}:${address}`;
+      const { signature: sig } = await signMessage({ message });
 
-      const result = await createAdminSession(publicKey.toBase58(), timestamp, sigHex);
+      const result = await createAdminSession(address, timestamp, sig);
       if (result.success) {
         window.location.href = '/admin/submissions';
       } else {
@@ -113,12 +112,12 @@ export default function AdminLoginPage() {
 
         {/* Option 2: Wallet Login */}
         <div className="wt-input-label" style={{ marginBottom: 12 }}>CONNECT AUTHORIZED WALLET</div>
-        {!connected ? (
+        {!isConnected ? (
           <WalletButton />
         ) : (
           <>
             <div style={{ fontFamily: 'IBM Plex Mono', fontSize: 11, color: 'rgba(var(--fg-rgb),0.5)', marginBottom: 16 }}>
-              Wallet: {publicKey?.toBase58().slice(0, 8)}...
+              Wallet: {address?.slice(0, 10)}...
             </div>
             <button type="button" className="sf-btn-ghost" style={{ width: '100%' }} onClick={handleSign} disabled={status === 'signing'}>
               {status === 'signing' ? 'AUTHENTICATING...' : 'SIGN TO AUTHENTICATE'}

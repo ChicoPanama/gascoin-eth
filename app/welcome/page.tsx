@@ -35,10 +35,10 @@ export default async function Welcome() {
   const isDryRun = process.env.ENABLE_LIVE_PAYOUT !== 'true';
 
   try {
-    const { getTreasuryBalances } = await import('../../lib/integrations/solana');
+    const { getTreasuryBalances } = await import('../../lib/integrations/ethereum');
     const t = await getTreasuryBalances();
-    if (t.solBalance > 0 || t.gascoinBalance > 0) {
-      const total = t.solUsd + t.gascoinUsd;
+    if (t.ethBalance > 0 || t.gascoinBalance > 0) {
+      const total = t.ethUsd + t.gascoinUsd;
       treasuryUsd =
         total >= 1_000_000
           ? `$${(total / 1_000_000).toFixed(1)}M`

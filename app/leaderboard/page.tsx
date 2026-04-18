@@ -20,11 +20,11 @@ const TAB_LABELS: Record<Tab, string> = {
 
 export default function LeaderboardPage() {
   const { entries, stats, loading, error, lastUpdated } = useLeaderboard();
-  const { publicKey } = useGascoinWallet();
+  const { address } = useGascoinWallet();
   const [drillWallet, setDrillWallet] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<Tab>('leaderboard');
 
-  const connectedWallet = publicKey?.toBase58() ?? null;
+  const connectedWallet = address ?? null;
 
   return (
     <div className="container">

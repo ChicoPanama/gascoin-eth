@@ -11,13 +11,13 @@ import { TOKEN_TIERS } from '../../lib/token-tiers';
 import { refreshTokenBalance } from '../actions/token-gating';
 
 export default function PerksPage() {
-  const { publicKey, connected } = useGascoinWallet();
+  const { address, isConnected } = useGascoinWallet();
   const { balance, tier, nextTier, tokensToNextTier, progressToNextTier, loading } = useTokenGating();
   const [refreshed, setRefreshed] = useState(false);
 
   const handleRefresh = async () => {
-    if (!publicKey) return;
-    await refreshTokenBalance(publicKey.toBase58());
+    if (!address) return;
+    await refreshTokenBalance(address);
     setRefreshed(true);
     setTimeout(() => setRefreshed(false), 2000);
   };
@@ -45,7 +45,7 @@ export default function PerksPage() {
 
       {/* Zone 2 — Your Status */}
       <div className="ref-link-section" style={{ marginBottom: 48 }}>
-        {!connected ? (
+        {!isConnected ? (
           <div className="ref-gate" style={{ border: 'none', gridColumn: '1 / -1' }}>
             <div className="wt-input-label" style={{ marginBottom: 16 }}>CONNECT WALLET TO SEE YOUR TIER</div>
             <WalletButton />
@@ -99,8 +99,8 @@ export default function PerksPage() {
       <div className="gc-section-num" style={{ marginBottom: 16 }}>All Tiers</div>
       <div className="gc-steps-grid" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: 1, background: 'rgba(255,255,255,0.06)' }}>
         {TOKEN_TIERS.map((t) => {
-          const isCurrent = connected && tier.id === t.id;
-          const isNext = connected && nextTier?.id === t.id;
+          const isCurrent = isConnected && tier.id === t.id;
+          const isNext = isConnected && nextTier?.id === t.id;
           return (
             <div key={t.id} className="gc-step" style={{
               background: isCurrent ? 'rgba(255,255,255,0.04)' : '#000',

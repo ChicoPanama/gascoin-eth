@@ -74,9 +74,9 @@ export default async function TreasuryPage() {
       <div className="gc-stats" style={{ marginBottom: 32 }}>
         <div className="gc-stats-grid" style={{ gridTemplateColumns: 'repeat(4, 1fr)' }}>
           <div className="gc-stat">
-            <div className="gc-stat-label">SOL BALANCE</div>
-            <div className="gc-stat-value">{treasury.solBalance.toFixed(4)}</div>
-            <div className="gc-stat-sub">${treasury.solUsd.toFixed(2)} USD</div>
+            <div className="gc-stat-label">ETH BALANCE</div>
+            <div className="gc-stat-value">{treasury.ethBalance.toFixed(4)}</div>
+            <div className="gc-stat-sub">${treasury.ethUsd.toFixed(2)} USD</div>
           </div>
           <div className="gc-stat">
             <div className="gc-stat-label">GASCOIN BALANCE</div>

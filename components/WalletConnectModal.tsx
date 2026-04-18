@@ -4,7 +4,7 @@
  * WalletConnectModal
  *
  * Custom wallet picker built on wagmi's useConnect hook. Replaces the
- * old wallet-adapter-react-ui modal. Privy handles X/Twitter auth;
+ * Privy handles X/Twitter auth;
  * this modal handles on-chain wallet connection for payout verification.
  *
  * Portaled to `document.body` so it escapes any stacking context (including

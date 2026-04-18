@@ -80,8 +80,8 @@ function StatIconAvg() {
 }
 
 export default function CommunityPage() {
-  const { publicKey } = useGascoinWallet();
-  const connectedWallet = publicKey?.toBase58() ?? null;
+  const { address } = useGascoinWallet();
+  const connectedWallet = address ?? null;
   const [filter, setFilter] = useState<FeedFilter>('all');
   const [sort, setSort] = useState<FeedSort>('newest');
   const [selected, setSelected] = useState<CommunityReceipt | null>(null);

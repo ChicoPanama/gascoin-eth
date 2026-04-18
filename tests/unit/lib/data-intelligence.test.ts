@@ -248,10 +248,10 @@ describe('updateQualityTrend', () => {
 describe('snapshotTreasury', () => {
   it('inserts treasury snapshot with all balances', async () => {
     const sb = makeSupabase();
-    await snapshotTreasury(sb, { solBalance: 100, solUsd: 1500, gascoinBalance: 5000000, gascoinUsd: 250 });
+    await snapshotTreasury(sb, { ethBalance: 100, ethUsd: 1500, gascoinBalance: 5000000, gascoinUsd: 250 });
     expect(sb.from).toHaveBeenCalledWith('treasury_snapshots');
     expect(sb.insert).toHaveBeenCalledWith(expect.objectContaining({
-      sol_balance: 100,
+      eth_balance: 100,
       usd_value: 1500,
       gascoin_balance: 5000000,
       gascoin_usd_value: 250,
@@ -261,7 +261,7 @@ describe('snapshotTreasury', () => {
   it('does not throw on DB error (non-blocking)', async () => {
     const sb = makeSupabase({ insert: vi.fn().mockRejectedValue(new Error('connection lost')) });
     await expect(
-      snapshotTreasury(sb, { solBalance: 100, solUsd: 1500, gascoinBalance: 5000000, gascoinUsd: 250 }),
+      snapshotTreasury(sb, { ethBalance: 100, ethUsd: 1500, gascoinBalance: 5000000, gascoinUsd: 250 }),
     ).resolves.not.toThrow();
   });
 });

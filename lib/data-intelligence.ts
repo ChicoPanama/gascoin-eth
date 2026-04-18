@@ -95,8 +95,8 @@ export async function getTypicalGasPrice(
 export async function snapshotTreasury(
   supabase: any,
   balances: {
-    solBalance: number;
-    solUsd: number;
+    ethBalance: number;
+    ethUsd: number;
     gascoinBalance: number;
     gascoinUsd: number;
   },
@@ -105,8 +105,8 @@ export async function snapshotTreasury(
     const wallet = process.env.GASCOIN_TREASURY_WALLET || '';
     await supabase.from('treasury_snapshots').insert({
       wallet,
-      sol_balance: balances.solBalance,
-      usd_value: balances.solUsd,
+      eth_balance: balances.ethBalance,
+      usd_value: balances.ethUsd,
       gascoin_balance: balances.gascoinBalance,
       gascoin_usd_value: balances.gascoinUsd,
     });

@@ -32,8 +32,8 @@ type ConvFilter = 'all' | 'dispatched' | 'pending' | 'skipped';
 const PAGE_SIZE = 15;
 
 export default function ReferralPage() {
-  const { publicKey } = useGascoinWallet();
-  const wallet = publicKey?.toBase58() ?? null;
+  const { address } = useGascoinWallet();
+  const wallet = address ?? null;
   const { summary, conversions, clickStats, referralCode, hasApprovedSubmission, loading, error } = useReferralDashboard(wallet);
 
   const [copied, setCopied] = useState(false);

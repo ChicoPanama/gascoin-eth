@@ -35,7 +35,7 @@ function isValidEthAddress(addr: string): boolean {
 const PAGE_SIZE = 10;
 
 export function WalletTrackerClient({ initialLookupAddress }: { initialLookupAddress: string | null }) {
-  const { address: connectedWallet } = useGascoinWallet();
+  const { address: connectedWallet, ethBalance } = useGascoinWallet();
 
   const [lookupInput, setLookupInput] = useState(initialLookupAddress || '');
   const [lookupAddress, setLookupAddress] = useState<string | null>(initialLookupAddress);
@@ -145,9 +145,9 @@ export function WalletTrackerClient({ initialLookupAddress }: { initialLookupAdd
           </div>
           <div className="wt-connected-right">
             <span className="wt-connected-bal">
-              {solBalance != null ? `${solBalance.toFixed(4)} SOL` : '— SOL'}
+              {ethBalance != null ? `${ethBalance.toFixed(4)} ETH` : '— ETH'}
             </span>
-            <button type="button" className="wt-disconnect" onClick={() => disconnect()}>DISCONNECT</button>
+            <button type="button" className="wt-disconnect" onClick={() => doClear()}>DISCONNECT</button>
           </div>
         </div>
       ) : (

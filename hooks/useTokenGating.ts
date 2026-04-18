@@ -19,7 +19,7 @@ export interface TokenGatingState {
 const REFRESH_MS = 5 * 60 * 1000;
 
 export function useTokenGating(): TokenGatingState {
-  const { publicKey, connected } = useGascoinWallet();
+  const { address, isConnected } = useGascoinWallet();
   const [state, setState] = useState<TokenGatingState>({
     balance: 0, tier: TOKEN_TIERS[0], nextTier: TOKEN_TIERS[1],
     tokensToNextTier: TOKEN_TIERS[1].min_tokens, progressToNextTier: 0,
@@ -27,12 +27,12 @@ export function useTokenGating(): TokenGatingState {
   });
 
   useEffect(() => {
-    if (!connected || !publicKey) {
+    if (!isConnected || !address) {
       setState((s) => ({ ...s, balance: 0, tier: TOKEN_TIERS[0], loading: false }));
       return;
     }
 
-    const addr = publicKey.toBase58();
+    const addr = address;
     let active = true;
 
     const load = async () => {
@@ -67,7 +67,7 @@ export function useTokenGating(): TokenGatingState {
     load();
     const id = setInterval(load, REFRESH_MS);
     return () => { active = false; clearInterval(id); };
-  }, [connected, publicKey]);
+  }, [isConnected, address]);
 
   return state;
 }

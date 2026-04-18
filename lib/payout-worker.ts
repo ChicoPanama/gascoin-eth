@@ -328,7 +328,7 @@ export async function processQueuedPayout(claimId: string) {
   // memory immutable (permanent audit record that cannot be overwritten).
   writePayoutEvent(job.wallet, {
     claimId,
-    amountEth: job.amount_eth,
+    amountSol: job.amount_eth,
     txHash: sent.txHash || 'unknown',
     status: 'dispatched',
   }).catch(() => {});
