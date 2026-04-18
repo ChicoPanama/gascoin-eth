@@ -3,12 +3,26 @@
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { randomBytes } from 'crypto';
+import { ed25519 } from '@noble/curves/ed25519';
+import { PublicKey } from '@solana/web3.js';
 import { isAdminWallet } from '../../lib/admin-auth';
 import { getSupabaseAdmin } from '../../lib/supabase';
 
-export async function createAdminSession(walletAddress: string, timestamp: number): Promise<{ success: boolean; error?: string }> {
+export async function createAdminSession(walletAddress: string, timestamp: number, signatureHex: string): Promise<{ success: boolean; error?: string }> {
   if (!isAdminWallet(walletAddress)) return { success: false, error: 'Wallet not authorized' };
   if (Math.abs(Date.now() - timestamp) > 300000) return { success: false, error: 'Challenge expired' };
+
+  // Verify the Ed25519 signature — proves the caller owns the private key
+  // corresponding to walletAddress, not just that they know the address string.
+  try {
+    const msgBytes = Buffer.from(`GASCOIN_ADMIN_AUTH:${timestamp}:${walletAddress}`);
+    const sigBytes = Buffer.from(signatureHex, 'hex');
+    const pubkeyBytes = new PublicKey(walletAddress).toBytes();
+    const valid = ed25519.verify(sigBytes, msgBytes, pubkeyBytes);
+    if (!valid) return { success: false, error: 'Signature invalid' };
+  } catch {
+    return { success: false, error: 'Signature verification failed' };
+  }
 
   // SECURITY: Use cryptographically random token instead of deterministic hash
   const sessionToken = randomBytes(32).toString('hex');
@@ -67,17 +81,8 @@ export async function createAdminSessionViaPrivy(xUserId: string, xHandle: strin
     adminRow = byHandle;
   }
 
-  // Try 3: check ANY active admin (for first-time setup when IDs don't match)
-  // This is safe because Privy already verified the X identity
-  if (!adminRow) {
-    const { data: byPartial } = await supabase
-      .from('admin_users')
-      .select('x_user_id,x_handle,role,active')
-      .eq('active', true)
-      .or(`x_handle.ilike.${normalizedHandle},x_user_id.eq.${xUserId}`)
-      .maybeSingle();
-    adminRow = byPartial;
-  }
+  // Try 3 (broad .or() fallback) removed — it was redundant with Try 1 + Try 2 and
+  // interpolated raw user-controlled strings into the PostgREST filter expression.
 
   if (!adminRow) return { success: false, error: 'X account not authorized as admin' };
 

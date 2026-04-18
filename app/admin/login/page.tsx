@@ -43,9 +43,10 @@ export default function AdminLoginPage() {
       const timestamp = Date.now();
       const message = `GASCOIN_ADMIN_AUTH:${timestamp}:${publicKey.toBase58()}`;
       const encoded = new TextEncoder().encode(message);
-      await signMessage(encoded);
+      const sig = await signMessage(encoded);
+      const sigHex = Buffer.from(sig).toString('hex');
 
-      const result = await createAdminSession(publicKey.toBase58(), timestamp);
+      const result = await createAdminSession(publicKey.toBase58(), timestamp, sigHex);
       if (result.success) {
         window.location.href = '/admin/submissions';
       } else {

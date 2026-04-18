@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '../../../../lib/supabase';
+import { verifyPrivySession } from '../../../../lib/integrations/privy';
 import { verifyAllTweetGates } from '../../../../lib/gate-verifiers/tweet-gates';
 import { parseTweetUrl } from '../../../../lib/tweet-parser';
 import { checkRateLimit } from '../../../../lib/rate-limit';
@@ -12,6 +13,15 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'rate_limited', retryAfterSec: rl.resetSec }, { status: 429 });
   }
 
+  const session = await verifyPrivySession(
+    req.headers.get('authorization'),
+    undefined,
+    req.headers.get('cookie'),
+  );
+  if (!session) {
+    return NextResponse.json({ error: 'unauthorized' }, { status: 401 });
+  }
+
   try {
     const { tweet_url, claim_id } = await req.json();
 
@@ -22,9 +32,19 @@ export async function POST(req: NextRequest) {
 
     const results = await verifyAllTweetGates(tweet_url);
 
-    // Write results to gate_results if claim_id provided
+    // Write results to gate_results only if the session wallet owns the claim
     if (claim_id) {
       const supabase = getSupabaseAdmin();
+      const { data: claim } = await supabase
+        .from('claims')
+        .select('wallet')
+        .eq('id', claim_id)
+        .maybeSingle();
+
+      if (!claim || claim.wallet.toLowerCase() !== session.wallet.toLowerCase()) {
+        return NextResponse.json({ error: 'forbidden' }, { status: 403 });
+      }
+
       for (const r of results) {
         await supabase.from('gate_results').upsert({
           claim_id,

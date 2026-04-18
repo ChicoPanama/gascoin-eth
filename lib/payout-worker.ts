@@ -177,6 +177,33 @@ export async function processQueuedPayout(claimId: string) {
     return { ok: false, error: 'amount_exceeds_tier_cap', requestedAmount, tierSlug: currentTier.slug, maxAllowed: currentTier.max_sol_refund };
   }
 
+  // Per-day spend cap — configurable via DAILY_PAYOUT_CAP_SOL (default 10 SOL).
+  // Prevents a single compromised session from draining the treasury in one batch.
+  // Default: 50 SOL/day (~500 Standard or ~50 Fleet payouts). Set
+  // DAILY_PAYOUT_CAP_SOL to ~15% of your treasury balance for right-sizing.
+  const dailyCapSol = Number(process.env.DAILY_PAYOUT_CAP_SOL ?? 50);
+  const todayUtc = new Date().toISOString().slice(0, 10); // 'YYYY-MM-DD'
+  const { data: todayPayouts } = await supabase
+    .from('payouts')
+    .select('amount_sol')
+    .eq('status', 'paid')
+    .gte('sent_at', `${todayUtc}T00:00:00.000Z`);
+  const todayTotal = (todayPayouts || []).reduce((s, p: any) => s + Number(p.amount_sol || 0), 0);
+  if (todayTotal + requestedAmount > dailyCapSol) {
+    try {
+      await supabase.from('intelligence_entries').insert({
+        entry_type: 'daily_payout_cap_reached',
+        entity_type: 'wallet',
+        entity_id: job.wallet,
+        summary: `Daily payout cap (${dailyCapSol} SOL) reached — claim ${claimId} queued for next day`,
+        detail_json: { claimId, wallet: job.wallet, requestedAmount, todayTotal, dailyCapSol },
+        severity: 'high',
+        pipeline_source: 'payout_worker',
+      });
+    } catch {}
+    return { ok: false, error: 'daily_payout_cap_reached', todayTotal, dailyCapSol };
+  }
+
   const sent = await sendSolPayout(job.wallet, requestedAmount);
   if (!sent.ok) {
     const attempts = Number(job.attempts || 0) + 1;

@@ -1,6 +1,8 @@
 'use server';
 
+import { headers, cookies } from 'next/headers';
 import { getSupabaseAdmin } from '../../lib/supabase';
+import { verifyPrivySession } from '../../lib/integrations/privy';
 import type { WalletSubmission, WalletSummary, CooldownStatus } from '../../types/wallet-tracker';
 
 function mapClaim(c: any): WalletSubmission {
@@ -32,6 +34,17 @@ function mapClaim(c: any): WalletSubmission {
 // Full history — connected wallet owner
 export async function getOwnSubmissions(wallet: string): Promise<WalletSubmission[]> {
   try {
+    const hdrs = await headers();
+    const jar = await cookies();
+    const session = await verifyPrivySession(
+      hdrs.get('authorization'),
+      undefined,
+      jar.toString() || hdrs.get('cookie'),
+    );
+    if (!session?.wallet || session.wallet.toLowerCase() !== wallet.toLowerCase()) {
+      return [];
+    }
+
     const supabase = getSupabaseAdmin();
 
     // Get claims with gate results

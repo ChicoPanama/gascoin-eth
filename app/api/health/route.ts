@@ -31,7 +31,15 @@ async function pingUrl(url: string, init?: RequestInit): Promise<DepStatus> {
   }
 }
 
-export async function GET() {
+export async function GET(req: Request) {
+  // Require CRON_SECRET bearer so this endpoint isn't fingerprintable by
+  // external scanners. Monitoring tools should pass it in the Authorization header.
+  const cronSecret = (process.env.CRON_SECRET || '').trim();
+  const presented = (req.headers.get('authorization') || '').replace(/^Bearer\s+/i, '').trim();
+  if (!cronSecret || presented !== cronSecret) {
+    return NextResponse.json({ ok: false }, { status: 401 });
+  }
+
   const isDryRun = process.env.ENABLE_LIVE_PAYOUT !== 'true';
   const buildSha = (process.env.VERCEL_GIT_COMMIT_SHA || '').slice(0, 8) || 'local';
   const region = process.env.VERCEL_REGION || 'local';

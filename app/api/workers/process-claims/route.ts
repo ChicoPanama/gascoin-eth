@@ -208,6 +208,29 @@ export async function POST(req: Request) {
   }
 
   // --- Phase 3: Process queued payout jobs ---
+  // Pre-flight: skip dispatch entirely when live payouts are disabled so we
+  // don't silently accumulate DRYRUN records that look like real transactions.
+  if (process.env.ENABLE_LIVE_PAYOUT !== 'true') {
+    writeIntelligence({
+      entry_type: 'live_payout_disabled',
+      entity_type: 'system',
+      entity_id: 'process_claims_worker',
+      summary: 'Payout dispatch skipped — ENABLE_LIVE_PAYOUT is not set to true',
+      detail_json: { dueJobs: 0 },
+      severity: 'high',
+      pipeline_source: 'process_claims',
+    }).catch(() => {});
+
+    return NextResponse.json({
+      ok: true,
+      transitionedClaims: transitioned,
+      autoApprovedClaims: autoApproved,
+      duePayoutJobs: 0,
+      payoutResults: [],
+      note: 'live_payout_disabled — dispatch skipped',
+    });
+  }
+
   const { data: jobs, error: jobsErr } = await supabase
     .from('payout_jobs')
     .select('id,claim_id,wallet,amount_sol,attempts,max_attempts,status,next_retry_at')

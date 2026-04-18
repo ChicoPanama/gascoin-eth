@@ -20,19 +20,21 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'unauthorized' }, { status: 401 });
     }
 
-    const { wallet, x_handle, x_user_id, profile_image_url } = await req.json();
+    const { wallet, profile_image_url } = await req.json();
 
-    if (!wallet || !x_handle) {
-      return NextResponse.json({ error: 'wallet and x_handle required' }, { status: 400 });
+    // x_handle and x_user_id must come from the verified Privy session, not the body.
+    // Accepting them from the body would let a caller link any handle to any wallet.
+    const handle = (session.xHandle || '').replace(/^@/, '').toLowerCase();
+    const userId = session.xId || '';
+
+    if (!wallet || !handle) {
+      return NextResponse.json({ error: 'wallet and x identity required' }, { status: 400 });
     }
 
     // SECURITY: Validate wallet is a real Solana address
     if (!isValidSolanaAddress(wallet)) {
       return NextResponse.json({ error: 'invalid_wallet_address' }, { status: 400 });
     }
-
-    const handle = x_handle.replace(/^@/, '').toLowerCase();
-    const userId = x_user_id || session.xId || '';
     const supabase = getSupabaseAdmin();
 
     // SECURITY: Check if this wallet is already registered to a DIFFERENT X account

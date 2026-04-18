@@ -1,10 +1,23 @@
 'use server';
 
+import { headers, cookies } from 'next/headers';
 import { getSupabaseAdmin } from '../../lib/supabase';
 import { getTokenBalanceServer } from '../../lib/token-balance';
 import { getTierForBalance } from '../../lib/token-tiers';
+import { verifyPrivySession } from '../../lib/integrations/privy';
 
 export async function refreshTokenBalance(walletAddress: string) {
+  const hdrs = await headers();
+  const jar = await cookies();
+  const session = await verifyPrivySession(
+    hdrs.get('authorization'),
+    undefined,
+    jar.toString() || hdrs.get('cookie'),
+  );
+  if (!session?.wallet || session.wallet.toLowerCase() !== walletAddress.toLowerCase()) {
+    return { balance: 0, tier: getTierForBalance(0) };
+  }
+
   const result = await getTokenBalanceServer(walletAddress);
   const tier = getTierForBalance(result.uiAmount);
 

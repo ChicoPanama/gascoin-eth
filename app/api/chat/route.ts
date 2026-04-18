@@ -25,10 +25,9 @@ import { getUserChatProfile, saveUserPreferences } from '../../../lib/chat-user-
 export const runtime = 'nodejs';
 export const maxDuration = 60;
 
-// Model selection — Gemma 4 via OpenRouter when key present, Gateway fallback.
-//   T1  → gemma-4-26b-a4b-it:free  (26B MoE, 4B active — fast, no reasoning leak)
-//   T2/3 → gemma-4-31b-it:free     (31B full — deeper, no reasoning leak)
-// Gemma 4 has no reasoning capability = zero chain-of-thought leaks.
+// Model selection — DeepSeek via OpenRouter when key present, Gateway fallback.
+//   T1   → deepseek/deepseek-chat  (low-cost general support)
+//   T2/3 → deepseek/deepseek-chat  (deeper context path, same low-cost model)
 // Without key: Haiku (T1) + Sonnet (T2/T3) via Vercel AI Gateway.
 const openRouter = process.env.OPENROUTER_API_KEY
   ? createOpenAI({
@@ -41,8 +40,8 @@ const openRouter = process.env.OPENROUTER_API_KEY
     })
   : null;
 
-const TIER1_MODEL  = openRouter ? openRouter.chat('google/gemma-4-26b-a4b-it:free') : gateway('anthropic/claude-haiku-4.5');
-const TIER23_MODEL = openRouter ? openRouter.chat('google/gemma-4-31b-it:free') : gateway('anthropic/claude-sonnet-4.6');
+const TIER1_MODEL  = openRouter ? openRouter.chat('deepseek/deepseek-chat') : gateway('anthropic/claude-haiku-4.5');
+const TIER23_MODEL = openRouter ? openRouter.chat('deepseek/deepseek-chat') : gateway('anthropic/claude-sonnet-4.6');
 
 const SYSTEM_PROMPT = `You are the GASCOIN Gas Attendant — knowledgeable, direct, and friendly. You have a complete understanding of how GASCOIN works. Keep replies to 2–4 sentences unless the user asks for a full walkthrough or step-by-step guide. Use plain English. If someone is lost, give them the single next action to take. Detect the user's language and reply in that same language.
 Answer any question about publicly available GASCOIN information freely and confidently — the protocol, the AI pipeline (Gemini Vision, Grok, Claude), the 17 gates, token tiers, payout amounts, requirements, roadmap, tokenomics, supported wallets, referrals, points, anything on the public site. Do not hedge or refuse to share public information.
@@ -233,7 +232,7 @@ GATE 12: RECEIPT NOT AI-GENERATED
 
 GATE 13: RECEIPT NOT TAMPERED
   What it checks: Whether the receipt image has been digitally manipulated (amounts, dates, or text edited).
-  How to pass: Submit the original, unedited photo from your camera. Do not edit the image in any way. Light brightness adjustments are fine; any editing of the receipt content itself is detected.
+  How to pass: Submit the original, unmodified photo directly from your camera. Do not edit the image in any way.
 
 GATE 14: RECEIPT AMOUNT MINIMUM $5
   What it checks: The total on your receipt is at least $5 USD (foreign currency is auto-converted).
@@ -268,9 +267,8 @@ CLAUDE (Anthropic) — Final Oversight
 Claude reviews claims that need additional verification and makes the final call: approve, flag for manual review, or reject.
 
 RESULT PATHS:
-  - All gates pass, clean signals → Auto-approved, enters payout queue
-  - All gates pass, ambiguous signals → Claude oversight review (a few hours)
-  - Gates fail OR clearly fraudulent signals → Rejected, specific gate failures shown
+  - Gates pass → Enters the approval and payout queue
+  - Gates fail → Rejected, with the specific failed gate and fix instructions shown
   - X API temporarily down → Retry-later path (PENALTY-FREE — your cooldown does not trigger, resubmit when API recovers)
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -278,9 +276,8 @@ WHAT HAPPENS AFTER SUBMISSION — FULL FLOW
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 1. You submit on Step 4.
 2. 17 gates run automatically — watch real-time results on Step 5 (5–30 min depending on image processing queue).
-3a. If gates pass + clean signals: auto-approved → enters payout queue.
-3b. If gates pass + ambiguous signals: goes to Claude oversight (a few hours).
-3c. If gates fail: rejected. Specific failed gates and fix instructions shown. You can resubmit once you've corrected the issue (new receipt, new tweet).
+3. If gates pass → enters the approval and payout queue.
+3b. If gates fail: rejected. Specific failed gates and fix instructions shown. You can resubmit once you've corrected the issue (new receipt, new tweet).
 4. Before SOL is dispatched, the system runs a pre-payout re-check: tweet still live, account still public, token balance still held, no new duplicate detected. If anything changed, payout is blocked.
 5. If treasury is low when your claim is approved: enters payout queue, auto-retries every 6 hours. Status shows "pending queue" at gascoin.app/wallet. No action needed.
 6. SOL dispatched → status updates to "approved" → transaction link appears in Wallet Tracker.
@@ -595,8 +592,8 @@ tweet_live → Keep tweet public, don't delete
 receipt_hashtag → Write #gascoin on physical receipt in pen
 wallet_match → Write last 4 wallet chars larger, retake photo
 not_duplicate → Use a different receipt (each one can only be claimed once)
-ai_image_check → Take fresh photo of real receipt (no AI generation, no screenshots)
-tamper_check → Submit original unmodified photo
+ai_image_check → Submit an original photo of a real physical receipt
+tamper_check → Submit the original, unmodified photo directly from your camera
 cooldown → Wait for cooldown to expire at gascoin.app/wallet
 min_amount → Receipt must be $5+ USD
 min_followers → Need 100+ real X followers

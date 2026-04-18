@@ -10,7 +10,16 @@ async function requireAdmin() {
   return session.walletAddress;
 }
 
+// Maximum SOL an admin can manually approve — 50% above Fleet tier cap (1.0 SOL).
+// The payout worker enforces tier caps at dispatch; this is a second server-side
+// guard against inflated amounts reaching the payout_jobs table at all.
+const ADMIN_APPROVE_SOL_CAP = 1.5;
+
 export async function approveSubmission(claimId: string, solAmount: number, note?: string) {
+  if (typeof solAmount !== 'number' || !isFinite(solAmount) || solAmount <= 0 || solAmount > ADMIN_APPROVE_SOL_CAP) {
+    throw new Error(`solAmount must be > 0 and ≤ ${ADMIN_APPROVE_SOL_CAP} SOL`);
+  }
+
   const adminWallet = await requireAdmin();
   const supabase = getSupabaseAdmin();
   const { data: before } = await supabase.from('claims').select('*').eq('id', claimId).single();

@@ -203,10 +203,13 @@ export async function GET(req: Request) {
   const gascoinBalance = Number(cachedTier?.gascoin_balance || 0);
 
   // ─── Leaderboard rank ───
+  // Capped at 5 000 rows — enough for an accurate percentile on a sub-10k user
+  // base while preventing a full-table scan that could time out at scale.
   const { data: allPayouts } = await supabase
     .from('payouts')
     .select('wallet, amount_sol')
-    .eq('status', 'paid');
+    .eq('status', 'paid')
+    .limit(5000);
 
   const walletScores = new Map<string, number>();
   for (const p of allPayouts || []) {
@@ -216,7 +219,8 @@ export async function GET(req: Request) {
   const allWalletPoints = new Map<string, number>();
   const { data: allPoints } = await supabase
     .from('engagement_points')
-    .select('wallet, points');
+    .select('wallet, points')
+    .limit(5000);
   for (const p of allPoints || []) {
     allWalletPoints.set(p.wallet, (allWalletPoints.get(p.wallet) || 0) + Number(p.points || 0));
   }

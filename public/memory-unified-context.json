@@ -1,6 +1,6 @@
 {
   "schema": "whiteclaw.memory.unified.v2",
-  "generatedAt": "2026-04-11T06:10:08.684676+00:00",
+  "generatedAt": "2026-04-18T06:10:10.739298+00:00",
   "workspaceArchitecture": {
     "canonicalSource": "memory/context/unified-context.json",
     "safeWebsiteMirrors": [
@@ -94,7 +94,7 @@
           "version": "0.1.0"
         },
         "surface": {
-          "apiRouteCount": 30,
+          "apiRouteCount": 41,
           "memoryContextEndpoint": "True",
           "publicMirror": "True"
         }
@@ -168,50 +168,50 @@
   },
   "sources": {
     "morningBrief": {
-      "path": "memory/context/2026-04-10-mem0-brief.md",
-      "title": "Mem0 Morning Brief \u2014 2026-04-10",
-      "excerpt": "## Priorities today - Keep the enterprise memory pipeline healthy: preserve and surface unified context artifacts and public endpoints (`/api/memory/context/enterprise`, `/api/public/memory/context/enterprise`). - Maintain operational discipline across core domains: GasCoin Montage, GhostTrack, Obsidian Model, and workspace capabilities. - Continue treating Obsidian as source-of-truth for durable ops knowledge (runbooks, decisions, dossiers, daily capture). ## Open blockers - Cross-workspace drift risk is still act"
+      "path": "memory/context/2026-04-17-mem0-brief.md",
+      "title": "Mem0 Morning Brief",
+      "excerpt": "## Priorities today - Keep **Obsidian as source of truth**: continue linking execution artifacts to Decisions/Runbooks/Dossiers so project memory stays audit-ready. - Advance **enterprise memory pipeline** work already shipped (enterprise context endpoints + daily 23:20 PT build) and verify today\u2019s artifact health. - Push **high-leverage active tracks**: AgentV trading intelligence (Dune pack), WhiteClaw virality-inspector operations, and Crypto Social Legitimacy Pass validation flow. ## Open blockers - **Secret/co"
     },
     "weeklyCandidate": {
-      "path": "memory/weekly/2026-W14-candidate.md",
-      "title": "Weekly Candidate Digest \u2014 2026-W14",
-      "excerpt": "Source window: 2026-03-30 to 2026-04-05 (existing daily files: 2026-04-01, 2026-04-02, 2026-04-03, 2026-04-04, 2026-04-05) ## Key decisions - Adopted a conservative affected-wallet union set for Project Gift by combining Drift deposit and IF pre-hack sets (`5,198` wallets). - Chose confidence-tiering for reconciliation outputs (Strict/Balanced/Broad) and recommended **Strict** for payout safety. - Locked payout execution scope to strict criteria (`class=system_wallet`, `hit_count>=3`, `net_flow_units>=100`), result"
+      "path": "memory/weekly/2026-W15-candidate.md",
+      "title": "Weekly Memory Candidate \u2014 2026-W15",
+      "excerpt": "## Scope Daily files reviewed: 2026-04-06 to 2026-04-12 (7/7 files present) ## Key decisions - No explicit product, operational, or strategic decisions were recorded this week. ## Key deliveries - Daily memory continuity maintained. - 2026-04-07 and 2026-04-08 include explicit initialization notes to satisfy memory health checks. ## Open risks/blockers - Sparse logging across the week (most session notes and TODO sections are empty), which risks losing decision/context continuity."
     },
     "recentDaily": [
       {
-        "path": "memory/2026-04-10.md",
-        "title": "2026-04-10",
+        "path": "memory/2026-04-17.md",
+        "title": "2026-04-17$d",
         "excerpt": "## Session notes - ## TODO - - No major updates logged yet."
       },
       {
-        "path": "memory/2026-04-09.md",
-        "title": "2026-04-09",
+        "path": "memory/2026-04-16.md",
+        "title": "Daily Log",
+        "excerpt": "- No major updates logged yet."
+      },
+      {
+        "path": "memory/2026-04-15.md",
+        "title": "2026-04-15",
         "excerpt": "## Session notes - ## TODO -"
       },
       {
-        "path": "memory/2026-04-08.md",
-        "title": "2026-04-08",
-        "excerpt": "## Session notes - Initialized daily memory file to satisfy memory health checks."
+        "path": "memory/2026-04-14.md",
+        "title": "2026-04-14",
+        "excerpt": "## Session notes - Locked GASCOIN tokenomics direction for presale/liquidity model: - Base allocation model (from prior/last-week tokenomics) reaffirmed by user: - 35% ICO - 35% Treasury - 15% Team - 10% LP Mining - 5% Advisors - Launch route preference shifted to Raydium-first (Meteora optional phase-2)."
       },
       {
-        "path": "memory/2026-04-07.md",
-        "title": "2026-04-07",
-        "excerpt": "## Session notes - Initialized daily memory file to satisfy memory health checks."
+        "path": "memory/2026-04-13.md",
+        "title": "2026-04-13",
+        "excerpt": "## Session notes - ## TODO - - No major updates logged yet."
       },
       {
-        "path": "memory/2026-04-06.md",
-        "title": "2026-04-06",
+        "path": "memory/2026-04-12.md",
+        "title": "2026-04-12",
         "excerpt": "## Session notes - ## TODO -"
       },
       {
-        "path": "memory/2026-04-05.md",
-        "title": "2026-04-05",
-        "excerpt": "- - No major updates logged yet."
-      },
-      {
-        "path": "memory/2026-04-04.md",
-        "title": "2026-04-04",
-        "excerpt": "## Session notes - Backfilled entry file to restore daily memory continuity. - Continued planning for new video project workflow based on prior montage pipeline. ## TODO - Add detailed retro summary for this date if needed."
+        "path": "memory/2026-04-11.md",
+        "title": "2026-04-11",
+        "excerpt": "## Session notes - ## TODO - - No major updates logged yet."
       }
     ]
   },

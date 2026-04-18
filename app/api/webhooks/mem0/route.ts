@@ -19,6 +19,7 @@
  */
 
 import { NextResponse } from 'next/server';
+import { timingSafeEqual } from 'crypto';
 import { getSupabaseAdmin } from '../../../../lib/supabase';
 import { cacheGet, cacheSet } from '../../../../lib/cache';
 
@@ -83,7 +84,9 @@ export async function POST(req: Request) {
   }
   const authHeader = req.headers.get('authorization') || '';
   const presentedSecret = authHeader.replace(/^Bearer\s+/i, '').trim();
-  if (presentedSecret !== expectedSecret) {
+  const secretsMatch = presentedSecret.length === expectedSecret.length &&
+    timingSafeEqual(Buffer.from(presentedSecret), Buffer.from(expectedSecret));
+  if (!secretsMatch) {
     return NextResponse.json({ ok: false, error: 'unauthorized' }, { status: 401 });
   }
 

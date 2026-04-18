@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '../../../../lib/supabase';
+import { verifyPrivySession } from '../../../../lib/integrations/privy';
 import { isValidSolanaAddress } from '../../../../lib/validate-wallet';
 import { checkRateLimit } from '../../../../lib/rate-limit';
 import { getClientIp } from '../../../../lib/ip';
@@ -10,8 +11,7 @@ export async function GET(req: Request) {
   if (!rl.ok) {
     return NextResponse.json({ error: 'rate_limited' }, { status: 429 });
   }
-  const { searchParams } = new URL(req.url);
-  const wallet = searchParams.get('wallet');
+  const wallet = new URL(req.url).searchParams.get('wallet');
 
   if (!wallet) {
     return NextResponse.json({ error: 'wallet param required' }, { status: 400 });
@@ -47,15 +47,29 @@ export async function GET(req: Request) {
   }
 }
 
-// POST — create a referral link / register a referral
+// POST — register a referral; requires the referred user's own session
 export async function POST(req: Request) {
   const rl = await checkRateLimit(`pub_referrals_post:${getClientIp(req)}`, 5, 60);
   if (!rl.ok) {
     return NextResponse.json({ error: 'rate_limited' }, { status: 429 });
   }
+
+  // Require the referred user to be authenticated — prevents pre-claiming
+  // victim wallet referral slots before they sign up.
+  const session = await verifyPrivySession(
+    req.headers.get('authorization'),
+    undefined,
+    req.headers.get('cookie'),
+  );
+  if (!session?.wallet) {
+    return NextResponse.json({ error: 'unauthorized' }, { status: 401 });
+  }
+
   try {
     const body = await req.json();
-    const { referrer_wallet, referred_wallet } = body;
+    const { referrer_wallet } = body;
+    // referred_wallet must be the authenticated session wallet — not body-supplied
+    const referred_wallet = session.wallet;
 
     if (!referrer_wallet || !referred_wallet) {
       return NextResponse.json({ error: 'referrer_wallet and referred_wallet required' }, { status: 400 });

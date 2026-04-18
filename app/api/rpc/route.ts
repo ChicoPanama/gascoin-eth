@@ -29,7 +29,8 @@ const ALLOWED_METHODS = new Set([
 
 export async function POST(req: Request) {
   // Rate limit: 100 requests per minute per IP (per security hardening spec)
-  const rl = await checkRateLimit(`rpc:${getClientIp(req)}`, 100, 60);
+  const ip = getClientIp(req);
+  const rl = await checkRateLimit(`rpc:${ip}`, 100, 60);
   if (!rl.ok) {
     return NextResponse.json(
       {
@@ -61,6 +62,18 @@ export async function POST(req: Request) {
         { jsonrpc: '2.0', error: { code: -32601, message: 'Method not allowed' }, id: parsed?.id ?? null },
         { status: 403 },
       );
+    }
+
+    // Tighter limit for sendTransaction — 10/min/IP prevents relay abuse
+    // while still supporting normal wallet operations.
+    if (method === 'sendTransaction') {
+      const stRl = await checkRateLimit(`rpc:sendtx:${ip}`, 10, 60);
+      if (!stRl.ok) {
+        return NextResponse.json(
+          { jsonrpc: '2.0', error: { code: -32000, message: 'sendTransaction rate limit exceeded.' }, id: parsed?.id ?? null },
+          { status: 429, headers: { 'Retry-After': '60' } },
+        );
+      }
     }
 
     const res = await fetch(RPC_URL, {

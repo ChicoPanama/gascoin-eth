@@ -53,9 +53,11 @@ export async function GET(req: Request) {
       continue;
     }
 
-    // Skip re-verification for manually admin-approved claims
+    // Skip re-verification only for admin-dispatched claims. The prefix is
+    // 'admin_dispatched' (not the broader 'admin_') so arbitrary custom notes
+    // like 'admin_override' can't inadvertently bypass re-verification.
     const reason = (claim as any).decision_reason || '';
-    if (reason.startsWith('admin_dispatched') || reason.startsWith('admin_')) {
+    if (reason.startsWith('admin_dispatched')) {
       verified++;
       continue;
     }

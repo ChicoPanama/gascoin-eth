@@ -44,7 +44,12 @@ const WORKERS: Array<{
 
 export const dynamic = 'force-dynamic';
 
-export async function GET() {
+export async function GET(req: Request) {
+  const cronSecret = (process.env.CRON_SECRET || '').trim();
+  const presented = (req.headers.get('authorization') || '').replace(/^Bearer\s+/i, '').trim();
+  if (!cronSecret || presented !== cronSecret) {
+    return NextResponse.json({ ok: false }, { status: 401 });
+  }
   let supabase: ReturnType<typeof getSupabaseAdmin> | null = null;
   try {
     supabase = getSupabaseAdmin();
