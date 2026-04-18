@@ -99,7 +99,7 @@ export function WalletTrackerClient({ initialLookupAddress }: { initialLookupAdd
           WALLET TRACKER
         </h1>
         <p className="gt-header-body">
-          Connect your wallet or paste any Solana address to see submission status,
+          Connect your wallet or paste any Ethereum address to see submission status,
           gate progress, payout history, and cooldown status in real time.
         </p>
       </header>
@@ -121,7 +121,7 @@ export function WalletTrackerClient({ initialLookupAddress }: { initialLookupAdd
               <input
                 type="text"
                 className="wt-lookup-input"
-                placeholder="Enter Solana wallet address..."
+                placeholder="Enter Ethereum wallet address..."
                 value={lookupInput}
                 onChange={(e) => setLookupInput(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && doLookup()}
@@ -213,7 +213,7 @@ export function WalletTrackerClient({ initialLookupAddress }: { initialLookupAdd
             </div>
             <div className="wt-cooldown-right">
               <div className="wt-cooldown-why-label">WHY COOLDOWN?</div>
-              <p className="wt-cooldown-why">Each wallet may receive one SOL refund per 30-day rolling window. This prevents abuse and ensures fair distribution.</p>
+              <p className="wt-cooldown-why">Each wallet may receive one ETH refund per 30-day rolling window. This prevents abuse and ensures fair distribution.</p>
               <Link href="/gates" className="gc-teaser-link">See Gate 8</Link>
             </div>
           </div>
@@ -349,7 +349,7 @@ export function WalletTrackerClient({ initialLookupAddress }: { initialLookupAdd
           <h2 className="wt-idle-title">Connect or Lookup</h2>
           <p className="wt-idle-body">
             Connect your wallet to see your submission history and cooldown status,
-            or enter any Solana address to view their public payout record.
+            or enter any Ethereum address to view their public payout record.
           </p>
         </div>
       )}

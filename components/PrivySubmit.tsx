@@ -129,7 +129,7 @@ function PrivySubmitForm() {
         </div>
         <div>
           <label>Connected Wallet</label>
-          <input name="wallet" required defaultValue={wallet} placeholder="Your Solana wallet address" />
+          <input name="wallet" required defaultValue={wallet} placeholder="Your Ethereum wallet address" />
         </div>
         <div>
           <label>Last 4 of wallet on receipt</label>

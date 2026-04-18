@@ -116,7 +116,7 @@ export async function POST(req: Request) {
 
     if (allWallets.length > 0) {
       // `.in('wallet', allWallets)` silently truncates once the URL crosses
-      // ~180 Solana addresses. chunkedIn slices the list and concatenates.
+      // ~180 Ethereum addresses. chunkedIn slices the list and concatenates.
       type ClaimRow = { wallet: string; status: string; created_at: string };
       type RefRow = { referrer_wallet: string; reward_status: string };
       type AnomRow = { wallet: string; metadata_json: any };

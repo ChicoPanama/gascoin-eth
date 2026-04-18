@@ -241,7 +241,7 @@ export default async function TreasuryPage() {
                           <span style={{ color: 'var(--status-warn)' }}>{job.tx_hash}</span>
                         ) : (
                           <a
-                            href={`https://solscan.io/tx/${job.tx_hash}`}
+                            href={`https://etherscan.io/tx/${job.tx_hash}`}
                             target="_blank"
                             rel="noopener noreferrer"
                             style={{ color: 'var(--status-info)', textDecoration: 'underline' }}

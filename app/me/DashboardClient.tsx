@@ -680,7 +680,7 @@ export function DashboardClient({ wallet, xHandle, isDryRun = false, claims, pay
                               </span>
                             ) : (
                               <a
-                                href={`https://solscan.io/tx/${payout.tx_hash}`}
+                                href={`https://etherscan.io/tx/${payout.tx_hash}`}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="ud-meta__link"
@@ -730,7 +730,7 @@ export function DashboardClient({ wallet, xHandle, isDryRun = false, claims, pay
                         </span>
                       ) : (
                         <a
-                          href={`https://solscan.io/tx/${p.tx_hash}`}
+                          href={`https://etherscan.io/tx/${p.tx_hash}`}
                           target="_blank"
                           rel="noopener noreferrer"
                         >

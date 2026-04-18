@@ -8,7 +8,7 @@ import { writeIntelligence } from '../../../../lib/knowledge-base';
 import { chunkedIn } from '../../../../lib/supabase-utils';
 
 // Worker: auto-verify referrals + award POINTS (not SOL)
-// SOL payouts are for gas receipts ONLY
+// ETH payouts are for gas receipts ONLY
 // Runs every 15 minutes via Vercel cron
 
 // Ring detection BFS + AI verification calls — bump timeout to 60s

@@ -84,7 +84,7 @@ export function WalletConnectModal({ open, onClose }: Props) {
   async function handlePick(walletName: string) {
     setBusyName(walletName);
     try {
-      // The wallet adapter's `select` is synchronous but the resulting
+      // The wallet's `select` is synchronous but the resulting
       // `connect` happens on a state-driven side effect. We call connect()
       // explicitly here to trigger immediately rather than waiting for the
       // adapter's next render cycle.
@@ -112,7 +112,7 @@ export function WalletConnectModal({ open, onClose }: Props) {
         className="gc-wcm"
         role="dialog"
         aria-modal="true"
-        aria-label="Connect a Solana wallet"
+        aria-label="Connect a Ethereum wallet"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="gc-wcm-header">

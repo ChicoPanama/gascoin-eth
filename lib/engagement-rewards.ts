@@ -1,7 +1,7 @@
 // ═══════════════════════════════════════════
 // GASCOIN Points System
 //
-// SOL payouts are for gas receipts ONLY.
+// ETH payouts are for gas receipts ONLY.
 // Everything else earns POINTS:
 //   - Tweet engagement (impressions, likes, RTs, quotes, replies)
 //   - Referral conversions

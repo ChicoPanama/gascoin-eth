@@ -29,7 +29,7 @@ const STEPS: Step[] = [
     title: 'Set Up a Solana Wallet',
     time: '5 min',
     bullets: [
-      'Download Phantom wallet — it\'s a free app for your phone or browser. Think of it like Venmo, but for crypto.',
+      'Download MetaMask or any Ethereum wallet — it\'s a free app for your phone or browser. Think of it like Venmo, but for crypto.',
       'Create your wallet. It gives you a "seed phrase" (12 words). Write these down on paper and keep them safe. Never share them with anyone.',
       'Your wallet address is a long string of letters and numbers — like a bank account number. It\'s safe to share.',
     ],
@@ -61,7 +61,7 @@ const STEPS: Step[] = [
     bullets: [
       'SOL is the currency of Solana — you need it to buy GASCOIN tokens and pay tiny transaction fees.',
       'You can buy SOL directly inside Phantom with a debit card — easiest option for beginners.',
-      'Or buy SOL on an exchange and send it to your Phantom wallet address.',
+      'Or buy SOL on an exchange and send it to your MetaMask or any Ethereum wallet address.',
       'Moonpay also lets you buy SOL with a card and send it straight to your wallet.',
     ],
     links: [
@@ -81,7 +81,7 @@ const STEPS: Step[] = [
     title: 'Get GASCOIN Tokens',
     time: '3 min',
     bullets: [
-      'You need to hold at least 1 GASCOIN token in your Phantom wallet before you can submit.',
+      'You need to hold at least 1 GASCOIN token in your MetaMask or any Ethereum wallet before you can submit.',
       'Swap some SOL for GASCOIN on a Solana DEX — search for the GASCOIN token.',
       'Holding more GASCOIN unlocks higher tiers with bigger refund caps and faster queue priority.',
     ],
@@ -134,10 +134,10 @@ const STEPS: Step[] = [
     time: '3 min',
     bullets: [
       'Go to the Submit page on GASCOIN.',
-      'Click "Connect Wallet" and connect your Phantom wallet.',
+      'Click "Connect Wallet" and connect your MetaMask or any Ethereum wallet.',
       'Sign in with your X account.',
       'Paste your tweet URL.',
-      'Upload a clear photo of your receipt (with the last 4 wallet characters visible).',
+      'Upload a clear photo of your receipt (with the last 4 hex characters of your Ethereum wallet address visible, e.g. a3F2).',
       'Check the 3 confirmation boxes and hit Submit.',
     ],
     links: [
@@ -151,7 +151,7 @@ const STEPS: Step[] = [
     bullets: [
       `The system automatically runs ${GATE_COUNT} verification checks on your submission. This takes 2-5 minutes.`,
       'If all checks pass, an admin reviews your submission and approves it.',
-      'SOL is sent directly to your Phantom wallet within 24-48 hours.',
+      'SOL is sent directly to your MetaMask or any Ethereum wallet within 24-48 hours.',
       'You can track your submission status on the Tracker page.',
     ],
     links: [
@@ -163,7 +163,7 @@ const STEPS: Step[] = [
     title: 'Cash Out',
     subtitle: 'Optional',
     bullets: [
-      'Your SOL is already in your Phantom wallet — you can hold it, spend it, or convert it to dollars.',
+      'Your SOL is already in your MetaMask or any Ethereum wallet — you can hold it, spend it, or convert it to dollars.',
       'Send SOL to an exchange and sell it for USD, EUR, or your local currency.',
       'Or use Moonpay to send it directly to your bank account.',
       'You can submit again after 7 days with a new receipt.',

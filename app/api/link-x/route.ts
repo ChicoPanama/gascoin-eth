@@ -31,7 +31,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'wallet and x identity required' }, { status: 400 });
     }
 
-    // SECURITY: Validate wallet is a real Solana address
+    // SECURITY: Validate wallet is a real Ethereum address
     if (!isValidSolanaAddress(wallet)) {
       return NextResponse.json({ error: 'invalid_wallet_address' }, { status: 400 });
     }

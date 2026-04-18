@@ -261,7 +261,7 @@ Return your verdict as JSON matching the required schema.`;
 
   // Enforce per-tier minimum confidence floor. An 'approve' with confidence
   // below the tier threshold is downgraded to 'flag' — a 55% confidence
-  // approve on a Fleet-tier 2.5 SOL payout is not good enough.
+  // approve on a Fleet-tier 2.5 ETH payout is not good enough.
   const minConf = TIER_MIN_CONFIDENCE[context.tier] ?? 0.50;
   if (verdict.verdict === 'approve' && verdict.confidence < minConf) {
     verdict.verdict = 'flag';

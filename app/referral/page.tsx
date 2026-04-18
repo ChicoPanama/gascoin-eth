@@ -249,7 +249,7 @@ export default function ReferralPage() {
                       </td>
                       <td className="lb-table-action">
                         {c.reward_tx_signature ? (
-                          <a href={`https://solscan.io/tx/${c.reward_tx_signature}`} target="_blank" rel="noopener" onClick={(e) => e.stopPropagation()}>View TX →</a>
+                          <a href={`https://etherscan.io/tx/${c.reward_tx_signature}`} target="_blank" rel="noopener" onClick={(e) => e.stopPropagation()}>View TX →</a>
                         ) : c.reward_status === 'pending' ? (
                           <span style={{ color: 'rgba(255,255,255,0.3)' }}>Pending dispatch</span>
                         ) : null}

@@ -166,7 +166,7 @@ export const GATES: GateDefinition[] = [
   },
   {
     id: 10, slug: 'wallet-match', policyGate: 'wallet_match', name: 'Wallet Match on Receipt', category: 'wallet',
-    description: 'The last 4 characters of your connected Solana wallet must be written on the receipt and visible in the photo.',
+    description: 'The last 4 characters of your connected Ethereum wallet must be written on the receipt and visible in the photo.',
     what_we_check: 'OCR extracts text from the receipt image and searches for the last 4 characters of your connected wallet (case-insensitive). The extracted characters must match exactly.',
     common_failures: [
       'Characters written too small or unclear',
@@ -263,7 +263,7 @@ export const GATES: GateDefinition[] = [
   {
     id: 17, slug: 'gascoin-min-hold', policyGate: 'gascoin_min_hold', name: 'GASCOIN Min Hold', category: 'wallet',
     description: 'Your connected wallet must hold at least 1 GASCOIN token at the time of submission. In Season 1 dry-run mode this gate is bypassed so testers can participate without holding the token.',
-    what_we_check: 'On-chain SPL token balance of your connected wallet against the GASCOIN mint. During Season 1 (ENABLE_LIVE_PAYOUT=false) this check auto-passes.',
+    what_we_check: 'On-chain ERC-20 token balance of your connected wallet against the GASCOIN mint. During Season 1 (ENABLE_LIVE_PAYOUT=false) this check auto-passes.',
     common_failures: [
       'Wallet holds 0 GASCOIN tokens (live mode)',
       'Wallet holds GASCOIN on a different chain or in a centralized exchange',

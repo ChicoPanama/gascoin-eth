@@ -96,20 +96,20 @@ export const DOC_CATEGORIES: DocCategory[] = [
 <p>Fill up at any gas station. Keep the paper receipt — you'll need it. Purchase must be within the last 7 days.</p>
 
 <h3>Step 2 — Write your wallet ID on the receipt</h3>
-<p>Using a pen, write the <strong>last 4 characters</strong> of your Solana wallet address on the receipt. This links the receipt to your wallet so the system can verify it's yours. No pen? No payout — this is required.</p>
+<p>Using a pen, write the <strong>last 4 characters</strong> of your Ethereum wallet address on the receipt. This links the receipt to your wallet so the system can verify it's yours. No pen? No payout — this is required.</p>
 
 <h3>Step 3 — Post on X</h3>
 <p>Take a clear photo of the receipt and post it on X (Twitter). Your tweet must include the hashtag <strong>#GasCoin</strong> and tag <strong>@GasCoinApp</strong>. The tweet must be public. Copy the tweet URL — you'll need it in the next step.</p>
 
 <h3>Step 4 — Submit at gascoin.app/submit</h3>
-<p>Go to <strong>gascoin.app/submit</strong>, connect your Solana wallet, paste your tweet URL, and upload your receipt photo. The system runs 15 automated checks — takes about 2 minutes.</p>
+<p>Go to <strong>gascoin.app/submit</strong>, connect your Ethereum wallet, paste your tweet URL, and upload your receipt photo. The system runs 15 automated checks — takes about 2 minutes.</p>
 
 <h3>Step 5 — Receive SOL</h3>
 <p>If all checks pass, SOL is sent directly to your connected wallet within 2–6 hours (48 hours maximum). No action needed on your end.</p>
 
 <h3>Before you start — quick checklist</h3>
 <ul>
-<li>Solana wallet installed (Phantom, Solflare, or Backpack — all free)</li>
+<li>Ethereum wallet installed (Phantom, Solflare, or Backpack — all free)</li>
 <li>X (Twitter) account that is public and verified (blue checkmark)</li>
 <li>You follow <a href="https://x.com/GasCoinApp" target="_blank" rel="noopener">@GasCoinApp</a> on X</li>
 <li>Gas receipt dated within the last 7 days</li>
@@ -142,7 +142,7 @@ export const DOC_CATEGORIES: DocCategory[] = [
 <ul>
 <li>Public X account meeting follower/activity policy</li>
 <li>Physical gas receipt within policy date window</li>
-<li>Connected Solana wallet for payout destination</li>
+<li>Connected Ethereum wallet for payout destination</li>
 <li>Required wallet characters written on receipt</li>
 </ul>
 
@@ -158,10 +158,10 @@ export const DOC_CATEGORIES: DocCategory[] = [
         description: "",
         content: `<ul>
 <li>You fill up your gas tank at any gas station</li>
-<li>Before or after filling up, you write the last 4 characters of your Solana wallet address on the receipt in pen</li>
+<li>Before or after filling up, you write the last 4 characters of your Ethereum wallet address on the receipt in pen</li>
 <li>You post a tweet on X (formerly Twitter) containing the hashtag #gascoin</li>
 <li>You visit gascoin.com and click Submit</li>
-<li>You connect your Solana wallet, paste your tweet URL, and upload a photo of your receipt</li>
+<li>You connect your Ethereum wallet, paste your tweet URL, and upload a photo of your receipt</li>
 <li>The system automatically runs 15 verification checks on your submission</li>
 <li>If all 15 checks pass, SOL is sent directly to your wallet within 2–6 hours (48 hours maximum)</li>
 </ul>`,
@@ -190,7 +190,7 @@ export const DOC_CATEGORIES: DocCategory[] = [
         category: "Overview",
         description: "",
         content: `<ul>
-<li><strong>Required: </strong>A Solana wallet — Phantom, Solflare, or Backpack (all free to install)</li>
+<li><strong>Required: </strong>A Ethereum wallet — Phantom, Solflare, or Backpack (all free to install)</li>
 <li><strong>Required: </strong>A <strong>verified</strong> X (Twitter) account (blue, business, or government checkmark) set to public, with at least 100 followers, a profile bio, and posting history. Unverified accounts are rejected at submission to prevent sybil attacks.</li>
 <li><strong>Required: </strong>You must <strong>follow <a href="https://x.com/GasCoinApp" target="_blank" rel="noopener">@GasCoinApp</a></strong> on X before submitting. The system checks the official follower list on every submission — non-followers are rejected at the gate.</li>
 <li><strong>Required: </strong>A physical gas receipt from a real gas station purchase within the last 7 days</li>
@@ -248,7 +248,7 @@ export const DOC_CATEGORIES: DocCategory[] = [
         categorySlug: "submitting",
         category: "Submitting",
         description: "",
-        content: `<p>The first step is connecting your Solana wallet. This tells the system which wallet address to send your SOL refund to and which address to check for GASCOIN token balance.</p>
+        content: `<p>The first step is connecting your Ethereum wallet. This tells the system which wallet address to send your ETH refund to and which address to check for GASCOIN token balance.</p>
 <h3>How to connect your wallet</h3>
 <ol>
 <li>Click the Connect Wallet button on Step 1</li>
@@ -264,7 +264,7 @@ export const DOC_CATEGORIES: DocCategory[] = [
 <ul>
 <li>You cannot proceed past Step 1 without connecting a wallet</li>
 <li>Only one wallet can be connected at a time</li>
-<li>The wallet you connect is the wallet that receives your SOL refund. Make sure it is the correct wallet</li>
+<li>The wallet you connect is the wallet that receives your ETH refund. Make sure it is the correct wallet</li>
 <li>Submission frequency depends on your tier: Standard and Commuter can submit once per week, Road Warrior twice per week, and Fleet four times per week. If you have an active or recently approved submission, you must wait until the cooldown expires</li>
 <li>The system checks for a pending submission from your wallet. If one already exists, you will see a message indicating this and cannot submit a duplicate</li>
 </ul>`,
@@ -299,12 +299,12 @@ export const DOC_CATEGORIES: DocCategory[] = [
         categorySlug: "submitting",
         category: "Submitting",
         description: "",
-        content: `<p>Step 3 requires you to upload a photo of your gas receipt. This is the physical paper receipt from a real gas station. The receipt must have the last 4 characters of your Solana wallet address written on it in pen.</p>
+        content: `<p>Step 3 requires you to upload a photo of your gas receipt. This is the physical paper receipt from a real gas station. The receipt must have the last 4 characters of your Ethereum wallet address written on it in pen.</p>
 <div class="doc-callout doc-callout--warn"><p>IMPORTANT: You must write the last 4 characters of your wallet address on the physical receipt BEFORE photographing it. They must be clearly legible in the photo. This is a required element — submissions without readable wallet characters on the receipt will fail the Wallet Match gate and be rejected.</p></div>
 <h3>How to prepare your receipt</h3>
 <ol>
 <li>Obtain the paper receipt from the gas station at the time of purchase, or retrieve a saved receipt from within the last 7 days</li>
-<li>Using a black pen, write the last 4 characters of your Solana wallet address clearly on the receipt. Write them large enough to be readable in a photograph. You can find your last 4 in your wallet app or on the GASCOIN submit page</li>
+<li>Using a black pen, write the last 4 characters of your Ethereum wallet address clearly on the receipt. Write them large enough to be readable in a photograph. You can find your last 4 in your wallet app or on the GASCOIN submit page</li>
 <li>Place the receipt flat on a bright surface. Do not crumple, fold, or obscure any part of the receipt</li>
 <li>Photograph the receipt using your phone camera in good lighting. The entire receipt must be visible. The total amount, date, and your written wallet characters must all be clearly readable</li>
 <li>Transfer the photo to the device you are using to submit (if you took the photo on your phone and are submitting on desktop, AirDrop or email the photo to yourself)</li>
@@ -376,7 +376,7 @@ export const DOC_CATEGORIES: DocCategory[] = [
 <h3>How long verification takes</h3>
 <p>Most gates complete in under 10 seconds. The wallet-match gate involves OCR image processing and can take up to 45 seconds. The entire verification process typically completes within 2-5 minutes for a passing submission.</p>
 <h3>If all 17 gates pass</h3>
-<p>The screen displays SUBMISSION APPROVED. Your SOL refund will be dispatched to your wallet within 2–6 hours (48 hours maximum). You can track your submission status at any time using the Wallet Tracker page at /wallet.</p>
+<p>The screen displays SUBMISSION APPROVED. Your ETH refund will be dispatched to your wallet within 2–6 hours (48 hours maximum). You can track your submission status at any time using the Wallet Tracker page at /wallet.</p>
 <h3>If a gate fails</h3>
 <p>The screen displays SUBMISSION INCOMPLETE. The failed gate is highlighted and a specific failure reason is shown explaining exactly what went wrong. Gates that come after the failed gate show the dash icon — they were not run because a previous gate blocked progress.</p>
 <p>After a failure, you can resubmit. Different gates have different resubmission requirements — see the Gates section of this document for details on each gate and how to fix failures.</p>
@@ -879,15 +879,15 @@ Inputs(wallet,tweet,receipt)
         categorySlug: "technology",
         category: "Technology",
         description: "",
-        content: `<p>Every financial operation in GASCOIN happens on the Solana blockchain — fully transparent and publicly auditable.</p>
+        content: `<p>Every financial operation in GASCOIN happens on the Ethereum blockchain — fully transparent and publicly auditable.</p>
 <h3>Treasury Transparency</h3>
-<p>The GASCOIN treasury wallet is a standard Solana wallet. Its balance is queried via RPC before every payout. If the treasury cannot cover a refund, the submission is queued (not rejected) until funds are available. The treasury balance is publicly visible on the Dashboard page.</p>
+<p>The GASCOIN treasury wallet is a standard Ethereum wallet. Its balance is queried via RPC before every payout. If the treasury cannot cover a refund, the submission is queued (not rejected) until funds are available. The treasury balance is publicly visible on the Dashboard page.</p>
 <h3>Token Holdings Verification</h3>
 <p>Your GASCOIN token balance is checked twice: once at submission time (to determine your tier and cooldown) and again immediately before SOL is dispatched (to ensure you still hold tokens). If you sell your GASCOIN between submission and payout, the payout is blocked.</p>
 <h3>Immutable Audit Trail</h3>
 <p>Every admin action — approvals, rejections, gate overrides, payout dispatches — is permanently recorded in the audit log. No admin action can be taken silently. The audit trail cannot be modified or deleted.</p>
 <h3>Solana Transaction Receipts</h3>
-<p>Every SOL payout generates a Solana transaction hash that can be independently verified on any Solana block explorer. The transaction proves exactly when the payment was made, how much was sent, and to which wallet.</p>`,
+<p>Every ETH payout generates a Solana transaction hash that can be independently verified on any Solana block explorer. The transaction proves exactly when the payment was made, how much was sent, and to which wallet.</p>`,
         order: 33,
       },
       {
@@ -1444,7 +1444,7 @@ Inputs(wallet,tweet,receipt)
         content: `<p>The submit page hosts the 5-step submission portal described in full in Section 2 of this document. See Section 2 for complete details on each step.</p>
 <p>Key rules for the submit page:</p>
 <ul>
-<li>You must connect a Solana wallet to proceed past Step 1</li>
+<li>You must connect a Ethereum wallet to proceed past Step 1</li>
 <li>You must have an active X (Twitter) account to proceed past Step 2</li>
 <li>You must have a qualifying gas receipt to proceed past Step 3</li>
 <li>Each submission requires a unique receipt and a new tweet — you cannot reuse either</li>
@@ -1598,7 +1598,7 @@ Inputs(wallet,tweet,receipt)
 <h3>The four tiers</h3>
 <p>Standard (1 token), Commuter (100K tokens), Road Warrior (5M tokens), and Fleet (10M tokens). Higher tiers unlock bigger refund caps and faster submission frequency.</p>
 <h3>How tier is determined</h3>
-<p>Your tier is determined by the GASCOIN token balance in your connected wallet at the time of submission. Balance is checked on-chain via a Solana blockchain query. The system checks your connected wallet's GASCOIN token balance live on the Solana blockchain when you connect. The balance is also cached and refreshed every 5 minutes. If you buy more GASCOIN and want to see your updated tier immediately, click the Refresh Balance button on the Perks page.</p>
+<p>Your tier is determined by the GASCOIN token balance in your connected wallet at the time of submission. Balance is checked on-chain via a Ethereum blockchain query. The system checks your connected wallet's GASCOIN token balance live on the Ethereum blockchain when you connect. The balance is also cached and refreshed every 5 minutes. If you buy more GASCOIN and want to see your updated tier immediately, click the Refresh Balance button on the Perks page.</p>
 <h3>When tier is applied</h3>
 <p>Your tier is snapshotted at the time of submission. The refund cap associated with that tier applies to that submission — even if your holdings later change before dispatch. If you upgrade after submitting, the original tier at submission time still applies.</p>
 <h3>Queue priority</h3>
@@ -1800,7 +1800,7 @@ Inputs(wallet,tweet,receipt)
         categorySlug: "security",
         category: "Security & Admin",
         description: "",
-        content: `<p>Requiring the last 4 characters of a Solana wallet address to be physically written on the paper receipt and visible in the photograph is a low-friction anti-fraud measure. It ties the receipt to a specific wallet that was known at the time of the gas purchase while keeping the process simple for users.</p>`,
+        content: `<p>Requiring the last 4 characters of a Ethereum wallet address to be physically written on the paper receipt and visible in the photograph is a low-friction anti-fraud measure. It ties the receipt to a specific wallet that was known at the time of the gas purchase while keeping the process simple for users.</p>`,
         order: 53,
         navHidden: true,
       },
@@ -2020,11 +2020,11 @@ Inputs(wallet,tweet,receipt)
       },
       {
         slug: "what-is-a-solana-wallet-and-how-do-i-get-one",
-        title: "What is a Solana wallet and how do I get one?",
+        title: "What is a Ethereum wallet and how do I get one?",
         categorySlug: "help",
         category: "Help",
         description: "",
-        content: `<p>A Solana wallet is a free browser extension that manages your cryptocurrency. The three supported wallets are Phantom (phantom.app), Solflare (solflare.com), and Backpack (backpack.app). All three are free and take approximately 5 minutes to set up. During setup you will be given a seed phrase — write this down and keep it safe. Never share your seed phrase with anyone, including GASCOIN.</p>`,
+        content: `<p>A Ethereum wallet is a free browser extension that manages your cryptocurrency. The three supported wallets are Phantom (phantom.app), Solflare (solflare.com), and Backpack (backpack.app). All three are free and take approximately 5 minutes to set up. During setup you will be given a seed phrase — write this down and keep it safe. Never share your seed phrase with anyone, including GASCOIN.</p>`,
         order: 61,
       },
       {
@@ -2033,7 +2033,7 @@ Inputs(wallet,tweet,receipt)
         categorySlug: "help",
         category: "Help",
         description: "",
-        content: `<p>SOL is a real cryptocurrency traded on major exchanges. The SOL you receive in a refund is real and can be converted to USD through any cryptocurrency exchange (Coinbase, Kraken, Binance, etc.). GASCOIN tokens are also real tradeable tokens on the Solana blockchain. Their value fluctuates based on market conditions.</p>`,
+        content: `<p>SOL is a real cryptocurrency traded on major exchanges. The SOL you receive in a refund is real and can be converted to USD through any cryptocurrency exchange (Coinbase, Kraken, Binance, etc.). GASCOIN tokens are also real tradeable tokens on the Ethereum blockchain. Their value fluctuates based on market conditions.</p>`,
         order: 62,
         navHidden: true,
       },
@@ -2061,7 +2061,7 @@ Inputs(wallet,tweet,receipt)
         categorySlug: "help",
         category: "Help",
         description: "",
-        content: `<p>Yes. The platform is fully responsive and works on mobile browsers. Submitting from mobile has an advantage for the receipt upload step — you can take the photo directly with your phone camera without needing to transfer the file to a desktop. Ensure you have a mobile Solana wallet installed (Phantom and Solflare both have mobile apps).</p>`,
+        content: `<p>Yes. The platform is fully responsive and works on mobile browsers. Submitting from mobile has an advantage for the receipt upload step — you can take the photo directly with your phone camera without needing to transfer the file to a desktop. Ensure you have a mobile Ethereum wallet installed (Phantom and Solflare both have mobile apps).</p>`,
         order: 65,
       },
       {
@@ -2070,7 +2070,7 @@ Inputs(wallet,tweet,receipt)
         categorySlug: "help",
         category: "Help",
         description: "",
-        content: `<p>When your submission is approved and the SOL is dispatched, the Wallet Tracker updates your submission status to 'approved' and shows the transaction signature. You can click the transaction signature link to view the transfer on Solscan (the Solana blockchain explorer) where you can verify the exact amount and confirm it arrived in your wallet.</p>`,
+        content: `<p>When your submission is approved and the SOL is dispatched, the Wallet Tracker updates your submission status to 'approved' and shows the transaction signature. You can click the transaction signature link to view the transfer on Solscan (the Ethereum blockchain explorer) where you can verify the exact amount and confirm it arrived in your wallet.</p>`,
         order: 66,
       },
       {
@@ -2088,7 +2088,7 @@ Inputs(wallet,tweet,receipt)
         categorySlug: "help",
         category: "Help",
         description: "",
-        content: `<p>From completing a gas purchase to having SOL in your wallet typically takes 2-6 hours if everything goes smoothly: about 5-10 minutes to photograph the receipt and post the tweet, 5 minutes for the submission portal, 2-5 minutes for automated verification, and up to 48 hours for the admin to approve and dispatch the SOL refund. In practice, most submissions are processed and dispatched within a few hours.</p>`,
+        content: `<p>From completing a gas purchase to having SOL in your wallet typically takes 2-6 hours if everything goes smoothly: about 5-10 minutes to photograph the receipt and post the tweet, 5 minutes for the submission portal, 2-5 minutes for automated verification, and up to 48 hours for the admin to approve and dispatch the ETH refund. In practice, most submissions are processed and dispatched within a few hours.</p>`,
         order: 68,
       },
       {
@@ -2129,11 +2129,11 @@ Inputs(wallet,tweet,receipt)
         category: "Help",
         description: "How the GASCOIN points system works — earning, leaderboard, and rewards.",
         content: `<h3>What this is</h3>
-<p>A concise reference for how the points system operates relative to SOL payouts.</p>
+<p>A concise reference for how the points system operates relative to ETH payouts.</p>
 
 <h3>Core distinction</h3>
 <ul>
-<li><strong>SOL payouts:</strong> only for approved gas receipt claims</li>
+<li><strong>ETH payouts:</strong> only for approved gas receipt claims</li>
 <li><strong>Points:</strong> earned from engagement, referrals, streaks, and holdings</li>
 </ul>
 
@@ -2222,7 +2222,7 @@ Inputs(wallet,tweet,receipt)
         category: "Help",
         description: "Submission points and streak bonuses.",
         content: `<h3>Submission Points</h3>
-<p>Every time a gas receipt submission is approved by the admin, you earn <strong>1,000 points</strong> immediately. These points are awarded the moment the admin clicks "Approve" — you do not need to wait for the SOL refund to arrive.</p>
+<p>Every time a gas receipt submission is approved by the admin, you earn <strong>1,000 points</strong> immediately. These points are awarded the moment the admin clicks "Approve" — you do not need to wait for the ETH refund to arrive.</p>
 
 <h3>Streak Bonus</h3>
 <p>If you submit and get approved in consecutive 30-day windows, you earn a streak bonus. The streak rewards consistency — regular participants earn more than one-off submitters.</p>

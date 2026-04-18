@@ -2,7 +2,7 @@
  * Supabase query helpers.
  *
  * Supabase REST URLs are bounded (roughly 8 KB). A single `.in('col', values)`
- * with more than ~180 Solana addresses (44 chars each) silently fails at the
+ * with more than ~180 Ethereum addresses (44 chars each) silently fails at the
  * edge — no rows returned, no error surfaced. `chunkedIn` splits the list,
  * issues one query per chunk, and concatenates the rows.
  */

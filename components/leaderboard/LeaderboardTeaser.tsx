@@ -33,7 +33,7 @@ export function LeaderboardTeaser() {
           <div className="gc-section-num">03 — Top Earners</div>
           <h2 className="lb-teaser-title">Who&apos;s Leading</h2>
           <p className="lb-teaser-sub">
-            Real-time rankings of verified SOL refund earners.
+            Real-time rankings of verified ETH refund earners.
           </p>
         </div>
         <div className="lb-teaser-right glass-card" style={{ padding: 24 }}>

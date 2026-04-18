@@ -12,7 +12,7 @@ export function WalletButton() {
   const [timedOut, setTimedOut] = useState(false);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Connection timeout — reset to idle if wallet adapter hangs
+  // Connection timeout — reset to idle if wallet hangs
   useEffect(() => {
     if (connecting) {
       setTimedOut(false);

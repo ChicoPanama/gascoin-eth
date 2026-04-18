@@ -18,7 +18,7 @@ export function composeDashboardTweet(params: {
 export function composePostApprovalTweet(params: {
   referralUrl: string;
 }): string {
-  return `Just submitted my gas receipt to GASCOIN for a SOL refund. Get your gas money back too → ${params.referralUrl}\n\n@GasCoinApp $GASCOIN #gascoin`;
+  return `Just submitted my gas receipt to GASCOIN for a ETH refund. Get your gas money back too → ${params.referralUrl}\n\n@GasCoinApp $GASCOIN #gascoin`;
 }
 
 export function buildReferralUrl(referralCode: string): string {

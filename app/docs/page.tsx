@@ -20,7 +20,7 @@ const CHAPTER_ORDER = [
 
 const CHAPTER_META: Record<string, { label: string; kicker: string; roman: string }> = {
   overview:     { label: 'The Protocol',        kicker: 'What GASCOIN is and why it exists',                        roman: 'I' },
-  submitting:   { label: 'The Submission',      kicker: 'Step-by-step flow from receipt to SOL refund',             roman: 'II' },
+  submitting:   { label: 'The Submission',      kicker: 'Step-by-step flow from receipt to ETH refund',             roman: 'II' },
   verification: { label: 'The Gates',           kicker: `All ${GATE_COUNT} automated verification checks, in order`, roman: 'III' },
   technology:   { label: 'The Machine Room',    kicker: '3 AI engines, 17 gates, 9 cron workers, 4-layer cache',    roman: 'IV' },
   platform:     { label: 'The Surfaces',        kicker: 'Every page on gascoin.app and what it does',               roman: 'V' },
@@ -147,7 +147,7 @@ export default function DocsSinglePage() {
             <div className="gcdocs-footer-kicker">THE END OF THE MANUAL</div>
             <h2 className="gcdocs-footer-title">Ready to submit?</h2>
             <p className="gcdocs-footer-lede">
-              You've read the full protocol. If your receipt has the last 4 of your wallet written on it,
+              You've read the full protocol. If your receipt has the last 4 hex characters of your Ethereum wallet address written on it (e.g. if your address ends in <code>...a3F2</code>, write <code>a3F2</code>),
               your tweet mentions <code>$GASCOIN</code> or <code>#gascoin</code> and tags{' '}
               <code>@GasCoinApp</code>, and your X account is verified with 100+ followers — you're ready.
             </p>

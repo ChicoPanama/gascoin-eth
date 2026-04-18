@@ -1,7 +1,7 @@
 // ═══════════════════════════════════════════
 // GASCOIN Referral System
 // Referrals earn POINTS, not SOL
-// SOL payouts are for gas receipts ONLY
+// ETH payouts are for gas receipts ONLY
 // ═══════════════════════════════════════════
 
 export const REFERRAL_CONFIG = {

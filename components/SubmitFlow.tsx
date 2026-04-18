@@ -71,7 +71,7 @@ function StepWallet({ onConnect }: {
   return (
     <div className="sf-step">
       <h2 className="sf-headline">Connect Your Wallet</h2>
-      <p className="sf-sub">We verify your wallet is not a duplicate and use it to send your SOL refund.</p>
+      <p className="sf-sub">We verify your wallet is not a duplicate and use it to send your ETH refund.</p>
 
       {connected ? (
         <div className="sf-connected">
@@ -332,7 +332,7 @@ function StepReceipt({ onNext, onBack, initialFile }: {
   return (
     <div className="sf-step">
       <h2 className="sf-headline">Upload Your Receipt</h2>
-      <p className="sf-sub">Photo must clearly show the total amount, date, and the last 4 characters of your wallet written on the receipt.</p>
+      <p className="sf-sub">Photo must clearly show the total amount, date, and the last 4 hex characters of your Ethereum wallet address written on the receipt (e.g. if your address ends in <code>...a3F2</code>, write <code>a3F2</code>).</p>
 
       <div
         className={`sf-upload${file ? ' sf-upload--has-file' : ''}`}
@@ -377,7 +377,7 @@ function StepReceipt({ onNext, onBack, initialFile }: {
         {[
           'Receipt shows total amount clearly',
           'Receipt date is visible',
-          'The last 4 characters of my wallet are written on the receipt',
+          'The last 4 hex characters of my Ethereum wallet address are written on the receipt',
         ].map((label, i) => (
           <label key={i} className="sf-check-row" onClick={() => toggleCheck(i)}>
             <span className={`sf-checkbox${checks[i] ? ' sf-checkbox--checked' : ''}`}>
@@ -562,7 +562,7 @@ function StepGates({ failGate, failGateMessage, onReset, onResubmit, referralCod
 
       {done && (
         <div className="sf-result">
-          <p className="sf-result-text">SOL refund will be dispatched within 24–48 hours</p>
+          <p className="sf-result-text">ETH refund will be dispatched within 24–48 hours</p>
           {referralCode && (
             <ViralShareCard variant="post-approval" referralCode={referralCode} />
           )}

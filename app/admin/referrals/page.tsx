@@ -143,7 +143,7 @@ export default async function ReferralsPage(props: { searchParams: Promise<{ tab
                     </div>
                   )}
                   {c.reward_status === 'dispatched' && c.reward_tx_signature && (
-                    <a href={`https://solscan.io/tx/${c.reward_tx_signature}`} target="_blank" rel="noopener"
+                    <a href={`https://etherscan.io/tx/${c.reward_tx_signature}`} target="_blank" rel="noopener"
                       style={{ fontFamily: 'IBM Plex Mono', fontSize: 9, color: 'rgba(var(--fg-rgb),0.4)' }}>
                       View TX →
                     </a>

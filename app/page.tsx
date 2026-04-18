@@ -164,7 +164,7 @@ export default async function Home() {
                 <p className="gc-hero-body">
                   Gas prices are crushing everyday people. GASCOIN is a community-funded
                   movement on Solana that gives real money back for real gas purchases.
-                  Post proof on X, submit your receipt, and receive SOL directly to your
+                  Post proof on X, submit your receipt, and receive ETH directly to your
                   wallet. No middlemen. No custodians. Just people helping people.
                 </p>
               </HeroItem>

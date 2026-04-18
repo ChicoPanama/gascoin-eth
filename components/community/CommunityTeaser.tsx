@@ -65,7 +65,7 @@ export function CommunityTeaser() {
             <span className="cf-teaser-ghost">Real Payouts.</span>
           </h2>
           <p className="cf-teaser-sub">
-            Every card below is a verified gas receipt that received a SOL refund
+            Every card below is a verified gas receipt that received a ETH refund
             from the GASCOIN treasury. No actors. No mockups.
           </p>
           <Link href="/community" className="gc-teaser-link">View all receipts</Link>

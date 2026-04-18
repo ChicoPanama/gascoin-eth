@@ -1,0 +1,7 @@
+-- HOLD: Apply only after Ethereum app stable in production for 2+ weeks.
+-- ALTER TABLE claims DROP COLUMN wallet;
+-- ALTER TABLE payouts DROP COLUMN wallet, tx_hash, amount_sol;
+-- ALTER TABLE payout_jobs DROP COLUMN wallet, amount_sol;
+-- ALTER TABLE wallet_links DROP COLUMN wallet;
+-- ALTER TABLE treasury_snapshots DROP COLUMN wallet, sol_balance;
+-- ALTER TABLE admin_users DROP COLUMN wallet;
