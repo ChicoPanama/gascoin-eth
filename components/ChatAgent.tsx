@@ -369,7 +369,25 @@ export function ChatAgent({
         onClick={() => setOpen(o => !o)}
         aria-label="Gas Attendant"
       >
-        {open ? '✕' : '?'}
+        {open ? (
+          <span className="chat-fab-close">✕</span>
+        ) : (
+          <>
+            {/* Black Clippy for light mode, white Clippy for dark mode */}
+            <img
+              src="/clippy-black.png"
+              alt="Gas Attendant"
+              className="chat-fab-clippy chat-fab-clippy--light"
+              draggable={false}
+            />
+            <img
+              src="/clippy-white.png"
+              alt="Gas Attendant"
+              className="chat-fab-clippy chat-fab-clippy--dark"
+              draggable={false}
+            />
+          </>
+        )}
       </button>
 
       {open && (

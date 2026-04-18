@@ -15,7 +15,8 @@
 import { cacheGetOrFetch } from './cache';
 import { getSupabaseAdmin } from './supabase';
 import { getTokenBalanceServer } from './token-balance';
-import { searchMemories, addMemory, MEM0_CATEGORIES, MEM0_APPS } from './mem0';
+import { searchMemories, addMemory, MEM0_CATEGORIES, MEM0_APPS, type Mem0Memory } from './mem0';
+import { MEM0_CHAT_CACHE_KEY, MEM0_CHAT_TTL } from './chat-context';
 
 // ── Tier thresholds (mirrors lib/policy.ts) ──────────────────────────────────
 
@@ -188,21 +189,63 @@ interface Mem0Prefs {
 
 async function fetchMem0Prefs(wallet: string): Promise<Mem0Prefs> {
   try {
-    const memories = await searchMemories('wallet', wallet, 'chat user preferences language topics', {
-      limit: 10,
-    });
+    // Use shared cache key — buildMem0Context populates this in parallel.
+    // Single-flight coalescing (cacheGetOrFetch) ensures only one mem0 API
+    // call is made per request even when both functions run concurrently.
+    const memories = await cacheGetOrFetch(
+      MEM0_CHAT_CACHE_KEY(wallet),
+      () => searchMemories('wallet', wallet,
+        'chat user preferences language support topics gate history',
+        { limit: 8 },
+      ),
+      MEM0_CHAT_TTL,
+    ) as Mem0Memory[];
 
     let language: string | null = null;
     const topics: string[] = [];
 
+    // Language name → ISO 639-1 code (for natural-language writes)
+    const LANG_NAMES: Record<string, string> = {
+      spanish: 'es', french: 'fr', portuguese: 'pt',
+      german: 'de', italian: 'it', hindi: 'hi', arabic: 'ar',
+    };
+
     for (const mem of memories) {
       const text = mem.memory || '';
-      // Extract language preference
-      const langMatch = text.match(/lang:(\w+)/);
-      if (langMatch) language = langMatch[1];
-      // Extract support topics
-      const topicMatch = text.match(/topic:(\w[\w\s]*)/);
-      if (topicMatch) topics.push(topicMatch[1].trim());
+
+      // ── Language detection ── (both structured and natural-language writes)
+      if (!language) {
+        // Structured: lang:es  (old format)
+        const structLang = text.match(/\blang:([a-z]{2})\b/);
+        if (structLang) { language = structLang[1]; }
+        else {
+          // Natural language: "User prefers Spanish", "communicates in French"
+          const nlLang = text.match(/(?:prefers?|communicates? in|speaks?|responded? in)\s+(\w+)/i);
+          if (nlLang) {
+            const word = nlLang[1].toLowerCase();
+            language = LANG_NAMES[word] ?? (word.length === 2 ? word : null);
+          }
+        }
+      }
+
+      // ── Topic detection ── (both structured and natural-language writes)
+      // Structured: topic:gate_failures  (old format)
+      const structTopic = text.match(/\btopic:([\w_]+)/);
+      if (structTopic) topics.push(structTopic[1]);
+
+      // Natural language topic inference from memory text
+      const NL_TOPICS: [RegExp, string][] = [
+        [/gate.{0,5}(\d+|fail|reject|block)/i,            'gate_failures'],
+        [/cooldown|how.{0,5}long|wait.*submit/i,           'cooldown'],
+        [/payout|sol\b|payment|when.{0,10}(get|receiv)/i, 'payout'],
+        [/tier|token|balance|hold/i,                       'tier_tokens'],
+        [/receipt|photo|pen|write.*receipt/i,              'receipt_help'],
+        [/tweet|hashtag|twitter|x\.com/i,                  'tweet_help'],
+        [/refer|invite|code/i,                             'referrals'],
+      ];
+      for (const [pat, topic] of NL_TOPICS) {
+        if (pat.test(text) && !topics.includes(topic)) topics.push(topic);
+      }
     }
 
     return { language, topics: [...new Set(topics)].slice(0, 5) };
@@ -214,13 +257,13 @@ async function fetchMem0Prefs(wallet: string): Promise<Mem0Prefs> {
 // ── Save detected preferences ────────────────────────────────────────────────
 
 /**
- * Detect and persist user preferences from a chat exchange.
- * Called once per session (rate-limited by the caller).
- * Fire-and-forget — never throws.
+ * Detect and persist user preferences from the first exchange of a session.
+ * Writes natural-language sentences so mem0's LLM extraction builds a richer
+ * semantic model than structured tags ever could.
  *
  * Detects:
- *   - Language: if the agent responded in a non-English language
- *   - Topics: gate failures, cooldown, payout, tier questions
+ *   - Language: non-English patterns in the assistant response
+ *   - Topics: gate failures, cooldown, payout, tier, receipt, tweet, referral
  */
 export async function saveUserPreferences(
   wallet: string,
@@ -231,42 +274,47 @@ export async function saveUserPreferences(
 
   const parts: string[] = [];
 
-  // Detect language from common non-English patterns in the assistant response
-  const langPatterns: [RegExp, string][] = [
-    [/\b(hola|cómo|puedes|necesitas|enviar)\b/i, 'es'],
-    [/\b(bonjour|comment|pouvez|envoyer)\b/i, 'fr'],
-    [/\b(olá|como|pode|enviar)\b/i, 'pt'],
-    [/\b(hallo|wie|können|senden)\b/i, 'de'],
-    [/\b(ciao|come|puoi|inviare)\b/i, 'it'],
+  // Language detection — from assistant response (more reliable than user text)
+  const LANG_PATTERNS: [RegExp, string][] = [
+    [/\b(hola|cómo|puedes|necesitas|enviar|gracias)\b/i,    'Spanish'],
+    [/\b(bonjour|comment|pouvez|envoyer|merci)\b/i,          'French'],
+    [/\b(olá|como|pode|enviar|obrigado)\b/i,                 'Portuguese'],
+    [/\b(hallo|wie|können|senden|danke)\b/i,                 'German'],
+    [/\b(ciao|come|puoi|inviare|grazie)\b/i,                 'Italian'],
+    [/\b(مرحبا|كيف|يمكنك|إرسال)\b/,                          'Arabic'],
+    [/\b(नमस्ते|कैसे|भेजें|धन्यवाद)\b/,                      'Hindi'],
   ];
-  for (const [pattern, code] of langPatterns) {
+  for (const [pattern, lang] of LANG_PATTERNS) {
     if (pattern.test(assistantText)) {
-      parts.push(`lang:${code}`);
+      parts.push(`User communicates in ${lang}`);
       break;
     }
   }
 
-  // Detect support topic from user question
-  const topicPatterns: [RegExp, string][] = [
-    [/gate.{0,5}\d+|gate.{0,10}(fail|reject|block)/i, 'gate_failures'],
-    [/cooldown|how.{0,5}long|wait/i, 'cooldown'],
-    [/payout|pay\b|sol\b|dispat|when.{0,10}(get|receive)/i, 'payout'],
-    [/tier|token|balance|hold/i, 'tier_tokens'],
-    [/receipt|photo|write|pen/i, 'receipt_help'],
-    [/tweet|twitter|x\.com|hashtag/i, 'tweet_help'],
+  // Topic detection — from user question
+  const TOPIC_PATTERNS: [RegExp, string][] = [
+    [/gate.{0,5}\d+|gate.{0,10}(fail|reject|block)/i,        'gate failures'],
+    [/cooldown|how.{0,5}long|wait.*submit/i,                  'cooldown timing'],
+    [/payout|pay\b|sol\b|dispat|when.{0,10}(get|receive)/i,  'payout questions'],
+    [/tier|token|balance|hold/i,                              'tier and tokens'],
+    [/receipt|photo|write|pen/i,                              'receipt help'],
+    [/tweet|twitter|x\.com|hashtag/i,                         'tweet help'],
+    [/refer|invite|code/i,                                    'referral program'],
   ];
-  for (const [pattern, topic] of topicPatterns) {
+  for (const [pattern, topic] of TOPIC_PATTERNS) {
     if (pattern.test(userText)) {
-      parts.push(`topic:${topic}`);
-      break; // one topic per exchange
+      parts.push(`Frequently asks about ${topic}`);
+      break;
     }
   }
 
   if (parts.length === 0) return;
 
   try {
+    // Natural language for mem0's LLM extraction — builds richer semantic
+    // user model than the old "lang:es | topic:gate_failures" tag format.
     await addMemory('wallet', wallet,
-      `chat_prefs | ${parts.join(' | ')}`,
+      parts.join('. ') + '.',
       { category: MEM0_CATEGORIES.MISC, appId: MEM0_APPS.SUBMIT },
     );
   } catch {

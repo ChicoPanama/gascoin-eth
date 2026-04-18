@@ -66,7 +66,9 @@ async function main() {
     apiKey,
     headers: { 'HTTP-Referer': 'https://gascoin.app', 'X-Title': 'GASCOIN-CacheSeed' },
   });
-  const model = openRouter.chat('nvidia/nemotron-3-super-120b-a12b:free');
+  // Gemma 4 — no reasoning capability = zero chain-of-thought leaks in cached responses.
+  const MODEL_T1  = openRouter.chat('google/gemma-4-26b-a4b-it:free');  // fast, 4B active
+  const MODEL_T23 = openRouter.chat('google/gemma-4-31b-it:free');       // deeper, full 31B
 
   const questions = QUESTIONS_1000;
   console.log(`\n  GASCOIN Cache Seed — ${questions.length} questions (starting at ${startIdx})\n`);
@@ -101,7 +103,7 @@ async function main() {
       const t0 = Date.now();
       try {
         const result = streamText({
-          model,
+          model: tier === 1 ? MODEL_T1 : MODEL_T23,
           system: systemPrompt,
           messages: [{ role: 'user' as const, content: q }],
           maxOutputTokens: maxTokens,

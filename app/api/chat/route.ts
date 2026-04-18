@@ -20,7 +20,7 @@ import {
 } from '../../../lib/chat-intent';
 import { buildChatTools } from '../../../lib/chat-tools';
 import { getChatCache, setChatCache } from '../../../lib/chat-cache';
-import { addMemory, MEM0_CATEGORIES, MEM0_APPS } from '../../../lib/mem0';
+import { addMemory, MEM0_CATEGORIES, MEM0_APPS, MEM0_AGENTS } from '../../../lib/mem0';
 import { getUserChatProfile, saveUserPreferences } from '../../../lib/chat-user-profile';
 
 export const runtime = 'nodejs';
@@ -673,9 +673,19 @@ export async function POST(req: Request) {
 
   // ── Tier 1: Simple — light model, mini prompt, no dynamic context ─────
   if (tier === 1) {
+    // For authenticated users inject language preference (cheap Redis read,
+    // 30-min cache) so non-English users get responses in their language
+    // even for simple questions that skip full T2/3 context enrichment.
+    let tier1System = MINI_SYSTEM_PROMPT;
+    if (wallet) {
+      const t1Profile = await getUserChatProfile(wallet).catch(() => null);
+      if (t1Profile?.preferredLanguage) {
+        tier1System = `${MINI_SYSTEM_PROMPT}\nUser's preferred language code: ${t1Profile.preferredLanguage}. Reply in that language.`;
+      }
+    }
     const result = streamText({
       model: TIER1_MODEL,
-      system: MINI_SYSTEM_PROMPT,
+      system: tier1System,
       messages,
       maxOutputTokens: 512,
       onError: ({ error }) => console.error('[chat/t1] error', (error as Error)?.name, (error as Error)?.message, JSON.stringify(error)),
@@ -724,29 +734,51 @@ export async function POST(req: Request) {
     onError: ({ error }) => console.error('[chat/t23] error', (error as Error)?.name, (error as Error)?.message, JSON.stringify(error)),
     onFinish: ({ text }) => {
       if (wallet && lastUserText && text) {
+        // ── Short-term: rolling Redis summary (2h TTL, in-session context) ──
         saveConvMemory(wallet, lastUserText, text).catch(() => {});
 
-        // Persist notable support interactions to mem0 so Claude oversight
-        // sees "user reported Gate X failure" or "user expressed frustration"
-        // during their next claim review. Fire-and-forget.
+        // ── Long-term: natural-language mem0 write on every exchange ─────────
+        // Writes a sentence pair that mem0's LLM extraction converts into
+        // persistent user memories (language, recurring topics, frustration
+        // patterns). These survive the 2-hour Redis TTL and compound across
+        // sessions — "user has asked about Gate 10 three times" emerges
+        // automatically from multiple writes.
+        //
+        // Format: natural language, not machine tags. mem0 builds a richer
+        // semantic model from "User asked about cooldown timing" than from
+        // "topic:cooldown".
+        //
+        // Security: only the agent's response is stored (model-generated, safe).
+        // Raw user text is never written — prevents prompt injection into mem0.
+        const tierLabel = userProfile?.tier ? `${userProfile.tier} tier` : 'GASCOIN';
+        const memLine = `${tierLabel} user asked: "${lastUserText.slice(0, 100)}". Agent: ${text.slice(0, 130)}`;
+        addMemory('wallet', wallet, memLine, {
+          category: MEM0_CATEGORIES.MISC,
+          agentId: MEM0_AGENTS.SUBMIT_PIPELINE,
+          appId: MEM0_APPS.SUBMIT,
+        }).catch(() => {});
+
+        // ── Intelligence aggregator signals (gate issues + frustration) ───────
+        // Additional tagged writes for Claude oversight — separate from the
+        // natural-language write so the aggregator can filter by signal type.
         const isGateIssue = /gate.{0,5}\d|reject|fail|block/i.test(lastUserText);
         const isFrustrated = /not.{0,5}work|broken|give.{0,5}up|still.{0,5}(fail|same)/i.test(lastUserText);
         if (isGateIssue || isFrustrated) {
           const tag = isFrustrated ? 'support:frustrated' : 'support:gate_issue';
-          // Only store the tag + assistant response (model-generated, safe).
-          // Never store raw user text — prevents prompt injection into mem0.
           addMemory('wallet', wallet,
             `${tag} | agent responded: ${text.slice(0, 200)}`,
             { category: MEM0_CATEGORIES.MISC, appId: MEM0_APPS.SUBMIT },
           ).catch(() => {});
         }
       }
-      // Save user preferences to mem0 on the first exchange of the session.
-      // Detects language, frequent topics. Rate-limited to first message only.
+      // ── First-exchange preference detection ───────────────────────────────
+      // Language + topic seeds that mem0 merges into the user profile.
+      // Rate-limited to first message — the per-exchange write above handles
+      // ongoing context accumulation.
       if (priorExchanges === 0) {
         saveUserPreferences(wallet, lastUserText, text).catch(() => {});
       }
-      // Cache Tier 2 responses when there's no wallet context (not personalized)
+      // ── Tier 2 response cache (no wallet = not personalized) ──────────────
       if (tier === 2 && !wallet && text) {
         setChatCache(lastUserText, text, 2).catch(() => {});
       }

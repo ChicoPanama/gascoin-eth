@@ -17,10 +17,10 @@ const PAGE_HINTS: Record<string, ChatPageHint> = {
 const AUTO_OPEN_PATHS = new Set(['/submit']);
 
 // Pages where the agent aligns left instead of right
-const ALIGN_LEFT_PATHS = new Set(['/welcome']);
+const ALIGN_LEFT_PATHS = new Set<string>();
 
 // Route prefixes where the agent should not appear
-const HIDDEN_PREFIXES = ['/admin'];
+const HIDDEN_PREFIXES = ['/admin', '/welcome'];
 
 export function GlobalChatAgent() {
   const pathname = usePathname();

@@ -12,9 +12,19 @@
  */
 
 import { searchKB, getKBEntry } from './knowledge-base';
-import { cacheGet, cacheSet } from './cache';
+import { cacheGet, cacheSet, cacheGetOrFetch } from './cache';
 import { getSupabaseAdmin } from './supabase';
-import { getCachedFlags, type CachedFlags } from './mem0';
+import { getCachedFlags, searchMemories, type CachedFlags, type Mem0Memory } from './mem0';
+
+// Shared Redis key for mem0 search results — both buildMem0Context and
+// fetchMem0Prefs (in chat-user-profile.ts) read from this key so only
+// one searchMemories API call is made per request, even in Promise.all.
+export const MEM0_CHAT_CACHE_KEY = (wallet: string) => `chat:mem0:${wallet}`;
+export const MEM0_CHAT_TTL = 300; // 5 minutes
+
+// mem0 categories safe to surface in the user-facing chat agent.
+// Excludes fraud_signals, referral_ring_flag, ban_state (detection internals).
+const MEM0_SAFE_CHAT = new Set(['misc', 'claim_verdict', 'payout_event', 'tier_change']);
 
 // KB categories safe to surface in the user-facing chat agent.
 // Includes treasury so the agent can answer payout queue questions.
@@ -143,32 +153,64 @@ export async function saveConvMemory(
 // ── 4. mem0 entity profile ────────────────────────────────────────────────────
 
 /**
- * Inject user's mem0 profile summary (trust trajectory, active flags) into
- * the system prompt. Uses getCachedFlags which reads from Redis (15-min TTL,
- * populated by the intelligence aggregator worker). Zero mem0 API calls.
+ * Inject user's mem0 profile into the system prompt.
  *
- * Never exposes fraud algorithm internals — only surfaces:
- *   - Trust trajectory (improving/stable/declining/new)
- *   - Active risk flags (ban state, ring flags) — so the agent knows
- *     to escalate to DM support instead of troubleshooting a banned user
+ * Two data sources run in parallel:
+ *   1. Redis flags (from intelligence aggregator, 15-min TTL) — trust trajectory,
+ *      risk flags, ban state. Fast path — zero mem0 API calls on hit.
+ *   2. Direct mem0 search (5-min Redis TTL, shared with fetchMem0Prefs) — chat
+ *      history, support interactions, claim verdicts. Surfaces persistent memory
+ *      for users whose aggregator cache is cold (new users, low-activity wallets).
+ *
+ * Categories never surfaced: fraud_signals, referral_ring_flag, ban_state,
+ * pipeline_anomaly (contain detection internals). Safe: misc, claim_verdict,
+ * payout_event, tier_change.
  */
 export async function buildMem0Context(wallet: string): Promise<string> {
   if (!wallet) return '';
   try {
-    const flags: CachedFlags | null = await getCachedFlags(wallet);
-    if (!flags) return ''; // no cached profile = new user or cold cache
+    const [flags, memories] = await Promise.all([
+      getCachedFlags(wallet).catch(() => null),
+      cacheGetOrFetch(
+        MEM0_CHAT_CACHE_KEY(wallet),
+        () => searchMemories('wallet', wallet,
+          'support chat history gate failures preferences payout cooldown tier',
+          { limit: 8 },
+        ),
+        MEM0_CHAT_TTL,
+      ).catch(() => [] as Mem0Memory[]),
+    ]);
 
-    const lines: string[] = ['\n\n[ACCOUNT INTELLIGENCE]'];
-    lines.push(`Trust: ${flags.trajectory}`);
-    if (flags.riskFlags.length > 0) {
-      // Sanitize flag names — never expose internal signal taxonomy to the LLM.
-      // The agent only needs to know the account is flagged, not why.
-      lines.push('Status: account flagged for review');
+    const parts: string[] = [];
+
+    // ── 1. Intelligence aggregator flags (Redis) ──────────────────────────
+    if (flags) {
+      parts.push(`Trust: ${flags.trajectory}`);
+      if (flags.riskFlags.length > 0) {
+        // Never expose internal signal names — just flag the account.
+        parts.push('Status: flagged for review');
+      }
+      if (flags.trustLevel === 'suspicious') {
+        parts.push('NOTE: Account flagged. Recommend DM @GasCoinApp on X for direct support.');
+      }
     }
-    if (flags.trustLevel === 'suspicious') {
-      lines.push('NOTE: This account is flagged. If they report issues, recommend DMing @GasCoinApp on X for direct support.');
+
+    // ── 2. Direct mem0 memories (chat history, verdicts, prefs) ──────────
+    const safe = (memories as Mem0Memory[])
+      .filter(m => {
+        const cat = String((m.metadata as Record<string, unknown>)?.category ?? '');
+        return !cat || MEM0_SAFE_CHAT.has(cat);
+      })
+      .filter(m => (m.memory || '').length > 8)
+      .slice(0, 5);
+
+    if (safe.length > 0) {
+      // Surface as inline history — agent gets persistent cross-session memory
+      parts.push('History: ' + safe.map(m => m.memory.slice(0, 140)).join(' | '));
     }
-    return lines.join('\n');
+
+    if (parts.length === 0) return '';
+    return `\n\n[ACCOUNT INTELLIGENCE]\n${parts.join('\n')}`;
   } catch {
     return '';
   }

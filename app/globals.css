@@ -9070,17 +9070,42 @@ button.docs-footer-link {
 /* ── Chat Agent ──────────────────────────────────────────────── */
 .chat-agent-fab {
   position: fixed; bottom: 24px;
-  width: 48px; height: 48px; border-radius: 50%;
-  background: #E7E9EA; color: #000;
-  font-size: 20px; font-weight: 700;
+  width: 56px; height: 56px; border-radius: 50%;
+  background: #E7E9EA;
   border: none; cursor: pointer; z-index: 1000;
   display: flex; align-items: center; justify-content: center;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.35);
   transition: transform 0.15s ease;
+  overflow: hidden;
+  padding: 0;
 }
-.chat-agent-fab:hover { transform: scale(1.08); }
+.chat-agent-fab:hover { transform: scale(1.1); }
 .chat-agent-fab--right { right: 24px; }
 .chat-agent-fab--left  { left: 24px; }
+
+/* Clippy images — portrait crop fits into circle */
+.chat-fab-clippy {
+  width: 100%; height: 100%;
+  object-fit: cover; object-position: center 15%;
+  display: block;
+  pointer-events: none;
+  user-select: none;
+}
+/* Light mode: black Clippy */
+.chat-fab-clippy--dark  { display: none; }
+.chat-fab-clippy--light { display: block; }
+@media (prefers-color-scheme: dark) {
+  .chat-agent-fab { background: #1a1a1a; }
+  .chat-fab-clippy--light { display: none; }
+  .chat-fab-clippy--dark  { display: block; }
+}
+/* Close icon when panel open */
+.chat-fab-close {
+  color: #000; font-size: 18px; font-weight: 700; line-height: 1;
+}
+@media (prefers-color-scheme: dark) {
+  .chat-fab-close { color: #fff; }
+}
 
 .chat-agent-panel {
   position: fixed; bottom: 84px;
