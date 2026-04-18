@@ -11,6 +11,7 @@ import {
 } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
 import { mainnet } from 'viem/chains';
+import { cacheGetOrFetch, cacheDel } from '../cache';
 
 const DECIMALS = parseInt(process.env.GASCOIN_DECIMALS || '18', 10);
 const SCALE = BigInt(10) ** BigInt(DECIMALS);
@@ -61,25 +62,38 @@ export async function bustTreasuryCache(): Promise<void> {
   _treasuryCache = null;
 }
 
-/** Clears the treasury balance cache for a given wallet (wallet arg kept for API compatibility) */
-export async function bustBalanceCache(_wallet?: string): Promise<void> {
-  _treasuryCache = null;
+/** Clears the Redis balance cache for a specific wallet (call after a payout to that wallet) */
+export async function bustBalanceCache(wallet?: string): Promise<void> {
+  if (wallet && isAddress(wallet)) {
+    const contract = process.env.GASCOIN_CONTRACT_ADDRESS ?? '';
+    await cacheDel(`balance:${wallet.toLowerCase()}:${contract.toLowerCase()}`);
+  }
 }
 
-/** Raw token balance divided by decimals = whole token count */
+const BALANCE_CACHE_TTL = 75; // seconds — balances change slowly; ~80% Alchemy CU reduction
+
+/** Raw token balance divided by decimals = whole token count. Redis-cached for 75 s. */
 export async function getWalletGascoinBalance(walletAddress: string): Promise<number> {
   if (!isAddress(walletAddress)) return 0;
-  try {
-    const raw = await getPublicClient().readContract({
-      address: getContractAddress(),
-      abi: ERC20_ABI,
-      functionName: 'balanceOf',
-      args: [walletAddress as Address],
-    });
-    return Number(raw) / Number(SCALE);
-  } catch {
-    return 0;
-  }
+  const contract = process.env.GASCOIN_CONTRACT_ADDRESS ?? '';
+  const cacheKey = `balance:${walletAddress.toLowerCase()}:${contract.toLowerCase()}`;
+  return cacheGetOrFetch(
+    cacheKey,
+    async () => {
+      try {
+        const raw = await getPublicClient().readContract({
+          address: getContractAddress(),
+          abi: ERC20_ABI,
+          functionName: 'balanceOf',
+          args: [walletAddress as Address],
+        });
+        return Number(raw) / Number(SCALE);
+      } catch {
+        return 0;
+      }
+    },
+    BALANCE_CACHE_TTL,
+  );
 }
 
 export async function hasMinimumGascoin(
