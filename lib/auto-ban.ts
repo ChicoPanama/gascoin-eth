@@ -13,9 +13,12 @@ import { writeBanState } from './mem0';
  * Admins can always unban manually via the user_bans table.
  */
 
-const REJECT_THRESHOLD_30D = 5;      // 5 rejections in 30 days = pattern, not mistakes
-const DUPLICATE_THRESHOLD = 3;       // 3 duplicate receipt attempts = deliberate reuse
-const LIFETIME_REJECT_THRESHOLD = 10; // 10 lifetime rejections = serial bad actor
+const REJECT_THRESHOLD_30D = 5;        // 5 rejections in 30 days = pattern, not mistakes
+const DUPLICATE_THRESHOLD = 3;         // 3 duplicate receipt attempts = deliberate reuse
+const LIFETIME_REJECT_THRESHOLD = 10;  // 10 lifetime rejections = serial bad actor
+// Accounts with zero approvals are more likely farming. Apply tighter windows.
+const REJECT_THRESHOLD_14D_ZERO_APPROVALS = 3; // 3 rejections in 14 days with no approved history
+const NEEDS_REVIEW_THRESHOLD_14D = 5;  // 5 needs_review flags in 14 days = repeated near-misses
 
 export async function checkAndAutoBan(
   userId: string,
@@ -35,6 +38,7 @@ export async function checkAndAutoBan(
   if (existing) return { banned: true, reason: 'already_banned' };
 
   const thirtyDaysAgo = new Date(Date.now() - 30 * 86400000).toISOString();
+  const fourteenDaysAgo = new Date(Date.now() - 14 * 86400000).toISOString();
 
   // Count rejected claims in last 30 days
   const { count: recentRejects } = await supabase
@@ -60,6 +64,29 @@ export async function checkAndAutoBan(
     .eq('user_id', userId)
     .eq('status', 'rejected');
 
+  // Lifetime approvals — used to tighten thresholds for zero-approval accounts
+  const { count: lifetimeApprovals } = await supabase
+    .from('claims')
+    .select('*', { count: 'exact', head: true })
+    .eq('user_id', userId)
+    .in('status', ['approved', 'paid', 'ready_for_dispatch']);
+
+  // Repeated near-misses: needs_review flags in last 14 days
+  const { count: recentNeedsReview14d } = await supabase
+    .from('claims')
+    .select('*', { count: 'exact', head: true })
+    .eq('user_id', userId)
+    .eq('status', 'needs_review')
+    .gte('created_at', fourteenDaysAgo);
+
+  // Rejections in last 14 days (tighter window for zero-approval accounts)
+  const { count: recentRejects14d } = await supabase
+    .from('claims')
+    .select('*', { count: 'exact', head: true })
+    .eq('user_id', userId)
+    .eq('status', 'rejected')
+    .gte('created_at', fourteenDaysAgo);
+
   let banReason: string | null = null;
 
   if ((recentRejects ?? 0) >= REJECT_THRESHOLD_30D) {
@@ -68,6 +95,10 @@ export async function checkAndAutoBan(
     banReason = `auto_ban: ${dupeAttempts} duplicate receipt attempts (threshold: ${DUPLICATE_THRESHOLD})`;
   } else if ((lifetimeRejects ?? 0) >= LIFETIME_REJECT_THRESHOLD) {
     banReason = `auto_ban: ${lifetimeRejects} lifetime rejections (threshold: ${LIFETIME_REJECT_THRESHOLD})`;
+  } else if ((lifetimeApprovals ?? 0) === 0 && (recentRejects14d ?? 0) >= REJECT_THRESHOLD_14D_ZERO_APPROVALS) {
+    banReason = `auto_ban: ${recentRejects14d} rejections in 14 days with zero approvals (threshold: ${REJECT_THRESHOLD_14D_ZERO_APPROVALS})`;
+  } else if ((recentNeedsReview14d ?? 0) >= NEEDS_REVIEW_THRESHOLD_14D) {
+    banReason = `auto_ban: ${recentNeedsReview14d} needs_review flags in 14 days — repeated near-misses (threshold: ${NEEDS_REVIEW_THRESHOLD_14D})`;
   }
 
   if (!banReason) return { banned: false };
@@ -90,8 +121,11 @@ export async function checkAndAutoBan(
       reason: banReason,
       trigger: reason,
       recentRejects: recentRejects ?? 0,
+      recentRejects14d: recentRejects14d ?? 0,
+      recentNeedsReview14d: recentNeedsReview14d ?? 0,
       dupeAttempts: dupeAttempts ?? 0,
       lifetimeRejects: lifetimeRejects ?? 0,
+      lifetimeApprovals: lifetimeApprovals ?? 0,
     },
   });
 

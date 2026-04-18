@@ -522,30 +522,53 @@ export async function POST(req: Request){
     return NextResponse.json({ ok:false, error:'receipt_insert_failed', claimId }, { status: 500 });
   }
 
-  if (result.gates.length) {
-    const gateRows = result.gates.map((g) => ({
+  const gateRows = result.gates.map((g) => ({
+    claim_id: claimId,
+    gate_name: g.gate,
+    passed: g.passed,
+    score: g.score ?? null,
+    reason_code: g.reason ?? null
+  }));
+  // R4: Content fingerprint duplicate is a soft gate. Same physical receipt from a
+  // different camera angle passes hash/pHash dedup but should still be human-reviewed.
+  if (contentFingerprintDuplicate) {
+    gateRows.push({
       claim_id: claimId,
-      gate_name: g.gate,
-      passed: g.passed,
-      score: g.score ?? null,
-      reason_code: g.reason ?? null
-    }));
+      gate_name: 'content_fingerprint_duplicate',
+      passed: false,
+      score: null,
+      reason_code: 'same_receipt_date_amount_other_wallet',
+    });
+  }
+  if (gateRows.length) {
     await supabase.from('gate_results').insert(gateRows);
   }
 
+  // Bump auto-approved claims to needs_review when content fingerprint matches.
+  // Claims already hard-rejected keep that status.
+  const finalDecision: typeof result.decision =
+    contentFingerprintDuplicate && result.decision === 'ready_for_dispatch'
+      ? 'needs_review'
+      : result.decision;
+
+  const failedGateNames = [
+    ...result.failed.map((f: { gate: string }) => f.gate),
+    ...(contentFingerprintDuplicate ? ['content_fingerprint_duplicate'] : []),
+  ];
+
   await supabase.from('claims').update({
-    status: result.decision,
+    status: finalDecision,
     updated_at: new Date().toISOString(),
-    decision_reason: result.failed.map(f => f.gate).join(',') || 'auto_approved'
+    decision_reason: failedGateNames.join(',') || 'auto_approved'
   }).eq('id', claimId);
 
   await supabase.from('claim_status_events').insert({
     claim_id: claimId,
     from_status: 'submitted',
-    to_status: result.decision,
+    to_status: finalDecision,
     actor_type: 'system',
     actor_id: 'gate_engine',
-    reason: result.failed.map(f => f.gate).join(',') || 'auto_approved'
+    reason: failedGateNames.join(',') || 'auto_approved'
   });
 
   await supabase.from('audit_logs').insert({
@@ -558,7 +581,7 @@ export async function POST(req: Request){
       tweetUrl,
       wallet,
       riskScore: result.riskScore,
-      decision: result.decision,
+      decision: finalDecision,
       duplicateHash,
       duplicatePhash,
       ...(contentFingerprintDuplicate ? { contentFingerprintDuplicate: true } : {}),

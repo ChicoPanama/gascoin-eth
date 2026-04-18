@@ -66,12 +66,12 @@ describe('checkAndAutoBan — 30-day reject threshold', () => {
   });
 
   it('does NOT ban when rejections are below threshold (4 in 30d)', async () => {
-    // Seed 4 rejected claims with recent dates (< 30 days)
+    // Seed 4 rejected claims 15–18 days ago (within 30d but outside 14d zero-approval window)
     const recentClaims = Array.from({ length: 4 }, (_, i) => ({
       id: `claim-${i}`,
       user_id: USER_ID,
       status: 'rejected',
-      created_at: new Date(Date.now() - i * 86400000).toISOString(),
+      created_at: new Date(Date.now() - (15 + i) * 86400000).toISOString(),
     }));
     mockStore.seed('claims', recentClaims);
     mockStore.seed('audit_logs', []);

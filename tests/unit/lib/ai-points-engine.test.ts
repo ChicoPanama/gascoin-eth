@@ -444,7 +444,7 @@ describe('verifyPointAward — pre-award verification gate', () => {
     expect(result.holdForReview).toBe(true);
   });
 
-  it('veteran wallet: daily velocity flag but NOT held for review', async () => {
+  it('veteran wallet: exceeds 200K cap is flagged AND held', async () => {
     vi.mocked(generateAIText).mockResolvedValue({
       ok: true,
       text: '{"block":false,"reduce":false,"multiplier":1.0,"reason":"veteran ok"}',
@@ -455,14 +455,14 @@ describe('verifyPointAward — pre-award verification gate', () => {
       source: 'submission_approved',
       rawPoints: 5000,
       metadata: {},
-      walletTrust: VETERAN_WALLET, // veteran bypasses velocity hold
-      totalPointsToday: 46000,
+      walletTrust: VETERAN_WALLET,
+      totalPointsToday: 196000, // 196K + 6K (5K×1.2) = 202K > 200K veteran cap
       totalPointsAllTime: 500000,
     });
 
     expect(result.flags).toContain('daily_velocity_high');
-    expect(result.holdForReview).toBe(false);
-    expect(result.approved).toBe(true);
+    expect(result.holdForReview).toBe(true);
+    expect(result.approved).toBe(false);
   });
 });
 

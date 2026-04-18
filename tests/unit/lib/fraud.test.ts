@@ -20,7 +20,9 @@ vi.mock('@/lib/integrations/ai-gateway', () => ({
 
 vi.mock('@/lib/prompts', () => ({
   getSystemPrompt: vi.fn().mockResolvedValue('system prompt'),
+  getThreshold: vi.fn().mockImplementation((_key: string, fallback: number) => Promise.resolve(fallback)),
   PROMPT_KEYS: { GROK_FRAUD: 'grok_fraud' },
+  THRESHOLD_KEYS: { AI_SCORE: 'threshold_ai_score', TAMPER_SCORE: 'threshold_tamper_score', FLAGS_COUNT: 'threshold_flags_count', MIN_QUALITY: 'threshold_min_account_quality' },
 }));
 
 vi.mock('@/lib/mem0', () => ({

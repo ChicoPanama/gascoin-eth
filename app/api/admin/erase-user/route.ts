@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { requireReviewer } from '../../../../lib/reviewer-auth';
 import { getSupabaseAdmin } from '../../../../lib/supabase';
+import { deleteEntityMemories } from '../../../../lib/mem0';
 
 /**
  * POST /api/admin/erase-user
@@ -56,7 +57,7 @@ export async function POST(req: Request) {
   // ── Step 0: Resolve wallet if not provided ──────────────────────────────────
   let resolvedWallet = wallet?.trim() || null;
   if (!resolvedWallet) {
-    // Try to fetch from wallet_x_links or claims
+    // Try claims first (most likely source)
     const { data: claimRow } = await supabase
       .from('claims')
       .select('wallet')
@@ -64,6 +65,34 @@ export async function POST(req: Request) {
       .limit(1)
       .maybeSingle();
     resolvedWallet = claimRow?.wallet || null;
+  }
+  if (!resolvedWallet) {
+    // Fallback: wallet_links table
+    const { data: linkRow } = await supabase
+      .from('wallet_links')
+      .select('wallet')
+      .eq('user_id', user_id)
+      .eq('is_primary', true)
+      .limit(1)
+      .maybeSingle();
+    resolvedWallet = linkRow?.wallet || null;
+  }
+  if (!resolvedWallet) {
+    // Last resort: wallet_x_links keyed by x_user_id via users table
+    const { data: userRow } = await supabase
+      .from('users')
+      .select('x_user_id')
+      .eq('id', user_id)
+      .maybeSingle();
+    if (userRow?.x_user_id) {
+      const { data: wxLink } = await supabase
+        .from('wallet_x_links')
+        .select('wallet')
+        .eq('x_user_id', userRow.x_user_id)
+        .limit(1)
+        .maybeSingle();
+      resolvedWallet = wxLink?.wallet || null;
+    }
   }
 
   const erased: Record<string, number> = {
@@ -73,10 +102,13 @@ export async function POST(req: Request) {
     engagement_points: 0,
     scored_tweets: 0,
     wallet_x_links: 0,
+    wallet_token_cache: 0,
+    user_metrics_history: 0,
     user_bans: 0,
     users: 0,
     referrals: 0,
     referral_conversions: 0,
+    mem0_memories: 0,
   };
 
   // ── Step 1 & 2: Find claim_ids → delete claim_receipts + gate_results ───────
@@ -126,6 +158,18 @@ export async function POST(req: Request) {
     // 6. wallet_x_links
     await supabase.from('wallet_x_links').delete().eq('wallet', resolvedWallet);
     erased.wallet_x_links = 1;
+
+    // 6a. wallet_token_cache
+    await supabase.from('wallet_token_cache').delete().eq('wallet', resolvedWallet);
+    erased.wallet_token_cache = 1;
+
+    // 6b. user_metrics_history
+    await supabase.from('user_metrics_history').delete().eq('wallet', resolvedWallet);
+    erased.user_metrics_history = 1;
+
+    // 6c. mem0 entity memories (GDPR: delete all AI memory for this wallet)
+    const mem0Result = await deleteEntityMemories('wallet', resolvedWallet).catch(() => ({ deleted: 0 }));
+    erased.mem0_memories = mem0Result.deleted;
   }
 
   // 7. user_bans

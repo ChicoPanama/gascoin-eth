@@ -1,5 +1,15 @@
 // @vitest-environment node
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+
+vi.mock('@/lib/integrations/ai-gateway', () => ({
+  isAiGatewayAvailable: vi.fn().mockReturnValue(true),
+  generateAIText: vi.fn().mockResolvedValue({
+    ok: true,
+    text: '{"block":false,"reduce":false,"multiplier":1.0,"reason":"ok"}',
+  }),
+  AI_MODELS: { GROK: 'grok-3', GEMINI_FAST: 'gemini-flash', GEMINI_VISION: 'gemini-pro-vision' },
+}));
+
 import { calculateEngagementPoints, POINTS_CONFIG } from '@/lib/engagement-rewards';
 import { scoreTweetQuality, calculateWalletTrust, verifyPointAward, type TweetQualityScore, type WalletTrustScore } from '@/lib/ai-points-engine';
 
@@ -200,18 +210,18 @@ describe('User Flow: Sign in → Tweet → Engagement Points', () => {
       expect(result.flags).toContain('daily_velocity_high');
     });
 
-    it('daily velocity >50K does NOT hold veteran', async () => {
+    it('daily velocity >50K but below 200K cap does NOT flag or hold veteran', async () => {
       const result = await verifyPointAward({
         wallet: 'GAsVeteranHigh11111111111111111111111111111111',
         source: 'tweet_engagement',
         rawPoints: 5000,
         metadata: {},
         walletTrust: veteranTrust,
-        totalPointsToday: 48000,
+        totalPointsToday: 48000, // 48K + 6K (5K×1.2) = 54K < 200K veteran cap
         totalPointsAllTime: 500000,
       });
-      // Veteran: flagged but NOT held
-      expect(result.flags).toContain('daily_velocity_high');
+      // Veteran: below 200K cap — no velocity flag, not held
+      expect(result.flags).not.toContain('daily_velocity_high');
       expect(result.holdForReview).toBe(false);
     });
   });

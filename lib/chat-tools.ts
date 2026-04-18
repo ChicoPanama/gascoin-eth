@@ -35,23 +35,20 @@ function getTierInfo(balance: number) {
 
 /**
  * Build the tools object for streamText.
- * `sessionWallet` is the Privy-verified wallet from the session;
- * tools accept an optional override so Claude can look up specific wallets.
+ * `sessionWallet` is the Privy-verified wallet from the session.
+ * All tools are scoped to the session wallet only — no wallet override
+ * parameter is accepted to prevent cross-wallet data enumeration.
  */
 export function buildChatTools(sessionWallet: string) {
   return {
     // ── Cooldown check ────────────────────────────────────────────────────
     checkCooldown: tool({
       description:
-        'Check when a user can submit their next GASCOIN claim based on cooldown. ' +
+        'Check when the connected user can submit their next GASCOIN claim based on cooldown. ' +
         'Use when the user asks about cooldown, how long they have to wait, or when they can submit next.',
-      inputSchema: z.object({
-        wallet: z.string().optional().describe(
-          'Solana wallet address. Defaults to the connected session wallet.'
-        ),
-      }),
-      execute: async ({ wallet: w }) => {
-        const target = (w || sessionWallet || '').trim();
+      inputSchema: z.object({}),
+      execute: async () => {
+        const target = sessionWallet.trim();
         if (!target) return { error: 'No wallet address available.' };
 
         try {
@@ -172,13 +169,11 @@ export function buildChatTools(sessionWallet: string) {
     // ── Claim status ──────────────────────────────────────────────────────
     getClaimStatus: tool({
       description:
-        'Get the current status and gate results for the user\'s most recent claim. ' +
+        'Get the current status and gate results for the connected user\'s most recent claim. ' +
         'Use when the user asks what happened to their submission, which gates failed, or why they were rejected.',
-      inputSchema: z.object({
-        wallet: z.string().optional().describe('Solana wallet address. Defaults to session wallet.'),
-      }),
-      execute: async ({ wallet: w }) => {
-        const target = (w || sessionWallet || '').trim();
+      inputSchema: z.object({}),
+      execute: async () => {
+        const target = sessionWallet.trim();
         if (!target) return { error: 'No wallet address available.' };
 
         try {
@@ -237,13 +232,11 @@ export function buildChatTools(sessionWallet: string) {
     // ── Token tier ────────────────────────────────────────────────────────
     checkTokenTier: tool({
       description:
-        'Check a wallet\'s $GASCOIN token balance and determine their current tier. ' +
+        'Check the connected user\'s $GASCOIN token balance and determine their current tier. ' +
         'Use when the user asks about their tier, token balance, or how many submissions per week they get.',
-      inputSchema: z.object({
-        wallet: z.string().optional().describe('Solana wallet address. Defaults to session wallet.'),
-      }),
-      execute: async ({ wallet: w }) => {
-        const target = (w || sessionWallet || '').trim();
+      inputSchema: z.object({}),
+      execute: async () => {
+        const target = sessionWallet.trim();
         if (!target) return { error: 'No wallet address available.' };
 
         try {
