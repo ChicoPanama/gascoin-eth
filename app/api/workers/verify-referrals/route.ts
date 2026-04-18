@@ -5,6 +5,7 @@ import { calculateWalletTrust, detectReferralRing, awardVerifiedPoints } from '.
 import { isAuthorizedCron as isAuthorized } from '../../../../lib/cron-auth';
 import { writeReferralRingFlag } from '../../../../lib/mem0';
 import { writeIntelligence } from '../../../../lib/knowledge-base';
+import { chunkedIn } from '../../../../lib/supabase-utils';
 
 // Worker: auto-verify referrals + award POINTS (not SOL)
 // SOL payouts are for gas receipts ONLY
@@ -34,11 +35,13 @@ export async function POST(req: Request) {
     let heldForReview = 0;
 
     // Batch: pre-fetch all paid payouts for referred wallets in one query
-    const referredWallets = [...new Set((pending || []).map((r: any) => r.referred_wallet))];
-    const { data: paidPayouts } = referredWallets.length > 0
-      ? await supabase.from('payouts').select('wallet').eq('status', 'paid').in('wallet', referredWallets)
-      : { data: [] };
-    const paidWalletSet = new Set((paidPayouts || []).map((p: any) => p.wallet));
+    const referredWallets = [...new Set((pending || []).map((r: any) => r.referred_wallet))] as string[];
+    const paidPayouts = await chunkedIn<{ wallet: string }>(
+      () => supabase.from('payouts').select('wallet').eq('status', 'paid'),
+      'wallet',
+      referredWallets,
+    );
+    const paidWalletSet = new Set(paidPayouts.map((p) => p.wallet));
 
     for (const ref of pending || []) {
       if (!paidWalletSet.has(ref.referred_wallet)) continue;

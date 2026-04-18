@@ -8,6 +8,8 @@
  * - Engagement quality trending per user
  */
 
+import { silentLog } from './silent-log';
+
 /** Record gas price data from OCR extraction into gas_city_prices table. */
 export async function recordGasPrice(
   supabase: any,
@@ -29,8 +31,8 @@ export async function recordGasPrice(
       amount_usd: data.amountUsd,
       source: 'submission_ocr',
     });
-  } catch {
-    // Non-blocking
+  } catch (err) {
+    silentLog(err, { module: 'data-intelligence', operation: 'recordGasPrice' });
   }
 }
 
@@ -83,7 +85,8 @@ export async function getTypicalGasPrice(
       : amounts[mid];
 
     return { median, sampleSize: amounts.length };
-  } catch {
+  } catch (err) {
+    silentLog(err, { module: 'data-intelligence', operation: 'getTypicalGasPrice', extra: { country } });
     return { median: null, sampleSize: 0 };
   }
 }
@@ -107,8 +110,8 @@ export async function snapshotTreasury(
       gascoin_balance: balances.gascoinBalance,
       gascoin_usd_value: balances.gascoinUsd,
     });
-  } catch {
-    // Non-blocking
+  } catch (err) {
+    silentLog(err, { module: 'data-intelligence', operation: 'snapshotTreasury' });
   }
 }
 
@@ -131,37 +134,29 @@ export async function detectStationPattern(
 ): Promise<{ suspicious: boolean; matchCount: number; signal: string }> {
   if (!ocrText || ocrText.length < 20) return { suspicious: false, matchCount: 0, signal: 'insufficient_ocr' };
 
-  try {
-    const weekAgo = new Date(Date.now() - 7 * 86400000).toISOString();
+  const stationName = extractStationName(ocrText);
+  if (!stationName) return { suspicious: false, matchCount: 0, signal: 'no_station_name' };
 
-    // Get recent receipts from OTHER wallets with their OCR text
-    const { data, error } = await supabase
-      .from('claim_receipts')
-      .select('claim_id, ocr_text, claims!inner(wallet, created_at)')
-      .gte('claims.created_at', weekAgo)
-      .neq('claims.wallet', wallet)
-      .limit(100);
+  try {
+    // Similarity match pushed into Postgres — pg_trgm is already enabled.
+    // Replaces the old JS loop that pulled 100 rows and compared in-process.
+    const { data, error } = await supabase.rpc('find_similar_stations', {
+      p_wallet: wallet,
+      p_station_name: stationName,
+      p_since: new Date(Date.now() - 7 * 86400000).toISOString(),
+      p_similarity_threshold: 0.6,
+    });
 
     if (error || !data) return { suspicious: false, matchCount: 0, signal: 'query_error' };
 
-    // Extract first line of OCR (usually station name) and compare
-    const thisStation = extractStationName(ocrText);
-    if (!thisStation) return { suspicious: false, matchCount: 0, signal: 'no_station_name' };
-
-    const matchingWallets = new Set<string>();
-    for (const row of data) {
-      const otherStation = extractStationName(row.ocr_text || '');
-      if (otherStation && isSameStation(thisStation, otherStation)) {
-        matchingWallets.add((row as any).claims?.wallet);
-      }
-    }
-
+    const matchingWallets = data.length;
     return {
-      suspicious: matchingWallets.size >= 2, // 2 other wallets + this one = 3 total
-      matchCount: matchingWallets.size + 1,
-      signal: matchingWallets.size >= 2 ? `same_station:${thisStation}` : 'unique',
+      suspicious: matchingWallets >= 2,
+      matchCount: matchingWallets + 1,
+      signal: matchingWallets >= 2 ? `same_station:${stationName}` : 'unique',
     };
-  } catch {
+  } catch (err) {
+    silentLog(err, { module: 'data-intelligence', operation: 'detectStationPattern', wallet });
     return { suspicious: false, matchCount: 0, signal: 'error' };
   }
 }
@@ -196,7 +191,6 @@ function isSameStation(a: string, b: string): boolean {
 export async function updateQualityTrend(
   supabase: any,
   wallet: string,
-  latestQualityScore: number,
 ): Promise<void> {
   try {
     // Fetch last 10 quality scores for this wallet
@@ -216,7 +210,7 @@ export async function updateQualityTrend(
       .from('wallet_x_links')
       .update({ avg_quality_score: Math.round(avg * 100) / 100 })
       .eq('wallet', wallet);
-  } catch {
-    // Non-blocking
+  } catch (err) {
+    silentLog(err, { module: 'data-intelligence', operation: 'updateQualityTrend', wallet });
   }
 }

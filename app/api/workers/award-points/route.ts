@@ -6,6 +6,7 @@ import { detectReferralRing, calculateWalletTrust, generateAuditSummary, awardVe
 import { isAuthorizedCron as isAuthorized } from '../../../../lib/cron-auth';
 import { addMemory } from '../../../../lib/mem0';
 import { writeIntelligence } from '../../../../lib/knowledge-base';
+import { chunkedIn } from '../../../../lib/supabase-utils';
 
 // ═══════════════════════════════════════════
 // Daily Points Worker
@@ -65,6 +66,48 @@ export async function POST(req: Request) {
       .select('id, wallet, claim_id, created_at')
       .eq('status', 'paid');
 
+    // Pull holdings + referral conversions up front so we can pre-aggregate
+    // engagement_points totals for every wallet this run will touch. Without
+    // this, each awardVerifiedPoints call fires 2-3 SELECTs per wallet — an
+    // N+1 storm across submissions + streak + holdings + passive referrals.
+    const { data: cachedWalletsPre } = await supabase
+      .from('wallet_token_cache')
+      .select('wallet_address, gascoin_balance, tier_id');
+
+    const { data: allConversionsPre } = await supabase
+      .from('referral_conversions')
+      .select('referrer_wallet, referred_wallet')
+      .eq('status', 'verified');
+
+    const walletsUnion = new Set<string>();
+    for (const p of paidPayouts || []) walletsUnion.add(p.wallet);
+    for (const c of cachedWalletsPre || []) walletsUnion.add(c.wallet_address);
+    for (const r of allConversionsPre || []) walletsUnion.add(r.referrer_wallet);
+
+    const monthStart = `${todayKey.slice(0, 7)}-01T00:00:00Z`;
+    const todayStart = `${todayKey}T00:00:00Z`;
+    const pointTotalsCache = new Map<string, { today: number; allTime: number; month: number }>();
+
+    if (walletsUnion.size > 0) {
+      type PtRow = { wallet: string; points: number; source: string; created_at: string };
+      const allPoints = await chunkedIn<PtRow>(
+        () => supabase.from('engagement_points').select('wallet, points, source, created_at'),
+        'wallet',
+        [...walletsUnion],
+      );
+      for (const pt of allPoints) {
+        const cur = pointTotalsCache.get(pt.wallet) || { today: 0, allTime: 0, month: 0 };
+        const pts = Number(pt.points || 0);
+        cur.allTime += pts;
+        if (pt.created_at >= todayStart) cur.today += pts;
+        if (pt.created_at >= monthStart && pt.source === 'tweet_engagement') cur.month += pts;
+        pointTotalsCache.set(pt.wallet, cur);
+      }
+    }
+
+    const zeroTotals = { today: 0, allTime: 0, month: 0 };
+    const getTotals = (wallet: string) => pointTotalsCache.get(wallet) || zeroTotals;
+
     for (const payout of paidPayouts || []) {
       // Check if already awarded
       const { data: existing } = await supabase
@@ -87,6 +130,7 @@ export async function POST(req: Request) {
         rawPoints: POINTS_CONFIG.POINTS_PER_APPROVED_SUBMISSION,
         metadata: { claim_id: payout.claim_id, payout_id: payout.id, awarded_date: todayKey },
         walletTrust: subTrust,
+        precomputedTotals: getTotals(payout.wallet),
       });
       if (subResult.awarded) submissionPointsAwarded += subResult.points;
       if (subResult.heldForReview) heldCount++;
@@ -148,6 +192,7 @@ export async function POST(req: Request) {
           rawPoints: streakPoints,
           metadata: { consecutive_windows: consecutiveWindows, awarded_date: todayKey },
           walletTrust: streakTrust,
+          precomputedTotals: getTotals(wallet),
         });
         if (streakResult.awarded) streakPointsAwarded += streakResult.points;
         if (streakResult.heldForReview) heldCount++;
@@ -156,9 +201,7 @@ export async function POST(req: Request) {
 
     // ─── 3. HOLDINGS BONUS ───
     // Award tier-based daily points to all cached wallets
-    const { data: cachedWallets } = await supabase
-      .from('wallet_token_cache')
-      .select('wallet_address, gascoin_balance, tier_id');
+    const cachedWallets = cachedWalletsPre;
 
     const tierPointsMap: Record<number, number> = {
       0: POINTS_CONFIG.POINTS_PER_CYCLE_STANDARD,
@@ -209,6 +252,7 @@ export async function POST(req: Request) {
         rawPoints: verifiedPoints,
         metadata: { tier_id: cached.tier_id, gascoin_balance: cached.gascoin_balance, awarded_date: todayKey, verified_onchain: true },
         walletTrust: holdTrust,
+        precomputedTotals: getTotals(cached.wallet_address),
       });
       if (holdResult.awarded) holdingsPointsAwarded += holdResult.points;
       if (holdResult.heldForReview) heldCount++;
@@ -220,10 +264,7 @@ export async function POST(req: Request) {
     let referralPassiveAwarded = 0;
 
     const thirtyDaysAgo = new Date(Date.now() - 30 * 86400000).toISOString();
-    const { data: allConversions } = await supabase
-      .from('referral_conversions')
-      .select('referrer_wallet, referred_wallet')
-      .eq('status', 'verified');
+    const allConversions = allConversionsPre;
 
     if (allConversions && allConversions.length > 0) {
       // Group by referrer
@@ -285,6 +326,7 @@ export async function POST(req: Request) {
             awarded_date: todayKey,
           },
           walletTrust: passiveTrust,
+          precomputedTotals: getTotals(referrerWallet),
         });
 
         if (passiveResult.awarded) referralPassiveAwarded += passiveResult.points;

@@ -149,7 +149,10 @@ export async function cacheSetIsMember(key: string, member: string): Promise<boo
   }
 }
 
-/** Replace a set's contents atomically: delete old, add new members, set TTL.
+/** Replace a set's contents atomically: build into a staging key, then RENAME
+ * onto the destination. Prevents the empty-set window that existed between
+ * DEL and the first SADD — SISMEMBER callers (e.g. follows_gascoin gate)
+ * would otherwise see false negatives during a rebuild.
  * Returns the count added, or -1 on failure. */
 export async function cacheSetReplace(
   key: string,
@@ -159,19 +162,33 @@ export async function cacheSetReplace(
   const client = getRedis();
   if (!client) return -1;
   const prefixed = `gc:${key}`;
+
+  // Empty-members special case: RENAME requires the source key to exist, so
+  // fall back to a plain DEL rather than building an empty staging key.
+  if (members.length === 0) {
+    try {
+      await client.del(prefixed);
+      return 0;
+    } catch {
+      return -1;
+    }
+  }
+
+  const tempKey = `gc:${key}:_staging_${Date.now()}`;
   try {
-    await client.del(prefixed);
-    // SADD in chunks to avoid oversized requests (Upstash REST has a size cap).
     const CHUNK = 500;
     for (let i = 0; i < members.length; i += CHUNK) {
       const slice = members.slice(i, i + CHUNK);
       if (slice.length > 0) {
-        await client.sadd(prefixed, slice[0], ...slice.slice(1));
+        await client.sadd(tempKey, slice[0], ...slice.slice(1));
       }
     }
+    // Atomic swap — RENAME replaces the destination key instantly.
+    await client.rename(tempKey, prefixed);
     if (ttlSeconds > 0) await client.expire(prefixed, ttlSeconds);
     return members.length;
   } catch {
+    try { await client.del(tempKey); } catch {}
     return -1;
   }
 }

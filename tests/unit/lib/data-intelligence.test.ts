@@ -20,6 +20,7 @@ function makeSupabase(overrides: Record<string, any> = {}) {
     order: vi.fn().mockReturnThis(),
     limit: vi.fn().mockResolvedValue({ data: [], error: null }),
     update: vi.fn().mockReturnThis(),
+    rpc: vi.fn().mockResolvedValue({ data: [], error: null }),
     ...overrides,
   };
   chain.from = vi.fn().mockReturnValue(chain);
@@ -143,7 +144,7 @@ describe('detectStationPattern — short OCR', () => {
     const result = await detectStationPattern(sb, 'wallet1', null);
     expect(result.suspicious).toBe(false);
     expect(result.signal).toBe('insufficient_ocr');
-    expect(sb.from).not.toHaveBeenCalled();
+    expect(sb.rpc).not.toHaveBeenCalled();
   });
 
   it('returns suspicious=false for OCR shorter than 20 chars', async () => {
@@ -154,66 +155,44 @@ describe('detectStationPattern — short OCR', () => {
   });
 });
 
-describe('detectStationPattern — station matching', () => {
-  function makeSb(receipts: Array<{ ocr_text: string; wallet: string }>) {
-    return makeSupabase({
-      limit: vi.fn().mockResolvedValue({
-        data: receipts.map((r) => ({
-          claim_id: `claim-${r.wallet}`,
-          ocr_text: r.ocr_text,
-          claims: { wallet: r.wallet, created_at: new Date().toISOString() },
-        })),
-        error: null,
-      }),
-    });
-  }
-
-  it('returns suspicious=false when no other wallets match the station', async () => {
-    const sb = makeSb([
-      { ocr_text: 'BP STATION\nTotal: $45.00', wallet: 'wallet2' },
-      { ocr_text: 'CHEVRON GAS\nTotal: $62.00', wallet: 'wallet3' },
-    ]);
+describe('detectStationPattern — station matching (pg_trgm RPC)', () => {
+  it('returns suspicious=false when RPC returns no matching wallets', async () => {
+    const sb = makeSupabase({ rpc: vi.fn().mockResolvedValue({ data: [], error: null }) });
     const result = await detectStationPattern(sb, 'wallet1', 'SHELL STATION #4521\nTotal: $52.00');
     expect(result.suspicious).toBe(false);
+    expect(result.signal).toBe('unique');
   });
 
-  it('returns suspicious=true when 2+ other wallets use the same station', async () => {
-    const sb = makeSb([
-      { ocr_text: 'SHELL STATION #4521\nGallon $3.99', wallet: 'wallet2' },
-      { ocr_text: 'SHELL STATION\nUnleaded Total $50', wallet: 'wallet3' },
-    ]);
+  it('returns suspicious=true when RPC returns 2+ matching wallets', async () => {
+    const sb = makeSupabase({
+      rpc: vi.fn().mockResolvedValue({ data: [{ wallet: 'wallet2' }, { wallet: 'wallet3' }], error: null }),
+    });
     const result = await detectStationPattern(sb, 'wallet1', 'SHELL STATION #4521\nTotal: $52.00');
     expect(result.suspicious).toBe(true);
-    expect(result.matchCount).toBeGreaterThanOrEqual(3); // 2 others + this wallet
-  });
-
-  it('includes station name in signal when suspicious', async () => {
-    const sb = makeSb([
-      { ocr_text: 'SHELL STATION 4521\nGallon 3.99', wallet: 'wallet2' },
-      { ocr_text: 'SHELL STATION\nUnleaded 50', wallet: 'wallet3' },
-    ]);
-    const result = await detectStationPattern(sb, 'wallet1', 'SHELL STATION 4521\nTotal 52');
+    expect(result.matchCount).toBe(3);
     expect(result.signal).toContain('same_station');
   });
 
-  it('returns suspicious=false with only 1 other matching wallet', async () => {
-    const sb = makeSb([
-      { ocr_text: 'SHELL STATION #4521\nGallon $3.99', wallet: 'wallet2' },
-      { ocr_text: 'BP STATION\nGallon $4.10', wallet: 'wallet3' },
-    ]);
+  it('returns suspicious=false with only 1 matching wallet', async () => {
+    const sb = makeSupabase({
+      rpc: vi.fn().mockResolvedValue({ data: [{ wallet: 'wallet2' }], error: null }),
+    });
     const result = await detectStationPattern(sb, 'wallet1', 'SHELL STATION #4521\nTotal $52.00');
     expect(result.suspicious).toBe(false);
   });
 
-  it('excludes submitting wallet from the comparison query', async () => {
-    const sb = makeSb([]);
+  it('passes the submitting wallet + extracted station name to the RPC', async () => {
+    const sb = makeSupabase();
     await detectStationPattern(sb, 'my-wallet', 'SHELL STATION #4521\nTotal $52.00');
-    expect(sb.neq).toHaveBeenCalledWith('claims.wallet', 'my-wallet');
+    expect(sb.rpc).toHaveBeenCalledWith(
+      'find_similar_stations',
+      expect.objectContaining({ p_wallet: 'my-wallet', p_station_name: expect.stringContaining('SHELL') }),
+    );
   });
 
-  it('returns suspicious=false and signal=query_error on DB error', async () => {
+  it('returns suspicious=false and signal=query_error on RPC error', async () => {
     const sb = makeSupabase({
-      limit: vi.fn().mockResolvedValue({ data: null, error: new Error('DB failure') }),
+      rpc: vi.fn().mockResolvedValue({ data: null, error: new Error('RPC failure') }),
     });
     const result = await detectStationPattern(sb, 'wallet1', 'SHELL STATION #4521\nTotal $52.00');
     expect(result.suspicious).toBe(false);
@@ -221,7 +200,7 @@ describe('detectStationPattern — station matching', () => {
   });
 
   it('does not throw on Supabase exception (non-blocking)', async () => {
-    const sb = makeSupabase({ limit: vi.fn().mockRejectedValue(new Error('timeout')) });
+    const sb = makeSupabase({ rpc: vi.fn().mockRejectedValue(new Error('timeout')) });
     await expect(
       detectStationPattern(sb, 'wallet1', 'SHELL STATION #4521\nTotal $52.00'),
     ).resolves.not.toThrow();
@@ -242,7 +221,7 @@ describe('updateQualityTrend', () => {
       }),
       update,
     });
-    await updateQualityTrend(sb, 'wallet1', 0.7);
+    await updateQualityTrend(sb, 'wallet1');
     expect(update).toHaveBeenCalledWith(expect.objectContaining({
       avg_quality_score: expect.any(Number),
     }));
@@ -254,13 +233,13 @@ describe('updateQualityTrend', () => {
       limit: vi.fn().mockResolvedValue({ data: [], error: null }),
       update,
     });
-    await updateQualityTrend(sb, 'wallet1', 0.7);
+    await updateQualityTrend(sb, 'wallet1');
     expect(update).not.toHaveBeenCalled();
   });
 
   it('does not throw on DB error (non-blocking)', async () => {
     const sb = makeSupabase({ limit: vi.fn().mockRejectedValue(new Error('timeout')) });
-    await expect(updateQualityTrend(sb, 'wallet1', 0.7)).resolves.not.toThrow();
+    await expect(updateQualityTrend(sb, 'wallet1')).resolves.not.toThrow();
   });
 });
 

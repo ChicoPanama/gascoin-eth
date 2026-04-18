@@ -6,21 +6,38 @@ function getBearer() {
   return process.env.X_API_BEARER_TOKEN || process.env.X_BEARER_TOKEN || '';
 }
 
-async function xFetch(endpoint: string, params: Record<string, string> = {}): Promise<Response> {
+async function xFetch(
+  endpoint: string,
+  params: Record<string, string> = {},
+  retries: number = 2,
+): Promise<Response> {
   const url = new URL(`${X_API_BASE}${endpoint}`);
   Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, v));
 
-  const res = await fetch(url.toString(), {
-    headers: { Authorization: `Bearer ${getBearer()}`, 'Content-Type': 'application/json' },
-    cache: 'no-store',
-  });
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    const res = await fetch(url.toString(), {
+      headers: { Authorization: `Bearer ${getBearer()}`, 'Content-Type': 'application/json' },
+      cache: 'no-store',
+    });
 
-  if (res.status === 429) {
-    const reset = res.headers.get('x-rate-limit-reset');
-    throw new Error(`X API rate limit. Resets: ${reset ? new Date(parseInt(reset) * 1000).toISOString() : 'unknown'}`);
+    if (res.status === 429) {
+      const reset = res.headers.get('x-rate-limit-reset');
+      if (reset && attempt < retries) {
+        // Reset is unix seconds; wait until it passes (+1s buffer), capped at
+        // 15s so a single handle can't stall the worker's 60s budget.
+        const waitMs = Math.max(0, parseInt(reset) * 1000 - Date.now()) + 1000;
+        await new Promise((r) => setTimeout(r, Math.min(waitMs, 15000)));
+        continue;
+      }
+      throw new Error(
+        `X API rate limit after ${attempt + 1} attempts. Resets: ${reset ? new Date(parseInt(reset) * 1000).toISOString() : 'unknown'}`,
+      );
+    }
+
+    return res;
   }
 
-  return res;
+  throw new Error('xFetch exhausted retries');
 }
 
 // ─── Types ───

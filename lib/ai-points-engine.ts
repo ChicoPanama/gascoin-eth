@@ -15,6 +15,7 @@
 
 import { generateAIText, isAiGatewayAvailable, AI_MODELS } from './integrations/ai-gateway';
 import { cacheGetOrFetch } from './cache';
+import { silentLog } from './silent-log';
 
 async function aiCall(prompt: string, tag: string = 'points-engine'): Promise<string> {
   if (!isAiGatewayAvailable()) return '';
@@ -104,9 +105,19 @@ async function doScoreTweetQuality(params: {
 
   // AI quality assessment
   const contentTypeLabel = contentType || 'unknown';
+  // Sanitize tweet text to prevent prompt injection. Replace any content that
+  // looks like a system directive (lines of dashes, JSON blocks, bracket keywords)
+  // with a placeholder so an adversarial tweet cannot manipulate AI scoring.
+  const sanitizedText = tweetText
+    .slice(0, 280)
+    .replace(/^[-=*#]{3,}.*$/gm, '[---]')       // separator lines
+    .replace(/\[SYSTEM[^\]]*\]/gi, '[...]')       // [SYSTEM ...] directives
+    .replace(/\{[\s\S]{0,200}"(verdict|block|score|override)"[\s\S]{0,200}\}/gi, '[...]'); // embedded JSON
   const prompt = `Rate this tweet's quality for a gas refund community platform (GASCOIN). Return ONLY valid JSON.
 
-Tweet: "${tweetText.slice(0, 280)}"
+<TWEET_CONTENT_START>
+${sanitizedText}
+</TWEET_CONTENT_START>
 Content type: ${contentTypeLabel}
 Metrics: ${impressions} impressions, ${likes} likes, ${retweets} RTs, ${replies} replies
 Author followers: ${followerCount}
@@ -159,9 +170,10 @@ export async function detectReferralRing(params: {
 }): Promise<RingDetectionResult> {
   const { referrerWallet, referredWallet, allReferrals } = params;
 
-  // ─── BFS cycle detection up to 6 nodes ───
-  // Given new edge referrer→referred, check if referred can reach referrer (cycle)
-  const cyclePath = detectCycleBFS(referredWallet, referrerWallet, allReferrals, 6);
+  // ─── BFS cycle detection up to 10 nodes ───
+  // 6 was insufficient — 7-node rings evaded detection entirely.
+  // 10 covers realistic farming ring sizes without meaningful perf cost.
+  const cyclePath = detectCycleBFS(referredWallet, referrerWallet, allReferrals, 10);
   if (cyclePath) {
     return {
       isSuspicious: true, ringType: 'circular', confidence: 0.95,
@@ -370,12 +382,13 @@ export async function verifyPointAward(params: {
 
   // ─── Layer 3: Velocity checks (instant) ───
 
-  // Daily velocity: >50K points in one day is suspicious
-  if (params.totalPointsToday + adjustedPoints > 50000) {
+  // Daily velocity caps — veterans get a higher threshold but are not exempt.
+  // Complete bypass for veterans was a trust escalation exploit: build veteran
+  // status legitimately, then farm points without velocity control.
+  const dailyVelocityCap = params.walletTrust.level === 'veteran' ? 200_000 : 50_000;
+  if (params.totalPointsToday + adjustedPoints > dailyVelocityCap) {
     flags.push('daily_velocity_high');
-    if (params.walletTrust.level !== 'veteran') {
-      holdForReview = true;
-    }
+    holdForReview = true;
   }
 
   // Single award >10K from one source: unusual, flag but don't block veterans
@@ -386,6 +399,23 @@ export async function verifyPointAward(params: {
   // ─── Layer 4: AI verification (only for flagged or high-value awards) ───
   // Only call AI when something looks suspicious — saves cost on clean awards
   if (flags.length > 0 || adjustedPoints > 1000) {
+    // If AI Gateway is down, hold high-value or flagged awards rather than approving blindly.
+    // This prevents the fail-open window during Gateway outages from becoming exploitable.
+    if (!isAiGatewayAvailable()) {
+      flags.push('ai_gate_bypassed_outage');
+      if (adjustedPoints > 500 || flags.some(f => f !== 'ai_gate_bypassed_outage')) {
+        holdForReview = true;
+      }
+      return {
+        approved: !holdForReview,
+        adjustedPoints,
+        holdForReview,
+        reason: holdForReview ? 'ai_gateway_unavailable_held_for_review' : 'ai_gateway_unavailable_low_value_approved',
+        trustMultiplier: params.walletTrust.multiplier,
+        flags,
+      };
+    }
+
     const aiVerdict = await aiVerifyAward({
       wallet: params.wallet.slice(0, 8) + '...',
       source: params.source,
@@ -478,7 +508,8 @@ Rules:
       multiplier: Math.max(0.1, Math.min(1.0, Number(parsed.multiplier || 1.0))),
       reason: parsed.reason || '',
     };
-  } catch {
+  } catch (err) {
+    silentLog(err, { module: 'ai-points-engine', operation: 'aiVerifyAward.parse', extra: { source: params.source } });
     return { block: false, reduce: false, multiplier: 1.0, reason: 'Parse error — defaulting to approve' };
   }
 }
@@ -497,25 +528,51 @@ export async function awardVerifiedPoints(
     walletTrust: WalletTrustScore;
     tweetQuality?: TweetQualityScore;
     ringDetection?: RingDetectionResult;
+    /**
+     * Pre-aggregated point totals for this wallet. When supplied, the three
+     * per-award SELECTs are skipped — callers in a loop (workers) must
+     * pre-compute these in a single batch query to avoid an N+1 storm.
+     */
+    precomputedTotals?: { today: number; allTime: number; month: number };
   }
 ): Promise<{ awarded: boolean; points: number; heldForReview: boolean; reason: string }> {
-  // Get daily total for this wallet
   const todayKey = new Date().toISOString().split('T')[0];
-  const { data: todayEntries } = await supabase
-    .from('engagement_points')
-    .select('points')
-    .eq('wallet', params.wallet)
-    .gte('created_at', `${todayKey}T00:00:00Z`);
 
-  const totalPointsToday = (todayEntries || []).reduce((s: number, e: any) => s + Number(e.points || 0), 0);
+  let totalPointsToday: number;
+  let totalPointsAllTime: number;
+  // Monthly total is only needed for the tweet_engagement cap below. We
+  // carry it through the outer scope so it can be reused without another query.
+  let totalPointsMonthPrecomputed: number | null = null;
 
-  // Get all-time total
-  const { data: allTimeEntries } = await supabase
-    .from('engagement_points')
-    .select('points')
-    .eq('wallet', params.wallet);
+  if (params.precomputedTotals) {
+    totalPointsToday = params.precomputedTotals.today;
+    totalPointsAllTime = params.precomputedTotals.allTime;
+    totalPointsMonthPrecomputed = params.precomputedTotals.month;
+  } else {
+    const { data: todayEntries } = await supabase
+      .from('engagement_points')
+      .select('points')
+      .eq('wallet', params.wallet)
+      .gte('created_at', `${todayKey}T00:00:00Z`);
+    totalPointsToday = (todayEntries || []).reduce((s: number, e: any) => s + Number(e.points || 0), 0);
 
-  const totalPointsAllTime = (allTimeEntries || []).reduce((s: number, e: any) => s + Number(e.points || 0), 0);
+    // Server-side SUM aggregate — avoids pulling every engagement_points row
+    // for a wallet just to add them up. Falls back to row fetch if the
+    // aggregate path errors (older supabase-js or missing column alias).
+    const { data: sumRows, error: sumErr } = await supabase
+      .from('engagement_points')
+      .select('points.sum()')
+      .eq('wallet', params.wallet);
+    if (sumErr || !sumRows) {
+      const { data: allTimeEntries } = await supabase
+        .from('engagement_points')
+        .select('points')
+        .eq('wallet', params.wallet);
+      totalPointsAllTime = (allTimeEntries || []).reduce((s: number, e: any) => s + Number(e.points || 0), 0);
+    } else {
+      totalPointsAllTime = Number((sumRows as any[])[0]?.sum || 0);
+    }
+  }
 
   // Run pre-award verification
   const verification = await verifyPointAward({
@@ -564,14 +621,19 @@ export async function awardVerifiedPoints(
     }
 
     // Monthly cap
-    const monthStart = `${todayKey.slice(0, 7)}-01T00:00:00Z`;
-    const { data: monthEntries } = await supabase
-      .from('engagement_points')
-      .select('points')
-      .eq('wallet', params.wallet)
-      .eq('source', 'tweet_engagement')
-      .gte('created_at', monthStart);
-    const totalPointsMonth = (monthEntries || []).reduce((s: number, e: any) => s + Number(e.points || 0), 0);
+    let totalPointsMonth: number;
+    if (totalPointsMonthPrecomputed !== null) {
+      totalPointsMonth = totalPointsMonthPrecomputed;
+    } else {
+      const monthStart = `${todayKey.slice(0, 7)}-01T00:00:00Z`;
+      const { data: monthEntries } = await supabase
+        .from('engagement_points')
+        .select('points')
+        .eq('wallet', params.wallet)
+        .eq('source', 'tweet_engagement')
+        .gte('created_at', monthStart);
+      totalPointsMonth = (monthEntries || []).reduce((s: number, e: any) => s + Number(e.points || 0), 0);
+    }
     if (totalPointsMonth + verification.adjustedPoints > POINTS_CONFIG.MAX_ENGAGEMENT_POINTS_PER_MONTH) {
       const remaining = Math.max(0, POINTS_CONFIG.MAX_ENGAGEMENT_POINTS_PER_MONTH - totalPointsMonth);
       if (remaining <= 0) {

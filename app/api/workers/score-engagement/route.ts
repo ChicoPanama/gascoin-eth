@@ -1,13 +1,17 @@
 import { NextResponse } from 'next/server';
 import { createHash } from 'crypto';
+import pLimit from 'p-limit';
 import { getSupabaseAdmin } from '../../../../lib/supabase';
 import { calculateEngagementPoints } from '../../../../lib/engagement-rewards';
 import { scoreTweetQuality, calculateWalletTrust, awardVerifiedPoints } from '../../../../lib/ai-points-engine';
-import { searchRecentTweets, extractMetrics, getUserByUsername } from '../../../../lib/x-api';
+import { searchRecentTweets, extractMetrics, getTweet } from '../../../../lib/x-api';
 import type { XTweet, XMedia } from '../../../../lib/x-api';
 import { isAuthorizedCron as isAuthorized } from '../../../../lib/cron-auth';
 import { updateQualityTrend } from '../../../../lib/data-intelligence';
 import { addMemory } from '../../../../lib/mem0';
+import { writeIntelligence } from '../../../../lib/knowledge-base';
+import { isAiGatewayAvailable } from '../../../../lib/integrations/ai-gateway';
+import { chunkedIn } from '../../../../lib/supabase-utils';
 
 // ═══════════════════════════════════════════
 // Engagement Worker v3
@@ -36,6 +40,19 @@ export async function POST(req: Request) {
   const token = process.env.X_BEARER_TOKEN;
   if (!token) {
     return NextResponse.json({ error: 'X_BEARER_TOKEN not configured' }, { status: 500 });
+  }
+
+  // R5: Alert when AI Gateway is unavailable — high-value awards will be held for review
+  if (!isAiGatewayAvailable()) {
+    writeIntelligence({
+      entry_type: 'ai_gateway_unavailable',
+      entity_type: 'system',
+      entity_id: 'score_engagement_worker',
+      summary: 'AI Gateway unavailable during engagement scoring — high-value awards held for review',
+      detail_json: {},
+      severity: 'high',
+      pipeline_source: 'score_engagement',
+    }).catch(() => {});
   }
 
   try {
@@ -95,47 +112,95 @@ export async function POST(req: Request) {
     // ─── Pre-fetch real wallet trust data for all wallets in batch ───
     const allWallets = [...walletHandles.keys()];
     const walletTrustCache = new Map<string, ReturnType<typeof calculateWalletTrust>>();
+    const pointTotalsCache = new Map<string, { today: number; allTime: number; month: number }>();
 
     if (allWallets.length > 0) {
-      const { data: allClaims } = await supabase
-        .from('claims')
-        .select('wallet, status, created_at')
-        .in('wallet', allWallets);
+      // `.in('wallet', allWallets)` silently truncates once the URL crosses
+      // ~180 Solana addresses. chunkedIn slices the list and concatenates.
+      type ClaimRow = { wallet: string; status: string; created_at: string };
+      type RefRow = { referrer_wallet: string; reward_status: string };
+      type AnomRow = { wallet: string; metadata_json: any };
+      type EngPtRow = { wallet: string; points: number; source: string; created_at: string };
 
-      const { data: allRefs } = await supabase
-        .from('referral_conversions')
-        .select('referrer_wallet, reward_status')
-        .in('referrer_wallet', allWallets);
+      const allClaims = await chunkedIn<ClaimRow>(
+        () => supabase.from('claims').select('wallet, status, created_at'),
+        'wallet',
+        allWallets,
+      );
+      const allRefs = await chunkedIn<RefRow>(
+        () => supabase.from('referral_conversions').select('referrer_wallet, reward_status'),
+        'referrer_wallet',
+        allWallets,
+      );
+      const allAnomalies = await chunkedIn<AnomRow>(
+        () => supabase.from('engagement_points').select('wallet, metadata_json').eq('source', 'tweet_engagement'),
+        'wallet',
+        allWallets,
+      );
 
-      const { data: allAnomalies } = await supabase
-        .from('engagement_points')
-        .select('wallet, metadata_json')
-        .eq('source', 'tweet_engagement')
-        .in('wallet', allWallets);
+      // Pre-aggregate point totals (today / month / all-time) for every wallet
+      // that awardVerifiedPoints may be called for. Skips the per-award N+1.
+      const monthStart = `${new Date().toISOString().slice(0, 7)}-01T00:00:00Z`;
+      const todayStart = `${new Date().toISOString().slice(0, 10)}T00:00:00Z`;
+      const allPoints = await chunkedIn<EngPtRow>(
+        () => supabase.from('engagement_points').select('wallet, points, source, created_at'),
+        'wallet',
+        allWallets,
+      );
+
+      // Build O(1)-lookup index Maps — replaces per-wallet .filter() over
+      // the full arrays (was O(wallets × records)).
+      const claimsByWallet = new Map<string, ClaimRow[]>();
+      for (const c of allClaims) {
+        const arr = claimsByWallet.get(c.wallet) || [];
+        arr.push(c);
+        claimsByWallet.set(c.wallet, arr);
+      }
+      const refsByWallet = new Map<string, RefRow[]>();
+      for (const r of allRefs) {
+        const arr = refsByWallet.get(r.referrer_wallet) || [];
+        arr.push(r);
+        refsByWallet.set(r.referrer_wallet, arr);
+      }
+      const anomaliesByWallet = new Map<string, AnomRow[]>();
+      for (const e of allAnomalies) {
+        const arr = anomaliesByWallet.get(e.wallet) || [];
+        arr.push(e);
+        anomaliesByWallet.set(e.wallet, arr);
+      }
+
+      for (const pt of allPoints) {
+        const cur = pointTotalsCache.get(pt.wallet) || { today: 0, allTime: 0, month: 0 };
+        const pts = Number(pt.points || 0);
+        cur.allTime += pts;
+        if (pt.created_at >= todayStart) cur.today += pts;
+        if (pt.created_at >= monthStart && pt.source === 'tweet_engagement') cur.month += pts;
+        pointTotalsCache.set(pt.wallet, cur);
+      }
 
       for (const wallet of allWallets) {
-        const wClaims = (allClaims || []).filter((c: any) => c.wallet === wallet);
-        const wRefs = (allRefs || []).filter((r: any) => r.referrer_wallet === wallet);
-        const wAnomalies = (allAnomalies || []).filter((e: any) => e.wallet === wallet);
+        const wClaims = claimsByWallet.get(wallet) || [];
+        const wRefs = refsByWallet.get(wallet) || [];
+        const wAnomalies = anomaliesByWallet.get(wallet) || [];
 
-        const aiFlags = wAnomalies.filter((e: any) => {
+        const aiFlags = wAnomalies.filter((e) => {
           const meta = e.metadata_json as any;
           return meta?.verification?.flags?.some?.((f: string) => f.includes('spam') || f.includes('bot'));
         }).length;
 
-        const firstClaim = wClaims.sort((a: any, b: any) =>
+        const firstClaim = [...wClaims].sort((a, b) =>
           new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
-        )[0] as any;
+        )[0];
         const ageDays = firstClaim?.created_at
           ? Math.floor((Date.now() - new Date(firstClaim.created_at).getTime()) / 86400000)
           : 0;
 
         walletTrustCache.set(wallet, calculateWalletTrust({
           totalSubmissions: wClaims.length,
-          approvedSubmissions: wClaims.filter((c: any) => ['approved', 'paid', 'ready_for_dispatch'].includes(c.status)).length,
-          rejectedSubmissions: wClaims.filter((c: any) => c.status === 'rejected').length,
-          referralConversions: wRefs.filter((r: any) => r.reward_status === 'verified').length,
-          skippedReferrals: wRefs.filter((r: any) => r.reward_status === 'skipped').length,
+          approvedSubmissions: wClaims.filter((c) => ['approved', 'paid', 'ready_for_dispatch'].includes(c.status)).length,
+          rejectedSubmissions: wClaims.filter((c) => c.status === 'rejected').length,
+          referralConversions: wRefs.filter((r) => r.reward_status === 'verified').length,
+          skippedReferrals: wRefs.filter((r) => r.reward_status === 'skipped').length,
           accountAgeDays: ageDays,
           anomalyCount: aiFlags,
         }));
@@ -143,18 +208,51 @@ export async function POST(req: Request) {
     }
 
     // ─── PHASE 2: For each handle, search for ALL #gascoin tweets ───
-    for (const [wallet, { handle, userId }] of walletHandles) {
+    // Sort stale handles first so that if the X API rate-limit cuts us off
+    // mid-run, the handles we did score are the ones most overdue.
+    const sortedEntries = [...walletHandles.entries()].sort((a, b) => {
+      const aLink = (links || []).find((l: any) => l.wallet === a[0]);
+      const bLink = (links || []).find((l: any) => l.wallet === b[0]);
+      const aTime = aLink?.last_tweet_scan ? new Date(aLink.last_tweet_scan).getTime() : 0;
+      const bTime = bLink?.last_tweet_scan ? new Date(bLink.last_tweet_scan).getTime() : 0;
+      return aTime - bTime;
+    });
+
+    // Within one handle, tweets are scored in parallel (DB + AI round-trips
+    // dominate; X API rate-limits are per-app, not per-tweet). Across handles
+    // we stay sequential so we don't burst the X search endpoint.
+    const tweetLimit = pLimit(3);
+
+    for (const [wallet, { handle }] of sortedEntries) {
       handlesScanned++;
 
       try {
         const result = await searchRecentTweets(`from:${handle} #gascoin`, 10);
 
         if (result.tweets.length === 0) {
-          // Fallback: score claim-linked tweets individually
+          // Fallback: re-score claim-linked tweets through the SAME pipeline
+          // used for search-found tweets. An earlier shortcut bypassed AI
+          // quality scoring + verification — legacy path left in by accident.
           const claimTweets = (claims || []).filter((c: any) => c.wallet === wallet);
           for (const claim of claimTweets) {
-            await scoreSingleTweet(supabase, token, wallet, handle, claim.tweet_url, claim.id);
-            scored++;
+            const idMatch = claim.tweet_url?.match(/status\/(\d+)/);
+            if (!idMatch) continue;
+            const fetched = await getTweet(idMatch[1]);
+            if (!fetched.tweet) continue;
+            const scoreResult = await scoreTweet(
+              supabase,
+              wallet,
+              handle,
+              fetched.tweet,
+              0,
+              rescoreCutoff,
+              walletTrustCache.get(wallet),
+              [],
+              pointTotalsCache.get(wallet),
+            );
+            if (scoreResult.scored) scored++;
+            if (scoreResult.pointsAwarded > 0) totalPointsAwarded += scoreResult.pointsAwarded;
+            if (scoreResult.heldForReview) heldForReview++;
           }
           continue;
         }
@@ -164,11 +262,27 @@ export async function POST(req: Request) {
 
         tweetsFound += result.tweets.length;
 
-        for (const tweet of result.tweets) {
-          const scoreResult = await scoreTweet(supabase, wallet, handle, tweet, followerCount, rescoreCutoff, walletTrustCache.get(wallet), result.media);
-          if (scoreResult.scored) scored++;
-          if (scoreResult.pointsAwarded > 0) totalPointsAwarded += scoreResult.pointsAwarded;
-          if (scoreResult.heldForReview) heldForReview++;
+        const scorePromises = result.tweets.map((tweet) =>
+          tweetLimit(() =>
+            scoreTweet(
+              supabase,
+              wallet,
+              handle,
+              tweet,
+              followerCount,
+              rescoreCutoff,
+              walletTrustCache.get(wallet),
+              result.media,
+              pointTotalsCache.get(wallet),
+            ),
+          ),
+        );
+        const settled = await Promise.allSettled(scorePromises);
+        for (const r of settled) {
+          if (r.status !== 'fulfilled') continue;
+          if (r.value.scored) scored++;
+          if (r.value.pointsAwarded > 0) totalPointsAwarded += r.value.pointsAwarded;
+          if (r.value.heldForReview) heldForReview++;
         }
 
         // Update last scan timestamp + persist X profile data
@@ -186,7 +300,7 @@ export async function POST(req: Request) {
 
         // Update rolling quality trend for this wallet (non-blocking)
         if (result.tweets.length > 0) {
-          updateQualityTrend(supabase, wallet, result.tweets[0]?.public_metrics ? 0.5 : 0).catch(() => {});
+          updateQualityTrend(supabase, wallet).catch(() => {});
         }
 
       } catch {
@@ -218,11 +332,13 @@ async function scoreTweet(
   rescoreCutoff: string,
   walletTrust?: ReturnType<typeof calculateWalletTrust>,
   mediaIncludes: XMedia[] = [],
+  precomputedTotals?: { today: number; allTime: number; month: number },
 ): Promise<{ scored: boolean; pointsAwarded: number; heldForReview: boolean }> {
-  // Check if already scored recently
+  // Check if already scored recently — also pull metrics_history so we can
+  // append the current snapshot for engagement-velocity analysis.
   const { data: existingScored } = await supabase
     .from('scored_tweets')
-    .select('id, last_scored_at, adjusted_points, score_count')
+    .select('id, last_scored_at, adjusted_points, score_count, metrics_history')
     .eq('tweet_id', tweet.id)
     .maybeSingle();
 
@@ -263,6 +379,22 @@ async function scoreTweet(
 
   const points = Math.round(rawPoints * qualityScore.multiplier);
 
+  // Append current metrics snapshot to the tweet's history ring. 24 entries
+  // = ~24h at hourly rescore cadence; old snapshots fall off. Velocity jumps
+  // between adjacent entries signal purchased engagement.
+  const existingHistory: Array<Record<string, unknown>> = Array.isArray(existingScored?.metrics_history)
+    ? (existingScored!.metrics_history as Array<Record<string, unknown>>)
+    : [];
+  const metricsSnapshot = {
+    ts: new Date().toISOString(),
+    impressions: metrics.impressions,
+    likes: metrics.likes,
+    retweets: metrics.retweets,
+    replies: metrics.replies,
+    bookmarks: metrics.bookmarks,
+  };
+  const updatedHistory = [...existingHistory, metricsSnapshot].slice(-24);
+
   // Upsert scored tweet record (now includes bookmarks + content_type)
   await supabase.from('scored_tweets').upsert({
     wallet,
@@ -283,6 +415,7 @@ async function scoreTweet(
     adjusted_points: points,
     quality_score: qualityScore.quality,
     quality_multiplier: qualityScore.multiplier,
+    metrics_history: updatedHistory,
     last_scored_at: new Date().toISOString(),
     score_count: existingScored ? existingScored.score_count + 1 : 1,
   }, { onConflict: 'tweet_id' });
@@ -313,6 +446,7 @@ async function scoreTweet(
     },
     walletTrust: trust,
     tweetQuality: qualityScore,
+    precomputedTotals,
   });
 
   // Record notable engagement signals in mem0
@@ -331,41 +465,3 @@ async function scoreTweet(
   };
 }
 
-// ─── Fallback: score a single claim-linked tweet by URL ───
-async function scoreSingleTweet(supabase: any, token: string, wallet: string, handle: string, tweetUrl: string, claimId: string) {
-  const tweetIdMatch = tweetUrl?.match(/status\/(\d+)/);
-  if (!tweetIdMatch) return;
-
-  const tweetId = tweetIdMatch[1];
-  const endpoint = new URL(`https://api.x.com/2/tweets/${tweetId}`);
-  endpoint.searchParams.set('tweet.fields', 'public_metrics,text,created_at');
-
-  try {
-    const res = await fetch(endpoint.toString(), {
-      headers: { authorization: `Bearer ${token}` },
-      cache: 'no-store',
-    });
-    if (!res.ok) return;
-
-    const json = (await res.json()) as any;
-    const pm = json?.data?.public_metrics;
-    if (!pm) return;
-
-    const metrics = {
-      impressions: Number(pm.impression_count || 0),
-      likes: Number(pm.like_count || 0),
-      retweets: Number(pm.retweet_count || 0),
-      quote_tweets: Number(pm.quote_count || 0),
-      replies: Number(pm.reply_count || 0),
-      bookmarks: Number(pm.bookmark_count || 0),
-    };
-
-    // Legacy engagement_scores entry
-    await supabase.from('engagement_scores').upsert({
-      wallet, claim_id: claimId, tweet_url: tweetUrl,
-      ...metrics,
-      score: metrics.impressions * 0.01 + metrics.likes + metrics.retweets * 3 + metrics.quote_tweets * 5 + metrics.replies * 2 + metrics.bookmarks * 2,
-      fetched_at: new Date().toISOString(),
-    }, { onConflict: 'claim_id' });
-  } catch {}
-}

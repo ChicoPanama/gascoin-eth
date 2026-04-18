@@ -22,6 +22,7 @@
  */
 
 import { cacheGet, cacheSet, cacheGetOrFetch } from './cache';
+import { silentLog } from './silent-log';
 
 // ---------------------------------------------------------------------------
 // Config
@@ -410,8 +411,13 @@ export async function addMemory(
     if (!res.ok && (res.status === 401 || res.status === 403)) {
       reportMem0KeyExpired(res.status, 'addMemory').catch(() => {});
     }
-  } catch {
-    // Silent failure — never block a pipeline
+  } catch (err) {
+    silentLog(err, {
+      module: 'mem0',
+      operation: 'addMemory',
+      wallet: entityType === 'wallet' ? entityId : undefined,
+      extra: { entityType, entityId },
+    });
   }
 }
 
@@ -568,8 +574,8 @@ export async function refreshFlagCache(wallet: string): Promise<void> {
       trajectory: profile.trust_trajectory,
     };
     await cacheSet(`mem0:wallet:${wallet}`, cached, FLAG_CACHE_TTL);
-  } catch {
-    // Silent failure
+  } catch (err) {
+    silentLog(err, { module: 'mem0', operation: 'refreshFlagCache', wallet });
   }
 }
 
@@ -892,6 +898,43 @@ export async function listWebhooks(): Promise<Mem0Webhook[]> {
  * Invalidate the cached entity profile for a given wallet or x_handle.
  * Call after writing new memories so the next read reflects the update.
  */
+/**
+ * GDPR Right-to-Erasure — delete ALL mem0 memories for a wallet entity.
+ * Called by the erase-user admin route. Fire-and-forget safe; never throws.
+ * Uses DELETE /v1/memories/ with user_id filter (mem0 Pro bulk-delete endpoint).
+ */
+export async function deleteEntityMemories(
+  entityType: 'wallet' | 'x_handle',
+  entityId: string,
+): Promise<{ deleted: number }> {
+  const cfg = getConfig();
+  if (!cfg) return { deleted: 0 };
+
+  const userId = entityUserId(entityType, entityId);
+
+  try {
+    const params = new URLSearchParams({ user_id: userId, org_id: cfg.orgId, project_id: cfg.projectId });
+    const res = await fetch(`${MEM0_API_HOST}/v1/memories/?${params.toString()}`, {
+      method: 'DELETE',
+      headers: { Authorization: `Token ${cfg.apiKey}` },
+      cache: 'no-store',
+    });
+
+    if (res.status === 401 || res.status === 403) {
+      reportMem0KeyExpired(res.status, 'deleteEntityMemories').catch(() => {});
+      return { deleted: 0 };
+    }
+    if (!res.ok) return { deleted: 0 };
+
+    // Also bust the Redis cache so stale profile data isn't served after deletion
+    await bustEntityProfileCache(entityType, entityId).catch(() => {});
+
+    return { deleted: 1 };
+  } catch {
+    return { deleted: 0 };
+  }
+}
+
 export async function bustEntityProfileCache(
   entityType: 'wallet' | 'x_handle',
   entityId: string,

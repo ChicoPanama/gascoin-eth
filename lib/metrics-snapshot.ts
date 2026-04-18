@@ -4,6 +4,7 @@
  */
 
 import type { XUser } from './x-api';
+import { silentLog } from './silent-log';
 
 export interface MetricsSnapshotInput {
   userId: string;
@@ -46,8 +47,8 @@ export async function persistMetricsSnapshot(
     await supabase
       .from('user_metrics_history')
       .insert(buildMetricsRow(input));
-  } catch {
-    // Non-blocking — metrics persistence should never break the main flow
+  } catch (err) {
+    silentLog(err, { module: 'metrics-snapshot', operation: 'persistMetricsSnapshot', wallet: input.wallet, extra: { source: input.source } });
   }
 }
 
@@ -62,7 +63,7 @@ export async function persistHandleChange(
     await supabase
       .from('x_handle_history')
       .insert({ user_id: userId, x_user_id: xUserId, old_handle: oldHandle, new_handle: newHandle });
-  } catch {
-    // Non-blocking
+  } catch (err) {
+    silentLog(err, { module: 'metrics-snapshot', operation: 'persistHandleChange', extra: { userId, xUserId, oldHandle, newHandle } });
   }
 }
