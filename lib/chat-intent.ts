@@ -92,9 +92,13 @@ const FAQ_MAP: [RegExp, string][] = [
   [/what.{0,10}(is.{0,5}solana|blockchain)|solana.{0,10}what/i,
     "Solana is a fast, low-fee blockchain. GASCOIN runs on Solana. You need a Solana wallet (Phantom/Solflare/Backpack) to receive your refund."],
 
-  // Legitimacy / trust
-  [/legit|scam|\breal\b|trust|\bsafe\b|fraud/i,
+  // Legitimacy / trust (is this legit? is this a scam? can I trust it?)
+  [/\blegit\b|is.{0,15}scam|sounds.{0,8}scam|a.{0,5}scam|is.{0,15}real|is.{0,15}fake|\btrust\b|\bsafe\b|is.{0,15}fraud/i,
     "GASCOIN is legitimate. Every payout is an on-chain Solana transaction — verifiable on Solscan with exact amount and timestamp. Live payouts have been active since Season 1 beta."],
+
+  // Fraud detection / how it prevents abuse
+  [/how.{0,15}(fraud|scam|fake|cheat|abuse|duplicate).{0,20}(detect|prevent|stop|catch|work)|prevent.{0,10}fraud|stop.{0,10}scam|detect.{0,10}fake/i,
+    "Every receipt passes 17 automated gates including AI receipt scanning, duplicate image detection, X account age and follower checks, wallet activity analysis, and geolocation plausibility. Multiple AI models cross-verify before any payout is approved."],
 
   // Cooldown (generic — no wallet lookup needed)
   [/cooldown.{0,15}how.{0,10}long|how.{0,10}long.{0,15}cooldown|reset.{0,10}cooldown/i,
