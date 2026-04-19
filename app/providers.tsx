@@ -16,7 +16,10 @@ import { wagmiConfig, queryClient } from '../lib/wagmi-config';
  */
 function PrivyInner({ children }: { children: React.ReactNode }) {
   const { resolved } = useTheme();
-  const appId = (process.env.NEXT_PUBLIC_PRIVY_APP_ID || '').trim();
+  // Privy App ID for gascoin-eth. NEXT_PUBLIC_PRIVY_APP_ID env var takes
+  // precedence when set; the literal is a safe default since the app ID
+  // is public (client-side identifier, not a secret).
+  const appId = (process.env.NEXT_PUBLIC_PRIVY_APP_ID || 'cmnj8z4po008b0dl74uza4zv7').trim();
 
   if (!appId || appId.length < 10) {
     return <>{children}</>;
