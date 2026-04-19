@@ -7,6 +7,11 @@ export function formatEth(amount: number): string {
   return `${amount.toFixed(4)} ETH`;
 }
 
+/** USD display with 2dp, comma thousands, $ prefix. Used for user-facing USD-equivalent amounts. */
+export function formatUsd(amount: number): string {
+  return `$${amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+}
+
 export function timeAgo(date: Date | string): string {
   const seconds = Math.floor(
     (new Date().getTime() - new Date(date).getTime()) / 1000

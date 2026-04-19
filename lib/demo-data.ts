@@ -52,15 +52,16 @@ export const DEMO_LEADERBOARD = [
 ];
 
 // ── Proof of Payout (8 recent receipts — cycles in groups of 4) ──
+// USD amounts shown to the user; actual on-chain settlement is in ETH.
 export const DEMO_COMMUNITY = [
-  { country: 'United States', sol: 0.42, date: 'Apr 6' },
-  { country: 'Mexico', sol: 0.31, date: 'Apr 5' },
-  { country: 'Canada', sol: 0.55, date: 'Apr 4' },
-  { country: 'United Kingdom', sol: 0.28, date: 'Apr 3' },
-  { country: 'Germany', sol: 0.37, date: 'Apr 2' },
-  { country: 'Brazil', sol: 0.49, date: 'Apr 1' },
-  { country: 'Australia', sol: 0.33, date: 'Mar 31' },
-  { country: 'Japan', sol: 0.61, date: 'Mar 30' },
+  { country: 'United States', usd: 42.00, date: 'Apr 6' },
+  { country: 'Mexico', usd: 31.00, date: 'Apr 5' },
+  { country: 'Canada', usd: 55.00, date: 'Apr 4' },
+  { country: 'United Kingdom', usd: 28.00, date: 'Apr 3' },
+  { country: 'Germany', usd: 37.00, date: 'Apr 2' },
+  { country: 'Brazil', usd: 49.00, date: 'Apr 1' },
+  { country: 'Australia', usd: 33.00, date: 'Mar 31' },
+  { country: 'Japan', usd: 61.00, date: 'Mar 30' },
 ];
 
 // ── Gate Pass Rates (10 gates) ──

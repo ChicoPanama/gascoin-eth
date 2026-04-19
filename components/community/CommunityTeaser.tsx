@@ -3,12 +3,12 @@
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { supabaseBrowser } from '../../lib/supabase-client';
-import { formatEth } from '../../lib/formatters';
+import { formatUsd } from '../../lib/formatters';
 import { DEMO_COMMUNITY } from '../../lib/demo-data';
 
 interface MiniReceipt {
   country: string | null;
-  sol: number;
+  usd: number;
   date: string;
 }
 
@@ -21,16 +21,21 @@ export function CommunityTeaser() {
   useEffect(() => {
     (async () => {
       try {
-        const { data } = await supabaseBrowser
-          .from('payouts')
-          .select('amount_eth, created_at, claims(country)')
-          .eq('status', 'paid')
-          .order('created_at', { ascending: false })
-          .limit(8);
+        // Fetch real payouts + current ETH price to render amounts as USD.
+        const [payoutsRes, statsRes] = await Promise.all([
+          supabaseBrowser
+            .from('payouts')
+            .select('amount_eth, created_at, claims(country)')
+            .eq('status', 'paid')
+            .order('created_at', { ascending: false })
+            .limit(8),
+          fetch('/api/public/community/stats').then((r) => r.json()).catch(() => null),
+        ]);
 
-        const rows = (data || []).map((p: any) => ({
+        const ethPriceUsd = Number(statsRes?.eth_price_usd || 0) || 2350;
+        const rows: MiniReceipt[] = (payoutsRes.data || []).map((p: any) => ({
           country: p.claims?.country || null,
-          sol: Number(p.amount_eth || 0),
+          usd: Number(p.amount_eth || 0) * ethPriceUsd,
           date: new Date(p.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
         }));
         setAllItems(rows.length > 0 ? rows : DEMO_COMMUNITY);
@@ -65,8 +70,8 @@ export function CommunityTeaser() {
             <span className="cf-teaser-ghost">Real Payouts.</span>
           </h2>
           <p className="cf-teaser-sub">
-            Every card below is a verified gas receipt that received a ETH refund
-            from the GASCOIN treasury. No actors. No mockups.
+            Every card below is a verified gas receipt that received a refund
+            from the GASCOIN treasury. Amounts shown in USD · settled on-chain in ETH.
           </p>
           <Link href="/community" className="gc-teaser-link">View all receipts</Link>
         </div>
@@ -91,7 +96,7 @@ export function CommunityTeaser() {
                     <div className="cf-teaser-card-loc">
                       {item.country || 'Verified'}
                     </div>
-                    <div className="cf-teaser-card-sol">{formatEth(item.sol)}</div>
+                    <div className="cf-teaser-card-sol">{formatUsd(item.usd)}</div>
                     <div className="cf-teaser-card-date">{item.date}</div>
                   </div>
                 ))
