@@ -658,22 +658,22 @@ describe('Category 4: Tier System Under Volume', () => {
     // Fleet: 7/1.75 = 4 subs/week * 1.0 SOL = 4.0 SOL/week
     const fleet = weeklyPayouts.find((p) => p.slug === 'fleet')!;
     expect(fleet.submissionsPerWeek).toBe(4);
-    expect(fleet.weeklyMax).toBe(0.2);
+    expect(fleet.weeklyMax).toBeCloseTo(0.16);
 
-    // Road Warrior: 7/3.5 = 2 subs/week * 0.50 = 1.0 SOL/week
+    // Road Warrior: 7/3.5 = 2 subs/week * 0.02 ETH = 0.04 ETH/week
     const rw = weeklyPayouts.find((p) => p.slug === 'road-warrior')!;
     expect(rw.submissionsPerWeek).toBe(2);
-    expect(rw.weeklyMax).toBe(0.05);
+    expect(rw.weeklyMax).toBeCloseTo(0.04);
 
     // Commuter: 7/7 = 1 sub/week * 0.25 = 0.25 SOL/week
     const commuter = weeklyPayouts.find((p) => p.slug === 'commuter')!;
     expect(commuter.submissionsPerWeek).toBe(1);
-    expect(commuter.weeklyMax).toBe(0.0125);
+    expect(commuter.weeklyMax).toBe(0.01);
 
     // Standard: 7/7 = 1 sub/week * 0.10 = 0.10 SOL/week
     const standard = weeklyPayouts.find((p) => p.slug === 'standard')!;
     expect(standard.submissionsPerWeek).toBe(1);
-    expect(standard.weeklyMax).toBe(0.005);
+    expect(standard.weeklyMax).toBe(0.004);
 
     // Fleet should be the highest earner
     const maxPayout = Math.max(...weeklyPayouts.map((p) => p.weeklyMax));
@@ -696,7 +696,7 @@ describe('Category 4: Tier System Under Volume', () => {
     // At payout time: balance dropped to 100K => Commuter
     const payoutTier = getTierForBalance(100_000);
     expect(payoutTier.slug).toBe('commuter');
-    expect(payoutTier.max_eth_refund).toBe(0.0125);
+    expect(payoutTier.max_eth_refund).toBe(0.01);
     expect(payoutTier.max_eth_refund).toBeLessThan(submitTier.max_eth_refund);
 
     // Edge: dropped to 0 => Standard (min_tokens=1, but 0 < 1)

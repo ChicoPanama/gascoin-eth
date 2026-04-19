@@ -404,10 +404,10 @@ Holding GASCOIN is the strongest signal. Whales who also create content and refe
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 TOKEN TIER PERKS (from gascoin.app/perks)
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-STANDARD (1+ token):       0.10 ETH max refund · 1×/week · Queue priority #4
-COMMUTER (100K+ tokens):   0.25 ETH max refund · 1×/week · Queue priority #3
-ROAD WARRIOR (5M+ tokens): 0.50 ETH max refund · 2×/week · Queue priority #2 · Featured on community feed
-FLEET (10M+ tokens):       1.0 ETH max refund  · 4×/week · Queue priority #1 · Always featured · Early access to new features
+STANDARD (1+ token):       0.004 ETH max refund · 1×/week · Queue priority #4
+COMMUTER (100K+ tokens):   0.01 ETH max refund · 1×/week · Queue priority #3
+ROAD WARRIOR (5M+ tokens): 0.02 ETH max refund · 2×/week · Queue priority #2 · Featured on community feed
+FLEET (10M+ tokens):       0.04 ETH max refund  · 4×/week · Queue priority #1 · Always featured · Early access to new features
 
 Buy tokens on Uniswap (app.uniswap.org), 1inch, or CowSwap.
 
@@ -432,7 +432,7 @@ Your referral dashboard shows: clicks, conversions, conversion rate, monthly cap
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 PAYOUT DETAILS
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-ETH refund caps per tier: Standard 0.10 ETH · Commuter 0.25 ETH · Road Warrior 0.50 ETH · Fleet 1.0 ETH.
+ETH refund caps per tier: Standard 0.004 ETH · Commuter 0.01 ETH · Road Warrior 0.02 ETH · Fleet 0.04 ETH.
 ETH is sent directly to the wallet you connected at submission.
 
 If approved but not yet paid: the treasury may be queued. Your claim auto-retries every 6 hours. Status shows "pending queue" at gascoin.app/wallet. No action needed.
@@ -554,7 +554,7 @@ SUBMISSION FLOW DETAIL (5 steps at gascoin.app/submit)
 Step 1 — Connect Wallet: Click Connect Wallet, choose MetaMask/Rabby/Rainbow/Coinbase Wallet. Read-only — no transaction authorized. Shows truncated address and current tier.
 Step 2 — Verify Tweet: Paste tweet URL. System checks hashtag, @GasCoinApp tag, public visibility, and author match. Runs in 2–8 seconds. Preview card shows handle and confirmation.
 Step 3 — Upload Receipt: Upload photo (JPG/PNG/HEIC/WEBP, max 15MB). Three checkboxes required: receipt shows total, date visible, last 4 hex characters of your Ethereum wallet address written. Take photo directly in browser on mobile.
-Step 4 — Review & Submit: Summary of wallet, tweet, receipt, estimated refund (~0.05 ETH). Hit Submit. If it takes >30 seconds, the AI pipeline is busy — wait.
+Step 4 — Review & Submit: Summary of wallet, tweet, receipt, estimated refund (~0.02 ETH). Hit Submit. If it takes >30 seconds, the AI pipeline is busy — wait.
 Step 5 — Gate Progress: Watch all 17 gates flip from pending → passed/failed in real time. OCR gates take up to 45 seconds. On success: "SUBMISSION APPROVED — ETH refund within 24-48 hours." On failure: specific gate name + fix instruction shown.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

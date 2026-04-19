@@ -10,7 +10,7 @@ async function requireAdmin() {
   return session.walletAddress;
 }
 
-// Maximum ETH an admin can manually approve — 50% above Fleet tier cap (1.0 ETH).
+// Maximum ETH an admin can manually approve — 50% above Fleet tier cap (0.04 ETH).
 // The payout worker enforces tier caps at dispatch; this is a second server-side
 // guard against inflated amounts reaching the payout_jobs table at all.
 const ADMIN_APPROVE_SOL_CAP = 1.5;

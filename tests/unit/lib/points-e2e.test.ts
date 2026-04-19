@@ -63,7 +63,7 @@ describe('Journey: New Standard User (0 GASCOIN)', () => {
     const tier = getTierForBalance(0);
     expect(tier.id).toBe(0);
     expect(tier.name).toBe('Standard');
-    expect(tier.max_eth_refund).toBe(0.005);
+    expect(tier.max_eth_refund).toBe(0.004);
   });
 
   it('earns submission points on first approved receipt', () => {
@@ -123,7 +123,7 @@ describe('Journey: Commuter Tier (100K GASCOIN)', () => {
     expect(tier.id).toBe(1);
     expect(tier.name).toBe('Commuter');
     expect(holdingsPoints).toBe(POINTS_CONFIG.POINTS_PER_CYCLE_COMMUTER);
-    expect(tier.max_eth_refund).toBe(0.0125);
+    expect(tier.max_eth_refund).toBe(0.01);
   });
 
   it('earns 5x more holdings than Standard over 30 days', () => {
@@ -151,7 +151,7 @@ describe('Journey: Road Warrior (5M GASCOIN)', () => {
   it('gets correct tier', () => {
     const tier = getTierForBalance(5_000_000);
     expect(tier.id).toBe(2);
-    expect(tier.max_eth_refund).toBe(0.025);
+    expect(tier.max_eth_refund).toBe(0.02);
   });
 
   it('earns Road Warrior holdings per day', () => {
@@ -180,7 +180,7 @@ describe('Journey: Fleet Tier (10M GASCOIN)', () => {
   it('gets 1.0 SOL max refund', () => {
     const tier = getTierForBalance(10_000_000);
     expect(tier.id).toBe(3);
-    expect(tier.max_eth_refund).toBe(0.05);
+    expect(tier.max_eth_refund).toBe(0.04);
   });
 
   it('earns Fleet holdings per day', () => {

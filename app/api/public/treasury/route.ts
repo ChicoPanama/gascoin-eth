@@ -12,7 +12,7 @@ export async function GET(req: Request) {
   }
   try {
     const t = await getTreasuryBalances();
-    const avgPayoutEth = 0.005;
+    const avgPayoutEth = 0.015;
     const capacity = avgPayoutEth > 0 ? Math.floor(t.ethBalance / avgPayoutEth) : 0;
 
     return NextResponse.json({
