@@ -25,10 +25,10 @@ import { getUserChatProfile, saveUserPreferences } from '../../../lib/chat-user-
 export const runtime = 'nodejs';
 export const maxDuration = 60;
 
-// Model selection — DeepSeek via OpenRouter when key present, Gateway fallback.
-//   T1   → deepseek/deepseek-chat  (low-cost general support)
-//   T2/3 → deepseek/deepseek-chat  (deeper context path, same low-cost model)
-// Without key: Haiku (T1) + Sonnet (T2/T3) via Vercel AI Gateway.
+// Model selection — DeepSeek via OpenRouter when key present, cheapest Gateway fallback.
+//   Primary (OpenRouter): deepseek/deepseek-chat for both tiers — low-cost general support
+//   Fallback (Gateway):   google/gemini-3-flash for both tiers — cheapest mainstream model
+//                         (~$0.075/M input · 13x cheaper than Claude Haiku)
 const openRouter = process.env.OPENROUTER_API_KEY
   ? createOpenAI({
       baseURL: 'https://openrouter.ai/api/v1',
@@ -40,8 +40,8 @@ const openRouter = process.env.OPENROUTER_API_KEY
     })
   : null;
 
-const TIER1_MODEL  = openRouter ? openRouter.chat('deepseek/deepseek-chat') : gateway('anthropic/claude-haiku-4.5');
-const TIER23_MODEL = openRouter ? openRouter.chat('deepseek/deepseek-chat') : gateway('anthropic/claude-sonnet-4.6');
+const TIER1_MODEL  = openRouter ? openRouter.chat('deepseek/deepseek-chat') : gateway('google/gemini-3-flash');
+const TIER23_MODEL = openRouter ? openRouter.chat('deepseek/deepseek-chat') : gateway('google/gemini-3-flash');
 
 const SYSTEM_PROMPT = `You are the GASCOIN Gas Attendant — knowledgeable, direct, and friendly. You have a complete understanding of how GASCOIN works. Keep replies to 2–4 sentences unless the user asks for a full walkthrough or step-by-step guide. Use plain English. If someone is lost, give them the single next action to take. Detect the user's language and reply in that same language.
 Answer any question about publicly available GASCOIN information freely and confidently — the protocol, the AI pipeline (Gemini Vision, Grok, Claude), the 17 gates, token tiers, payout amounts, requirements, roadmap, tokenomics, supported wallets, referrals, points, anything on the public site. Do not hedge or refuse to share public information.
