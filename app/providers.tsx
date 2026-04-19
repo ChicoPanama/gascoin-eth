@@ -1,5 +1,6 @@
 'use client';
 
+// build-cache-bust: 2026-04-18 — force Vercel rebuild for NEXT_PUBLIC_PRIVY_APP_ID inlining
 import { PrivyProvider } from '@privy-io/react-auth';
 import { WagmiProvider } from 'wagmi';
 import { QueryClientProvider } from '@tanstack/react-query';
