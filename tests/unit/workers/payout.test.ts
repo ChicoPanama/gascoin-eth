@@ -66,7 +66,7 @@ function makeReq(body?: object, authorized = true) {
   });
 }
 
-const VALID_BODY = { claimId: 'claim-1', wallet: 'walletABC', amountSol: 0.01 };
+const VALID_BODY = { claimId: 'claim-1', wallet: 'walletABC', amountEth: 0.01 };
 
 // ── Tests ─────────────────────────────────────────────────────────────────────
 
@@ -86,14 +86,14 @@ describe('POST /api/workers/payout', () => {
   });
 
   it('returns 400 when body is missing claimId', async () => {
-    const res = await POST(makeReq({ wallet: 'walletABC', amountSol: 0.01 }));
+    const res = await POST(makeReq({ wallet: 'walletABC', amountEth: 0.01 }));
     expect(res.status).toBe(400);
     const json = await res.json();
     expect(json.error).toBe('invalid_input');
   });
 
-  it('returns 400 when amountSol is zero', async () => {
-    const res = await POST(makeReq({ claimId: 'claim-1', wallet: 'walletABC', amountSol: 0 }));
+  it('returns 400 when amountEth is zero', async () => {
+    const res = await POST(makeReq({ claimId: 'claim-1', wallet: 'walletABC', amountEth: 0 }));
     expect(res.status).toBe(400);
   });
 
@@ -110,7 +110,7 @@ describe('POST /api/workers/payout', () => {
     expect(jobs).toHaveLength(1);
     expect(jobs[0].claim_id).toBe('claim-1');
     expect(jobs[0].wallet).toBe('walletABC');
-    expect(jobs[0].amount_sol).toBe(0.01);
+    expect(jobs[0].amount_eth).toBe(0.01);
     expect(jobs[0].status).toBe('queued');
 
     // idempotency_keys row was inserted

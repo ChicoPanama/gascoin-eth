@@ -12,8 +12,8 @@ export async function POST(req: Request) {
   const body = await req.json().catch(() => ({}));
   const claimId = String(body.claimId || '');
   const wallet = String(body.wallet || '');
-  const amountSol = Number(body.amountSol || 0);
-  if (!claimId || !wallet || amountSol <= 0) {
+  const amountEth = Number(body.amountEth || 0);
+  if (!claimId || !wallet || amountEth <= 0) {
     return NextResponse.json({ ok: false, error: 'invalid_input' }, { status: 400 });
   }
 
@@ -24,8 +24,8 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok:false, error:'supabase_not_configured' }, { status: 500 });
   }
 
-  const idemKey = resolveIdempotencyKey(req.headers, `${claimId}:${wallet}:${amountSol}`);
-  const reqHash = hashRequestBody({ claimId, wallet, amountSol });
+  const idemKey = resolveIdempotencyKey(req.headers, `${claimId}:${wallet}:${amountEth}`);
+  const reqHash = hashRequestBody({ claimId, wallet, amountEth });
 
   const { data: idemExisting } = await supabase
     .from('idempotency_keys')
@@ -54,7 +54,7 @@ export async function POST(req: Request) {
   await supabase.from('payout_jobs').upsert({
     claim_id: claimId,
     wallet,
-    amount_sol: amountSol,
+    amount_eth: amountEth,
     status: 'queued',
     idempotency_key: idemKey,
     updated_at: new Date().toISOString()

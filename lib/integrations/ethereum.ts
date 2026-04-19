@@ -96,6 +96,92 @@ export async function getWalletGascoinBalance(walletAddress: string): Promise<nu
   );
 }
 
+/**
+ * Batch GASCOIN balance lookup using alchemy_getTokenBalances (16 CU vs 26 CU per eth_call).
+ * Falls back to parallel eth_call when ALCHEMY_API_KEY is absent.
+ */
+export async function getWalletGascoinBalanceBatch(
+  wallets: string[],
+): Promise<Record<string, number>> {
+  const valid = wallets.filter((w) => isAddress(w));
+  if (valid.length === 0) return {};
+
+  const contract = process.env.GASCOIN_CONTRACT_ADDRESS ?? '';
+  const rpcUrl = getRpcUrl();
+
+  const results = await Promise.all(
+    valid.map(async (wallet): Promise<[string, number]> => {
+      try {
+        const res = await fetch(rpcUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            id: 1,
+            jsonrpc: '2.0',
+            method: 'alchemy_getTokenBalances',
+            params: [wallet, [contract]],
+          }),
+        });
+        const json = await res.json();
+        const hex: string = json?.result?.tokenBalances?.[0]?.tokenBalance ?? '0x0';
+        const raw = BigInt(hex === '0x' ? '0x0' : hex);
+        return [wallet, Number(raw) / Number(SCALE)];
+      } catch {
+        return [wallet, 0];
+      }
+    }),
+  );
+
+  return Object.fromEntries(results);
+}
+
+export interface AssetTransfer {
+  blockNum: string;
+  hash: string;
+  from: string;
+  to: string | null;
+  value: number | null;
+  asset: string | null;
+}
+
+/**
+ * Pull ETH transfers to/from the treasury wallet via alchemy_getAssetTransfers.
+ * Used for payout ledger reconciliation and the claims history feed.
+ */
+export async function getTreasuryTransfers(
+  direction: 'from' | 'to',
+  pageKey?: string,
+): Promise<{ transfers: AssetTransfer[]; pageKey?: string }> {
+  const treasury = process.env.GASCOIN_TREASURY_WALLET ?? '';
+  if (!treasury || !isAddress(treasury)) return { transfers: [] };
+
+  const params: Record<string, unknown> = {
+    category: ['external'],
+    maxCount: '0x14', // 20 per page
+    order: 'desc',
+    withMetadata: false,
+    excludeZeroValue: true,
+  };
+  if (direction === 'from') params.fromAddress = treasury;
+  else params.toAddress = treasury;
+  if (pageKey) params.pageKey = pageKey;
+
+  try {
+    const res = await fetch(getRpcUrl(), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: 1, jsonrpc: '2.0', method: 'alchemy_getAssetTransfers', params: [params] }),
+    });
+    const json = await res.json();
+    return {
+      transfers: json?.result?.transfers ?? [],
+      pageKey: json?.result?.pageKey,
+    };
+  } catch {
+    return { transfers: [] };
+  }
+}
+
 export async function hasMinimumGascoin(
   walletAddress: string,
   minTokens: number,
@@ -182,15 +268,27 @@ export async function sendEthPayout(toAddress: string, amountEth: number): Promi
 
   try {
     const account = privateKeyToAccount(privateKey);
+    const client = getPublicClient();
     const walletClient = createWalletClient({
       account,
       chain: mainnet,
       transport: http(getRpcUrl()),
     });
 
+    const value = parseEther(amountEth.toFixed(18));
+
+    // EIP-1559 gas estimation — avoids overpaying base fee and stuck txs
+    const [fees, gasEstimate] = await Promise.all([
+      client.estimateFeesPerGas(),
+      client.estimateGas({ account: account.address, to: toAddress as Address, value }),
+    ]);
+
     const txHash = await walletClient.sendTransaction({
       to: toAddress as Address,
-      value: parseEther(amountEth.toFixed(18)),
+      value,
+      maxFeePerGas: fees.maxFeePerGas,
+      maxPriorityFeePerGas: fees.maxPriorityFeePerGas,
+      gas: gasEstimate,
     });
 
     return { ok: true, txHash, isDryRun: false };
