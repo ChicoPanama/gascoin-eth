@@ -2,7 +2,7 @@ import { redirect } from 'next/navigation';
 import { verifyAdminSession } from '../../actions/admin-auth';
 import { getSupabaseAdmin } from '../../../lib/supabase';
 import { getTreasuryBalances } from '../../../lib/integrations/ethereum';
-import { formatSol } from '../../../lib/formatters';
+import { formatEth } from '../../../lib/formatters';
 
 export default async function TreasuryPage() {
   const session = await verifyAdminSession();
@@ -29,17 +29,17 @@ export default async function TreasuryPage() {
       .eq('reward_status', 'pending'),
     supabase
       .from('payout_jobs')
-      .select('id, claim_id, wallet, amount_sol, status, created_at, tx_hash, last_error, attempts')
+      .select('id, claim_id, wallet, amount_eth, status, created_at, tx_hash, last_error, attempts')
       .order('created_at', { ascending: false })
       .limit(20),
     supabase
       .from('treasury_snapshots')
-      .select('ts, sol_balance, usd_value, gascoin_balance')
+      .select('ts, eth_balance, usd_value, gascoin_balance')
       .order('ts', { ascending: false })
       .limit(30),
     supabase
       .from('payout_jobs')
-      .select('id, claim_id, wallet, amount_sol, last_error, attempts, max_attempts, updated_at')
+      .select('id, claim_id, wallet, amount_eth, last_error, attempts, max_attempts, updated_at')
       .eq('status', 'failed')
       .order('updated_at', { ascending: false })
       .limit(10),
@@ -50,8 +50,8 @@ export default async function TreasuryPage() {
   // Treasury snapshot history — reverse chronological from query, reverse
   // for chart (oldest → newest left to right)
   const snapshots = (snapshotRows || []).slice().reverse();
-  const snapshotMax = Math.max(1, ...snapshots.map((s: any) => Number(s.sol_balance || 0)));
-  const snapshotMin = Math.min(...snapshots.map((s: any) => Number(s.sol_balance || 0)), snapshotMax);
+  const snapshotMax = Math.max(1, ...snapshots.map((s: any) => Number(s.eth_balance || 0)));
+  const snapshotMin = Math.min(...snapshots.map((s: any) => Number(s.eth_balance || 0)), snapshotMax);
 
   return (
     <div style={{ padding: '32px 40px' }}>
@@ -112,25 +112,25 @@ export default async function TreasuryPage() {
         border: `1px solid ${process.env.ENABLE_LIVE_PAYOUT === 'true' ? 'rgba(100,220,120,0.2)' : 'rgba(255,200,80,0.2)'}`,
         color: process.env.ENABLE_LIVE_PAYOUT === 'true' ? 'rgba(100,220,120,0.9)' : 'rgba(255,200,80,0.8)',
       }}>
-        PAYOUT MODE: {process.env.ENABLE_LIVE_PAYOUT === 'true' ? 'LIVE — real SOL transactions' : 'DRY RUN — no real transactions'}
+        PAYOUT MODE: {process.env.ENABLE_LIVE_PAYOUT === 'true' ? 'LIVE — real ETH transactions' : 'DRY RUN — no real transactions'}
       </div>
 
       {/* Treasury snapshot history */}
       {snapshots.length > 0 && (
         <div style={{ marginBottom: 32 }}>
           <div style={{ fontFamily: 'IBM Plex Mono', fontSize: 10, color: 'var(--text-secondary)', letterSpacing: '0.3em', textTransform: 'uppercase', marginBottom: 16 }}>
-            SOL BALANCE · LAST {snapshots.length} SNAPSHOTS
+            ETH BALANCE · LAST {snapshots.length} SNAPSHOTS
           </div>
           <div style={{ border: '1px solid var(--line)', padding: 16, background: 'rgba(var(--fg-rgb), 0.02)' }}>
             <div style={{ display: 'flex', gap: 2, alignItems: 'flex-end', height: 100 }}>
               {snapshots.map((s: any, i: number) => {
-                const sol = Number(s.sol_balance || 0);
+                const sol = Number(s.eth_balance || 0);
                 const range = snapshotMax - snapshotMin || 1;
                 const pct = (sol - snapshotMin) / range;
                 return (
                   <div
                     key={i}
-                    title={`${new Date(s.ts).toLocaleString()}\n${sol.toFixed(4)} SOL\n$${Number(s.usd_value || 0).toFixed(2)}`}
+                    title={`${new Date(s.ts).toLocaleString()}\n${sol.toFixed(4)} ETH\n$${Number(s.usd_value || 0).toFixed(2)}`}
                     style={{
                       flex: 1,
                       height: `${Math.max(4, pct * 80 + 12)}px`,
@@ -175,7 +175,7 @@ export default async function TreasuryPage() {
                     WALLET <span style={{ color: 'var(--fg)' }}>{j.wallet ? `${j.wallet.slice(0, 4)}…${j.wallet.slice(-4)}` : '—'}</span>
                   </span>
                   <span style={{ color: 'var(--text-secondary)' }}>
-                    AMOUNT <span style={{ color: 'var(--fg)' }}>{formatSol(Number(j.amount_sol || 0))}</span>
+                    AMOUNT <span style={{ color: 'var(--fg)' }}>{formatEth(Number(j.amount_eth || 0))}</span>
                   </span>
                   <span style={{ color: 'var(--text-secondary)' }}>
                     ATTEMPTS <span style={{ color: 'var(--status-warn)' }}>{j.attempts}/{j.max_attempts}</span>
@@ -231,7 +231,7 @@ export default async function TreasuryPage() {
                     <td className="lb-table-wallet">
                       {job.wallet ? `${job.wallet.slice(0, 4)}…${job.wallet.slice(-4)}` : '—'}
                     </td>
-                    <td className="lb-table-sol">{formatSol(job.amount_sol ?? 0)}</td>
+                    <td className="lb-table-sol">{formatEth(job.amount_eth ?? 0)}</td>
                     <td className="lb-table-time">
                       <span style={{ color: statusColor }}>{(job.status ?? '—').toUpperCase()}</span>
                     </td>

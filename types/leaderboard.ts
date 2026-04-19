@@ -1,7 +1,7 @@
 export interface LeaderboardEntry {
   wallet_address: string;
   total_submissions: number;
-  total_sol_earned: number;
+  total_eth_earned: number;
   last_submission_at: string;
   rank: number;
   gascoin_holdings: number;
@@ -15,7 +15,7 @@ export interface LeaderboardEntry {
 
 export interface LeaderboardStats {
   total_earners: number;
-  total_sol_paid: number;
+  total_eth_paid: number;
   total_approved: number;
   largest_single_refund: number;
   avg_refund_amount: number;

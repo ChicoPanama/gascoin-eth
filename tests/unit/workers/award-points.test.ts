@@ -46,14 +46,14 @@ vi.mock('@/lib/knowledge-base', () => ({
 // Token tiers for holdings tests
 vi.mock('@/lib/token-tiers', () => ({
   TOKEN_TIERS: [
-    { id: 0, slug: 'standard', name: 'Standard', min_balance: 1, max_sol_refund: 0.01 },
-    { id: 1, slug: 'commuter', name: 'Commuter', min_balance: 100000, max_sol_refund: 0.05 },
+    { id: 0, slug: 'standard', name: 'Standard', min_balance: 1, max_eth_refund: 0.01 },
+    { id: 1, slug: 'commuter', name: 'Commuter', min_balance: 100000, max_eth_refund: 0.05 },
   ],
   getTierForBalance: vi.fn().mockReturnValue({
     id: 0,
     slug: 'standard',
     name: 'Standard',
-    max_sol_refund: 0.01,
+    max_eth_refund: 0.01,
   }),
 }));
 

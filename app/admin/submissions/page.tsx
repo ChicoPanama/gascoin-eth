@@ -2,7 +2,7 @@ import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { verifyAdminSession } from '../../actions/admin-auth';
 import { getSupabaseAdmin } from '../../../lib/supabase';
-import { truncateWallet, timeAgo, formatSol } from '../../../lib/formatters';
+import { truncateWallet, timeAgo, formatEth } from '../../../lib/formatters';
 import { approveSubmission, rejectSubmission } from '../../actions/admin/submissions';
 
 const STATUS_LABELS: Record<string, string> = {
@@ -224,7 +224,7 @@ export default async function SubmissionsPage(props: { searchParams: Promise<{ f
             <th>Auth Score</th>
             <th>Dedup</th>
             <th>Gates</th>
-            <th>SOL</th>
+            <th>ETH</th>
             <th>Actions</th>
           </tr>
         </thead>
@@ -311,7 +311,7 @@ export default async function SubmissionsPage(props: { searchParams: Promise<{ f
                       await approveSubmission(c.id, recommendedSol, 'admin_dispatch');
                     }}>
                       <button type="submit" className="sf-btn-solid" style={{ padding: '4px 12px', fontSize: 9 }}>
-                        APPROVE {formatSol(recommendedSol)}
+                        APPROVE {formatEth(recommendedSol)}
                       </button>
                     </form>
                   )}

@@ -368,7 +368,7 @@ describe('CATEGORY 3: Token Tier System', () => {
 
     expect(tier.name).toBe('Standard');
     expect(tier.cooldown_days).toBe(7);
-    expect(tier.max_sol_refund).toBe(0.10);
+    expect(tier.max_eth_refund).toBe(0.005);
   });
 
   it('Test 17: Balance at exact tier boundaries — 100000=Commuter, 4999999=Commuter (not Road Warrior)', () => {
@@ -394,7 +394,7 @@ describe('CATEGORY 3: Token Tier System', () => {
     expect(tier.name).toBe('Fleet');
     expect(tier.min_tokens).toBe(10_000_000);
     expect(tier.cooldown_days).toBe(1.75);
-    expect(tier.max_sol_refund).toBe(1.0);
+    expect(tier.max_eth_refund).toBe(0.05);
     expect(tier.queue_priority).toBe(1); // highest priority
   });
 
@@ -817,7 +817,7 @@ describe('CATEGORY 8: Tier + Cooldown Interaction', () => {
     const tier = getTierForBalance(1);
 
     expect(tier.name).toBe('Standard');
-    expect(tier.max_sol_refund).toBe(0.10);
+    expect(tier.max_eth_refund).toBe(0.005);
     expect(tier.cooldown_days).toBe(7);
 
     // Verify cooldown math: 7 days = 168 hours = 1 submission per week
@@ -836,7 +836,7 @@ describe('CATEGORY 8: Tier + Cooldown Interaction', () => {
     const tier = getTierForBalance(10_000_000);
 
     expect(tier.name).toBe('Fleet');
-    expect(tier.max_sol_refund).toBe(1.0);
+    expect(tier.max_eth_refund).toBe(0.05);
     expect(tier.cooldown_days).toBe(1.75);
 
     // Verify cooldown math
@@ -889,10 +889,10 @@ describe('CATEGORY 8: Tier + Cooldown Interaction', () => {
     const exactFleet = getTierForBalance(10_000_000);
     expect(exactFleet.name).toBe('Fleet');
 
-    // Verify max_sol_refund at each boundary edge
-    expect(justBelowCommuter.max_sol_refund).toBe(0.10);  // Standard cap
-    expect(justBelowRoadWarrior.max_sol_refund).toBe(0.25); // Commuter cap
-    expect(justBelowFleet.max_sol_refund).toBe(0.50);       // Road Warrior cap
+    // Verify max_eth_refund at each boundary edge
+    expect(justBelowCommuter.max_eth_refund).toBe(0.005);  // Standard cap
+    expect(justBelowRoadWarrior.max_eth_refund).toBe(0.0125); // Commuter cap
+    expect(justBelowFleet.max_eth_refund).toBe(0.025);       // Road Warrior cap
   });
 });
 

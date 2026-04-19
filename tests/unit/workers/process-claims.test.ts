@@ -37,7 +37,7 @@ vi.mock('@/lib/token-tiers', () => ({
     id: 'standard',
     slug: 'standard',
     name: 'Standard',
-    max_sol_refund: 0.01,
+    max_eth_refund: 0.01,
   }),
 }));
 

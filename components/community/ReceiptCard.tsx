@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import type { CommunityReceipt } from '../../types/community';
-import { truncateWallet, formatSol } from '../../lib/formatters';
+import { truncateWallet, formatEth } from '../../lib/formatters';
 
 export function ReceiptCard({ receipt, onClick }: {
   receipt: CommunityReceipt;
@@ -55,7 +55,7 @@ export function ReceiptCard({ receipt, onClick }: {
           <span className="cf-card-date">{date}</span>
         </div>
 
-        <div className="cf-card-sol">{formatSol(receipt.sol_amount)}</div>
+        <div className="cf-card-sol">{formatEth(receipt.sol_amount)}</div>
 
         {receipt.receipt_usd != null && receipt.receipt_usd > 0 && (
           <div className="cf-card-usd">${receipt.receipt_usd.toFixed(2)} receipt</div>

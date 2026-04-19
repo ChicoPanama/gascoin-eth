@@ -139,7 +139,7 @@ export default function PerksPage() {
         <div className="gc-section-num" style={{ marginBottom: 16 }}>How Token Gating Works</div>
         <div className="gc-steps-grid">
           {[
-            { num: '01', title: 'Acquire GASCOIN', desc: 'Buy GASCOIN on Raydium or Jupiter. Or earn through referrals and platform participation. Your tier is checked live at submission time — upgrades take effect immediately, no re-connecting required.' },
+            { num: '01', title: 'Acquire GASCOIN', desc: 'Buy GASCOIN on Uniswap or 1inch. Or earn through referrals and platform participation. Your tier is checked live at submission time — upgrades take effect immediately, no re-connecting required.' },
             { num: '02', title: 'Hold in Your Wallet', desc: 'Keep GASCOIN in your connected wallet. Balance is checked live on-chain at submission time.' },
             { num: '03', title: 'Submit & Earn More', desc: 'Higher tier = higher refund cap per submission. Your tier is snapshotted at submission time.' },
           ].map((s) => (
@@ -170,14 +170,14 @@ export default function PerksPage() {
       <div style={{ marginTop: 48, marginBottom: 64, border: '1px solid rgba(255,255,255,0.08)', padding: 32 }}>
         <div className="gc-section-num" style={{ marginBottom: 16 }}>Where to Buy GASCOIN</div>
         <p style={{ fontFamily: 'IBM Plex Sans', fontWeight: 300, fontSize: 14, color: 'rgba(255,255,255,0.5)', lineHeight: 1.7, marginBottom: 24 }}>
-          GASCOIN trades on Solana DEXes. Your tier is checked live at submission time — upgrades take effect immediately, no re-connecting required.
+          GASCOIN trades on Ethereum DEXes. Your tier is checked live at submission time — upgrades take effect immediately, no re-connecting required.
         </p>
         <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
           <a href="https://raydium.io/swap" target="_blank" rel="noopener" className="sf-btn-solid" style={{ textDecoration: 'none' }}>
-            Buy on Raydium →
+            Buy on Uniswap →
           </a>
-          <a href="https://jup.ag" target="_blank" rel="noopener" className="sf-btn-ghost" style={{ textDecoration: 'none' }}>
-            Buy on Jupiter →
+          <a href="https://uniswap.org" target="_blank" rel="noopener" className="sf-btn-ghost" style={{ textDecoration: 'none' }}>
+            Buy on 1inch →
           </a>
         </div>
       </div>

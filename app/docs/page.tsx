@@ -5,7 +5,7 @@ import Link from 'next/link';
 
 export const metadata = {
   title: 'GASCOIN — The Complete Protocol Manual',
-  description: `Single-page documentation for GASCOIN: ${GATE_COUNT} verification gates, 3-AI pipeline, Solana payouts, and the full Season 1 beta manual.`,
+  description: `Single-page documentation for GASCOIN: ${GATE_COUNT} verification gates, 3-AI pipeline, Ethereum payouts, and the full Season 1 beta manual.`,
 };
 
 const CHAPTER_ORDER = [
@@ -93,7 +93,7 @@ export default function DocsSinglePage() {
           <Link href="/submit" className="gcdocs-hero-btn">Submit Receipt</Link>
         </div>
         <pre className="gcdocs-hero-ascii">
-{`  BUY GAS  ──→  WRITE LAST 4  ──→  TWEET $GASCOIN  ──→  SUBMIT  ──→  ${GATE_COUNT} GATES  ──→  SOL REFUND
+{`  BUY GAS  ──→  WRITE LAST 4  ──→  TWEET $GASCOIN  ──→  SUBMIT  ──→  ${GATE_COUNT} GATES  ──→  ETH REFUND
   (any station)    (on receipt)      (public post)      (upload)   (auto-verify)    (to wallet)`}
         </pre>
       </section>

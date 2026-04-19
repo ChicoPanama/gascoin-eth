@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '../../../lib/supabase';
 import { verifyPrivySession } from '../../../lib/integrations/privy';
-import { isValidSolanaAddress } from '../../../lib/validate-wallet';
+import { isValidEthereumAddress } from '../../../lib/validate-wallet';
 
 // SECURITY: Requires Privy authentication + wallet format validation.
 // Hardened 2026-04-06 — was previously unauthenticated (HIGH risk).
@@ -32,7 +32,7 @@ export async function POST(req: NextRequest) {
     }
 
     // SECURITY: Validate wallet is a real Ethereum address
-    if (!isValidSolanaAddress(wallet)) {
+    if (!isValidEthereumAddress(wallet)) {
       return NextResponse.json({ error: 'invalid_wallet_address' }, { status: 400 });
     }
     const supabase = getSupabaseAdmin();

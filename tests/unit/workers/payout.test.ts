@@ -26,7 +26,7 @@ vi.mock('@/lib/integrations/ethereum', () => ({
 }));
 
 vi.mock('@/lib/token-tiers', () => ({
-  getTierForBalance: vi.fn().mockReturnValue({ slug: 'commuter', max_sol_refund: 0.1 }),
+  getTierForBalance: vi.fn().mockReturnValue({ slug: 'commuter', max_eth_refund: 0.1 }),
 }));
 
 vi.mock('@/lib/integrations/x', () => ({
@@ -193,7 +193,7 @@ describe('T8 — double-payout race: processQueuedPayout idempotency guard', () 
         id: 'job-paid-1',
         claim_id: 'claim-already-paid',
         wallet: 'walletPaid',
-        amount_sol: 0.01,
+        amount_eth: 0.01,
         status: 'paid',
         attempts: 1,
         max_attempts: 5,
@@ -239,7 +239,7 @@ describe('T8 — double-payout race: processQueuedPayout idempotency guard', () 
         id: 'job-seq-1',
         claim_id: 'claim-seq-1',
         wallet: 'walletSeqTest',
-        amount_sol: 0.01,
+        amount_eth: 0.01,
         status: 'queued',
         attempts: 0,
         max_attempts: 5,

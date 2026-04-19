@@ -12,7 +12,7 @@ export function composeDashboardTweet(params: {
   if (usd > 0) {
     return `My network has saved $${usd} in gas fees through GASCOIN. ${params.referredCount} people refunded so far.\n\nGet your gas money back too → ${params.referralUrl}\n\n@GasCoinApp $GASCOIN #gascoin`;
   }
-  return `I'm earning gas refunds in SOL with GASCOIN. Submit a receipt and get your gas money back → ${params.referralUrl}\n\n@GasCoinApp $GASCOIN #gascoin`;
+  return `I'm earning gas refunds in ETH with GASCOIN. Submit a receipt and get your gas money back → ${params.referralUrl}\n\n@GasCoinApp $GASCOIN #gascoin`;
 }
 
 export function composePostApprovalTweet(params: {

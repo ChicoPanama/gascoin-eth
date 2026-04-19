@@ -158,10 +158,10 @@ export async function processQueuedPayout(claimId: string) {
   // the job was created with an inflated amount.
   const currentTier = getTierForBalance(gate.tokenBalance);
   const requestedAmount = Number(job.amount_eth);
-  if (requestedAmount > currentTier.max_sol_refund + 0.0001) {
+  if (requestedAmount > currentTier.max_eth_refund + 0.0001) {
     await supabase.from('payout_jobs').update({
       status: 'blocked',
-      last_error: `amount_exceeds_tier_cap:${currentTier.slug}:max=${currentTier.max_sol_refund}:requested=${requestedAmount}`,
+      last_error: `amount_exceeds_tier_cap:${currentTier.slug}:max=${currentTier.max_eth_refund}:requested=${requestedAmount}`,
       updated_at: new Date().toISOString()
     }).eq('id', job.id);
 
@@ -171,17 +171,17 @@ export async function processQueuedPayout(claimId: string) {
       action: 'payout_blocked_amount_exceeds_tier',
       target_type: 'claim',
       target_id: claimId,
-      payload_json: { wallet: job.wallet, requestedAmount, tierSlug: currentTier.slug, maxAllowed: currentTier.max_sol_refund },
+      payload_json: { wallet: job.wallet, requestedAmount, tierSlug: currentTier.slug, maxAllowed: currentTier.max_eth_refund },
     });
 
-    return { ok: false, error: 'amount_exceeds_tier_cap', requestedAmount, tierSlug: currentTier.slug, maxAllowed: currentTier.max_sol_refund };
+    return { ok: false, error: 'amount_exceeds_tier_cap', requestedAmount, tierSlug: currentTier.slug, maxAllowed: currentTier.max_eth_refund };
   }
 
-  // Per-day spend cap — configurable via DAILY_PAYOUT_CAP_ETH (default 10 ETH).
+  // Per-day spend cap — configurable via DAILY_PAYOUT_CAP_ETH (default 1 ETH).
   // Prevents a single compromised session from draining the treasury in one batch.
-  // Default: 50 ETH/day (~500 Standard or ~50 Fleet payouts). Set
+  // Default: 1 ETH/day (~200 Standard or ~20 Fleet payouts). Set
   // DAILY_PAYOUT_CAP_ETH to ~15% of your treasury balance for right-sizing.
-  const dailyCapSol = Number(process.env.DAILY_PAYOUT_CAP_ETH ?? 50);
+  const dailyCapEth = Number(process.env.DAILY_PAYOUT_CAP_ETH ?? 1);
   const todayUtc = new Date().toISOString().slice(0, 10); // 'YYYY-MM-DD'
   const { data: todayPayouts } = await supabase
     .from('payouts')
@@ -189,19 +189,19 @@ export async function processQueuedPayout(claimId: string) {
     .eq('status', 'paid')
     .gte('sent_at', `${todayUtc}T00:00:00.000Z`);
   const todayTotal = (todayPayouts || []).reduce((s, p: any) => s + Number(p.amount_eth || 0), 0);
-  if (todayTotal + requestedAmount > dailyCapSol) {
+  if (todayTotal + requestedAmount > dailyCapEth) {
     try {
       await supabase.from('intelligence_entries').insert({
         entry_type: 'daily_payout_cap_reached',
         entity_type: 'wallet',
         entity_id: job.wallet,
-        summary: `Daily payout cap (${dailyCapSol} ETH) reached — claim ${claimId} queued for next day`,
-        detail_json: { claimId, wallet: job.wallet, requestedAmount, todayTotal, dailyCapSol },
+        summary: `Daily payout cap (${dailyCapEth} ETH) reached — claim ${claimId} queued for next day`,
+        detail_json: { claimId, wallet: job.wallet, requestedAmount, todayTotal, dailyCapEth },
         severity: 'high',
         pipeline_source: 'payout_worker',
       });
     } catch {}
-    return { ok: false, error: 'daily_payout_cap_reached', todayTotal, dailyCapSol };
+    return { ok: false, error: 'daily_payout_cap_reached', todayTotal, dailyCapEth };
   }
 
   const sent = await sendEthPayout(job.wallet, requestedAmount);
@@ -328,7 +328,7 @@ export async function processQueuedPayout(claimId: string) {
   // memory immutable (permanent audit record that cannot be overwritten).
   writePayoutEvent(job.wallet, {
     claimId,
-    amountSol: job.amount_eth,
+    amountEth: job.amount_eth,
     txHash: sent.txHash || 'unknown',
     status: 'dispatched',
   }).catch(() => {});

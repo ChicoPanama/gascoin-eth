@@ -118,7 +118,7 @@ export async function GET(req: Request) {
   const noDataCount = workers.filter((w) => w.status === 'no_data').length;
 
   // T1: Flag if live payouts are disabled — DRYRUN mode silently marks claims
-  // paid without transferring SOL. Surface this in the health feed.
+  // paid without transferring ETH. Surface this in the health feed.
   const livePayoutEnabled = process.env.ENABLE_LIVE_PAYOUT === 'true';
 
   // C4: Validate GASCOIN_CONTRACT_ADDRESS format at health-check time.

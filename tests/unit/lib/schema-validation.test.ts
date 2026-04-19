@@ -15,7 +15,7 @@ describe('Schema: admin/treasury queries', () => {
   it('payout_jobs select uses only valid columns', () => {
     const errors = validateSelect(
       'payout_jobs',
-      'id, claim_id, wallet, amount_sol, status, created_at'
+      'id, claim_id, wallet, amount_eth, status, created_at'
     );
     expect(errors).toEqual([]);
   });

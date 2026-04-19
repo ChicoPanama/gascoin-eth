@@ -7,14 +7,14 @@
 // ── Treasury ──
 export const DEMO_TREASURY = {
   solBalance: 12847,
-  solUsd: 2_180_000,
+  ethUsd: 2_180_000,
   gascoinBalance: 8_500_000,
   gascoinUsd: 1_950_000,
 };
 
 export const DEMO_TREASURY_DISPLAY = {
   treasuryUsd: '$2.2M',
-  treasurySub: '12,847 SOL',
+  treasurySub: '12,847 ETH',
   marketCap: '$4.2M',
   volume: '$180K',
 };
@@ -39,16 +39,16 @@ export const DEMO_CHART_DATA = [
 
 // ── Leaderboard (10 entries with X handles) ──
 export const DEMO_LEADERBOARD = [
-  { wallet_address: '7xKp...m3Fv', total_sol_earned: 2.847, rank: 1, total_submissions: 8, composite_score: 285, x_handle: 'sol_saver' },
-  { wallet_address: '9bRq...kE2L', total_sol_earned: 2.134, rank: 2, total_submissions: 6, composite_score: 213, x_handle: 'gas_refund_king' },
-  { wallet_address: '3mWx...pT8J', total_sol_earned: 1.892, rank: 3, total_submissions: 5, composite_score: 189, x_handle: 'crypto_driver' },
-  { wallet_address: 'Ah4N...v7Ks', total_sol_earned: 1.456, rank: 4, total_submissions: 4, composite_score: 146, x_handle: 'defi_commuter' },
-  { wallet_address: 'Fm9B...cR3P', total_sol_earned: 1.201, rank: 5, total_submissions: 4, composite_score: 120, x_handle: 'pump_receipts' },
-  { wallet_address: '2qLv...hW6D', total_sol_earned: 0.987, rank: 6, total_submissions: 3, composite_score: 99, x_handle: 'solana_fuel' },
-  { wallet_address: 'Jn5X...tM4A', total_sol_earned: 0.743, rank: 7, total_submissions: 2, composite_score: 74, x_handle: 'chain_refund' },
-  { wallet_address: 'Ks8H...bY1G', total_sol_earned: 0.512, rank: 8, total_submissions: 2, composite_score: 51, x_handle: 'gas_back_sol' },
-  { wallet_address: 'Pv2C...nQ5R', total_sol_earned: 0.234, rank: 9, total_submissions: 1, composite_score: 23, x_handle: 'receipt_hunter' },
-  { wallet_address: 'Wt6F...jL9E', total_sol_earned: 0.089, rank: 10, total_submissions: 1, composite_score: 9, x_handle: 'gascoin_og' },
+  { wallet_address: '7xKp...m3Fv', total_eth_earned: 2.847, rank: 1, total_submissions: 8, composite_score: 285, x_handle: 'sol_saver' },
+  { wallet_address: '9bRq...kE2L', total_eth_earned: 2.134, rank: 2, total_submissions: 6, composite_score: 213, x_handle: 'gas_refund_king' },
+  { wallet_address: '3mWx...pT8J', total_eth_earned: 1.892, rank: 3, total_submissions: 5, composite_score: 189, x_handle: 'crypto_driver' },
+  { wallet_address: 'Ah4N...v7Ks', total_eth_earned: 1.456, rank: 4, total_submissions: 4, composite_score: 146, x_handle: 'defi_commuter' },
+  { wallet_address: 'Fm9B...cR3P', total_eth_earned: 1.201, rank: 5, total_submissions: 4, composite_score: 120, x_handle: 'pump_receipts' },
+  { wallet_address: '2qLv...hW6D', total_eth_earned: 0.987, rank: 6, total_submissions: 3, composite_score: 99, x_handle: 'solana_fuel' },
+  { wallet_address: 'Jn5X...tM4A', total_eth_earned: 0.743, rank: 7, total_submissions: 2, composite_score: 74, x_handle: 'chain_refund' },
+  { wallet_address: 'Ks8H...bY1G', total_eth_earned: 0.512, rank: 8, total_submissions: 2, composite_score: 51, x_handle: 'gas_back_sol' },
+  { wallet_address: 'Pv2C...nQ5R', total_eth_earned: 0.234, rank: 9, total_submissions: 1, composite_score: 23, x_handle: 'receipt_hunter' },
+  { wallet_address: 'Wt6F...jL9E', total_eth_earned: 0.089, rank: 10, total_submissions: 1, composite_score: 9, x_handle: 'gascoin_og' },
 ];
 
 // ── Proof of Payout (8 recent receipts — cycles in groups of 4) ──
@@ -86,7 +86,7 @@ export const DEMO_REFERRAL = {
 // ── Community Stats ──
 export const DEMO_COMMUNITY_STATS = {
   total_approved: 1247,
-  total_sol_paid: 4821.5,
+  total_eth_paid: 4821.5,
   unique_countries: 23,
   avg_refund_sol: 0.38,
 };

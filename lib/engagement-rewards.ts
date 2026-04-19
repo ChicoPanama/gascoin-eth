@@ -9,7 +9,7 @@
 //   - GASCOIN holdings bonus
 //
 // Points drive leaderboard rank, badges, and status.
-// Points do NOT convert to SOL.
+// Points do NOT convert to ETH.
 // ═══════════════════════════════════════════
 
 import type { ContentType } from './x-api';

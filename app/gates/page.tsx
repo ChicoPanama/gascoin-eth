@@ -74,7 +74,7 @@ export default function GatesPage() {
         </h1>
         <p className="gt-header-body">
           Every GASCOIN submission passes through {GATE_COUNT} sequential verification
-          gates before SOL is released. All gate logic is documented here in
+          gates before ETH is released. All gate logic is documented here in
           full. Admin review may apply in edge cases.
         </p>
         <div className="lb-header__live">

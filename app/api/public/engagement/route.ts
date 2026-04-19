@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '../../../../lib/supabase';
-import { isValidSolanaAddress } from '../../../../lib/validate-wallet';
+import { isValidEthereumAddress } from '../../../../lib/validate-wallet';
 import { checkRateLimit } from '../../../../lib/rate-limit';
 import { getClientIp } from '../../../../lib/ip';
 
@@ -19,7 +19,7 @@ export async function GET(req: Request) {
   }
 
   // SECURITY: Validate wallet format
-  if (!isValidSolanaAddress(wallet)) {
+  if (!isValidEthereumAddress(wallet)) {
     return NextResponse.json({ error: 'invalid_wallet_address' }, { status: 400 });
   }
 

@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useWalletHistory } from '../../hooks/useWalletHistory';
-import { formatSol, timeAgo } from '../../lib/formatters';
+import { formatEth, timeAgo } from '../../lib/formatters';
 
 export function WalletDrillDown({ wallet, onClose }: {
   wallet: string | null;
@@ -49,7 +49,7 @@ export function WalletDrillDown({ wallet, onClose }: {
                 <div className="lb-drill-date">
                   {new Date(h.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                 </div>
-                <div className="lb-drill-amount">{formatSol(h.sol_amount)}</div>
+                <div className="lb-drill-amount">{formatEth(h.sol_amount)}</div>
                 <div className="lb-drill-gates">{h.gates_passed}/10 GATES</div>
                 <div className="lb-drill-id">
                   GC-{new Date(h.created_at).getFullYear()}-{h.id.slice(0, 5).toUpperCase()}
@@ -60,7 +60,7 @@ export function WalletDrillDown({ wallet, onClose }: {
         </div>
 
         <div className="lb-drill-footer">
-          <span className="lb-drill-total">Total Earned: {formatSol(total)}</span>
+          <span className="lb-drill-total">Total Earned: {formatEth(total)}</span>
           <Link href="/submit" className="gc-teaser-link">Submit Receipt</Link>
         </div>
       </div>

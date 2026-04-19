@@ -713,19 +713,19 @@ export async function writeReferralRingFlag(
 }
 
 /**
- * Record a payout event (on-chain SOL dispatch). Lands in payout_event,
+ * Record a payout event (on-chain ETH dispatch). Lands in payout_event,
  * marked immutable (permanent audit record).
  */
 export async function writePayoutEvent(
   wallet: string,
   payout: {
     claimId: string;
-    amountSol: number;
+    amountEth: number;
     txHash: string;
     status: 'dispatched' | 'failed' | 'retried';
   },
 ): Promise<void> {
-  const line = `payout:${payout.status} | ${payout.amountSol.toFixed(4)} SOL | claim=${payout.claimId} | tx=${payout.txHash.slice(0, 16)}...`;
+  const line = `payout:${payout.status} | ${payout.amountEth.toFixed(4)} ETH | claim=${payout.claimId} | tx=${payout.txHash.slice(0, 16)}...`;
   await addMemory('wallet', wallet, line, {
     category: MEM0_CATEGORIES.PAYOUT_EVENT,
     agentId: MEM0_AGENTS.PAYOUT_WORKER,
@@ -738,7 +738,7 @@ export async function writePayoutEvent(
       signal: payout.status,
       severity: payout.status === 'failed' ? 'high' : 'info',
       claim_id: payout.claimId,
-      amount_sol: payout.amountSol,
+      amount_eth: payout.amountEth,
       tx_hash: payout.txHash,
     },
   });

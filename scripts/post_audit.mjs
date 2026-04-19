@@ -21,7 +21,7 @@ const required = [
   'lib/integrations/ocr.ts',
   'lib/integrations/fraud.ts',
   'lib/integrations/pricing.ts',
-  'lib/integrations/solana.ts',
+  'lib/integrations/ethereum.ts',
   'app/api/auth/session/route.ts',
   'app/api/workers/process-claims/route.ts',
   'app/api/workers/payout/route.ts',

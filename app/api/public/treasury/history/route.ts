@@ -15,7 +15,7 @@ export async function GET() {
 
   const { data, error } = await supabase
     .from('treasury_snapshots')
-    .select('sol_balance,usd_value,ts')
+    .select('eth_balance,usd_value,ts')
     .gte('ts', since)
     .order('ts', { ascending: true })
     .limit(400);
@@ -30,7 +30,7 @@ export async function GET() {
     const key = d.toISOString().slice(0, 10);
     byDay.set(key, {
       day: d.toLocaleDateString('en-US', { weekday: 'short' }),
-      sol: Number(row.sol_balance || 0),
+      sol: Number(row.eth_balance || 0),
       usdc: Number(row.usd_value || 0),
       ts,
     });

@@ -102,7 +102,7 @@ export default async function AdminActivityPage() {
       .select('status'),
     supabase
       .from('payout_jobs')
-      .select('id, claim_id, wallet, amount_sol, last_error, attempts, max_attempts, updated_at')
+      .select('id, claim_id, wallet, amount_eth, last_error, attempts, max_attempts, updated_at')
       .eq('status', 'failed')
       .order('updated_at', { ascending: false })
       .limit(5),

@@ -37,7 +37,7 @@ vi.mock('@/lib/token-tiers', () => ({
   getTierForBalance: vi.fn().mockReturnValue({
     id: 'standard',
     slug: 'standard',
-    max_sol_refund: 0.01,
+    max_eth_refund: 0.01,
   }),
 }));
 

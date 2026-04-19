@@ -7,7 +7,7 @@ import { WalletButton } from '../ui/WalletButton';
 import { useGascoinWallet } from '../../hooks/useGascoinWallet';
 import { useWalletTracker } from '../../hooks/useWalletTracker';
 import { useCooldownTimer } from '../../hooks/useCooldownTimer';
-import { truncateWallet, formatSol, timeAgo } from '../../lib/formatters';
+import { truncateWallet, formatEth, timeAgo } from '../../lib/formatters';
 import { GATES } from '../../lib/gates';
 import type { WalletSubmission, HistoryFilter } from '../../types/wallet-tracker';
 
@@ -48,7 +48,7 @@ export function WalletTrackerClient({ initialLookupAddress }: { initialLookupAdd
 
   const timer = useCooldownTimer(cooldown);
 
-  const aEarned = useAnimVal(summary?.total_sol_earned ?? 0);
+  const aEarned = useAnimVal(summary?.total_eth_earned ?? 0);
   const aApproved = useAnimVal(summary?.total_approved ?? 0);
   const aPending = useAnimVal(summary?.total_pending ?? 0);
   const aRejected = useAnimVal(summary?.total_rejected ?? 0);
@@ -169,7 +169,7 @@ export function WalletTrackerClient({ initialLookupAddress }: { initialLookupAdd
           <div className="gc-stats-grid">
             <div className="gc-stat">
               <div className="gc-stat-label">Total Earned</div>
-              <div className="gc-stat-value">{loading ? <div className="lb-skeleton" /> : formatSol(aEarned)}</div>
+              <div className="gc-stat-value">{loading ? <div className="lb-skeleton" /> : formatEth(aEarned)}</div>
             </div>
             <div className="gc-stat">
               <div className="gc-stat-label">Approved</div>
@@ -300,7 +300,7 @@ export function WalletTrackerClient({ initialLookupAddress }: { initialLookupAdd
               <tr>
                 <th>Date</th>
                 {mode === 'connected' && <th>Status</th>}
-                <th>SOL</th>
+                <th>ETH</th>
                 <th>USD</th>
                 <th>Location</th>
                 <th>Gates</th>
@@ -322,7 +322,7 @@ export function WalletTrackerClient({ initialLookupAddress }: { initialLookupAdd
                         </span>
                       </td>
                     )}
-                    <td className="lb-table-sol">{formatSol(s.sol_amount)}</td>
+                    <td className="lb-table-sol">{formatEth(s.sol_amount)}</td>
                     <td className="lb-table-claims">{s.receipt_usd != null ? `$${s.receipt_usd.toFixed(2)}` : '—'}</td>
                     <td className="lb-table-claims">{loc}</td>
                     <td className="lb-table-claims">{isRejected ? `✕ G${s.gates_passed}` : `${s.gates_passed}/${GATES.length}`}</td>

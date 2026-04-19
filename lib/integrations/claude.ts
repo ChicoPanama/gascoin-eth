@@ -28,7 +28,7 @@ export interface ClaudeReviewContext {
   wallet: string;
   xHandle: string;
   tier: string;
-  amountSol: number;
+  amountEth: number;
   // Gate results
   gateResults: Array<{ gate: string; passed: boolean; score?: number; reason?: string }>;
   riskScore: number;
@@ -94,7 +94,7 @@ async function doClaudeReview(context: ClaudeReviewContext): Promise<ClaudeVerdi
       entity_type: 'claim',
       entity_id: context.claimId,
       summary: `Claude Gateway unavailable — claim ${context.claimId} held for manual review`,
-      detail_json: { wallet: context.wallet, tier: context.tier, amountSol: context.amountSol },
+      detail_json: { wallet: context.wallet, tier: context.tier, amountEth: context.amountEth },
       severity: 'high',
       pipeline_source: 'claude_oversight',
     }).catch(() => {});
@@ -191,7 +191,7 @@ ENTITY INTELLIGENCE:
 - Wallet: ${context.wallet}
 - X Handle: @${context.xHandle}
 - Tier: ${context.tier} — ${scrutinyNote}
-- Payout amount: ${context.amountSol} SOL
+- Payout amount: ${context.amountEth} ETH
 - Risk score: ${context.riskScore}
 
 GATE RESULTS (${passedGates.length} passed, ${failedGates.length} failed):

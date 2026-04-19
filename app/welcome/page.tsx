@@ -5,11 +5,11 @@ import { WelcomeClient } from './welcome-client';
 export const metadata: Metadata = {
   title: 'GASCOIN — Gas. Paid Back.',
   description:
-    'GASCOIN is a community-funded Solana protocol that refunds real gas receipts in SOL. Burn gas. Post proof. Get paid in SOL.',
+    'GASCOIN is a community-funded Ethereum protocol that refunds real gas receipts in ETH. Burn gas. Post proof. Get paid in ETH.',
   openGraph: {
     title: 'GASCOIN — Gas. Paid Back.',
     description:
-      'A community-funded Solana protocol that refunds real gas receipts in SOL. Verified by 15 automated gates and a three-AI review pipeline.',
+      'A community-funded Ethereum protocol that refunds real gas receipts in ETH. Verified by 15 automated gates and a three-AI review pipeline.',
     url: 'https://gascoin.app/welcome',
     images: ['/welcome/pump.svg'],
   },

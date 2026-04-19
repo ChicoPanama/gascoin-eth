@@ -646,34 +646,34 @@ describe('Category 4: Tier System Under Volume', () => {
   });
 
   // Test 17: Cooldown math — max weekly SOL payout per tier.
-  // submissions_per_week = 7 / cooldown_days, then * max_sol_refund.
+  // submissions_per_week = 7 / cooldown_days, then * max_eth_refund.
   // Fleet should be the highest earner.
   it('Test 17: Fleet tier has highest weekly SOL earning potential', () => {
     const weeklyPayouts = TOKEN_TIERS.map((tier) => {
       const submissionsPerWeek = 7 / tier.cooldown_days;
-      const weeklyMax = submissionsPerWeek * tier.max_sol_refund;
+      const weeklyMax = submissionsPerWeek * tier.max_eth_refund;
       return { slug: tier.slug, submissionsPerWeek, weeklyMax };
     });
 
     // Fleet: 7/1.75 = 4 subs/week * 1.0 SOL = 4.0 SOL/week
     const fleet = weeklyPayouts.find((p) => p.slug === 'fleet')!;
     expect(fleet.submissionsPerWeek).toBe(4);
-    expect(fleet.weeklyMax).toBe(4.0);
+    expect(fleet.weeklyMax).toBe(0.2);
 
     // Road Warrior: 7/3.5 = 2 subs/week * 0.50 = 1.0 SOL/week
     const rw = weeklyPayouts.find((p) => p.slug === 'road-warrior')!;
     expect(rw.submissionsPerWeek).toBe(2);
-    expect(rw.weeklyMax).toBe(1.0);
+    expect(rw.weeklyMax).toBe(0.05);
 
     // Commuter: 7/7 = 1 sub/week * 0.25 = 0.25 SOL/week
     const commuter = weeklyPayouts.find((p) => p.slug === 'commuter')!;
     expect(commuter.submissionsPerWeek).toBe(1);
-    expect(commuter.weeklyMax).toBe(0.25);
+    expect(commuter.weeklyMax).toBe(0.0125);
 
     // Standard: 7/7 = 1 sub/week * 0.10 = 0.10 SOL/week
     const standard = weeklyPayouts.find((p) => p.slug === 'standard')!;
     expect(standard.submissionsPerWeek).toBe(1);
-    expect(standard.weeklyMax).toBe(0.10);
+    expect(standard.weeklyMax).toBe(0.005);
 
     // Fleet should be the highest earner
     const maxPayout = Math.max(...weeklyPayouts.map((p) => p.weeklyMax));
@@ -696,8 +696,8 @@ describe('Category 4: Tier System Under Volume', () => {
     // At payout time: balance dropped to 100K => Commuter
     const payoutTier = getTierForBalance(100_000);
     expect(payoutTier.slug).toBe('commuter');
-    expect(payoutTier.max_sol_refund).toBe(0.25);
-    expect(payoutTier.max_sol_refund).toBeLessThan(submitTier.max_sol_refund);
+    expect(payoutTier.max_eth_refund).toBe(0.0125);
+    expect(payoutTier.max_eth_refund).toBeLessThan(submitTier.max_eth_refund);
 
     // Edge: dropped to 0 => Standard (min_tokens=1, but 0 < 1)
     // Actually, getTierForBalance(0) should still return Standard as fallback

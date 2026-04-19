@@ -13,7 +13,7 @@ const FAQS = [
   },
   {
     q: 'How long does gate processing take?',
-    a: 'Most submissions complete all 17 gates within 2–5 minutes. Receipt OCR (Gates 9 and 10) takes the longest — up to 45 seconds each. Once all gates pass, SOL is dispatched within 2–6 hours. The 48-hour figure is the hard maximum.',
+    a: 'Most submissions complete all 17 gates within 2–5 minutes. Receipt OCR (Gates 9 and 10) takes the longest — up to 45 seconds each. Once all gates pass, ETH is dispatched within 2–6 hours. The 48-hour figure is the hard maximum.',
   },
   {
     q: 'Can I check my submission status while gates are processing?',

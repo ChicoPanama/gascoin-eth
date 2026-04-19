@@ -19,7 +19,7 @@ export function useCommunityStats() {
           ? realStats
           : {
               ...DEMO_COMMUNITY_STATS,
-              total_usdc_paid: DEMO_COMMUNITY_STATS.total_sol_paid * 170,
+              total_usdc_paid: DEMO_COMMUNITY_STATS.total_eth_paid * 170,
               avg_refund_usdc: DEMO_COMMUNITY_STATS.avg_refund_sol * 170,
               sol_price_usd: 170,
             });
@@ -27,7 +27,7 @@ export function useCommunityStats() {
         console.error('Stats fetch error:', err);
         setStats({
           ...DEMO_COMMUNITY_STATS,
-          total_usdc_paid: DEMO_COMMUNITY_STATS.total_sol_paid * 170,
+          total_usdc_paid: DEMO_COMMUNITY_STATS.total_eth_paid * 170,
           avg_refund_usdc: DEMO_COMMUNITY_STATS.avg_refund_sol * 170,
           sol_price_usd: 170,
         });

@@ -41,7 +41,7 @@ function ReferralStats({ loading, totalConv, referrers }: { loading: boolean; to
 
 export function ReferralTeaser() {
   const [totalConv, setTotalConv] = useState(0);
-  const [totalSol, setTotalSol] = useState(0);
+  const [totalEth, setTotalSol] = useState(0);
   const [referrers, setReferrers] = useState(0);
   const [loading, setLoading] = useState(true);
 

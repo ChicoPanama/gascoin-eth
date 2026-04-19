@@ -18,7 +18,7 @@ export function CinematicIntro() {
       <div className="gc-intro-grid" />
       <div className="gc-intro-scanlines" />
       <div className="gc-intro-title">GASCOIN</div>
-      <div className="gc-intro-subtitle">Community Gas Refunds — Solana</div>
+      <div className="gc-intro-subtitle">Community Gas Refunds — Ethereum</div>
       <div className="gc-intro-flash" />
       <div className="gc-intro-bar">
         <div className="gc-intro-bar-fill" />

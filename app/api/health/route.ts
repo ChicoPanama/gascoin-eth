@@ -107,8 +107,8 @@ export async function GET(req: Request) {
         ethereum,
       },
       note: isDryRun
-        ? 'Season 1 beta — submissions flow end-to-end but no SOL is dispatched.'
-        : 'Live mode — real SOL transactions enabled.',
+        ? 'Season 1 beta — submissions flow end-to-end but no ETH is dispatched.'
+        : 'Live mode — real ETH transactions enabled.',
     },
     {
       status: allOk ? 200 : 503,

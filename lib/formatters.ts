@@ -3,8 +3,8 @@ export function truncateWallet(address: string, chars = 4): string {
   return `${address.slice(0, chars + 2)}...${address.slice(-chars)}`;
 }
 
-export function formatSol(amount: number): string {
-  return `${amount.toFixed(4)} SOL`;
+export function formatEth(amount: number): string {
+  return `${amount.toFixed(4)} ETH`;
 }
 
 export function timeAgo(date: Date | string): string {

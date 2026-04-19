@@ -8,13 +8,13 @@ export async function LiveTreasuryBar(){
     const supabase = getSupabaseAdmin();
     const { data } = await supabase
       .from('treasury_snapshots')
-      .select('sol_balance,usd_value')
+      .select('eth_balance,usd_value')
       .order('ts', { ascending: false })
       .limit(1)
       .maybeSingle();
     if (data) {
       treasuryUsd = `$${Number(data.usd_value || 0).toLocaleString()}`;
-      solBalance = `${Number(data.sol_balance || 0).toLocaleString()} SOL`;
+      solBalance = `${Number(data.eth_balance || 0).toLocaleString()} ETH`;
     }
   } catch {}
 
@@ -26,7 +26,7 @@ export async function LiveTreasuryBar(){
       <div className="v">{treasuryUsd}</div>
     </div>
     <div className="card">
-      <div className="k">SOL Balance</div>
+      <div className="k">ETH Balance</div>
       <div className="v">{solBalance}</div>
     </div>
     <div className="card">

@@ -6,9 +6,6 @@ export function isValidEthereumAddress(address: string): boolean {
   return isAddress(address);
 }
 
-// Alias so existing imports of isValidSolanaAddress still compile during transition
-export { isValidEthereumAddress as isValidSolanaAddress };
-
 export function checksumAddress(address: string): string {
   if (!isAddress(address)) throw new Error(`Invalid address: ${address}`);
   return getAddress(address);

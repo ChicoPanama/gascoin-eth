@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { supabaseBrowser } from '../../lib/supabase-client';
-import { formatSol } from '../../lib/formatters';
+import { formatEth } from '../../lib/formatters';
 import { DEMO_COMMUNITY } from '../../lib/demo-data';
 
 interface MiniReceipt {
@@ -23,14 +23,14 @@ export function CommunityTeaser() {
       try {
         const { data } = await supabaseBrowser
           .from('payouts')
-          .select('amount_sol, created_at, claims(country)')
+          .select('amount_eth, created_at, claims(country)')
           .eq('status', 'paid')
           .order('created_at', { ascending: false })
           .limit(8);
 
         const rows = (data || []).map((p: any) => ({
           country: p.claims?.country || null,
-          sol: Number(p.amount_sol || 0),
+          sol: Number(p.amount_eth || 0),
           date: new Date(p.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
         }));
         setAllItems(rows.length > 0 ? rows : DEMO_COMMUNITY);
@@ -91,7 +91,7 @@ export function CommunityTeaser() {
                     <div className="cf-teaser-card-loc">
                       {item.country || 'Verified'}
                     </div>
-                    <div className="cf-teaser-card-sol">{formatSol(item.sol)}</div>
+                    <div className="cf-teaser-card-sol">{formatEth(item.sol)}</div>
                     <div className="cf-teaser-card-date">{item.date}</div>
                   </div>
                 ))

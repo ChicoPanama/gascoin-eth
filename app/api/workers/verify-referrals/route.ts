@@ -7,7 +7,7 @@ import { writeReferralRingFlag } from '../../../../lib/mem0';
 import { writeIntelligence } from '../../../../lib/knowledge-base';
 import { chunkedIn } from '../../../../lib/supabase-utils';
 
-// Worker: auto-verify referrals + award POINTS (not SOL)
+// Worker: auto-verify referrals + award POINTS (not ETH)
 // ETH payouts are for gas receipts ONLY
 // Runs every 15 minutes via Vercel cron
 
@@ -83,13 +83,13 @@ export async function POST(req: Request) {
         }
       }
 
-      // Create conversion record — points only, no SOL
+      // Create conversion record — points only, no ETH
       await supabase.from('referral_conversions').insert({
         referral_code: '',
         referrer_wallet: ref.referrer_wallet,
         referred_wallet: ref.referred_wallet,
         submission_id: ref.id,
-        reward_sol: 0, // No SOL for referrals
+        reward_eth: 0, // No ETH for referrals
         reward_status: skipReason ? 'skipped' : 'verified',
         skip_reason: skipReason,
       });
@@ -114,7 +114,7 @@ export async function POST(req: Request) {
           // Use the typed writeReferralRingFlag helper — categorizes under
           // referral_ring_flag, marks immutable, assigns agent/app scope, and
           // busts the Upstash profile cache. The ringType/confidence/cyclePath
-          // metadata is what the payout worker reads before dispatching SOL.
+          // metadata is what the payout worker reads before dispatching ETH.
           writeReferralRingFlag(ref.referrer_wallet, {
             ringType: ringCheck.ringType === 'none' ? 'cluster' : ringCheck.ringType,
             confidence: ringCheck.confidence,

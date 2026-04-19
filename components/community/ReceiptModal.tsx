@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import type { CommunityReceipt } from '../../types/community';
 import { GATES } from '../../lib/gates';
-import { truncateWallet, formatSol } from '../../lib/formatters';
+import { truncateWallet, formatEth } from '../../lib/formatters';
 
 export function ReceiptModal({ receipt, onClose }: {
   receipt: CommunityReceipt | null;
@@ -88,8 +88,8 @@ export function ReceiptModal({ receipt, onClose }: {
             </div>
 
             <div className="cf-modal-row cf-modal-row--sol">
-              <span className="cf-modal-label">SOL Refunded</span>
-              <span className="cf-modal-value-sol">{formatSol(receipt.sol_amount)}</span>
+              <span className="cf-modal-label">ETH Refunded</span>
+              <span className="cf-modal-value-sol">{formatEth(receipt.sol_amount)}</span>
             </div>
 
             {receipt.receipt_usd != null && receipt.receipt_usd > 0 && (

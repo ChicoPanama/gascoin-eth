@@ -24,7 +24,7 @@ const TTL_TIER2  = 60 * 60 * 24;       // 24 hours — complex answers slightly 
 // ── Key derivation ─────────────────────────────────────────────────────────
 
 /**
- * Normalize question text so minor variations ("what is sol?" vs "What is SOL")
+ * Normalize question text so minor variations ("what is sol?" vs "What is ETH")
  * resolve to the same cache key.
  */
 function normalize(text: string): string {

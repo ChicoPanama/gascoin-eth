@@ -383,7 +383,7 @@ export function WelcomeClient({
         <div className="wlc-botstrip-legal">
           {isDryRun
             ? 'SEASON 1 · DRY-RUN · POINTS ONLY'
-            : 'SEASON 1 · LIVE SOL PAYOUTS'}
+            : 'SEASON 1 · LIVE ETH PAYOUTS'}
         </div>
         <Link href="/submit" className="wlc-botstrip-enter">
           ENTER →
@@ -726,7 +726,7 @@ function RoadmapPopover() {
       state: 'done' as const,
       prose: 'The foundation the whole protocol runs on — built, tested, and hardened.',
       items: [
-        'Solana payout rails',
+        'Ethereum payout rails',
         '17-gate automated verification engine',
         'AI receipt scanning with computer vision',
         'Tweet proof + wallet identity checks',
@@ -742,7 +742,7 @@ function RoadmapPopover() {
       prose: 'Invite-only. Real users, real receipts, real ETH payouts hitting real wallets.',
       items: [
         'Sign in with X (Twitter)',
-        'Ethereum wallet linking (Phantom, Backpack, Solflare)',
+        'Ethereum wallet linking (MetaMask, Rabby, Rainbow, Coinbase Wallet)',
         'Gas receipt upload and AI review',
         'Live ETH payouts on approval',
         'Claims history and status tracking',

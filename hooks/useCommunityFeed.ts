@@ -13,7 +13,7 @@ function mapPayoutToReceipt(p: any, connectedWallet: string | null): CommunityRe
   return {
     id: p.id,
     wallet: p.wallet || '',
-    sol_amount: Number(p.amount_sol || 0),
+    sol_amount: Number(p.amount_eth || 0),
     country: claim.country || null,
     receipt_usd: claim.parsed_amount ? Number(claim.parsed_amount) : null,
     receipt_date: claim.created_at || p.created_at,
@@ -47,7 +47,7 @@ export function useCommunityFeed(
     try {
       let query = supabaseBrowser
         .from('payouts')
-        .select('id, wallet, amount_sol, status, created_at, claim_id, claims(parsed_amount, created_at, country, is_featured, claim_receipts(storage_path_private, is_image_redacted))')
+        .select('id, wallet, amount_eth, status, created_at, claim_id, claims(parsed_amount, created_at, country, is_featured, claim_receipts(storage_path_private, is_image_redacted))')
         .eq('status', 'paid')
         .range(from, to);
 
@@ -57,7 +57,7 @@ export function useCommunityFeed(
 
       switch (sort) {
         case 'oldest': query = query.order('created_at', { ascending: true }); break;
-        case 'highest_sol': query = query.order('amount_sol', { ascending: false }); break;
+        case 'highest_sol': query = query.order('amount_eth', { ascending: false }); break;
         default: query = query.order('created_at', { ascending: false });
       }
 

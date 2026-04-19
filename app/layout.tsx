@@ -19,9 +19,9 @@ export const viewport: Viewport = {
 // If GATE_COUNT changes, update the "14" in this description manually.
 export const metadata: Metadata = {
   title: 'GASCOIN',
-  description: 'Community gas refunds on Solana. Post $GASCOIN or #gascoin, submit a receipt, get SOL back.',
+  description: 'Community gas refunds on Ethereum. Post $GASCOIN or #gascoin, submit a receipt, get ETH back.',
   openGraph: {
-    title: 'GASCOIN — Community Gas Refunds on Solana',
+    title: 'GASCOIN — Community Gas Refunds on Ethereum',
     description: 'Post $GASCOIN or #gascoin on X, submit your gas receipt, and receive ETH directly to your wallet. 15 automated verification gates. No middlemen.',
     siteName: 'GASCOIN',
     type: 'website',
@@ -29,7 +29,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'GASCOIN — Community Gas Refunds on Solana',
+    title: 'GASCOIN — Community Gas Refunds on Ethereum',
     description: 'Post $GASCOIN or #gascoin on X, submit your gas receipt, and receive ETH directly to your wallet.',
   },
   icons: {

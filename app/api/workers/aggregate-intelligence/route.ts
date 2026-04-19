@@ -46,7 +46,7 @@ export async function POST(req: Request) {
 
   const { data: activePayouts } = await supabase
     .from('payouts')
-    .select('wallet, amount_sol, status')
+    .select('wallet, amount_eth, status')
     .gte('created_at', yesterdayStart);
 
   const { data: activePoints } = await supabase
@@ -65,10 +65,10 @@ export async function POST(req: Request) {
     const payouts = (activePayouts || []).filter((p: any) => p.wallet === wallet);
     const points = (activePoints || []).filter((e: any) => e.wallet === wallet);
     const totalPoints = points.reduce((s: number, e: any) => s + Number(e.points || 0), 0);
-    const totalSol = payouts.filter((p: any) => p.status === 'paid').reduce((s: number, p: any) => s + Number(p.amount_sol || 0), 0);
+    const totalEth = payouts.filter((p: any) => p.status === 'paid').reduce((s: number, p: any) => s + Number(p.amount_eth || 0), 0);
 
     addMemory('wallet', wallet,
-      `Daily ${todayKey}: ${claims.length} claims, ${payouts.length} payouts (${totalSol} SOL), ${totalPoints} points. ` +
+      `Daily ${todayKey}: ${claims.length} claims, ${payouts.length} payouts (${totalEth} ETH), ${totalPoints} points. ` +
       `Statuses: ${claims.map((c: any) => c.status).join(',')}`,
       { pipeline: 'intelligence', date: todayKey },
     ).catch(() => {});

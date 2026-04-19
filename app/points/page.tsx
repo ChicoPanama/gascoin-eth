@@ -23,10 +23,10 @@ const ENGAGEMENT_ROWS = [
 ];
 
 const TIERS = [
-  { name: 'Standard', min: '1', pts: POINTS_CONFIG.POINTS_PER_CYCLE_STANDARD, cooldown: '7 days', refund: '0.10 SOL' },
-  { name: 'Commuter', min: '100K', pts: POINTS_CONFIG.POINTS_PER_CYCLE_COMMUTER, cooldown: '7 days', refund: '0.25 SOL' },
-  { name: 'Road Warrior', min: '5M', pts: POINTS_CONFIG.POINTS_PER_CYCLE_ROAD_WARRIOR, cooldown: '3.5 days', refund: '0.50 SOL' },
-  { name: 'Fleet', min: '10M', pts: POINTS_CONFIG.POINTS_PER_CYCLE_FLEET, cooldown: '1.75 days', refund: '1.0 SOL' },
+  { name: 'Standard', min: '1', pts: POINTS_CONFIG.POINTS_PER_CYCLE_STANDARD, cooldown: '7 days', refund: '0.10 ETH' },
+  { name: 'Commuter', min: '100K', pts: POINTS_CONFIG.POINTS_PER_CYCLE_COMMUTER, cooldown: '7 days', refund: '0.25 ETH' },
+  { name: 'Road Warrior', min: '5M', pts: POINTS_CONFIG.POINTS_PER_CYCLE_ROAD_WARRIOR, cooldown: '3.5 days', refund: '0.50 ETH' },
+  { name: 'Fleet', min: '10M', pts: POINTS_CONFIG.POINTS_PER_CYCLE_FLEET, cooldown: '1.75 days', refund: '1.0 ETH' },
 ];
 
 export default function PointsPage() {

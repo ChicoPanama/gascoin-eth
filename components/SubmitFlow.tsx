@@ -66,7 +66,7 @@ function StepWallet({ onConnect }: {
     }, 1200);
   };
 
-  const wallets = ['Phantom', 'Solflare', 'Backpack'];
+  const wallets = ['MetaMask', 'Rabby', 'Rainbow', 'Coinbase Wallet'];
 
   return (
     <div className="sf-step">
@@ -441,7 +441,7 @@ function StepReview({ wallet, tweetUrl, handle, file, onSubmit, onBack }: {
     { label: 'Tweet', value: tweetUrl.length > 50 ? tweetUrl.slice(0, 50) + '...' : tweetUrl },
     { label: 'Receipt', value: file ? `${file.name} · ${(file.size / 1024).toFixed(0)} KB` : '—' },
     { label: 'Submission Date', value: new Date().toLocaleString() },
-    { label: 'Estimated Refund', value: '~0.05 SOL' },
+    { label: 'Estimated Refund', value: '~0.05 ETH' },
   ];
 
   return (

@@ -45,13 +45,13 @@ $$;
 
 -- Payouts aggregated by wallet for admin/stats top-wallets table
 create or replace function get_payouts_by_wallet(lim int default 10)
-returns table(wallet text, total_sol numeric, payout_count bigint)
+returns table(wallet text, total_eth numeric, payout_count bigint)
 language sql stable security definer as $$
-  select wallet, sum(amount_sol) as total_sol, count(*) as payout_count
+  select wallet, sum(amount_eth) as total_eth, count(*) as payout_count
   from payouts
   where status = 'paid'
   group by wallet
-  order by total_sol desc
+  order by total_eth desc
   limit lim;
 $$;
 
@@ -59,20 +59,20 @@ $$;
 create or replace function get_leaderboard_data(lim int default 100)
 returns table(
   wallet       text,
-  total_sol    numeric,
+  total_eth    numeric,
   payout_count bigint,
   last_at      timestamptz
 )
 language sql stable security definer as $$
   select
     wallet,
-    sum(amount_sol)  as total_sol,
+    sum(amount_eth)  as total_eth,
     count(*)         as payout_count,
     max(created_at)  as last_at
   from payouts
   where status = 'paid'
   group by wallet
-  order by total_sol desc
+  order by total_eth desc
   limit lim;
 $$;
 

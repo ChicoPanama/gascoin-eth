@@ -29,7 +29,7 @@ interface Claim {
 
 interface Payout {
   id: string;
-  amount_sol: number;
+  amount_eth: number;
   amount_usdc?: number;
   status: string;
   tx_hash: string | null;
@@ -65,7 +65,7 @@ interface PointsData {
 }
 
 interface TierData {
-  current: { id: number; name: string; max_sol_refund: number };
+  current: { id: number; name: string; max_eth_refund: number };
   next: { id: number; name: string; min_tokens: number } | null;
   gascoinBalance: number;
   tokensToNext: number;
@@ -93,7 +93,7 @@ interface GateFailure {
 
 interface Analytics {
   approvalRate: number;
-  avgRefundSol: number;
+  avgRefundEth: number;
   avgRefundUsd: number;
   topGateFailures: GateFailure[];
   conversionRate: number;
@@ -112,7 +112,7 @@ interface Props {
   referral: Referral;
   stats: Stats;
   networkImpact: NetworkImpact;
-  pricing?: { solPriceUsd?: number };
+  pricing?: { ethPriceUsd?: number };
   points?: PointsData;
   tier?: TierData;
   leaderboard?: { rank: number; totalRanked: number };
@@ -187,7 +187,7 @@ function UsdcIcon() {
 export function DashboardClient({ wallet, xHandle, isDryRun = false, claims, payouts, referral, stats, networkImpact, pricing, points, tier, leaderboard, engagement, streak, cooldown, analytics }: Props) {
   const [expandedClaim, setExpandedClaim] = useState<string | null>(null);
   const [tab, setTab] = useState<'all' | 'approved' | 'pending' | 'rejected'>('all');
-  const [solUsdPrice, setSolUsdPrice] = useState(Number(pricing?.solPriceUsd || 170));
+  const [ethUsdPrice, setSolUsdPrice] = useState(Number(pricing?.ethPriceUsd || 170));
 
   useEffect(() => {
     let active = true;
@@ -197,7 +197,7 @@ export function DashboardClient({ wallet, xHandle, isDryRun = false, claims, pay
         if (!res.ok) return;
         const m = await res.json();
         if (!active) return;
-        const p = Number(m?.solPriceUsd || 0);
+        const p = Number(m?.ethPriceUsd || 0);
         if (p > 0) setSolUsdPrice(p);
       } catch {
         // keep fallback
@@ -289,7 +289,7 @@ export function DashboardClient({ wallet, xHandle, isDryRun = false, claims, pay
             <div className="gc-stat-value">
               {isDryRun
                 ? (points?.total || 0).toLocaleString()
-                : formatUsd((stats as any).totalEarnedUsdc ?? (stats.totalEarned * solUsdPrice))}
+                : formatUsd((stats as any).totalEarnedUsdc ?? (stats.totalEarned * ethUsdPrice))}
             </div>
             <div className="gc-stat-sub">
               {isDryRun ? 'claim on treasury' : <span className="gc-inline-token"><UsdcIcon />USDC</span>}
@@ -389,7 +389,7 @@ export function DashboardClient({ wallet, xHandle, isDryRun = false, claims, pay
               <div className="gc-stat">
                 <div className="gc-stat-label">Avg Refund</div>
                 <div className="gc-stat-value">{formatUsd(analytics.avgRefundUsd)}</div>
-                <div className="gc-stat-sub">{analytics.avgRefundSol.toFixed(4)} SOL</div>
+                <div className="gc-stat-sub">{analytics.avgRefundEth.toFixed(4)} ETH</div>
               </div>
               <div className="gc-stat">
                 <div className="gc-stat-label">Percentile</div>
@@ -495,7 +495,7 @@ export function DashboardClient({ wallet, xHandle, isDryRun = false, claims, pay
               <div className="gt-progress-fill" style={{ width: `${Math.min(100, tier.gascoinBalance / tier.next.min_tokens * 100)}%` }} />
             </div>
             <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'rgba(var(--fg-rgb),0.3)', marginTop: 8 }}>
-              Max refund: {tier?.current?.max_sol_refund || 0.10} SOL · Cooldown: {cooldown?.days || 7}d
+              Max refund: {tier?.current?.max_eth_refund || 0.10} ETH · Cooldown: {cooldown?.days || 7}d
               {cooldown?.remainingMs && cooldown.remainingMs > 0 ? ` · Next submission: ${Math.ceil(cooldown.remainingMs / 3600000)}h` : ' · Ready to submit'}
             </div>
           </div>
@@ -600,7 +600,7 @@ export function DashboardClient({ wallet, xHandle, isDryRun = false, claims, pay
                     <div className="ud-claim__right">
                       {payout && (
                         <span className="ud-claim__sol">
-                          {formatUsd((payout.amount_usdc ?? (payout.amount_sol * solUsdPrice)))} <span className="gc-inline-token"><UsdcIcon />USDC</span>
+                          {formatUsd((payout.amount_usdc ?? (payout.amount_eth * ethUsdPrice)))} <span className="gc-inline-token"><UsdcIcon />USDC</span>
                         </span>
                       )}
                       <span className="ud-claim__expand">
@@ -719,7 +719,7 @@ export function DashboardClient({ wallet, xHandle, isDryRun = false, claims, pay
                   <span className="ud-payouts__amount">
                     {isDryRunTx
                       ? <span style={{ color: 'rgba(255,220,140,0.8)' }}>1,000 pts</span>
-                      : <>{formatUsd((p.amount_usdc ?? (p.amount_sol * solUsdPrice)))} <span className="gc-inline-token"><UsdcIcon />USDC</span></>}
+                      : <>{formatUsd((p.amount_usdc ?? (p.amount_eth * ethUsdPrice)))} <span className="gc-inline-token"><UsdcIcon />USDC</span></>}
                   </span>
                   <span>{statusBadge(p.status)}</span>
                   <span className="ud-payouts__tx">

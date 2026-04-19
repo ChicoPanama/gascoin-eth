@@ -32,7 +32,7 @@ export interface ChatUserProfile {
 // ---------------------------------------------------------------------------
 
 const DEFAULT_WELCOME =
-  'Hey! Ready to get your gas money back?\n\nYour checklist:\n1. Connect wallet\n2. Post proof on X\n3. Submit at /submit\n4. Wait for AI review (~5–30 min)\n5. SOL in wallet\n\nWhat step are you on, or do you have a question?';
+  'Hey! Ready to get your gas money back?\n\nYour checklist:\n1. Connect wallet\n2. Post proof on X\n3. Submit at /submit\n4. Wait for AI review (~5–30 min)\n5. ETH in wallet\n\nWhat step are you on, or do you have a question?';
 
 function buildOpeningMessage(
   pageHint?: ChatPageHint,
@@ -213,7 +213,7 @@ function TierCard({ result }: { result: Record<string, unknown> }) {
         </p>
       )}
       {!result.meetsMinimum && (
-        <p className="chat-card-gate-fix">Buy at least 1 $GASCOIN on Jupiter (jup.ag) to participate.</p>
+        <p className="chat-card-gate-fix">Buy at least 1 $GASCOIN on Uniswap (app.uniswap.org) to participate.</p>
       )}
       {Boolean(result.nextTierName) && (
         <p className="chat-card-sub">

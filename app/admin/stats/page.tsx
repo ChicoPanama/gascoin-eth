@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation';
 import { verifyAdminSession } from '../../actions/admin-auth';
 import { getSupabaseAdmin } from '../../../lib/supabase';
-import { truncateWallet, formatSol } from '../../../lib/formatters';
+import { truncateWallet, formatEth } from '../../../lib/formatters';
 
 export default async function StatsPage() {
   const session = await verifyAdminSession();
@@ -11,7 +11,7 @@ export default async function StatsPage() {
 
   // All queries run in parallel. No full table scans:
   // get_claims_status_counts() → GROUP BY status (replaces SELECT status FROM claims)
-  // get_payouts_by_wallet()    → GROUP BY wallet ORDER BY total_sol LIMIT 10
+  // get_payouts_by_wallet()    → GROUP BY wallet ORDER BY total_eth LIMIT 10
   // referral_conversions       → COUNT only (head:true, no rows transferred)
   // gate_stats_view            → small view, already aggregated
   const [claimsCountRes, walletRes, refRes, gateStatsRes] = await Promise.all([
@@ -29,10 +29,10 @@ export default async function StatsPage() {
 
   const topWallets = (walletRes.data || []).map((r: any) => ({
     wallet: r.wallet as string,
-    sol: Number(r.total_sol),
+    sol: Number(r.total_eth),
     count: Number(r.payout_count),
   }));
-  const totalSol = topWallets.reduce((s: number, w: any) => s + w.sol, 0);
+  const totalEth = topWallets.reduce((s: number, w: any) => s + w.sol, 0);
 
   const statuses = ['submitted', 'auto_review', 'needs_manual_review', 'approved', 'rejected'];
 
@@ -50,8 +50,8 @@ export default async function StatsPage() {
             <div className="gc-stat-value">{totalClaims}</div>
           </div>
           <div className="gc-stat">
-            <div className="gc-stat-label">Total SOL Paid</div>
-            <div className="gc-stat-value">{totalSol.toFixed(4)}</div>
+            <div className="gc-stat-label">Total ETH Paid</div>
+            <div className="gc-stat-value">{totalEth.toFixed(4)}</div>
           </div>
           <div className="gc-stat">
             <div className="gc-stat-label">Referral Conversions</div>
@@ -111,15 +111,15 @@ export default async function StatsPage() {
         </table>
       </div>
 
-      <h3 style={{ fontFamily: 'Bebas Neue', fontSize: 28, marginBottom: 16 }}>Top Wallets by SOL</h3>
+      <h3 style={{ fontFamily: 'Bebas Neue', fontSize: 28, marginBottom: 16 }}>Top Wallets by ETH</h3>
       <table className="lb-table">
-        <thead><tr><th>#</th><th>Wallet</th><th>SOL</th><th>Claims</th></tr></thead>
+        <thead><tr><th>#</th><th>Wallet</th><th>ETH</th><th>Claims</th></tr></thead>
         <tbody>
           {topWallets.map((w: any, i: number) => (
             <tr key={w.wallet} className="lb-table-row">
               <td className="lb-table-rank">{i + 1}</td>
               <td className="lb-table-wallet">{truncateWallet(w.wallet)}</td>
-              <td className="lb-table-sol">{formatSol(w.sol)}</td>
+              <td className="lb-table-sol">{formatEth(w.sol)}</td>
               <td className="lb-table-claims">{w.count}</td>
             </tr>
           ))}

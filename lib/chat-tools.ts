@@ -249,7 +249,7 @@ export function buildChatTools(sessionWallet: string) {
               balance,
               tier: 'None',
               meetsMinimum: false,
-              message: `Your wallet holds ${balance.toLocaleString()} $GASCOIN — below the 1-token minimum for Standard tier. Buy at least 1 $GASCOIN on Jupiter (jup.ag) to participate.`,
+              message: `Your wallet holds ${balance.toLocaleString()} $GASCOIN — below the 1-token minimum for Standard tier. Buy at least 1 $GASCOIN on Uniswap (app.uniswap.org) to participate.`,
             };
           }
 

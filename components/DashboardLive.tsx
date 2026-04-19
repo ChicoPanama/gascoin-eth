@@ -6,7 +6,7 @@ import { DEMO_CHART_DATA, DEMO_GATE_RATES, DEMO_STATS } from '../lib/demo-data';
 type TreasurySummary = {
   live: boolean;
   solBalance: number;
-  solUsd: number;
+  ethUsd: number;
   gascoinBalance: number;
   gascoinUsd: number;
   totalUsd: number;
@@ -20,7 +20,7 @@ async function fetchTreasurySummary(): Promise<TreasurySummary | null> {
     return {
       live: Boolean(json?.live),
       solBalance: Number(json?.solBalance || 0),
-      solUsd: Number(json?.solUsd || 0),
+      ethUsd: Number(json?.ethUsd || 0),
       gascoinBalance: Number(json?.gascoinBalance || 0),
       gascoinUsd: Number(json?.gascoinUsd || 0),
       totalUsd: Number(json?.totalUsd || 0),
@@ -130,7 +130,7 @@ export function LiveStatsBar({ refundsToday, totalPaid, queueDepth }: {
   const useDemoTreasury = !treasury || !treasury.live || treasury.totalUsd <= 0;
   const displayBalUsd = useDemoTreasury ? 2_180_000 : treasury.totalUsd;
   const displayGc = useDemoTreasury ? 8_500_000 : treasury.gascoinBalance;
-  const solPrice = treasury && treasury.solBalance > 0 ? treasury.solUsd / treasury.solBalance : 0;
+  const solPrice = treasury && treasury.solBalance > 0 ? treasury.ethUsd / treasury.solBalance : 0;
   const displayRefunds = refundsToday > 0 ? refundsToday : DEMO_STATS.refundsToday;
   const displayPaidUsd = totalPaid > 0 && solPrice > 0
     ? totalPaid * solPrice
@@ -206,7 +206,7 @@ export function TreasuryChart() {
   const [chartData, setChartData] = useState<{ day: string; usdc: number }[]>(
     DEMO_CHART_DATA.map((d) => ({ day: d.day, usdc: d.sol * 170 }))
   );
-  const [solUsdPrice, setSolUsdPrice] = useState(170);
+  const [ethUsdPrice, setSolUsdPrice] = useState(170);
 
   useEffect(() => {
     let active = true;
@@ -222,7 +222,7 @@ export function TreasuryChart() {
             const sol = Number(r.sol || 0);
             return {
               day: String(r.day || ''),
-              usdc: usdc > 0 ? usdc : sol * solUsdPrice,
+              usdc: usdc > 0 ? usdc : sol * ethUsdPrice,
             };
           }));
         }
@@ -243,7 +243,7 @@ export function TreasuryChart() {
         if (!res.ok) return;
         const m = await res.json();
         if (!active) return;
-        const p = Number(m?.solPriceUsd || 0);
+        const p = Number(m?.ethPriceUsd || 0);
         if (p > 0) setSolUsdPrice(p);
       } catch {
         // keep fallback
@@ -359,7 +359,7 @@ export function TreasuryChart() {
       ctx.fillStyle = '#fff';
       ctx.fill();
     }
-  }, [chartData, solUsdPrice]);
+  }, [chartData, ethUsdPrice]);
 
   useEffect(() => { draw(hover); }, [draw, hover]);
 
@@ -412,7 +412,7 @@ export function SubmissionFeed() {
           const rows = (Array.isArray(data) ? data : []).slice(0, 8).map((r: any) => ({
             wallet: r.xHandle || '@unknown',
             location: r.status || 'queued',
-            amount: Number(r.amountSol || 0).toFixed(2),
+            amount: Number(r.amountEth || 0).toFixed(2),
             gatesPassed: 10,
             _new: false,
           }));

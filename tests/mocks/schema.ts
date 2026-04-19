@@ -25,17 +25,17 @@ export const SCHEMA: Record<string, string[]> = {
   gate_results: ['id', 'claim_id', 'gate_name', 'passed', 'score', 'reason_code', 'created_at'],
 
   payouts: [
-    'id', 'claim_id', 'wallet', 'amount_sol', 'tx_hash',
+    'id', 'claim_id', 'wallet', 'amount_eth', 'tx_hash',
     'status', 'sent_at', 'fail_reason', 'created_at',
   ],
 
   payout_jobs: [
-    'id', 'claim_id', 'wallet', 'amount_sol', 'status',
+    'id', 'claim_id', 'wallet', 'amount_eth', 'status',
     'attempts', 'max_attempts', 'next_retry_at', 'last_error',
     'idempotency_key', 'created_at', 'updated_at',
   ],
 
-  treasury_snapshots: ['id', 'wallet', 'sol_balance', 'usd_value', 'gascoin_balance', 'gascoin_usd_value', 'ts'],
+  treasury_snapshots: ['id', 'wallet', 'eth_balance', 'usd_value', 'gascoin_balance', 'gascoin_usd_value', 'ts'],
 
   market_snapshots: ['id', 'gascoin_price_usd', 'market_cap_usd', 'volume_24h_usd', 'source', 'ts'],
 
@@ -102,8 +102,8 @@ export const SCHEMA: Record<string, string[]> = {
 export const VIEWS: Record<string, string[]> = {
   gate_stats_view: ['gate_id', 'total_processed', 'total_passed', 'total_failed', 'pass_rate_pct'],
   gate_failure_reasons_view: ['gate_id', 'gate_name', 'failure_reason', 'occurrence_count', 'pct_of_gate_failures'],
-  leaderboard_view: ['wallet_address', 'total_submissions', 'total_sol_earned', 'last_submission_at', 'rank'],
-  leaderboard_stats: ['unique_earners', 'total_sol_paid', 'total_payouts'],
+  leaderboard_view: ['wallet_address', 'total_submissions', 'total_eth_earned', 'last_submission_at', 'rank'],
+  leaderboard_stats: ['unique_earners', 'total_eth_paid', 'total_payouts'],
   public_claims_feed: [],
   submission_queue_view: [],
   wallet_points_view: [],

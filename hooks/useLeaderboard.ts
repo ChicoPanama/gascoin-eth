@@ -32,16 +32,16 @@ export function useLeaderboard() {
         setEntries(DEMO_LEADERBOARD.map((d: any) => ({
           wallet_address: d.wallet_address,
           total_submissions: d.total_submissions ?? 1,
-          total_sol_earned: d.total_sol_earned,
+          total_eth_earned: d.total_eth_earned,
           rank: d.rank,
           gascoin_holdings: 0,
-          composite_score: d.composite_score ?? d.total_sol_earned * 100,
+          composite_score: d.composite_score ?? d.total_eth_earned * 100,
           referral_count: 0,
           engagement_score: 0,
           x_handle: d.x_handle,
         })) as LeaderboardEntry[]);
         setStats({
-          total_earners: 10, total_sol_paid: 4821.5, total_approved: 36,
+          total_earners: 10, total_eth_paid: 4821.5, total_approved: 36,
           largest_single_refund: 2.847, avg_refund_amount: 0.38,
           total_gascoin_held: 0, total_referrals: 847,
         });
@@ -110,7 +110,7 @@ export function useLeaderboard() {
         return {
           wallet_address: r.wallet as string,
           total_submissions: Number(r.payout_count),
-          total_sol_earned: Number(r.total_sol),
+          total_eth_earned: Number(r.total_eth),
           last_submission_at: r.last_at as string,
           rank: 0,
           gascoin_holdings: gc,
@@ -141,16 +141,16 @@ export function useLeaderboard() {
       } catch {}
 
       // ── 6. Stats ───────────────────────────────────────────────────
-      const totalPaid = leaderRows.reduce((s: number, r: any) => s + Number(r.total_sol || 0), 0);
+      const totalPaid = leaderRows.reduce((s: number, r: any) => s + Number(r.total_eth || 0), 0);
       const totalApproved = leaderRows.reduce((s: number, r: any) => s + Number(r.payout_count || 0), 0);
-      const largestWallet = Math.max(...leaderRows.map((r: any) => Number(r.total_sol || 0)));
+      const largestWallet = Math.max(...leaderRows.map((r: any) => Number(r.total_eth || 0)));
       const totalGc = Array.from(holdingsMap.values()).reduce((s, v) => s + v, 0);
       const totalRefs = Array.from(refMap.values()).reduce((s, v) => s + v, 0);
 
       setEntries(raw);
       setStats({
         total_earners: leaderRows.length,
-        total_sol_paid: totalPaid,
+        total_eth_paid: totalPaid,
         total_approved: totalApproved,
         largest_single_refund: largestWallet,
         avg_refund_amount: totalApproved > 0 ? totalPaid / totalApproved : 0,

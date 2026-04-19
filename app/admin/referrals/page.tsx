@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { verifyAdminSession } from '../../actions/admin-auth';
 import { getSupabaseAdmin } from '../../../lib/supabase';
 import { getTreasuryBalances } from '../../../lib/integrations/ethereum';
-import { truncateWallet, formatSol, timeAgo } from '../../../lib/formatters';
+import { truncateWallet, formatEth, timeAgo } from '../../../lib/formatters';
 import { REFERRAL_CONFIG, SKIP_REASON_LABELS } from '../../../lib/referral-config';
 import { markReferralDispatched, skipReferralReward } from '../../actions/admin/referrals';
 
@@ -24,7 +24,7 @@ export default async function ReferralsPage(props: { searchParams: Promise<{ tab
 
   const query = supabase
     .from('referral_conversions')
-    .select('id, referrer_wallet, referred_wallet, reward_sol, reward_status, reward_tx_signature, skip_reason, created_at, dispatched_at')
+    .select('id, referrer_wallet, referred_wallet, reward_eth, reward_status, reward_tx_signature, skip_reason, created_at, dispatched_at')
     .order('created_at', { ascending: tab === 'DISPATCH' });
 
   if (statusFilter) query.eq('reward_status', statusFilter);

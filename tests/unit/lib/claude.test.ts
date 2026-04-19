@@ -70,7 +70,7 @@ function makeContext(overrides: Partial<ClaudeReviewContext> = {}): ClaudeReview
     wallet: 'GAsWalletTest123',
     xHandle: 'testuser',
     tier: 'Standard',
-    amountSol: 0.05,
+    amountEth: 0.05,
     gateResults: [
       { gate: 'authentic_photo', passed: true, score: 0.9 },
       { gate: 'gas_station', passed: true },
@@ -174,7 +174,7 @@ describe('reviewClaim — gateway unavailable', () => {
 
   it('writes intelligence entry when gateway is unavailable', async () => {
     vi.mocked(isAiGatewayAvailable).mockReturnValueOnce(false);
-    await reviewClaim(makeContext({ claimId: 'claim-gw-down', tier: 'Fleet', amountSol: 2.5 }));
+    await reviewClaim(makeContext({ claimId: 'claim-gw-down', tier: 'Fleet', amountEth: 2.5 }));
     await new Promise((r) => setTimeout(r, 0));
     expect(writeIntelligence).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -196,7 +196,7 @@ describe('reviewClaim — tier scrutiny weighting', () => {
       ok: true,
       data: { verdict: 'approve', confidence: 0.9, narrative: 'OK', concerns: [] },
     } as any);
-    await reviewClaim(makeContext({ tier: 'Fleet', amountSol: 2.5 }));
+    await reviewClaim(makeContext({ tier: 'Fleet', amountEth: 2.5 }));
     const call = vi.mocked(generateAIJson).mock.calls[0][1];
     expect(call.prompt).toContain('MAXIMUM scrutiny');
   });
@@ -232,7 +232,7 @@ describe('reviewClaim — confidence tier floors', () => {
       ok: true,
       data: { verdict: 'approve', confidence: 0.55, narrative: 'Borderline.', concerns: [] },
     } as any);
-    const result = await reviewClaim(makeContext({ tier: 'Fleet', amountSol: 2.5 }));
+    const result = await reviewClaim(makeContext({ tier: 'Fleet', amountEth: 2.5 }));
     expect(result.verdict).toBe('flag');
     expect(result.concerns).toContain('confidence_below_tier_floor_0.8');
   });
@@ -242,7 +242,7 @@ describe('reviewClaim — confidence tier floors', () => {
       ok: true,
       data: { verdict: 'approve', confidence: 0.85, narrative: 'Clean.', concerns: [] },
     } as any);
-    const result = await reviewClaim(makeContext({ tier: 'Fleet', amountSol: 2.5 }));
+    const result = await reviewClaim(makeContext({ tier: 'Fleet', amountEth: 2.5 }));
     expect(result.verdict).toBe('approve');
   });
 
@@ -271,7 +271,7 @@ describe('reviewClaim — confidence tier floors', () => {
       ok: true,
       data: { verdict: 'reject', confidence: 0.3, narrative: 'Clear fraud.', concerns: ['ai_score'] },
     } as any);
-    const result = await reviewClaim(makeContext({ tier: 'Fleet', amountSol: 2.5 }));
+    const result = await reviewClaim(makeContext({ tier: 'Fleet', amountEth: 2.5 }));
     expect(result.verdict).toBe('reject');
   });
 });
@@ -468,7 +468,7 @@ describe('reviewClaim — userPrompt structure', () => {
     } as any);
     await reviewClaim(makeContext({
       tier: 'Fleet',
-      amountSol: 2.5,
+      amountEth: 2.5,
       riskScore: 0.2,
       previousRejections: 1,
       recentRejections7d: 0,

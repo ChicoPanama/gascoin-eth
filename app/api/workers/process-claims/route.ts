@@ -60,7 +60,7 @@ export async function POST(req: Request) {
     // Determine payout amount from user's token tier
     const balance = await hasMinimumGascoin(claim.wallet, 0);
     const tier = getTierForBalance(balance.tokenBalance ?? 0);
-    const solAmount = tier.max_sol_refund;
+    const ethAmount = tier.max_eth_refund;
 
     // Approve the claim
     await supabase.from('claims').update({
@@ -75,7 +75,7 @@ export async function POST(req: Request) {
       to_status: 'approved',
       actor_type: 'system',
       actor_id: 'claims_worker',
-      reason: `auto_approved: all gates passed, tier=${tier.name}, payout=${solAmount} SOL`,
+      reason: `auto_approved: all gates passed, tier=${tier.name}, payout=${ethAmount} ETH`,
     });
 
     // ─── CLAUDE OVERSIGHT GATE ───
@@ -112,7 +112,7 @@ export async function POST(req: Request) {
       // Use tier.name ('Fleet', 'Road Warrior', etc.) — must match TIER_MIN_CONFIDENCE
       // keys in claude.ts. tier.slug ('fleet', 'road-warrior') would bypass tier floors.
       tier: tier.name,
-      amountSol: solAmount,
+      amountEth: ethAmount,
       gateResults: (gateRows || []).map((g: any) => ({ gate: g.gate_name, passed: g.passed, score: g.score, reason: g.reason_code })),
       riskScore: claim.risk_score ?? 0,
       aiScore: receiptMeta?.ai_score ?? 0,
@@ -183,7 +183,7 @@ export async function POST(req: Request) {
     await supabase.from('payout_jobs').upsert({
       claim_id: claim.id,
       wallet: claim.wallet,
-      amount_sol: solAmount,
+      amount_eth: ethAmount,
       status: 'queued',
     }, { onConflict: 'claim_id' });
 
@@ -201,7 +201,7 @@ export async function POST(req: Request) {
       action: 'claim_auto_approved',
       target_type: 'claim',
       target_id: claim.id,
-      payload_json: { wallet: claim.wallet, tier: tier.name, solAmount, claude_verdict: claudeVerdict.verdict },
+      payload_json: { wallet: claim.wallet, tier: tier.name, ethAmount, claude_verdict: claudeVerdict.verdict },
     });
 
     autoApproved++;
@@ -233,7 +233,7 @@ export async function POST(req: Request) {
 
   const { data: jobs, error: jobsErr } = await supabase
     .from('payout_jobs')
-    .select('id,claim_id,wallet,amount_sol,attempts,max_attempts,status,next_retry_at')
+    .select('id,claim_id,wallet,amount_eth,attempts,max_attempts,status,next_retry_at')
     .in('status', ['queued', 'retry_scheduled'])
     .order('next_retry_at', { ascending: true })
     .limit(50);

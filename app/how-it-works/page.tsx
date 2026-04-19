@@ -21,22 +21,23 @@ const STEPS: Step[] = [
   {
     number: 0,
     title: 'What is GASCOIN?',
-    body: 'You buy gas at any gas station. You post proof on X. You get real money sent to your digital wallet. No catch. No middlemen. Funded by the GASCOIN community treasury on Solana.',
+    body: 'You buy gas at any gas station. You post proof on X. You get real money sent to your digital wallet. No catch. No middlemen. Funded by the GASCOIN community treasury on Ethereum.',
     bullets: [],
   },
   {
     number: 1,
-    title: 'Set Up a Solana Wallet',
+    title: 'Set Up an Ethereum Wallet',
     time: '5 min',
     bullets: [
-      'Download MetaMask or any Ethereum wallet — it\'s a free app for your phone or browser. Think of it like Venmo, but for crypto.',
+      'Download MetaMask, Rabby, Rainbow, or Coinbase Wallet — free app for your phone or browser. Think of it like Venmo, but for crypto.',
       'Create your wallet. It gives you a "seed phrase" (12 words). Write these down on paper and keep them safe. Never share them with anyone.',
-      'Your wallet address is a long string of letters and numbers — like a bank account number. It\'s safe to share.',
+      'Your wallet address starts with 0x and is 42 characters long — like a bank account number. It\'s safe to share.',
     ],
     links: [
-      { name: 'Phantom', url: 'https://phantom.app', icon: brand('phantom') },
-      { name: 'iOS App', url: 'https://apps.apple.com/app/phantom-crypto-wallet/id1598432977', icon: brand('apple') },
-      { name: 'Android App', url: 'https://play.google.com/store/apps/details?id=app.phantom', icon: brand('google-play') },
+      { name: 'MetaMask', url: 'https://metamask.io', icon: brand('metamask') },
+      { name: 'Rabby', url: 'https://rabby.io', icon: brand('rabby') },
+      { name: 'Rainbow', url: 'https://rainbow.me', icon: brand('rainbow') },
+      { name: 'Coinbase Wallet', url: 'https://www.coinbase.com/wallet', icon: brand('coinbase') },
     ],
   },
   {
@@ -56,23 +57,20 @@ const STEPS: Step[] = [
   },
   {
     number: 3,
-    title: 'Get SOL',
+    title: 'Get ETH',
     time: '5 min',
     bullets: [
-      'SOL is the currency of Solana — you need it to buy GASCOIN tokens and pay tiny transaction fees.',
-      'You can buy SOL directly inside Phantom with a debit card — easiest option for beginners.',
-      'Or buy SOL on an exchange and send it to your MetaMask or any Ethereum wallet address.',
-      'Moonpay also lets you buy SOL with a card and send it straight to your wallet.',
+      'ETH is the native currency of Ethereum — you need it to buy GASCOIN tokens and pay gas (transaction) fees.',
+      'You can buy ETH directly inside MetaMask or Coinbase Wallet with a debit card — easiest option for beginners.',
+      'Or buy ETH on an exchange and send it to your wallet address (starts with 0x).',
+      'Moonpay also lets you buy ETH with a card and send it straight to your wallet.',
     ],
     links: [
-      { name: 'Phantom Buy', url: 'https://phantom.app', icon: brand('phantom') },
       { name: 'Coinbase', url: 'https://www.coinbase.com', icon: brand('coinbase') },
       { name: 'Binance', url: 'https://www.binance.com', icon: brand('binance') },
+      { name: 'Kraken', url: 'https://www.kraken.com', icon: brand('kraken') },
       { name: 'Bybit', url: 'https://www.bybit.com', icon: brand('bybit') },
       { name: 'OKX', url: 'https://www.okx.com', icon: brand('okx') },
-      { name: 'Bitget', url: 'https://www.bitget.com', icon: brand('bitget') },
-      { name: 'Gate.io', url: 'https://www.gate.io', icon: brand('gate') },
-      { name: 'MEXC', url: 'https://www.mexc.com', icon: brand('mexc') },
       { name: 'Moonpay', url: 'https://www.moonpay.com', icon: brand('moonpay') },
     ],
   },
@@ -81,14 +79,14 @@ const STEPS: Step[] = [
     title: 'Get GASCOIN Tokens',
     time: '3 min',
     bullets: [
-      'You need to hold at least 1 GASCOIN token in your MetaMask or any Ethereum wallet before you can submit.',
-      'Swap some SOL for GASCOIN on a Solana DEX — search for the GASCOIN token.',
+      'You need to hold at least 1 GASCOIN token in your Ethereum wallet before you can submit.',
+      'Swap some ETH for GASCOIN on an Ethereum DEX like Uniswap or 1inch — search for the GASCOIN token contract.',
       'Holding more GASCOIN unlocks higher tiers with bigger refund caps and faster queue priority.',
     ],
     links: [
-      { name: 'Jupiter', url: 'https://jup.ag', icon: brand('jupiter') },
-      { name: 'Raydium', url: 'https://raydium.io', icon: brand('raydium') },
-      { name: 'Meteora', url: 'https://meteora.ag', icon: brand('meteora') },
+      { name: 'Uniswap', url: 'https://app.uniswap.org', icon: brand('uniswap') },
+      { name: '1inch', url: 'https://app.1inch.io', icon: brand('1inch') },
+      { name: 'CowSwap', url: 'https://swap.cow.fi', icon: brand('cowswap') },
     ],
   },
   {
@@ -105,13 +103,13 @@ const STEPS: Step[] = [
     title: 'Write on Your Receipt',
     time: '30 sec',
     bullets: [
-      'Open Phantom and find your wallet address (tap your address to copy it).',
-      'Write the LAST 4 characters of your wallet address on the receipt with a black pen.',
+      'Open your wallet and copy your address (e.g. 0x742d35Cc6634C0532925a3b844Bc454e4438f44e).',
+      'Write the LAST 4 hex characters of your wallet address on the receipt with a black pen.',
       'Write them big and clear — the system uses a camera to read them automatically.',
-      'Example: if your wallet ends in "cR3P", write cR3P on the receipt.',
+      'Example: if your wallet ends in "a3F2", write a3F2 on the receipt.',
     ],
     links: [
-      { name: 'Open Phantom', url: 'https://phantom.app/ul/browse', icon: brand('phantom') },
+      { name: 'MetaMask', url: 'https://metamask.io', icon: brand('metamask') },
     ],
   },
   {
@@ -134,7 +132,7 @@ const STEPS: Step[] = [
     time: '3 min',
     bullets: [
       'Go to the Submit page on GASCOIN.',
-      'Click "Connect Wallet" and connect your MetaMask or any Ethereum wallet.',
+      'Click "Connect Wallet" and connect your Ethereum wallet.',
       'Sign in with your X account.',
       'Paste your tweet URL.',
       'Upload a clear photo of your receipt (with the last 4 hex characters of your Ethereum wallet address visible, e.g. a3F2).',
@@ -151,7 +149,7 @@ const STEPS: Step[] = [
     bullets: [
       `The system automatically runs ${GATE_COUNT} verification checks on your submission. This takes 2-5 minutes.`,
       'If all checks pass, an admin reviews your submission and approves it.',
-      'SOL is sent directly to your MetaMask or any Ethereum wallet within 24-48 hours.',
+      'ETH is sent directly to your wallet within 24-48 hours — viewable on Etherscan.',
       'You can track your submission status on the Tracker page.',
     ],
     links: [
@@ -163,8 +161,8 @@ const STEPS: Step[] = [
     title: 'Cash Out',
     subtitle: 'Optional',
     bullets: [
-      'Your SOL is already in your MetaMask or any Ethereum wallet — you can hold it, spend it, or convert it to dollars.',
-      'Send SOL to an exchange and sell it for USD, EUR, or your local currency.',
+      'Your ETH is already in your wallet — you can hold it, spend it, or convert it to dollars.',
+      'Send ETH to an exchange and sell it for USD, EUR, or your local currency.',
       'Or use Moonpay to send it directly to your bank account.',
       'You can submit again after 7 days with a new receipt.',
     ],

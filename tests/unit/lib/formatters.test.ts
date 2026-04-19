@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { truncateWallet, formatSol, timeAgo, formatRank } from '@/lib/formatters';
+import { truncateWallet, formatEth, timeAgo, formatRank } from '@/lib/formatters';
 
 describe('truncateWallet', () => {
   it('truncates to 4 chars each side', () => {
@@ -9,9 +9,9 @@ describe('truncateWallet', () => {
   it('returns short address unchanged', () => { expect(truncateWallet('short')).toBe('short'); });
 });
 
-describe('formatSol', () => {
-  it('formats to 4dp', () => { expect(formatSol(0.05)).toBe('0.0500 SOL'); });
-  it('handles zero', () => { expect(formatSol(0)).toBe('0.0000 SOL'); });
+describe('formatEth', () => {
+  it('formats to 4dp', () => { expect(formatEth(0.05)).toBe('0.0500 ETH'); });
+  it('handles zero', () => { expect(formatEth(0)).toBe('0.0000 ETH'); });
 });
 
 describe('timeAgo', () => {

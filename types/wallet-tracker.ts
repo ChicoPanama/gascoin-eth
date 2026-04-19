@@ -28,7 +28,7 @@ export interface WalletSummary {
   total_approved: number;
   total_pending: number;
   total_rejected: number;
-  total_sol_earned: number;
+  total_eth_earned: number;
   last_approved_at: string | null;
   last_submission_at: string | null;
 }

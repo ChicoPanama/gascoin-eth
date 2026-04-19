@@ -3,7 +3,7 @@ export interface TokenTier {
   name: string;
   slug: string;
   min_tokens: number;
-  max_sol_refund: number;
+  max_eth_refund: number;
   cooldown_days: number;
   queue_priority: number;
   badge_label: string;
@@ -14,25 +14,25 @@ export interface TokenTier {
 export const TOKEN_TIERS: TokenTier[] = [
   {
     id: 0, name: 'Standard', slug: 'standard', min_tokens: 1,
-    max_sol_refund: 0.10, cooldown_days: 7, queue_priority: 4, badge_label: '',
+    max_eth_refund: 0.005, cooldown_days: 7, queue_priority: 4, badge_label: '',
     description: 'Hold 1 GASCOIN to access the platform.',
     perks: ['Standard refund queue', 'Tier-based refund cap (set at review time)', '1 submission per week', '7-day cooldown'],
   },
   {
     id: 1, name: 'Commuter', slug: 'commuter', min_tokens: 100_000,
-    max_sol_refund: 0.25, cooldown_days: 7, queue_priority: 3, badge_label: 'COMMUTER',
+    max_eth_refund: 0.0125, cooldown_days: 7, queue_priority: 3, badge_label: 'COMMUTER',
     description: 'Hold 100K GASCOIN to unlock Commuter status.',
     perks: ['Elevated refund queue', 'Higher cap than Standard', '1 submission per week', 'COMMUTER badge on leaderboard'],
   },
   {
     id: 2, name: 'Road Warrior', slug: 'road-warrior', min_tokens: 5_000_000,
-    max_sol_refund: 0.50, cooldown_days: 3.5, queue_priority: 2, badge_label: 'ROAD WARRIOR',
+    max_eth_refund: 0.025, cooldown_days: 3.5, queue_priority: 2, badge_label: 'ROAD WARRIOR',
     description: 'Hold 5M GASCOIN for Road Warrior status — 2 submissions per week.',
     perks: ['Priority refund queue', 'Higher cap than Commuter', '2 submissions per week', 'ROAD WARRIOR badge', 'Featured placement on community feed'],
   },
   {
     id: 3, name: 'Fleet', slug: 'fleet', min_tokens: 10_000_000,
-    max_sol_refund: 1.0, cooldown_days: 1.75, queue_priority: 1, badge_label: 'FLEET',
+    max_eth_refund: 0.05, cooldown_days: 1.75, queue_priority: 1, badge_label: 'FLEET',
     description: 'Hold 10M GASCOIN for Fleet — 4 submissions per week, max rewards.',
     perks: ['Highest priority queue', 'Highest tier cap', '4 submissions per week', 'FLEET badge everywhere', 'Featured on community feed always', 'Early access to new features'],
   },

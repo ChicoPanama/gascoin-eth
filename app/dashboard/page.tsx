@@ -20,7 +20,7 @@ async function getDashboardData() {
         .gte('updated_at', dayAgo),
       supabase
         .from('payouts')
-        .select('amount_sol')
+        .select('amount_eth')
         .eq('status', 'paid'),
       supabase
         .from('claims')
@@ -29,7 +29,7 @@ async function getDashboardData() {
     ]);
 
     refundsToday = todayRes.count ?? 0;
-    totalPaid = (totalRes.data || []).reduce((s: number, r: any) => s + Number(r.amount_sol || 0), 0);
+    totalPaid = (totalRes.data || []).reduce((s: number, r: any) => s + Number(r.amount_eth || 0), 0);
     queueDepth = queueRes.count ?? 0;
   } catch {}
 

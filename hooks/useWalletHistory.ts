@@ -17,7 +17,7 @@ export function useWalletHistory(walletAddress: string | null) {
       try {
         const { data, error: err } = await supabaseBrowser
           .from("payouts")
-          .select("id, amount_sol, created_at, status, claim_id")
+          .select("id, amount_eth, created_at, status, claim_id")
           .eq("wallet", walletAddress)
           .eq("status", "paid")
           .order("created_at", { ascending: false });
@@ -26,7 +26,7 @@ export function useWalletHistory(walletAddress: string | null) {
         setHistory(
           (data ?? []).map((p: any) => ({
             id: p.claim_id || p.id,
-            sol_amount: Number(p.amount_sol || 0),
+            sol_amount: Number(p.amount_eth || 0),
             created_at: p.created_at,
             gates_passed: 10,
             status: p.status,

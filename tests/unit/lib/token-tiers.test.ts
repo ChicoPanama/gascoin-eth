@@ -36,8 +36,8 @@ describe('TOKEN_TIERS', () => {
   it('ordered by min_tokens', () => {
     for (let i = 1; i < TOKEN_TIERS.length; i++) expect(TOKEN_TIERS[i].min_tokens).toBeGreaterThan(TOKEN_TIERS[i - 1].min_tokens);
   });
-  it('max_sol_refund increases', () => {
-    for (let i = 1; i < TOKEN_TIERS.length; i++) expect(TOKEN_TIERS[i].max_sol_refund).toBeGreaterThan(TOKEN_TIERS[i - 1].max_sol_refund);
+  it('max_eth_refund increases', () => {
+    for (let i = 1; i < TOKEN_TIERS.length; i++) expect(TOKEN_TIERS[i].max_eth_refund).toBeGreaterThan(TOKEN_TIERS[i - 1].max_eth_refund);
   });
   it('queue_priority decreases', () => {
     for (let i = 1; i < TOKEN_TIERS.length; i++) expect(TOKEN_TIERS[i].queue_priority).toBeLessThan(TOKEN_TIERS[i - 1].queue_priority);

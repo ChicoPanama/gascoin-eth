@@ -26,10 +26,10 @@ describe('Admin Treasury page queries', () => {
   });
 
   it('payout_jobs detail select uses only valid columns', () => {
-    // from('payout_jobs').select('id, claim_id, wallet, amount_sol, status, created_at')
+    // from('payout_jobs').select('id, claim_id, wallet, amount_eth, status, created_at')
     const errors = validateSelect(
       'payout_jobs',
-      'id, claim_id, wallet, amount_sol, status, created_at'
+      'id, claim_id, wallet, amount_eth, status, created_at'
     );
     expect(errors).toEqual([]);
   });

@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { supabaseBrowser } from '../../lib/supabase-client';
-import { truncateWallet, formatSol, formatRank } from '../../lib/formatters';
+import { truncateWallet, formatEth, formatRank } from '../../lib/formatters';
 import type { LeaderboardEntry } from '../../types/leaderboard';
 import { DEMO_LEADERBOARD } from '../../lib/demo-data';
 
@@ -51,7 +51,7 @@ export function LeaderboardTeaser() {
                     <tr key={e.wallet_address}>
                       <td className="lb-mini-rank">{formatRank(e.rank)}</td>
                       <td className="lb-mini-wallet">{truncateWallet(e.wallet_address)}</td>
-                      <td className="lb-mini-sol">{formatSol(e.total_sol_earned)}</td>
+                      <td className="lb-mini-sol">{formatEth(e.total_eth_earned)}</td>
                     </tr>
                   ))
               }

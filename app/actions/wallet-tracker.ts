@@ -54,15 +54,15 @@ export async function getOwnSubmissions(wallet: string): Promise<WalletSubmissio
       .eq('wallet', wallet)
       .order('created_at', { ascending: false });
 
-    // Get payouts to attach SOL amounts
+    // Get payouts to attach ETH amounts
     const { data: payouts } = await supabase
       .from('payouts')
-      .select('claim_id, amount_sol, status')
+      .select('claim_id, amount_eth, status')
       .eq('wallet', wallet);
 
     const payoutMap = new Map<string, number>();
     for (const p of payouts || []) {
-      if (p.status === 'paid') payoutMap.set(p.claim_id, Number(p.amount_sol || 0));
+      if (p.status === 'paid') payoutMap.set(p.claim_id, Number(p.amount_eth || 0));
     }
 
     return (claims || []).map((c: any) => {
@@ -84,7 +84,7 @@ export async function getPublicSubmissions(wallet: string): Promise<WalletSubmis
 
     const { data: payouts } = await supabase
       .from('payouts')
-      .select('id, wallet, amount_sol, created_at, claim_id, claims(country, parsed_amount, created_at)')
+      .select('id, wallet, amount_eth, created_at, claim_id, claims(country, parsed_amount, created_at)')
       .eq('wallet', wallet)
       .eq('status', 'paid')
       .order('created_at', { ascending: false });
@@ -93,7 +93,7 @@ export async function getPublicSubmissions(wallet: string): Promise<WalletSubmis
       id: p.claim_id || p.id,
       wallet: p.wallet,
       status: 'approved',
-      sol_amount: Number(p.amount_sol || 0),
+      sol_amount: Number(p.amount_eth || 0),
       storage_path: null,
       country: p.claims?.country || null,
       receipt_usd: p.claims?.parsed_amount ? Number(p.claims.parsed_amount) : null,
@@ -115,7 +115,7 @@ export async function getWalletSummary(wallet: string): Promise<WalletSummary> {
 
     const [claimsRes, payoutsRes] = await Promise.all([
       supabase.from('claims').select('status, created_at').eq('wallet', wallet),
-      supabase.from('payouts').select('amount_sol, created_at').eq('wallet', wallet).eq('status', 'paid'),
+      supabase.from('payouts').select('amount_eth, created_at').eq('wallet', wallet).eq('status', 'paid'),
     ]);
 
     const claims = claimsRes.data || [];
@@ -124,7 +124,7 @@ export async function getWalletSummary(wallet: string): Promise<WalletSummary> {
     const approved = claims.filter((c: any) => c.status === 'approved' || c.status === 'paid').length + payouts.length;
     const pending = claims.filter((c: any) => ['submitted', 'auto_review', 'needs_manual_review'].includes(c.status)).length;
     const rejected = claims.filter((c: any) => c.status === 'rejected').length;
-    const totalSol = payouts.reduce((s: number, p: any) => s + Number(p.amount_sol || 0), 0);
+    const totalEth = payouts.reduce((s: number, p: any) => s + Number(p.amount_eth || 0), 0);
 
     const approvedDates = payouts.map((p: any) => p.created_at).filter(Boolean).sort();
     const allDates = claims.map((c: any) => c.created_at).filter(Boolean).sort();
@@ -133,12 +133,12 @@ export async function getWalletSummary(wallet: string): Promise<WalletSummary> {
       total_approved: approved,
       total_pending: pending,
       total_rejected: rejected,
-      total_sol_earned: totalSol,
+      total_eth_earned: totalEth,
       last_approved_at: approvedDates.length > 0 ? approvedDates[approvedDates.length - 1] : null,
       last_submission_at: allDates.length > 0 ? allDates[allDates.length - 1] : null,
     };
   } catch {
-    return { total_approved: 0, total_pending: 0, total_rejected: 0, total_sol_earned: 0, last_approved_at: null, last_submission_at: null };
+    return { total_approved: 0, total_pending: 0, total_rejected: 0, total_eth_earned: 0, last_approved_at: null, last_submission_at: null };
   }
 }
 

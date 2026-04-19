@@ -84,6 +84,12 @@ const nextConfig = {
       path: false,
       crypto: false,
     };
+    // Privy pulls in Farcaster Solana compat transitively; we don't use it on ETH.
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      '@farcaster/mini-app-solana': false,
+      '@farcaster/miniapp-sdk': false,
+    };
     return config;
   },
 };

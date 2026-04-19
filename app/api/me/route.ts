@@ -14,8 +14,8 @@ export async function GET(req: Request) {
   const xHandle = session.xHandle;
   let wallet = session.wallet || '';
   const supabase = getSupabaseAdmin();
-  const market = await getMarketSnapshot().catch(() => ({ solPriceUsd: 170 } as any));
-  const solPriceUsd = Number(market?.solPriceUsd || 170);
+  const market = await getMarketSnapshot().catch(() => ({ ethPriceUsd: 170 } as any));
+  const ethPriceUsd = Number(market?.ethPriceUsd || 170);
 
   // If no wallet from Privy session, look it up from wallet_x_links
   if (!wallet) {
@@ -48,15 +48,15 @@ export async function GET(req: Request) {
       payouts: [],
       referral: { code: '', clicks: 0, uniqueClicks: 0, conversions: 0 },
       stats: { totalEarned: 0, totalEarnedUsdc: 0, approved: 0, pending: 0, rejected: 0 },
-      pricing: { solPriceUsd },
+      pricing: { ethPriceUsd },
       networkImpact: emptyNetworkImpact,
       points: { total: 0, bySource: {} },
-      tier: { current: { id: 0, name: 'Standard', max_sol_refund: 0.10 }, next: { id: 1, name: 'Commuter', min_tokens: 100000 }, gascoinBalance: 0, tokensToNext: 100000 },
+      tier: { current: { id: 0, name: 'Standard', max_eth_refund: 0.10 }, next: { id: 1, name: 'Commuter', min_tokens: 100000 }, gascoinBalance: 0, tokensToNext: 100000 },
       leaderboard: { rank: 0, totalRanked: 0 },
       engagement: { topTweets: [], contentTypeDist: {}, totalScoredTweets: 0 },
       streak: { consecutiveWindows: 0, maxMultiplier: 5 },
       cooldown: { days: 7, endsAt: null, remainingMs: 0 },
-      analytics: { approvalRate: 0, avgRefundSol: 0, avgRefundUsd: 0, topGateFailures: [], conversionRate: 0, percentile: 0, pointsLast30: 0, pointsPrior30: 0, pointsTrend: 0 },
+      analytics: { approvalRate: 0, avgRefundEth: 0, avgRefundUsd: 0, topGateFailures: [], conversionRate: 0, percentile: 0, pointsLast30: 0, pointsPrior30: 0, pointsTrend: 0 },
     });
   }
 
@@ -77,7 +77,7 @@ export async function GET(req: Request) {
 
     supabase
       .from('payouts')
-      .select('id, amount_sol, status, tx_hash, created_at, claim_id')
+      .select('id, amount_eth, status, tx_hash, created_at, claim_id')
       .eq('wallet', wallet)
       .order('created_at', { ascending: false })
       .limit(25),
@@ -104,7 +104,7 @@ export async function GET(req: Request) {
   const payouts = payoutsRes.data ?? [];
   const payoutsWithUsd = payouts.map((p: any) => ({
     ...p,
-    amount_usdc: Number(p.amount_sol || 0) * solPriceUsd,
+    amount_usdc: Number(p.amount_eth || 0) * ethPriceUsd,
   }));
 
   const clicks = clicksRes.data ?? [];
@@ -117,7 +117,7 @@ export async function GET(req: Request) {
 
   const totalEarned = payouts
     .filter((p: any) => p.status === 'paid')
-    .reduce((s: number, p: any) => s + Number(p.amount_sol ?? 0), 0);
+    .reduce((s: number, p: any) => s + Number(p.amount_eth ?? 0), 0);
 
   const approved = claims.filter(
     (c: any) => c.status === 'approved' || c.status === 'paid',
@@ -155,7 +155,7 @@ export async function GET(req: Request) {
           .in('id', submissionIds),
         supabase
           .from('payouts')
-          .select('amount_sol, claim_id')
+          .select('amount_eth, claim_id')
           .in('claim_id', submissionIds)
           .eq('status', 'paid'),
       ]);
@@ -163,7 +163,7 @@ export async function GET(req: Request) {
       networkUsdSaved = (networkClaimsRes.data ?? [])
         .reduce((s: number, c: any) => s + Number(c.parsed_amount ?? 0), 0);
       networkSolSaved = (networkPayoutsRes.data ?? [])
-        .reduce((s: number, p: any) => s + Number(p.amount_sol ?? 0), 0);
+        .reduce((s: number, p: any) => s + Number(p.amount_eth ?? 0), 0);
     }
 
     networkImpact = {
@@ -207,13 +207,13 @@ export async function GET(req: Request) {
   // base while preventing a full-table scan that could time out at scale.
   const { data: allPayouts } = await supabase
     .from('payouts')
-    .select('wallet, amount_sol')
+    .select('wallet, amount_eth')
     .eq('status', 'paid')
     .limit(5000);
 
   const walletScores = new Map<string, number>();
   for (const p of allPayouts || []) {
-    walletScores.set(p.wallet, (walletScores.get(p.wallet) || 0) + Number(p.amount_sol || 0));
+    walletScores.set(p.wallet, (walletScores.get(p.wallet) || 0) + Number(p.amount_eth || 0));
   }
   // Simple rank by total points (approximate — full composite uses holdings + engagement weights)
   const allWalletPoints = new Map<string, number>();
@@ -262,7 +262,7 @@ export async function GET(req: Request) {
   // ─── Analytics: approval rate, avg refund, gate failures ───
   const approvalRate = claims.length > 0 ? (approved / claims.length * 100) : 0;
   const avgRefund = paidPayouts.length > 0
-    ? paidPayouts.reduce((s: number, p: any) => s + Number(p.amount_sol || 0), 0) / paidPayouts.length
+    ? paidPayouts.reduce((s: number, p: any) => s + Number(p.amount_eth || 0), 0) / paidPayouts.length
     : 0;
 
   // Gate failure analysis — which gates fail most
@@ -330,8 +330,8 @@ export async function GET(req: Request) {
       uniqueClicks,
       conversions: totalConversions,
     },
-    stats: { totalEarned, totalEarnedUsdc: totalEarned * solPriceUsd, approved, pending, rejected },
-    pricing: { solPriceUsd },
+    stats: { totalEarned, totalEarnedUsdc: totalEarned * ethPriceUsd, approved, pending, rejected },
+    pricing: { ethPriceUsd },
     networkImpact,
     // New enriched data
     points: {
@@ -339,7 +339,7 @@ export async function GET(req: Request) {
       bySource: pointsBySource,
     },
     tier: {
-      current: { id: currentTier.id, name: currentTier.name, max_sol_refund: currentTier.max_sol_refund },
+      current: { id: currentTier.id, name: currentTier.name, max_eth_refund: currentTier.max_eth_refund },
       next: nextTier ? { id: nextTier.id, name: nextTier.name, min_tokens: nextTier.min_tokens } : null,
       gascoinBalance,
       tokensToNext: nextTier ? Math.max(0, nextTier.min_tokens - gascoinBalance) : 0,
@@ -364,8 +364,8 @@ export async function GET(req: Request) {
     },
     analytics: {
       approvalRate: +approvalRate.toFixed(1),
-      avgRefundSol: +avgRefund.toFixed(4),
-      avgRefundUsd: +(avgRefund * solPriceUsd).toFixed(2),
+      avgRefundEth: +avgRefund.toFixed(4),
+      avgRefundUsd: +(avgRefund * ethPriceUsd).toFixed(2),
       topGateFailures,
       conversionRate: +conversionRate.toFixed(1),
       percentile,

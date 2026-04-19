@@ -6,7 +6,7 @@ import { Nav } from '../../components/Nav';
 import { WalletButton } from '../../components/ui/WalletButton';
 import { useGascoinWallet } from '../../hooks/useGascoinWallet';
 import { useReferralDashboard } from '../../hooks/useReferralDashboard';
-import { truncateWallet, formatSol, timeAgo } from '../../lib/formatters';
+import { truncateWallet, formatEth, timeAgo } from '../../lib/formatters';
 import { REFERRAL_CONFIG, SKIP_REASON_LABELS } from '../../lib/referral-config';
 import { GATE_COUNT } from '../../lib/policy';
 import type { ReferralConversion } from '../../types/referral';

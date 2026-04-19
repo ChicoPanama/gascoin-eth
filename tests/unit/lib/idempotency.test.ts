@@ -5,14 +5,14 @@ import { hashRequestBody, resolveIdempotencyKey } from '@/lib/idempotency';
 
 describe('hashRequestBody', () => {
   it('happy path: returns a 64-char hex string for a typical body', () => {
-    const hash = hashRequestBody({ claimId: 'claim-1', wallet: 'walletABC', amountSol: 0.01 });
+    const hash = hashRequestBody({ claimId: 'claim-1', wallet: 'walletABC', amountEth: 0.01 });
 
     expect(hash).toHaveLength(64);
     expect(hash).toMatch(/^[a-f0-9]{64}$/);
   });
 
   it('same body always produces same hash (deterministic)', () => {
-    const body = { claimId: 'claim-1', wallet: 'walletABC', amountSol: 0.01 };
+    const body = { claimId: 'claim-1', wallet: 'walletABC', amountEth: 0.01 };
 
     expect(hashRequestBody(body)).toBe(hashRequestBody(body));
   });

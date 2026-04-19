@@ -20,7 +20,7 @@ export type FeedSort = 'newest' | 'oldest' | 'highest_sol' | 'highest_usd';
 
 export interface CommunityStats {
   total_approved: number;
-  total_sol_paid: number;
+  total_eth_paid: number;
   total_usdc_paid: number;
   unique_countries: number;
   avg_refund_sol: number;

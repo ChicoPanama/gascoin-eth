@@ -283,7 +283,7 @@ export default async function AdminHealthPage() {
               {isDryRun ? 'DRY RUN' : 'LIVE'}
             </div>
             <div className="gc-stat-sub">
-              {isDryRun ? 'No SOL dispatched' : 'Real ETH payouts'}
+              {isDryRun ? 'No ETH dispatched' : 'Real ETH payouts'}
             </div>
           </div>
           <div className="gc-stat">

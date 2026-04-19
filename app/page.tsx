@@ -133,7 +133,7 @@ export default async function Home() {
               SEASON 1 · BETA
             </span>
             <span style={{ flex: '1 1 auto', minWidth: 0 }}>
-              Points-only mode. Submit receipts, climb the leaderboard, earn Season 1 points — treasury payouts activate at token launch. No real SOL is dispatched yet.
+              Points-only mode. Submit receipts, climb the leaderboard, earn Season 1 points — treasury payouts activate at token launch. No real ETH is dispatched yet.
             </span>
           </div>
         )}
@@ -150,7 +150,7 @@ export default async function Home() {
           <div className="gc-hero-content">
             <HeroStagger>
               <HeroItem>
-                <div className="gc-section-label">— Solana · On-Chain Gas Refunds</div>
+                <div className="gc-section-label">— Ethereum · On-Chain Gas Refunds</div>
               </HeroItem>
               <HeroItem>
                 <h1>
@@ -163,7 +163,7 @@ export default async function Home() {
               <HeroItem>
                 <p className="gc-hero-body">
                   Gas prices are crushing everyday people. GASCOIN is a community-funded
-                  movement on Solana that gives real money back for real gas purchases.
+                  movement on Ethereum that gives real money back for real gas purchases.
                   Post proof on X, submit your receipt, and receive ETH directly to your
                   wallet. No middlemen. No custodians. Just people helping people.
                 </p>
@@ -270,9 +270,9 @@ export default async function Home() {
             <div className="gc-step">
               <div className="gc-step-ghost">03</div>
               <div className="gc-step-index">Step 03</div>
-              <div className="gc-step-title">Get SOL Back</div>
+              <div className="gc-step-title">Get ETH Back</div>
               <p className="gc-step-desc">
-                Once all verification gates pass, SOL is sent directly to your
+                Once all verification gates pass, ETH is sent directly to your
                 wallet. Fully on-chain. Fully transparent. The community funds
                 the treasury, the treasury pays you back.
               </p>
@@ -439,7 +439,7 @@ export default async function Home() {
                   <div className="gc-tech-layer-title">Claude Oversight</div>
                   <div className="gc-tech-layer-tag">CLAUDE OPUS · ANTHROPIC · FINAL REVIEW</div>
                   <p className="gc-tech-layer-desc">
-                    Before SOL leaves the treasury, Claude reviews the complete submission package —
+                    Before ETH leaves the treasury, Claude reviews the complete submission package —
                     all {gates} gate results, fraud scores, X account metrics,
                     submission history, and full mem0 intelligence profile.
                     Returns a verdict with a written audit narrative.

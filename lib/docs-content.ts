@@ -79,13 +79,13 @@ export const DOC_CATEGORIES: DocCategory[] = [
         category: "Overview",
         description: "",
         order: 0,
-        content: `<p><strong>Gas = real gasoline at a pump.</strong> Not crypto transaction fees. You fill up your car, you get SOL back. That's it.</p>
+        content: `<p><strong>Gas = real gasoline at a pump.</strong> Not crypto transaction fees. You fill up your car, you get ETH back. That's it.</p>
 
 <pre class="doc-ascii">
   ┌──────────────┐   ┌──────────────┐   ┌──────────────┐   ┌──────────────┐   ┌──────────────┐
   │   STEP 1     │──→│   STEP 2     │──→│   STEP 3     │──→│   STEP 4     │──→│   STEP 5     │
   │              │   │              │   │              │   │              │   │              │
-  │  Fill up at  │   │  Write last  │   │  Post tweet  │   │  Submit at   │   │  SOL lands   │
+  │  Fill up at  │   │  Write last  │   │  Post tweet  │   │  Submit at   │   │  ETH lands   │
   │  any gas     │   │  4 chars of  │   │  on X with   │   │  gascoin.app │   │  in your     │
   │  station     │   │  wallet on   │   │  #GasCoin    │   │  /submit     │   │  wallet      │
   │              │   │  receipt     │   │  + receipt   │   │              │   │              │
@@ -104,12 +104,12 @@ export const DOC_CATEGORIES: DocCategory[] = [
 <h3>Step 4 — Submit at gascoin.app/submit</h3>
 <p>Go to <strong>gascoin.app/submit</strong>, connect your Ethereum wallet, paste your tweet URL, and upload your receipt photo. The system runs 15 automated checks — takes about 2 minutes.</p>
 
-<h3>Step 5 — Receive SOL</h3>
-<p>If all checks pass, SOL is sent directly to your connected wallet within 2–6 hours (48 hours maximum). No action needed on your end.</p>
+<h3>Step 5 — Receive ETH</h3>
+<p>If all checks pass, ETH is sent directly to your connected wallet within 2–6 hours (48 hours maximum). No action needed on your end.</p>
 
 <h3>Before you start — quick checklist</h3>
 <ul>
-<li>Ethereum wallet installed (Phantom, Solflare, or Backpack — all free)</li>
+<li>Ethereum wallet installed (MetaMask, Rabby, Rainbow, or Coinbase Wallet — all free)</li>
 <li>X (Twitter) account that is public and verified (blue checkmark)</li>
 <li>You follow <a href="https://x.com/GasCoinApp" target="_blank" rel="noopener">@GasCoinApp</a> on X</li>
 <li>Gas receipt dated within the last 7 days</li>
@@ -123,10 +123,10 @@ export const DOC_CATEGORIES: DocCategory[] = [
         category: "Overview",
         description: "",
         content: `<h3>What this is</h3>
-<p>GASCOIN is a Solana (a fast, low-cost cryptocurrency network) protocol that refunds verified real-world fuel purchases in SOL.</p>
+<p>GASCOIN is a Ethereum protocol that refunds verified real-world fuel purchases in ETH.</p>
 <p>All claims pass through a deterministic 17-gate pipeline before payout is released.</p>
 <pre class="doc-ascii">
-  BUY GAS ──→ WRITE LAST 4 ──→ TWEET $GASCOIN/#GASCOIN ──→ SUBMIT ──→ 15 GATES ──→ SOL REFUND
+  BUY GAS ──→ WRITE LAST 4 ──→ TWEET $GASCOIN/#GASCOIN ──→ SUBMIT ──→ 15 GATES ──→ ETH REFUND
   (any station)  (on receipt)     (public post)     (upload)   (auto-verify)  (to wallet)
 </pre>
 
@@ -163,7 +163,7 @@ export const DOC_CATEGORIES: DocCategory[] = [
 <li>You visit gascoin.com and click Submit</li>
 <li>You connect your Ethereum wallet, paste your tweet URL, and upload a photo of your receipt</li>
 <li>The system automatically runs 15 verification checks on your submission</li>
-<li>If all 15 checks pass, SOL is sent directly to your wallet within 2–6 hours (48 hours maximum)</li>
+<li>If all 15 checks pass, ETH is sent directly to your wallet within 2–6 hours (48 hours maximum)</li>
 </ul>`,
         order: 2,
       },
@@ -174,7 +174,7 @@ export const DOC_CATEGORIES: DocCategory[] = [
         category: "Overview",
         description: "",
         content: `<h3>Understanding refund value</h3>
-<p>Refunds are paid in SOL, and SOL market price moves daily. GASCOIN therefore does not publish fixed USD equivalents in docs.</p>
+<p>Refunds are paid in ETH, and ETH market price moves daily. GASCOIN therefore does not publish fixed USD equivalents in docs.</p>
 <table><thead><tr><th>Tier</th><th>GASCOIN Required</th><th>Refund Policy</th><th>Submission Frequency</th></tr></thead>
 <tbody><tr><td>Standard</td><td>1</td><td>Tier-based cap set at review time</td><td>1 / week</td></tr>
 <tr><td>Commuter</td><td>100,000</td><td>Higher cap than Standard</td><td>1 / week</td></tr>
@@ -190,7 +190,7 @@ export const DOC_CATEGORIES: DocCategory[] = [
         category: "Overview",
         description: "",
         content: `<ul>
-<li><strong>Required: </strong>A Ethereum wallet — Phantom, Solflare, or Backpack (all free to install)</li>
+<li><strong>Required: </strong>An Ethereum wallet — MetaMask, Rabby, Rainbow, or Coinbase Wallet (all free to install)</li>
 <li><strong>Required: </strong>A <strong>verified</strong> X (Twitter) account (blue, business, or government checkmark) set to public, with at least 100 followers, a profile bio, and posting history. Unverified accounts are rejected at submission to prevent sybil attacks.</li>
 <li><strong>Required: </strong>You must <strong>follow <a href="https://x.com/GasCoinApp" target="_blank" rel="noopener">@GasCoinApp</a></strong> on X before submitting. The system checks the official follower list on every submission — non-followers are rejected at the gate.</li>
 <li><strong>Required: </strong>A physical gas receipt from a real gas station purchase within the last 7 days</li>
@@ -252,14 +252,14 @@ export const DOC_CATEGORIES: DocCategory[] = [
 <h3>How to connect your wallet</h3>
 <ol>
 <li>Click the Connect Wallet button on Step 1</li>
-<li>A wallet selection modal appears showing three options: Phantom, Solflare, and Backpack</li>
+<li>A wallet selection modal appears showing several options: MetaMask, Rabby, Rainbow, and Coinbase Wallet</li>
 <li>Click the wallet you have installed. Your browser will open a popup from that wallet extension</li>
 <li>Approve the connection in the wallet popup. You are not authorizing any transaction — just a read-only connection</li>
 <li>Once connected, your wallet address appears in truncated form (e.g., GAs...xK92) and Step 1 is marked complete</li>
 <li>The system automatically checks your GASCOIN token balance and displays your tier (Standard, Commuter, Road Warrior, or Fleet)</li>
 </ol>
 <h3>What happens if your wallet is not installed</h3>
-<p>If you click Phantom but do not have Phantom installed, your browser will redirect to the Phantom website where you can install it as a browser extension. After installing, return to the GASCOIN submit page and connect. The same applies to Solflare and Backpack.</p>
+<p>If you click MetaMask but do not have MetaMask installed, your browser will redirect to the MetaMask website where you can install it as a browser extension. After installing, return to the GASCOIN submit page and connect. The same applies to Rabby, Rainbow, and Coinbase Wallet.</p>
 <h3>Important notes about wallet connection</h3>
 <ul>
 <li>You cannot proceed past Step 1 without connecting a wallet</li>
@@ -381,7 +381,7 @@ export const DOC_CATEGORIES: DocCategory[] = [
 <p>The screen displays SUBMISSION INCOMPLETE. The failed gate is highlighted and a specific failure reason is shown explaining exactly what went wrong. Gates that come after the failed gate show the dash icon — they were not run because a previous gate blocked progress.</p>
 <p>After a failure, you can resubmit. Different gates have different resubmission requirements — see the Gates section of this document for details on each gate and how to fix failures.</p>
 <h3>Treasury check (happens after all gates pass)</h3>
-<p>After every gate passes, the payout worker verifies the GASCOIN treasury has enough SOL to cover your refund before dispatch. This is NOT a policy gate — it is a pre-payout safety check. If the treasury is temporarily low, your approved submission enters a queue and is automatically retried every 6 hours until funds are available. You do not need to resubmit or take any action — the retry is automatic.</p>`,
+<p>After every gate passes, the payout worker verifies the GASCOIN treasury has enough ETH to cover your refund before dispatch. This is NOT a policy gate — it is a pre-payout safety check. If the treasury is temporarily low, your approved submission enters a queue and is automatically retried every 6 hours until funds are available. You do not need to resubmit or take any action — the retry is automatic.</p>`,
         order: 10,
       },
     ],
@@ -441,7 +441,7 @@ export const DOC_CATEGORIES: DocCategory[] = [
   │       │                                                                  │
   │       ├──► X API v2 (verifyTweet, followers, account quality) ──┐        │
   │       │                                                         │        │
-  │       ├──► Solana RPC (tier holdings) ─────────────────────────┐│        │
+  │       ├──► Ethereum RPC (tier holdings) ─────────────────────────┐│        │
   │       │                                                        ││        │
   │       └──► GEMINI VISION (receipt OCR, EXIF, tamper, AI signal)││        │
   │                       │                                       ▼▼        │
@@ -479,7 +479,7 @@ export const DOC_CATEGORIES: DocCategory[] = [
   │                      └──────────┬───────────────┘                   │    │
   │                                 │                                   │    │
   │                                 ▼                                   │    │
-  │                           ON-CHAIN SOL                              │    │
+  │                           ON-CHAIN ETH                              │    │
   │                           + payout row                              │    │
   │                           + audit log                               │    │
   │                                                                     │    │
@@ -563,7 +563,7 @@ export const DOC_CATEGORIES: DocCategory[] = [
                                                                │
                     ┌──────────────┐  ┌──────────────┐  ┌──────▼───────┐
                     │   PAYOUT     │← │ mem0 GUARD   │← │ Claude + KB  │
-                    │ SOL → Wallet │  │ + Queue      │  │ + mem0 Intel │
+                    │ ETH → Wallet │  │ + Queue      │  │ + mem0 Intel │
                     └──────────────┘  └──────────────┘  └──────────────┘
 
                     Every action logged → Audit Trail + mem0 Memory
@@ -599,7 +599,7 @@ All states/events -> Persistence + Audit Log (immutable trail)
 <h3>Model contract (clear boundaries)</h3>
 <ul>
 <li><strong>Deterministic policy layer:</strong> 13 sequential gates, thresholds, cooldown, queue rules, and payout state transitions</li>
-<li><strong>Model-assisted layer (Gemini Vision + Grok Reasoning + Claude Oversight):</strong> Gemini extracts receipt data and flags tampering, Grok reasons across signals for high-risk cases, Claude runs later as the final reviewer before SOL dispatch</li>
+<li><strong>Model-assisted layer (Gemini Vision + Grok Reasoning + Claude Oversight):</strong> Gemini extracts receipt data and flags tampering, Grok reasons across signals for high-risk cases, Claude runs later as the final reviewer before ETH dispatch</li>
 <li><strong>Safety principle:</strong> model outputs inform decisions; deterministic policy enforces final pass/fail paths. Claude can only <em>block</em> or <em>flag</em> an already auto-approved claim — never unilaterally approve one the gates rejected</li>
 </ul>
 <h3>Newcomer Path (Simple)</h3>
@@ -607,7 +607,7 @@ All states/events -> Persistence + Audit Log (immutable trail)
 <li>Submit wallet + tweet + receipt</li>
 <li>AI checks social proof and receipt authenticity</li>
 <li>Gate engine evaluates pass/fail sequence</li>
-<li>If approved, payout worker dispatches SOL</li>
+<li>If approved, payout worker dispatches ETH</li>
 <li>If treasury is short, claim enters automatic retry queue</li>
 </ul>
 <h3>Technical Path (Detailed)</h3>
@@ -631,8 +631,8 @@ All states/events -> Persistence + Audit Log (immutable trail)
   Gate engine: pass or fail            AI score + tamper score + pHash + account quality
           │                                    │
           ▼                                    ▼
-  Approved → SOL sent to wallet        Sequential gates → state transition → audit log
-  Rejected → see which gate failed     Payout queue → retry loop → SOL dispatch
+  Approved → ETH sent to wallet        Sequential gates → state transition → audit log
+  Rejected → see which gate failed     Payout queue → retry loop → ETH dispatch
 </pre>
 <h3>ASCII quick map (GitHub-style)</h3>
 <pre style="font-family:ui-monospace, SFMono-Regular, Menlo, monospace; font-size:12px; line-height:1.45; color:rgba(255,255,255,0.78); background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.12); padding:12px; overflow:auto">
@@ -776,7 +776,7 @@ Inputs(wallet,tweet,receipt)
           APPROVED                                  ▼
                │                              Treasury OK?
                ▼                              Yes → APPROVED
-           SOL PAYOUT                         No  → stay in queue
+           ETH PAYOUT                         No  → stay in queue
 </pre>`,
         order: 28,
       },
@@ -864,11 +864,11 @@ Inputs(wallet,tweet,receipt)
 <h3>Layer 3 — X API v2</h3>
 <p>The submitter's X account is evaluated for authenticity signals: follower count, account age, posting history, engagement patterns, and network quality. xAI-powered scoring identifies bot accounts, purchased followers, and coordinated networks. This layer makes it economically infeasible to create fake accounts at scale.</p>
 <h3>Layer 4 — Claude Oversight</h3>
-<p>Claude (Anthropic) reviews every auto-approved claim before SOL is dispatched. It receives all gate results, fraud scores, cross-validation signals, mem0 entity intelligence, and knowledge base context, then returns an approve/flag/reject verdict with a confidence score and written audit narrative. Flagged claims revert to admin review. Every verdict is written back to mem0 to inform future reviews.</p>
+<p>Claude (Anthropic) reviews every auto-approved claim before ETH is dispatched. It receives all gate results, fraud scores, cross-validation signals, mem0 entity intelligence, and knowledge base context, then returns an approve/flag/reject verdict with a confidence score and written audit narrative. Flagged claims revert to admin review. Every verdict is written back to mem0 to inform future reviews.</p>
 <h3>Layer 5 — Referral Pipeline</h3>
 <p>Graph analysis maps referral relationships and identifies circular referral patterns, mutual-referral schemes, and coordinated sign-up networks. Detected rings are flagged and excluded from referral rewards. Ring signals are written to mem0 and propagated to the payout worker — if a wallet is flagged for ring activity, its pending payouts are blocked.</p>
 <h3>Layer 6 — mem0 Cross-Pipeline Intelligence</h3>
-<p>Every pipeline writes signals to mem0 persistent memory: submission verdicts, payout results, engagement anomalies, referral rings, handle changes, and auto-bans. This creates a longitudinal profile for each wallet and X account. The payout worker checks mem0 flags before dispatching SOL — a wallet flagged by the referral pipeline after a claim was auto-approved will be caught here. Claude receives the full mem0 entity profile during review, giving it awareness of behavior across all pipelines. A daily intelligence worker synthesizes cross-pipeline patterns and refreshes Redis flag caches.</p>
+<p>Every pipeline writes signals to mem0 persistent memory: submission verdicts, payout results, engagement anomalies, referral rings, handle changes, and auto-bans. This creates a longitudinal profile for each wallet and X account. The payout worker checks mem0 flags before dispatching ETH — a wallet flagged by the referral pipeline after a claim was auto-approved will be caught here. Claude receives the full mem0 entity profile during review, giving it awareness of behavior across all pipelines. A daily intelligence worker synthesizes cross-pipeline patterns and refreshes Redis flag caches.</p>
 <h3>Layer 7 — Institutional Knowledge Base</h3>
 <p>Gate rules, fraud patterns, policy thresholds, and decision history are stored in a knowledge base synced from operational documentation. Claude's review prompt dynamically pulls relevant entries based on the claim's risk profile — high-risk claims get fraud pattern context, failed gates get rule explanations, referral flags get ring detection rules. Weekly intelligence reports generated from cross-pipeline analysis are stored back into the knowledge base, creating an ever-growing institutional memory.</p>`,
         order: 32,
@@ -883,11 +883,11 @@ Inputs(wallet,tweet,receipt)
 <h3>Treasury Transparency</h3>
 <p>The GASCOIN treasury wallet is a standard Ethereum wallet. Its balance is queried via RPC before every payout. If the treasury cannot cover a refund, the submission is queued (not rejected) until funds are available. The treasury balance is publicly visible on the Dashboard page.</p>
 <h3>Token Holdings Verification</h3>
-<p>Your GASCOIN token balance is checked twice: once at submission time (to determine your tier and cooldown) and again immediately before SOL is dispatched (to ensure you still hold tokens). If you sell your GASCOIN between submission and payout, the payout is blocked.</p>
+<p>Your GASCOIN token balance is checked twice: once at submission time (to determine your tier and cooldown) and again immediately before ETH is dispatched (to ensure you still hold tokens). If you sell your GASCOIN between submission and payout, the payout is blocked.</p>
 <h3>Immutable Audit Trail</h3>
 <p>Every admin action — approvals, rejections, gate overrides, payout dispatches — is permanently recorded in the audit log. No admin action can be taken silently. The audit trail cannot be modified or deleted.</p>
-<h3>Solana Transaction Receipts</h3>
-<p>Every ETH payout generates a Solana transaction hash that can be independently verified on any Solana block explorer. The transaction proves exactly when the payment was made, how much was sent, and to which wallet.</p>`,
+<h3>Ethereum Transaction Receipts</h3>
+<p>Every ETH payout generates a Ethereum transaction hash that can be independently verified on any Ethereum block explorer. The transaction proves exactly when the payment was made, how much was sent, and to which wallet.</p>`,
         order: 33,
       },
       {
@@ -907,12 +907,12 @@ Inputs(wallet,tweet,receipt)
 <li><strong>Referral ring detection</strong> — AI graph analysis identifies and blocks circular referral schemes</li>
 <li><strong>Tier-based cooldowns</strong> — Submission frequency is capped by tier. Even Fleet (the highest tier) is limited to 4 per week</li>
 <li><strong>Dual token check</strong> — Token balance is verified at submission AND before payout. Dumping tokens after submission blocks the refund</li>
-<li><strong>Pre-payout re-verification</strong> — Before every SOL dispatch, the system re-checks: tweet still live, follower count still valid, account quality still passing, token balance still held</li>
+<li><strong>Pre-payout re-verification</strong> — Before every ETH dispatch, the system re-checks: tweet still live, follower count still valid, account quality still passing, token balance still held</li>
 <li><strong>Admin review layer</strong> — Every submission is reviewed by a human admin before funds are released. The admin has full visibility into all gate results, AI scores, and fraud signals</li>
 <li><strong>Immutable audit log</strong> — Every action on the platform is permanently recorded. Nothing can be done silently</li>
-<li><strong>Claude oversight with memory</strong> — Every claim is reviewed by AI manager before SOL moves. Claude receives all 17 gate results, fraud scores, cross-validation signals, plus the wallet's full behavioral history from mem0 and relevant institutional rules from the knowledge base. A wallet with a declining trust trajectory and cross-pipeline flags gets extra scrutiny</li>
+<li><strong>Claude oversight with memory</strong> — Every claim is reviewed by AI manager before ETH moves. Claude receives all 17 gate results, fraud scores, cross-validation signals, plus the wallet's full behavioral history from mem0 and relevant institutional rules from the knowledge base. A wallet with a declining trust trajectory and cross-pipeline flags gets extra scrutiny</li>
 <li><strong>Cross-pipeline memory</strong> — Every pipeline writes signals to persistent memory. A referral ring detected at 10am blocks the pending payout at 10:05am. Engagement spam flagged on Monday informs Claude's review on Tuesday. Nothing is forgotten</li>
-<li><strong>Payout cross-pipeline guard</strong> — Before SOL is dispatched, the payout worker checks for flags from other pipelines. A wallet flagged for ring activity, auto-banned, or showing declining trust is blocked even if the claim was already approved</li>
+<li><strong>Payout cross-pipeline guard</strong> — Before ETH is dispatched, the payout worker checks for flags from other pipelines. A wallet flagged for ring activity, auto-banned, or showing declining trust is blocked even if the claim was already approved</li>
 <li><strong>API fault tolerance</strong> — If X API fails, user gets retry_later (503), not a rejection. No legitimate claim is penalized for upstream outages</li>
 <li><strong>Signal decay</strong> — Historical penalties weaken over time (30% weight at 180+ days) — prevents false positives from legitimate X purges</li>
 <li><strong>Score clamping</strong> — Anomalous upstream values (AI score=999) are clamped and logged for audit. No single signal can produce an out-of-range result</li>
@@ -927,7 +927,7 @@ Inputs(wallet,tweet,receipt)
         category: "Technology",
         description: "",
         content: `<h3>What this is</h3>
-<p>Claude (Anthropic) acts as the final AI reviewer for every auto-approved claim before SOL is dispatched. This is the last verification layer before funds move.</p>
+<p>Claude (Anthropic) acts as the final AI reviewer for every auto-approved claim before ETH is dispatched. This is the last verification layer before funds move.</p>
 
 <h3>How it works</h3>
 <p>After the policy engine auto-approves a claim, Claude receives the complete verification payload plus cross-pipeline intelligence:</p>
@@ -1143,7 +1143,7 @@ Inputs(wallet,tweet,receipt)
   [ SYNCHRONOUS SUBMIT PATH ]                [ ASYNC WORKER PATH ]
      │                                                      │
      ├─► X API v2 ───────────┐                              │
-     ├─► Solana holdings ────┤                              │
+     ├─► Ethereum holdings ────┤                              │
      ├─► Gemini Vision ──────┤                              │
      │        │              ▼                              │
      │        ▼       ┌──────────────┐                      │
@@ -1182,7 +1182,7 @@ Inputs(wallet,tweet,receipt)
     · Budget cap hit      → HTTP 402 → conservative defaults
     · Provider outage     → AI Gateway failover to next provider
 </pre>
-<p>Every submission fans out in parallel to the cheap signals (X API v2, Solana holdings) and the expensive signal (Gemini Vision receipt extraction). The fraud module conditionally escalates to Grok for cross-signal reasoning when the initial signals look suspicious. The 13-gate policy engine consumes everything, persists the decision, and returns the user their response. Auto-approved claims then cross an async boundary into the cron worker, where <strong>Claude acts as the final reviewer</strong> — receiving the Gemini output, the Grok verdict (if it ran), the gate results, the mem0 entity profile, and the knowledge base rulebook — before any SOL is dispatched. The payout worker does a final X API re-verify and a mem0 ring-flag check, then executes the on-chain transfer. mem0 is the horizontal bus that lets the referral and engagement workers influence the payout decision without being coupled to the submission path.</p>
+<p>Every submission fans out in parallel to the cheap signals (X API v2, Ethereum holdings) and the expensive signal (Gemini Vision receipt extraction). The fraud module conditionally escalates to Grok for cross-signal reasoning when the initial signals look suspicious. The 13-gate policy engine consumes everything, persists the decision, and returns the user their response. Auto-approved claims then cross an async boundary into the cron worker, where <strong>Claude acts as the final reviewer</strong> — receiving the Gemini output, the Grok verdict (if it ran), the gate results, the mem0 entity profile, and the knowledge base rulebook — before any ETH is dispatched. The payout worker does a final X API re-verify and a mem0 ring-flag check, then executes the on-chain transfer. mem0 is the horizontal bus that lets the referral and engagement workers influence the payout decision without being coupled to the submission path.</p>
 <p>Verifiable. Auditable. Economically bounded. This is what it looks like when a protocol treats AI as infrastructure instead of a line item.</p>
 
 <h3>What is live right now</h3>
@@ -1260,7 +1260,7 @@ Inputs(wallet,tweet,receipt)
   │  engagement_pattern      · tweet quality signals, bot detection,│
   │                            spam flags, content-type anomalies  │
   │                                                                  │
-  │  payout_event            · on-chain SOL dispatch events         │
+  │  payout_event            · on-chain ETH dispatch events         │
   │                            (immutable history)                 │
   │                                                                  │
   │  account_quality         · X account quality signals            │
@@ -1357,7 +1357,7 @@ Inputs(wallet,tweet,receipt)
   └─────────────────────────────────────────────────────────────────┘
 </pre>
 
-<p>The critical property: <strong>a referral ring detected <em>after</em> Claude already approved a claim still blocks the payout</strong>. That's because the referral worker writes a ring flag to mem0, the payout worker reads mem0 right before dispatching SOL, sees the flag, and refuses to send. No direct coupling between the two workers — the mem0 bus is the entire interface.</p>
+<p>The critical property: <strong>a referral ring detected <em>after</em> Claude already approved a claim still blocks the payout</strong>. That's because the referral worker writes a ring flag to mem0, the payout worker reads mem0 right before dispatching ETH, sees the flag, and refuses to send. No direct coupling between the two workers — the mem0 bus is the entire interface.</p>
 
 <h3>What this means in plain terms</h3>
 <ul>
@@ -1422,9 +1422,9 @@ Inputs(wallet,tweet,receipt)
 <li>Navigation bar with links to all platform pages and a CONNECT WALLET button</li>
 <li>Hero section with the GASCOIN value proposition: POST. SUBMIT. GET PAID BACK.</li>
 <li>AI technology pipeline showing full integration with X + Grok across verification flows</li>
-<li>Live statistics strip: Treasury SOL balance, Market Cap, 24h Volume, Verification Gates count</li>
+<li>Live statistics strip: Treasury ETH balance, Market Cap, 24h Volume, Verification Gates count</li>
 <li>How It Works section: 3-step visual summary of the submission process</li>
-<li>Live treasury teaser section with real-time SOL balance</li>
+<li>Live treasury teaser section with real-time ETH balance</li>
 <li>Community receipt feed teaser showing the 4 most recent approved receipts</li>
 <li>Gate transparency teaser showing all 17 gate names with live pass rates</li>
 <li>Wallet Tracker teaser with a static gate progress illustration</li>
@@ -1444,7 +1444,7 @@ Inputs(wallet,tweet,receipt)
         content: `<p>The submit page hosts the 5-step submission portal described in full in Section 2 of this document. See Section 2 for complete details on each step.</p>
 <p>Key rules for the submit page:</p>
 <ul>
-<li>You must connect a Ethereum wallet to proceed past Step 1</li>
+<li>You must connect an Ethereum wallet to proceed past Step 1</li>
 <li>You must have an active X (Twitter) account to proceed past Step 2</li>
 <li>You must have a qualifying gas receipt to proceed past Step 3</li>
 <li>Each submission requires a unique receipt and a new tweet — you cannot reuse either</li>
@@ -1462,7 +1462,7 @@ Inputs(wallet,tweet,receipt)
 <h3>What each receipt card shows</h3>
 <ul>
 <li>Location: the city and state where the gas was purchased (e.g., Austin, TX)</li>
-<li>SOL Refund Amount: the exact SOL sent to the submitter</li>
+<li>ETH Refund Amount: the exact ETH sent to the submitter</li>
 <li>Receipt Total: the USD amount of the gas purchase</li>
 <li>Submission Date: when the submission was made</li>
 <li>Wallet: the submitter's wallet address in truncated format</li>
@@ -1472,7 +1472,7 @@ Inputs(wallet,tweet,receipt)
 <h3>Filters and sorting</h3>
 <p>Filter the feed by country, date range, or featured status. Sort results by newest first or highest refund amount. Filters and sort options combine so you can narrow down to exactly the receipts you want to see.</p>
 <h3>Receipt detail modal</h3>
-<p>Clicking any receipt card opens a full detail view showing the complete receipt image, all submission details (wallet, SOL amount, receipt total, gas station location, receipt date, gates passed, submission ID), and a copy button for the wallet address.</p>
+<p>Clicking any receipt card opens a full detail view showing the complete receipt image, all submission details (wallet, ETH amount, receipt total, gas station location, receipt date, gates passed, submission ID), and a copy button for the wallet address.</p>
 <h3>Live updates</h3>
 <p>The community feed updates in real time. When a new submission is approved, a notification bar appears at the top of the feed: '↑ X new receipts — click to load.' Clicking this bar adds the new receipts to the top of the grid without requiring a page refresh.</p>
 <h3>Privacy</h3>
@@ -1485,7 +1485,7 @@ Inputs(wallet,tweet,receipt)
         categorySlug: "platform",
         category: "Platform Pages",
         description: "",
-        content: `<p>The leaderboard ranks all wallets that have earned SOL through GASCOIN by a composite score. It is public and visible to anyone — no wallet connection required to view it.</p>
+        content: `<p>The leaderboard ranks all wallets that have earned ETH through GASCOIN by a composite score. It is public and visible to anyone — no wallet connection required to view it.</p>
 <h3>The scoring formula</h3>
 <p>The composite score is built from engagement points, referral points, holdings points, and submission streaks. The weights assigned to each factor are dynamic and may be adjusted over time to maintain healthy ecosystem growth.</p>
 <p>Each wallet's leaderboard score is calculated from 4 factors:</p>
@@ -1496,7 +1496,7 @@ Inputs(wallet,tweet,receipt)
 <p>When 3 or more wallets have submissions, the top 3 are displayed in a visual podium above the table. The rank 1 wallet appears in the center and is slightly taller. If your connected wallet is in the top 3, a YOU badge appears on your podium card.</p>
 <h3>Live updates</h3>
 <p>The leaderboard updates in real time via Supabase Realtime. When any submission status changes in the database, the leaderboard data refreshes automatically. The LIVE indicator in the page header shows the time since last update.</p><h3>How scores are calculated</h3>
-<p>Each wallet's leaderboard position is determined by a proprietary composite score based on three factors: referral activity, platform engagement, and GASCOIN holdings. The weights are dynamic and may be adjusted. SOL earned from receipt refunds is not a factor — the leaderboard rewards ecosystem contribution, not receipt size.</p>
+<p>Each wallet's leaderboard position is determined by a proprietary composite score based on three factors: referral activity, platform engagement, and GASCOIN holdings. The weights are dynamic and may be adjusted. ETH earned from receipt refunds is not a factor — the leaderboard rewards ecosystem contribution, not receipt size.</p>
 <p>→ See also: Points System documentation for details on how points are earned</p>`,
         order: 26,
       },
@@ -1605,12 +1605,12 @@ Inputs(wallet,tweet,receipt)
 <p>Higher tier submissions are processed before lower tier submissions. If multiple submissions are pending in the admin queue, a Fleet tier submission will appear above a Standard tier submission. This does not affect the automated gate processing — it affects the order in which the admin reviews and approves refund amounts.</p>
 <h3>Where tier badges appear</h3>
 <p>Once you have an approved submission, your tier badge appears on your leaderboard row, on your receipt cards in the community feed, and in the wallet tracker.</p><h3>How to acquire GASCOIN tokens</h3>
-<p>GASCOIN tokens are available on Solana decentralised exchanges:</p>
+<p>GASCOIN tokens are available on Ethereum decentralised exchanges:</p>
 <ul>
-<li><strong>Raydium</strong> — <a href="https://raydium.io/swap" target="_blank">raydium.io/swap</a></li>
-<li><strong>Jupiter</strong> — <a href="https://jup.ag" target="_blank">jup.ag</a></li>
+<li><strong>Uniswap</strong> — <a href="https://app.uniswap.org/swap" target="_blank">app.uniswap.org/swap</a></li>
+<li><strong>1inch</strong> — <a href="https://app.uniswap.org" target="_blank">app.uniswap.org</a></li>
 </ul>
-<p>To buy GASCOIN: ensure your wallet has SOL for the purchase and transaction fees, visit the DEX, connect your wallet, swap SOL for GASCOIN, then return to the Perks page and click Refresh Balance to see your updated tier.</p>
+<p>To buy GASCOIN: ensure your wallet has ETH for the purchase and transaction fees, visit the DEX, connect your wallet, swap ETH for GASCOIN, then return to the Perks page and click Refresh Balance to see your updated tier.</p>
 <p>Your tier is checked live at submission time. Tier upgrades take effect immediately — no re-connecting required.</p>
 <p>→ See also: Token Tiers for the full tier comparison</p>`,
         order: 29,
@@ -1623,9 +1623,9 @@ Inputs(wallet,tweet,receipt)
         description: "",
         content: `<p>The Treasury/Dashboard page shows the financial health of the GASCOIN platform. It is publicly viewable and designed to provide full transparency about the treasury's ability to pay refunds.</p>
 <h3>What the dashboard shows</h3>
-<p>The dashboard displays the live treasury SOL balance, total submissions processed, total SOL disbursed to date, gate pass rates across all submissions, and a recent activity feed showing the latest approvals and payouts.</p>
+<p>The dashboard displays the live treasury ETH balance, total submissions processed, total ETH disbursed to date, gate pass rates across all submissions, and a recent activity feed showing the latest approvals and payouts.</p>
 <h3>How to interpret the treasury balance</h3>
-<p>The treasury balance is the amount of SOL currently available to pay refunds. A healthy treasury will comfortably exceed the sum of all pending refund amounts. If the treasury balance drops below 1 SOL, the admin dashboard displays a LOW TREASURY warning and new approvals may be paused.</p>`,
+<p>The treasury balance is the amount of ETH currently available to pay refunds. A healthy treasury will comfortably exceed the sum of all pending refund amounts. If the treasury balance drops below 1 ETH, the admin dashboard displays a LOW TREASURY warning and new approvals may be paused.</p>`,
         order: 30,
       },
       {
@@ -1690,8 +1690,8 @@ Inputs(wallet,tweet,receipt)
         description: "",
         content: `<p>The Submissions page is the primary daily operations page. It shows all submissions across all statuses with filtering, searching, and action controls.</p>
 <h3>Submission actions</h3>
-<h3>SOL amount entry</h3>
-<p>When approving a submission, the admin enters the exact SOL amount to refund. The maximum is capped by the submitter's tier policy, and the system prevents entering a value above that cap.</p>`,
+<h3>ETH amount entry</h3>
+<p>When approving a submission, the admin enters the exact ETH amount to refund. The maximum is capped by the submitter's tier policy, and the system prevents entering a value above that cap.</p>`,
         order: 34,
       },
       {
@@ -1700,7 +1700,7 @@ Inputs(wallet,tweet,receipt)
         categorySlug: "security",
         category: "Security & Admin",
         description: "",
-        content: `<p>The Referral Rewards page shows all referral conversions and their point awards. Referral points are awarded automatically through the AI verification gate — no manual SOL dispatch is needed for referrals. The admin page is for monitoring and auditing referral activity.</p>
+        content: `<p>The Referral Rewards page shows all referral conversions and their point awards. Referral points are awarded automatically through the AI verification gate — no manual ETH dispatch is needed for referrals. The admin page is for monitoring and auditing referral activity.</p>
 <h3>How referral points work</h3>
 <ul>
 <li>Open /admin/referrals to see all referral conversions</li>
@@ -1800,7 +1800,7 @@ Inputs(wallet,tweet,receipt)
         categorySlug: "security",
         category: "Security & Admin",
         description: "",
-        content: `<p>Requiring the last 4 characters of a Ethereum wallet address to be physically written on the paper receipt and visible in the photograph is a low-friction anti-fraud measure. It ties the receipt to a specific wallet that was known at the time of the gas purchase while keeping the process simple for users.</p>`,
+        content: `<p>Requiring the last 4 characters of an Ethereum wallet address to be physically written on the paper receipt and visible in the photograph is a low-friction anti-fraud measure. It ties the receipt to a specific wallet that was known at the time of the gas purchase while keeping the process simple for users.</p>`,
         order: 53,
         navHidden: true,
       },
@@ -1865,8 +1865,8 @@ Inputs(wallet,tweet,receipt)
         category: "Help",
         description: "",
         content: `<ul>
-<li>Ensure you have Phantom, Solflare, or Backpack installed as a browser extension</li>
-<li>If you see 'Install Phantom', the extension is not detected — install it from the official website and reload the page</li>
+<li>Ensure you have MetaMask, Rabby, Rainbow, or Coinbase Wallet installed as a browser extension</li>
+<li>If you see 'Install MetaMask', the extension is not detected — install it from the official website and reload the page</li>
 <li>Try refreshing the page and connecting again</li>
 <li>Ensure your browser allows extensions to run on this site</li>
 <li>Try a different browser if the issue persists</li>
@@ -1942,11 +1942,11 @@ Inputs(wallet,tweet,receipt)
       },
       {
         slug: "approved-but-sol-hasnt-arrived",
-        title: "My claim was approved but SOL hasn't arrived",
+        title: "My claim was approved but ETH hasn't arrived",
         categorySlug: "help",
         category: "Help",
         description: "",
-        content: `<p>If your submission was approved but SOL has not yet arrived, the treasury likely had insufficient SOL at the exact moment your refund was being dispatched. Your approved submission is in the payout queue and will be automatically retried every 6 hours. Check the Wallet Tracker — your submission will show status 'pending queue'. No action is required from you. SOL will be dispatched when the treasury is replenished.</p>`,
+        content: `<p>If your submission was approved but ETH has not yet arrived, the treasury likely had insufficient ETH at the exact moment your refund was being dispatched. Your approved submission is in the payout queue and will be automatically retried every 6 hours. Check the Wallet Tracker — your submission will show status 'pending queue'. No action is required from you. ETH will be dispatched when the treasury is replenished.</p>`,
         order: 45,
       },
       {
@@ -1965,7 +1965,7 @@ Inputs(wallet,tweet,receipt)
         categorySlug: "help",
         category: "Help",
         description: "",
-        content: `<p>The '--' indicator means the live Solana RPC call has not yet returned data. This typically resolves within 5-10 seconds of page load. If it persists for more than 30 seconds, the RPC endpoint may be temporarily unavailable. Refresh the page to retry.</p>`,
+        content: `<p>The '--' indicator means the live Ethereum RPC call has not yet returned data. This typically resolves within 5-10 seconds of page load. If it persists for more than 30 seconds, the RPC endpoint may be temporarily unavailable. Refresh the page to retry.</p>`,
         order: 47,
         navHidden: true,
       },
@@ -1985,7 +1985,7 @@ Inputs(wallet,tweet,receipt)
         categorySlug: "help",
         category: "Help",
         description: "",
-        content: `<p>The exact refund amount is determined by an admin at approval time within your current tier policy. Because SOL price changes daily, GASCOIN does not publish fixed USD-equivalent refund numbers in docs.</p>`,
+        content: `<p>The exact refund amount is determined by an admin at approval time within your current tier policy. Because ETH price changes daily, GASCOIN does not publish fixed USD-equivalent refund numbers in docs.</p>`,
         order: 57,
         navHidden: true,
       },
@@ -2020,11 +2020,11 @@ Inputs(wallet,tweet,receipt)
       },
       {
         slug: "what-is-a-solana-wallet-and-how-do-i-get-one",
-        title: "What is a Ethereum wallet and how do I get one?",
+        title: "What is an Ethereum wallet and how do I get one?",
         categorySlug: "help",
         category: "Help",
         description: "",
-        content: `<p>A Ethereum wallet is a free browser extension that manages your cryptocurrency. The three supported wallets are Phantom (phantom.app), Solflare (solflare.com), and Backpack (backpack.app). All three are free and take approximately 5 minutes to set up. During setup you will be given a seed phrase — write this down and keep it safe. Never share your seed phrase with anyone, including GASCOIN.</p>`,
+        content: `<p>An Ethereum wallet is a free browser extension that manages your cryptocurrency. The four supported wallets are MetaMask (metamask.io), Rabby (rabby.io), Rainbow (rainbow.me), and Coinbase Wallet (coinbase.com/wallet). All three are free and take approximately 5 minutes to set up. During setup you will be given a seed phrase — write this down and keep it safe. Never share your seed phrase with anyone, including GASCOIN.</p>`,
         order: 61,
       },
       {
@@ -2033,7 +2033,7 @@ Inputs(wallet,tweet,receipt)
         categorySlug: "help",
         category: "Help",
         description: "",
-        content: `<p>SOL is a real cryptocurrency traded on major exchanges. The SOL you receive in a refund is real and can be converted to USD through any cryptocurrency exchange (Coinbase, Kraken, Binance, etc.). GASCOIN tokens are also real tradeable tokens on the Ethereum blockchain. Their value fluctuates based on market conditions.</p>`,
+        content: `<p>ETH is a real cryptocurrency traded on major exchanges. The ETH you receive in a refund is real and can be converted to USD through any cryptocurrency exchange (Coinbase, Kraken, Binance, etc.). GASCOIN tokens are also real tradeable tokens on the Ethereum blockchain. Their value fluctuates based on market conditions.</p>`,
         order: 62,
         navHidden: true,
       },
@@ -2061,7 +2061,7 @@ Inputs(wallet,tweet,receipt)
         categorySlug: "help",
         category: "Help",
         description: "",
-        content: `<p>Yes. The platform is fully responsive and works on mobile browsers. Submitting from mobile has an advantage for the receipt upload step — you can take the photo directly with your phone camera without needing to transfer the file to a desktop. Ensure you have a mobile Ethereum wallet installed (Phantom and Solflare both have mobile apps).</p>`,
+        content: `<p>Yes. The platform is fully responsive and works on mobile browsers. Submitting from mobile has an advantage for the receipt upload step — you can take the photo directly with your phone camera without needing to transfer the file to a desktop. Ensure you have a mobile Ethereum wallet installed (MetaMask, Rabby, Rainbow, and Coinbase Wallet all have mobile apps).</p>`,
         order: 65,
       },
       {
@@ -2070,7 +2070,7 @@ Inputs(wallet,tweet,receipt)
         categorySlug: "help",
         category: "Help",
         description: "",
-        content: `<p>When your submission is approved and the SOL is dispatched, the Wallet Tracker updates your submission status to 'approved' and shows the transaction signature. You can click the transaction signature link to view the transfer on Solscan (the Ethereum blockchain explorer) where you can verify the exact amount and confirm it arrived in your wallet.</p>`,
+        content: `<p>When your submission is approved and the ETH is dispatched, the Wallet Tracker updates your submission status to 'approved' and shows the transaction signature. You can click the transaction signature link to view the transfer on Etherscan (the Ethereum blockchain explorer) where you can verify the exact amount and confirm it arrived in your wallet.</p>`,
         order: 66,
       },
       {
@@ -2084,11 +2084,11 @@ Inputs(wallet,tweet,receipt)
       },
       {
         slug: "how-long-does-the-entire-process-take-from-gas-sta",
-        title: "How long does the entire process take from gas station to SOL in wallet?",
+        title: "How long does the entire process take from gas station to ETH in wallet?",
         categorySlug: "help",
         category: "Help",
         description: "",
-        content: `<p>From completing a gas purchase to having SOL in your wallet typically takes 2-6 hours if everything goes smoothly: about 5-10 minutes to photograph the receipt and post the tweet, 5 minutes for the submission portal, 2-5 minutes for automated verification, and up to 48 hours for the admin to approve and dispatch the ETH refund. In practice, most submissions are processed and dispatched within a few hours.</p>`,
+        content: `<p>From completing a gas purchase to having ETH in your wallet typically takes 2-6 hours if everything goes smoothly: about 5-10 minutes to photograph the receipt and post the tweet, 5 minutes for the submission portal, 2-5 minutes for automated verification, and up to 48 hours for the admin to approve and dispatch the ETH refund. In practice, most submissions are processed and dispatched within a few hours.</p>`,
         order: 68,
       },
       {
@@ -2138,7 +2138,7 @@ Inputs(wallet,tweet,receipt)
 </ul>
 
 <h3>Why points matter</h3>
-<p>Points determine leaderboard rank, visibility, and ecosystem contribution standing. Points are not a direct SOL conversion path.</p>
+<p>Points determine leaderboard rank, visibility, and ecosystem contribution standing. Points are not a direct ETH conversion path.</p>
 
 <h3>Primary sources</h3>
 <ul>
@@ -2281,7 +2281,7 @@ Inputs(wallet,tweet,receipt)
 <p>The exact weights are dynamic and may be adjusted to maintain healthy platform growth. All three factors matter — focusing on only one will not maximize your rank.</p>
 
 <h3>What the Leaderboard Does NOT Factor</h3>
-<p>SOL earned from receipt refunds is <strong>not</strong> a factor in the leaderboard. A user who received one large refund does not outrank a user who consistently refers new members and posts engaging tweets. The leaderboard rewards contribution to the ecosystem, not receipt size.</p>
+<p>ETH earned from receipt refunds is <strong>not</strong> a factor in the leaderboard. A user who received one large refund does not outrank a user who consistently refers new members and posts engaging tweets. The leaderboard rewards contribution to the ecosystem, not receipt size.</p>
 
 <h3>Integrity</h3>
 <p>An automated AI audit runs daily across the points system. It monitors for anomalies, duplicate entries, and suspicious patterns. Any flagged issues are reviewed and corrected to maintain fair rankings.</p>`,
@@ -2294,7 +2294,7 @@ Inputs(wallet,tweet,receipt)
         category: "Help",
         description: "",
         content: `<p>GASCOIN Protocol Documentation — Version 1.0</p>
-<p>gascoin.com  |  Solana Mainnet  |  All rights reserved</p>`,
+<p>gascoin.com  |  Ethereum Mainnet  |  All rights reserved</p>`,
         order: 69,
         navHidden: true,
       },

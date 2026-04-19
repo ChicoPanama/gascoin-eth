@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '../../../../lib/supabase';
 import { verifyPrivySession } from '../../../../lib/integrations/privy';
-import { isValidSolanaAddress } from '../../../../lib/validate-wallet';
+import { isValidEthereumAddress } from '../../../../lib/validate-wallet';
 import { checkRateLimit } from '../../../../lib/rate-limit';
 import { getClientIp } from '../../../../lib/ip';
 
@@ -18,7 +18,7 @@ export async function GET(req: Request) {
   }
 
   // SECURITY: Validate wallet format to prevent injection
-  if (!isValidSolanaAddress(wallet)) {
+  if (!isValidEthereumAddress(wallet)) {
     return NextResponse.json({ error: 'invalid_wallet_address' }, { status: 400 });
   }
 
@@ -76,7 +76,7 @@ export async function POST(req: Request) {
     }
 
     // SECURITY: Validate both wallet addresses
-    if (!isValidSolanaAddress(referrer_wallet) || !isValidSolanaAddress(referred_wallet)) {
+    if (!isValidEthereumAddress(referrer_wallet) || !isValidEthereumAddress(referred_wallet)) {
       return NextResponse.json({ error: 'invalid_wallet_address' }, { status: 400 });
     }
 

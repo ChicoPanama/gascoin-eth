@@ -64,7 +64,7 @@ create table if not exists payouts (
   id uuid primary key default gen_random_uuid(),
   claim_id uuid not null references claims(id) on delete cascade,
   wallet text not null,
-  amount_sol numeric not null,
+  amount_eth numeric not null,
   tx_hash text,
   status text not null default 'queued',
   sent_at timestamptz,
@@ -75,7 +75,7 @@ create table if not exists payouts (
 create table if not exists treasury_snapshots (
   id bigserial primary key,
   wallet text not null,
-  sol_balance numeric not null,
+  eth_balance numeric not null,
   usd_value numeric not null,
   gascoin_balance numeric,
   gascoin_usd_value numeric,

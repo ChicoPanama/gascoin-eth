@@ -1,6 +1,6 @@
 // ═══════════════════════════════════════════
 // GASCOIN Referral System
-// Referrals earn POINTS, not SOL
+// Referrals earn POINTS, not ETH
 // ETH payouts are for gas receipts ONLY
 // ═══════════════════════════════════════════
 
