@@ -34,6 +34,7 @@ const CATEGORY_MAP: Record<string, string> = {
   'Community': 'architecture',
   'Integrations': 'pipeline',
   'Supabase': 'architecture',
+  'Gas-Network': 'architecture',
 };
 
 function slugify(filePath: string): string {
