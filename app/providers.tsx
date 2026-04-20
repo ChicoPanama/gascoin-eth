@@ -29,8 +29,10 @@ function PrivyInner({ children }: { children: React.ReactNode }) {
     <PrivyProvider
       appId={appId}
       config={{
-        loginMethods: ['twitter'],
-        appearance: { theme: resolved },
+        // Twitter = primary login for refund flow. Wallet = required for the
+        // /presale page so contributors can sign with MetaMask/Rainbow/etc.
+        loginMethods: ['twitter', 'wallet'],
+        appearance: { theme: resolved, walletChainType: 'ethereum-only' },
         defaultChain: mainnet,
         supportedChains: [mainnet],
         embeddedWallets: {

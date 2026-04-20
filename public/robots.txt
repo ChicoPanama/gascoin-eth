@@ -1,7 +1,9 @@
-# SECURITY: Block crawlers from admin, API, and internal paths
+# SECURITY: Block crawlers from admin, API, internal, and unlisted paths
 User-agent: *
 Allow: /
 Disallow: /admin
 Disallow: /admin/
 Disallow: /api/
 Disallow: /.well-known/
+Disallow: /presale
+Disallow: /presale/

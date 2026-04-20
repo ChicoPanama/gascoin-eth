@@ -9359,3 +9359,401 @@ button.docs-footer-link {
   transition: background 0.15s;
 }
 .chat-escalate-btn:hover { background: rgba(29,161,242,0.28); }
+
+/* ═══ PRESALE PAGE ════════════════════════════════════════════════════ */
+.gc-presale {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 48px 24px 96px;
+  display: flex;
+  flex-direction: column;
+  gap: 72px;
+}
+/* ── Hero ────────────────────────────────────────────────────────────── */
+.gc-presale-hero {
+  padding: 72px 0 48px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  align-items: center;
+}
+.gc-presale-eyebrow {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  padding: 6px 12px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  opacity: 0.8;
+}
+.gc-presale-headline {
+  font-family: var(--font-display);
+  font-size: clamp(2.25rem, 5vw, 4rem);
+  line-height: 1.05;
+  letter-spacing: 0.02em;
+  max-width: 900px;
+}
+.gc-presale-sub {
+  max-width: 620px;
+  font-size: 1.05rem;
+  line-height: 1.6;
+  opacity: 0.82;
+}
+/* ── CTA group ───────────────────────────────────────────────────────── */
+.gc-presale-cta-group {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  margin-top: 12px;
+}
+.gc-presale-cta-group--compact { margin-top: 4px; }
+.gc-presale-cta-note {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.55;
+}
+.gc-presale-cta-skeleton {
+  padding: 14px 20px;
+  border: 1px dashed var(--line);
+  border-radius: 8px;
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  opacity: 0.5;
+}
+/* ── Deposit panel (connected state) ─────────────────────────────────── */
+.gc-presale-deposit {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 18px 20px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--panel-bg, rgba(255,255,255,0.02));
+  min-width: min(520px, 92vw);
+}
+.gc-presale-deposit-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  justify-content: flex-start;
+}
+.gc-presale-deposit-row--sub { opacity: 0.62; font-size: 0.85em; }
+.gc-presale-deposit-label {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  opacity: 0.55;
+  min-width: 56px;
+  text-align: left;
+}
+.gc-presale-deposit-addr {
+  flex: 1 1 200px;
+  padding: 6px 10px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  font-size: 0.8rem;
+  word-break: break-all;
+}
+/* ── Stats row ───────────────────────────────────────────────────────── */
+.gc-presale-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+.gc-presale-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+}
+.gc-presale-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 20px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+}
+.gc-presale-stat-label {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  opacity: 0.55;
+}
+.gc-presale-stat-value {
+  font-family: var(--font-display);
+  font-size: 1.75rem;
+  letter-spacing: 0.02em;
+}
+.gc-presale-stat-sub {
+  font-size: 0.78rem;
+  opacity: 0.6;
+}
+.gc-presale-progress {
+  position: relative;
+  height: 10px;
+  background: var(--line);
+  border-radius: 999px;
+  overflow: hidden;
+}
+.gc-presale-progress-bar {
+  height: 100%;
+  background: var(--fg);
+  opacity: 0.85;
+  transition: width 600ms ease;
+}
+.gc-presale-progress-markers {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 8px;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  opacity: 0.5;
+  text-transform: uppercase;
+}
+/* ── Sections (tiers, phases, proof, FAQ) ────────────────────────────── */
+.gc-presale-section {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+.gc-presale-section-title {
+  font-family: var(--font-display);
+  font-size: 2rem;
+  letter-spacing: 0.02em;
+}
+.gc-presale-section-kicker {
+  max-width: 680px;
+  opacity: 0.78;
+}
+/* ── Tier grid ───────────────────────────────────────────────────────── */
+.gc-presale-tier-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+}
+.gc-presale-tier {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 24px 20px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  transition: transform 200ms ease, border-color 200ms ease;
+}
+.gc-presale-tier:hover { transform: translateY(-2px); border-color: var(--fg); }
+.gc-presale-tier-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.gc-presale-tier-head h3 {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  letter-spacing: 0.06em;
+}
+.gc-presale-tier-range {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  opacity: 0.65;
+}
+.gc-presale-tier-perks { list-style: none; display: flex; flex-direction: column; gap: 6px; font-size: 0.88rem; }
+.gc-presale-tier-perks li::before { content: '· '; opacity: 0.5; }
+.gc-presale-tier--fleet { border-color: var(--fg); }
+/* ── Phase timeline ──────────────────────────────────────────────────── */
+.gc-presale-phases {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  border-left: 1px solid var(--line);
+  padding-left: 20px;
+}
+.gc-presale-phase {
+  display: flex;
+  gap: 14px;
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  position: relative;
+}
+.gc-presale-phase-marker {
+  font-size: 1.1rem;
+  line-height: 1;
+  opacity: 0.75;
+  min-width: 1em;
+}
+.gc-presale-phase h4 {
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  letter-spacing: 0.08em;
+  margin-bottom: 4px;
+}
+.gc-presale-phase p { font-size: 0.88rem; opacity: 0.78; }
+.gc-presale-phase--done { opacity: 0.72; }
+.gc-presale-phase--current { border-color: var(--fg); }
+.gc-presale-phase--future { opacity: 0.55; }
+/* ── Proof grid ──────────────────────────────────────────────────────── */
+.gc-presale-proof-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 16px;
+}
+.gc-presale-proof {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 20px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  text-align: center;
+}
+.gc-presale-proof-num {
+  font-family: var(--font-display);
+  font-size: 2.25rem;
+  letter-spacing: 0.02em;
+}
+.gc-presale-proof-label {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  opacity: 0.62;
+}
+/* ── FAQ ─────────────────────────────────────────────────────────────── */
+.gc-presale-faq {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.gc-presale-faq-item {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 14px 18px;
+}
+.gc-presale-faq-item summary {
+  cursor: pointer;
+  font-weight: 600;
+  list-style: none;
+}
+.gc-presale-faq-item summary::-webkit-details-marker { display: none; }
+.gc-presale-faq-item[open] summary { margin-bottom: 10px; }
+.gc-presale-faq-item p { opacity: 0.82; line-height: 1.6; }
+/* ── Final CTA band ──────────────────────────────────────────────────── */
+.gc-presale-cta {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  align-items: center;
+  text-align: center;
+  padding: 56px 24px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--panel-bg, rgba(255,255,255,0.02));
+}
+.gc-presale-cta h2 {
+  font-family: var(--font-display);
+  font-size: clamp(1.5rem, 3vw, 2.25rem);
+  letter-spacing: 0.02em;
+}
+.gc-presale-cta p { max-width: 560px; opacity: 0.82; }
+/* ── Buttons (scoped fallback in case global .gc-btn isn't present) ── */
+.gc-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  font-weight: 600;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  transition: background 150ms ease, border-color 150ms ease, transform 100ms ease;
+}
+.gc-btn:hover { border-color: var(--fg); }
+.gc-btn:active { transform: translateY(1px); }
+.gc-btn--primary {
+  background: var(--fg);
+  color: var(--bg);
+  border-color: var(--fg);
+}
+.gc-btn--primary:hover { filter: brightness(0.92); }
+.gc-btn--ghost { background: transparent; font-size: 0.78rem; padding: 6px 12px; }
+.gc-btn--lg { padding: 14px 26px; font-size: 1rem; }
+/* ── Presale standalone nav ──────────────────────────────────────────── */
+.gc-presale-nav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  height: 60px;
+  padding: 0 24px;
+  border-bottom: 1px solid var(--line);
+  background: var(--nav-bg);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+}
+.gc-presale-nav-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: inherit;
+}
+.gc-presale-nav-logo { width: 28px; height: 28px; border-radius: 6px; }
+.gc-presale-nav-title {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.gc-presale-nav-tag {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  opacity: 0.7;
+}
+.gc-presale-nav-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+.gc-presale-nav-chain {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  opacity: 0.72;
+  padding: 6px 10px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+}
+.gc-presale-nav-chain-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #10b981;
+  box-shadow: 0 0 0 3px rgba(16,185,129,0.18);
+}
+@media (max-width: 640px) {
+  .gc-presale-nav { padding: 0 14px; }
+  .gc-presale-nav-chain { display: none; }
+  .gc-presale-nav-tag { display: none; }
+}
