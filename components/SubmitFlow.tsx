@@ -45,10 +45,26 @@ function ProgressBar({ step, maxStep }: { step: Step; maxStep: Step }) {
 function StepWallet({ onConnect }: {
   onConnect: (wallet: string) => void;
 }) {
+  const { ready, authenticated, user, login } = usePrivy();
   const [loading, setLoading] = useState<string | null>(null);
   const [error, setError] = useState('');
   const [connected, setConnected] = useState('');
   const attempts = useRef<Record<string, number>>({});
+  const autoAdvanced = useRef(false);
+
+  // ── Auto-advance when the user already has a wallet on their Privy
+  //    session. Signing in with X creates an embedded wallet, and
+  //    returning testers shouldn't have to re-connect on every claim.
+  //    Tester report (Crush, 2026-04-20): "shouldn't make me have to
+  //    connect again because we see top right I'm already connected."
+  const sessionWallet = (user as any)?.wallet?.address as string | undefined;
+  useEffect(() => {
+    if (!ready || !authenticated || !sessionWallet || autoAdvanced.current) return;
+    autoAdvanced.current = true;
+    setConnected(sessionWallet);
+    // Small visual beat so users see "Already connected" before moving on
+    setTimeout(() => onConnect(sessionWallet), 400);
+  }, [ready, authenticated, sessionWallet, onConnect]);
 
   const connect = (provider: string) => {
     attempts.current[provider] = (attempts.current[provider] || 0) + 1;
@@ -58,15 +74,23 @@ function StepWallet({ onConnect }: {
     }
     setError('');
     setLoading(provider);
-    setTimeout(() => {
-      const addr = 'GAs' + Math.random().toString(36).slice(2, 6) + '...' + Math.random().toString(36).slice(2, 6).toUpperCase();
+    // Trigger Privy's login modal. Privy handles the actual wallet provider
+    // selection (MetaMask / Rabby / Rainbow / Coinbase / embedded) and
+    // returns the REAL Ethereum address via the session. Previously we
+    // generated a fake "GAs..." base58 string here — leftover Solana-era
+    // mock code that caused spurious "wallet changed mid-session" errors
+    // when the fake string couldn't match the real session wallet.
+    try {
+      login();
       setLoading(null);
-      setConnected(addr);
-      setTimeout(() => onConnect(addr), 1000);
-    }, 1200);
+    } catch (e: any) {
+      setLoading(null);
+      setError(e?.message || 'Could not open wallet connect modal');
+    }
   };
 
-  const wallets = ['MetaMask', 'Rabby', 'Rainbow', 'Coinbase Wallet'];
+  const displayAddr = (addr: string) =>
+    addr.length > 12 ? `${addr.slice(0, 6)}…${addr.slice(-4)}` : addr;
 
   return (
     <div className="sf-step">
@@ -76,30 +100,53 @@ function StepWallet({ onConnect }: {
       {connected ? (
         <div className="sf-connected">
           <span className="sf-check-badge">●</span>
-          <span className="sf-connected-addr">{connected}</span>
-          <span className="sf-connected-label">Connected</span>
+          <span className="sf-connected-addr" title={connected}>{displayAddr(connected)}</span>
+          <span className="sf-connected-label">Connected — continuing…</span>
         </div>
       ) : (
-        <div className="sf-wallet-list">
-          {wallets.map((w) => (
+        <>
+          {ready && authenticated && (
+            <div
+              style={{
+                marginBottom: 16,
+                padding: 12,
+                border: '1px solid rgba(255,255,255,0.1)',
+                borderRadius: 0,
+                fontSize: 13,
+                color: 'rgba(255,255,255,0.6)',
+              }}
+            >
+              Signed in, but no wallet on your session yet. Pick a wallet below to link one, or continue with the embedded wallet Privy created at sign-in.
+            </div>
+          )}
+          <div className="sf-wallet-list">
             <button
-              key={w}
               type="button"
               className="sf-wallet-btn"
-              onClick={() => connect(w)}
+              onClick={() => connect('privy')}
               disabled={!!loading}
             >
-              {loading === w ? (
+              {loading === 'privy' ? (
                 <span className="sf-spinner" />
               ) : (
                 <>
-                  <span>{w}</span>
+                  <span>Connect via Privy</span>
                   <span className="sf-arrow">&rarr;</span>
                 </>
               )}
             </button>
-          ))}
-        </div>
+          </div>
+          <div
+            style={{
+              marginTop: 8,
+              fontFamily: 'IBM Plex Mono, monospace',
+              fontSize: 11,
+              color: 'rgba(255,255,255,0.4)',
+            }}
+          >
+            Opens the Privy modal — supports MetaMask, Rabby, Rainbow, Coinbase Wallet, and email + embedded wallets.
+          </div>
+        </>
       )}
 
       {error && <div className="sf-error">{error}</div>}
