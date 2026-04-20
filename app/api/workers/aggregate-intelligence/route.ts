@@ -172,3 +172,6 @@ export async function POST(req: Request) {
     weeklyReport: weeklyReport ? 'generated' : 'skipped',
   });
 }
+
+// Vercel Cron sends GET requests; delegate to the POST handler above.
+export const GET = POST;

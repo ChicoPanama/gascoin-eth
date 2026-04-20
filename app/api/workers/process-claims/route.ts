@@ -269,3 +269,6 @@ export async function POST(req: Request) {
     payoutProcessing: results,
   });
 }
+
+// Vercel Cron sends GET requests; delegate to the POST handler above.
+export const GET = POST;

@@ -73,3 +73,6 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'flush_failed' }, { status: 500 });
   }
 }
+
+// Vercel Cron sends GET requests; delegate to the POST handler above.
+export const GET = POST;

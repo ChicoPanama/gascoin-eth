@@ -90,3 +90,6 @@ export async function POST(req: Request) {
 
   return NextResponse.json({ ok: true, upserted, processed: (links || []).length });
 }
+
+// Vercel Cron sends GET requests; delegate to the POST handler above.
+export const GET = POST;
