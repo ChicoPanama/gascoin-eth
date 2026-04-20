@@ -29,6 +29,10 @@ const NAV_SECTIONS = [
 
 export default async function AdminLayout({ children }: { children: ReactNode }) {
   const session = await verifyAdminSession();
+  // Season 1 dry-run flag — surfaced on every admin page so operators
+  // never lose track of which mode prod is in. Flips automatically when
+  // ENABLE_LIVE_PAYOUT=true is set in the deployment target.
+  const isDryRun = process.env.ENABLE_LIVE_PAYOUT !== 'true';
 
   return (
     <div className="admin-layout">
@@ -37,6 +41,27 @@ export default async function AdminLayout({ children }: { children: ReactNode })
           <div className="admin-sidebar-top">
             <div className="admin-sidebar-label">ADMIN</div>
             <div className="admin-sidebar-brand">GASCOIN</div>
+            <div
+              className="admin-mode-pill"
+              title={isDryRun
+                ? 'ENABLE_LIVE_PAYOUT=false — no ETH leaves the treasury. Gates, scoring, and AI run exactly as in production; payout is mocked.'
+                : 'ENABLE_LIVE_PAYOUT=true — real ETH dispatched on approved claims.'}
+              style={{
+                marginTop: 12,
+                padding: '4px 8px',
+                borderRadius: 4,
+                fontSize: 11,
+                letterSpacing: '0.08em',
+                fontFamily: 'var(--font-mono, monospace)',
+                border: `1px solid ${isDryRun ? 'var(--status-warn, #d97706)' : 'var(--status-pass, #10b981)'}`,
+                color: isDryRun ? 'var(--status-warn, #d97706)' : 'var(--status-pass, #10b981)',
+                background: 'transparent',
+                textAlign: 'center',
+                fontWeight: 600,
+              }}
+            >
+              {isDryRun ? '● SEASON 1 · DRY RUN' : '● LIVE PAYOUTS'}
+            </div>
           </div>
           {NAV_SECTIONS.map((section) => (
             <div key={section.label} className="admin-nav-section">
