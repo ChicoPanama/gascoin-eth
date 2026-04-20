@@ -211,15 +211,22 @@ export async function POST(req: Request) {
   // Pre-flight: skip dispatch entirely when live payouts are disabled so we
   // don't silently accumulate DRYRUN records that look like real transactions.
   if (process.env.ENABLE_LIVE_PAYOUT !== 'true') {
-    writeIntelligence({
-      entry_type: 'live_payout_disabled',
-      entity_type: 'system',
-      entity_id: 'process_claims_worker',
-      summary: 'Payout dispatch skipped — ENABLE_LIVE_PAYOUT is not set to true',
-      detail_json: { dueJobs: 0 },
-      severity: 'high',
-      pipeline_source: 'process_claims',
-    }).catch(() => {});
+    // Skip the intel write during Season 1 beta — live payouts are
+    // intentionally disabled, so logging it as HIGH severity every 5-minute
+    // cron run just floods the admin dashboard and burns Supabase writes.
+    // When SEASON_1_POINTS_ONLY is off, keep the alert so a real
+    // misconfiguration in production still pages us.
+    if (process.env.SEASON_1_POINTS_ONLY !== 'true') {
+      writeIntelligence({
+        entry_type: 'live_payout_disabled',
+        entity_type: 'system',
+        entity_id: 'process_claims_worker',
+        summary: 'Payout dispatch skipped — ENABLE_LIVE_PAYOUT is not set to true',
+        detail_json: { dueJobs: 0 },
+        severity: 'high',
+        pipeline_source: 'process_claims',
+      }).catch(() => {});
+    }
 
     return NextResponse.json({
       ok: true,
