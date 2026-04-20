@@ -421,19 +421,93 @@ function StepReceipt({ onNext, onBack, initialFile }: {
 
       {error && <div className="sf-error">{error}</div>}
 
-      <div className="sf-checklist">
-        {[
-          'Receipt shows total amount clearly',
-          'Receipt date is visible',
-          'The last 4 hex characters of my Ethereum wallet address are written on the receipt',
-        ].map((label, i) => (
-          <label key={i} className="sf-check-row" onClick={() => toggleCheck(i)}>
-            <span className={`sf-checkbox${checks[i] ? ' sf-checkbox--checked' : ''}`}>
-              {checks[i] && '✓'}
-            </span>
-            <span>{label}</span>
-          </label>
-        ))}
+      {/* ─── Required user-confirmation checklist ───────────────────────
+          Earlier tester (Crush) thought the app auto-checked these after
+          uploading the photo. Making the "YOU need to check each box"
+          intent explicit: amber accent, info icon, header text, and a
+          checked-count pill so progress is visible. */}
+      <div
+        style={{
+          marginTop: 20,
+          padding: 16,
+          border: '1px solid var(--status-warn, #d97706)',
+          borderRadius: 0,
+          background: 'rgba(217, 119, 6, 0.04)',
+        }}
+      >
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 10,
+            marginBottom: 10,
+            flexWrap: 'wrap',
+          }}
+        >
+          <span
+            aria-hidden
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: 20,
+              height: 20,
+              borderRadius: '50%',
+              border: '1.5px solid var(--status-warn, #d97706)',
+              color: 'var(--status-warn, #d97706)',
+              fontSize: 12,
+              fontWeight: 700,
+              flexShrink: 0,
+            }}
+          >
+            !
+          </span>
+          <span
+            style={{
+              fontFamily: 'IBM Plex Mono, monospace',
+              fontSize: 11,
+              letterSpacing: '0.1em',
+              color: 'var(--status-warn, #d97706)',
+              fontWeight: 600,
+            }}
+          >
+            REQUIRED · YOU MUST CHECK EACH BOX
+          </span>
+          <span
+            style={{
+              marginLeft: 'auto',
+              fontFamily: 'IBM Plex Mono, monospace',
+              fontSize: 11,
+              color: 'rgba(255,255,255,0.55)',
+            }}
+          >
+            {checks.filter(Boolean).length} / {checks.length}
+          </span>
+        </div>
+        <p
+          style={{
+            fontSize: 13,
+            lineHeight: 1.5,
+            color: 'rgba(255,255,255,0.7)',
+            marginBottom: 12,
+          }}
+        >
+          Check each item below only after you&apos;ve confirmed it&apos;s true of your receipt photo. The app doesn&apos;t auto-check these — it&apos;s your attestation that the photo meets the verification rules.
+        </p>
+        <div className="sf-checklist">
+          {[
+            'Receipt shows total amount clearly',
+            'Receipt date is visible',
+            'The last 4 hex characters of my Ethereum wallet address are written on the receipt',
+          ].map((label, i) => (
+            <label key={i} className="sf-check-row" onClick={() => toggleCheck(i)}>
+              <span className={`sf-checkbox${checks[i] ? ' sf-checkbox--checked' : ''}`}>
+                {checks[i] && '✓'}
+              </span>
+              <span>{label}</span>
+            </label>
+          ))}
+        </div>
       </div>
 
       {/* Explicit hint when NEXT isn't actionable. Previously the disabled
