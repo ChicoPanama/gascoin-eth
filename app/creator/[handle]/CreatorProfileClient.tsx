@@ -94,6 +94,12 @@ export function CreatorProfileClient({ profile, posts, impact, certs = [] }: Pro
             {profile.avgQualityScore != null ? `${Math.round(profile.avgQualityScore)}/100` : '—'}
           </span>
         </div>
+        <div className="gc-creator-stat">
+          <span className="gc-creator-stat-label">Influence</span>
+          <span className="gc-creator-stat-value">
+            {profile.compositeScore != null ? `${Math.round(profile.compositeScore)}/100` : '—'}
+          </span>
+        </div>
       </section>
 
       {/* ─── TABS ────────────────────────────────────────────────────── */}
