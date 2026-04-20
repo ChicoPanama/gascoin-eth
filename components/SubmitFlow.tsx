@@ -116,7 +116,7 @@ function StepWallet({ onConnect }: {
                 color: 'rgba(255,255,255,0.6)',
               }}
             >
-              Signed in, but no wallet on your session yet. Pick a wallet below to link one, or continue with the embedded wallet Privy created at sign-in.
+              Signed in. Now connect a wallet (MetaMask, Rainbow, Coinbase, Rabby, etc.) — this is where your ETH refund will land.
             </div>
           )}
           <div className="sf-wallet-list">
@@ -144,7 +144,7 @@ function StepWallet({ onConnect }: {
               color: 'rgba(255,255,255,0.4)',
             }}
           >
-            Opens the Privy modal — supports MetaMask, Rabby, Rainbow, Coinbase Wallet, and email + embedded wallets.
+            Opens the Privy modal — supports MetaMask, Rabby, Rainbow, and Coinbase Wallet.
           </div>
         </>
       )}
@@ -269,7 +269,7 @@ function StepTweet({ onVerified, onBack, initialUrl, loggedInHandle }: {
       <h2 className="sf-headline">Post a Tweet, Then Verify</h2>
       <p className="sf-sub">Two sub-steps. Post a GasCoin tweet on X first, then come back and paste the URL so we can verify it.</p>
 
-      {/* ─── Sub-step A: compose tweet on X ─────────────────────────── */}
+      {/* ─── Sub-step A: compose tweet on X ─────────────── */}
       <div style={{ marginTop: 20, padding: 16, border: '1px solid rgba(255,255,255,0.08)', borderRadius: 0 }}>
         <div style={{ fontFamily: 'IBM Plex Mono', fontSize: 11, letterSpacing: '0.1em', color: 'rgba(255,255,255,0.5)', marginBottom: 8 }}>
           STEP A · POST ON X
@@ -292,7 +292,7 @@ function StepTweet({ onVerified, onBack, initialUrl, loggedInHandle }: {
         </div>
       </div>
 
-      {/* ─── Sub-step B: paste the URL ──────────────────────────────── */}
+      {/* ─── Sub-step B: paste the URL ──────────────────── */}
       <div style={{ marginTop: 16, padding: 16, border: '1px solid rgba(255,255,255,0.08)', borderRadius: 0 }}>
         <div style={{ fontFamily: 'IBM Plex Mono', fontSize: 11, letterSpacing: '0.1em', color: 'rgba(255,255,255,0.5)', marginBottom: 8 }}>
           STEP B · PASTE TWEET URL
@@ -468,7 +468,7 @@ function StepReceipt({ onNext, onBack, initialFile }: {
 
       {error && <div className="sf-error">{error}</div>}
 
-      {/* ─── Required user-confirmation checklist ───────────────────────
+      {/* ─── Required user-confirmation checklist ───────────────────
           Earlier tester (Crush) thought the app auto-checked these after
           uploading the photo. Making the "YOU need to check each box"
           intent explicit: amber accent, info icon, header text, and a
