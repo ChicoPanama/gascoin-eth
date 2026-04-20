@@ -208,7 +208,10 @@ export async function POST(req: Request) {
       }
     }
 
-    // ─── PHASE 2: For each handle, search for ALL #gascoin tweets ───
+    // ─── PHASE 2: For each handle, search for ALL GASCOIN tweets ───
+    // Query matches either the `#gascoin` hashtag or the `$GASCOIN` cashtag
+    // because the /submit UI tells users either is acceptable. A hashtag-only
+    // query silently missed everyone who used only the cashtag.
     // Sort stale handles first so that if the X API rate-limit cuts us off
     // mid-run, the handles we did score are the ones most overdue.
     const sortedEntries = [...walletHandles.entries()].sort((a, b) => {
@@ -228,7 +231,7 @@ export async function POST(req: Request) {
       handlesScanned++;
 
       try {
-        const result = await searchRecentTweets(`from:${handle} #gascoin`, 10);
+        const result = await searchRecentTweets(`from:${handle} (#gascoin OR $GASCOIN)`, 10);
 
         if (result.tweets.length === 0) {
           // Fallback: re-score claim-linked tweets through the SAME pipeline
