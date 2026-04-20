@@ -5101,7 +5101,9 @@ button.docs-footer-link {
   color: var(--fg);
 }
 
-.sf-btn-solid:disabled { opacity: 0.3; cursor: not-allowed; }
+.sf-btn-solid:disabled,
+.sf-btn-solid--pending,
+.sf-btn-solid[aria-disabled="true"] { opacity: 0.3; cursor: not-allowed; }
 
 .sf-btn-solid--loading {
   color: transparent;
