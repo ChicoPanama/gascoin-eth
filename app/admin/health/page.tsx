@@ -139,14 +139,21 @@ async function probeMem0(): Promise<ConnectResult> {
   const start = Date.now();
   const apiKey = (process.env.MEM0_API_KEY || '').trim();
   const orgId = (process.env.MEM0_ORG_ID || '').trim();
-  if (!apiKey || !orgId) return { ok: false, latencyMs: 0, detail: 'MEM0_API_KEY or MEM0_ORG_ID missing' };
+  const projectId = (process.env.MEM0_PROJECT_ID || '').trim();
+  if (!apiKey) return { ok: false, latencyMs: 0, detail: 'MEM0_API_KEY missing' };
   try {
-    // mem0 /memories requires one of {app_id, user_id, agent_id, run_id};
-    // omitting them returns 400 regardless of key validity. Use a
-    // definitely-empty user_id so the probe tests the key + org, not the
-    // query shape. 404 / empty list => key is valid.
+    // mem0 rules verified live:
+    //   1. must include one of {app_id, user_id, agent_id, run_id}
+    //   2. must include BOTH org_id AND project_id, or neither
+    // Previous probe passed org_id alone → always 400. Include both if
+    // available; otherwise omit both and query the key's default scope.
+    const params = new URLSearchParams({ user_id: 'health_probe', limit: '1' });
+    if (orgId && projectId) {
+      params.set('org_id', orgId);
+      params.set('project_id', projectId);
+    }
     const res = await withTimeout(
-      fetch(`https://api.mem0.ai/v1/memories/?org_id=${orgId}&user_id=health_probe&limit=1`, {
+      fetch(`https://api.mem0.ai/v1/memories/?${params.toString()}`, {
         headers: { Authorization: `Token ${apiKey}` },
         cache: 'no-store',
       }),
