@@ -703,8 +703,17 @@ export async function POST(req: Request) {
   // 2. Strip control chars except \n \t \r
   // 3. Collapse runs of whitespace/newlines
   // 4. Cap length (longer = more attack surface + more tokens)
+  // NOTE: the tag-unicode range U+E0000-U+E007F lives outside the BMP and
+  // cannot be expressed in a character class without the `u` flag — without
+  // it, `\uE0000-\uE007F` is parsed as `\uE000` + `0` + `-` + `\uE007` + `F`,
+  // which creates an unintended range `0`..`\uE007` that matches almost every
+  // printable character. The previous regex silently stripped every user
+  // message to empty (see PR that introduced this, ~2026-04-20). We keep the
+  // common zero-width + bidi + word-joiner + BOM stripping (BMP-only) and
+  // drop the tag-unicode range — it's vanishingly rare in legitimate chat
+  // input and the other ranges cover the real attack surface.
   const lastUserText = rawUserText
-    .replace(/[\u200B-\u200F\u202A-\u202E\u2060-\u2064\uFEFF\uE0000-\uE007F]/g, '')
+    .replace(/[\u200B-\u200F\u202A-\u202E\u2060-\u2064\uFEFF]/g, '')
     // eslint-disable-next-line no-control-regex
     .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F-\x9F]/g, '')
     .replace(/[ \t]{4,}/g, '   ')
