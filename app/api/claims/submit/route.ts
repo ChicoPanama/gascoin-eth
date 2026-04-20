@@ -126,7 +126,10 @@ export async function POST(req: Request){
   if (!wallet) {
     return NextResponse.json({ ok:false, error:'wallet_not_connected_in_privy_session' }, { status: 400 });
   }
-  if (walletInput && walletInput !== session.wallet) {
+  // Ethereum addresses are case-insensitive (EIP-55 checksum is just display).
+  // Compare lowercased so a checksum-cased address from the browser wallet
+  // doesn't spuriously fail the session-match check.
+  if (walletInput && walletInput.toLowerCase() !== session.wallet.toLowerCase()) {
     return NextResponse.json({ ok:false, error:'wallet_mismatch_with_session' }, { status: 400 });
   }
 
