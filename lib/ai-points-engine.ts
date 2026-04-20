@@ -113,20 +113,28 @@ async function doScoreTweetQuality(params: {
     .replace(/^[-=*#]{3,}.*$/gm, '[---]')       // separator lines
     .replace(/\[SYSTEM[^\]]*\]/gi, '[...]')       // [SYSTEM ...] directives
     .replace(/\{[\s\S]{0,200}"(verdict|block|score|override)"[\s\S]{0,200}\}/gi, '[...]'); // embedded JSON
-  const prompt = `Rate this tweet's quality for a gas refund community platform (GASCOIN). Return ONLY valid JSON.
+  // Quality prompt judges CONTENT ONLY. Engagement/follower metrics are
+  // intentionally withheld — a small account with low reach shouldn't read
+  // as "low quality content." Bot-engagement suspicion is handled earlier
+  // by the deterministic engagement-rate tier check (see suspiciousEngagement
+  // above), so the AI no longer duplicates that signal.
+  const prompt = `Rate this tweet's content quality for a gas refund community platform (GASCOIN). Return ONLY valid JSON.
 
 <TWEET_CONTENT_START>
 ${sanitizedText}
 </TWEET_CONTENT_START>
 Content type: ${contentTypeLabel}
-Metrics: ${impressions} impressions, ${likes} likes, ${retweets} RTs, ${replies} replies
-Author followers: ${followerCount}
 
-Score these (0-1 each):
+Scoring rules:
+- Judge only the WORDS and CONTENT TYPE. Do NOT penalize for short text, small follower counts, or low engagement — those are not content-quality signals.
+- Relevant terms (gas, fuel, refund, GASCOIN, $GASCOIN, pump, gas prices, etc.) written in a genuine way → higher quality.
+- Pure hashtag dumps, copy-paste, "#gascoin" stapled onto irrelevant text → lower quality and higher spam.
+- MEDIA BOOST: when contentType is ORIGINAL_IMAGE or ORIGINAL_VIDEO AND the text mentions any relevant term, add ~0.15 to quality — posting media takes more effort than a text-only post. Do NOT boost media that has irrelevant or off-topic text.
+
+Return:
 {
-  "quality": 0.0-1.0 (is this genuine, original content about GASCOIN/gas prices/refunds? Original videos and personal takes score highest. Reposts, cross-posted content, or #gascoin slapped on unrelated content score lowest.),
-  "spam_probability": 0.0-1.0 (pure hashtag spam, copy-paste, hashtag on unrelated video, no original thought?),
-  "bot_engagement_probability": 0.0-1.0 (do the engagement numbers look artificial?),
+  "quality": 0.0-1.0,
+  "spam_probability": 0.0-1.0 (pure hashtag spam, copy-paste, or hashtag on unrelated content?),
   "reason": "one sentence explanation"
 }`;
 
@@ -139,7 +147,10 @@ Score these (0-1 each):
     const parsed = JSON.parse(jsonMatch[0]);
     const quality = Math.max(0, Math.min(1, Number(parsed.quality || 0.7)));
     const isSpam = Number(parsed.spam_probability || 0) > 0.6;
-    const isBotEngagement = Number(parsed.bot_engagement_probability || 0) > 0.6;
+    // Bot-engagement is already decided deterministically by the tier check
+    // above (suspiciousEngagement → early return). If we reach this branch,
+    // engagement wasn't suspicious.
+    const isBotEngagement = false;
 
     // Calculate multiplier: quality acts as a direct multiplier
     let multiplier = quality;
