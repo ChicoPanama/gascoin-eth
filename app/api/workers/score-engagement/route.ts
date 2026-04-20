@@ -12,6 +12,7 @@ import { addMemory } from '../../../../lib/mem0';
 import { writeIntelligence } from '../../../../lib/knowledge-base';
 import { isAiGatewayAvailable } from '../../../../lib/integrations/ai-gateway';
 import { chunkedIn } from '../../../../lib/supabase-utils';
+import { recordAttributionEvent } from '../../../../lib/attribution';
 
 // ═══════════════════════════════════════════
 // Engagement Worker v3
@@ -338,7 +339,7 @@ async function scoreTweet(
   // append the current snapshot for engagement-velocity analysis.
   const { data: existingScored } = await supabase
     .from('scored_tweets')
-    .select('id, last_scored_at, adjusted_points, score_count, metrics_history')
+    .select('id, last_scored_at, adjusted_points, score_count, metrics_history, last_scored_impressions')
     .eq('tweet_id', tweet.id)
     .maybeSingle();
 
@@ -417,8 +418,25 @@ async function scoreTweet(
     quality_multiplier: qualityScore.multiplier,
     metrics_history: updatedHistory,
     last_scored_at: new Date().toISOString(),
+    last_scored_impressions: metrics.impressions,
     score_count: existingScored ? existingScored.score_count + 1 : 1,
   }, { onConflict: 'tweet_id' });
+
+  // Gas Network Piece 5.5 — impression attribution signal. Delta = current
+  // - last_scored. Fire-and-forget. Zero events on first-ever score
+  // (existingScored is null → treat as seed, not a delta).
+  const priorImpressions = existingScored
+    ? Number((existingScored as Record<string, unknown>).last_scored_impressions || 0)
+    : 0;
+  const impressionDelta = existingScored
+    ? Math.max(0, Number(metrics.impressions || 0) - priorImpressions)
+    : 0;
+  if (impressionDelta > 0) {
+    recordAttributionEvent(tweet.id, 'impression', null, {
+      delta: impressionDelta,
+      snapshot: Number(metrics.impressions || 0),
+    }).catch(() => {});
+  }
 
   // Calculate delta points (only new engagement since last score)
   const previousPoints = existingScored ? Number(existingScored.adjusted_points || 0) : 0;

@@ -21,8 +21,15 @@ export function composePostApprovalTweet(params: {
   return `Just submitted my gas receipt to GASCOIN for a ETH refund. Get your gas money back too → ${params.referralUrl}\n\n@GasCoinApp $GASCOIN #gascoin`;
 }
 
-export function buildReferralUrl(referralCode: string): string {
-  return `${getBaseUrl()}/submit?ref=${referralCode}`;
+/**
+ * Build the canonical share URL for a referral code.
+ * @param tweetId  Optional source X tweet id. When present, is attached as
+ *                 `&src=<id>` so the /api/referral/click handler can write
+ *                 a `wallet_connect` attribution event tied to the post.
+ */
+export function buildReferralUrl(referralCode: string, tweetId?: string): string {
+  const base = `${getBaseUrl()}/submit?ref=${encodeURIComponent(referralCode)}`;
+  return tweetId ? `${base}&src=${encodeURIComponent(tweetId)}` : base;
 }
 
 export function buildTwitterIntentUrl(text: string): string {

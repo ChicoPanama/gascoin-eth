@@ -3,6 +3,7 @@ import { getSupabaseAdmin } from '../../../../lib/supabase';
 import { validateReferralCode, generateReferralCode } from '../../../../lib/referral-code';
 import { checkRateLimit } from '../../../../lib/rate-limit';
 import { getClientIp } from '../../../../lib/ip';
+import { recordAttributionEvent } from '../../../../lib/attribution';
 
 export async function POST(req: NextRequest) {
   // Rate limit: 10 clicks per minute per IP
@@ -12,11 +13,17 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const { referral_code } = await req.json();
+    const { referral_code, src } = await req.json();
 
     if (!referral_code || !validateReferralCode(referral_code)) {
       return NextResponse.json({ error: 'Invalid code' }, { status: 400 });
     }
+
+    // Sanitize optional source tweet id — X ids are numeric decimal strings up
+    // to 19 digits. Reject anything that doesn't match to keep attribution_events
+    // clean and prevent junk payloads.
+    const sourceTweetId: string | null =
+      typeof src === 'string' && /^[0-9]{6,20}$/.test(src) ? src : null;
 
     const supabase = getSupabaseAdmin();
 
@@ -68,7 +75,17 @@ export async function POST(req: NextRequest) {
       referral_code,
       referrer_wallet: referrerWallet,
       click_fingerprint: fingerprint,
+      source_tweet_id: sourceTweetId,
     });
+
+    // Gas Network Piece 5 — emit wallet_connect attribution event if the
+    // click came from a tagged share URL. Fire-and-forget.
+    if (sourceTweetId) {
+      recordAttributionEvent(sourceTweetId, 'wallet_connect', null, {
+        referral_code,
+        referrer_wallet: referrerWallet,
+      }).catch(() => {});
+    }
 
     return NextResponse.json({ ok: true });
   } catch {
