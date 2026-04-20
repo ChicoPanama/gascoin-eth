@@ -35,8 +35,11 @@ function PrivyInner({ children }: { children: React.ReactNode }) {
         appearance: { theme: resolved, walletChainType: 'ethereum-only' },
         defaultChain: mainnet,
         supportedChains: [mainnet],
+        // Users connect their own wallet (MetaMask/Rainbow/Coinbase/etc).
+        // No auto-created embedded wallet — refunds go to a wallet the
+        // user actually controls outside of Privy.
         embeddedWallets: {
-          ethereum: { createOnLogin: 'users-without-wallets' },
+          ethereum: { createOnLogin: 'off' },
         },
       }}
     >
