@@ -208,12 +208,15 @@ export async function POST(req: Request) {
       }
     }
 
-    // ─── PHASE 2: For each handle, search for ALL GASCOIN tweets ───
-    // Query matches either the `#gascoin` hashtag or the `$GASCOIN` cashtag
-    // because the /submit UI tells users either is acceptable. A hashtag-only
-    // query silently missed everyone who used only the cashtag.
-    // Sort stale handles first so that if the X API rate-limit cuts us off
-    // mid-run, the handles we did score are the ones most overdue.
+    // ─── PHASE 2: Batched search — one X API call per batch of handles ───
+    // Query matches `#gascoin` OR `$GASCOIN` because the /submit UI accepts
+    // either. X API's /tweets/search/recent supports `from:` OR-composition,
+    // so we batch up to 15 handles per request rather than firing one call
+    // per handle. At 1,000 testers this is a ~95% reduction in X API spend
+    // vs the old per-handle loop. Batch size 15 keeps the query string well
+    // under X's 512-char limit even with maximum-length handles.
+    // Sort stale handles first so rate-limit cut-offs leave the most overdue
+    // handles re-tried first next cycle.
     const sortedEntries = [...walletHandles.entries()].sort((a, b) => {
       const aLink = (links || []).find((l: any) => l.wallet === a[0]);
       const bLink = (links || []).find((l: any) => l.wallet === b[0]);
@@ -227,16 +230,97 @@ export async function POST(req: Request) {
     // we stay sequential so we don't burst the X search endpoint.
     const tweetLimit = pLimit(3);
 
-    for (const [wallet, { handle }] of sortedEntries) {
-      handlesScanned++;
+    const BATCH_SIZE = 15;
+    const batches: Array<typeof sortedEntries> = [];
+    for (let i = 0; i < sortedEntries.length; i += BATCH_SIZE) {
+      batches.push(sortedEntries.slice(i, i + BATCH_SIZE));
+    }
+
+    for (const batch of batches) {
+      const fromClauses = batch.map(([, { handle }]) => `from:${handle}`).join(' OR ');
+      const batchQuery = `(${fromClauses}) (#gascoin OR $GASCOIN)`;
 
       try {
-        const result = await searchRecentTweets(`from:${handle} (#gascoin OR $GASCOIN)`, 10);
+        // max_results=100 is X's per-request cap. 15 handles × avg 1-3 matching
+        // tweets each stays well under. At tails we may need pagination but
+        // beta traffic is nowhere near.
+        const result = await searchRecentTweets(batchQuery, 100);
+        handlesScanned += batch.length;
+        tweetsFound += result.tweets.length;
 
-        if (result.tweets.length === 0) {
-          // Fallback: re-score claim-linked tweets through the SAME pipeline
-          // used for search-found tweets. An earlier shortcut bypassed AI
-          // quality scoring + verification — legacy path left in by accident.
+        // Index users by id and handle→wallet for O(1) lookup during grouping.
+        const usersById = new Map<string, typeof result.users[number]>();
+        for (const u of result.users) usersById.set(u.id, u);
+        const handleToEntry = new Map<string, { wallet: string; handle: string }>();
+        for (const [wallet, { handle }] of batch) {
+          handleToEntry.set(handle.toLowerCase(), { wallet, handle });
+        }
+
+        // Group tweets by the wallet that owns the authoring handle.
+        const tweetsByWallet = new Map<string, { handle: string; tweets: typeof result.tweets; authorUser?: typeof result.users[number] }>();
+        for (const tweet of result.tweets) {
+          const author = tweet.author_id ? usersById.get(tweet.author_id) : undefined;
+          if (!author) continue;
+          const entry = handleToEntry.get(author.username.toLowerCase());
+          if (!entry) continue;
+          const slot = tweetsByWallet.get(entry.wallet) || { handle: entry.handle, tweets: [], authorUser: author };
+          slot.tweets.push(tweet);
+          tweetsByWallet.set(entry.wallet, slot);
+        }
+
+        // Score each wallet's tweets in parallel.
+        for (const [wallet, { handle, tweets, authorUser }] of tweetsByWallet.entries()) {
+          const followerCount = authorUser?.public_metrics?.followers_count || 0;
+
+          const scorePromises = tweets.map((tweet) =>
+            tweetLimit(() =>
+              scoreTweet(
+                supabase,
+                wallet,
+                handle,
+                tweet,
+                followerCount,
+                rescoreCutoff,
+                walletTrustCache.get(wallet),
+                result.media,
+                pointTotalsCache.get(wallet),
+              ),
+            ),
+          );
+          const settled = await Promise.allSettled(scorePromises);
+          for (const r of settled) {
+            if (r.status !== 'fulfilled') continue;
+            if (r.value.scored) scored++;
+            if (r.value.pointsAwarded > 0) totalPointsAwarded += r.value.pointsAwarded;
+            if (r.value.heldForReview) heldForReview++;
+          }
+
+          const linkUpdate: Record<string, any> = { last_tweet_scan: new Date().toISOString() };
+          if (authorUser) {
+            if ((authorUser as any).location) linkUpdate.x_location = (authorUser as any).location;
+            if ((authorUser as any).description) linkUpdate.bio = (authorUser as any).description;
+            if ((authorUser as any).created_at) linkUpdate.x_account_created_at = (authorUser as any).created_at;
+            if ((authorUser as any).protected !== undefined) linkUpdate.x_is_protected = !!(authorUser as any).protected;
+          }
+          await supabase.from('wallet_x_links')
+            .update(linkUpdate)
+            .eq('wallet', wallet)
+            .eq('x_handle', handle);
+
+          if (tweets.length > 0) {
+            updateQualityTrend(supabase, wallet).catch(() => {});
+          }
+        }
+
+        // For wallets in this batch that found NO tweets in the batched search,
+        // (a) bump last_tweet_scan so we don't re-query them every cycle, and
+        // (b) fall back to re-scoring their claim-linked tweets through the
+        //     same pipeline — legacy safety net for users whose tweets have
+        //     aged out of X's 7-day recent-search window.
+        const nowIso = new Date().toISOString();
+        for (const [wallet, { handle }] of batch) {
+          if (tweetsByWallet.has(wallet)) continue;
+
           const claimTweets = (claims || []).filter((c: any) => c.wallet === wallet);
           for (const claim of claimTweets) {
             const idMatch = claim.tweet_url?.match(/status\/(\d+)/);
@@ -258,55 +342,12 @@ export async function POST(req: Request) {
             if (scoreResult.pointsAwarded > 0) totalPointsAwarded += scoreResult.pointsAwarded;
             if (scoreResult.heldForReview) heldForReview++;
           }
-          continue;
+
+          await supabase.from('wallet_x_links')
+            .update({ last_tweet_scan: nowIso })
+            .eq('wallet', wallet)
+            .eq('x_handle', handle);
         }
-
-        const authorUser = result.users.find((u) => u.username.toLowerCase() === handle.toLowerCase());
-        const followerCount = authorUser?.public_metrics?.followers_count || 0;
-
-        tweetsFound += result.tweets.length;
-
-        const scorePromises = result.tweets.map((tweet) =>
-          tweetLimit(() =>
-            scoreTweet(
-              supabase,
-              wallet,
-              handle,
-              tweet,
-              followerCount,
-              rescoreCutoff,
-              walletTrustCache.get(wallet),
-              result.media,
-              pointTotalsCache.get(wallet),
-            ),
-          ),
-        );
-        const settled = await Promise.allSettled(scorePromises);
-        for (const r of settled) {
-          if (r.status !== 'fulfilled') continue;
-          if (r.value.scored) scored++;
-          if (r.value.pointsAwarded > 0) totalPointsAwarded += r.value.pointsAwarded;
-          if (r.value.heldForReview) heldForReview++;
-        }
-
-        // Update last scan timestamp + persist X profile data
-        const linkUpdate: Record<string, any> = { last_tweet_scan: new Date().toISOString() };
-        if (authorUser) {
-          if ((authorUser as any).location) linkUpdate.x_location = (authorUser as any).location;
-          if ((authorUser as any).description) linkUpdate.bio = (authorUser as any).description;
-          if ((authorUser as any).created_at) linkUpdate.x_account_created_at = (authorUser as any).created_at;
-          if ((authorUser as any).protected !== undefined) linkUpdate.x_is_protected = !!(authorUser as any).protected;
-        }
-        await supabase.from('wallet_x_links')
-          .update(linkUpdate)
-          .eq('wallet', wallet)
-          .eq('x_handle', handle);
-
-        // Update rolling quality trend for this wallet (non-blocking)
-        if (result.tweets.length > 0) {
-          updateQualityTrend(supabase, wallet).catch(() => {});
-        }
-
       } catch {
         continue;
       }

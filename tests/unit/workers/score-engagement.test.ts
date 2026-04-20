@@ -118,19 +118,46 @@ describe('score-engagement worker', () => {
     expect(body.handlesScanned).toBeGreaterThanOrEqual(1);
   });
 
-  it('continues processing remaining wallets when X API errors for one', async () => {
+  it('returns 200 when a batched search fails — entire batch is skipped and retried next cycle', async () => {
+    // Worker batches up to 15 handles per search query to cut X API spend.
+    // On batch failure, we skip those handles rather than falling back to
+    // per-handle retries (defeats the batching purpose). Worker must still
+    // complete cleanly (200 ok) so the cron doesn't retry the whole run.
     mockLinks = [
       { wallet: 'wallet1', x_handle: 'user1', x_user_id: 'u1', last_tweet_scan: null },
       { wallet: 'wallet2', x_handle: 'user2', x_user_id: 'u2', last_tweet_scan: null },
     ];
-    (searchRecentTweets as any)
-      .mockRejectedValueOnce(new Error('X API error'))
-      .mockResolvedValueOnce({ tweets: [], users: [], media: [], meta: {} });
+    (searchRecentTweets as any).mockRejectedValueOnce(new Error('X API error'));
 
     const res = await POST(makeReq());
     expect(res.status).toBe(200);
     const body = await res.json();
     expect(body.ok).toBe(true);
-    expect(body.handlesScanned).toBe(2);
+    // Batch failed → no handles scanned in this run. Next cron cycle retries.
+    expect(body.handlesScanned).toBe(0);
+  });
+
+  it('batches multiple handles into a single searchRecentTweets call', async () => {
+    mockLinks = [
+      { wallet: 'wallet1', x_handle: 'user1', x_user_id: 'u1', last_tweet_scan: null },
+      { wallet: 'wallet2', x_handle: 'user2', x_user_id: 'u2', last_tweet_scan: null },
+      { wallet: 'wallet3', x_handle: 'user3', x_user_id: 'u3', last_tweet_scan: null },
+    ];
+    (searchRecentTweets as any).mockResolvedValueOnce({ tweets: [], users: [], media: [], meta: {} });
+
+    const res = await POST(makeReq());
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.ok).toBe(true);
+    expect(body.handlesScanned).toBe(3);
+    // Three handles, one batched call — confirms the optimization.
+    expect(searchRecentTweets).toHaveBeenCalledTimes(1);
+    // The query should OR the handles together + match the cashtag/hashtag.
+    const callArgs = (searchRecentTweets as any).mock.calls[0];
+    expect(callArgs[0]).toMatch(/from:user1/);
+    expect(callArgs[0]).toMatch(/from:user2/);
+    expect(callArgs[0]).toMatch(/from:user3/);
+    expect(callArgs[0]).toContain('OR');
+    expect(callArgs[0]).toMatch(/#gascoin|GASCOIN/);
   });
 });
