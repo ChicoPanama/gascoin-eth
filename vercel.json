@@ -25,6 +25,10 @@
       "schedule": "15 7 * * *"
     },
     {
+      "path": "/api/workers/mint-reach-certs",
+      "schedule": "45 7 * * *"
+    },
+    {
       "path": "/api/workers/flush-receipts",
       "schedule": "0 3 * * 0"
     },

@@ -9935,3 +9935,48 @@ button.docs-footer-link {
   text-transform: uppercase;
   letter-spacing: 0.06em;
 }
+
+/* ═══ REACH CERTIFICATES (Piece 4) ════════════════════════════════════ */
+.gc-creator-certs {
+  margin-top: 40px;
+  padding-top: 24px;
+  border-top: 1px solid rgba(var(--fg-rgb), 0.08);
+}
+.gc-creator-certs-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 28px;
+  letter-spacing: 0.02em;
+  margin: 0 0 4px;
+}
+.gc-creator-certs-sub { font-size: 13px; opacity: 0.62; margin: 0 0 16px; }
+.gc-creator-cert-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 12px;
+}
+.gc-creator-cert {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 14px 16px;
+  background: rgba(var(--accent-rgb, 34, 197, 94), 0.06);
+  border: 1px solid rgba(var(--accent-rgb, 34, 197, 94), 0.2);
+  border-radius: 6px;
+}
+.gc-creator-cert-badge {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 18px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgb(var(--accent-rgb, 34, 197, 94));
+}
+.gc-creator-cert-amount {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 15px;
+  font-weight: 600;
+}
+.gc-creator-cert-date { font-size: 11px; opacity: 0.6; }
+.gc-creator-cert-link { font-size: 11px; opacity: 0.8; }

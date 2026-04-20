@@ -51,6 +51,14 @@ export interface CreatorImpact {
   bestPostImpressions: number;
 }
 
+export interface CreatorCertificate {
+  milestone: string;
+  amount: number;
+  tokenId: number | null;
+  txHash: string | null;
+  mintedAt: string | null;
+}
+
 /** Normalize for case-insensitive handle lookup. */
 function norm(handle: string): string {
   return (handle || '').trim().toLowerCase();
@@ -193,4 +201,29 @@ export async function getCreatorImpact(handle: string): Promise<CreatorImpact> {
     totalPaidClaims: paidPayouts.length,
     bestPostImpressions,
   };
+}
+
+/**
+ * Fetch earned reach certificates for a creator. Only confirmed mints
+ * (status=paid with tx_hash) are returned — in-flight/dry-run mints
+ * don't surface to the public.
+ */
+export async function getCreatorCertificates(handle: string): Promise<CreatorCertificate[]> {
+  if (!handle) return [];
+  const h = norm(handle);
+  const supabase = getSupabaseAdmin();
+
+  const { data } = await supabase
+    .from('certificate_mints_public')
+    .select('milestone,amount,token_id,tx_hash,minted_at')
+    .eq('handle', h)
+    .order('minted_at', { ascending: false });
+
+  return (data || []).map((c: any) => ({
+    milestone: c.milestone,
+    amount: Number(c.amount || 0),
+    tokenId: c.token_id != null ? Number(c.token_id) : null,
+    txHash: c.tx_hash ?? null,
+    mintedAt: c.minted_at ?? null,
+  }));
 }

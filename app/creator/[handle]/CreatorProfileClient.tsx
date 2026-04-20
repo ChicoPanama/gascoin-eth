@@ -2,13 +2,14 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import type { CreatorProfile, CreatorPost, CreatorImpact } from '../../../lib/creator-profile';
+import type { CreatorProfile, CreatorPost, CreatorImpact, CreatorCertificate } from '../../../lib/creator-profile';
 import { formatEth } from '../../../lib/formatters';
 
 interface Props {
   profile: CreatorProfile;
   posts: CreatorPost[];
   impact: CreatorImpact;
+  certs?: CreatorCertificate[];
 }
 
 type Tab = 'posts' | 'earnings';
@@ -22,7 +23,7 @@ function fmtDate(iso: string | null): string {
   return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 }
 
-export function CreatorProfileClient({ profile, posts, impact }: Props) {
+export function CreatorProfileClient({ profile, posts, impact, certs = [] }: Props) {
   const [tab, setTab] = useState<Tab>('posts');
 
   return (
@@ -187,6 +188,35 @@ export function CreatorProfileClient({ profile, posts, impact }: Props) {
               </p>
             </div>
           )}
+        </section>
+      )}
+
+      {/* ─── CERTIFICATES ────────────────────────────────────────────── */}
+      {certs.length > 0 && (
+        <section className="gc-creator-certs">
+          <h2 className="gc-creator-certs-title">Reach Certificates</h2>
+          <p className="gc-creator-certs-sub">
+            Soulbound ERC-721 tokens minted by GASCOIN for verified milestones. Non-transferable.
+          </p>
+          <ul className="gc-creator-cert-list">
+            {certs.map((c) => (
+              <li key={`${c.milestone}-${c.tokenId}`} className="gc-creator-cert">
+                <span className="gc-creator-cert-badge">{c.milestone}</span>
+                <span className="gc-creator-cert-amount">{fmtInt(c.amount)}</span>
+                {c.mintedAt && <span className="gc-creator-cert-date">{fmtDate(c.mintedAt)}</span>}
+                {c.txHash && !c.txHash.startsWith('DRYRUN_') && (
+                  <a
+                    href={`https://etherscan.io/tx/${c.txHash}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="gc-creator-cert-link"
+                  >
+                    view tx →
+                  </a>
+                )}
+              </li>
+            ))}
+          </ul>
         </section>
       )}
 

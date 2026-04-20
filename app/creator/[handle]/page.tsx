@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation';
-import { getCreatorProfile, getCreatorPosts, getCreatorImpact } from '../../../lib/creator-profile';
+import { getCreatorProfile, getCreatorPosts, getCreatorImpact, getCreatorCertificates } from '../../../lib/creator-profile';
 import { CreatorProfileClient } from './CreatorProfileClient';
 import type { Metadata } from 'next';
 
@@ -18,13 +18,14 @@ export async function generateMetadata({ params }: { params: Promise<{ handle: s
 
 export default async function CreatorPage({ params }: { params: Promise<{ handle: string }> }) {
   const { handle } = await params;
-  const [profile, posts, impact] = await Promise.all([
+  const [profile, posts, impact, certs] = await Promise.all([
     getCreatorProfile(handle),
     getCreatorPosts(handle, 20),
     getCreatorImpact(handle),
+    getCreatorCertificates(handle),
   ]);
 
   if (!profile) notFound();
 
-  return <CreatorProfileClient profile={profile} posts={posts} impact={impact} />;
+  return <CreatorProfileClient profile={profile} posts={posts} impact={impact} certs={certs} />;
 }
