@@ -211,33 +211,81 @@ function StepTweet({ onVerified, onBack, initialUrl, loggedInHandle }: {
     }
   };
 
+  // Pre-filled tweet the user can edit before posting. Keeps the hashtag +
+  // mention requirements satisfied out of the box so testers don't forget
+  // them and get rejected.
+  const tweetDraft = 'Just filled up and getting ETH back thanks to @GasCoinApp. Real money back on real gas. #gascoin $GASCOIN';
+  const composeUrl = `https://x.com/intent/post?text=${encodeURIComponent(tweetDraft)}`;
+
   return (
     <div className="sf-step">
-      <h2 className="sf-headline">Verify Your Tweet</h2>
-      <p className="sf-sub">Paste the URL of your tweet. Must tag <strong>@GasCoinApp</strong> and include <strong>#gascoin</strong> or <strong>$GASCOIN</strong>, be public, and posted within the last 48 hours.</p>
+      <h2 className="sf-headline">Post a Tweet, Then Verify</h2>
+      <p className="sf-sub">Two sub-steps. Post a GasCoin tweet on X first, then come back and paste the URL so we can verify it.</p>
 
-      <input
-        type="text"
-        className={`sf-input${status === 'loading' ? ' sf-input--loading' : ''}${status === 'error' ? ' sf-input--error' : ''}`}
-        placeholder="https://x.com/yourhandle/status/..."
-        value={url}
-        onChange={(e) => handleInput(e.target.value)}
-      />
-
-      {status === 'success' && (
-        <div className="sf-tweet-preview">
-          <div className="sf-tweet-avatar">{handle[0]?.toUpperCase() || 'G'}</div>
-          <div className="sf-tweet-body">
-            <div className="sf-tweet-meta">@{handle} · {tweetAge}</div>
-            <div className="sf-tweet-status">✓ #gascoin / $GASCOIN detected · Public · Posted {tweetAge}</div>
-          </div>
+      {/* ─── Sub-step A: compose tweet on X ─────────────────────────── */}
+      <div style={{ marginTop: 20, padding: 16, border: '1px solid rgba(255,255,255,0.08)', borderRadius: 0 }}>
+        <div style={{ fontFamily: 'IBM Plex Mono', fontSize: 11, letterSpacing: '0.1em', color: 'rgba(255,255,255,0.5)', marginBottom: 8 }}>
+          STEP A · POST ON X
         </div>
-      )}
+        <p style={{ fontSize: 14, lineHeight: 1.5, marginBottom: 12 }}>
+          Tweet must tag <strong>@GasCoinApp</strong> and include <strong>#gascoin</strong> or <strong>$GASCOIN</strong>. Must be public. Must be posted within the last 48 hours.
+        </p>
+        <a
+          href={composeUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="sf-btn-solid"
+          style={{ display: 'inline-flex', alignItems: 'center', gap: 8, textDecoration: 'none' }}
+        >
+          <span>Compose tweet on X</span>
+          <span aria-hidden>→</span>
+        </a>
+        <div style={{ fontFamily: 'IBM Plex Mono', fontSize: 11, color: 'rgba(255,255,255,0.4)', marginTop: 10 }}>
+          Opens x.com in a new tab with a draft you can edit. Post it, then copy the tweet URL.
+        </div>
+      </div>
 
-      {status === 'error' && <div className="sf-error">{errorMsg}</div>}
-      {status === 'idle' && url.length === 0 && (
-        <div style={{ fontFamily: 'IBM Plex Mono', fontSize: 11, color: 'rgba(255,255,255,0.3)', marginTop: 8 }}>
-          Paste your tweet URL above to continue
+      {/* ─── Sub-step B: paste the URL ──────────────────────────────── */}
+      <div style={{ marginTop: 16, padding: 16, border: '1px solid rgba(255,255,255,0.08)', borderRadius: 0 }}>
+        <div style={{ fontFamily: 'IBM Plex Mono', fontSize: 11, letterSpacing: '0.1em', color: 'rgba(255,255,255,0.5)', marginBottom: 8 }}>
+          STEP B · PASTE TWEET URL
+        </div>
+        <input
+          type="text"
+          className={`sf-input${status === 'loading' ? ' sf-input--loading' : ''}${status === 'error' ? ' sf-input--error' : ''}`}
+          placeholder="https://x.com/yourhandle/status/..."
+          value={url}
+          onChange={(e) => handleInput(e.target.value)}
+          aria-label="Tweet URL"
+        />
+
+        {status === 'success' && (
+          <div className="sf-tweet-preview">
+            <div className="sf-tweet-avatar">{handle[0]?.toUpperCase() || 'G'}</div>
+            <div className="sf-tweet-body">
+              <div className="sf-tweet-meta">@{handle} · {tweetAge}</div>
+              <div className="sf-tweet-status">✓ #gascoin / $GASCOIN detected · Public · Posted {tweetAge}</div>
+            </div>
+          </div>
+        )}
+
+        {status === 'error' && <div className="sf-error">{errorMsg}</div>}
+        {status === 'idle' && url.length === 0 && (
+          <div style={{ fontFamily: 'IBM Plex Mono', fontSize: 11, color: 'rgba(255,255,255,0.3)', marginTop: 8 }}>
+            Paste your tweet URL above to continue.
+          </div>
+        )}
+        {status === 'loading' && (
+          <div style={{ fontFamily: 'IBM Plex Mono', fontSize: 11, color: 'rgba(255,255,255,0.5)', marginTop: 8 }}>
+            Verifying tweet…
+          </div>
+        )}
+      </div>
+
+      {/* Live hint so users see why Next is grayed out */}
+      {status !== 'success' && url.length > 0 && (
+        <div role="status" aria-live="polite" style={{ marginTop: 12, marginBottom: -4, fontSize: 12, color: 'rgba(255,255,255,0.55)' }}>
+          {status === 'loading' ? 'Still verifying your tweet…' : 'Fix the issue above, then Next will unlock.'}
         </div>
       )}
 
@@ -245,9 +293,9 @@ function StepTweet({ onVerified, onBack, initialUrl, loggedInHandle }: {
         <button type="button" className="sf-btn-ghost" onClick={onBack}>&larr; Back</button>
         <button
           type="button"
-          className="sf-btn-solid"
-          disabled={status !== 'success'}
-          onClick={() => onVerified(url, handle)}
+          aria-disabled={status !== 'success'}
+          className={`sf-btn-solid${status !== 'success' ? ' sf-btn-solid--pending' : ''}`}
+          onClick={() => { if (status === 'success') onVerified(url, handle); }}
         >
           Next
         </button>
