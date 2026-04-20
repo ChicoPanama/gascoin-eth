@@ -24,13 +24,44 @@ export async function GET(req: Request) {
   const limit = Math.min(100, Math.max(1, Number(url.searchParams.get('limit') || 20)));
 
   const supabase = getSupabaseAdmin();
+
+  // Primary ordering: Composite Influence Score (per-account), falling back
+  // to total_eth_earned for wallets that haven't been scored yet.
+  const { data: composites } = await supabase
+    .from('composite_scores')
+    .select('wallet, composite')
+    .order('composite', { ascending: false })
+    .limit(limit * 2);
+
+  const orderedWallets = (composites || [])
+    .map((c: any) => String(c.wallet).toLowerCase())
+    .filter(Boolean);
+
   const { data } = await supabase
     .from('creator_public_view')
     .select('*')
     .order('total_eth_earned', { ascending: false })
-    .limit(limit);
+    .limit(limit * 2);
 
-  const rows = (data || []).filter((r: any) => {
+  const byWallet = new Map<string, any>(
+    (data || []).map((r: any) => [String(r.wallet).toLowerCase(), r]),
+  );
+  const compositeByWallet = new Map<string, number>(
+    (composites || []).map((c: any) => [String(c.wallet).toLowerCase(), Number(c.composite || 0)]),
+  );
+
+  // Merge: composite order first, then any remaining creators by earnings
+  const merged: any[] = [];
+  for (const w of orderedWallets) {
+    const r = byWallet.get(w);
+    if (r) merged.push(r);
+  }
+  for (const r of data || []) {
+    const w = String(r.wallet).toLowerCase();
+    if (!orderedWallets.includes(w)) merged.push(r);
+  }
+
+  const rows = merged.slice(0, limit).filter((r: any) => {
     if (minFollowers > 0 && Number(r.followers_count || 0) < minFollowers) return false;
     return true;
   });
@@ -47,7 +78,11 @@ export async function GET(req: Request) {
         .maybeSingle();
       const topImpact = Number(topTweet?.impact_score || 0);
       if (minImpact > 0 && topImpact < minImpact) return null;
-      return filterForTier({ ...r, impact_score: topImpact }, gate.tier!);
+      const composite = compositeByWallet.get(String(r.wallet).toLowerCase()) || 0;
+      return filterForTier(
+        { ...r, impact_score: topImpact, composite_score: composite },
+        gate.tier!,
+      );
     }),
   );
 

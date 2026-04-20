@@ -24,6 +24,8 @@ export interface CreatorProfile {
   avgQualityScore: number | null;
   firstSeenAt: string | null;
   linkedAt: string | null;
+  /** Composite Influence Score v2 — 0–100, null if not yet computed. */
+  compositeScore: number | null;
 }
 
 export interface CreatorPost {
@@ -97,6 +99,12 @@ export async function getCreatorProfile(handle: string): Promise<CreatorProfile 
     .ilike('handle', h)
     .maybeSingle();
 
+  const { data: composite } = await supabase
+    .from('composite_scores')
+    .select('composite')
+    .eq('wallet', String(link.wallet).toLowerCase())
+    .maybeSingle();
+
   return {
     handle: h,
     wallet: link.wallet,
@@ -109,6 +117,7 @@ export async function getCreatorProfile(handle: string): Promise<CreatorProfile 
     avgQualityScore: link.avg_quality_score ?? null,
     firstSeenAt: profile?.first_seen_at ?? null,
     linkedAt: link.linked_at ?? null,
+    compositeScore: composite?.composite != null ? Number(composite.composite) : null,
   };
 }
 
