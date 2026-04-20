@@ -9757,3 +9757,171 @@ button.docs-footer-link {
   .gc-presale-nav-chain { display: none; }
   .gc-presale-nav-tag { display: none; }
 }
+
+/* ═══ GAS NETWORK · CREATOR PROFILE ═══════════════════════════════════ */
+.gc-creator {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 40px 24px 80px;
+}
+.gc-creator-hero {
+  padding: 24px 0 32px;
+  border-bottom: 1px solid rgba(var(--fg-rgb), 0.08);
+}
+.gc-creator-hero-inner {
+  display: flex;
+  gap: 24px;
+  align-items: flex-start;
+}
+.gc-creator-avatar {
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: rgba(var(--fg-rgb), 0.06);
+  flex: 0 0 96px;
+}
+.gc-creator-avatar--placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 48px;
+  color: rgba(var(--fg-rgb), 0.5);
+}
+.gc-creator-hero-meta { flex: 1; min-width: 0; }
+.gc-creator-handle-row {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.gc-creator-handle {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 40px;
+  letter-spacing: 0.02em;
+  margin: 0;
+}
+.gc-creator-verified {
+  font-size: 12px;
+  padding: 3px 8px;
+  background: rgba(var(--accent-rgb, 34, 197, 94), 0.15);
+  color: rgb(var(--accent-rgb, 34, 197, 94));
+  border-radius: 4px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+.gc-creator-tier {
+  font-size: 11px;
+  padding: 3px 8px;
+  border: 1px solid rgba(var(--fg-rgb), 0.2);
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 600;
+}
+.gc-creator-bio { margin: 8px 0 6px; opacity: 0.82; }
+.gc-creator-sub {
+  font-size: 13px;
+  opacity: 0.62;
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.gc-creator-wallet { opacity: 0.82; }
+.gc-creator-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin: 32px 0;
+}
+.gc-creator-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 16px;
+  background: rgba(var(--fg-rgb), 0.03);
+  border-radius: 8px;
+}
+.gc-creator-stat-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  opacity: 0.62;
+}
+.gc-creator-stat-value {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 24px;
+  letter-spacing: 0.02em;
+}
+.gc-creator-tabs {
+  display: flex;
+  gap: 8px;
+  border-bottom: 1px solid rgba(var(--fg-rgb), 0.08);
+  margin-bottom: 20px;
+}
+.gc-creator-tab {
+  padding: 10px 14px;
+  background: transparent;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  color: inherit;
+  cursor: pointer;
+  font-size: 14px;
+  opacity: 0.62;
+  transition: opacity 0.15s, border-color 0.15s;
+}
+.gc-creator-tab:hover { opacity: 0.9; }
+.gc-creator-tab--active {
+  opacity: 1;
+  border-bottom-color: currentColor;
+}
+.gc-creator-empty { opacity: 0.5; padding: 32px 0; text-align: center; }
+.gc-creator-posts {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.gc-creator-post {
+  padding: 14px 16px;
+  border: 1px solid rgba(var(--fg-rgb), 0.08);
+  border-radius: 6px;
+}
+.gc-creator-post-meta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  opacity: 0.62;
+  margin-bottom: 8px;
+}
+.gc-creator-post-metrics {
+  display: flex;
+  gap: 14px;
+  font-size: 13px;
+  flex-wrap: wrap;
+}
+.gc-creator-post-points { font-weight: 600; opacity: 0.9; }
+.gc-creator-earnings {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 18px;
+  background: rgba(var(--fg-rgb), 0.03);
+  border-radius: 8px;
+}
+.gc-creator-footer {
+  margin-top: 40px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(var(--fg-rgb), 0.08);
+  font-size: 14px;
+  opacity: 0.62;
+}
+@media (max-width: 640px) {
+  .gc-creator-hero-inner { flex-direction: column; }
+  .gc-creator-avatar { width: 72px; height: 72px; flex: 0 0 72px; }
+  .gc-creator-handle { font-size: 32px; }
+  .gc-creator-stats { grid-template-columns: repeat(2, 1fr); }
+}

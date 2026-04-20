@@ -17,6 +17,10 @@
       "schedule": "0 6 * * *"
     },
     {
+      "path": "/api/workers/sync-creator-profiles",
+      "schedule": "15 7 * * *"
+    },
+    {
       "path": "/api/workers/flush-receipts",
       "schedule": "0 3 * * 0"
     },
