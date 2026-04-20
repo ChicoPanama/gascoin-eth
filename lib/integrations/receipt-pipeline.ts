@@ -268,7 +268,7 @@ const ReceiptSchema = z.object({
   wallet_address: z
     .string()
     .nullable()
-    .describe('any long alphanumeric string (32-44 chars) found handwritten or null'),
+    .describe('handwritten wallet fingerprint — the last 4+ hex characters of the user Ethereum wallet (e.g. "a3F2", "0b7d"); may include longer fragments up to the full 0x-prefixed 42-char address if present; null if no handwritten alphanumeric mark visible'),
   has_handwriting: z.boolean(),
   has_gascoin_hashtag: z.boolean(),
   is_physical_receipt: z.boolean().describe('false if screenshot, digital receipt, or AI-generated'),

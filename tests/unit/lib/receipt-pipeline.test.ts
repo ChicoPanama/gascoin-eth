@@ -192,6 +192,65 @@ describe('processReceipt — AI path (gateway available)', () => {
     expect(result.extraction.ocr_fallback).toBeUndefined();
   });
 
+  // Wallet-fingerprint pipeline: users only handwrite the last 4 chars of their
+  // Ethereum address (not the full 42-char 0x… string). This test proves the
+  // extractor happily carries a short fingerprint through, and the downstream
+  // policy matcher — which compares slice(-4) case-insensitively — passes.
+  it('handles a 4-char handwritten wallet fingerprint end-to-end', async () => {
+    const { isAiGatewayAvailable, generateAIJsonVision } = await import('@/lib/integrations/ai-gateway');
+    vi.mocked(isAiGatewayAvailable).mockReturnValueOnce(true);
+    vi.mocked(generateAIJsonVision).mockResolvedValueOnce({
+      ok: true,
+      data: {
+        station_country: 'US', receipt_date: '2026-04-20',
+        total_amount: 48.12, currency: 'USD',
+        wallet_address: 'a3F2', // last 4 of e.g. 0x742d35Cc6634C0532925a3F2
+        has_handwriting: true, has_gascoin_hashtag: true,
+        is_physical_receipt: true, is_gas_station: true,
+        is_digitally_manipulated: false, confidence: 0.92,
+        fraud_notes: '', raw_text: 'SHELL 10.2gal 48.12 #gascoin a3F2',
+      },
+    } as any);
+
+    const result = await processReceipt(fakeReceiptBuffer(), 'image/jpeg');
+
+    // 1. Short fingerprint survives the Zod schema + pipeline untouched.
+    expect(result.extraction.wallet_address).toBe('a3F2');
+    // 2. Pipeline does NOT flag "no_wallet_address_found" for a short string.
+    expect(result.flags).not.toContain('no_wallet_address_found');
+    // 3. Policy-layer matcher agrees: case-insensitive last-4 compare is the gate.
+    const connectedWallet = '0x742d35Cc6634C0532925a3F2';
+    const walletOnReceipt = result.extraction.wallet_address!;
+    expect(
+      connectedWallet.slice(-4).toLowerCase() === walletOnReceipt.slice(-4).toLowerCase(),
+    ).toBe(true);
+  });
+
+  it('handles case-mismatch on the handwritten fingerprint (a3F2 vs A3F2)', async () => {
+    const { isAiGatewayAvailable, generateAIJsonVision } = await import('@/lib/integrations/ai-gateway');
+    vi.mocked(isAiGatewayAvailable).mockReturnValueOnce(true);
+    vi.mocked(generateAIJsonVision).mockResolvedValueOnce({
+      ok: true,
+      data: {
+        station_country: 'US', receipt_date: '2026-04-20',
+        total_amount: 50, currency: 'USD',
+        wallet_address: 'A3F2', // OCR returned uppercase
+        has_handwriting: true, has_gascoin_hashtag: true,
+        is_physical_receipt: true, is_gas_station: true,
+        is_digitally_manipulated: false, confidence: 0.88,
+        fraud_notes: '', raw_text: 'SHELL 50.00 #gascoin A3F2',
+      },
+    } as any);
+
+    const result = await processReceipt(fakeReceiptBuffer(), 'image/jpeg');
+    expect(result.extraction.wallet_address).toBe('A3F2');
+    const connectedWallet = '0x742d35Cc6634C0532925a3f2'; // stored lowercase
+    const walletOnReceipt = result.extraction.wallet_address!;
+    expect(
+      connectedWallet.slice(-4).toLowerCase() === walletOnReceipt.slice(-4).toLowerCase(),
+    ).toBe(true);
+  });
+
   it('falls back when AI Gateway returns an error', async () => {
     const { isAiGatewayAvailable, generateAIJsonVision } = await import('@/lib/integrations/ai-gateway');
     vi.mocked(isAiGatewayAvailable).mockReturnValueOnce(true);
