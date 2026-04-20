@@ -29,6 +29,10 @@
       "schedule": "45 7 * * *"
     },
     {
+      "path": "/api/workers/settle-marketplace",
+      "schedule": "0 */6 * * *"
+    },
+    {
       "path": "/api/workers/flush-receipts",
       "schedule": "0 3 * * 0"
     },
