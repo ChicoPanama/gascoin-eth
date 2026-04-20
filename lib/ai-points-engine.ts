@@ -725,12 +725,18 @@ export async function awardVerifiedPoints(
   }
 
   // Write verified points
+  // Season 1 beta mode: tag row with metadata.beta=true so leaderboard/composite
+  // can exclude beta activity from public rankings at launch. Source strings are
+  // kept unchanged so worker idempotency checks (.eq('source', 'submission_approved'))
+  // continue to match.
+  const isBetaMode = process.env.SEASON_1_POINTS_ONLY === 'true';
   await supabase.from('engagement_points').insert({
     wallet: params.wallet,
     source: params.source,
     points: verification.adjustedPoints,
     metadata_json: {
       ...params.metadata,
+      ...(isBetaMode ? { beta: true, beta_season: 'season_1' } : {}),
       verification: {
         approved: true,
         trustMultiplier: verification.trustMultiplier,
