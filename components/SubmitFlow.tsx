@@ -388,12 +388,28 @@ function StepReceipt({ onNext, onBack, initialFile }: {
         ))}
       </div>
 
+      {/* Explicit hint when NEXT isn't actionable. Previously the disabled
+          attribute swallowed clicks so the user saw no response and had no
+          idea WHY the button was grayed out. */}
+      {(!allChecked || !file) && (
+        <div
+          className="sf-hint"
+          style={{ marginTop: 12, marginBottom: -4, fontSize: 12, color: 'rgba(255,255,255,0.55)' }}
+          role="status"
+          aria-live="polite"
+        >
+          {!file
+            ? 'Upload a receipt photo above to continue.'
+            : `Confirm the ${checks.filter((c) => !c).length} remaining checklist item${checks.filter((c) => !c).length === 1 ? '' : 's'} above to continue.`}
+        </div>
+      )}
+
       <div className="sf-nav-buttons">
         <button type="button" className="sf-btn-ghost" onClick={onBack}>&larr; Back</button>
         <button
           type="button"
-          className={`sf-btn-solid${shake ? ' sf-shake' : ''}`}
-          disabled={!allChecked || !file}
+          aria-disabled={!allChecked || !file}
+          className={`sf-btn-solid${shake ? ' sf-shake' : ''}${(!allChecked || !file) ? ' sf-btn-solid--pending' : ''}`}
           onClick={tryNext}
         >
           Next
