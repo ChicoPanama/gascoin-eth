@@ -91,11 +91,15 @@ async function probeRedis(): Promise<ConnectResult> {
   try {
     const redis = new Redis({ url, token });
     const key = `health:probe:${Date.now()}`;
+    // Use a distinctive string so loose equality after SDK deserialization
+    // still passes. Earlier we used '1' which Upstash's SDK reads back as a
+    // number 1, failing strict `!==`. A random hex string avoids that.
+    const marker = `ok-${Math.random().toString(36).slice(2, 10)}`;
     await withTimeout(
       (async () => {
-        await redis.set(key, '1', { ex: 10 });
+        await redis.set(key, marker, { ex: 10 });
         const v = await redis.get(key);
-        if (v !== '1') throw new Error('round-trip mismatch');
+        if (String(v) !== marker) throw new Error('round-trip mismatch');
         await redis.del(key);
       })(),
       3000,
@@ -137,8 +141,12 @@ async function probeMem0(): Promise<ConnectResult> {
   const orgId = (process.env.MEM0_ORG_ID || '').trim();
   if (!apiKey || !orgId) return { ok: false, latencyMs: 0, detail: 'MEM0_API_KEY or MEM0_ORG_ID missing' };
   try {
+    // mem0 /memories requires one of {app_id, user_id, agent_id, run_id};
+    // omitting them returns 400 regardless of key validity. Use a
+    // definitely-empty user_id so the probe tests the key + org, not the
+    // query shape. 404 / empty list => key is valid.
     const res = await withTimeout(
-      fetch(`https://api.mem0.ai/v1/memories/?org_id=${orgId}&limit=1`, {
+      fetch(`https://api.mem0.ai/v1/memories/?org_id=${orgId}&user_id=health_probe&limit=1`, {
         headers: { Authorization: `Token ${apiKey}` },
         cache: 'no-store',
       }),
@@ -147,7 +155,9 @@ async function probeMem0(): Promise<ConnectResult> {
     if (res.status === 401 || res.status === 403) {
       return { ok: false, latencyMs: Date.now() - start, detail: `HTTP ${res.status} — key expired or invalid` };
     }
-    return { ok: res.ok, latencyMs: Date.now() - start, detail: res.ok ? undefined : `HTTP ${res.status}` };
+    // 200 (empty results) + 404 (user not found) both mean auth succeeded.
+    const ok = res.ok || res.status === 404;
+    return { ok, latencyMs: Date.now() - start, detail: ok ? undefined : `HTTP ${res.status}` };
   } catch (e: any) {
     return { ok: false, latencyMs: Date.now() - start, detail: e?.message?.slice(0, 80) };
   }
@@ -158,9 +168,12 @@ async function probeXApi(): Promise<ConnectResult> {
   const token = (process.env.X_BEARER_TOKEN || '').trim();
   if (!token) return { ok: false, latencyMs: 0, detail: 'X_BEARER_TOKEN missing' };
   try {
-    // Lightweight endpoint: rate_limit_status returns 200 without consuming quota
+    // IMPORTANT: /2/users/me requires OAuth2 USER CONTEXT — app-only bearer
+    // tokens (the kind score-engagement actually uses) get 403 on that
+    // endpoint even when fully valid. Probe with an app-only-compatible
+    // endpoint instead: users/by/username. That's what our workers call.
     const res = await withTimeout(
-      fetch('https://api.x.com/2/users/me', {
+      fetch('https://api.x.com/2/users/by/username/GasCoinApp', {
         headers: { Authorization: `Bearer ${token}` },
         cache: 'no-store',
       }),
