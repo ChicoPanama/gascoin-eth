@@ -678,12 +678,25 @@ export async function POST(req: Request) {
     // wallet must come from the verified session — accepting body.wallet lets
     // unauthenticated callers accumulate mem0 context under any wallet address.
     wallet = (session?.wallet || '').trim();
-  } catch {
-    return new Response('Bad request', { status: 400 });
+  } catch (e) {
+    console.error('[chat] json-parse-fail', (e as Error)?.message);
+    return new Response('Bad request: json parse failed', { status: 400 });
+  }
+
+  // Guard: body.messages must be a non-empty array of UIMessages. If the
+  // client sends {} or a malformed envelope, return a diagnosable 400
+  // instead of crashing the extractor on `messages.length`.
+  if (!Array.isArray(uiMessages) || uiMessages.length === 0) {
+    console.error('[chat] no-messages-array', { type: typeof uiMessages, keys: uiMessages ? Object.keys(uiMessages) : null });
+    return new Response('Bad request: messages array missing or empty', { status: 400 });
   }
 
   const rawUserText = extractLastUserText(uiMessages as unknown[]);
-  if (!rawUserText) return new Response('Bad request', { status: 400 });
+  if (!rawUserText) {
+    const lastMsg = uiMessages[uiMessages.length - 1] as unknown as Record<string, unknown>;
+    console.error('[chat] empty-raw-user-text', { msgCount: uiMessages.length, lastRole: lastMsg?.role, lastShape: lastMsg ? Object.keys(lastMsg) : null });
+    return new Response('Bad request: no user text found in messages', { status: 400 });
+  }
 
   // ── User-input sanitization (defense against prompt injection) ────────
   // 1. Strip zero-width + bidi + tag unicode that invisibly inject prompts
@@ -698,7 +711,10 @@ export async function POST(req: Request) {
     .replace(/\n{4,}/g, '\n\n\n')
     .trim()
     .slice(0, 4000);
-  if (!lastUserText) return new Response('Bad request', { status: 400 });
+  if (!lastUserText) {
+    console.error('[chat] empty-after-sanitize', { rawLen: rawUserText.length, rawSample: rawUserText.slice(0, 80) });
+    return new Response('Bad request: user text empty after sanitize', { status: 400 });
+  }
 
   // ── Security layer 1: Per-IP/wallet ban check ────────────────────────
   // Banned identifiers get a canned refusal without any LLM call or
