@@ -21,3 +21,15 @@ coverage/
 .env*.local
 pnpm-lock.yaml
 .worktrees/
+
+# ──────────────────────────────────────────────────────────────
+# Security: block ad-hoc env backup, sync, or temp files
+# ──────────────────────────────────────────────────────────────
+.env.*.bak
+.env.local.bak
+.env.sync-*
+.env.backup
+*.pem
+*.key
+secrets/
+scratch/

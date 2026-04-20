@@ -49,9 +49,52 @@ function shouldBypassGate(pathname: string): boolean {
   return false;
 }
 
+// ── AI scraper / abusive UA block ────────────────────────────────────
+// Hard block BEFORE gate/rate-limit. robots.txt is politeness — this
+// enforces. Returns 403 to any request whose UA matches a known AI
+// training crawler or hostile scraper. Case-insensitive match.
+const BLOCKED_UA_PATTERNS = [
+  'GPTBot', 'ChatGPT-User', 'OAI-SearchBot',
+  'ClaudeBot', 'Claude-Web', 'anthropic-ai',
+  'Google-Extended', 'GoogleOther',
+  'CCBot', 'PerplexityBot', 'Perplexity-User',
+  'cohere-ai', 'Cohere-AI',
+  'FacebookBot', 'Meta-ExternalAgent', 'Meta-ExternalFetcher',
+  'Bytespider', 'ByteDance',
+  'Amazonbot', 'Applebot-Extended',
+  'YouBot', 'DuckAssistBot',
+  'diffbot', 'PetalBot', 'Omgilibot', 'Omgili',
+  'ImagesiftBot', 'Timpibot', 'AI2Bot',
+  'Scrapy', 'SemrushBot', 'AhrefsBot', 'MJ12bot',
+  'DataForSeoBot', 'magpie-crawler',
+];
+const BLOCKED_UA_RE = new RegExp(
+  BLOCKED_UA_PATTERNS.map((p) => p.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|'),
+  'i',
+);
+
+function isBlockedUserAgent(ua: string | null): boolean {
+  if (!ua) return true; // No UA = curl/script/scraper. Block.
+  if (ua.length < 10) return true; // Suspiciously short
+  return BLOCKED_UA_RE.test(ua);
+}
+
 export async function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl;
   const ip = getClientIp(req);
+  const ua = req.headers.get('user-agent');
+
+  // ── UA hard block (runs first; ignores admin bypass to avoid false
+  //    positives from any internal tooling that might share the IP) ──
+  if (isBlockedUserAgent(ua)) {
+    return new NextResponse('Forbidden', {
+      status: 403,
+      headers: {
+        'Cache-Control': 'no-store, no-cache, must-revalidate',
+        'X-Robots-Tag': 'noindex, nofollow, nosnippet, noarchive, noai, noimageai',
+      },
+    });
+  }
 
   // ── Site gate check (only when SITE_GATE_ENABLED=true) ───────────
   // Flip this env var to "false" or remove it entirely to open the site.

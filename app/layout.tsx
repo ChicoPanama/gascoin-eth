@@ -35,6 +35,13 @@ export const metadata: Metadata = {
   icons: {
     icon: '/favicon.svg',
   },
+  // Universal opt-out from AI training + archive indexing. Per-route
+  // metadata can still override (e.g. /presale sets noindex too). Also
+  // enforced server-side via X-Robots-Tag in next.config.js.
+  other: {
+    'robots': 'noai, noimageai, max-snippet:0, max-image-preview:none',
+    'googlebot': 'noai, noimageai, max-snippet:0, max-image-preview:none',
+  },
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {

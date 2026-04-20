@@ -1,4 +1,12 @@
-# SECURITY: Block crawlers from admin, API, internal, and unlisted paths
+# ═══════════════════════════════════════════════════════════════════════
+# GASCOIN — crawler & AI scraper policy
+#   · Default: crawlable public marketing surface only
+#   · All internal, admin, API, presale, auth, and user-specific paths: denied
+#   · All known AI training/model crawlers: denied protocol-wide
+#   · Site gate (proxy.ts) still enforces cookie check on any non-bypass path
+# ═══════════════════════════════════════════════════════════════════════
+
+# ─── Default policy ────────────────────────────────────────────────────
 User-agent: *
 Allow: /
 Disallow: /admin
@@ -7,3 +15,126 @@ Disallow: /api/
 Disallow: /.well-known/
 Disallow: /presale
 Disallow: /presale/
+Disallow: /submit
+Disallow: /submit/
+Disallow: /me
+Disallow: /me/
+Disallow: /wallet
+Disallow: /wallet/
+Disallow: /dashboard
+Disallow: /dashboard/
+Disallow: /referral
+Disallow: /invite
+Disallow: /invites
+Disallow: /*?*        # Query-string URLs (prevents cache/session leaks)
+
+# ─── AI training / model crawlers — full block ─────────────────────────
+# Rationale: GASCOIN content is proprietary and training models on it does
+# not benefit the protocol. Each of these crawlers has documented UA.
+
+User-agent: GPTBot
+Disallow: /
+
+User-agent: ChatGPT-User
+Disallow: /
+
+User-agent: OAI-SearchBot
+Disallow: /
+
+User-agent: ClaudeBot
+Disallow: /
+
+User-agent: Claude-Web
+Disallow: /
+
+User-agent: anthropic-ai
+Disallow: /
+
+User-agent: Google-Extended
+Disallow: /
+
+User-agent: GoogleOther
+Disallow: /
+
+User-agent: CCBot
+Disallow: /
+
+User-agent: PerplexityBot
+Disallow: /
+
+User-agent: Perplexity-User
+Disallow: /
+
+User-agent: cohere-ai
+Disallow: /
+
+User-agent: Cohere-AI
+Disallow: /
+
+User-agent: FacebookBot
+Disallow: /
+
+User-agent: Meta-ExternalAgent
+Disallow: /
+
+User-agent: Meta-ExternalFetcher
+Disallow: /
+
+User-agent: Bytespider
+Disallow: /
+
+User-agent: ByteDance
+Disallow: /
+
+User-agent: Amazonbot
+Disallow: /
+
+User-agent: Applebot-Extended
+Disallow: /
+
+User-agent: YouBot
+Disallow: /
+
+User-agent: DuckAssistBot
+Disallow: /
+
+User-agent: diffbot
+Disallow: /
+
+User-agent: PetalBot
+Disallow: /
+
+User-agent: Omgilibot
+Disallow: /
+
+User-agent: Omgili
+Disallow: /
+
+User-agent: ImagesiftBot
+Disallow: /
+
+User-agent: Timpibot
+Disallow: /
+
+User-agent: AI2Bot
+Disallow: /
+
+User-agent: Scrapy
+Disallow: /
+
+User-agent: SemrushBot
+Disallow: /
+
+User-agent: AhrefsBot
+Disallow: /
+
+User-agent: MJ12bot
+Disallow: /
+
+User-agent: DataForSeoBot
+Disallow: /
+
+User-agent: magpie-crawler
+Disallow: /
+
+Sitemap: https://gascoin.app/sitemap.xml
