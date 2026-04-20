@@ -9925,3 +9925,13 @@ button.docs-footer-link {
   .gc-creator-handle { font-size: 32px; }
   .gc-creator-stats { grid-template-columns: repeat(2, 1fr); }
 }
+.gc-creator-post-impact {
+  padding: 1px 7px;
+  background: rgba(var(--accent-rgb, 34, 197, 94), 0.18);
+  color: rgb(var(--accent-rgb, 34, 197, 94));
+  border-radius: 3px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}

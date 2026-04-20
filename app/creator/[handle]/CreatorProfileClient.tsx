@@ -143,6 +143,14 @@ export function CreatorProfileClient({ profile, posts, impact }: Props) {
                     <span className="gc-creator-post-points">
                       {fmtInt(p.adjustedPoints)} pts
                     </span>
+                    {p.impactScore != null && (
+                      <span
+                        className="gc-creator-post-impact"
+                        title={`Direct ${formatEth(p.directPayoutEth || 0)} · Referral ${formatEth(p.referralPayoutEth || 0)} · ${p.referredWallets || 0} signups`}
+                      >
+                        impact {Math.round(p.impactScore)}
+                      </span>
+                    )}
                   </div>
                 </li>
               ))}

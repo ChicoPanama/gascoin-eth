@@ -37,6 +37,10 @@ export interface CreatorPost {
   quoteTweets: number;
   adjustedPoints: number;
   qualityScore: number | null;
+  impactScore: number | null;
+  directPayoutEth: number | null;
+  referralPayoutEth: number | null;
+  referredWallets: number | null;
 }
 
 export interface CreatorImpact {
@@ -118,7 +122,7 @@ export async function getCreatorPosts(handle: string, limit = 20): Promise<Creat
 
   const { data: tweets } = await supabase
     .from('scored_tweets')
-    .select('tweet_id,tweet_url,posted_at,impressions,likes,retweets,replies,quote_tweets,adjusted_points,quality_score')
+    .select('tweet_id,tweet_url,posted_at,impressions,likes,retweets,replies,quote_tweets,adjusted_points,quality_score,impact_score,direct_payout_eth,referral_payout_eth,referred_wallets')
     .eq('wallet', link.wallet)
     .order('posted_at', { ascending: false })
     .limit(limit);
@@ -134,6 +138,10 @@ export async function getCreatorPosts(handle: string, limit = 20): Promise<Creat
     quoteTweets: Number(t.quote_tweets || 0),
     adjustedPoints: Number(t.adjusted_points || 0),
     qualityScore: t.quality_score ?? null,
+    impactScore: t.impact_score != null ? Number(t.impact_score) : null,
+    directPayoutEth: t.direct_payout_eth != null ? Number(t.direct_payout_eth) : null,
+    referralPayoutEth: t.referral_payout_eth != null ? Number(t.referral_payout_eth) : null,
+    referredWallets: t.referred_wallets != null ? Number(t.referred_wallets) : null,
   }));
 }
 
