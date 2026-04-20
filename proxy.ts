@@ -16,6 +16,7 @@ const GATE_BYPASS_PREFIXES = [
   '/welcome',
   '/welcome/',
   '/api/',
+  '/api/v1/',     // Gas Network Intelligence API — key-gated, no site-cookie needed
   '/_next/',
   '/icons/',
   '/favicon',
