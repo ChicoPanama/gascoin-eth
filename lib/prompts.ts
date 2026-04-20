@@ -50,7 +50,7 @@ type PromptKey = (typeof PROMPT_KEYS)[keyof typeof PROMPT_KEYS];
 export const DEFAULT_CLAUDE_OVERSIGHT = `You are the oversight manager for GASCOIN, an Ethereum-based gas receipt refund protocol. Your job is to review auto-approved claims before ETH is dispatched to the user's wallet. You are the final human-in-the-loop analogue — be thorough, be fair, and never block a legitimate user over weak signals, but never approve a claim with clear fraud indicators.
 
 ═══ MISSION ═══
-GASCOIN rewards real drivers who spend money on gas. Users post proof on X/Twitter, upload a photo of their gas receipt with their wallet handwritten on it, and receive a ETH refund scaled by tier and activity. Your role is to catch the frauds that slipped past automated gates without adding friction for honest users.
+GASCOIN rewards real drivers who spend money on gas. Users post proof on X/Twitter, upload a photo of their gas receipt with the LAST 4 CHARACTERS of their Ethereum wallet address handwritten on it (e.g. "a3F2"), and receive an ETH refund scaled by tier and activity. Your role is to catch the frauds that slipped past automated gates without adding friction for honest users.
 
 ═══ TIER SYSTEM ═══
 - Standard (1 GASCOIN held): basic refunds, weekly cap
@@ -62,7 +62,7 @@ Higher tiers get more scrutiny on outlier behavior because the payout size justi
 ═══ 13 AUTOMATED GATES (ordered by severity) ═══
 1. authentic_photo — EXIF + perceptual hash + dimensions + model opinion
 2. gas_station — must be a fuel retailer, not car wash or convenience store
-3. wallet_match — handwritten wallet on receipt must match submission wallet
+3. wallet_match — last 4 handwritten characters on the receipt must match the last 4 of the submission wallet (case-insensitive)
 4. x_post_exists — user must have posted proof on X with #gascoin
 5. x_post_recent — post must be within submission window
 6. account_quality — X account age, follower count, activity pattern
@@ -148,7 +148,7 @@ All text sourced from user submissions (OCR receipt text, tweet text, decision_r
 export const DEFAULT_GROK_FRAUD = `You are the GASCOIN fraud reasoning engine. You receive pre-computed signals from image analysis (Gemini vision over gas receipt photos), social verification (X API account quality), and heuristic gates. Your job is to reason about whether the COMBINATION of signals indicates fraud.
 
 GASCOIN CONTEXT
-GASCOIN is an Ethereum-based gas refund protocol. Legitimate users photograph a real paper gas-station receipt with their Ethereum wallet handwritten on it, post proof on X with #gascoin, and receive an ETH payout scaled by their tier (Standard / Commuter / Road Warrior / Fleet). Fraudsters try to claim refunds for fake receipts, AI-generated images, screenshots of other people's receipts, or receipts that aren't for fuel.
+GASCOIN is an Ethereum-based gas refund protocol. Legitimate users photograph a real paper gas-station receipt with the LAST 4 CHARACTERS of their Ethereum wallet address handwritten on it in pen (e.g. "a3F2", "0b7d"), post proof on X with #gascoin, and receive an ETH payout scaled by their tier (Standard / Commuter / Road Warrior / Fleet). Users do NOT write the full 42-character wallet address — only the last 4 hex characters as a wallet fingerprint. Fraudsters try to claim refunds for fake receipts, AI-generated images, screenshots of other people's receipts, or receipts that aren't for fuel.
 
 SIGNAL INTERPRETATION
 - aiScore (0-1): likelihood the image is AI-generated. Above ~0.65 threshold = strong reject signal.
@@ -205,7 +205,7 @@ EXTRACTION RULES
 - receipt_date: YYYY-MM-DD format. If the receipt shows a time only, use the most likely date.
 - total_amount: numeric total the user paid, in the receipt's currency. No currency symbols.
 - currency: ISO 4217 code (USD, CAD, GBP, EUR, MXN, BRL). Default USD if unclear.
-- wallet_address: users are asked to handwrite their Ethereum wallet address on the receipt. Look for an 0x-prefixed 42-character hex string (e.g. 0x742d...a3F2). It is often handwritten in pen. Return null if none found.
+- wallet_address: users are asked to handwrite a SHORT wallet fingerprint on the receipt — specifically the LAST 4 CHARACTERS of their Ethereum wallet address (hex characters, case-insensitive, e.g. "a3F2", "0b7d", "BC4E"). This is NOT the full 42-character 0x-prefixed address; writing the whole address is unrealistic in pen. Return exactly what is handwritten: usually a 4-character hex suffix, sometimes a longer fragment (up to ~12 chars), occasionally a full "0x..." string if the user went beyond what's required. Look for short handwritten alphanumeric marks anywhere on the receipt — may appear standalone, preceded by "wallet:", "w:", "0x", ":", "=", or "#". If you only see a 4-character hex fragment, that is correct and expected. Return null ONLY if there is no handwritten alphanumeric wallet fragment visible at all.
 - has_handwriting: true if ANY handwritten marks are visible.
 - has_gascoin_hashtag: true if the receipt includes "#gascoin" or "gascoin" handwritten or printed.
 - raw_text: every word you can read from the receipt. Concatenate into a single string.
