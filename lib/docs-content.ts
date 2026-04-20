@@ -824,15 +824,17 @@ Inputs(wallet,tweet,receipt)
         categorySlug: "technology",
         category: "Technology",
         description: "",
-        content: `<p>The engagement and quality scoring system uses xAI intelligence to evaluate every participant across four parallel AI modules:</p>
+        content: `<p>The engagement and quality scoring system uses xAI intelligence to evaluate every participant across five parallel AI modules:</p>
 <h3>1. Tweet Quality Scorer</h3>
 <p>Analyzes tweet content, engagement metrics (impressions, likes, retweets, quotes, replies), and audience quality. High-quality tweets that drive genuine engagement earn more points. Low-effort or spam-like tweets are scored accordingly.</p>
 <h3>2. Referral Ring Detector</h3>
-<p>Graph analysis that maps referral relationships and identifies circular referral patterns, mutual-referral schemes, and coordinated sign-up networks. Detected rings are flagged and excluded from referral rewards.</p>
-<h3>3. Wallet Trust Calculator</h3>
-<p>Reputation scoring based on submission history, approval rate, tier consistency, and on-chain behavior. Wallets with a strong track record earn higher trust scores, which influence queue priority and review speed.</p>
-<h3>4. Pre-Award Verification Gate</h3>
-<p>Before any points are awarded, a multi-layer verification gate runs: trust multiplier check, source-specific validation, velocity analysis, and AI verification for flagged or high-value awards. This prevents point farming and manipulation.</p>`,
+<p>Graph analysis that maps referral relationships and identifies circular referral patterns, mutual-referral schemes, and coordinated sign-up networks per-pair. Detected rings are flagged and excluded from referral rewards.</p>
+<h3>3. Ring Density Scorer</h3>
+<p>A per-creator companion to the Ring Detector. Walks the 2-hop referral neighborhood around each account and produces a 0–1 density score based on cyclic-edge ratio and cross-links among referees. Feeds directly into the Composite Influence Score so that tight farming clusters score near zero on the referral axis and on self-cluster payouts. A clean one-way audience produces near-zero density and keeps full credit.</p>
+<h3>4. Wallet Trust Calculator</h3>
+<p>Reputation scoring based on submission history, approval rate, referral quality, account age, and anomaly flags. Wallets with a strong track record earn higher trust scores, which influence queue priority, review speed, and the global Trust Dampener that sits above the Composite Influence Score.</p>
+<h3>5. Pre-Award Verification Gate</h3>
+<p>Before any points are awarded, a multi-layer verification gate runs: trust multiplier check, source-specific validation, velocity analysis, and AI verification for flagged or high-value awards. When the AI Gateway is unavailable, high-value or flagged awards are held for admin review rather than auto-approved — fail-closed, not fail-open. This prevents point farming and manipulation.</p>`,
         order: 31,
       },
       {
@@ -1485,20 +1487,68 @@ Inputs(wallet,tweet,receipt)
         categorySlug: "platform",
         category: "Platform Pages",
         description: "",
-        content: `<p>The leaderboard ranks all wallets that have earned ETH through GASCOIN by a composite score. It is public and visible to anyone — no wallet connection required to view it.</p>
-<h3>The scoring formula</h3>
-<p>The composite score is built from engagement points, referral points, holdings points, and submission streaks. The weights assigned to each factor are dynamic and may be adjusted over time to maintain healthy ecosystem growth.</p>
-<p>Each wallet's leaderboard score is calculated from 4 factors:</p>
+        content: `<p>The leaderboard ranks GASCOIN community members by their <strong>Leaderboard Score</strong> — a holdings-weighted composite that rewards the people who keep the protocol online. It is public and visible to anyone — no wallet connection required to view it.</p>
+<h3>Two scores, two purposes</h3>
+<p>GASCOIN surfaces two different composite scores, and they answer different questions. Both matter.</p>
+<ul>
+<li><strong>Leaderboard Score</strong> — this page. Community ranking that rewards long-term holders, consistent posters, and active referrers. Holdings count because holders are what keep the treasury solvent and the protocol online through every cycle.</li>
+<li><strong>Composite Influence Score</strong> — a separate per-account 0–100 number used on creator profiles and by the brand-facing Gas Network API. Deliberately excludes holdings so it can measure real external wallet movement, not token wealth. See the Composite Influence Score doc for details.</li>
+</ul>
+<p>A whale can top the Leaderboard without moving any outside wallets; a mid-size creator who converts audiences from outside their cluster can top the Influence Score without holding much. Both are legitimate contributions.</p>
+<h3>The Leaderboard scoring formula</h3>
+<p>The Leaderboard Score is built from four factors:</p>
+<ul>
+<li><strong>Engagement points</strong> — tweet performance under the content economy.</li>
+<li><strong>Referral points</strong> — welcome bonuses and ongoing passive share from referred users.</li>
+<li><strong>Holdings points</strong> — daily credit based on your tier (Standard, Commuter, Road Warrior, Fleet). Holders are the base of the protocol and are rewarded for it.</li>
+<li><strong>Submission streak</strong> — consecutive 30-day windows with at least one paid payout, multiplier up to 5×.</li>
+</ul>
+<p>Exact weights are governance-tunable and may be adjusted to maintain healthy ecosystem growth.</p>
 <h3>The leaderboard table</h3>
-<p>The main table shows all wallets ordered by composite score. Each row shows: rank, wallet address (truncated), number of referrals, engagement score, GASCOIN holdings, points earned, composite score, and a View link.</p>
+<p>The main table shows all wallets ordered by Leaderboard Score. Each row shows: rank, wallet address (truncated), number of referrals, engagement score, GASCOIN holdings, points earned, Leaderboard Score, and a View link.</p>
 <p>Clicking View on any row opens the full submission history for that wallet in the Wallet Tracker.</p>
 <h3>Top 3 Podium</h3>
 <p>When 3 or more wallets have submissions, the top 3 are displayed in a visual podium above the table. The rank 1 wallet appears in the center and is slightly taller. If your connected wallet is in the top 3, a YOU badge appears on your podium card.</p>
 <h3>Live updates</h3>
-<p>The leaderboard updates in real time via Supabase Realtime. When any submission status changes in the database, the leaderboard data refreshes automatically. The LIVE indicator in the page header shows the time since last update.</p><h3>How scores are calculated</h3>
-<p>Each wallet's leaderboard position is determined by a proprietary composite score based on three factors: referral activity, platform engagement, and GASCOIN holdings. The weights are dynamic and may be adjusted. ETH earned from receipt refunds is not a factor — the leaderboard rewards ecosystem contribution, not receipt size.</p>
-<p>→ See also: Points System documentation for details on how points are earned</p>`,
+<p>The leaderboard updates in real time via Supabase Realtime. When any submission status changes in the database, the leaderboard data refreshes automatically. The LIVE indicator in the page header shows the time since last update.</p>
+<h3>What the Leaderboard does NOT factor</h3>
+<p>ETH earned from receipt refunds is not a factor. A user who received one large refund does not outrank a user who consistently refers new members, holds long-term, and posts engaging tweets. The Leaderboard rewards ecosystem contribution, not receipt size.</p>
+<p>→ See also: Composite Influence Score · Points System · Referral Engine</p>`,
         order: 26,
+      },
+      {
+        slug: "composite-influence-score",
+        title: "Composite Influence Score",
+        categorySlug: "platform",
+        category: "Platform Pages",
+        description: "The per-account 0–100 influence rating that powers creator profiles and the brand-facing Gas Network.",
+        content: `<p>The <strong>Composite Influence Score</strong> is a per-account 0–100 number surfaced on every creator profile (as the <em>Influence</em> stat) and used by the Gas Network to answer the question brands and partner protocols actually want answered: <em>which creators move real wallets, not just impressions?</em></p>
+<p>It is refreshed nightly by the <code>recompute-composite</code> worker and stored in the <code>composite_scores</code> table. A public read surface is available for leaderboard-style consumers that want to rank by Influence rather than by the community Leaderboard Score.</p>
+<h3>How it differs from the Leaderboard Score</h3>
+<p>The Leaderboard Score rewards ecosystem contribution — holders, referrers, posters — and holdings are a first-class factor. The Composite Influence Score asks a different question: if you are a brand paying a creator, how much of their reach actually translates into outside-cluster wallet activity? To answer cleanly, the Composite deliberately excludes holdings. A creator's own token balance does not make their audience move.</p>
+<h3>The four axes</h3>
+<p>The Composite blends four behavioural axes — each independently observable, each with a different attacker cost curve — and multiplies the result by two global dampeners. No single axis can dominate; no single signal is assumed unfakeable.</p>
+<ul>
+<li><strong>Payout axis.</strong> ETH that flowed to claimants citing this creator's posts. Payments to claimants inside the creator's own referral cluster count at a steep discount, so a creator cannot fund their own claims into influence.</li>
+<li><strong>Engagement axis.</strong> Platform points from scored tweets, log-scaled so a single viral post cannot permanently dominate a creator's score.</li>
+<li><strong>Consistency axis.</strong> Cadence regularity over a rolling window. Rewards sustained contribution; catches coordinated groups that rotate posters.</li>
+<li><strong>Referral axis.</strong> Verified referrals, discounted by how dense and interconnected the creator's referral sub-graph is. A clean one-way audience scores full credit; a tight mutual-referral ring scores near zero.</li>
+</ul>
+<h3>The two dampeners</h3>
+<ul>
+<li><strong>Trust Dampener.</strong> Attenuates the whole Composite for low-reputation accounts, with a floor so legitimately new creators remain visible. Feeds from the wallet trust scorer (submission history, referral quality, account age, anomaly flags).</li>
+<li><strong>Recency Multiplier.</strong> A rolling half-life so influence earned this week counts more than influence earned six months ago. One-time viral moments decay; sustained activity holds value.</li>
+</ul>
+<h3>Where you see it</h3>
+<ul>
+<li>On <code>/creator/[handle]</code> — displayed as the <em>Influence</em> stat card next to Trust score, Total earned, and Total impressions.</li>
+<li>In the <code>/api/v1/creators</code> response — every row now returns a <code>composite_score</code> field, and list ordering prefers Composite-ranked wallets with an earnings fallback for wallets that have not yet been scored.</li>
+<li>(Coming) in the Creator Marketplace brief-matching layer, so brands can filter creators by verified external reach.</li>
+</ul>
+<h3>Why the numbers are hidden</h3>
+<p>Exact weights, floors, half-lives, and ring-density thresholds are governance-tunable parameters and are deliberately withheld. Publishing them would convert the score from a signal into a target. What you can rely on is the shape: four axes, two dampeners, holdings excluded, adversary-hardened against the common gaming vectors.</p>
+<p>→ See also: Leaderboard Score · Reach Certificates · Conversion Attribution · Creator Marketplace</p>`,
+        order: 26.5,
       },
       {
         slug: "wallet-tracker-wallet",
@@ -2270,18 +2320,26 @@ Inputs(wallet,tweet,receipt)
         title: "Points — Leaderboard Formula",
         categorySlug: "help",
         category: "Help",
-        description: "How the leaderboard composite score is calculated.",
-        content: `<h3>How Your Rank Is Determined</h3>
-<p>Your leaderboard position is calculated from a proprietary composite score that weighs three factors:</p>
+        description: "How the Leaderboard Score is calculated, and how it differs from the Composite Influence Score.",
+        content: `<h3>Two Scores — Pick the One That Matches the Question</h3>
+<p>GASCOIN surfaces two separate composite scores. They are not redundant; they answer different questions.</p>
 <ul>
-<li><strong>Referral activity</strong> — bringing new verified users into the ecosystem is heavily rewarded</li>
-<li><strong>Platform engagement</strong> — tweet performance, submission consistency, and streak maintenance all contribute</li>
-<li><strong>GASCOIN holdings</strong> — long-term holders who have skin in the game are recognized</li>
+<li><strong>Leaderboard Score</strong> — the community ranking. Shown on the public Leaderboard. Rewards holders, referrers, and consistent posters. Holdings are a first-class factor because holders are what keep the protocol online through every cycle.</li>
+<li><strong>Composite Influence Score</strong> — the per-account 0–100 Influence number on creator profiles and in the brand-facing Gas Network API. Deliberately excludes holdings so it measures external wallet movement, not token wealth. See the Composite Influence Score doc.</li>
 </ul>
-<p>The exact weights are dynamic and may be adjusted to maintain healthy platform growth. All three factors matter — focusing on only one will not maximize your rank.</p>
+
+<h3>How Your Leaderboard Rank Is Determined</h3>
+<p>Your leaderboard position is calculated from the Leaderboard Score, which weighs four factors:</p>
+<ul>
+<li><strong>Referral activity</strong> — bringing new verified users into the ecosystem, both the one-time welcome bonus and the ongoing passive share from referred users.</li>
+<li><strong>Platform engagement</strong> — tweet performance, submission consistency, and streak maintenance.</li>
+<li><strong>GASCOIN holdings</strong> — long-term holders are recognized directly. Standard, Commuter, Road Warrior, and Fleet tiers each earn a daily holdings credit because holder conviction is what keeps the treasury solvent and the refunds flowing.</li>
+<li><strong>Submission streak</strong> — consecutive 30-day windows with at least one paid payout. Multiplier up to 5×.</li>
+</ul>
+<p>Exact weights are governance-tunable and may be adjusted to maintain healthy platform growth. All four factors matter — focusing on only one will not maximize your rank.</p>
 
 <h3>What the Leaderboard Does NOT Factor</h3>
-<p>ETH earned from receipt refunds is <strong>not</strong> a factor in the leaderboard. A user who received one large refund does not outrank a user who consistently refers new members and posts engaging tweets. The leaderboard rewards contribution to the ecosystem, not receipt size.</p>
+<p>ETH earned from receipt refunds is <strong>not</strong> a factor in the Leaderboard Score. A user who received one large refund does not outrank a user who consistently refers new members, holds long-term, and posts engaging tweets. The Leaderboard rewards contribution to the ecosystem, not receipt size.</p>
 
 <h3>Integrity</h3>
 <p>An automated AI audit runs daily across the points system. It monitors for anomalies, duplicate entries, and suspicious patterns. Any flagged issues are reviewed and corrected to maintain fair rankings.</p>`,

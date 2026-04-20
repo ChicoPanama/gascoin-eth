@@ -199,6 +199,76 @@ export async function detectReferralRing(params: {
   return { isSuspicious: false, ringType: 'none', confidence: 0, wallets: [], reason: '' };
 }
 
+/**
+ * Ring density 0–1 for a wallet's extended referral subgraph.
+ *
+ * Walks the 2-hop referral neighborhood around `wallet` (every wallet it
+ * referred + every wallet referred through those), then measures the
+ * ratio of bidirectional/cyclic edges to total edges within that sub-graph.
+ *
+ * A creator with 20 one-way unique referrals (no one refers back, no
+ * cross-links among referees) returns ~0 — legit audience.
+ * A creator + 10 burners all mutually referring each other returns ~1 —
+ * tight farming ring.
+ *
+ * Used by the Composite Influence Score to discount referral + payout
+ * credit from detected rings.
+ */
+export function calculateRingDensity(
+  wallet: string,
+  allReferrals: Array<{ referrer: string; referred: string }>,
+): number {
+  if (!wallet) return 0;
+  const w = wallet.toLowerCase();
+
+  // 1-hop: wallets the creator directly referred
+  const directRefs = new Set(
+    allReferrals
+      .filter((r) => r.referrer.toLowerCase() === w)
+      .map((r) => r.referred.toLowerCase()),
+  );
+
+  // 2-hop: wallets referred by any direct ref
+  const extendedRefs = new Set<string>(directRefs);
+  for (const r of allReferrals) {
+    if (directRefs.has(r.referrer.toLowerCase())) {
+      extendedRefs.add(r.referred.toLowerCase());
+    }
+  }
+
+  // Cluster = creator + extended neighborhood
+  const cluster = new Set<string>([w, ...extendedRefs]);
+  if (cluster.size < 3) return 0; // too small to be a "ring"
+
+  // Count edges where both endpoints are in the cluster
+  let inClusterEdges = 0;
+  let cyclicEdges = 0;
+  for (const edge of allReferrals) {
+    const a = edge.referrer.toLowerCase();
+    const b = edge.referred.toLowerCase();
+    if (!cluster.has(a) || !cluster.has(b)) continue;
+    inClusterEdges++;
+    // Back-edge? Is there an edge from b → a (or any path bringing them back)?
+    const hasBackEdge = allReferrals.some(
+      (e) => e.referrer.toLowerCase() === b && e.referred.toLowerCase() === a,
+    );
+    if (hasBackEdge) cyclicEdges++;
+  }
+
+  if (inClusterEdges === 0) return 0;
+
+  // Density = weighted mix: cyclic edge ratio (strong signal) + edge density
+  // relative to a star topology (n−1 edges for n nodes). Values > 1.0 mean
+  // more edges than a pure star → cross-links among referees = suspicious.
+  const cyclicRatio = cyclicEdges / inClusterEdges;
+  const expectedStarEdges = Math.max(1, cluster.size - 1);
+  const edgeDensity = Math.max(0, (inClusterEdges - expectedStarEdges) / expectedStarEdges);
+
+  // Blend: cyclic ratio dominates, edge density is a weaker signal.
+  const raw = cyclicRatio * 0.7 + Math.min(1, edgeDensity) * 0.3;
+  return Math.max(0, Math.min(1, raw));
+}
+
 // BFS: from `start`, can we reach `target` following referral edges? Max depth.
 function detectCycleBFS(
   start: string,

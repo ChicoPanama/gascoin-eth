@@ -1,30 +1,94 @@
 {
   "crons": [
-    { "path": "/api/workers/process-claims", "schedule": "*/5 * * * *" },
-    { "path": "/api/workers/verify-referrals", "schedule": "*/15 * * * *" },
-    { "path": "/api/workers/score-engagement", "schedule": "0 * * * *" },
-    { "path": "/api/workers/score-content-impact", "schedule": "30 * * * *" },
-    { "path": "/api/workers/award-points", "schedule": "0 6 * * *" },
-    { "path": "/api/workers/sync-creator-profiles", "schedule": "15 7 * * *" },
-    { "path": "/api/workers/mint-reach-certs", "schedule": "45 7 * * *" },
-    { "path": "/api/workers/settle-marketplace", "schedule": "0 */6 * * *" },
-    { "path": "/api/workers/flush-receipts", "schedule": "0 3 * * 0" },
-    { "path": "/api/workers/sync-x-handles", "schedule": "0 3 * * *" },
-    { "path": "/api/workers/pre-payout-verify", "schedule": "55 23 * * *" },
-    { "path": "/api/workers/aggregate-intelligence", "schedule": "0 7 * * *" },
-    { "path": "/api/workers/sync-gascoin-followers", "schedule": "*/30 * * * *" }
+    {
+      "path": "/api/workers/process-claims",
+      "schedule": "*/5 * * * *"
+    },
+    {
+      "path": "/api/workers/verify-referrals",
+      "schedule": "*/15 * * * *"
+    },
+    {
+      "path": "/api/workers/score-engagement",
+      "schedule": "0 * * * *"
+    },
+    {
+      "path": "/api/workers/score-content-impact",
+      "schedule": "30 * * * *"
+    },
+    {
+      "path": "/api/workers/award-points",
+      "schedule": "0 6 * * *"
+    },
+    {
+      "path": "/api/workers/sync-creator-profiles",
+      "schedule": "15 7 * * *"
+    },
+    {
+      "path": "/api/workers/mint-reach-certs",
+      "schedule": "45 7 * * *"
+    },
+    {
+      "path": "/api/workers/settle-marketplace",
+      "schedule": "0 */6 * * *"
+    },
+    {
+      "path": "/api/workers/flush-receipts",
+      "schedule": "0 3 * * 0"
+    },
+    {
+      "path": "/api/workers/sync-x-handles",
+      "schedule": "0 3 * * *"
+    },
+    {
+      "path": "/api/workers/pre-payout-verify",
+      "schedule": "55 23 * * *"
+    },
+    {
+      "path": "/api/workers/aggregate-intelligence",
+      "schedule": "0 7 * * *"
+    },
+    {
+      "path": "/api/workers/sync-gascoin-followers",
+      "schedule": "*/30 * * * *"
+    },
+    {
+      "path": "/api/workers/recompute-composite",
+      "schedule": "0 8 * * *"
+    }
   ],
   "headers": [
     {
       "source": "/(.*)",
       "headers": [
-        { "key": "Strict-Transport-Security", "value": "max-age=63072000; includeSubDomains; preload" },
-        { "key": "X-Frame-Options", "value": "DENY" },
-        { "key": "X-Content-Type-Options", "value": "nosniff" },
-        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
-        { "key": "Permissions-Policy", "value": "camera=(), microphone=(), geolocation=(), interest-cohort=()" },
-        { "key": "Cross-Origin-Opener-Policy", "value": "same-origin-allow-popups" },
-        { "key": "Content-Security-Policy", "value": "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.privy.io https://*.privy.systems https://*.supabase.co https://va.vercel-scripts.com https://vercel.live https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https: https://*.supabase.co https://coin-images.coingecko.com https://pbs.twimg.com https://abs.twimg.com https://explorer-api.walletconnect.com https://*.walletconnect.com https://*.walletconnect.org; connect-src 'self' https://*.privy.io https://*.privy.systems wss://*.privy.io https://*.supabase.co wss://*.supabase.co https://*.upstash.io https://api.x.com https://api.twitter.com https://api.coingecko.com https://eth-mainnet.g.alchemy.com https://mainnet.infura.io https://api.etherscan.io https://*.openrouter.ai https://openrouter.ai https://generativelanguage.googleapis.com https://api.mem0.ai https://vitals.vercel-insights.com https://va.vercel-scripts.com https://*.walletconnect.com wss://*.walletconnect.com https://*.walletconnect.org wss://*.walletconnect.org https://explorer-api.walletconnect.com https://relay.walletconnect.com https://relay.walletconnect.org https://rpc.walletconnect.com https://api.web3modal.com https://*.coinbase.com https://*.coinbasewallet.com https://*.base.org; frame-src 'self' https://*.privy.io https://challenges.cloudflare.com https://*.walletconnect.com https://*.walletconnect.org https://verify.walletconnect.com https://verify.walletconnect.org https://*.coinbase.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'; upgrade-insecure-requests" }
+        {
+          "key": "Strict-Transport-Security",
+          "value": "max-age=63072000; includeSubDomains; preload"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        },
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "strict-origin-when-cross-origin"
+        },
+        {
+          "key": "Permissions-Policy",
+          "value": "camera=(), microphone=(), geolocation=(), interest-cohort=()"
+        },
+        {
+          "key": "Cross-Origin-Opener-Policy",
+          "value": "same-origin-allow-popups"
+        },
+        {
+          "key": "Content-Security-Policy",
+          "value": "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.privy.io https://*.privy.systems https://*.supabase.co https://va.vercel-scripts.com https://vercel.live https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https: https://*.supabase.co https://coin-images.coingecko.com https://pbs.twimg.com https://abs.twimg.com https://explorer-api.walletconnect.com https://*.walletconnect.com https://*.walletconnect.org; connect-src 'self' https://*.privy.io https://*.privy.systems wss://*.privy.io https://*.supabase.co wss://*.supabase.co https://*.upstash.io https://api.x.com https://api.twitter.com https://api.coingecko.com https://eth-mainnet.g.alchemy.com https://mainnet.infura.io https://api.etherscan.io https://*.openrouter.ai https://openrouter.ai https://generativelanguage.googleapis.com https://api.mem0.ai https://vitals.vercel-insights.com https://va.vercel-scripts.com https://*.walletconnect.com wss://*.walletconnect.com https://*.walletconnect.org wss://*.walletconnect.org https://explorer-api.walletconnect.com https://relay.walletconnect.com https://relay.walletconnect.org https://rpc.walletconnect.com https://api.web3modal.com https://*.coinbase.com https://*.coinbasewallet.com https://*.base.org; frame-src 'self' https://*.privy.io https://challenges.cloudflare.com https://*.walletconnect.com https://*.walletconnect.org https://verify.walletconnect.com https://verify.walletconnect.org https://*.coinbase.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'; upgrade-insecure-requests"
+        }
       ]
     }
   ]
