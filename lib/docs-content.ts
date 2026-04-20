@@ -1876,6 +1876,218 @@ Inputs(wallet,tweet,receipt)
     ],
   },
   {
+    slug: "learn",
+    label: "Learn",
+    sections: [
+      {
+        slug: "learn-thesis",
+        title: "The Thesis — Community, Attention, Signal",
+        categorySlug: "learn",
+        category: "Learn",
+        description: "Why GasCoin exists and what it rebuilds for crypto retail.",
+        content: `<p>The founding promise of crypto was that ordinary people would share in the upside of a new monetary system. A decade and a half later, the industry is dominated by sophisticated insiders and launches engineered to extract value from the newest participant in the room. Meanwhile, the average household spends more than $2,500 a year on fuel — an unavoidable cost crypto has no answer for.</p>
+<p>Retail is not absent because retail is stupid. Retail is absent because crypto stopped being useful to anyone who was not already inside it. The path back is not another trading product. It is a platform that materially helps people with an unavoidable physical-world cost, and uses on-chain rails to deliver that help transparently.</p>
+<h3>Three reinforcing moats</h3>
+<ul>
+<li><strong>Community moat — Retail Rescue.</strong> We meet drivers at the moment they pay for fuel. The subsidy is the hook. The community is the moat.</li>
+<li><strong>Attention moat — X as Subsidy Rail.</strong> Every verified claim is a public X post. X pays the creator for impressions; GasCoin pays the same creator for the on-chain behaviour behind the post. The same tweet is monetised twice.</li>
+<li><strong>Technological moat — The Gas Net.</strong> A live AI-assembled influence graph fed by X signal, receipts, wallet intelligence, and referral topology. Built on Gemini Vision + xAI Grok + Anthropic Claude.</li>
+</ul>
+<p>A subsidy with no attention layer is just a giveaway. An attention economy with no measurement layer is just noise. An AI measurement graph with no user base is just a demo. GasCoin runs all three.</p>
+<p>→ Next: <a href="/docs/learn-the-loop">The GasCoin Loop</a></p>`,
+        order: 80,
+      },
+      {
+        slug: "learn-the-loop",
+        title: "The GasCoin Loop",
+        categorySlug: "learn",
+        category: "Learn",
+        description: "How subsidy, content, attention, and signal compound in every pass through the protocol.",
+        content: `<p>Every pass through the loop generates subsidy, content, data, and signal at the same time.</p>
+<ol>
+<li>A driver buys gasoline at a fuel retailer.</li>
+<li>They handwrite the <strong>last four characters</strong> of their Ethereum wallet address (and <code>#gascoin</code>) on the paper thermal receipt.</li>
+<li>They photograph the receipt for upload to gascoin.app — privately, never on X.</li>
+<li>They post original GasCoin content on X with the <code>#gascoin</code> hashtag and an <code>@GasCoinApp</code> mention. The post is content, not a photo of the receipt.</li>
+<li>They upload the receipt photo at gascoin.app/submit, linked to the same X account.</li>
+<li>The submission enters the seventeen-gate verification pipeline.</li>
+<li>Gemini Vision OCRs the receipt. xAI Grok reasons over authenticity, fraud risk, and tweet quality. Anthropic Claude oversees borderline cases.</li>
+<li>If every gate passes, an ETH refund is scheduled and $GASCOIN engagement points are awarded according to the user's tier and the tweet's Content Impact.</li>
+<li>The tweet generates impressions on X. X monetises those impressions to the creator. The same impressions feed the Gas Net influence score.</li>
+<li>The score compounds. Higher-scoring users unlock better tiers, higher caps, faster cooldowns, and greater visibility.</li>
+</ol>
+<p>Every step is instrumented, audited, and idempotent. Every step is a unit of both subsidy and signal.</p>
+<p>→ Next: <a href="/docs/learn-the-gas-net">The Gas Net</a></p>`,
+        order: 81,
+      },
+      {
+        slug: "learn-the-gas-net",
+        title: "The Gas Net — AI-Assembled Signal Layer",
+        categorySlug: "learn",
+        category: "Learn",
+        description: "A live, permissionless, AI-refreshed map of who in crypto actually moves markets, narratives, and wallets.",
+        content: `<p>The Gas Net is the long game. It is what separates GasCoin from a subsidy program: a live, permissionless, AI-refreshed map of who in crypto actually moves markets, narratives, and wallets. Every claim, every tweet, every wallet interaction, every payout flows into it.</p>
+<p>What is missing from the rest of the industry is a unified view: who posts, who engages with whom, whose posts produce measurable downstream activity, and which wallets are linked to which voices. Nobody has built that graph, because nobody has had the combination of (a) ground-truth receipt-level user data, (b) X API access, and (c) frontier AI to package it into a coherent metric.</p>
+<p class="doc-callout"><strong>The Gas Net is not a reporting dashboard. It is a programmable trust surface.</strong> A brand paying a creator can query the Gas Net to confirm that the engagement on a sponsored post came from wallets with verified on-chain activity, not bot networks.</p>
+<h3>Five AI scoring modules</h3>
+<ul>
+<li><strong>Tweet Quality Scorer</strong> — rates originality, substance, and brand safety of each submitted tweet.</li>
+<li><strong>Ring Detector</strong> — flags dense sub-graphs of accounts that onboarded each other in coordinated patterns.</li>
+<li><strong>Ring Density</strong> — quantifies how tight a creator's referral sub-graph is; feeds discounts on referral and self-cluster payout credit.</li>
+<li><strong>Wallet Trust Scorer</strong> — blends submission history, referral quality, account age, and anomaly signals into a single wallet trust number.</li>
+<li><strong>Daily Audit Narrator</strong> — generates a plain-English summary of every non-trivial claim decision for governance review.</li>
+</ul>
+<p>All five are routed through the Vercel AI Gateway with uniform observability, vendor failover, and exact-match caching.</p>
+<p>→ Next: <a href="/docs/composite-influence-score">Composite Influence Score</a> · <a href="/docs/learn-reach-certificates">Reach Certificates</a></p>`,
+        order: 82,
+      },
+      {
+        slug: "learn-reach-certificates",
+        title: "Reach Certificates",
+        categorySlug: "learn",
+        category: "Learn",
+        description: "Soulbound ERC-721 tokens minted when a creator crosses a verified milestone.",
+        content: `<p>When a creator crosses a verified milestone — impressions, ETH earned, paid claims, successful referrals — the protocol mints a soulbound ERC-721 certificate directly to their wallet.</p>
+<p><strong>Non-transferable by construction:</strong> you cannot buy a GasCoin reputation, you can only earn one. Metadata is on-chain; no IPFS dependency.</p>
+<h3>Milestone slugs</h3>
+<ul>
+<li><code>pump</code> — first reach threshold</li>
+<li><code>station</code> — sustained reach</li>
+<li><code>commuter</code> — cumulative ETH earned by referred wallets</li>
+<li><code>road warrior</code> — high-conversion creators</li>
+<li><code>recruiter</code> — referral-driven impact</li>
+</ul>
+<p>Milestones cover both reach and conversion, so a certificate is evidence of real downstream effect, not just follower count. Holders cannot transfer or sell certificates; the reputation follows the wallet forever.</p>
+<p>→ Next: <a href="/docs/learn-conversion-attribution">Conversion Attribution</a></p>`,
+        order: 83,
+      },
+      {
+        slug: "learn-conversion-attribution",
+        title: "Conversion Attribution",
+        categorySlug: "learn",
+        category: "Learn",
+        description: "How the Gas Net measures which creators move real wallets outside their own cluster.",
+        content: `<p>Every paid claim carries a verifiable link back to the creator whose post the claimant cited. Claimant wallets are hashed into a cluster-identity so the Gas Net can tell, for any creator, what fraction of downstream claims and ETH came from wallets that are <em>not</em> already inside the creator's own referral sub-graph.</p>
+<p class="doc-callout"><strong>This is the single cleanest number for brand spend: reach that moved wallets outside your room.</strong></p>
+<p>Cross-cluster conversion is the ground truth for influence. Inside-cluster conversion is still tracked, but it counts at a steep discount in the Composite Influence Score because it does not grow the network — it recycles it.</p>
+<p>The attribution ledger is append-only. Every stage of the funnel (impression → profile click → wallet connect → submission → payout) is recorded with a reference to the source tweet, so post-hoc analysis can reconstruct exactly how a campaign performed.</p>
+<p>→ Next: <a href="/docs/learn-creator-marketplace">Creator Marketplace</a></p>`,
+        order: 84,
+      },
+      {
+        slug: "learn-creator-marketplace",
+        title: "Creator Marketplace",
+        categorySlug: "learn",
+        category: "Learn",
+        description: "Performance-gated USDC escrow between brands and creators, settled on-chain against Gas Net attestations.",
+        content: `<p>Brands post briefs with USDC escrowed on-chain. Creators apply; the brand accepts one. On campaign settlement, the protocol signs an EIP-712 attestation certifying that the winning post met the brief's performance threshold, and the creator pulls the escrowed USDC.</p>
+<h3>Economics</h3>
+<ul>
+<li>Brands pay 3% at brief creation.</li>
+<li>Creators pay 3% at release.</li>
+<li>Both halves split 50/50 between treasury and operations.</li>
+</ul>
+<p>On a 500 USDC brief, the brand pays 515, the creator nets 485, and the protocol retains 30.</p>
+<h3>Security</h3>
+<ul>
+<li>The signing key is segregated from the treasury key — a narrower leak surface.</li>
+<li>Attestations carry a short replay window.</li>
+<li>Treasury and operations addresses are set at contract deploy and are owner-rotatable; owner authority is held by the GasCoin foundation multisig at launch, with hand-off to governance on the roadmap.</li>
+</ul>
+<p>Contracts are deployed and admin-tooled today; the public brand/creator UI ships behind a feature flag after the first cohort onboards.</p>
+<p>→ Next: <a href="/docs/learn-tokenomics">Tokenomics</a></p>`,
+        order: 85,
+      },
+      {
+        slug: "learn-tokenomics",
+        title: "Tokenomics",
+        categorySlug: "learn",
+        category: "Learn",
+        description: "$GASCOIN supply, allocation, and the treasury mandate.",
+        content: `<p><strong>$GASCOIN is an ERC-20 token on Ethereum mainnet</strong> with a fixed supply of 1,000,000,000 (one billion) tokens, transparent allocation, and an explicit treasury mandate: every dollar of treasury exists to pay refunds, fund the Gas Net, and deepen liquidity.</p>
+<table class="doc-table">
+<thead><tr><th>Allocation</th><th>Share</th><th>Purpose</th></tr></thead>
+<tbody>
+<tr><td>Presale / DEX Liquidity</td><td>30%</td><td>Genesis price discovery and bootstrap of mainnet liquidity.</td></tr>
+<tr><td>Community Treasury</td><td>35%</td><td>ETH refunds, engagement rewards, grants, and emergency reserves.</td></tr>
+<tr><td>Team &amp; Development</td><td>15%</td><td>Founders and core contributors, subject to vesting.</td></tr>
+<tr><td>Marketing</td><td>5%</td><td>Creator campaigns, partnerships, and distribution spend.</td></tr>
+<tr><td>Liquidity Mining</td><td>15%</td><td>Programmatic liquidity incentives on approved venues.</td></tr>
+</tbody>
+</table>
+<p>Team and Development tokens are subject to a vesting schedule with a cliff; exact cliff and linear-vest parameters are disclosed at Token Generation Event alongside the deployed token contract address.</p>
+<p>Community Treasury spend is governed by on-chain rules: the same claim pipeline that authorises user payouts is the only mechanism that releases treasury ETH. No admin key can reach into the pool; no off-pipeline transfer can pay a claim.</p>
+<h3>Contract address registry</h3>
+<p>The protocol uses a small number of on-chain entities. A consolidated registry is published at <code>gascoin.app/addresses</code> and refreshed on every deploy. Environment slots: <code>GASCOIN_CONTRACT_ADDRESS</code>, <code>GASCOIN_TREASURY_WALLET</code>, <code>GASCOIN_MARKETPLACE_CONTRACT</code>, <code>GASCOIN_CERTIFICATE_CONTRACT</code>, <code>GASCOIN_MARKETPLACE_VERIFIER</code>, <code>GASCOIN_OPS_WALLET</code>.</p>`,
+        order: 86,
+      },
+      {
+        slug: "learn-defense-in-depth",
+        title: "Defence in Depth — How Fraud Is Stopped",
+        categorySlug: "learn",
+        category: "Learn",
+        description: "GasCoin's adversarial-hardened design: no single signal is unfakeable; defence is paying every cost curve at once.",
+        content: `<p>GasCoin is an adversarial environment by construction: we pay real ETH for verifiable behaviour, and sophisticated actors will try to fake it. Our design assumption is that <strong>no single signal is unfakeable</strong>. The defence is to require an attacker to pay every cost curve at once, while making each curve steeper.</p>
+<h3>Attack vector / defence mapping</h3>
+<table class="doc-table">
+<thead><tr><th>Attack</th><th>What it tries</th><th>Defence</th></tr></thead>
+<tbody>
+<tr><td>Bot engagement farms</td><td>Inflate likes, retweets, impressions.</td><td>Tweet Quality Scorer + engagement-rate heuristics + prompt-injection-hardened input sanitisation + Trust Dampener attenuates low-reputation Composites.</td></tr>
+<tr><td>Self-payout loops</td><td>Creator funds claims on their own posts.</td><td>Payout axis distinguishes cross-cluster from self-cluster ETH; self-cluster counts at steep discount, scaled by detected ring density.</td></tr>
+<tr><td>Sybil referral farms</td><td>Chain burner wallets.</td><td>Ring Detector flags dense or cyclic sub-graphs; Ring Density discounts referral credit as density rises; pre-award AI verification blocks payout citations inside flagged rings.</td></tr>
+<tr><td>Paid conversion rings</td><td>Pay a cohort to file real-looking claims.</td><td>Ring clustering groups the paid cohort; cross-cluster discount kicks in; mem0 cross-session memory flags repeat operators.</td></tr>
+<tr><td>One-time viral spike</td><td>Score once and coast.</td><td>Recency Multiplier decays stale activity; Consistency axis rewards cadence, not moments.</td></tr>
+<tr><td>Reputation buying</td><td>Acquire a veteran wallet.</td><td>Reach Certificates are soulbound; reputation is non-transferable by construction.</td></tr>
+</tbody>
+</table>
+<h3>Operational safeguards</h3>
+<ul>
+<li>A pre-award AI verification gate runs before any points are written.</li>
+<li>A nightly pre-payout verification sweep re-runs all gates before ETH leaves the treasury.</li>
+<li>Kill switch and maintenance mode in Edge Config, propagating globally within seconds.</li>
+<li>Row-level security on Supabase, Privy-verified identity on every mutation, timing-safe comparisons on every sensitive equality check.</li>
+<li>Marketplace attestations signed with a key segregated from the treasury key.</li>
+</ul>
+<p class="doc-callout">Governance-tunable parameters — gate thresholds, tier boundaries, emission rates, Composite weights, anti-farming caps, Trust Dampener floor, Recency half-life, ring-density thresholds — are subject to a public proposal and timelock cycle. Their current values are deliberately withheld; publishing them would convert signals into targets.</p>`,
+        order: 87,
+      },
+      {
+        slug: "learn-what-gascoin-is-not",
+        title: "What GasCoin Is Not",
+        categorySlug: "learn",
+        category: "Learn",
+        description: "Non-goals — what GasCoin is deliberately not, so readers can calibrate expectations.",
+        content: `<p>Every protocol gets read through the lens of things that already exist. A short list of what GasCoin is deliberately <em>not</em>:</p>
+<ul>
+<li><strong>Not a rebate program.</strong> Payouts are on-chain and rule-driven. There is no central reimbursement budget and no merchant relationship to renegotiate.</li>
+<li><strong>Not an investment vehicle.</strong> $GASCOIN is a utility token for tier gating and future governance. Nothing in this document is financial advice or a solicitation.</li>
+<li><strong>Not KYC-gated at the protocol layer.</strong> No government ID is collected to submit a claim. Jurisdictional compliance is the user's responsibility.</li>
+<li><strong>Not US-only.</strong> The protocol is available globally wherever X is available; users transact in ETH regardless of local currency.</li>
+<li><strong>Not a loan or credit product.</strong> No obligation, no repayment schedule, no creditworthiness check.</li>
+<li><strong>Not an oracle or a stablecoin.</strong> GasCoin does not price fuel, broadcast pricing to third parties, or peg to a reference asset.</li>
+</ul>`,
+        order: 88,
+      },
+      {
+        slug: "learn-risks",
+        title: "Risk Factors",
+        categorySlug: "learn",
+        category: "Learn",
+        description: "Honest risks — platform dependencies, adversarial capture, regulatory drift, market and treasury risk, AI model risk, audit status.",
+        content: `<ul>
+<li><strong>Platform dependency.</strong> GasCoin depends on X API access, Vercel infrastructure, Supabase, Alchemy, and AI model vendors. Any of them can deprecate or reprice. The system is designed for vendor substitution where possible, but disruption risk is real.</li>
+<li><strong>Adversarial capture.</strong> Sophisticated rings will attempt to fabricate receipts and game the engagement economy. The three-model AI loop, mem0 memory, and graph ring detection are our answer; they are not a guarantee.</li>
+<li><strong>Regulatory drift.</strong> Classification of $GASCOIN and of the consumer-refund mechanic may evolve with jurisdiction. The protocol is structured to adapt.</li>
+<li><strong>Market risk.</strong> Token value, ETH price, and gasoline price all affect the subsidy economics. Treasury policy is designed around resilience to these inputs, not dependence on them.</li>
+<li><strong>Reflexive treasury risk.</strong> Refunds are funded by ETH held in the treasury. If treasury ETH is exhausted faster than it is replenished, refunds pause until replenished. Treasury policy is designed to hold a multi-month buffer and to scale caps downward before pausing.</li>
+<li><strong>AI model risk.</strong> False positives lock legitimate drivers out of refunds; false negatives pay fraudsters. The oversight layer and governance review exist to correct both.</li>
+<li><strong>Audit status.</strong> Protocol contracts and platform code have undergone internal adversarial review (April 2026). A third-party external audit of the Marketplace Escrow, Reach Certificate, and $GASCOIN token contracts is scheduled before unrestricted mainnet launch; audit provider, scope, and final report will be published alongside the deployed contract addresses. Readers should assume contracts are pre-external-audit until that disclosure.</li>
+</ul>`,
+        order: 89,
+      },
+    ],
+  },
+  {
     slug: "help",
     label: "Help",
     sections: [
