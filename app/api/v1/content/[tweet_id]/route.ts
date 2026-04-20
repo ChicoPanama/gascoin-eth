@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server';
-import { gateRequest, filterForTier } from '../../../../../lib/api-gating';
+import { gateRequest, filterForTier, hasTierAccess } from '../../../../../lib/api-gating';
 import { getSupabaseAdmin } from '../../../../../lib/supabase';
 import { signEnvelope } from '../../../../../lib/response-signer';
+import { getFunnelForTweet } from '../../../../../lib/attribution';
 
 export const dynamic = 'force-dynamic';
 
@@ -30,6 +31,11 @@ export async function GET(
 
   if (!tweet) return NextResponse.json({ error: 'not_found' }, { status: 404 });
 
+  // Agency+ gets the full attribution funnel for this tweet.
+  const history = hasTierAccess(gate.tier!, 'agency')
+    ? await getFunnelForTweet(tweet.tweet_id)
+    : null;
+
   const record = {
     tweet_id: tweet.tweet_id,
     tweet_url: tweet.tweet_url,
@@ -48,6 +54,7 @@ export async function GET(
     referral_payout_eth: tweet.referral_payout_eth,
     referred_wallets: tweet.referred_wallets,
     content_type: tweet.content_type,
+    history,
   };
 
   const filtered = filterForTier(record, gate.tier!);

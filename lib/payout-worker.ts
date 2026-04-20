@@ -5,6 +5,7 @@ import { getUserByUsername } from './x-api';
 import { scoreAccountQuality } from './account-quality';
 import { getSupabaseAdmin } from './supabase';
 import { getCachedFlags, addMemory, writePayoutEvent } from './mem0';
+import { recordAttributionEvent } from './attribution';
 
 const RETRY_BASE_SECONDS = 60;
 const MIN_FOLLOWERS = 100;
@@ -332,6 +333,25 @@ export async function processQueuedPayout(claimId: string) {
     txHash: sent.txHash || 'unknown',
     status: 'dispatched',
   }).catch(() => {});
+
+  // Gas Network Piece 5 — write attribution event for this payout,
+  // keyed back to the source tweet. Fire-and-forget.
+  (async () => {
+    if (!claim?.tweet_url) return;
+    const { data: tweet } = await supabase
+      .from('scored_tweets')
+      .select('tweet_id')
+      .eq('wallet', job.wallet)
+      .eq('tweet_url', claim.tweet_url)
+      .maybeSingle();
+    if (tweet?.tweet_id) {
+      recordAttributionEvent(tweet.tweet_id, 'payout', job.wallet, {
+        claim_id: claimId,
+        amount_eth: job.amount_eth,
+        tx_hash: sent.txHash,
+      }).catch(() => {});
+    }
+  })().catch(() => {});
 
   return { ok: true, txHash: sent.txHash, gate, reused: false };
 }
