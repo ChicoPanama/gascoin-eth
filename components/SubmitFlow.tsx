@@ -269,7 +269,7 @@ function StepTweet({ onVerified, onBack, initialUrl, loggedInHandle }: {
       <h2 className="sf-headline">Post a Tweet, Then Verify</h2>
       <p className="sf-sub">Two sub-steps. Post a GasCoin tweet on X first, then come back and paste the URL so we can verify it.</p>
 
-      {/* ─── Sub-step A: compose tweet on X ─────────────── */}
+      {/* ─── Sub-step A: compose tweet on X ─────────────────────────── */}
       <div style={{ marginTop: 20, padding: 16, border: '1px solid rgba(255,255,255,0.08)', borderRadius: 0 }}>
         <div style={{ fontFamily: 'IBM Plex Mono', fontSize: 11, letterSpacing: '0.1em', color: 'rgba(255,255,255,0.5)', marginBottom: 8 }}>
           STEP A · POST ON X
@@ -292,7 +292,7 @@ function StepTweet({ onVerified, onBack, initialUrl, loggedInHandle }: {
         </div>
       </div>
 
-      {/* ─── Sub-step B: paste the URL ──────────────────── */}
+      {/* ─── Sub-step B: paste the URL ──────────────────────────────── */}
       <div style={{ marginTop: 16, padding: 16, border: '1px solid rgba(255,255,255,0.08)', borderRadius: 0 }}>
         <div style={{ fontFamily: 'IBM Plex Mono', fontSize: 11, letterSpacing: '0.1em', color: 'rgba(255,255,255,0.5)', marginBottom: 8 }}>
           STEP B · PASTE TWEET URL
@@ -362,7 +362,9 @@ function StepReceipt({ onNext, onBack, initialFile }: {
   const [file, setFile] = useState<File | null>(initialFile);
   const [preview, setPreview] = useState('');
   const [error, setError] = useState('');
-  const [checks, setChecks] = useState([false, false, false]);
+  // 4th checkbox added per Crush feedback (2026-04-20): user attests receipt
+  // total is $5+ BEFORE OCR runs, letting us fail fast on sub-$5 receipts.
+  const [checks, setChecks] = useState([false, false, false, false]);
   const [shake, setShake] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -468,7 +470,7 @@ function StepReceipt({ onNext, onBack, initialFile }: {
 
       {error && <div className="sf-error">{error}</div>}
 
-      {/* ─── Required user-confirmation checklist ───────────────────
+      {/* ─── Required user-confirmation checklist ───────────────────────
           Earlier tester (Crush) thought the app auto-checked these after
           uploading the photo. Making the "YOU need to check each box"
           intent explicit: amber accent, info icon, header text, and a
@@ -546,6 +548,7 @@ function StepReceipt({ onNext, onBack, initialFile }: {
             'Receipt shows total amount clearly',
             'Receipt date is visible',
             'The last 4 hex characters of my Ethereum wallet address are written on the receipt',
+            'My receipt total is $5 or more',
           ].map((label, i) => (
             <label key={i} className="sf-check-row" onClick={() => toggleCheck(i)}>
               <span className={`sf-checkbox${checks[i] ? ' sf-checkbox--checked' : ''}`}>
@@ -626,7 +629,7 @@ function StepReview({ wallet, tweetUrl, handle, file, onSubmit, onBack }: {
     { label: 'Tweet', value: tweetUrl.length > 50 ? tweetUrl.slice(0, 50) + '...' : tweetUrl },
     { label: 'Receipt', value: file ? `${file.name} · ${(file.size / 1024).toFixed(0)} KB` : '—' },
     { label: 'Submission Date', value: new Date().toLocaleString() },
-    { label: 'Estimated Refund', value: '~0.02 ETH' },
+    { label: 'Season 1 Reward', value: 'Beta points — ETH refunds resume at launch' },
   ];
 
   return (
@@ -681,13 +684,63 @@ function StepGates({ failGate, failGateMessage, onReset, onResubmit, referralCod
   onResubmit: () => void;
   referralCode: string;
 }) {
+  const { getAccessToken, user } = usePrivy();
   const [gates, setGates] = useState<Gate[]>(
     GATE_NAMES.map((name) => ({ name, status: 'pending' }))
   );
   const [done, setDone] = useState(false);
   const [failed, setFailed] = useState(false);
   const [showFix, setShowFix] = useState(false);
+  const [rechecking, setRechecking] = useState(false);
+  const [recheckResult, setRecheckResult] = useState<'' | 'ok' | 'still_no' | 'error'>('');
+  const [recheckMessage, setRecheckMessage] = useState('');
   const subId = useRef(`GC-${new Date().getFullYear()}-${String(Math.floor(Math.random() * 99999)).padStart(5, '0')}`);
+
+  // Only the follows_gascoin gate (index 1) gets the Recheck button. This is
+  // the only gate whose false-negative has a remediation that doesn't require
+  // resubmitting the whole flow — the Redis follower cache may just be stale.
+  const isFollowsGate = GATE_DEFS[failGate ?? -1]?.id === 'follows_gascoin';
+
+  const recheckFollow = async () => {
+    setRechecking(true);
+    setRecheckResult('');
+    setRecheckMessage('');
+    try {
+      const token = await getAccessToken();
+      if (!token) {
+        setRecheckResult('error');
+        setRecheckMessage('Session expired — sign in again.');
+        return;
+      }
+      const res = await fetch('/api/recheck-follow', {
+        method: 'POST',
+        headers: {
+          authorization: `Bearer ${token}`,
+          'x-privy-user-id': String((user as any)?.id || ''),
+          'x-privy-handle': String((user as any)?.twitter?.username || '').replace(/^@/, ''),
+          'x-privy-wallet': String((user as any)?.wallet?.address || ''),
+        },
+      });
+      const json = await res.json();
+      if (!res.ok) {
+        setRecheckResult('error');
+        setRecheckMessage(json?.message || 'Recheck failed — try again in a moment.');
+        return;
+      }
+      if (json?.following) {
+        setRecheckResult('ok');
+        setRecheckMessage(json.message || 'Confirmed — you follow @GasCoinApp.');
+      } else {
+        setRecheckResult('still_no');
+        setRecheckMessage(json?.message || 'Still not seeing you in the follower list.');
+      }
+    } catch {
+      setRecheckResult('error');
+      setRecheckMessage('Network error — try again.');
+    } finally {
+      setRechecking(false);
+    }
+  };
 
   useEffect(() => {
     let cancelled = false;
@@ -747,7 +800,7 @@ function StepGates({ failGate, failGateMessage, onReset, onResubmit, referralCod
 
       {done && (
         <div className="sf-result">
-          <p className="sf-result-text">ETH refund will be dispatched within 24–48 hours</p>
+          <p className="sf-result-text">Beta points credited to your account. ETH refunds resume at Season 1 launch.</p>
           {referralCode && (
             <ViralShareCard variant="post-approval" referralCode={referralCode} />
           )}
@@ -783,6 +836,43 @@ function StepGates({ failGate, failGateMessage, onReset, onResubmit, referralCod
                 </div>
               )}
             </>
+          )}
+          {isFollowsGate && (
+            <div style={{ marginTop: 20, padding: 14, border: '1px solid rgba(255,255,255,0.12)', borderRadius: 0 }}>
+              <div style={{ fontFamily: 'IBM Plex Mono, monospace', fontSize: 11, letterSpacing: '0.1em', color: 'rgba(255,255,255,0.55)', marginBottom: 8 }}>
+                JUST FOLLOWED? FORCE A CACHE RECHECK
+              </div>
+              <p style={{ fontSize: 13, lineHeight: 1.5, color: 'rgba(255,255,255,0.7)', marginBottom: 12 }}>
+                Our follower list refreshes every 2 hours. If you followed <strong>@GasCoinApp</strong> moments ago, tap below to force a live re-check against X.
+              </p>
+              <button
+                type="button"
+                className="sf-btn-solid"
+                onClick={recheckFollow}
+                disabled={rechecking || recheckResult === 'ok'}
+                aria-disabled={rechecking || recheckResult === 'ok'}
+              >
+                {rechecking ? 'Checking…' : recheckResult === 'ok' ? 'Confirmed ✓' : 'Recheck follow status'}
+              </button>
+              {recheckMessage && (
+                <div
+                  role="status"
+                  aria-live="polite"
+                  style={{
+                    marginTop: 10,
+                    fontSize: 12,
+                    color:
+                      recheckResult === 'ok'
+                        ? 'var(--status-pass, #10b981)'
+                        : recheckResult === 'error'
+                          ? 'var(--status-fail, #ef4444)'
+                          : 'rgba(255,255,255,0.6)',
+                  }}
+                >
+                  {recheckMessage}
+                </div>
+              )}
+            </div>
           )}
           <div className="sf-nav-buttons" style={{ marginTop: 24 }}>
             <button type="button" className="sf-btn-solid" onClick={onResubmit}>Resubmit</button>
@@ -1093,6 +1183,10 @@ export function SubmitFlow() {
       fd.append('wallet', wallet);
       fd.append('walletOnReceipt', '');
       fd.append('amountUsd', '');
+      // Step-3 checklist's 4th item: user attests receipt is $5+.
+      // SubmitFlow only lets them reach Step 4 with all 4 items checked,
+      // so this is always 'true' on a legit submission.
+      fd.append('userAttestsMinAmount', 'true');
       if (file) fd.append('receipt', file);
 
       const res = await fetch('/api/claims/submit', {
@@ -1109,6 +1203,19 @@ export function SubmitFlow() {
       const json = await res.json();
 
       if (!res.ok) {
+        // Special-case the follows_gascoin miss so Step 5 can offer the
+        // "Recheck" button that force-refreshes the cached follower list.
+        if (json?.error === 'not_following_gascoin') {
+          const gateIdx = GATE_DEFS.findIndex((d) => d.id === 'follows_gascoin');
+          setFailGate(gateIdx >= 0 ? gateIdx : 1);
+          setFailGateMessage({
+            headline: 'Not following @GasCoinApp',
+            fix: 'If you JUST followed, tap "Recheck" below — the follower cache refreshes every 2 hours, so the system may not have noticed yet.',
+          });
+          await minWait;
+          goTo(5);
+          return;
+        }
         const msg = getApiErrorMessage(json?.error || 'submit_failed');
         setFailGate(0);
         setFailGateMessage({ headline: msg, fix: '' });

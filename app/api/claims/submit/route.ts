@@ -160,6 +160,10 @@ export async function POST(req: Request){
     return NextResponse.json({ ok: false, error: 'invalid_amount' }, { status: 400 });
   }
   const amountUsd = amountUsdRaw;
+  // Per-Crush feedback: user attests their receipt is $5+ via Step-3 checkbox.
+  // We still OCR-verify later; this is a pre-flight that lets us fail fast on
+  // unchecked attestations and flag fraud if attestation disagrees with OCR.
+  const userAttestsMinAmount = String(form.get('userAttestsMinAmount') || '') === 'true';
   const receipt = form.get('receipt');
 
   if (!(receipt instanceof File)) {
@@ -199,16 +203,64 @@ export async function POST(req: Request){
     await supabase.from('idempotency_keys').insert({ key: idemKey, scope: 'claim_submit', request_hash: reqHash, status: 'processing' });
   }
 
-  // Run tweet verification, OCR, balance check, follower count, account lookup,
-  // and follows-gascoin membership check all in parallel.
-  const [tweet, ocr, minHold, followerCount, userLookup, followsGascoinCheck] = await Promise.all([
+  // Fail fast on user-attestation miss: Step 3 checklist required user to
+  // confirm "receipt total is $5 or more". If they submitted without it,
+  // reject before spending Gemini Vision/AI quota.
+  if (!userAttestsMinAmount) {
+    await supabase.from('idempotency_keys')
+      .update({ status: 'completed', response_json: { ok: false, error: 'receipt_below_min_amount' } })
+      .eq('key', idemKey);
+    return NextResponse.json({
+      ok: false,
+      error: 'receipt_below_min_amount',
+      message: 'Receipts must be $5 or more. Please check the attestation box and resubmit.',
+    }, { status: 400 });
+  }
+
+  // ─── Phase 1: cheap social-graph + RPC checks ──────────────────────
+  // Run tweet verification, balance check, follower count, account lookup,
+  // and follows-gascoin membership check in parallel. OCR is deferred to
+  // Phase 2 so we don't burn Gemini Vision on users who fail basic gates.
+  const [tweet, minHold, followerCount, userLookup, followsGascoinCheck] = await Promise.all([
     verifyTweetProof(tweetUrl, `@${session.xHandle}`),
-    analyzeReceipt(receipt),
     hasMinimumGascoin(wallet, 1),
     getFollowerCount(session.xHandle),
     getUserByUsername(session.xHandle),
     isFollowingGascoin(session.xId || ''),
   ]);
+
+  // Fail fast on min-follower miss. Crush-tested pipeline-reordering feedback.
+  const MIN_FOLLOWERS = 100;
+  if (followerCount >= 0 && followerCount < MIN_FOLLOWERS) {
+    await supabase.from('idempotency_keys')
+      .update({ status: 'completed', response_json: { ok: false, error: 'insufficient_followers' } })
+      .eq('key', idemKey);
+    return NextResponse.json({
+      ok: false,
+      error: 'insufficient_followers',
+      message: `You need at least ${MIN_FOLLOWERS} followers to submit. You have ${followerCount}.`,
+      required: MIN_FOLLOWERS,
+      actual: followerCount,
+    }, { status: 400 });
+  }
+
+  // Fail fast on follows-gascoin miss — no point OCRing a receipt if the
+  // submitter isn't following us. Gives the UI a signal to show the
+  // "Just followed, recheck" button (see /api/recheck-follow).
+  if (!followsGascoinCheck.ok && !followsGascoinCheck.apiFailure) {
+    await supabase.from('idempotency_keys')
+      .update({ status: 'completed', response_json: { ok: false, error: 'not_following_gascoin' } })
+      .eq('key', idemKey);
+    return NextResponse.json({
+      ok: false,
+      error: 'not_following_gascoin',
+      message: 'You must follow @GasCoinApp on X before submitting. If you just followed, tap "Recheck".',
+      recheckAvailable: true,
+    }, { status: 400 });
+  }
+
+  // ─── Phase 2: expensive OCR + fraud checks ─────────────────────────
+  const ocr = await analyzeReceipt(receipt);
 
   // Fetch historical signals for enhanced account quality scoring
   const { data: walletLink } = await supabase
