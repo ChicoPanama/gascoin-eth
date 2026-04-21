@@ -633,8 +633,12 @@ export async function writeDistilledProfile(
       claim_id: summary.claimId,
     },
   });
-  // Bust after a successful write so stale cache isn't cleared on write failure.
-  await bustEntityProfileCache('wallet', wallet);
+  // Intentionally NOT busting getEntityProfile cache. Engagement-point
+  // writes fire on every claim and every engagement worker tick — busting
+  // per write defeated the 15-min profile TTL (we were paying for a cold
+  // mem0 read on every Claude oversight call). Up to 15-min staleness on
+  // aggregate point totals is acceptable. Critical signals (ring flags,
+  // ban state) still bust — they must surface immediately.
 }
 
 /**
@@ -676,7 +680,9 @@ export async function writeFraudSignal(
       claim_id: signal.claimId,
     },
   });
-  await bustEntityProfileCache('wallet', wallet);
+  // NOT busting profile cache. Fraud signals fire often (Grok cross-val
+  // on every submission); paying for a mem0 re-read each time was costly.
+  // Ring detection and ban state still bust — see below.
 }
 
 /**
@@ -742,7 +748,8 @@ export async function writePayoutEvent(
       tx_hash: payout.txHash,
     },
   });
-  await bustEntityProfileCache('wallet', wallet);
+  // Payout events are append-only audit records; 15-min profile staleness
+  // doesn't change any downstream decision. Not busting.
 }
 
 /**
@@ -805,7 +812,8 @@ export async function writeAccountQuality(
       claim_id: quality.claimId,
     },
   });
-  await bustEntityProfileCache('wallet', wallet);
+  // Quality snapshots are trend data — Claude oversight tolerates up to
+  // 15 min staleness on the profile. Not busting.
 }
 
 /**
