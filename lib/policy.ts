@@ -28,6 +28,7 @@ export const GATE_DEFS = [
   { id: 'account_quality',            label: 'Account Quality' },
   { id: 'receipt_date_valid',         label: 'Receipt Date Valid' },
   { id: 'amount_verified',            label: 'OCR Amount Verified' },
+  { id: 'fraud_risk_acceptable',      label: 'Fraud Risk Acceptable' },
 ] as const;
 
 export const GATE_COUNT = GATE_DEFS.length;
@@ -64,6 +65,11 @@ export type ClaimInput = {
   followerCount: number;
   accountQualityScore: number;
   accountQualityPassed: boolean;
+  // Composite fraud label from the receipt pipeline + Grok cross-validation
+  // (`lib/integrations/fraud.ts`). Defaults to 'medium' if not supplied so
+  // older call sites that don't yet pass this field don't accidentally
+  // short-circuit to 'low'.
+  fraudRisk?: 'low' | 'medium' | 'high' | 'critical';
 };
 
 export type ClaimDecision = 'ready_for_dispatch' | 'needs_review' | 'rejected' | 'retry_later';
@@ -94,6 +100,7 @@ export function evaluateClaim(c: ClaimInput){
     // Receipt date and amount checks — pass with benefit-of-doubt on retry path
     gates.push({ gate:'receipt_date_valid', passed:true, reason:'API failure retry — date check deferred' });
     gates.push({ gate:'amount_verified', passed:true, reason:'API failure retry — amount check deferred' });
+    gates.push({ gate:'fraud_risk_acceptable', passed:true, reason:'API failure retry — fraud pipeline deferred' });
 
     return { gates, failed: gates.filter(g=>!g.passed), riskScore: 0, decision: 'retry_later' as ClaimDecision };
   }
@@ -123,8 +130,12 @@ export function evaluateClaim(c: ClaimInput){
     const dateValid = !isNaN(parsed.getTime()) && diffDays >= 0 && diffDays <= 7;
     gates.push({ gate:'receipt_date_valid', passed:dateValid, reason: dateValid ? 'Receipt date within 7-day window' : `Receipt dated ${c.receiptDate} is outside the 7-day submission window` });
   } else {
-    // OCR couldn't read date — pass but log; Claude will see no date in fraud signals
-    gates.push({ gate:'receipt_date_valid', passed:true, reason:'Receipt date not extractable by OCR — manual review recommended' });
+    // OCR couldn't read date — fail closed. Previously this auto-passed with
+    // "manual review recommended", which was a fail-open hole: submit a
+    // deliberately-unreadable receipt to bypass this gate. Failing here pushes
+    // the claim into needs_review via the riskScore accumulator so a human
+    // (or Claude oversight) actually sees it.
+    gates.push({ gate:'receipt_date_valid', passed:false, reason:'Receipt date not extractable — OCR couldn\'t read the date. Upload a clearer photo.' });
   }
 
   // Gate: amount_verified — claimed amount must not exceed OCR-detected by more than 25%
@@ -133,9 +144,22 @@ export function evaluateClaim(c: ClaimInput){
     const amountOk = c.amountUsd <= maxAllowed;
     gates.push({ gate:'amount_verified', passed:amountOk, score:c.amountUsd, reason: amountOk ? 'Claimed amount matches OCR' : `Claimed $${c.amountUsd} exceeds OCR-detected $${c.ocrAmount.toFixed(2)} by more than 25%` });
   } else {
-    // OCR returned no amount — pass; other gates (min_amount) already provide a floor
-    gates.push({ gate:'amount_verified', passed:true, reason:'OCR amount not detected — amount gate deferred to manual review' });
+    // OCR returned no amount — fail closed. min_amount gate already fails at
+    // $0, but this gate's specific job is OCR-claim agreement; if OCR couldn't
+    // read the total, we haven't verified anything. Was an auto-pass before.
+    gates.push({ gate:'amount_verified', passed:false, reason:'OCR amount not detected — the receipt total couldn\'t be read. Upload a clearer photo.' });
   }
+
+  // Gate: fraud_risk_acceptable — composite fraud label from the receipt
+  // pipeline + Grok cross-validation must not be 'critical' or 'high'.
+  // Previously the fraudRisk field was computed and stored but never
+  // checked, so a receipt that Grok flagged at critical fraud with 0.95
+  // confidence could still pass every gate if form fields were correct.
+  // Fail closed on high/critical. Medium passes but bumps riskScore via
+  // the failed-gates count already applied.
+  const fr = c.fraudRisk || 'medium';
+  const fraudPassed = fr === 'low' || fr === 'medium';
+  gates.push({ gate:'fraud_risk_acceptable', passed:fraudPassed, reason: fraudPassed ? `Fraud risk ${fr}` : `Fraud pipeline flagged risk as ${fr} — receipt does not appear genuine` });
 
   const failed = gates.filter(g=>!g.passed);
 

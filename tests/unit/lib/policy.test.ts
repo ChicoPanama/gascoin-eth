@@ -11,7 +11,8 @@ function validInput(overrides: Partial<ClaimInput> = {}): ClaimInput {
     receiptHasGascoin: true, gascoinTokenBalance: 100, aiScore: 0.1, tamperScore: 0.1,
     duplicateHash: false, duplicatePhash: false, cooldownOk: true, amountUsd: 50,
     ocrAmount: 52, receiptDate: today,
-    followerCount: 200, accountQualityScore: 60, accountQualityPassed: true, ...overrides,
+    followerCount: 200, accountQualityScore: 60, accountQualityPassed: true,
+    fraudRisk: 'low', ...overrides,
   };
 }
 
@@ -25,8 +26,8 @@ describe('GATE_DEFS / GATE_COUNT alignment', () => {
     expect(GATE_COUNT).toBe(GATE_DEFS.length);
   });
 
-  it('GATE_DEFS has 17 entries', () => {
-    expect(GATE_DEFS.length).toBe(17);
+  it('GATE_DEFS has 18 entries', () => {
+    expect(GATE_DEFS.length).toBe(18);
   });
 
   it('lib/gates.ts GATES has the same number of entries as GATE_DEFS', () => {
@@ -240,9 +241,11 @@ describe('evaluateClaim', () => {
     expect(r.failed.some((g) => g.gate === 'receipt_date_valid')).toBe(false);
   });
 
-  it('passes receipt_date_valid when receiptDate is null (OCR could not read date)', () => {
+  it('fails receipt_date_valid when receiptDate is null (OCR could not read date, fail-closed)', () => {
+    // Was fail-open (auto-pass) before 2026-04-21 — flipped to fail-closed so
+    // deliberately-unreadable receipts can't bypass the date check.
     const r = evaluateClaim(validInput({ receiptDate: null }));
-    expect(r.failed.some((g) => g.gate === 'receipt_date_valid')).toBe(false);
+    expect(r.failed.some((g) => g.gate === 'receipt_date_valid')).toBe(true);
   });
 
   // Gate 17: amount_verified
@@ -256,9 +259,10 @@ describe('evaluateClaim', () => {
     expect(r.failed.some((g) => g.gate === 'amount_verified')).toBe(false);
   });
 
-  it('passes amount_verified when ocrAmount is null (OCR could not read total)', () => {
+  it('fails amount_verified when ocrAmount is null (OCR could not read total, fail-closed)', () => {
+    // Was fail-open (auto-pass) before 2026-04-21 — flipped to fail-closed.
     const r = evaluateClaim(validInput({ ocrAmount: null }));
-    expect(r.failed.some((g) => g.gate === 'amount_verified')).toBe(false);
+    expect(r.failed.some((g) => g.gate === 'amount_verified')).toBe(true);
   });
 
   it('passes amount_verified when claimed amount equals OCR amount exactly', () => {
