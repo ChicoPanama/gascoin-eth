@@ -6,6 +6,7 @@ import { scoreAccountQuality } from './account-quality';
 import { getSupabaseAdmin } from './supabase';
 import { getCachedFlags, addMemory, writePayoutEvent } from './mem0';
 import { recordAttributionEvent } from './attribution';
+import { shouldSilenceBetaAlerts } from './season';
 
 const RETRY_BASE_SECONDS = 60;
 const MIN_FOLLOWERS = 100;
@@ -247,6 +248,7 @@ export async function processQueuedPayout(claimId: string) {
   }
 
   // O1: Detect DRYRUN hashes — ENABLE_LIVE_PAYOUT is not 'true' in production.
+  // Write to both audit_logs and intelligence_entries so admin dashboard alerts.
   if (sent.txHash?.startsWith('DRYRUN_')) {
     // Audit log is always useful — preserve it even during beta.
     await supabase.from('audit_logs').insert({
@@ -261,7 +263,7 @@ export async function processQueuedPayout(claimId: string) {
     // DRYRUN is expected for every claim — flooding the admin view with
     // CRITICAL entries is noise, not signal. Skip the alert write when the
     // beta flag is on; keep it otherwise so real prod misconfig still pages.
-    if (process.env.SEASON_1_POINTS_ONLY?.trim().toLowerCase() !== 'true') {
+    if (!shouldSilenceBetaAlerts()) {
       try {
         await supabase.from('intelligence_entries').insert({
           entry_type: 'dryrun_payout_detected',
@@ -276,27 +278,23 @@ export async function processQueuedPayout(claimId: string) {
     }
   }
 
-  // O3: Treasury ETH threshold alert — warn when balance drops below 1 ETH.
-  // Suppressed during Season 1 beta: treasury is intentionally unfunded, so a
-  // "low balance" alert is expected state and fires every payout run.
-  if (process.env.SEASON_1_POINTS_ONLY?.trim().toLowerCase() !== 'true') {
-    try {
-      const { getTreasuryBalances } = await import('./integrations/ethereum');
-      const balances = await getTreasuryBalances();
-      if (balances.ethBalance < 1) {
-        await supabase.from('intelligence_entries').insert({
-          entry_type: 'treasury_low_eth',
-          entity_type: 'system',
-          entity_id: 'treasury',
-          summary: `Treasury ETH balance is critically low: ${balances.ethBalance.toFixed(4)} ETH`,
-          detail_json: { ethBalance: balances.ethBalance, ethUsd: balances.ethUsd, threshold: 1 },
-          severity: balances.ethBalance < 0.1 ? 'critical' : 'high',
-          pipeline_source: 'payout_worker',
-        });
-      }
-    } catch {
-      // Non-blocking — balance check failure must not interrupt payout flow
+  // O3: Treasury ETH threshold alert — warn when balance drops below 1 ETH
+  try {
+    const { getTreasuryBalances } = await import('./integrations/ethereum');
+    const balances = await getTreasuryBalances();
+    if (balances.ethBalance < 1) {
+      await supabase.from('intelligence_entries').insert({
+        entry_type: 'treasury_low_eth',
+        entity_type: 'system',
+        entity_id: 'treasury',
+        summary: `Treasury ETH balance is critically low: ${balances.ethBalance.toFixed(4)} ETH`,
+        detail_json: { ethBalance: balances.ethBalance, ethUsd: balances.ethUsd, threshold: 1 },
+        severity: balances.ethBalance < 0.1 ? 'critical' : 'high',
+        pipeline_source: 'payout_worker',
+      });
     }
+  } catch {
+    // Non-blocking — balance check failure must not interrupt payout flow
   }
 
   await supabase.from('payouts').insert({

@@ -16,6 +16,7 @@
 import { generateAIText, isAiGatewayAvailable, AI_MODELS } from './integrations/ai-gateway';
 import { cacheGetOrFetch } from './cache';
 import { silentLog } from './silent-log';
+import { shouldTagPointsAsBeta } from './season';
 
 async function aiCall(prompt: string, tag: string = 'points-engine'): Promise<string> {
   if (!isAiGatewayAvailable()) return '';
@@ -729,7 +730,7 @@ export async function awardVerifiedPoints(
   // can exclude beta activity from public rankings at launch. Source strings are
   // kept unchanged so worker idempotency checks (.eq('source', 'submission_approved'))
   // continue to match.
-  const isBetaMode = process.env.SEASON_1_POINTS_ONLY?.trim().toLowerCase() === 'true';
+  const isBetaMode = shouldTagPointsAsBeta();
   await supabase.from('engagement_points').insert({
     wallet: params.wallet,
     source: params.source,

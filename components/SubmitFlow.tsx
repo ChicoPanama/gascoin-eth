@@ -6,6 +6,7 @@ import { generateReferralCodeClient } from '../lib/referral-code-client';
 import { GATE_DEFS, GATE_COUNT } from '../lib/policy';
 import { ViralShareCard } from './shared/ViralShareCard';
 import { getGateMessage, getApiErrorMessage, type GateMessage } from '../lib/gate-messages';
+import { shouldRequireInviteCode, shouldShowBetaCopy } from '../lib/season';
 
 // ─── Types ───
 type Step = 1 | 2 | 3 | 4 | 5;
@@ -629,7 +630,9 @@ function StepReview({ wallet, tweetUrl, handle, file, onSubmit, onBack }: {
     { label: 'Tweet', value: tweetUrl.length > 50 ? tweetUrl.slice(0, 50) + '...' : tweetUrl },
     { label: 'Receipt', value: file ? `${file.name} · ${(file.size / 1024).toFixed(0)} KB` : '—' },
     { label: 'Submission Date', value: new Date().toLocaleString() },
-    { label: 'Season 1 Reward', value: 'Beta points — ETH refunds resume at launch' },
+    shouldShowBetaCopy()
+      ? { label: 'Season 1 Reward', value: 'Beta points — ETH refunds resume at launch' }
+      : { label: 'Estimated Refund', value: '~0.02 ETH' },
   ];
 
   return (
@@ -800,7 +803,11 @@ function StepGates({ failGate, failGateMessage, onReset, onResubmit, referralCod
 
       {done && (
         <div className="sf-result">
-          <p className="sf-result-text">Beta points credited to your account. ETH refunds resume at Season 1 launch.</p>
+          <p className="sf-result-text">
+            {shouldShowBetaCopy()
+              ? 'Beta points credited to your account. ETH refunds resume at Season 1 launch.'
+              : 'ETH refund will be dispatched within 24–48 hours'}
+          </p>
           {referralCode && (
             <ViralShareCard variant="post-approval" referralCode={referralCode} />
           )}
@@ -917,9 +924,14 @@ function usePrivyHandle(): string {
 // /api/claims/submit call independently verifies invite status.
 
 function InviteGate({ children }: { children: React.ReactNode }) {
+  // Post-launch: drop the invite-code wall entirely. Flipping
+  // NEXT_PUBLIC_GASCOIN_PHASE=live turns this into a pass-through.
+  // InviteGate still renders so sign-in state is still enforced by the
+  // non-authenticated branch below — we just skip the redemption UI.
+  const inviteRequired = shouldRequireInviteCode();
   const { ready, authenticated, login, getAccessToken, user } = usePrivy();
-  const [checking, setChecking] = useState(true);
-  const [hasInvite, setHasInvite] = useState(false);
+  const [checking, setChecking] = useState(inviteRequired);
+  const [hasInvite, setHasInvite] = useState(!inviteRequired);
   const [code, setCode] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
@@ -930,6 +942,9 @@ function InviteGate({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     let cancelled = false;
     if (!ready) return;
+    // Post-launch: skip the /api/invites/redeem GET entirely. No gating,
+    // no Supabase hit, no Privy-token fetch for the invite lookup.
+    if (!inviteRequired) { setChecking(false); setHasInvite(true); return; }
     if (!authenticated) { setChecking(false); setHasInvite(false); return; }
 
     (async () => {
@@ -956,7 +971,7 @@ function InviteGate({ children }: { children: React.ReactNode }) {
     })();
 
     return () => { cancelled = true; };
-  }, [ready, authenticated, getAccessToken, user, handle]);
+  }, [ready, authenticated, getAccessToken, user, handle, inviteRequired]);
 
   async function redeem(e: React.FormEvent) {
     e.preventDefault();
