@@ -261,7 +261,7 @@ export async function processQueuedPayout(claimId: string) {
     // DRYRUN is expected for every claim — flooding the admin view with
     // CRITICAL entries is noise, not signal. Skip the alert write when the
     // beta flag is on; keep it otherwise so real prod misconfig still pages.
-    if (process.env.SEASON_1_POINTS_ONLY !== 'true') {
+    if (process.env.SEASON_1_POINTS_ONLY?.trim().toLowerCase() !== 'true') {
       try {
         await supabase.from('intelligence_entries').insert({
           entry_type: 'dryrun_payout_detected',
@@ -279,7 +279,7 @@ export async function processQueuedPayout(claimId: string) {
   // O3: Treasury ETH threshold alert — warn when balance drops below 1 ETH.
   // Suppressed during Season 1 beta: treasury is intentionally unfunded, so a
   // "low balance" alert is expected state and fires every payout run.
-  if (process.env.SEASON_1_POINTS_ONLY !== 'true') {
+  if (process.env.SEASON_1_POINTS_ONLY?.trim().toLowerCase() !== 'true') {
     try {
       const { getTreasuryBalances } = await import('./integrations/ethereum');
       const balances = await getTreasuryBalances();
