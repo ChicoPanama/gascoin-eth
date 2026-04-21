@@ -133,24 +133,25 @@ export async function POST(req: Request){
     return NextResponse.json({ ok:false, error:'wallet_mismatch_with_session' }, { status: 400 });
   }
 
-  // SECURITY: Verify this wallet isn't registered to a different X account
+  // SECURITY: Verify this wallet isn't registered to a different X account.
+  // One nested select instead of two sequential round trips — saves a DB
+  // hop on every submission. users!inner forces a join (no row means
+  // wallet isn't registered to anyone, safe to proceed).
   const { data: walletOwner } = await supabase
     .from('wallet_links')
-    .select('user_id')
+    .select('user_id, users!inner(x_user_id)')
     .eq('wallet', wallet)
     .eq('is_primary', true)
     .not('user_id', 'is', null)
     .maybeSingle();
 
-  if (walletOwner && walletOwner.user_id) {
-    // Check if it belongs to a different user
-    const { data: ownerUser } = await supabase
-      .from('users')
-      .select('x_user_id')
-      .eq('id', walletOwner.user_id)
-      .single();
-
-    if (ownerUser && ownerUser.x_user_id !== session.xId && ownerUser.x_user_id !== `x_${session.xHandle}`) {
+  if (walletOwner?.user_id) {
+    const ownerXId = (walletOwner as any).users?.x_user_id as string | undefined;
+    if (
+      ownerXId &&
+      ownerXId !== session.xId &&
+      ownerXId !== `x_${session.xHandle}`
+    ) {
       return NextResponse.json({ ok:false, error:'wallet_registered_to_another_account' }, { status: 409 });
     }
   }
