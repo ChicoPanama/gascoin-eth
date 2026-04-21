@@ -126,7 +126,7 @@ export const DOC_CATEGORIES: DocCategory[] = [
 <p>GASCOIN is a Ethereum protocol that refunds verified real-world fuel purchases in ETH.</p>
 <p>All claims pass through a deterministic ${GATE_COUNT}-gate pipeline before payout is released.</p>
 <pre class="doc-ascii">
-  BUY GAS ──→ WRITE LAST 4 ──→ TWEET $GASCOIN/#GASCOIN ──→ SUBMIT ──→ 15 GATES ──→ ETH REFUND
+  BUY GAS ──→ WRITE LAST 4 ──→ TWEET $GASCOIN/#GASCOIN ──→ SUBMIT ──→ ${GATE_COUNT} GATES ──→ ETH REFUND
   (any station)  (on receipt)     (public post)     (upload)   (auto-verify)  (to wallet)
 </pre>
 
@@ -370,7 +370,7 @@ export const DOC_CATEGORIES: DocCategory[] = [
         categorySlug: "submitting",
         category: "Submitting",
         description: "",
-        content: `<p>Step 5 is the verification monitoring screen. It shows your submission progressing through all 15 verification gates in real time. This is the system automatically checking every aspect of your submission.</p>
+        content: `<p>Step 5 is the verification monitoring screen. It shows your submission progressing through all ${GATE_COUNT} verification gates in real time. This is the system automatically checking every aspect of your submission.</p>
 <h3>Reading the gate progress screen</h3>
 <p>Each of the ${GATE_COUNT} gates is listed vertically. Each gate shows a status icon:</p>
 <h3>How long verification takes</h3>
@@ -1585,7 +1585,7 @@ Inputs(wallet,tweet,receipt)
 <li>Someone clicks your referral link</li>
 <li>Their browser stores your referral code for 7 days (the attribution window)</li>
 <li>They submit a gas receipt using the platform</li>
-<li>Their submission passes all 15 verification gates and is approved</li>
+<li>Their submission passes all ${GATE_COUNT} verification gates and is approved</li>
 <li>The system detects your referral code on their submission and checks eligibility</li>
 <li>If eligible, a 100-point welcome bonus is awarded to your wallet. You also begin earning 2% passive income from their future points</li>
 <li>Points are credited automatically. No admin action needed for referral points</li>
@@ -1684,7 +1684,7 @@ Inputs(wallet,tweet,receipt)
         categorySlug: "platform",
         category: "Platform Pages",
         description: "",
-        content: `<p>The Gates page is the full public documentation of GASCOIN's 15 verification gates. It is the reference page for understanding exactly what the system checks before approving a submission.</p>
+        content: `<p>The Gates page is the full public documentation of GASCOIN's ${GATE_COUNT} verification gates. It is the reference page for understanding exactly what the system checks before approving a submission.</p>
 <h3>Sections on the Gates page</h3>
 <ul>
 <li>Live system statistics: total submissions processed, overall pass rate, average processing time, most frequently failed gate</li>
@@ -1695,7 +1695,7 @@ Inputs(wallet,tweet,receipt)
 </ul>
 <h3>The pre-flight checklist</h3>
 <p>The pre-flight checklist is the most important self-service tool on the platform. Before submitting, visit /gates and check all 15 boxes. The checklist saves your progress in your browser — if you navigate away and return, your checked boxes are preserved. When all 15 are checked, a Submit Receipt button appears that takes you directly to the submission portal.</p>
-<p>The 15 pre-flight checks correspond directly to the 15 verification gates. Completing the checklist means you have self-verified that your tweet, receipt, and wallet meet all requirements before the automated system checks them.</p>
+<p>The ${GATE_COUNT} pre-flight checks correspond directly to the ${GATE_COUNT} verification gates. Completing the checklist means you have self-verified that your tweet, receipt, and wallet meet all requirements before the automated system checks them.</p>
 <h3>Gate detail panels</h3>
 <p>Clicking VIEW FULL DETAILS on any gate card opens an expanded panel showing three columns: What We Check (the exact system logic), Common Failures (real occurrence data from the database), and How To Pass (step-by-step guidance). Only one gate detail panel can be open at a time.</p>`,
         order: 31,

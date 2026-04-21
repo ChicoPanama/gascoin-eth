@@ -14,6 +14,7 @@ import {
 import { usePrivy } from '@privy-io/react-auth';
 import { PumpSvg, type PumpRegion } from '../../components/welcome/PumpSvg';
 import { GLOBAL_GAS_PRICES } from '../../lib/gas-prices-global';
+import { GATE_COUNT } from '../../lib/policy';
 
 type Props = {
   gateCount: number;
@@ -727,7 +728,7 @@ function RoadmapPopover() {
       prose: 'The foundation the whole protocol runs on — built, tested, and hardened.',
       items: [
         'Ethereum payout rails',
-        '18-gate automated verification engine',
+        `${GATE_COUNT}-gate automated verification engine`,
         'AI receipt scanning with computer vision',
         'Tweet proof + wallet identity checks',
         'Fraud detection and rate limiting',

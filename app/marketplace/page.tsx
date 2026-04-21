@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import type { Metadata } from 'next';
 import { isMarketplaceLive } from '../../lib/marketplace';
+import { GATE_COUNT } from '../../lib/policy';
 
 export const metadata: Metadata = {
   title: 'Creator Marketplace · GASCOIN',
@@ -22,7 +23,7 @@ export default function MarketplacePage() {
         </h1>
         <p className="gc-marketplace-lede">
           Brands lock USDC. Creators post. Payment releases only when the tweet
-          hits a verified impact score — scored by the same 18-gate pipeline
+          hits a verified impact score — scored by the same {GATE_COUNT}-gate pipeline
           that already powers GASCOIN gas refunds.
         </p>
         {!live && (
