@@ -22,7 +22,7 @@ const CHAPTER_META: Record<string, { label: string; kicker: string; roman: strin
   overview:     { label: 'The Protocol',        kicker: 'What GASCOIN is and why it exists',                        roman: 'I' },
   submitting:   { label: 'The Submission',      kicker: 'Step-by-step flow from receipt to ETH refund',             roman: 'II' },
   verification: { label: 'The Gates',           kicker: `All ${GATE_COUNT} automated verification checks, in order`, roman: 'III' },
-  technology:   { label: 'The Machine Room',    kicker: '3 AI engines, 18 gates, 9 cron workers, 4-layer cache',    roman: 'IV' },
+  technology:   { label: 'The Machine Room',    kicker: `3 AI engines, ${GATE_COUNT} gates, 9 cron workers, 4-layer cache`,    roman: 'IV' },
   platform:     { label: 'The Surfaces',        kicker: 'Every page on gascoin.app and what it does',               roman: 'V' },
   security:     { label: 'Admin & Anti-Fraud',  kicker: 'How we keep treasuries honest and submissions real',       roman: 'VI' },
   help:         { label: 'Troubleshooting',     kicker: 'Why your submission got blocked — and the fix',            roman: 'VII' },

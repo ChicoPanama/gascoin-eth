@@ -9,7 +9,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'GASCOIN — Gas. Paid Back.',
     description:
-      'A community-funded Ethereum protocol that refunds real gas receipts in ETH. Verified by 15 automated gates and a three-AI review pipeline.',
+      'A community-funded Ethereum protocol that refunds real gas receipts in ETH. Verified by automated gates and a three-AI review pipeline.',
     url: 'https://gascoin.app/welcome',
     images: ['/welcome/pump.svg'],
   },
