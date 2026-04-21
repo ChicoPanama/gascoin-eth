@@ -32,6 +32,15 @@ export const GATE_DEFS = [
 
 export const GATE_COUNT = GATE_DEFS.length;
 
+// AI-generated-image rejection threshold for gate 10 (ai_image_check).
+// Tightened from 0.65 → 0.5 on 2026-04-21 after tester @crush100x submitted
+// an AI-generated receipt that scored 0.6 — it slid through the primary
+// gate (0.6 < 0.65), and was only stopped by Grok's cross-validation layer
+// (isPhysicalReceipt=false, fraud_risk=critical). Real camera photos of
+// receipts typically score <0.3; AI-generated images cluster 0.5–0.65,
+// so 0.5 is the natural cutoff.
+export const AI_IMAGE_REJECT_THRESHOLD = 0.5;
+
 export type GateResult = { gate: string; passed: boolean; reason?: string; score?: number };
 export type ClaimInput = {
   xVerified: boolean;
@@ -77,7 +86,7 @@ export function evaluateClaim(c: ClaimInput){
     const dryRun = process.env.ENABLE_LIVE_PAYOUT !== 'true';
     gates.push({ gate:'gascoin_min_hold', passed: dryRun || c.gascoinTokenBalance>=1, reason:'Wallet must hold at least 1 GASCOIN' });
     gates.push({ gate:'not_duplicate', passed:!c.duplicateHash && !c.duplicatePhash, reason:'Receipt duplicate detected' });
-    gates.push({ gate:'ai_image_check', passed:c.aiScore<0.65, score:c.aiScore, reason:'AI probability too high' });
+    gates.push({ gate:'ai_image_check', passed:c.aiScore<AI_IMAGE_REJECT_THRESHOLD, score:c.aiScore, reason:'AI probability too high' });
     gates.push({ gate:'tamper_check', passed:c.tamperScore<0.55, score:c.tamperScore, reason:'Tamper risk too high' });
     gates.push({ gate:'cooldown', passed:c.cooldownOk, reason:'Submission cooldown has not expired' });
     gates.push({ gate:'min_followers', passed:false, score:c.followerCount, reason:'X API unavailable — retry later' });
