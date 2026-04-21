@@ -22,7 +22,7 @@ export default function MarketplacePage() {
         </h1>
         <p className="gc-marketplace-lede">
           Brands lock USDC. Creators post. Payment releases only when the tweet
-          hits a verified impact score — scored by the same 17-gate pipeline
+          hits a verified impact score — scored by the same 18-gate pipeline
           that already powers GASCOIN gas refunds.
         </p>
         {!live && (

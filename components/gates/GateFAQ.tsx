@@ -5,19 +5,19 @@ import { useState } from 'react';
 const FAQS = [
   {
     q: 'What happens if my submission fails a gate?',
-    a: 'The system stops at the first blocking gate failure and returns a report specifying exactly which gate failed and why. Gates 1–16 are blocking — a failure on any one of them rejects the claim. Gate 17 (GASCOIN Token Hold) is non-blocking: it determines your tier but does not reject your submission.',
+    a: 'The system stops at the first blocking gate failure and returns a report specifying exactly which gate failed and why. Gates 1–16 and Gate 18 are blocking — a failure on any of them rejects the claim or routes it to manual review. Gate 17 (GASCOIN Token Hold) is non-blocking: it determines your tier but does not reject your submission.',
   },
   {
     q: 'Can I resubmit after a failure?',
-    a: 'Yes. Identity failures (Gates 1–5: verification, following, cooldown, followers, account quality) require fixing your X account or waiting out your cooldown. Tweet failures (Gates 6–8: hashtag, @GasCoinApp tag, tweet live) require posting a corrected tweet. Receipt failures (Gates 9–15: receipt hashtag, wallet characters, duplicate check, AI detection, tamper check, minimum amount, receipt date) require a new receipt photo. Gate 16 (Amount Verified) requires re-entering the exact figure from your receipt.',
+    a: 'Yes. Identity failures (Gates 1–5: verification, following, cooldown, followers, account quality) require fixing your X account or waiting out your cooldown. Tweet failures (Gates 6–8: hashtag, @GasCoinApp tag, tweet live) require posting a corrected tweet. Receipt failures (Gates 9–15: receipt hashtag, wallet characters, duplicate check, AI detection, tamper check, minimum amount, receipt date) require a new receipt photo. Gate 16 (Amount Verified) requires re-entering the exact figure from your receipt. Gate 18 (Fraud Risk Acceptable) fails if our fraud pipeline flags the image as not-a-real-receipt — upload a genuine camera photo of a physical paper receipt.',
   },
   {
     q: 'How long does gate processing take?',
-    a: 'Most submissions complete all 17 gates within 2–5 minutes. Receipt OCR (Gates 9 and 10) takes the longest — up to 45 seconds each. Once all gates pass, ETH is dispatched within 2–6 hours. The 48-hour figure is the hard maximum.',
+    a: 'Most submissions complete all 18 gates within 2–5 minutes. Receipt OCR (Gates 9 and 10) takes the longest — up to 45 seconds each. Once all gates pass, ETH is dispatched within 2–6 hours. The 48-hour figure is the hard maximum.',
   },
   {
     q: 'Can I check my submission status while gates are processing?',
-    a: 'Yes — use the Wallet Tracker at /wallet to see real-time gate progress. Each of the 17 gates flips from pending to passed or failed as it completes.',
+    a: 'Yes — use the Wallet Tracker at /wallet to see real-time gate progress. Each of the 18 gates flips from pending to passed or failed as it completes.',
   },
   {
     q: 'What does "non-blocking" mean for Gate 17?',

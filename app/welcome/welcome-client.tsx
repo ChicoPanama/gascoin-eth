@@ -727,7 +727,7 @@ function RoadmapPopover() {
       prose: 'The foundation the whole protocol runs on — built, tested, and hardened.',
       items: [
         'Ethereum payout rails',
-        '17-gate automated verification engine',
+        '18-gate automated verification engine',
         'AI receipt scanning with computer vision',
         'Tweet proof + wallet identity checks',
         'Fraud detection and rate limiting',
