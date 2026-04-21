@@ -9,7 +9,9 @@ import { MobileMenu } from './ui/MobileMenu';
 import { NavActionsMenu } from './NavActionsMenu';
 import { useAdaptiveNav } from './useAdaptiveNav';
 import { ThemeToggle } from './ThemeToggle';
+import { isBeta } from '../lib/season';
 
+// Links that are always shown. See BETA_NAV_LINKS for the Season 1 addition.
 const NAV_LINKS = [
   { href: '/how-it-works', label: 'How It Works', icon: '?' },
   { href: '/submit', label: 'Submit', icon: '◇' },
@@ -21,6 +23,12 @@ const NAV_LINKS = [
   { href: '/perks', label: 'Perks', icon: '✦' },
   { href: '/gates', label: 'Gates', icon: '◈' },
   { href: '/wallet', label: 'Tracker', icon: '⌁' },
+];
+
+// Extra link only shown when NEXT_PUBLIC_GASCOIN_PHASE !== 'live'. At
+// launch the phase flip hides this automatically without a code change.
+const BETA_NAV_LINKS = [
+  { href: '/beta-guide', label: 'Beta Guide', icon: '⚑' },
 ];
 
 // Unified nav — uses gc-nav classes (same as HomeNav) for consistent
@@ -40,7 +48,7 @@ export function Nav() {
         <ThemeToggle />
       </div>
       <div ref={linksRef as any} className="gc-nav-links">
-        {NAV_LINKS.map(({ href, label, icon }) => (
+        {[...NAV_LINKS, ...(isBeta() ? BETA_NAV_LINKS : [])].map(({ href, label, icon }) => (
           <Link key={href} href={href} className={pathname === href ? 'gc-nav-active' : ''}>
             <span className="gc-nav-link-inner">
               <span className="gc-nav-link-icon" aria-hidden>{icon}</span>

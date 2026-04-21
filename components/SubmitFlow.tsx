@@ -631,8 +631,16 @@ function StepReview({ wallet, tweetUrl, handle, file, onSubmit, onBack }: {
     { label: 'Receipt', value: file ? `${file.name} · ${(file.size / 1024).toFixed(0)} KB` : '—' },
     { label: 'Submission Date', value: new Date().toLocaleString() },
     shouldShowBetaCopy()
-      ? { label: 'Season 1 Reward', value: 'Beta points — ETH refunds resume at launch' }
+      ? { label: 'Season 1 Reward', value: 'Beta points — Pioneer Bonus at launch' }
       : { label: 'Estimated Refund', value: '~0.02 ETH' },
+    ...(shouldShowBetaCopy()
+      ? [{
+          label: 'Rewards wallet',
+          value: wallet.length > 12
+            ? `${wallet.slice(0, 6)}…${wallet.slice(-4)} (locked for Season 1)`
+            : wallet,
+        }]
+      : []),
   ];
 
   return (
@@ -805,7 +813,7 @@ function StepGates({ failGate, failGateMessage, onReset, onResubmit, referralCod
         <div className="sf-result">
           <p className="sf-result-text">
             {shouldShowBetaCopy()
-              ? 'Beta points credited to your account. ETH refunds resume at Season 1 launch.'
+              ? 'Beta points credited. Your Season 1 Pioneer Bonus is registered to your locked wallet and pays out at launch.'
               : 'ETH refund will be dispatched within 24–48 hours'}
           </p>
           {referralCode && (
@@ -935,8 +943,12 @@ function InviteGate({ children }: { children: React.ReactNode }) {
   const [code, setCode] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
+  // Surfaced so the redemption panel + copy can show the pinned wallet
+  // without waiting for a second roundtrip after redeem success.
+  const [lockedWallet, setLockedWallet] = useState<string | null>(null);
 
   const handle = ((user as any)?.twitter?.username || '').toString();
+  const sessionWallet = ((user as any)?.wallet?.address || '').toString();
 
   // Check invite status whenever auth state changes
   useEffect(() => {
@@ -963,6 +975,7 @@ function InviteGate({ children }: { children: React.ReactNode }) {
         const data = await res.json();
         if (!cancelled) {
           setHasInvite(!!data?.hasInvite);
+          if (data?.lockedWallet) setLockedWallet(String(data.lockedWallet));
           setChecking(false);
         }
       } catch {
@@ -992,6 +1005,10 @@ function InviteGate({ children }: { children: React.ReactNode }) {
           authorization: `Bearer ${token}`,
           'x-privy-user-id': String((user as any)?.id || ''),
           'x-privy-handle': handle,
+          // The server pins this wallet into beta_participants. We also
+          // pass it as a hint for verifyPrivySession's fallback path when
+          // the Privy linked_accounts lookup is slow/flaky.
+          'x-privy-wallet': sessionWallet,
         },
         body: JSON.stringify({ code: normalized }),
       });
@@ -1000,6 +1017,7 @@ function InviteGate({ children }: { children: React.ReactNode }) {
         setError(data?.message || data?.error || 'Redemption failed.');
         return;
       }
+      if (data?.lockedWallet) setLockedWallet(String(data.lockedWallet));
       setHasInvite(true);
       setCode('');
     } catch (err: any) {
@@ -1023,12 +1041,12 @@ function InviteGate({ children }: { children: React.ReactNode }) {
     return (
       <div className="sf-container">
         <div className="sf-step">
-          <div className="sf-eyebrow">— SEASON 1 · BETA</div>
+          <div className="sf-eyebrow">— SEASON 1 · BETA · STEP 1 OF 3</div>
           <h2 className="sf-headline">Sign in to continue</h2>
           <p className="sf-sub">
-            Beta access is gated behind a single-use invite code. Sign in with your
-            verified X account first, then enter your code to unlock the submission
-            flow.
+            Beta access is gated behind a single-use invite code. Three quick
+            steps: sign in with X, connect the wallet your Season 1 Pioneer
+            Bonus will pay to, then enter your code.
           </p>
           <button
             type="button"
@@ -1043,18 +1061,100 @@ function InviteGate({ children }: { children: React.ReactNode }) {
     );
   }
 
-  if (!hasInvite) {
+  // Gate 2 of 3: wallet must be connected BEFORE redeeming the invite.
+  // Whatever wallet they connect here gets pinned to beta_participants at
+  // redemption time — that's where the Pioneer Bonus pays out at Season 1
+  // close. This is intentionally a hard stop: redeeming with no wallet
+  // would let testers lose track of their rewards address.
+  if (inviteRequired && !sessionWallet && !hasInvite) {
     return (
       <div className="sf-container">
         <div className="sf-step">
-          <div className="sf-eyebrow">— SEASON 1 · BETA · INVITE REQUIRED</div>
+          <div className="sf-eyebrow">— SEASON 1 · BETA · STEP 2 OF 3</div>
+          <h2 className="sf-headline">Connect your rewards wallet</h2>
+          <p className="sf-sub">
+            Signed in as <strong>@{handle || 'user'}</strong>. Connect the
+            wallet you want your Season 1 Pioneer Bonus to pay to — every
+            beta claim must come from this wallet, and it cannot be changed
+            once you redeem your invite code.
+          </p>
+          <p
+            style={{
+              marginTop: 16,
+              padding: 12,
+              border: '1px solid var(--line)',
+              borderRadius: 0,
+              fontFamily: 'IBM Plex Mono, monospace',
+              fontSize: 12,
+              lineHeight: 1.55,
+              color: 'rgba(255,255,255,0.7)',
+            }}
+          >
+            Use a wallet you will still control at launch. Hardware wallets
+            and self-custodial wallets (MetaMask, Rainbow, Coinbase Wallet,
+            Rabby) are strongly recommended. Do not use exchange deposit
+            addresses or a wallet you might lose access to.
+          </p>
+          <button
+            type="button"
+            className="sf-btn-solid"
+            onClick={() => login()}
+            style={{ marginTop: 24 }}
+          >
+            Connect wallet
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (!hasInvite) {
+    const shortWallet = sessionWallet
+      ? `${sessionWallet.slice(0, 6)}…${sessionWallet.slice(-4)}`
+      : '';
+    return (
+      <div className="sf-container">
+        <div className="sf-step">
+          <div className="sf-eyebrow">— SEASON 1 · BETA · STEP 3 OF 3</div>
           <h2 className="sf-headline">Enter your beta invite code</h2>
           <p className="sf-sub">
-            You&apos;re signed in as <strong>@{handle || 'user'}</strong>. Enter the
+            Signed in as <strong>@{handle || 'user'}</strong>. Enter the
             single-use invite code you received to unlock receipt submission.
-            Browsing the leaderboard, docs, and gates stays public — the code is
-            only required to submit.
+            Redeeming pins your connected wallet to Season 1 — your Pioneer
+            Bonus at launch will pay out there.
           </p>
+          {sessionWallet && (
+            <div
+              style={{
+                marginTop: 20,
+                padding: 14,
+                border: '1px solid var(--status-warn, #d97706)',
+                background: 'rgba(217, 119, 6, 0.06)',
+                borderRadius: 0,
+                fontFamily: 'IBM Plex Mono, monospace',
+                fontSize: 12,
+                lineHeight: 1.6,
+                color: 'rgba(255,255,255,0.85)',
+              }}
+            >
+              <div
+                style={{
+                  fontSize: 11,
+                  letterSpacing: '0.15em',
+                  color: 'var(--status-warn, #d97706)',
+                  fontWeight: 600,
+                  marginBottom: 6,
+                }}
+              >
+                REDEEMING WILL LOCK THIS WALLET
+              </div>
+              <div>
+                <strong title={sessionWallet}>{shortWallet}</strong> — your
+                Pioneer Bonus pays here at Season 1 close. Make sure you can
+                still access this wallet months from now.
+              </div>
+            </div>
+          )}
           <form onSubmit={redeem} style={{ marginTop: 32, maxWidth: 420 }}>
             <label
               style={{
