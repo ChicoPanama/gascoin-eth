@@ -411,8 +411,13 @@ async function scoreTweet(
     return { scored: false, pointsAwarded: 0, heldForReview: false };
   }
 
-  // AI quality scoring
+  // AI quality scoring. Passing tweetId enables the Upstash cache inside
+  // scoreTweetQuality keyed by tweetId + floor(impressions/1000). Without
+  // it every hourly rescore ran a full Grok call; with it we only re-score
+  // when impressions cross a 1000-unit bucket. Drops Grok spend on this
+  // worker by ~70%.
   const qualityScore = await scoreTweetQuality({
+    tweetId: tweet.id,
     tweetText,
     impressions: metrics.impressions,
     likes: metrics.likes,
