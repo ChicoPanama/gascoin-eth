@@ -98,9 +98,14 @@ async function aiFraudAnalysis(signals: {
     prompt: buildFraudUserPrompt(signals),
     maxTokens: 300,
     temperature: 0.1,
-    // P1-D: removed enableAnthropicCache (no-op on Grok); added gateway edge cache
-    // for identical signal combos during submission bursts
-    gatewayCacheSeconds: 30,
+    // Gateway edge cache. Fraud signals are deterministic given the same
+    // OCR + image + metric inputs; two submissions with identical fraud
+    // signal bundles (e.g. a tester resubmitting the same receipt photo
+    // after fixing some OTHER gate failure) cache-hit at the edge and
+    // return in ms with no Grok billing. 300s (5 min) is the sweet spot:
+    // long enough to catch rapid retries during debugging sessions,
+    // short enough we don't serve stale verdicts after content changes.
+    gatewayCacheSeconds: 300,
     fallbackModels: [AI_MODELS.GEMINI_FAST, 'google/gemini-2.5-flash'],
     tags: ['feature:fraud-reasoning', 'pipeline:submit'],
     userId,
