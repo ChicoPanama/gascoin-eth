@@ -7,6 +7,7 @@ import { snapshotTreasury } from '../../../../lib/data-intelligence';
 import { reviewClaim } from '../../../../lib/integrations/claude';
 import { isAuthorizedCron as isAuthorized } from '../../../../lib/cron-auth';
 import { writeIntelligence } from '../../../../lib/knowledge-base';
+import { shouldSilenceBetaAlerts } from '../../../../lib/season';
 
 export async function POST(req: Request) {
   if (!isAuthorized(req)) {
@@ -216,7 +217,8 @@ export async function POST(req: Request) {
     // cron run just floods the admin dashboard and burns Supabase writes.
     // When SEASON_1_POINTS_ONLY is off, keep the alert so a real
     // misconfiguration in production still pages us.
-    if (process.env.SEASON_1_POINTS_ONLY?.trim().toLowerCase() !== 'true') {
+    // Skip during beta (expected state). Helper reads NEXT_PUBLIC_GASCOIN_PHASE.
+    if (!shouldSilenceBetaAlerts()) {
       writeIntelligence({
         entry_type: 'live_payout_disabled',
         entity_type: 'system',
