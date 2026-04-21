@@ -437,6 +437,7 @@ export async function POST(req: Request){
     followerCount,
     accountQualityScore: accountQuality.score,
     accountQualityPassed: accountQuality.passed,
+    fraudRisk: fraudBase.fraudRisk,
   });
 
   // IP cross-account soft flag — adds +0.15 risk and routes to needs_review

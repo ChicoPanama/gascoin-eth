@@ -273,12 +273,28 @@ export const GATES: GateDefinition[] = [
     estimated_time_seconds: 6, is_blocking: false,
     checklist_label: 'I hold at least 1 GASCOIN (or am submitting during Season 1 dry-run)',
   },
+
+  // ─── FRAUD PIPELINE (1) ────────────────────────────────────────
+  {
+    id: 18, slug: 'fraud-risk-acceptable', policyGate: 'fraud_risk_acceptable', name: 'Fraud Risk Acceptable', category: 'receipt',
+    description: 'Your receipt must pass the composite fraud risk assessment. Our pipeline combines Grok cross-validation, EXIF metadata, image dimensions, authenticity scoring, and physical-receipt detection into a single risk label: low, medium, high, or critical. Submissions labeled high or critical fail this gate.',
+    what_we_check: 'Composite fraud label from Grok cross-validation + heuristic scoring. High/critical labels indicate Grok determined the image is not a genuine physical receipt (AI-generated, screenshot, digital mockup, etc.) or that multiple authenticity signals failed simultaneously.',
+    common_failures: [
+      'Image is AI-generated or digitally mocked up (not a photo of a real receipt)',
+      'Image is a screenshot rather than a camera photo (EXIF stripped, suspicious dimensions)',
+      'Receipt was digitally edited before photographing',
+      'Multiple weak signals combined (low EXIF + unusual dimensions + low model confidence)',
+    ],
+    how_to_pass: 'Take a real camera photo of a physical paper receipt. Do not upload screenshots, renders, or edited images. Keep EXIF metadata intact (do not strip via sharing apps).',
+    estimated_time_seconds: 10, is_blocking: true,
+    checklist_label: 'I am uploading a real camera photo of a physical paper receipt',
+  },
 ];
 
 export const GATE_CATEGORIES = {
   identity: { label: 'Identity Verification', count: 5 },
   tweet:    { label: 'Tweet Verification',    count: 3 },
-  receipt:  { label: 'Receipt Verification',  count: 7 },
+  receipt:  { label: 'Receipt Verification',  count: 8 },
   wallet:   { label: 'Wallet Verification',   count: 2 },
   treasury: { label: 'Treasury Check',        count: 0 }, // reserved for future
 } as const;

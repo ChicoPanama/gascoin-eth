@@ -48,11 +48,16 @@ function validClaim(overrides: Partial<ClaimInput> = {}): ClaimInput {
     duplicatePhash: false,
     cooldownOk: true,
     amountUsd: 50,
-    ocrAmount: null,
-    receiptDate: null,
+    // ocrAmount/receiptDate are now fail-closed when null (PR 2026-04-21).
+    // Default fixture sets valid values so the "every gate passes" baseline
+    // actually holds; tests that want to assert the fail-closed behavior
+    // override with null explicitly.
+    ocrAmount: 50,
+    receiptDate: new Date().toISOString().slice(0, 10),
     followerCount: 500,
     accountQualityScore: 70,
     accountQualityPassed: true,
+    fraudRisk: 'low',
     ...overrides,
   };
 }
@@ -397,25 +402,22 @@ describe('Category 2: Score Distribution Analysis', () => {
   });
 
   // Test 9: Exact risk score verification for near-threshold inputs.
-  // AI=0.64, tamper=0.54, amount=$250 (all near thresholds).
+  // AI=0.49 (just under the 0.5 reject threshold set 2026-04-21),
+  // tamper=0.54, amount=$250 (all near thresholds).
   // All gates pass => failed.length=0.
-  // risk = min(1, 0*0.09 + 0.64*0.35 + 0.54*0.25 + 0.08) = 0.224 + 0.135 + 0.08 = 0.439
+  // risk = min(1, 0*0.09 + 0.49*0.35 + 0.54*0.25 + 0.08)
   it('Test 9: Near-threshold claim produces exact expected risk score', () => {
     const r = evaluateClaim(
-      validClaim({ aiScore: 0.64, tamperScore: 0.54, amountUsd: 250 }),
+      validClaim({ aiScore: 0.49, tamperScore: 0.54, amountUsd: 250, ocrAmount: 250 }),
     );
 
     // Formula breakdown:
-    // failed gates: 0 (ai < 0.65, tamper < 0.55, all others pass)
-    // risk = (0 * 0.09) + (0.64 * 0.35) + (0.54 * 0.25) + 0.08 (amount > 200)
-    //       = 0 + 0.224 + 0.135 + 0.08
-    //       = 0.439
-    const expected = +(0 + 0.64 * 0.35 + 0.54 * 0.25 + 0.08).toFixed(4);
+    // failed gates: 0 (ai < 0.5, tamper < 0.55, all others pass)
+    // risk = (0 * 0.09) + (0.49 * 0.35) + (0.54 * 0.25) + 0.08 (amount > 200)
+    const expected = +(0 + 0.49 * 0.35 + 0.54 * 0.25 + 0.08).toFixed(4);
     expect(r.riskScore).toBe(expected);
     expect(r.failed.length).toBe(0);
-    // 0.439 > 0.35 but failed.length===0 => still needs_review because risk >= 0.35
-    // Actually: decision = failed.length===0 && riskScore<0.35 ? dispatch : (risk<0.6 ? review : rejected)
-    // failed=0 but risk=0.439 >= 0.35 => NOT dispatch => needs_review
+    // failed=0 but risk>0.35 => needs_review (not dispatch)
     expect(r.decision).toBe('needs_review');
   });
 
