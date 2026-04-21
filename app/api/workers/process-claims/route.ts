@@ -216,7 +216,7 @@ export async function POST(req: Request) {
     // cron run just floods the admin dashboard and burns Supabase writes.
     // When SEASON_1_POINTS_ONLY is off, keep the alert so a real
     // misconfiguration in production still pages us.
-    if (process.env.SEASON_1_POINTS_ONLY !== 'true') {
+    if (process.env.SEASON_1_POINTS_ONLY?.trim().toLowerCase() !== 'true') {
       writeIntelligence({
         entry_type: 'live_payout_disabled',
         entity_type: 'system',

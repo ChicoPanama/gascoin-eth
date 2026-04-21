@@ -729,7 +729,7 @@ export async function awardVerifiedPoints(
   // can exclude beta activity from public rankings at launch. Source strings are
   // kept unchanged so worker idempotency checks (.eq('source', 'submission_approved'))
   // continue to match.
-  const isBetaMode = process.env.SEASON_1_POINTS_ONLY === 'true';
+  const isBetaMode = process.env.SEASON_1_POINTS_ONLY?.trim().toLowerCase() === 'true';
   await supabase.from('engagement_points').insert({
     wallet: params.wallet,
     source: params.source,
