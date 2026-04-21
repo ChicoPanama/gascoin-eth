@@ -56,6 +56,22 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: false, error: 'unauthorized' }, { status: 401 });
   }
 
+  // A wallet must be connected BEFORE redeeming — this is the wallet we
+  // pin into beta_participants as the Pioneer Bonus payout target. Without
+  // this guard the tester could redeem with no wallet, then connect a
+  // throw-away wallet later, then lose access to the actual rewards wallet.
+  const sessionWallet = String(session.wallet || '').trim();
+  if (!sessionWallet) {
+    return NextResponse.json(
+      {
+        ok: false,
+        error: 'wallet_connect_required',
+        message: 'Connect your wallet before redeeming. Your Season 1 Pioneer Bonus will be locked to this wallet — make sure it\'s one you control and will keep.',
+      },
+      { status: 400 },
+    );
+  }
+
   // Parse body
   let body: any = {};
   try {
@@ -78,11 +94,20 @@ export async function POST(req: Request) {
     .maybeSingle();
 
   if (existing) {
+    // Return the pinned wallet so the UI can reflect "your Pioneer Bonus
+    // goes to 0x…" without a second round trip.
+    const { data: locked } = await supabase
+      .from('beta_participants')
+      .select('wallet, locked_at')
+      .eq('x_user_id', session.xId)
+      .maybeSingle();
     const gateCookie = await signGateCookie({ days: 90 });
     const res = NextResponse.json({
       ok: true,
       code: existing.code,
       alreadyRedeemed: true,
+      lockedWallet: locked?.wallet || null,
+      lockedAt: locked?.locked_at || null,
       message: 'You already have beta access.',
     });
     res.cookies.set(GATE_COOKIE_NAME, gateCookie, {
@@ -137,11 +162,34 @@ export async function POST(req: Request) {
     );
   }
 
+  // Pin the wallet to this x_user_id. From this moment forward every beta
+  // submission must come from sessionWallet. Pioneer Bonus pays here at
+  // Season 1 close. ON CONFLICT DO NOTHING protects against a race where
+  // the tester redeems via two devices simultaneously — whoever's row
+  // wins the invite_codes UPDATE above also wins the wallet pin.
+  const { error: participantErr } = await supabase
+    .from('beta_participants')
+    .insert({
+      x_user_id: session.xId,
+      x_handle: session.xHandle,
+      wallet: sessionWallet,
+      invite_code: updated.code,
+    });
+  if (participantErr && !participantErr.message?.includes('duplicate')) {
+    // Don't block the user on this — the invite is already claimed in
+    // invite_codes and the submit pipeline's idempotent backfill (see
+    // migration comment) will pick them up. But surface to logs.
+    // eslint-disable-next-line no-console
+    console.error('beta_participants insert failed', { xId: session.xId, err: participantErr.message });
+  }
+
   const gateCookie = await signGateCookie({ days: 90 });
   const res = NextResponse.json({
     ok: true,
     code: updated.code,
-    message: 'Beta access unlocked. You can now submit receipts.',
+    lockedWallet: sessionWallet,
+    lockedAt: new Date().toISOString(),
+    message: 'Beta access unlocked. Your Season 1 Pioneer Bonus is pinned to this wallet.',
   });
   res.cookies.set(GATE_COOKIE_NAME, gateCookie, {
     httpOnly: true,
@@ -171,16 +219,27 @@ export async function GET(req: Request) {
   }
 
   const supabase = getSupabaseAdmin();
-  const { data } = await supabase
-    .from('invite_codes')
-    .select('code, redeemed_at')
-    .eq('used_by_x_user_id', session.xId)
-    .maybeSingle();
+  const [inviteRow, lockedRow] = await Promise.all([
+    supabase
+      .from('invite_codes')
+      .select('code, redeemed_at')
+      .eq('used_by_x_user_id', session.xId)
+      .maybeSingle(),
+    supabase
+      .from('beta_participants')
+      .select('wallet, locked_at')
+      .eq('x_user_id', session.xId)
+      .maybeSingle(),
+  ]);
+  const data = inviteRow.data;
+  const locked = lockedRow.data;
 
   return NextResponse.json({
     ok: true,
     hasInvite: !!data,
     code: data?.code || null,
     redeemedAt: data?.redeemed_at || null,
+    lockedWallet: locked?.wallet || null,
+    lockedAt: locked?.locked_at || null,
   });
 }

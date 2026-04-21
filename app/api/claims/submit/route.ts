@@ -265,6 +265,39 @@ export async function POST(req: Request){
     }, { status: 400 });
   }
 
+  // Fail fast on beta-wallet mismatch. Every Season 1 tester has a wallet
+  // pinned in beta_participants at invite redemption. If the current
+  // submission's wallet != pinned wallet, reject — otherwise the Pioneer
+  // Bonus at launch goes to a wallet the tester may not control at the
+  // time of this submission. No-op when no beta_participants row exists
+  // (non-beta users, or post-launch when the table is empty of new rows).
+  const { data: lockedParticipant } = await supabase
+    .from('beta_participants')
+    .select('wallet, locked_at')
+    .eq('x_user_id', session.xId)
+    .maybeSingle();
+  if (
+    lockedParticipant &&
+    lockedParticipant.wallet.toLowerCase() !== session.wallet.toLowerCase()
+  ) {
+    await supabase.from('idempotency_keys')
+      .update({
+        status: 'completed',
+        response_json: { ok: false, error: 'wallet_mismatch_with_locked_beta_wallet' },
+      })
+      .eq('key', idemKey);
+    const shortLocked = `${lockedParticipant.wallet.slice(0, 6)}…${lockedParticipant.wallet.slice(-4)}`;
+    return NextResponse.json(
+      {
+        ok: false,
+        error: 'wallet_mismatch_with_locked_beta_wallet',
+        message: `Season 1 submissions must come from your locked beta wallet (${shortLocked}). Reconnect that wallet and resubmit — your Pioneer Bonus is pinned to it.`,
+        lockedWallet: lockedParticipant.wallet,
+      },
+      { status: 409 },
+    );
+  }
+
   // ─── Phase 2: expensive OCR + fraud checks ─────────────────────────
   const ocr = await analyzeReceipt(receipt);
 
