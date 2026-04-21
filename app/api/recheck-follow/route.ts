@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { verifyPrivySession } from '../../../lib/integrations/privy';
 import { refreshGascoinFollowersCache, isFollowingGascoin } from '../../../lib/integrations/x';
+import { getUserByUsername } from '../../../lib/x-api';
 import { checkRateLimit } from '../../../lib/rate-limit';
 import { getClientIp } from '../../../lib/ip';
 
@@ -81,8 +82,24 @@ export async function POST(req: Request) {
     );
   }
 
-  // Now re-test membership against the freshly populated set.
-  const check = await isFollowingGascoin(session.xId);
+  // Resolve the X numeric subject ID. Prefer Privy's linked_accounts value;
+  // fall back to a live X API lookup if Privy didn't supply one. SISMEMBER
+  // against the freshly populated follower cache needs X's numeric ID —
+  // the Privy DID never matches (see SessionIdentity.xSubjectId comment).
+  let xSubjectId = session.xSubjectId || '';
+  if (!xSubjectId && session.xHandle) {
+    const lookup = await getUserByUsername(session.xHandle);
+    xSubjectId = lookup.user?.id || '';
+  }
+  if (!xSubjectId) {
+    return NextResponse.json(
+      { ok: false, error: 'x_subject_id_unavailable',
+        message: 'Could not resolve your X account ID. Try again in a moment.' },
+      { status: 503 },
+    );
+  }
+
+  const check = await isFollowingGascoin(xSubjectId);
 
   return NextResponse.json({
     ok: true,

@@ -218,16 +218,22 @@ export async function POST(req: Request){
   }
 
   // ─── Phase 1: cheap social-graph + RPC checks ──────────────────────
-  // Run tweet verification, balance check, follower count, account lookup,
-  // and follows-gascoin membership check in parallel. OCR is deferred to
-  // Phase 2 so we don't burn Gemini Vision on users who fail basic gates.
-  const [tweet, minHold, followerCount, userLookup, followsGascoinCheck] = await Promise.all([
+  // Run tweet verification, balance check, follower count, and account
+  // lookup in parallel. OCR is deferred to Phase 2 so we don't burn Gemini
+  // Vision on users who fail basic gates.
+  const [tweet, minHold, followerCount, userLookup] = await Promise.all([
     verifyTweetProof(tweetUrl, `@${session.xHandle}`),
     hasMinimumGascoin(wallet, 1),
     getFollowerCount(session.xHandle),
     getUserByUsername(session.xHandle),
-    isFollowingGascoin(session.xId || ''),
   ]);
+
+  // Follow check runs after userLookup so we can fall back to the X numeric
+  // ID from that response if Privy didn't supply `xSubjectId`. The follower
+  // cache keys on X's numeric user ID — passing the Privy DID would never
+  // match (see SessionIdentity.xSubjectId comment).
+  const xSubjectForFollowCheck = session.xSubjectId || userLookup.user?.id || '';
+  const followsGascoinCheck = await isFollowingGascoin(xSubjectForFollowCheck);
 
   // Fail fast on min-follower miss. Crush-tested pipeline-reordering feedback.
   const MIN_FOLLOWERS = 100;

@@ -1,10 +1,28 @@
 import { PrivyClient } from '@privy-io/node';
 
 export type SessionIdentity = {
+  /**
+   * Privy's internal user DID (e.g. `did:privy:cmo7qzbzt006o0cl1igvah732`).
+   * Used for our users table row id, audit log actor id, rate-limit keys.
+   * NOT the X/Twitter numeric user ID — use `xSubjectId` for SISMEMBER
+   * lookups against the @GasCoinApp follower cache.
+   */
   xId: string;
   xHandle: string;
   xVerified: boolean;
   wallet: string;
+  /**
+   * X (Twitter) numeric user ID extracted from Privy's linked_accounts
+   * twitter_oauth.subject. Empty string if unavailable. This is the value
+   * the X API returns in its /users/:id/followers response — use it for
+   * follower-cache membership checks.
+   *
+   * Historical bug (fixed 2026-04-21): previously callers passed `xId`
+   * (a Privy DID) to `isFollowingGascoin`, which never matched entries
+   * in the cached follower set, so follows_gascoin always failed for
+   * legitimate followers.
+   */
+  xSubjectId: string;
 };
 
 export type SessionHints = {
@@ -73,7 +91,8 @@ export async function verifyPrivySession(
       xId: 'x_mock_001',
       xHandle: 'mockuser',
       xVerified: true,
-      wallet: 'MockWallet111111111111111111111111111111111'
+      wallet: 'MockWallet111111111111111111111111111111111',
+      xSubjectId: ''
     };
   }
 
@@ -89,6 +108,7 @@ export async function verifyPrivySession(
     let xHandle = String(hints?.xHandle || '').replace(/^@/, '');
     let wallet = String(hints?.wallet || '');
     let xVerified = false;
+    let xSubjectId = '';
 
     // Best effort: fetch full user profile for authoritative linked accounts.
     try {
@@ -104,6 +124,13 @@ export async function verifyPrivySession(
         // verification signal comes from the X API (verified_type) and is
         // applied in the claim-submit pipeline, not here.
       }
+      // Privy's twitter_oauth.subject is the X numeric user ID (e.g.
+      // "1461529800"). This is what the X API /users/:id/followers call
+      // returns in its list, so this is what SISMEMBER against the
+      // @GasCoinApp follower cache needs to compare.
+      if (twitter?.subject) {
+        xSubjectId = String(twitter.subject);
+      }
       if (linkedWallet) wallet = String(linkedWallet);
     } catch {
       // keep token-verified identity + client hints fallback
@@ -115,7 +142,8 @@ export async function verifyPrivySession(
       xId,
       xHandle,
       xVerified,
-      wallet: String(wallet || '')
+      wallet: String(wallet || ''),
+      xSubjectId
     };
   } catch {
     if (options?.allowHintFallback) {
@@ -127,7 +155,8 @@ export async function verifyPrivySession(
           xId: fallbackId,
           xHandle: fallbackHandle,
           xVerified: false,
-          wallet: fallbackWallet
+          wallet: fallbackWallet,
+          xSubjectId: ''
         };
       }
     }
