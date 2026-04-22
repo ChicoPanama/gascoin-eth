@@ -22,8 +22,14 @@ type Props = {
 };
 
 export function WalletConnectModal({ open, onClose }: Props) {
-  const { connectors, connect, isPending, variables } = useConnect();
+  const { connectors, connectAsync, isPending, variables } = useConnect();
   const [mounted, setMounted] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // Reset error each time modal opens
+  useEffect(() => {
+    if (open) setError(null);
+  }, [open]);
 
   // Portal target — wait for client mount so SSR doesn't try to touch document.body
   useEffect(() => {
@@ -87,9 +93,31 @@ export function WalletConnectModal({ open, onClose }: Props) {
                 key={connector.uid}
                 type="button"
                 className={`gc-wcm-row${isBusy ? ' gc-wcm-row--busy' : ''}`}
-                onClick={() => {
-                  connect({ connector });
-                  onClose();
+                onClick={async () => {
+                  setError(null);
+                  try {
+                    // connectAsync lets us await the mutation and close the
+                    // modal only after the wallet handoff actually succeeds.
+                    // Using the fire-and-forget `connect({ connector })` +
+                    // synchronous `onClose()` closes the modal before the
+                    // wallet extension prompt renders — user sees it "just
+                    // exit out" with no feedback, and any error is swallowed.
+                    await connectAsync({ connector });
+                    onClose();
+                  } catch (e: any) {
+                    // User-facing error stays in the modal so the picker
+                    // is still usable for retry / different wallet.
+                    const msg = String(e?.shortMessage || e?.message || e || 'Connection failed');
+                    // Common case: user rejected in wallet — phrase it
+                    // plainly instead of leaking raw provider error.
+                    if (/rejected|denied|user cancelled/i.test(msg)) {
+                      setError('Connection rejected in wallet.');
+                    } else if (/not found|no provider|window.ethereum/i.test(msg)) {
+                      setError('No wallet extension detected. Install MetaMask, Rabby, or another Ethereum wallet and refresh.');
+                    } else {
+                      setError(msg);
+                    }
+                  }
                 }}
                 disabled={isBusy}
               >
@@ -107,6 +135,12 @@ export function WalletConnectModal({ open, onClose }: Props) {
             );
           })}
         </div>
+
+        {error && (
+          <div className="gc-wcm-error" role="alert">
+            {error}
+          </div>
+        )}
 
         <div className="gc-wcm-footer">
           PICK A WALLET TO CONTINUE.
