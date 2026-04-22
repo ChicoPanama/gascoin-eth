@@ -25,6 +25,11 @@ const HIDDEN_PREFIXES = ['/admin', '/welcome'];
 export function GlobalChatAgent() {
   const pathname = usePathname();
   const [profile, setProfile] = useState<ChatUserProfile | null>(null);
+  // Track viewport class so we can skip auto-open on mobile. On a 390px
+  // iPhone the expanded chat panel covers half the screen and buries the
+  // sign-in / submit CTA — a beta tester reported they couldn't see the
+  // primary action because the agent opened over it. Desktop UX is fine.
+  const [isNarrow, setIsNarrow] = useState(false);
 
   // Fetch user profile once on mount (requires Privy session)
   useEffect(() => {
@@ -34,12 +39,26 @@ export function GlobalChatAgent() {
       .catch(() => {}); // silent — profile is optional
   }, []);
 
+  useEffect(() => {
+    // 768px lines up with our @media (max-width: 768px) tablet/mobile
+    // breakpoint. Use matchMedia so we react to resize / rotation too.
+    if (typeof window === 'undefined') return;
+    const mql = window.matchMedia('(max-width: 768px)');
+    const update = () => setIsNarrow(mql.matches);
+    update();
+    mql.addEventListener('change', update);
+    return () => mql.removeEventListener('change', update);
+  }, []);
+
   if (HIDDEN_PREFIXES.some(p => pathname.startsWith(p))) return null;
 
   // Derive pageHint from the first path segment
   const base = '/' + (pathname.split('/')[1] ?? '');
   const pageHint = PAGE_HINTS[base];
-  const autoOpen = AUTO_OPEN_PATHS.has(base);
+  // Only auto-open when the viewport has room for the agent alongside
+  // the page's primary content. On mobile the user taps the floating
+  // Gas Attendant button to open it explicitly.
+  const autoOpen = AUTO_OPEN_PATHS.has(base) && !isNarrow;
   const align: 'left' | 'right' = ALIGN_LEFT_PATHS.has(base) ? 'left' : 'right';
 
   return <ChatAgent pageHint={pageHint} autoOpen={autoOpen} align={align} userProfile={profile} />;

@@ -36,6 +36,13 @@ export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
   viewportFit: 'cover',
+  // Matches our dark-theme `--bg` so iOS/Android color the status bar
+  // and browser chrome to blend with the page instead of a white band.
+  // Users in light-mode still get a sensible color — #000 on chrome
+  // reads as standard dark browser UI on both iOS Safari and Android
+  // Chrome; we don't switch per theme because the chrome color lives
+  // outside React state and toggling it mid-session flashes badly.
+  themeColor: '#000000',
 };
 
 // Note: gate count is hardcoded here because Next.js metadata is evaluated
@@ -58,6 +65,19 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: '/favicon.svg',
+    // iPhone uses `apple-touch-icon` when the user taps "Add to Home
+    // Screen". Without it, iOS generates a fuzzy screenshot of the
+    // current page as the icon. We point at our GASCOIN G logo; any
+    // PNG/JPG 180x180 or larger works — iOS rounds the corners itself.
+    apple: '/logo/gascoin-g.jpg',
+  },
+  // PWA manifest — enables standalone mode when the user installs the
+  // app to their home screen on Android (and on iOS 16.4+).
+  manifest: '/manifest.webmanifest',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'black-translucent',
+    title: 'GASCOIN',
   },
   // Universal opt-out from AI training + archive indexing. Per-route
   // metadata can still override (e.g. /presale sets noindex too). Also
@@ -65,6 +85,9 @@ export const metadata: Metadata = {
   other: {
     'robots': 'noai, noimageai, max-snippet:0, max-image-preview:none',
     'googlebot': 'noai, noimageai, max-snippet:0, max-image-preview:none',
+    // Explicit web-app-capable for older Android/WebKit that don't
+    // follow the Next.js `appleWebApp` emit path.
+    'mobile-web-app-capable': 'yes',
   },
 };
 
