@@ -1,8 +1,18 @@
-'use client';
-
+import type { Metadata } from 'next';
 import { Nav } from '../../components/Nav';
 import { POINTS_CONFIG, getContentTypeMultiplier } from '../../lib/engagement-rewards';
 import type { ContentType } from '../../lib/x-api';
+
+export const metadata: Metadata = {
+  title: 'Points System · GASCOIN',
+  description:
+    'How GASCOIN points work: tier multipliers, engagement weighting, AI quality scoring, and leaderboard ranking. Every point you earn is tagged at source.',
+  openGraph: {
+    title: 'Points System · GASCOIN',
+    description:
+      'Original video beats repost 10x. Replies beat likes 50x. Here\u2019s exactly how GASCOIN points are computed.',
+  },
+};
 
 const CONTENT_TYPES: { type: ContentType; label: string }[] = [
   { type: 'original_video', label: 'Original Video' },
