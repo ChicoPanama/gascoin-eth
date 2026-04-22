@@ -3,10 +3,34 @@ import '../styles/wallet-override.css';
 import type { ReactNode } from 'react';
 import type { Metadata, Viewport } from 'next';
 import Script from 'next/script';
+import { Bebas_Neue, IBM_Plex_Mono, IBM_Plex_Sans } from 'next/font/google';
 import { Providers } from './providers';
 import { GlobalFooter } from '../components/GlobalFooter';
 import { GlobalChatAgent } from '../components/GlobalChatAgent';
 import { THEME_INIT_SCRIPT } from '../components/ThemeProvider';
+
+// Self-hosted + subsetted fonts. next/font fingerprints the URL and serves
+// with `Cache-Control: public, max-age=31536000, immutable` — zero FOUT,
+// no blocking round-trip to fonts.googleapis.com, and the browser can
+// preload with the document request.
+const bebas = Bebas_Neue({
+  subsets: ['latin'],
+  weight: '400',
+  display: 'swap',
+  variable: '--font-bebas',
+});
+const plexSans = IBM_Plex_Sans({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700'],
+  display: 'swap',
+  variable: '--font-plex-sans',
+});
+const plexMono = IBM_Plex_Mono({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700'],
+  display: 'swap',
+  variable: '--font-plex-mono',
+});
 
 export const viewport: Viewport = {
   width: 'device-width',
@@ -46,7 +70,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" className={`${bebas.variable} ${plexSans.variable} ${plexMono.variable}`}>
       <head>
         {/* Theme init — runs before React hydrates so the first paint is
             already in the correct mode. Reads localStorage `gc_theme` and
@@ -55,12 +79,6 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           id="gc-theme-init"
           strategy="beforeInteractive"
         >{THEME_INIT_SCRIPT}</Script>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap"
-          rel="stylesheet"
-        />
       </head>
       <body>
         <a href="#main-content" className="skip-nav">Skip to content</a>
