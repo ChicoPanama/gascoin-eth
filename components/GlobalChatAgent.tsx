@@ -29,7 +29,16 @@ export function GlobalChatAgent() {
   // iPhone the expanded chat panel covers half the screen and buries the
   // sign-in / submit CTA — a beta tester reported they couldn't see the
   // primary action because the agent opened over it. Desktop UX is fine.
-  const [isNarrow, setIsNarrow] = useState(false);
+  //
+  // null === "not yet determined, before hydration completes". We defer
+  // the ChatAgent mount entirely until this resolves, because ChatAgent
+  // reads `autoOpen` only on initial mount — a later prop flip from
+  // true → false doesn't re-close an already-opened panel. The old fix
+  // (boolean default false) still auto-opened on mobile because the
+  // very first render of GlobalChatAgent used the default (!isNarrow =
+  // true) → ChatAgent mounted open → the later resize-listener update
+  // to true was ignored by the already-mounted panel.
+  const [isNarrow, setIsNarrow] = useState<boolean | null>(null);
 
   // Fetch user profile once on mount (requires Privy session)
   useEffect(() => {
@@ -51,6 +60,12 @@ export function GlobalChatAgent() {
   }, []);
 
   if (HIDDEN_PREFIXES.some(p => pathname.startsWith(p))) return null;
+
+  // Wait for the viewport classifier before we mount ChatAgent. It
+  // reads `autoOpen` once on mount, so we must supply the right value
+  // the first time. The gap is a single post-hydration frame and user
+  // won't notice — the floating button appears ~16ms after paint.
+  if (isNarrow === null) return null;
 
   // Derive pageHint from the first path segment
   const base = '/' + (pathname.split('/')[1] ?? '');
