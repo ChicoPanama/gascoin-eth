@@ -368,15 +368,24 @@ function StepReceipt({ onNext, onBack, initialFile }: {
   const [checks, setChecks] = useState([false, false, false, false]);
   const [shake, setShake] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const cameraRef = useRef<HTMLInputElement>(null);
 
   // F1: Must match server validation in app/api/claims/submit/route.ts
   // Server accepts: image/jpeg, image/png, image/heic, image/heif, image/webp, application/pdf · max 15 MB
   const VALID_TYPES = ['image/jpeg', 'image/png', 'image/heic', 'image/heif', 'image/webp', 'application/pdf'];
   const MAX_SIZE = 15 * 1024 * 1024;
 
+  // iOS Safari and recent Chrome can't decode HEIC/HEIF in <img>. If we
+  // pass the object URL to a thumbnail, the user sees a broken image
+  // icon and assumes their upload failed. Detect by MIME or extension
+  // and show a named card instead. OCR server-side handles HEIC fine.
+  const isHeic = (f: File) =>
+    f.type === 'image/heic' || f.type === 'image/heif' ||
+    /\.(heic|heif)$/i.test(f.name);
+
   useEffect(() => {
     if (initialFile) {
-      if (initialFile.type.startsWith('image/')) {
+      if (initialFile.type.startsWith('image/') && !isHeic(initialFile)) {
         setPreview(URL.createObjectURL(initialFile));
       }
     }
@@ -393,7 +402,10 @@ function StepReceipt({ onNext, onBack, initialFile }: {
       return;
     }
     setFile(f);
-    if (f.type.startsWith('image/')) {
+    // Skip HEIC preview — browsers can't render it. Card UI below
+    // shows filename + size instead, so the user still sees that
+    // their upload landed.
+    if (f.type.startsWith('image/') && !isHeic(f)) {
       setPreview(URL.createObjectURL(f));
     } else {
       setPreview('');
@@ -436,11 +448,25 @@ function StepReceipt({ onNext, onBack, initialFile }: {
         className={`sf-upload${file ? ' sf-upload--has-file' : ''}`}
         onDragOver={(e) => e.preventDefault()}
         onDrop={handleDrop}
-        onClick={() => !file && inputRef.current?.click()}
       >
         {file ? (
           <div className="sf-upload-preview">
-            {preview && <img src={preview} alt="Receipt" className="sf-upload-thumb" />}
+            {preview ? (
+              <img src={preview} alt="Receipt" className="sf-upload-thumb" />
+            ) : (
+              // HEIC / PDF: no browser-renderable preview. Show a
+              // clear "file attached" card so the user knows the
+              // upload succeeded even without a visual thumbnail.
+              <div className="sf-upload-thumb sf-upload-thumb--placeholder" aria-hidden>
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                  <polyline points="14 2 14 8 20 8" />
+                </svg>
+                <span className="sf-upload-thumb-label">
+                  {file.type === 'application/pdf' ? 'PDF' : 'IMAGE'}
+                </span>
+              </div>
+            )}
             <div className="sf-upload-info">
               <div className="sf-upload-name">{file.name}</div>
               <div className="sf-upload-size">{formatSize(file.size)}</div>
@@ -456,13 +482,55 @@ function StepReceipt({ onNext, onBack, initialFile }: {
               <circle cx="8.5" cy="8.5" r="1.5" />
               <path d="m21 15-5-5L5 21" />
             </svg>
-            <span>Drag &amp; drop or click to upload</span>
+            <div className="sf-upload-actions">
+              {/* Two buttons instead of one hit-area: on mobile the
+                  camera-only input opens the rear camera directly
+                  (Android needs `capture="environment"`; iOS honors
+                  it too since Safari 15). Desktop users ignore the
+                  Take Photo button and use Upload File. */}
+              <button
+                type="button"
+                className="sf-upload-btn sf-upload-btn--camera"
+                onClick={(e) => { e.stopPropagation(); cameraRef.current?.click(); }}
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                  <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
+                  <circle cx="12" cy="13" r="4" />
+                </svg>
+                TAKE PHOTO
+              </button>
+              <button
+                type="button"
+                className="sf-upload-btn sf-upload-btn--file"
+                onClick={(e) => { e.stopPropagation(); inputRef.current?.click(); }}
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                  <polyline points="17 8 12 3 7 8" />
+                  <line x1="12" y1="3" x2="12" y2="15" />
+                </svg>
+                UPLOAD FILE
+              </button>
+            </div>
+            <span className="sf-upload-hint">On desktop you can also drag &amp; drop.</span>
           </div>
         )}
         <input
           ref={inputRef}
           type="file"
           accept=".jpg,.jpeg,.png,.heic,.heif,.webp,.pdf"
+          style={{ display: 'none' }}
+          onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])}
+        />
+        {/* Camera-only input: accept filters to images (PDFs can't come
+            from a camera), and `capture="environment"` hints the rear
+            camera. Browsers that don't support capture fall back to the
+            normal file picker. */}
+        <input
+          ref={cameraRef}
+          type="file"
+          accept="image/*"
+          capture="environment"
           style={{ display: 'none' }}
           onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])}
         />
