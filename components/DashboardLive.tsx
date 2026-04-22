@@ -5,7 +5,7 @@ import { DEMO_CHART_DATA, DEMO_GATE_RATES, DEMO_STATS } from '../lib/demo-data';
 
 type TreasurySummary = {
   live: boolean;
-  solBalance: number;
+  ethBalance: number;
   ethUsd: number;
   gascoinBalance: number;
   gascoinUsd: number;
@@ -19,7 +19,7 @@ async function fetchTreasurySummary(): Promise<TreasurySummary | null> {
     const json = await res.json();
     return {
       live: Boolean(json?.live),
-      solBalance: Number(json?.solBalance || 0),
+      ethBalance: Number(json?.ethBalance ?? json?.solBalance ?? 0),
       ethUsd: Number(json?.ethUsd || 0),
       gascoinBalance: Number(json?.gascoinBalance || 0),
       gascoinUsd: Number(json?.gascoinUsd || 0),
@@ -130,11 +130,11 @@ export function LiveStatsBar({ refundsToday, totalPaid, queueDepth }: {
   const useDemoTreasury = !treasury || !treasury.live || treasury.totalUsd <= 0;
   const displayBalUsd = useDemoTreasury ? 2_180_000 : treasury.totalUsd;
   const displayGc = useDemoTreasury ? 8_500_000 : treasury.gascoinBalance;
-  const solPrice = treasury && treasury.solBalance > 0 ? treasury.ethUsd / treasury.solBalance : 0;
+  const ethPrice = treasury && treasury.ethBalance > 0 ? treasury.ethUsd / treasury.ethBalance : 0;
   const displayRefunds = refundsToday > 0 ? refundsToday : DEMO_STATS.refundsToday;
-  const displayPaidUsd = totalPaid > 0 && solPrice > 0
-    ? totalPaid * solPrice
-    : (DEMO_STATS.totalPaid * 170);
+  const displayPaidUsd = totalPaid > 0 && ethPrice > 0
+    ? totalPaid * ethPrice
+    : (DEMO_STATS.totalPaid * 3000);
   const displayQueue = queueDepth > 0 ? queueDepth : DEMO_STATS.queueDepth;
   const isDemo = useDemoTreasury || (refundsToday === 0 && totalPaid === 0);
 
@@ -203,10 +203,11 @@ export function TreasuryChart() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [hover, setHover] = useState<{ x: number; idx: number } | null>(null);
-  const [chartData, setChartData] = useState<{ day: string; usdc: number }[]>(
-    DEMO_CHART_DATA.map((d) => ({ day: d.day, usdc: d.sol * 170 }))
+  // Chart plots USD value per day.
+  const [chartData, setChartData] = useState<{ day: string; usd: number }[]>(
+    DEMO_CHART_DATA.map((d) => ({ day: d.day, usd: d.eth * 3000 }))
   );
-  const [ethUsdPrice, setSolUsdPrice] = useState(170);
+  const [ethUsdPrice, setEthUsdPrice] = useState(3000);
 
   useEffect(() => {
     let active = true;
@@ -218,11 +219,11 @@ export function TreasuryChart() {
         if (!active) return;
         if (Array.isArray(rows) && rows.length >= 2) {
           setChartData(rows.map((r: any) => {
-            const usdc = Number(r.usdc || 0);
-            const sol = Number(r.sol || 0);
+            const usd = Number(r.usd ?? 0);
+            const eth = Number(r.eth ?? 0);
             return {
               day: String(r.day || ''),
-              usdc: usdc > 0 ? usdc : sol * ethUsdPrice,
+              usd: usd > 0 ? usd : eth * ethUsdPrice,
             };
           }));
         }
@@ -244,7 +245,7 @@ export function TreasuryChart() {
         const m = await res.json();
         if (!active) return;
         const p = Number(m?.ethPriceUsd || 0);
-        if (p > 0) setSolUsdPrice(p);
+        if (p > 0) setEthUsdPrice(p);
       } catch {
         // keep fallback
       }
@@ -274,7 +275,7 @@ export function TreasuryChart() {
 
     ctx.clearRect(0, 0, w, h);
 
-    const vals = chartData.map(d => d.usdc);
+    const vals = chartData.map(d => d.usd);
     const min = Math.floor(Math.min(...vals) - 2);
     const max = Math.ceil(Math.max(...vals) + 2);
     const range = max - min;
@@ -313,7 +314,7 @@ export function TreasuryChart() {
     ctx.beginPath();
     chartData.forEach((d, i) => {
       const x = toX(i);
-      const y = toY(d.usdc);
+      const y = toY(d.usd);
       if (i === 0) ctx.moveTo(x, y);
       else ctx.lineTo(x, y);
     });
@@ -322,7 +323,7 @@ export function TreasuryChart() {
     // Dots
     chartData.forEach((d, i) => {
       ctx.beginPath();
-      ctx.arc(toX(i), toY(d.usdc), 2.5, 0, Math.PI * 2);
+      ctx.arc(toX(i), toY(d.usd), 2.5, 0, Math.PI * 2);
       ctx.fillStyle = '#fff';
       ctx.fill();
     });
@@ -331,7 +332,7 @@ export function TreasuryChart() {
     if (hoverState && hoverState.idx >= 0 && hoverState.idx < chartData.length) {
       const d = chartData[hoverState.idx];
       const x = toX(hoverState.idx);
-      const y = toY(d.usdc);
+      const y = toY(d.usd);
 
       ctx.strokeStyle = 'rgba(255,255,255,0.2)';
       ctx.lineWidth = 1;
@@ -343,7 +344,7 @@ export function TreasuryChart() {
       ctx.setLineDash([]);
 
       // Tooltip bg
-      const label = `${d.day} · ${formatUsd(d.usdc)}`;
+      const label = `${d.day} · ${formatUsd(d.usd)}`;
       ctx.font = '11px "IBM Plex Mono", monospace';
       const tw = ctx.measureText(label).width + 16;
       const tx = Math.min(x - tw / 2, w - tw - 4);

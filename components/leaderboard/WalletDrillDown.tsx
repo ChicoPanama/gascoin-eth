@@ -22,7 +22,7 @@ export function WalletDrillDown({ wallet, onClose }: {
     } catch {}
   };
 
-  const total = history.reduce((s, h) => s + h.sol_amount, 0);
+  const total = history.reduce((s, h) => s + h.eth_amount, 0);
 
   return (
     <div className="lb-drill-overlay" onClick={onClose}>
@@ -49,7 +49,7 @@ export function WalletDrillDown({ wallet, onClose }: {
                 <div className="lb-drill-date">
                   {new Date(h.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                 </div>
-                <div className="lb-drill-amount">{formatEth(h.sol_amount)}</div>
+                <div className="lb-drill-amount">{formatEth(h.eth_amount)}</div>
                 <div className="lb-drill-gates">{h.gates_passed}/10 GATES</div>
                 <div className="lb-drill-id">
                   GC-{new Date(h.created_at).getFullYear()}-{h.id.slice(0, 5).toUpperCase()}

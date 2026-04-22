@@ -6,7 +6,7 @@ import type { FeedFilter, FeedSort } from '../../types/community';
 const SORT_OPTIONS: { value: FeedSort; label: string }[] = [
   { value: 'newest', label: 'NEWEST' },
   { value: 'oldest', label: 'OLDEST' },
-  { value: 'highest_sol', label: 'HIGHEST ETH' },
+  { value: 'highest_eth', label: 'HIGHEST ETH' },
   { value: 'highest_usd', label: 'HIGHEST USD' },
 ];
 

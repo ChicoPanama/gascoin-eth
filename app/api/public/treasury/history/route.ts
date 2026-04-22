@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '../../../../../lib/supabase';
+import { withPublicCache } from '../../../../../lib/http-cache';
 
 export const dynamic = 'force-dynamic';
 
@@ -8,7 +9,7 @@ export async function GET() {
   try {
     supabase = getSupabaseAdmin();
   } catch {
-    return NextResponse.json([]);
+    return withPublicCache(NextResponse.json([]), { sMaxAge: 300 });
   }
 
   const since = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
@@ -20,21 +21,31 @@ export async function GET() {
     .order('ts', { ascending: true })
     .limit(400);
 
-  if (error || !data) return NextResponse.json([]);
+  if (error || !data) return withPublicCache(NextResponse.json([]), { sMaxAge: 300 });
 
-  // Downsample to ~7 points (daily nearest-latest snapshot)
-  const byDay = new Map<string, { day: string; sol: number; usdc: number; ts: string }>();
+  // Downsample to ~7 points (daily nearest-latest snapshot).
+  const byDay = new Map<string, {
+    day: string;
+    eth: number;
+    usd: number;
+    ts: string;
+  }>();
   for (const row of data as any[]) {
     const ts = row.ts as string;
     const d = new Date(ts);
     const key = d.toISOString().slice(0, 10);
     byDay.set(key, {
       day: d.toLocaleDateString('en-US', { weekday: 'short' }),
-      sol: Number(row.eth_balance || 0),
-      usdc: Number(row.usd_value || 0),
+      eth: Number(row.eth_balance || 0),
+      usd: Number(row.usd_value || 0),
       ts,
     });
   }
 
-  return NextResponse.json(Array.from(byDay.values()).slice(-7));
+  // 5-min cache: daily snapshots are written by the intel worker, so sub-5min
+  // freshness is impossible by design. Browser/edge keeps the chart cheap.
+  return withPublicCache(
+    NextResponse.json(Array.from(byDay.values()).slice(-7)),
+    { sMaxAge: 300 },
+  );
 }

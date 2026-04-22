@@ -10,7 +10,7 @@ function mapClaim(c: any): WalletSubmission {
     id: c.id,
     wallet: c.wallet,
     status: c.status,
-    sol_amount: 0,
+    eth_amount: 0,
     storage_path: c.claim_receipts?.[0]?.storage_path_private || null,
     country: c.country || null,
     receipt_usd: c.parsed_amount ? Number(c.parsed_amount) : null,
@@ -67,7 +67,7 @@ export async function getOwnSubmissions(wallet: string): Promise<WalletSubmissio
 
     return (claims || []).map((c: any) => {
       const sub = mapClaim(c);
-      sub.sol_amount = payoutMap.get(c.id) || 0;
+      sub.eth_amount = payoutMap.get(c.id) || 0;
       sub.gates_passed = (c.gate_results || []).filter((g: any) => g.passed).length;
       return sub;
     });
@@ -93,7 +93,7 @@ export async function getPublicSubmissions(wallet: string): Promise<WalletSubmis
       id: p.claim_id || p.id,
       wallet: p.wallet,
       status: 'approved',
-      sol_amount: Number(p.amount_eth || 0),
+      eth_amount: Number(p.amount_eth || 0),
       storage_path: null,
       country: p.claims?.country || null,
       receipt_usd: p.claims?.parsed_amount ? Number(p.claims.parsed_amount) : null,

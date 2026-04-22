@@ -29,10 +29,10 @@ export default async function StatsPage() {
 
   const topWallets = (walletRes.data || []).map((r: any) => ({
     wallet: r.wallet as string,
-    sol: Number(r.total_eth),
+    eth: Number(r.total_eth),
     count: Number(r.payout_count),
   }));
-  const totalEth = topWallets.reduce((s: number, w: any) => s + w.sol, 0);
+  const totalEth = topWallets.reduce((s: number, w: any) => s + w.eth, 0);
 
   const statuses = ['submitted', 'auto_review', 'needs_manual_review', 'approved', 'rejected'];
 
@@ -119,7 +119,7 @@ export default async function StatsPage() {
             <tr key={w.wallet} className="lb-table-row">
               <td className="lb-table-rank">{i + 1}</td>
               <td className="lb-table-wallet">{truncateWallet(w.wallet)}</td>
-              <td className="lb-table-sol">{formatEth(w.sol)}</td>
+              <td className="lb-table-sol">{formatEth(w.eth)}</td>
               <td className="lb-table-claims">{w.count}</td>
             </tr>
           ))}

@@ -28,13 +28,13 @@ export const DEMO_STATS = {
 
 // ── Chart (7-day treasury) ──
 export const DEMO_CHART_DATA = [
-  { day: 'Mon', sol: 12200 },
-  { day: 'Tue', sol: 12350 },
-  { day: 'Wed', sol: 12510 },
-  { day: 'Thu', sol: 12480 },
-  { day: 'Fri', sol: 12690 },
-  { day: 'Sat', sol: 12770 },
-  { day: 'Sun', sol: 12847 },
+  { day: 'Mon', eth: 12200 },
+  { day: 'Tue', eth: 12350 },
+  { day: 'Wed', eth: 12510 },
+  { day: 'Thu', eth: 12480 },
+  { day: 'Fri', eth: 12690 },
+  { day: 'Sat', eth: 12770 },
+  { day: 'Sun', eth: 12847 },
 ];
 
 // ── Leaderboard (10 entries with X handles) ──
@@ -89,7 +89,7 @@ export const DEMO_COMMUNITY_STATS = {
   total_approved: 1247,
   total_eth_paid: 4821.5,
   unique_countries: 23,
-  avg_refund_sol: 0.38,
+  avg_refund_eth: 0.38,
 };
 
 // ── Gate Stats (for full /gates page) ──
