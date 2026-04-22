@@ -84,9 +84,9 @@
   --spacing-64: 64px;
 
   /* ── Typography ── */
-  --font-display: 'Bebas Neue', sans-serif;
-  --font-body: 'IBM Plex Sans', sans-serif;
-  --font-mono: 'IBM Plex Mono', monospace;
+  --font-display: var(--font-bebas), 'Bebas Neue', sans-serif;
+  --font-body: var(--font-plex-sans), 'IBM Plex Sans', sans-serif;
+  --font-mono: var(--font-plex-mono), 'IBM Plex Mono', monospace;
 
   /* Fluid type scale: min @ 375px → max @ 1440px */
   --text-hero: clamp(48px, 6vw + 16px, 80px);

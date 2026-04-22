@@ -48,22 +48,24 @@ describe('buildFunnel', () => {
   });
 
   it('computes conversion rate between stages', () => {
-    const events = Array.from({ length: 100 }, (_, i) => ({
-      stage: 'impression' as AttributionStage,
-      referred_wallet: null,
-      occurred_at: '2026-04-01',
-    })).concat(
-      Array.from({ length: 20 }, (_, i) => ({
-        stage: 'wallet_connect' as AttributionStage,
+    type Evt = { stage: AttributionStage; referred_wallet: string | null; occurred_at: string };
+    const events: Evt[] = [
+      ...Array.from({ length: 100 }, (): Evt => ({
+        stage: 'impression',
+        referred_wallet: null,
+        occurred_at: '2026-04-01',
+      })),
+      ...Array.from({ length: 20 }, (_, i): Evt => ({
+        stage: 'wallet_connect',
         referred_wallet: `0x${i.toString(16).padStart(2, '0')}`,
         occurred_at: '2026-04-02',
       })),
-      Array.from({ length: 5 }, (_, i) => ({
-        stage: 'payout' as AttributionStage,
+      ...Array.from({ length: 5 }, (_, i): Evt => ({
+        stage: 'payout',
         referred_wallet: `0x${i.toString(16).padStart(2, '0')}`,
         occurred_at: '2026-04-03',
       })),
-    );
+    ];
     const funnel = buildFunnel(events);
     const impressions = funnel.find((s) => s.stage === 'impression')!;
     const payouts = funnel.find((s) => s.stage === 'payout')!;

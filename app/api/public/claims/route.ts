@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '../../../../lib/supabase';
 import { checkRateLimit } from '../../../../lib/rate-limit';
 import { getClientIp } from '../../../../lib/ip';
+import { withPublicCache } from '../../../../lib/http-cache';
 
 export async function GET(req: Request) {
   const rl = await checkRateLimit(`pub_claims:${getClientIp(req)}`, 30, 60);
@@ -12,7 +13,7 @@ export async function GET(req: Request) {
   try {
     supabase = getSupabaseAdmin();
   } catch {
-    return NextResponse.json([]);
+    return withPublicCache(NextResponse.json([]), { sMaxAge: 120 });
   }
 
   const { data, error } = await supabase
@@ -36,5 +37,7 @@ export async function GET(req: Request) {
     status: p.status || 'queued'
   }));
 
-  return NextResponse.json(rows);
+  // Proof-of-payout feed: only shows `paid` rows, so a 2-min cache lag is
+  // imperceptible — payouts trickle in minutes apart at most.
+  return withPublicCache(NextResponse.json(rows), { sMaxAge: 120 });
 }

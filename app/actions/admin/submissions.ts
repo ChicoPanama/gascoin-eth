@@ -68,7 +68,7 @@ export async function approveSubmission(claimId: string, ethAmount: number, note
     targetType: 'claim',
     targetId: claimId,
     beforeState: before,
-    afterState: { status: 'approved', sol_amount: ethAmount },
+    afterState: { status: 'approved', eth_amount: ethAmount },
     metadata: { note },
   });
 }

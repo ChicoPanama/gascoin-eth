@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getCreatorProfile, getCreatorPosts, getCreatorImpact } from '../../../../../lib/creator-profile';
+import { withPublicCache } from '../../../../../lib/http-cache';
 
 export const dynamic = 'force-dynamic';
 
@@ -22,5 +23,7 @@ export async function GET(
     return NextResponse.json({ error: 'not_found' }, { status: 404 });
   }
 
-  return NextResponse.json({ profile, posts, impact });
+  // Creator pages are the slowest to mutate — posts trickle in, impact
+  // recomputes in the worker. 2-min shared cache keeps creator pages snappy.
+  return withPublicCache(NextResponse.json({ profile, posts, impact }), { sMaxAge: 120 });
 }

@@ -13,7 +13,7 @@ function mapPayoutToReceipt(p: any, connectedWallet: string | null): CommunityRe
   return {
     id: p.id,
     wallet: p.wallet || '',
-    sol_amount: Number(p.amount_eth || 0),
+    eth_amount: Number(p.amount_eth || 0),
     country: claim.country || null,
     receipt_usd: claim.parsed_amount ? Number(claim.parsed_amount) : null,
     receipt_date: claim.created_at || p.created_at,
@@ -57,7 +57,7 @@ export function useCommunityFeed(
 
       switch (sort) {
         case 'oldest': query = query.order('created_at', { ascending: true }); break;
-        case 'highest_sol': query = query.order('amount_eth', { ascending: false }); break;
+        case 'highest_eth': query = query.order('amount_eth', { ascending: false }); break;
         default: query = query.order('created_at', { ascending: false });
       }
 

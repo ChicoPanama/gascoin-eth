@@ -54,22 +54,47 @@ export async function POST(req: Request) {
     .select('wallet, source, points')
     .gte('created_at', yesterdayStart);
 
+  // Index rows by wallet in a single pass — was O(wallets × rows) with
+  // repeated `.filter()` per wallet, now O(rows + wallets).
+  type ClaimRow = { wallet: string; status: string; risk_score: number | null };
+  type PayoutRow = { wallet: string; amount_eth: number | string | null; status: string };
+  type PointRow = { wallet: string; source: string; points: number | string | null };
+
+  const claimsByWallet = new Map<string, ClaimRow[]>();
+  const payoutsByWallet = new Map<string, PayoutRow[]>();
+  const pointsByWallet = new Map<string, PointRow[]>();
   const activeWallets = new Set<string>();
-  for (const c of activeClaims || []) activeWallets.add(c.wallet);
-  for (const p of activePayouts || []) activeWallets.add(p.wallet);
-  for (const e of activePoints || []) activeWallets.add(e.wallet);
+
+  for (const c of (activeClaims || []) as ClaimRow[]) {
+    activeWallets.add(c.wallet);
+    const arr = claimsByWallet.get(c.wallet);
+    if (arr) arr.push(c); else claimsByWallet.set(c.wallet, [c]);
+  }
+  for (const p of (activePayouts || []) as PayoutRow[]) {
+    activeWallets.add(p.wallet);
+    const arr = payoutsByWallet.get(p.wallet);
+    if (arr) arr.push(p); else payoutsByWallet.set(p.wallet, [p]);
+  }
+  for (const e of (activePoints || []) as PointRow[]) {
+    activeWallets.add(e.wallet);
+    const arr = pointsByWallet.get(e.wallet);
+    if (arr) arr.push(e); else pointsByWallet.set(e.wallet, [e]);
+  }
 
   let synthesized = 0;
   for (const wallet of activeWallets) {
-    const claims = (activeClaims || []).filter((c: any) => c.wallet === wallet);
-    const payouts = (activePayouts || []).filter((p: any) => p.wallet === wallet);
-    const points = (activePoints || []).filter((e: any) => e.wallet === wallet);
-    const totalPoints = points.reduce((s: number, e: any) => s + Number(e.points || 0), 0);
-    const totalEth = payouts.filter((p: any) => p.status === 'paid').reduce((s: number, p: any) => s + Number(p.amount_eth || 0), 0);
+    const claims = claimsByWallet.get(wallet) || [];
+    const payouts = payoutsByWallet.get(wallet) || [];
+    const points = pointsByWallet.get(wallet) || [];
+    const totalPoints = points.reduce((s, e) => s + Number(e.points || 0), 0);
+    const totalEth = payouts.reduce(
+      (s, p) => p.status === 'paid' ? s + Number(p.amount_eth || 0) : s,
+      0,
+    );
 
     addMemory('wallet', wallet,
       `Daily ${todayKey}: ${claims.length} claims, ${payouts.length} payouts (${totalEth} ETH), ${totalPoints} points. ` +
-      `Statuses: ${claims.map((c: any) => c.status).join(',')}`,
+      `Statuses: ${claims.map((c) => c.status).join(',')}`,
       { pipeline: 'intelligence', date: todayKey },
     ).catch(() => {});
 

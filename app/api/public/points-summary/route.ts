@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { headers } from 'next/headers';
 import { getSupabaseAdmin } from '../../../../lib/supabase';
 import { checkRateLimit } from '../../../../lib/rate-limit';
+import { withPublicCache } from '../../../../lib/http-cache';
 
 export const dynamic = 'force-dynamic';
 
@@ -82,19 +83,19 @@ export async function GET() {
     daily.push({ day, points: dayMap[day] || 0 });
   }
 
-  const res = NextResponse.json({
-    ok: true,
-    stats: {
-      total_points: totalPoints,
-      unique_wallets: uniqueWallets,
-      points_today: todayPoints,
-      pending_points: pendingPoints,
-    },
-    by_source: bySource,
-    daily,
-    recent: recentRows || [],
-  });
-
-  res.headers.set('Cache-Control', 'public, s-maxage=300, stale-while-revalidate=600');
-  return res;
+  return withPublicCache(
+    NextResponse.json({
+      ok: true,
+      stats: {
+        total_points: totalPoints,
+        unique_wallets: uniqueWallets,
+        points_today: todayPoints,
+        pending_points: pendingPoints,
+      },
+      by_source: bySource,
+      daily,
+      recent: recentRows || [],
+    }),
+    { sMaxAge: 300, staleWhileRevalidate: 600 },
+  );
 }

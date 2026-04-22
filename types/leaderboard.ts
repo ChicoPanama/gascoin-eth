@@ -26,7 +26,7 @@ export interface LeaderboardStats {
 
 export interface WalletSubmissionHistory {
   id: string;
-  sol_amount: number;
+  eth_amount: number;
   created_at: string;
   gates_passed: number;
   status: string;

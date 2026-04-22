@@ -2,7 +2,7 @@ export interface WalletSubmission {
   id: string;
   wallet: string;
   status: string;
-  sol_amount: number;
+  eth_amount: number;
   storage_path: string | null;
   country: string | null;
   receipt_usd: number | null;

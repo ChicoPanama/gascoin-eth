@@ -3,6 +3,7 @@ import { getSupabaseAdmin } from '../../../../lib/supabase';
 import { hashRequestBody, resolveIdempotencyKey } from '../../../../lib/idempotency';
 import { processQueuedPayout } from '../../../../lib/payout-worker';
 import { isAuthorizedCron as isAuthorized } from '../../../../lib/cron-auth';
+import { expireTags } from '../../../../lib/runtime-cache';
 
 export async function POST(req: Request) {
   if (!isAuthorized(req)) {
@@ -71,6 +72,10 @@ export async function POST(req: Request) {
   if (!result.ok) {
     return NextResponse.json(result, { status: result.error === 'min_gascoin_not_met' ? 422 : 500 });
   }
+
+  // Successful payout moved ETH out of treasury — bust the Runtime Cache
+  // tag so the next /api/public/treasury hit reflects the new balance.
+  await expireTags('treasury');
 
   return NextResponse.json(result);
 }

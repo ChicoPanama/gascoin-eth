@@ -322,7 +322,7 @@ export function WalletTrackerClient({ initialLookupAddress }: { initialLookupAdd
                         </span>
                       </td>
                     )}
-                    <td className="lb-table-sol">{formatEth(s.sol_amount)}</td>
+                    <td className="lb-table-sol">{formatEth(s.eth_amount)}</td>
                     <td className="lb-table-claims">{s.receipt_usd != null ? `$${s.receipt_usd.toFixed(2)}` : '—'}</td>
                     <td className="lb-table-claims">{loc}</td>
                     <td className="lb-table-claims">{isRejected ? `✕ G${s.gates_passed}` : `${s.gates_passed}/${GATES.length}`}</td>

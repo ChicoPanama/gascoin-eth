@@ -32,6 +32,7 @@
     "@upstash/ratelimit": "^2.0.8",
     "@upstash/redis": "^1.37.0",
     "@vercel/edge-config": "^1.4.3",
+    "@vercel/functions": "^3.4.4",
     "@wagmi/core": "^2.13.0",
     "ai": "^6.0.158",
     "framer-motion": "^12.38.0",

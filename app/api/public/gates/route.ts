@@ -1,14 +1,18 @@
 import { NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '../../../../lib/supabase';
+import { withPublicCache } from '../../../../lib/http-cache';
+import { withRuntimeCache } from '../../../../lib/runtime-cache';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET() {
+type GateRow = { name: string; rate: number; total: number };
+
+async function computeGateRates(): Promise<GateRow[]> {
   let supabase;
   try {
     supabase = getSupabaseAdmin();
   } catch {
-    return NextResponse.json([]);
+    return [];
   }
 
   const since = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString();
@@ -18,7 +22,7 @@ export async function GET() {
     .gte('created_at', since)
     .limit(10000);
 
-  if (error || !data) return NextResponse.json([]);
+  if (error || !data) return [];
 
   const counts = new Map<string, { total: number; passed: number }>();
   for (const row of data as any[]) {
@@ -30,11 +34,23 @@ export async function GET() {
     counts.set(name, c);
   }
 
-  const rows = Array.from(counts.entries()).map(([name, c]) => ({
+  return Array.from(counts.entries()).map(([name, c]) => ({
     name,
     rate: c.total > 0 ? Math.round((c.passed / c.total) * 100) : 0,
     total: c.total,
   }));
+}
 
-  return NextResponse.json(rows);
+export async function GET() {
+  // Two-tier cache: Runtime Cache (regional, 10 min) avoids re-scanning
+  // 14d of gate_results per region-warm function, CDN cache (600s) shares
+  // across clients. Tag `gates` so payout-worker can expireTag on major
+  // rule changes.
+  const rows = await withRuntimeCache(
+    'public:gates:v1',
+    computeGateRates,
+    { ttl: 600, tags: ['gates'], name: 'public-gates-rates' },
+  );
+
+  return withPublicCache(NextResponse.json(rows), { sMaxAge: 600 });
 }

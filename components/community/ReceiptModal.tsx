@@ -89,7 +89,7 @@ export function ReceiptModal({ receipt, onClose }: {
 
             <div className="cf-modal-row cf-modal-row--sol">
               <span className="cf-modal-label">ETH Refunded</span>
-              <span className="cf-modal-value-sol">{formatEth(receipt.sol_amount)}</span>
+              <span className="cf-modal-value-sol">{formatEth(receipt.eth_amount)}</span>
             </div>
 
             {receipt.receipt_usd != null && receipt.receipt_usd > 0 && (
