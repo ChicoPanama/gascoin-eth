@@ -5760,14 +5760,32 @@ button.docs-footer-link {
 
   .cf-grid { grid-template-columns: 1fr; }
   .cf-controls { flex-direction: column; gap: 12px; align-items: stretch; }
-  .cf-filters { width: 100%; }
+  /* Horizontal-scroll filter strip on mobile. At 320px, `flex: 1 1 0`
+     forced 5 tabs ("ALL/TWEET/RECEIPT/WALLET/TREASURY") into a row
+     where "TREASURY (0)" ran 91px past the right edge, invisible and
+     untappable on iPhone SE. Swiping horizontally is the native
+     iOS/Android filter-row pattern (see Twitter, Instagram tabs). */
+  .cf-filters {
+    width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    flex-wrap: nowrap;
+    scroll-snap-type: x proximity;
+    -webkit-overflow-scrolling: touch;
+    /* Hide the scrollbar track; the tabs themselves cue the scroll. */
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .cf-filters::-webkit-scrollbar { display: none; }
   .cf-filter-tab {
-    flex: 1 1 0;
-    min-height: 40px;
+    flex: 0 0 auto;     /* natural tab width, no equal-flex stretch */
+    min-height: 44px;   /* Apple HIG touch target */
     font-size: 11px;
     letter-spacing: 0.1em;
     text-align: center;
-    padding: 10px 12px;
+    padding: 10px 14px;
+    white-space: nowrap;
+    scroll-snap-align: start;
   }
   .cf-sort-wrap { width: 100%; }
   .cf-sort-btn {
@@ -5928,8 +5946,11 @@ button.docs-footer-link {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
+  /* 44×44 meets Apple HIG minimum touch target and Material Design's
+     48dp ≈ 44px guidance. 36px was measurably too small on audit —
+     users on /gates and mobile nav reported repeated mis-taps. */
+  width: 44px;
+  height: 44px;
   background: none;
   border: 1px solid rgba(var(--fg-rgb),0.15);
   border-radius: 4px;
@@ -7665,9 +7686,54 @@ button.docs-footer-link {
     z-index: 40;
     border-right: 0;
   }
-  .gcdocs-rail--open { transform: translateX(0); }
-  .gcdocs-scroll { height: auto; overflow: visible; }
-  .gcdocs-scroll-inner { padding: 0 22px 80px; }
+  .gcdocs-rail--open {
+    transform: translateX(0);
+  }
+  /* Chain of min-width:0 + max-width:100% from the grid item all the
+     way down to the widest content. Without this, CSS Grid's default
+     `min-width: auto` per grid item makes the track expand to fit the
+     widest descendant (a 1066px ASCII banner in one <pre>, long table
+     rows, etc.) — and because the track grows, the whole page grows.
+     At 320px iPhone-SE width we were getting 470–790px of horizontal
+     overflow on /docs depending on section. */
+  /* Final safety net: clip anything that still escapes (legacy tables
+     whose thead/tbody still compute wider than parent). Ensures no
+     horizontal page scroll on mobile regardless of content quirks. */
+  .gcdocs-shell {
+    overflow-x: hidden;
+    max-width: 100%;
+  }
+  .gcdocs-scroll {
+    height: auto;
+    overflow: visible;
+    min-width: 0;
+    max-width: 100%;
+  }
+  .gcdocs-scroll-inner {
+    padding: 0 22px 80px;
+    max-width: 100%;
+    min-width: 0;
+  }
+  /* Tables, pre, code: each becomes its own horizontal scroll region
+     so long content stays within its own container instead of pushing
+     the whole page. User swipes the block sideways; page stays put. */
+  .gcdocs-scroll-inner table,
+  .gcdocs-scroll-inner pre,
+  .gcdocs-scroll-inner code {
+    display: block;
+    max-width: 100%;
+    min-width: 0;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  /* Inline code inside text shouldn't break the table pattern — keep it
+     inline but allow wrapping at word boundaries so long identifiers
+     (env var names, hashes) don't stretch the line. */
+  .gcdocs-scroll-inner p code,
+  .gcdocs-scroll-inner li code {
+    display: inline;
+    overflow-wrap: anywhere;
+  }
   .gcdocs-hero { padding: 48px 0 40px; }
   .gcdocs-hero-stats { grid-template-columns: 1fr 1fr; }
   .gcdocs-hero-stat:nth-child(1),
