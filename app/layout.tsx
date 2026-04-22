@@ -70,7 +70,16 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en" className={`${bebas.variable} ${plexSans.variable} ${plexMono.variable}`}>
+    <html
+      lang="en"
+      className={`${bebas.variable} ${plexSans.variable} ${plexMono.variable}`}
+      // Theme init script sets data-theme on <html> from localStorage
+      // before hydration, so React's SSR snapshot ("no data-theme") will
+      // always differ from the client snapshot ("data-theme=light|dark").
+      // This is the exact case suppressHydrationWarning was designed for
+      // — same pattern next-themes + shadcn use. Applies to the <html>
+      // element only; descendants still get full hydration checks.
+      suppressHydrationWarning>
       <head>
         {/* Theme init — runs before React hydrates so the first paint is
             already in the correct mode. Reads localStorage `gc_theme` and
