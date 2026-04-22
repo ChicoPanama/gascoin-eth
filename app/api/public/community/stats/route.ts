@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '../../../../../lib/supabase';
 import { getMarketSnapshot } from '../../../../../lib/integrations/pricing';
+import { withPublicCache } from '../../../../../lib/http-cache';
 
 export const dynamic = 'force-dynamic';
 
@@ -9,15 +10,15 @@ export async function GET() {
   try {
     supabase = getSupabaseAdmin();
   } catch {
-    return NextResponse.json({
+    return withPublicCache(NextResponse.json({
       total_approved: 0,
       total_eth_paid: 0,
-      total_usdc_paid: 0,
+      total_usd_paid: 0,
       unique_countries: 0,
       avg_refund_eth: 0,
-      avg_refund_usdc: 0,
+      avg_refund_usd: 0,
       eth_price_usd: 3000,
-    });
+    }), { sMaxAge: 120 });
   }
 
   const [{ data, error }, market] = await Promise.all([
@@ -42,13 +43,16 @@ export async function GET() {
     rows.map((r: any) => r.claims?.country).filter(Boolean)
   );
 
-  return NextResponse.json({
-    total_approved: count,
-    total_eth_paid: totalEth,
-    total_usdc_paid: totalUsdc,
-    unique_countries: countries.size,
-    avg_refund_eth: count > 0 ? totalEth / count : 0,
-    avg_refund_usdc: count > 0 ? totalUsdc / count : 0,
-    eth_price_usd: ethPriceUsd,
-  });
+  return withPublicCache(
+    NextResponse.json({
+      total_approved: count,
+      total_eth_paid: totalEth,
+      total_usd_paid: totalUsdc,
+      unique_countries: countries.size,
+      avg_refund_eth: count > 0 ? totalEth / count : 0,
+      avg_refund_usd: count > 0 ? totalUsdc / count : 0,
+      eth_price_usd: ethPriceUsd,
+    }),
+    { sMaxAge: 120 },
+  );
 }
