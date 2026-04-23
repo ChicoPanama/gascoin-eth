@@ -116,7 +116,11 @@ const nextConfig = {
     ];
   },
 
-  productionBrowserSourceMaps: false,
+  // Sentry uploads the source maps at build time (authenticated upload
+  // via SENTRY_AUTH_TOKEN); they are NOT shipped to the browser because
+  // withSentryConfig() deletes them post-upload. Flipping this to true
+  // is required for Sentry's build plugin to find them before deletion.
+  productionBrowserSourceMaps: true,
   poweredByHeader: false,
 
   webpack: (config) => {
@@ -137,4 +141,38 @@ const nextConfig = {
   },
 };
 
-module.exports = nextConfig;
+// Wrap with Sentry's build plugin. This:
+//   - uploads source maps to Sentry at build time (authenticated via
+//     SENTRY_AUTH_TOKEN) so production stack traces are readable
+//   - installs the /monitoring tunnel route so event delivery isn't
+//     blocked by ad-blockers / shield extensions
+//   - injects server-side instrumentation so route handler errors
+//     (thrown exceptions, unhandled rejections) get captured automatically
+//
+// `authToken` is read from env at BUILD time only, never at runtime —
+// so a missing token during local dev just skips source-map upload
+// and everything still works.
+const { withSentryConfig } = require('@sentry/nextjs');
+
+module.exports = withSentryConfig(nextConfig, {
+  org: 'chicopanama',
+  project: 'javascript-nextjs',
+  authToken: process.env.SENTRY_AUTH_TOKEN,
+
+  // Upload a wider set of client source files so Sentry can resolve
+  // frames that live in shared chunks, not just the entry bundle.
+  widenClientFileUpload: true,
+
+  // Proxy Sentry ingestion through our own domain at /monitoring.
+  // Bypasses ad-blockers (uBlock, Brave Shields) that would otherwise
+  // drop event POSTs to *.ingest.sentry.io. CSP connect-src doesn't
+  // need sentry.io anymore because of this — traffic looks like a
+  // same-origin POST to the browser.
+  tunnelRoute: '/monitoring',
+
+  // Noisy on every local/CI build unless we're in GitHub Actions.
+  silent: !process.env.CI,
+
+  // Skip telemetry ping — we already pay with our events.
+  telemetry: false,
+});
