@@ -65,7 +65,7 @@ const nextConfig = {
           // WalletConnect explorer-api powers Privy's wallet picker (list of
           // supported WalletConnect-compatible wallets). pulse.walletconnect
           // is their telemetry. Both required for the wallet login flow.
-          "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://auth.privy.io https://*.privy.io https://eth-mainnet.g.alchemy.com https://mainnet.infura.io https://api.etherscan.io https://api.coingecko.com https://*.walletconnect.com https://*.walletconnect.org wss://*.walletconnect.com wss://*.walletconnect.org",
+          "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://auth.privy.io https://*.privy.io https://eth-mainnet.g.alchemy.com https://mainnet.infura.io https://api.etherscan.io https://api.coingecko.com https://*.walletconnect.com https://*.walletconnect.org wss://*.walletconnect.com wss://*.walletconnect.org https://*.sentry.io https://*.ingest.sentry.io https://*.ingest.us.sentry.io",
           // Privy's WalletConnect modal + Coinbase/Base wallet SDKs use
           // iframes for QR display and deep-link handoff.
           "frame-src https://auth.privy.io https://*.privy.io https://*.walletconnect.com https://*.walletconnect.org https://*.coinbase.com",
