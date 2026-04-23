@@ -351,7 +351,7 @@ export function DashboardClient({ wallet, xHandle, isDryRun = false, claims, pay
       <section className="ud-section">
         <div className="ud-section__header">
           <h2 className="ud-section__title">Points Breakdown</h2>
-          <Link href="/points" className="gc-btn-ghost">How Points Work</Link>
+          <Link href="/how-it-works#points" className="gc-btn-ghost">How Points Work</Link>
         </div>
         <div className="gc-stats">
           <div className="gc-stats-grid">
@@ -441,7 +441,7 @@ export function DashboardClient({ wallet, xHandle, isDryRun = false, claims, pay
       <section className="ud-section">
         <div className="ud-section__header">
           <h2 className="ud-section__title">Content Distribution</h2>
-          <Link href="/points" className="gc-btn-ghost">Multipliers</Link>
+          <Link href="/how-it-works#points" className="gc-btn-ghost">Multipliers</Link>
         </div>
         {engagement?.contentTypeDist && Object.keys(engagement.contentTypeDist).length > 0 ? (
           <>
