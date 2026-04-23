@@ -2,16 +2,20 @@
 
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
-import { Nav } from '../../components/Nav';
-import { ReceiptCard, ReceiptSkeleton } from '../../components/community/ReceiptCard';
-import { ReceiptModal } from '../../components/community/ReceiptModal';
-import { FeedControls } from '../../components/community/FeedControls';
+import { ReceiptCard, ReceiptSkeleton } from './ReceiptCard';
+import { ReceiptModal } from './ReceiptModal';
+import { FeedControls } from './FeedControls';
 import { useCommunityFeed } from '../../hooks/useCommunityFeed';
 import { useCommunityStats } from '../../hooks/useCommunityStats';
 import { useGascoinWallet } from '../../hooks/useGascoinWallet';
 import type { CommunityReceipt, FeedFilter, FeedSort } from '../../types/community';
 
-// Animated counter
+/**
+ * Community feed — verified receipts, live. Extracted from the former
+ * /community page so it can be embedded inside /leaderboard as the
+ * "Recent" tab. Identical behavior to the old page body.
+ */
+
 function useAnimVal(target: number, dur = 1200) {
   const [v, setV] = useState(0);
   const raf = useRef(0);
@@ -48,7 +52,6 @@ function StatIconReceipts() {
     </span>
   );
 }
-
 function StatIconUsd() {
   return (
     <span className="gc-mini-icon" aria-hidden>
@@ -56,7 +59,6 @@ function StatIconUsd() {
     </span>
   );
 }
-
 function StatIconCountries() {
   return (
     <span className="gc-mini-icon" aria-hidden>
@@ -67,7 +69,6 @@ function StatIconCountries() {
     </span>
   );
 }
-
 function StatIconAvg() {
   return (
     <span className="gc-mini-icon" aria-hidden>
@@ -79,7 +80,12 @@ function StatIconAvg() {
   );
 }
 
-export default function CommunityClient() {
+export interface CommunityFeedProps {
+  /** When true, renders the page-scoped LIVE FEED header. Leaderboard embed sets false. */
+  showHeader?: boolean;
+}
+
+export function CommunityFeed({ showHeader = false }: CommunityFeedProps) {
   const { address } = useGascoinWallet();
   const connectedWallet = address ?? null;
   const [filter, setFilter] = useState<FeedFilter>('all');
@@ -90,7 +96,6 @@ export default function CommunityClient() {
     useCommunityFeed(connectedWallet, filter, sort);
   const { stats, loading: statsLoading } = useCommunityStats();
 
-  // Intersection observer for infinite scroll
   const sentinelRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (!sentinelRef.current) return;
@@ -104,32 +109,26 @@ export default function CommunityClient() {
   const aCountries = useAnimVal(stats?.unique_countries ?? 0);
   const aAvgUsd = useAnimVal(stats?.avg_refund_usd ?? 0);
 
-  const handleConnectWallet = () => {
-    // Wallet connection is handled by Privy — no-op here
-  };
-
   return (
-    <div className="container">
-      <Nav />
+    <>
+      {showHeader && (
+        <header className="lb-header">
+          <div className="lb-header__meta">
+            <span className="lb-tag">— Verified Gas Receipts · Proof of Payout</span>
+          </div>
+          <h1 className="lb-title lb-title--iconed">
+            <span className="lb-title-icon-wrap" aria-hidden>
+              <img src="/icons/community-runner.jpg" alt="" className="lb-title-icon" />
+            </span>
+            COMMUNITY
+          </h1>
+          <div className="lb-header__live">
+            <span className="lb-pulse" />
+            <span className="lb-live-label">LIVE FEED</span>
+          </div>
+        </header>
+      )}
 
-      {/* Zone 1 — Header */}
-      <header className="lb-header">
-        <div className="lb-header__meta">
-          <span className="lb-tag">— Verified Gas Receipts · Proof of Payout</span>
-        </div>
-        <h1 className="lb-title lb-title--iconed">
-          <span className="lb-title-icon-wrap" aria-hidden>
-            <img src="/icons/community-runner.jpg" alt="" className="lb-title-icon" />
-          </span>
-          COMMUNITY
-        </h1>
-        <div className="lb-header__live">
-          <span className="lb-pulse" />
-          <span className="lb-live-label">LIVE FEED</span>
-        </div>
-      </header>
-
-      {/* Zone 2 — Stats */}
       <div className="gc-stats">
         <div className="gc-stats-grid">
           <div className="gc-stat">
@@ -153,26 +152,23 @@ export default function CommunityClient() {
         </div>
       </div>
 
-      {/* Zone 3 — Controls */}
       <FeedControls
         filter={filter}
         sort={sort}
         hasWallet={!!connectedWallet}
         onFilterChange={setFilter}
         onSortChange={setSort}
-        onConnectWallet={handleConnectWallet}
+        onConnectWallet={() => { /* Privy handles */ }}
       />
 
       {error && <div className="sf-error">{error}</div>}
 
-      {/* Zone 4 — New receipts bar */}
       {newCount > 0 && (
         <div className="cf-new-bar" onClick={flushNewReceipts}>
           ↑ {newCount} new receipt{newCount > 1 ? 's' : ''} — click to load
         </div>
       )}
 
-      {/* Zone 5 — Grid */}
       {loading ? (
         <div className="cf-grid">
           {Array.from({ length: 12 }).map((_, i) => <ReceiptSkeleton key={i} />)}
@@ -191,7 +187,6 @@ export default function CommunityClient() {
         </div>
       )}
 
-      {/* Zone 6 — Load more */}
       {!loading && receipts.length > 0 && (
         <div className="cf-load-more">
           {hasMore ? (
@@ -208,8 +203,7 @@ export default function CommunityClient() {
 
       <div ref={sentinelRef} style={{ height: 1 }} />
 
-      {/* Modal */}
       <ReceiptModal receipt={selected} onClose={() => setSelected(null)} />
-    </div>
+    </>
   );
 }

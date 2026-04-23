@@ -14,7 +14,6 @@ const NAV_LINKS = [
   { href: '/how-it-works', label: 'How It Works', icon: '?' },
   { href: '/submit', label: 'Submit', icon: '◇' },
   { href: '/dashboard', label: 'Treasury', icon: '▣' },
-  { href: '/community', label: 'Community', icon: '◎' },
   { href: '/leaderboard', label: 'Leaderboard', icon: '▲' },
   { href: '/referral', label: 'Refer', icon: '↗' },
   { href: '/standing', label: 'Standing', icon: '✦' },

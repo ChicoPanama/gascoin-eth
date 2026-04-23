@@ -4,7 +4,6 @@ const PUBLIC_ROUTES = [
   { path: '/', check: /GASCOIN/i },
   { path: '/submit', check: /Connect|Submit/i },
   { path: '/leaderboard', check: /LEADERBOARD/i },
-  { path: '/community', check: /COMMUNITY/i },
   { path: '/gates', check: /VERIFICATION|GATES/i },
   { path: '/wallet', check: /WALLET|TRACKER/i },
   { path: '/referral', check: /REFERRAL/i },
