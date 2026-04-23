@@ -126,15 +126,27 @@ export interface Milestone {
   slug: string;
   label: string;
   description: string;
-  /** Which aggregate column to check on creator_public_view. */
-  axis: 'total_impressions' | 'total_eth_earned' | 'total_paid_claims';
+  /**
+   * Reach Certificates reward reach, creative signal, and network-building —
+   * NOT refund volume. Refund ETH measures how much gas someone bought, which
+   * every driver does; that is not certificate-worthy.
+   *
+   * - total_impressions  → creator_public_view.total_impressions (X reach)
+   * - composite          → composite_scores.composite (0-100 AI-blended creator score)
+   * - paid_conversions   → referral_summary_view.paid_conversions (real humans brought in who got paid)
+   */
+  axis: 'total_impressions' | 'composite' | 'paid_conversions';
   threshold: number;
 }
 
+// Slugs "voice" and "signal" intentionally avoid name collision with the
+// token-balance tiers Commuter and Road Warrior (see lib/token-tiers.ts).
+// The on-chain mint() accepts any string, so this is a label change, not a
+// contract change — no redeploy.
 export const MILESTONES: Milestone[] = [
-  { slug: 'pump',        label: 'Pump',        axis: 'total_impressions', threshold: 100_000,   description: '100k verified impressions' },
-  { slug: 'station',     label: 'Station',     axis: 'total_impressions', threshold: 1_000_000, description: '1M verified impressions' },
-  { slug: 'commuter',    label: 'Commuter',    axis: 'total_eth_earned',  threshold: 10,        description: '10 ETH in verified refunds' },
-  { slug: 'roadwarrior', label: 'Road Warrior', axis: 'total_eth_earned', threshold: 100,       description: '100 ETH in verified refunds' },
-  { slug: 'recruiter',   label: 'Recruiter',   axis: 'total_paid_claims', threshold: 100,       description: '100 referred submissions paid' },
+  { slug: 'pump',      label: 'Pump',      axis: 'total_impressions', threshold: 100_000,   description: '100k verified impressions' },
+  { slug: 'station',   label: 'Station',   axis: 'total_impressions', threshold: 1_000_000, description: '1M verified impressions' },
+  { slug: 'voice',     label: 'Voice',     axis: 'composite',         threshold: 70,        description: 'Composite Influence Score ≥ 70 — sustained engagement, quality, consistency' },
+  { slug: 'signal',    label: 'Signal',    axis: 'composite',         threshold: 85,        description: 'Composite Influence Score ≥ 85 — elite creator across all four axes' },
+  { slug: 'recruiter', label: 'Recruiter', axis: 'paid_conversions',  threshold: 25,        description: '25 referred humans converted to paid claims' },
 ];
