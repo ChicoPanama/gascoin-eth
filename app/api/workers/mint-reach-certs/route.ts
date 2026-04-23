@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '../../../../lib/supabase';
 import { isAuthorizedCron } from '../../../../lib/cron-auth';
 import { mintCertificate, MILESTONES, type Milestone } from '../../../../lib/integrations/reach-certificate';
+import { withCronCheckIn } from '../../../../lib/observability/cron';
 
 export const dynamic = 'force-dynamic';
 
@@ -15,7 +16,7 @@ export const dynamic = 'force-dynamic';
  * Idempotent per (wallet, milestone) via the UNIQUE constraint — the
  * scan can re-run safely even mid-run.
  */
-export async function POST(req: Request) {
+async function handler(req: Request) {
   if (!isAuthorizedCron(req)) {
     return NextResponse.json({ ok: false, error: 'unauthorized' }, { status: 401 });
   }
@@ -127,5 +128,6 @@ export async function POST(req: Request) {
   });
 }
 
+export const POST = withCronCheckIn('mint-reach-certs', '45 7 * * *', handler);
 // Vercel Cron sends GET requests; delegate to the POST handler above.
 export const GET = POST;

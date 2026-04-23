@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '../../../../lib/supabase';
 import { computeCompositeForWallet, persistComposite } from '../../../../lib/composite-score';
 import { isAuthorizedCron } from '../../../../lib/cron-auth';
+import { withCronCheckIn } from '../../../../lib/observability/cron';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 300;
@@ -11,7 +12,7 @@ export const maxDuration = 300;
  * Daily at 08:00 UTC. Scans every wallet with an active X link and
  * recomputes its per-account Composite score.
  */
-export async function POST(req: Request) {
+async function handler(req: Request) {
   if (!isAuthorizedCron(req)) {
     return NextResponse.json({ ok: false, error: 'unauthorized' }, { status: 401 });
   }
@@ -45,4 +46,5 @@ export async function POST(req: Request) {
 }
 
 // Vercel Cron sends GET requests; delegate to the POST handler above.
+export const POST = withCronCheckIn('recompute-composite', '0 8 * * *', handler);
 export const GET = POST;

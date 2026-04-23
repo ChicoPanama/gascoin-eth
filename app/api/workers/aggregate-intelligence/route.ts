@@ -4,6 +4,7 @@ import { isAuthorizedCron as isAuthorized } from '../../../../lib/cron-auth';
 import { addMemory, searchMemories, refreshFlagCache } from '../../../../lib/mem0';
 import { writeIntelligence } from '../../../../lib/knowledge-base';
 import { callGrok, isGrokAvailable } from '../../../../lib/integrations/grok';
+import { withCronCheckIn } from '../../../../lib/observability/cron';
 
 /**
  * Daily Intelligence Aggregator
@@ -21,7 +22,7 @@ import { callGrok, isGrokAvailable } from '../../../../lib/integrations/grok';
 // Grok + mem0 synthesis calls — bump timeout to 60s
 export const maxDuration = 60;
 
-export async function POST(req: Request) {
+async function handler(req: Request) {
   if (!isAuthorized(req)) {
     return NextResponse.json({ ok: false, error: 'unauthorized' }, { status: 401 });
   }
@@ -199,4 +200,5 @@ export async function POST(req: Request) {
 }
 
 // Vercel Cron sends GET requests; delegate to the POST handler above.
+export const POST = withCronCheckIn('aggregate-intelligence', '0 7 * * *', handler);
 export const GET = POST;

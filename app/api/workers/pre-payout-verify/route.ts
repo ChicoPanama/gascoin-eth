@@ -9,6 +9,7 @@ import { addMemory } from '../../../../lib/mem0';
 import { persistMetricsSnapshot } from '../../../../lib/metrics-snapshot';
 import { hasMinimumGascoin } from '../../../../lib/integrations/ethereum';
 import { getTierForBalance } from '../../../../lib/token-tiers';
+import { withCronCheckIn } from '../../../../lib/observability/cron';
 
 const MIN_FOLLOWERS = 100;
 
@@ -21,7 +22,7 @@ const MIN_FOLLOWERS = 100;
  *
  * Claims that fail are reverted to needs_review with logged reasons.
  */
-export async function GET(req: Request) {
+async function handler(req: Request) {
   if (!isAuthorized(req)) {
     return NextResponse.json({ error: 'unauthorized' }, { status: 401 });
   }
@@ -184,3 +185,7 @@ async function revertClaim(supabase: any, claimId: string, reason: string, walle
     ).catch(() => {});
   }
 }
+
+export const GET = withCronCheckIn('pre-payout-verify', '55 23 * * *', handler);
+export const POST = GET;
+

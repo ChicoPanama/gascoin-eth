@@ -5,9 +5,13 @@
 // hydration and early client code (Privy init, theme script, etc.).
 
 import * as Sentry from '@sentry/nextjs';
+import { shouldDropEvent, currentRelease, currentEnvironment } from './lib/observability/sentry';
 
 Sentry.init({
   dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
+
+  release: currentRelease(),
+  environment: currentEnvironment(),
 
   // Send PII to Sentry (wallet addresses, X handles). These are already
   // public identifiers in the protocol, so no additional exposure.
@@ -16,6 +20,10 @@ Sentry.init({
   // Transaction sampling — 100% in dev, 10% in production. Keeps
   // quota burn low while capturing enough perf data to spot regressions.
   tracesSampleRate: process.env.NODE_ENV === 'development' ? 1.0 : 0.1,
+
+  // Drop known browser-extension noise + cross-origin script errors
+  // before they burn event quota. See lib/observability/sentry.ts.
+  beforeSend: shouldDropEvent,
 
   // Session Replay — records DOM + user actions around errors.
   // 10% of all sessions, 100% of sessions that hit an error.

@@ -8,8 +8,9 @@ import { reviewClaim } from '../../../../lib/integrations/claude';
 import { isAuthorizedCron as isAuthorized } from '../../../../lib/cron-auth';
 import { writeIntelligence } from '../../../../lib/knowledge-base';
 import { shouldSilenceBetaAlerts } from '../../../../lib/season';
+import { withCronCheckIn } from '../../../../lib/observability/cron';
 
-export async function POST(req: Request) {
+async function handler(req: Request) {
   if (!isAuthorized(req)) {
     return NextResponse.json({ ok: false, error: 'unauthorized' }, { status: 401 });
   }
@@ -280,4 +281,5 @@ export async function POST(req: Request) {
 }
 
 // Vercel Cron sends GET requests; delegate to the POST handler above.
+export const POST = withCronCheckIn('process-claims', '*/5 * * * *', handler);
 export const GET = POST;
