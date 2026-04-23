@@ -23,7 +23,7 @@ Always call search_memories with "GASCOIN" at the start of every session before 
 - Vercel deployment config or env var names
 - Supabase schema changes or table structures
 - Treasury dashboard logic or leaderboard rules
-- Submission portal validation gate details (all 12 gates)
+- Submission portal validation gate details (all 18 gates — see `lib/gates.ts` for the canonical list; count derives from `GATE_COUNT` in `lib/policy.ts`)
 - X/Twitter API integration specifics
 - Test suite state (Vitest, current pass rate)
 - Any bug root causes or fixes
@@ -47,14 +47,24 @@ When in doubt, save it.
 ```
 Gemini Vision (sees) → Grok (thinks) → Claude (decides) → ETH Payout
 
-12 automated gates · 5 verification layers · 225 stress tests
+18 automated gates · 5 verification layers · 949 tests
 Token tiers: Standard(1) · Commuter(100K) · Road Warrior(5M) · Fleet(10M)
 Cooldowns: 7d · 7d · 3.5d · 1.75d
 ```
 
 ## Testing
 - Framework: Vitest
-- Test files: 12
-- Total tests: 225
+- Test files: 53
+- Total tests: 949
 - Run: `npx vitest run`
-- Build: `npx next build`
+- Build: `npx next build --webpack`
+
+## Observability (2026-04-23)
+- Error monitoring + tracing + session replay: Sentry (`@sentry/nextjs`)
+- Dashboard: https://chicopanama.sentry.io/projects/javascript-nextjs/
+- Events tunnel through `/monitoring` to bypass ad-blockers
+- Source maps uploaded per deploy via `withSentryConfig` + `SENTRY_AUTH_TOKEN`
+
+## Remotes
+- `eth-fork` → github.com/ChicoPanama/gascoin-eth (production, only active remote)
+- The old `ChicoPanama/gascoin` (Solana) repo is archived at `ChicoPanama/Depreciated-Solana-Project` — not tracked locally
