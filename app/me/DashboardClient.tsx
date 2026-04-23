@@ -3,6 +3,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import Link from 'next/link';
 import { ViralShareCard } from '../../components/shared/ViralShareCard';
+import { ReferralDashboard } from '../../components/referral/ReferralDashboard';
 
 // ── Types ──
 interface GateResult {
@@ -757,46 +758,13 @@ export function DashboardClient({ wallet, xHandle, isDryRun = false, claims, pay
         />
       )}
 
-      {/* ── Referral Program ── */}
+      {/* ── Referral Program (full dashboard, blended) ── */}
       <section className="ud-section">
         <div className="ud-section__header">
           <h2 className="ud-section__title">Referral Program</h2>
-          <Link href="/referral" className="gc-btn-ghost">Manage</Link>
+          <Link href="/referral" className="gc-btn-ghost">Open full page ↗</Link>
         </div>
-        <div className="gc-stats">
-          <div className="gc-stats-grid">
-            <div className="gc-stat">
-              <div className="gc-stat-label">Referral Code</div>
-              <div className="gc-stat-value ud-stat-value--sm">{referral.code || '—'}</div>
-              <div className="gc-stat-sub">{referral.code ? 'share to earn' : 'submit first to unlock'}</div>
-            </div>
-            <div className="gc-stat">
-              <div className="gc-stat-label">Clicks</div>
-              <div className="gc-stat-value">{referral.clicks}</div>
-              <div className="gc-stat-sub">{referral.uniqueClicks} unique</div>
-            </div>
-            <div className="gc-stat">
-              <div className="gc-stat-label">Conversions</div>
-              <div className="gc-stat-value">{referral.conversions}</div>
-              <div className="gc-stat-sub">{analytics?.conversionRate || 0}% rate</div>
-            </div>
-            <div className="gc-stat">
-              <div className="gc-stat-label">Passive Income</div>
-              <div className="gc-stat-value">{(points?.bySource?.referral_passive || 0).toLocaleString()}</div>
-              <div className="gc-stat-sub">pts from referred users</div>
-            </div>
-          </div>
-        </div>
-        {/* Referral funnel */}
-        <div style={{ marginTop: 16, display: 'flex', alignItems: 'center', gap: 8, fontFamily: 'var(--font-mono)', fontSize: 11 }}>
-          <span style={{ color: 'rgba(var(--fg-rgb),0.4)' }}>{referral.clicks} clicks</span>
-          <span style={{ color: 'rgba(var(--fg-rgb),0.15)' }}>→</span>
-          <span style={{ color: 'rgba(var(--fg-rgb),0.4)' }}>{referral.uniqueClicks} unique</span>
-          <span style={{ color: 'rgba(var(--fg-rgb),0.15)' }}>→</span>
-          <span style={{ color: 'rgba(var(--fg-rgb),0.6)' }}>{referral.conversions} converted</span>
-          <span style={{ color: 'rgba(var(--fg-rgb),0.15)' }}>→</span>
-          <span style={{ color: 'var(--fg)' }}>2% passive</span>
-        </div>
+        <ReferralDashboard />
       </section>
     </>
   );
