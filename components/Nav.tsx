@@ -20,7 +20,7 @@ const NAV_LINKS = [
   { href: '/leaderboard', label: 'Leaderboard', icon: '▲' },
   { href: '/points', label: 'Points', icon: '◆' },
   { href: '/referral', label: 'Refer', icon: '↗' },
-  { href: '/perks', label: 'Perks', icon: '✦' },
+  { href: '/standing', label: 'Standing', icon: '✦' },
   { href: '/gates', label: 'Gates', icon: '◈' },
   { href: '/wallet', label: 'Tracker', icon: '⌁' },
 ];

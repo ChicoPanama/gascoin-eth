@@ -8,7 +8,7 @@ const PUBLIC_ROUTES = [
   { path: '/gates', check: /VERIFICATION|GATES/i },
   { path: '/wallet', check: /WALLET|TRACKER/i },
   { path: '/referral', check: /REFERRAL/i },
-  { path: '/perks', check: /TOKEN|PERKS/i },
+  { path: '/standing', check: /STANDING|TOPOGRAPHY/i },
   { path: '/dashboard', check: /TREASURY/i },
 ];
 

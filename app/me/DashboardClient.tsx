@@ -318,7 +318,7 @@ export function DashboardClient({ wallet, xHandle, isDryRun = false, claims, pay
         <Link href="/submit" className="gc-btn-solid">Submit Receipt</Link>
         <Link href="/referral" className="gc-btn-ghost">Share Referral Link</Link>
         <Link href="/wallet" className="gc-btn-ghost">Wallet Tracker</Link>
-        <Link href="/perks" className="gc-btn-ghost">View Perks</Link>
+        <Link href="/standing" className="gc-btn-ghost">View Standing</Link>
       </section>
 
       {/* ── Rank & Tier Strip ── */}
@@ -484,7 +484,7 @@ export function DashboardClient({ wallet, xHandle, isDryRun = false, claims, pay
       <section className="ud-section">
         <div className="ud-section__header">
           <h2 className="ud-section__title">Tier Progress</h2>
-          <Link href="/perks" className="gc-btn-ghost">View Perks</Link>
+          <Link href="/standing" className="gc-btn-ghost">View Standing</Link>
         </div>
         {tier?.next ? (
           <div style={{ padding: '16px 0' }}>

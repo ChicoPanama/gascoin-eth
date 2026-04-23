@@ -75,14 +75,21 @@ test.describe('Referral Page', () => {
   });
 });
 
-test.describe('Perks Page', () => {
+test.describe('Standing Page', () => {
   test('TG01 — renders tier grid', async ({ page }) => {
-    await page.goto('/perks');
+    await page.goto('/standing');
     await page.waitForLoadState('networkidle');
     await expect(page.getByText(/Standard/i)).toBeVisible();
     await expect(page.getByText(/Commuter/i)).toBeVisible();
     await expect(page.getByText(/Road Warrior/i)).toBeVisible();
     await expect(page.getByText(/Fleet/i)).toBeVisible();
+  });
+
+  test('TG02 — /perks legacy URL 308-redirects to /standing', async ({ page }) => {
+    const response = await page.goto('/perks');
+    // Next.js handles the redirect server-side; final URL should be /standing
+    await page.waitForLoadState('networkidle');
+    expect(page.url()).toContain('/standing');
   });
 });
 
