@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-const PAGES = ['/', '/submit', '/leaderboard', '/community', '/gates', '/wallet', '/standing', '/dashboard', '/referral'];
+const PAGES = ['/', '/submit', '/leaderboard', '/gates', '/wallet', '/standing', '/dashboard', '/referral'];
 
 test.describe('Responsive — Mobile 375px', () => {
   test.use({ viewport: { width: 375, height: 812 } });

@@ -14,15 +14,16 @@ test.describe('Leaderboard', () => {
   });
 });
 
-test.describe('Community Feed', () => {
-  test('CF01 — renders title', async ({ page }) => {
+test.describe('Community Feed (now on /leaderboard?view=recent)', () => {
+  test('CF01 — /community 308 redirects to /leaderboard?view=recent', async ({ page }) => {
     await page.goto('/community');
     await page.waitForLoadState('networkidle');
-    await expect(page.getByText(/COMMUNITY/i)).toBeVisible();
+    expect(page.url()).toContain('/leaderboard');
+    expect(page.url()).toContain('view=recent');
   });
 
-  test('CF02 — filter tabs render', async ({ page }) => {
-    await page.goto('/community');
+  test('CF02 — Recent tab renders filter tabs on /leaderboard', async ({ page }) => {
+    await page.goto('/leaderboard?view=recent');
     await page.waitForLoadState('networkidle');
     await expect(page.locator('.cf-filter-tab')).toHaveCount(3);
   });

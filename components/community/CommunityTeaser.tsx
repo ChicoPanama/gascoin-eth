@@ -73,7 +73,7 @@ export function CommunityTeaser() {
             Every card below is a verified gas receipt that received a refund
             from the GASCOIN treasury. Amounts shown in USD · settled on-chain in ETH.
           </p>
-          <Link href="/community" className="gc-teaser-link">View all receipts</Link>
+          <Link href="/leaderboard?view=recent" className="gc-teaser-link">View all receipts</Link>
         </div>
         <div className="cf-teaser-right">
           <div

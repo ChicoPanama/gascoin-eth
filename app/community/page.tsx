@@ -1,13 +1,7 @@
-import type { Metadata } from 'next';
-import CommunityClient from './CommunityClient';
+import { permanentRedirect } from 'next/navigation';
 
-export const metadata: Metadata = {
-  title: 'Community — GASCOIN',
-  description: 'Live feed of verified GASCOIN gas refund receipts and community activity.',
-};
-
-export const revalidate = 60;
-
-export default function CommunityPage() {
-  return <CommunityClient />;
+// The /community feed is now the "Recent" tab on /leaderboard.
+// 308 preserves existing share links and SEO rank.
+export default function CommunityLegacyRedirect(): never {
+  permanentRedirect('/leaderboard?view=recent');
 }

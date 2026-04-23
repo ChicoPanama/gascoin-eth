@@ -172,7 +172,7 @@ export default async function Home() {
                 <div className="gc-hero-buttons">
                   <Link href="/how-it-works" className="gc-btn-ghost">How It Works</Link>
                   <Link href="/submit" className="gc-btn-solid">Submit Receipt</Link>
-                  <Link href="/community" className="gc-btn-ghost">View Community</Link>
+                  <Link href="/leaderboard?view=recent" className="gc-btn-ghost">View Community</Link>
                 </div>
               </HeroItem>
             </HeroStagger>
