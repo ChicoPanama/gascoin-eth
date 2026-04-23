@@ -10,7 +10,7 @@ import { NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '../../../../lib/supabase';
 import { verifyPrivySession } from '../../../../lib/integrations/privy';
 import { getTokenBalanceServer } from '../../../../lib/token-balance';
-import { TOKEN_TIERS, getTierForBalance, getNextTier, tokensNeededForNextTier } from '../../../../lib/token-tiers';
+import { getTierForBalance, getNextTier, tokensNeededForNextTier } from '../../../../lib/token-tiers';
 import { MILESTONES, type Milestone } from '../../../../lib/integrations/reach-certificate';
 import { listBriefs, isMarketplaceLive } from '../../../../lib/marketplace';
 import {
@@ -18,7 +18,6 @@ import {
   getBandSpec,
   nextBand,
   eligibleBriefsForComposite,
-  COMPOSITE_BANDS,
 } from '../../../../lib/perks-ladder';
 
 export const dynamic = 'force-dynamic';
@@ -282,5 +281,3 @@ export async function GET(req: Request) {
   });
 }
 
-// Force referenced so tooling doesn't strip TOKEN_TIERS / COMPOSITE_BANDS.
-export const __metadata = { tiers: TOKEN_TIERS.length, bands: COMPOSITE_BANDS.length };
