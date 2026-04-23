@@ -8,6 +8,7 @@ import { comparePerceptualHashes } from '../../../../lib/integrations/receipt-pi
 import { runFraudChecks } from '../../../../lib/integrations/fraud';
 import { hasMinimumGascoin } from '../../../../lib/integrations/ethereum';
 import { verifyPrivySession } from '../../../../lib/integrations/privy';
+import { setSentryUser, breadcrumb } from '../../../../lib/observability/sentry';
 import { getUserByUsername } from '../../../../lib/x-api';
 import { scoreAccountQuality } from '../../../../lib/account-quality';
 import { checkAndAutoBan } from '../../../../lib/auto-ban';
@@ -126,6 +127,9 @@ export async function POST(req: Request){
   if (!wallet) {
     return NextResponse.json({ ok:false, error:'wallet_not_connected_in_privy_session' }, { status: 400 });
   }
+
+  setSentryUser({ xHandle: session.xHandle, wallet });
+  breadcrumb('claim', 'submit_started', { tweet_url: tweetUrl });
   // Ethereum addresses are case-insensitive (EIP-55 checksum is just display).
   // Compare lowercased so a checksum-cased address from the browser wallet
   // doesn't spuriously fail the session-match check.

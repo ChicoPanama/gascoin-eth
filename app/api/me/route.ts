@@ -3,6 +3,7 @@ import { getSupabaseAdmin } from '../../../lib/supabase';
 import { verifyPrivySession } from '../../../lib/integrations/privy';
 import { generateReferralCode } from '../../../lib/referral-code';
 import { getMarketSnapshot } from '../../../lib/integrations/pricing';
+import { setSentryUser } from '../../../lib/observability/sentry';
 
 export async function GET(req: Request) {
   const auth = req.headers.get('authorization');
@@ -29,6 +30,8 @@ export async function GET(req: Request) {
 
     wallet = link?.wallet || '';
   }
+
+  setSentryUser({ xHandle, wallet });
 
   const emptyNetworkImpact = {
     referredUsers: 0,

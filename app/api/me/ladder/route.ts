@@ -19,6 +19,7 @@ import {
   nextBand,
   eligibleBriefsForComposite,
 } from '../../../../lib/perks-ladder';
+import { setSentryUser } from '../../../../lib/observability/sentry';
 
 export const dynamic = 'force-dynamic';
 
@@ -97,6 +98,8 @@ export async function GET(req: Request) {
       .maybeSingle();
     wallet = String(link?.wallet || '').toLowerCase();
   }
+
+  setSentryUser({ xHandle, wallet });
 
   // ── Rung 1: Hold (token balance tier) ──────────────────────────────
   let balance = 0;
