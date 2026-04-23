@@ -53,7 +53,7 @@ interface LadderData {
   };
 }
 
-export default function PerksClient() {
+export default function StandingClient() {
   const { address, isConnected } = useGascoinWallet();
   const { balance, tier, nextTier, tokensToNextTier, progressToNextTier, loading } = useTokenGating();
   const [refreshed, setRefreshed] = useState(false);
@@ -95,18 +95,19 @@ export default function PerksClient() {
       {/* Header */}
       <header className="lb-header">
         <div className="lb-header__meta">
-          <span className="lb-tag">— One ladder · Driver to Creator</span>
+          <span className="lb-tag">— Where you stand on the topography</span>
         </div>
         <h1 className="lb-title lb-title--iconed">
           <span className="lb-title-icon-wrap" aria-hidden>
             <img src="/icons/perks-gift.jpg" alt="" className="lb-title-icon" />
           </span>
-          PERKS
+          STANDING
         </h1>
         <p className="gt-header-body">
-          Every rung of the GASCOIN protocol in one place. Hold tokens for driver perks,
-          post to earn airdrop points, compound into Reach Certificates, unlock
-          Marketplace briefs. Same pipeline, five visible milestones.
+          Your full position on the GASCOIN map, in one view. Hold, Earn, Reach,
+          Influence, Earn-as-Creator — five rungs of one continuous pipeline,
+          scored the same way whether you drive a Camry or write threads that
+          move three thousand wallets.
         </p>
       </header>
 

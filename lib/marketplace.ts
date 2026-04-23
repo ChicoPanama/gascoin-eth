@@ -127,6 +127,29 @@ export async function listBriefs(status?: BriefStatus): Promise<Brief[]> {
   return (data || []).map(rowToBrief);
 }
 
+/**
+ * List briefs a specific wallet qualifies for, band-gated server-side.
+ *
+ * Reads composite_scores for the wallet and uses lib/perks-ladder to map
+ * composite → band, then filters by eligibleBriefsForComposite. Mirrors
+ * what the SQL `creator_tier_rank()` function does on the DB side — both
+ * must stay in lockstep with lib/perks-ladder.ts::COMPOSITE_BANDS.
+ */
+export async function listBriefsForWallet(wallet: string): Promise<Brief[]> {
+  const { eligibleBriefsForComposite } = await import('./perks-ladder');
+  const supabase = getSupabaseAdmin();
+  const w = (wallet || '').toLowerCase();
+  if (!w) return [];
+  const { data: row } = await supabase
+    .from('composite_scores')
+    .select('composite')
+    .eq('wallet', w)
+    .maybeSingle();
+  const composite = Number(row?.composite || 0);
+  const briefs = await listBriefs('open');
+  return eligibleBriefsForComposite(composite, briefs);
+}
+
 function rowToBrief(row: any): Brief {
   return {
     id: Number(row.id),
