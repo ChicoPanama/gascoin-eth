@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '../../../../lib/supabase';
 import { isAuthorizedCron } from '../../../../lib/cron-auth';
-import { mintCertificate, MILESTONES } from '../../../../lib/integrations/reach-certificate';
+import { mintCertificate, MILESTONES, type Milestone } from '../../../../lib/integrations/reach-certificate';
 
 export const dynamic = 'force-dynamic';
 
@@ -29,11 +29,28 @@ export async function POST(req: Request) {
 
   const { data: creators } = await supabase
     .from('creator_public_view')
-    .select('handle, wallet, total_impressions, total_eth_earned, total_paid_claims');
+    .select('handle, wallet, total_impressions');
 
   if (!creators || creators.length === 0) {
     return NextResponse.json({ ok: true, minted: 0, scanned: 0 });
   }
+
+  const wallets = creators.map((c) => String(c.wallet || '')).filter(Boolean);
+
+  const [{ data: composites }, { data: referrals }] = await Promise.all([
+    supabase.from('composite_scores').select('wallet, composite').in('wallet', wallets),
+    supabase
+      .from('referral_summary_view')
+      .select('referrer_wallet, paid_conversions')
+      .in('referrer_wallet', wallets),
+  ]);
+
+  const compositeByWallet = new Map<string, number>(
+    (composites ?? []).map((r) => [String(r.wallet), Number(r.composite || 0)]),
+  );
+  const paidConversionsByWallet = new Map<string, number>(
+    (referrals ?? []).map((r) => [String(r.referrer_wallet), Number(r.paid_conversions || 0)]),
+  );
 
   let minted = 0;
   let failed = 0;
@@ -43,8 +60,14 @@ export async function POST(req: Request) {
     const wallet = String(c.wallet || '');
     if (!handle || !wallet) continue;
 
+    const axisValues: Record<Milestone['axis'], number> = {
+      total_impressions: Number(c.total_impressions || 0),
+      composite: compositeByWallet.get(wallet) ?? 0,
+      paid_conversions: paidConversionsByWallet.get(wallet) ?? 0,
+    };
+
     for (const m of MILESTONES) {
-      const value = Number((c as Record<string, unknown>)[m.axis] || 0);
+      const value = axisValues[m.axis];
       if (value < m.threshold) continue;
 
       // Already minted or in-flight? Unique constraint catches the race.
