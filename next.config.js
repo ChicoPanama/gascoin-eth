@@ -159,9 +159,31 @@ module.exports = withSentryConfig(nextConfig, {
   project: 'javascript-nextjs',
   authToken: process.env.SENTRY_AUTH_TOKEN,
 
-  // Upload a wider set of client source files so Sentry can resolve
-  // frames that live in shared chunks, not just the entry bundle.
-  widenClientFileUpload: true,
+  // Defer source-map upload to Next.js `runAfterProductionCompile` hook
+  // so it runs AFTER the build finishes instead of racing webpack.
+  // Default is true on Turbopack, false on Webpack — we opt in.
+  // Fixes the upload-during-build hang that stalls Vercel deploys
+  // (see getsentry/sentry-javascript#13533, #14132).
+  useRunAfterProductionCompileHook: true,
+
+  // If sentry.io is slow/unreachable, don't fail or hang the build —
+  // log and move on. Source maps can always be uploaded later via
+  // `sentry-cli sourcemaps upload`.
+  errorHandler: () => {},
+
+  // Skip the extra release create/finalize API round-trips that add
+  // latency and extra failure surface during upload.
+  release: { create: false, finalize: false },
+
+  // Narrow to entry bundles instead of shared chunks — trims upload
+  // time materially without meaningful loss in frame resolution.
+  widenClientFileUpload: false,
+
+  // Only attempt source-map upload on actual production deploys.
+  // Preview builds get the Sentry runtime without the upload step.
+  sourcemaps: {
+    disable: process.env.VERCEL_ENV !== 'production',
+  },
 
   // Proxy Sentry ingestion through our own domain at /monitoring.
   // Bypasses ad-blockers (uBlock, Brave Shields) that would otherwise
