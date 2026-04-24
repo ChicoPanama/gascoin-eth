@@ -39,7 +39,7 @@ Piece 2: Content Impact Scoring        ─┐
                                         ▼
 Piece 3: Intelligence API              ─┐
          (paywalled read by             │
-          GASCOIN balance)              │
+          $GAS balance)              │
                                         ▼
 Piece 4: Verified Reach Certificates    ─┐ (in parallel with 5)
          (soulbound ERC-721)             │
@@ -167,14 +167,14 @@ GROUP BY st.id, st.tweet_id, st.tweet_url, st.wallet, st.x_handle,
 
 ## Piece 3 — Intelligence API
 
-**Goal:** a public, paywalled JSON API for brands/agencies to query verified creator data. Tiered by `$GASCOIN` balance of the caller's wallet. Signed response envelope so downstream systems can verify authenticity.
+**Goal:** a public, paywalled JSON API for brands/agencies to query verified creator data. Tiered by `$GAS` balance of the caller's wallet. Signed response envelope so downstream systems can verify authenticity.
 
 **Files to create:**
 - `app/api/v1/creators/route.ts` — list (filters: min_impact, tier, min_followers)
 - `app/api/v1/creators/[handle]/route.ts` — single creator full detail
 - `app/api/v1/content/[tweet_id]/route.ts` — single post impact
 - `app/api/v1/reach/[handle]/route.ts` — signed reach certificate data (consumed by Piece 4)
-- `lib/api-gating.ts` — middleware enforcing GASCOIN balance tier
+- `lib/api-gating.ts` — middleware enforcing $GAS balance tier
 - `lib/response-signer.ts` — HMAC-signed JSON envelope
 - `app/docs/api/page.tsx` — public API docs page
 - `tests/unit/lib/api-gating.test.ts`
@@ -185,13 +185,13 @@ GROUP BY st.id, st.tweet_id, st.tweet_url, st.wallet, st.x_handle,
 
 **Steps:**
 
-- [ ] Write test: `api-gating.test.ts` — given wallet with N GASCOIN, assert correct tier + rate limit + field-access permissions.
+- [ ] Write test: `api-gating.test.ts` — given wallet with N $GAS, assert correct tier + rate limit + field-access permissions.
 - [ ] Test → FAIL
 - [ ] Define tiers in `lib/api-gating.ts`:
-  - **Free** (0 GASCOIN): basic stats, 10 req/day, creator handle + follower count only
-  - **Builder** (1,000+ GASCOIN): add engagement metrics + impact score, 1k req/day
-  - **Agency** (100k+ GASCOIN): add audience signals + historical, 10k req/day
-  - **Enterprise** (1M+ GASCOIN): full signed envelope + batch export, 100k req/day
+  - **Free** (0 $GAS): basic stats, 10 req/day, creator handle + follower count only
+  - **Builder** (1,000+ $GAS): add engagement metrics + impact score, 1k req/day
+  - **Agency** (100k+ $GAS): add audience signals + historical, 10k req/day
+  - **Enterprise** (1M+ $GAS): full signed envelope + batch export, 100k req/day
 - [ ] Implement `lib/response-signer.ts` — HMAC-SHA256 over (payload + timestamp + nonce), embedded `x-gascoin-signature` header
 - [ ] Add API key table migration: `api_keys(id, wallet, key_hash, tier, created_at, last_used_at, expires_at)`
 - [ ] Build the 4 endpoints — each gated by `requireTier(request, minTier)`
@@ -362,7 +362,7 @@ BriefPosted → ApplicationAccepted → PostSubmitted → PerformanceVerified �
 
 ## Key decisions deferred to implementation time
 
-- **Piece 3 API pricing:** are the tier thresholds (1k/100k/1M GASCOIN) correct, or do we want USD-stable pricing too?
+- **Piece 3 API pricing:** are the tier thresholds (1k/100k/1M $GAS) correct, or do we want USD-stable pricing too?
 - **Piece 4 IPFS provider:** web3.storage vs Pinata vs self-hosted?
 - **Piece 6 oracle model:** single verifier signer (chosen) vs optimistic with challenge period vs Chainlink Functions?
 - **Piece 6 stablecoin:** USDC only or multi-stable (USDC + USDT + DAI)?
