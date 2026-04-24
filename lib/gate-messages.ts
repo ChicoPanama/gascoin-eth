@@ -13,8 +13,8 @@ export const GATE_MESSAGES: Record<string, GateMessage> = {
     fix: 'Follow @GasCoinApp on X, then resubmit.',
   },
   tweet_hashtag: {
-    headline: 'Tweet is missing #gascoin or $GASCOIN',
-    fix: 'Your tweet must include #gascoin or $GASCOIN. Post a new tweet with the tag, then resubmit.',
+    headline: 'Tweet is missing #gascoin or $GAS',
+    fix: 'Your tweet must include #gascoin or $GAS. Post a new tweet with the tag, then resubmit.',
   },
   tweet_mentions_gascoinapp: {
     headline: 'Tweet doesn\'t tag @GasCoinApp',

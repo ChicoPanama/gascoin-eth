@@ -39,7 +39,7 @@ Key facts:
 17 verification gates run automatically. Gates 1–16 are blocking. Gate 17 (token hold) is informational.
 3 AI engines: Gemini Vision (receipt OCR), Grok (cross-validation), Claude (oversight).
 Tiers: Standard (1+ token, 7d cooldown), Commuter (100K+, 7d), Road Warrior (5M+, 3.5d), Fleet (10M+, 1.75d).
-Wallets: Phantom, Solflare, Backpack. Buy $GASCOIN on Jupiter (jup.ag).
+Wallets: Phantom, Solflare, Backpack. Buy $GAS on Jupiter (jup.ag).
 Points: 1,000 per approved claim + streak bonuses + daily holding points + engagement points.
 Referral: 100 pts per referred approval + 2% ongoing, max 20 per 30 days.
 Season 1 is beta, invite-only. Any gas station worldwide. Receipts must be <7 days old, min $5, gasoline only.

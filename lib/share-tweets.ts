@@ -10,15 +10,15 @@ export function composeDashboardTweet(params: {
 }): string {
   const usd = Math.round(params.networkUsd);
   if (usd > 0) {
-    return `My network has saved $${usd} in gas fees through GASCOIN. ${params.referredCount} people refunded so far.\n\nGet your gas money back too → ${params.referralUrl}\n\n@GasCoinApp $GASCOIN #gascoin`;
+    return `My network has saved $${usd} in gas fees through GASCOIN. ${params.referredCount} people refunded so far.\n\nGet your gas money back too → ${params.referralUrl}\n\n@GasCoinApp $GAS #gascoin`;
   }
-  return `I'm earning gas refunds in ETH with GASCOIN. Submit a receipt and get your gas money back → ${params.referralUrl}\n\n@GasCoinApp $GASCOIN #gascoin`;
+  return `I'm earning gas refunds in ETH with GASCOIN. Submit a receipt and get your gas money back → ${params.referralUrl}\n\n@GasCoinApp $GAS #gascoin`;
 }
 
 export function composePostApprovalTweet(params: {
   referralUrl: string;
 }): string {
-  return `Just submitted my gas receipt to GASCOIN for a ETH refund. Get your gas money back too → ${params.referralUrl}\n\n@GasCoinApp $GASCOIN #gascoin`;
+  return `Just submitted my gas receipt to GASCOIN for a ETH refund. Get your gas money back too → ${params.referralUrl}\n\n@GasCoinApp $GAS #gascoin`;
 }
 
 /**

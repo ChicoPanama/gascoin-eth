@@ -262,7 +262,7 @@ function StepTweet({ onVerified, onBack, initialUrl, loggedInHandle }: {
   // Pre-filled tweet the user can edit before posting. Keeps the hashtag +
   // mention requirements satisfied out of the box so testers don't forget
   // them and get rejected.
-  const tweetDraft = 'Just filled up and getting ETH back thanks to @GasCoinApp. Real money back on real gas. #gascoin $GASCOIN';
+  const tweetDraft = 'Just filled up and getting ETH back thanks to @GasCoinApp. Real money back on real gas. #gascoin $GAS';
   const composeUrl = `https://x.com/intent/post?text=${encodeURIComponent(tweetDraft)}`;
 
   return (
@@ -276,7 +276,7 @@ function StepTweet({ onVerified, onBack, initialUrl, loggedInHandle }: {
           STEP A · POST ON X
         </div>
         <p style={{ fontSize: 14, lineHeight: 1.5, marginBottom: 12 }}>
-          Tweet must tag <strong>@GasCoinApp</strong> and include <strong>#gascoin</strong> or <strong>$GASCOIN</strong>. Must be public. Must be posted within the last 48 hours.
+          Tweet must tag <strong>@GasCoinApp</strong> and include <strong>#gascoin</strong> or <strong>$GAS</strong>. Must be public. Must be posted within the last 48 hours.
         </p>
         <a
           href={composeUrl}
@@ -312,7 +312,7 @@ function StepTweet({ onVerified, onBack, initialUrl, loggedInHandle }: {
             <div className="sf-tweet-avatar">{handle[0]?.toUpperCase() || 'G'}</div>
             <div className="sf-tweet-body">
               <div className="sf-tweet-meta">@{handle} · {tweetAge}</div>
-              <div className="sf-tweet-status">✓ #gascoin / $GASCOIN detected · Public · Posted {tweetAge}</div>
+              <div className="sf-tweet-status">✓ #gascoin / $GAS detected · Public · Posted {tweetAge}</div>
             </div>
           </div>
         )}

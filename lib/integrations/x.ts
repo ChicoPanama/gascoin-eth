@@ -81,9 +81,12 @@ async function verifyViaXApi(tweetId: string, expectedHandle: string): Promise<T
   const user = j?.includes?.users?.[0] || {};
   const username = String(user?.username || '').toLowerCase();
   const expected = expectedHandle.replace(/^@/, '').toLowerCase();
-  // Cashtag-aware: accepts #gascoin (hashtag) OR $gascoin (X cashtag,
-  // April 2026). Character class [#$] matches either token prefix.
-  const containsGascoin = /[#$]gascoin\b/i.test(text);
+  // Ticker-aware: accepts #gascoin (hashtag) OR $GAS (cashtag, current).
+  // Legacy $GASCOIN is also accepted for a transition window so tweets
+  // posted before the ticker change still pass the gate. Remove the
+  // (coin)? alternate ~30 days post-migration once all legacy tweets
+  // have aged past the 48h verification window.
+  const containsGascoin = /#gascoin\b|\$gas(coin)?\b/i.test(text);
   const mentionsGascoinApp = GASCOINAPP_MENTION.test(text);
   const authorMatch = !!expected && username === expected;
 
@@ -109,8 +112,8 @@ async function verifyViaOEmbed(tweetUrl: string, expectedHandle: string): Promis
 
   const j = (await r.json()) as any;
   const html = String(j?.html || '');
-  // Cashtag-aware — mirrors the X API path above
-  const containsGascoin = /[#$]gascoin\b/i.test(html);
+  // Ticker-aware — mirrors the X API path above (#gascoin OR $GAS OR legacy $GASCOIN)
+  const containsGascoin = /#gascoin\b|\$gas(coin)?\b/i.test(html);
   const mentionsGascoinApp = GASCOINAPP_MENTION.test(html);
   const handleMatch = html.match(/twitter\.com\/([A-Za-z0-9_]+)/i);
   const found = handleMatch?.[1] ? `@${handleMatch[1]}` : undefined;

@@ -69,12 +69,12 @@ export function ReferralDashboard({ showHeader = false }: ReferralDashboardProps
     if (typeof navigator !== 'undefined' && (navigator as any).share) {
       (navigator as any).share({
         title: 'GASCOIN',
-        text: 'Get your gas money back. Submit a receipt @GasCoinApp $GASCOIN #gascoin',
+        text: 'Get your gas money back. Submit a receipt @GasCoinApp $GAS #gascoin',
         url: referralUrl,
       });
     } else {
       window.open(
-        `https://x.com/intent/tweet?text=${encodeURIComponent('Get your gas money back. Submit a receipt @GasCoinApp $GASCOIN #gascoin → ' + referralUrl)}`,
+        `https://x.com/intent/tweet?text=${encodeURIComponent('Get your gas money back. Submit a receipt @GasCoinApp $GAS #gascoin → ' + referralUrl)}`,
         '_blank',
       );
     }

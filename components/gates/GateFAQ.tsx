@@ -26,7 +26,7 @@ const FAQS = [
   },
   {
     q: 'What does "non-blocking" mean for Gate 17?',
-    a: 'Gate 17 checks your GASCOIN token balance to determine your tier (Standard, Commuter, Road Warrior, or Fleet). If your balance is below the Standard minimum of 1 token, the gate logs it but does not reject your claim — it is informational only in Season 1.',
+    a: 'Gate 17 checks your $GAS token balance to determine your tier (Standard, Commuter, Road Warrior, or Fleet). If your balance is below the Standard minimum of 1 token, the gate logs it but does not reject your claim — it is informational only in Season 1.',
   },
   {
     q: 'Are the pass rates on this page real?',

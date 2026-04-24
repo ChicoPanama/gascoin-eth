@@ -13,7 +13,7 @@
 export const GATE_DEFS = [
   { id: 'x_verified',                 label: 'X Verified' },
   { id: 'follows_gascoin',            label: 'Follows @GasCoinApp' },
-  { id: 'tweet_hashtag',              label: 'Tweet #gascoin / $GASCOIN' },
+  { id: 'tweet_hashtag',              label: 'Tweet #gascoin / $GAS' },
   { id: 'tweet_mentions_gascoinapp',  label: 'Tweet Tags @GasCoinApp' },
   { id: 'tweet_live',                 label: 'Tweet Live' },
   { id: 'receipt_hashtag',            label: 'Receipt Hashtag' },
@@ -84,7 +84,7 @@ export function evaluateClaim(c: ClaimInput){
     // Return retry_later so user can resubmit without penalty
     gates.push({ gate:'x_verified', passed:c.xVerified, reason:'X must be verified' });
     gates.push({ gate:'follows_gascoin', passed:false, reason:'X API unavailable — retry later' });
-    gates.push({ gate:'tweet_hashtag', passed:c.tweetHasGascoin, reason:'Tweet must include #gascoin or $GASCOIN' });
+    gates.push({ gate:'tweet_hashtag', passed:c.tweetHasGascoin, reason:'Tweet must include #gascoin or $GAS' });
     gates.push({ gate:'tweet_mentions_gascoinapp', passed:c.tweetMentionsGascoinApp, reason:'Tweet must tag @GasCoinApp' });
     gates.push({ gate:'tweet_live', passed:c.tweetLive, reason:'Tweet must remain live' });
     gates.push({ gate:'receipt_hashtag', passed:c.receiptHasGascoin, reason:'Receipt must include #gascoin' });
@@ -107,7 +107,7 @@ export function evaluateClaim(c: ClaimInput){
 
   gates.push({ gate:'x_verified', passed:c.xVerified, reason:'X must be verified' });
   gates.push({ gate:'follows_gascoin', passed:c.followsGascoin, reason:'You must follow @GasCoinApp on X before submitting' });
-  gates.push({ gate:'tweet_hashtag', passed:c.tweetHasGascoin, reason:'Tweet must include #gascoin or $GASCOIN' });
+  gates.push({ gate:'tweet_hashtag', passed:c.tweetHasGascoin, reason:'Tweet must include #gascoin or $GAS' });
   gates.push({ gate:'tweet_mentions_gascoinapp', passed:c.tweetMentionsGascoinApp, reason:'Tweet must tag @GasCoinApp' });
   gates.push({ gate:'tweet_live', passed:c.tweetLive, reason:'Tweet must remain live' });
   gates.push({ gate:'receipt_hashtag', passed:c.receiptHasGascoin, reason:'Receipt must include #gascoin' });
