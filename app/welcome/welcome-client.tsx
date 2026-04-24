@@ -506,7 +506,7 @@ function Popover({
 // ─── Popover contents ────────────────────────────────────────────────
 
 function EnterPopover({ testersRedeemed }: { testersRedeemed: number }) {
-  const { ready, authenticated, login, getAccessToken, user } = usePrivy();
+  const { ready, authenticated, login, getAccessToken, user, linkTwitter } = usePrivy();
   const router = useRouter();
   const [code, setCode] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -608,9 +608,36 @@ function EnterPopover({ testersRedeemed }: { testersRedeemed: number }) {
           <button
             type="button"
             className="wlc-pop-btn wlc-pop-btn--primary"
-            onClick={() => login()}
+            onClick={() => login({ loginMethods: ['twitter'] })}
           >
             SIGN IN WITH X →
+          </button>
+        </div>
+      </>
+    );
+  }
+
+  // Authenticated but X isn't linked (e.g. signed in via wallet-only
+  // from a different surface). Invite redemption requires x_user_id /
+  // x_handle so we can enforce one-code-per-X-account. Gate the form
+  // behind a "link X" step instead of letting the user hit UNLOCK and
+  // get a bare "unauthorized" back from the server.
+  if (!handle) {
+    return (
+      <>
+        <div className="wlc-pop-kicker">[ SEASON 1 · INVITE REQUIRED ]</div>
+        <h2 className="wlc-pop-title">Link your X account</h2>
+        <p className="wlc-pop-body">
+          You're signed in, but your X account isn't linked yet. Season 1
+          invite codes are pinned to your X identity — link it to continue.
+        </p>
+        <div className="wlc-pop-actions">
+          <button
+            type="button"
+            className="wlc-pop-btn wlc-pop-btn--primary"
+            onClick={() => { try { linkTwitter(); } catch { /* Privy handles UI */ } }}
+          >
+            LINK X ACCOUNT →
           </button>
         </div>
       </>
@@ -622,7 +649,7 @@ function EnterPopover({ testersRedeemed }: { testersRedeemed: number }) {
       <div className="wlc-pop-kicker">[ SEASON 1 · INVITE REQUIRED ]</div>
       <h2 className="wlc-pop-title">Enter your invite code</h2>
       <p className="wlc-pop-body">
-        Signed in as <strong>@{handle || 'user'}</strong>. Enter your single-use
+        Signed in as <strong>@{handle}</strong>. Enter your single-use
         beta code to unlock the protocol.
       </p>
       <form onSubmit={redeem} style={{ marginTop: 16 }}>

@@ -121,6 +121,21 @@ export function shouldDropEvent(
   if (/Cannot set property\s+(?:ethereum|solana|phantom)/i.test(message)) return null;
   if (/evmAsk\.js|evmAskSite|injectedWalletProvider/i.test(message)) return null;
 
+  // 1b. Extension-internal errors that surface in our page via inpage.js
+  // (MetaMask, Binance Wallet TON bridge SSE retries, Rabby, etc.).
+  // Heuristic: drop if the error itself mentions these, or if every
+  // stack frame is from an extension inpage/contentScript bundle or a
+  // chrome-extension:// URL. Our own frames never match those patterns.
+  if (/func sseError not found|\[FunctionCallError\]|wallet\.binance\.com\/tonbridge/i.test(message)) return null;
+  const frames = event.exception?.values?.[0]?.stacktrace?.frames ?? [];
+  if (frames.length > 0) {
+    const looksLikeExtension = (f: Sentry.StackFrame): boolean => {
+      const file = (f.filename || f.abs_path || '').toString();
+      return /^chrome-extension:\/\/|^moz-extension:\/\/|^app:\/\/\/inpage\.js|\/inpage\.js$|contentScript\.js|content_script\.js|injected\.js/i.test(file);
+    };
+    if (frames.every(looksLikeExtension)) return null;
+  }
+
   // 2. Cross-origin script noise
   if (message === 'Script error.' || message === 'Script error') return null;
 
