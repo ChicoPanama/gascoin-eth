@@ -2,24 +2,23 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import { usePrivy } from '@privy-io/react-auth';
 import { ThemeToggle } from '../ThemeToggle';
 
 /**
  * /me dashboard sidebar — X-style.
  *
- * Fixed-position left rail on desktop (≥901px). Hidden on mobile, which
- * falls back to the existing top `<Nav />` rendered by the /me layout.
- *
- * Sections are in-page anchors (#overview, #claims, etc.) rather than
- * sub-routes so a single /api/me fetch hydrates the whole page. Scroll
- * position determines the active highlight.
+ * Tab-switch behavior: each link sets ?tab=<id> without scrolling the page.
+ * The active tab is read from the URL; the rendered section lives in
+ * DashboardClient. No IntersectionObserver / scrollspy — a tab click
+ * swaps content, not scroll position.
  */
 
 interface SidebarItem {
-  id: string;        // anchor id in page
+  id: string;
   label: string;
-  icon: string;      // single-glyph icon, matches gc-nav-link-icon style
+  icon: string;
 }
 
 const SECTIONS: SidebarItem[] = [
@@ -32,6 +31,9 @@ const SECTIONS: SidebarItem[] = [
   { id: 'analytics',   label: 'Analytics',  icon: '⌁' },
 ];
 
+export const ME_SECTIONS = SECTIONS;
+export type MeTabId = typeof SECTIONS[number]['id'];
+
 export interface MeSidebarProps {
   xHandle?: string | null;
   wallet?: string | null;
@@ -43,30 +45,22 @@ function truncate(s: string, n = 6): string {
 }
 
 export function MeSidebar({ xHandle, wallet }: MeSidebarProps) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const { authenticated, logout } = usePrivy();
-  const [activeId, setActiveId] = useState<string>('overview');
   const [menuOpen, setMenuOpen] = useState(false);
 
-  // Scrollspy: update activeId as sections scroll past the viewport top.
-  useEffect(() => {
-    const ids = SECTIONS.map((s) => s.id);
-    const els = ids
-      .map((id) => ({ id, el: document.getElementById(id) }))
-      .filter((x): x is { id: string; el: HTMLElement } => !!x.el);
-    if (els.length === 0) return;
+  const rawTab = searchParams?.get('tab') ?? 'overview';
+  const activeId: MeTabId = (SECTIONS.some((s) => s.id === rawTab) ? rawTab : 'overview') as MeTabId;
 
-    const obs = new IntersectionObserver(
-      (entries) => {
-        const visible = entries
-          .filter((e) => e.isIntersecting)
-          .sort((a, b) => (a.boundingClientRect.top ?? 0) - (b.boundingClientRect.top ?? 0));
-        if (visible[0]?.target.id) setActiveId(visible[0].target.id);
-      },
-      { rootMargin: '-20% 0px -70% 0px', threshold: 0 },
-    );
-    els.forEach((x) => obs.observe(x.el));
-    return () => obs.disconnect();
-  }, []);
+  const selectTab = (id: MeTabId) => {
+    const params = new URLSearchParams(Array.from(searchParams?.entries() ?? []));
+    if (id === 'overview') params.delete('tab');
+    else params.set('tab', id);
+    const q = params.toString();
+    router.replace(q ? `${pathname}?${q}` : pathname, { scroll: false });
+  };
 
   return (
     <aside className="me-sidebar" aria-label="Dashboard navigation">
@@ -78,15 +72,16 @@ export function MeSidebar({ xHandle, wallet }: MeSidebarProps) {
 
         <nav className="me-sidebar-nav">
           {SECTIONS.map((s) => (
-            <a
+            <button
               key={s.id}
-              href={`#${s.id}`}
+              type="button"
               className={`me-sidebar-link${activeId === s.id ? ' me-sidebar-link--active' : ''}`}
-              onClick={() => setActiveId(s.id)}
+              onClick={() => selectTab(s.id as MeTabId)}
+              aria-current={activeId === s.id ? 'page' : undefined}
             >
               <span className="me-sidebar-link-icon" aria-hidden>{s.icon}</span>
               <span className="me-sidebar-link-label">{s.label}</span>
-            </a>
+            </button>
           ))}
         </nav>
 

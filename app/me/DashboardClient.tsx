@@ -2,8 +2,18 @@
 
 import { useState, useMemo, useEffect } from 'react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import { ViralShareCard } from '../../components/shared/ViralShareCard';
 import { ReferralDashboard } from '../../components/referral/ReferralDashboard';
+
+type MeTabId = 'overview' | 'claims' | 'payouts' | 'referrals' | 'engagement' | 'points' | 'analytics';
+
+function useActiveMeTab(): MeTabId {
+  const sp = useSearchParams();
+  const raw = sp?.get('tab') ?? 'overview';
+  const valid: MeTabId[] = ['overview', 'claims', 'payouts', 'referrals', 'engagement', 'points', 'analytics'];
+  return (valid as string[]).includes(raw) ? (raw as MeTabId) : 'overview';
+}
 
 // ── Types ──
 interface GateResult {
@@ -234,9 +244,11 @@ export function DashboardClient({ wallet, xHandle, isDryRun = false, claims, pay
   const payoutForClaim = (claimId: string) =>
     payouts.find((p) => p.claim_id === claimId && p.status === 'paid');
 
+  const activeTab = useActiveMeTab();
+
   return (
     <>
-      {/* ── Header ── */}
+      {/* ── Header (always visible) ── */}
       <header className="lb-header">
         <div className="lb-header__meta">
           <span className="lb-tag">— Personal Dashboard · Your Activity</span>
@@ -282,6 +294,7 @@ export function DashboardClient({ wallet, xHandle, isDryRun = false, claims, pay
         </div>
       )}
 
+      {activeTab === 'overview' && (<>
       {/* ── Stats Bar ── */}
       <section id="overview" className="gc-stats">
         <div className="gc-stats-grid">
@@ -347,7 +360,9 @@ export function DashboardClient({ wallet, xHandle, isDryRun = false, claims, pay
           </div>
         </div>
       </section>
+      </>)}
 
+      {activeTab === 'points' && (<>
       {/* ── Points Breakdown ── */}
       <section id="points" className="ud-section">
         <div className="ud-section__header">
@@ -373,6 +388,9 @@ export function DashboardClient({ wallet, xHandle, isDryRun = false, claims, pay
         </div>
       </section>
 
+      </>)}
+
+      {activeTab === 'analytics' && (<>
       {/* ── Performance Analytics ── */}
       <section id="analytics" className="ud-section">
         <div className="ud-section__header">
@@ -438,6 +456,9 @@ export function DashboardClient({ wallet, xHandle, isDryRun = false, claims, pay
         )}
       </section>
 
+      </>)}
+
+      {activeTab === 'engagement' && (<>
       {/* ── Content Type Distribution ── */}
       <section className="ud-section">
         <div className="ud-section__header">
@@ -481,6 +502,9 @@ export function DashboardClient({ wallet, xHandle, isDryRun = false, claims, pay
         )}
       </section>
 
+      </>)}
+
+      {activeTab === 'points' && (<>
       {/* ── Tier Progress ── */}
       <section className="ud-section">
         <div className="ud-section__header">
@@ -507,6 +531,9 @@ export function DashboardClient({ wallet, xHandle, isDryRun = false, claims, pay
         )}
       </section>
 
+      </>)}
+
+      {activeTab === 'engagement' && (<>
       {/* ── Top Tweets ── */}
       <section id="engagement" className="ud-section">
         <div className="ud-section__header">
@@ -549,6 +576,9 @@ export function DashboardClient({ wallet, xHandle, isDryRun = false, claims, pay
         )}
       </section>
 
+      </>)}
+
+      {activeTab === 'claims' && (<>
       {/* ── Submission History ── */}
       <section id="claims" className="ud-section">
         <div className="ud-section__header">
@@ -701,6 +731,9 @@ export function DashboardClient({ wallet, xHandle, isDryRun = false, claims, pay
         )}
       </section>
 
+      </>)}
+
+      {activeTab === 'payouts' && (<>
       {/* ── Payout History ── */}
       {payouts.length > 0 && (
         <section id="payouts" className="ud-section">
@@ -758,6 +791,9 @@ export function DashboardClient({ wallet, xHandle, isDryRun = false, claims, pay
         />
       )}
 
+      </>)}
+
+      {activeTab === 'referrals' && (<>
       {/* ── Referral Program (full dashboard, blended) ── */}
       <section id="referrals" className="ud-section">
         <div className="ud-section__header">
@@ -766,6 +802,7 @@ export function DashboardClient({ wallet, xHandle, isDryRun = false, claims, pay
         </div>
         <ReferralDashboard />
       </section>
+      </>)}
     </>
   );
 }

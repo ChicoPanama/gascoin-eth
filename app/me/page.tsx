@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { usePrivy } from '@privy-io/react-auth';
 import { useRouter } from 'next/navigation';
 import { Nav } from '../../components/Nav';
@@ -90,24 +90,26 @@ export default function MeDashboardPage() {
     <div className="container">
       <Nav />
       <main id="main-content">
-        <DashboardClient
-          wallet={data.wallet}
-          xHandle={data.xHandle}
-          isDryRun={data.isDryRun}
-          claims={data.claims}
-          payouts={data.payouts}
-          referral={data.referral}
-          stats={data.stats}
-          networkImpact={data.networkImpact}
-          pricing={data.pricing}
-          points={data.points}
-          tier={data.tier}
-          leaderboard={data.leaderboard}
-          engagement={data.engagement}
-          streak={data.streak}
-          cooldown={data.cooldown}
-          analytics={data.analytics}
-        />
+        <Suspense fallback={null}>
+          <DashboardClient
+            wallet={data.wallet}
+            xHandle={data.xHandle}
+            isDryRun={data.isDryRun}
+            claims={data.claims}
+            payouts={data.payouts}
+            referral={data.referral}
+            stats={data.stats}
+            networkImpact={data.networkImpact}
+            pricing={data.pricing}
+            points={data.points}
+            tier={data.tier}
+            leaderboard={data.leaderboard}
+            engagement={data.engagement}
+            streak={data.streak}
+            cooldown={data.cooldown}
+            analytics={data.analytics}
+          />
+        </Suspense>
       </main>
     </div>
   );

@@ -245,3 +245,170 @@
 .me-sidebar-menu-item:hover {
   background: rgba(255, 255, 255, 0.06);
 }
+
+/* ── Enterprise tables inside /me ──────────────────────────────
+ * Applied to every <table> descendant of .me-layout. Neutral palette,
+ * tabular figures, sticky-ish header, row dividers. Replaces the
+ * mixed-style tables that used to live in DashboardClient.
+ */
+@media (min-width: 901px) {
+  .me-layout main {
+    padding-top: 24px;
+    padding-bottom: 48px;
+  }
+
+  .me-layout .ud-section {
+    margin-bottom: 32px;
+    padding: 20px 24px;
+    border: 1px solid rgba(var(--fg-rgb), 0.08);
+    border-radius: 12px;
+    background: rgba(var(--fg-rgb), 0.015);
+  }
+
+  .me-layout .ud-section__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid rgba(var(--fg-rgb), 0.06);
+    gap: 16px;
+  }
+
+  .me-layout .ud-section__title {
+    font-family: var(--font-plex-sans, 'IBM Plex Sans'), system-ui, sans-serif !important;
+    font-size: 15px !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.02em !important;
+    color: var(--fg) !important;
+    margin: 0 !important;
+    text-transform: none !important;
+  }
+
+  /* Strip background, reset borders on built-in tables */
+  .me-layout table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: var(--font-plex-sans, 'IBM Plex Sans'), system-ui, sans-serif;
+    font-size: 13px;
+    font-variant-numeric: tabular-nums;
+  }
+  .me-layout table thead th {
+    padding: 10px 12px;
+    background: transparent;
+    border-bottom: 1px solid rgba(var(--fg-rgb), 0.12);
+    font-weight: 600;
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: rgba(var(--fg-rgb), 0.55);
+    text-align: left;
+    white-space: nowrap;
+  }
+  .me-layout table tbody td {
+    padding: 12px;
+    border-bottom: 1px solid rgba(var(--fg-rgb), 0.05);
+    vertical-align: middle;
+    color: var(--fg);
+  }
+  .me-layout table tbody tr:hover {
+    background: rgba(var(--fg-rgb), 0.025);
+  }
+  .me-layout table tbody tr:last-child td {
+    border-bottom: none;
+  }
+
+  /* Numeric columns — right-aligned, tabular */
+  .me-layout table td.lb-table-sol,
+  .me-layout table td.lb-table-time {
+    font-family: var(--font-plex-mono, 'IBM Plex Mono'), monospace;
+    font-size: 12px;
+    color: rgba(var(--fg-rgb), 0.75);
+  }
+
+  /* Status pill normalization */
+  .me-layout .wt-status-badge,
+  .me-layout .ud-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 10px;
+    border-radius: 9999px;
+    font-size: 10px;
+    letter-spacing: 0.06em;
+    font-weight: 600;
+    text-transform: uppercase;
+    border: 1px solid rgba(var(--fg-rgb), 0.15);
+    background: transparent;
+    color: rgba(var(--fg-rgb), 0.75);
+  }
+  .me-layout .ud-badge--pass,
+  .me-layout .wt-status-badge--approved {
+    color: #4ade80;
+    border-color: rgba(74, 222, 128, 0.35);
+  }
+  .me-layout .ud-badge--fail,
+  .me-layout .wt-status-badge--rejected {
+    color: #f87171;
+    border-color: rgba(248, 113, 113, 0.35);
+  }
+  .me-layout .ud-badge--pending,
+  .me-layout .wt-status-badge--pending {
+    color: #fbbf24;
+    border-color: rgba(251, 191, 36, 0.35);
+  }
+
+  /* Stats cards */
+  .me-layout .gc-stats {
+    margin-bottom: 24px;
+  }
+  .me-layout .gc-stats-grid {
+    gap: 1px;
+    background: rgba(var(--fg-rgb), 0.08);
+    border: 1px solid rgba(var(--fg-rgb), 0.08);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .me-layout .gc-stat {
+    background: var(--bg);
+    padding: 18px 20px;
+  }
+  .me-layout .gc-stat-label {
+    font-family: var(--font-plex-sans, 'IBM Plex Sans'), system-ui, sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: rgba(var(--fg-rgb), 0.5);
+    margin-bottom: 8px;
+  }
+  .me-layout .gc-stat-value {
+    font-family: var(--font-plex-sans, 'IBM Plex Sans'), system-ui, sans-serif;
+    font-size: 24px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    color: var(--fg);
+    line-height: 1.1;
+  }
+  .me-layout .gc-stat-sub {
+    font-family: var(--font-plex-mono, 'IBM Plex Mono'), monospace;
+    font-size: 11px;
+    color: rgba(var(--fg-rgb), 0.4);
+    margin-top: 4px;
+  }
+
+  /* Header tighten */
+  .me-layout .lb-header {
+    padding: 20px 0 24px;
+    margin-bottom: 8px;
+    border-bottom: 1px solid rgba(var(--fg-rgb), 0.06);
+  }
+  .me-layout .lb-title {
+    font-size: 42px;
+    letter-spacing: 0.02em;
+  }
+  .me-layout .lb-tag {
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    color: rgba(var(--fg-rgb), 0.5);
+  }
+}
