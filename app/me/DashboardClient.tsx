@@ -172,6 +172,23 @@ function timeAgo(iso: string) {
   return `${Math.floor(d / 86_400_000)}d ago`;
 }
 
+// timeAgo() reads Date.now() so the server render and the client-hydrate
+// render disagree on minute/hour boundaries ("59m ago" vs "1h ago"),
+// producing hydration mismatches. TimeAgo renders a stable ISO-derived
+// string on the server and swaps to the relative form after mount.
+// suppressHydrationWarning covers the intentional content swap.
+function TimeAgo({ iso }: { iso: string }) {
+  const [text, setText] = useState<string | null>(null);
+  useEffect(() => {
+    const update = () => setText(timeAgo(iso));
+    update();
+    const id = setInterval(update, 60_000);
+    return () => clearInterval(id);
+  }, [iso]);
+  const fallback = iso.slice(0, 10); // YYYY-MM-DD, stable across server/client
+  return <span suppressHydrationWarning>{text ?? fallback}</span>;
+}
+
 function truncate(s: string, n = 8) {
   if (s.length <= n * 2) return s;
   return `${s.slice(0, n)}...${s.slice(-n)}`;
@@ -544,7 +561,7 @@ export function DashboardClient({ wallet, xHandle, isDryRun = false, claims, pay
             {engagement.topTweets.map((t) => (
               <div key={t.tweet_id} className="ud-claim" style={{ cursor: 'default' }}>
                 <div className="ud-claim__top">
-                  <span className="ud-claim__date">{timeAgo(t.posted_at)}</span>
+                  <span className="ud-claim__date"><TimeAgo iso={t.posted_at} /></span>
                   <span className="ud-badge ud-badge--pass">{t.content_type?.replace(/_/g, ' ').toUpperCase() || 'TEXT'}</span>
                   <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--fg)', marginLeft: 'auto' }}>
                     {t.adjusted_points.toLocaleString()} pts
@@ -620,7 +637,7 @@ export function DashboardClient({ wallet, xHandle, isDryRun = false, claims, pay
                   >
                     <div className="ud-claim__left">
                       <span className="ud-claim__id">{claim.id.slice(0, 8)}…</span>
-                      <span className="ud-claim__time">{timeAgo(claim.created_at)}</span>
+                      <span className="ud-claim__time"><TimeAgo iso={claim.created_at} /></span>
                     </div>
                     <div className="ud-claim__center">
                       {statusBadge(claim.status)}
@@ -749,7 +766,7 @@ export function DashboardClient({ wallet, xHandle, isDryRun = false, claims, pay
               const isDryRunTx = p.tx_hash?.startsWith('DRYRUN_');
               return (
                 <div key={p.id} className="ud-payouts__row">
-                  <span className="ud-payouts__date">{timeAgo(p.created_at)}</span>
+                  <span className="ud-payouts__date"><TimeAgo iso={p.created_at} /></span>
                   <span className="ud-payouts__amount">
                     {isDryRunTx
                       ? <span style={{ color: 'rgba(255,220,140,0.8)' }}>1,000 pts</span>

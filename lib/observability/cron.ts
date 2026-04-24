@@ -30,17 +30,23 @@ export function withCronCheckIn(
     const monitorConfig = {
       schedule: { type: 'crontab', value: schedule } as const,
       checkinMargin: 2,       // minutes — lenient for cold starts
-      maxRuntime: 15,         // minutes — matches Vercel function timeout
+      maxRuntime: 6,          // minutes — slightly above Vercel Pro's 5min cap
       timezone: 'Etc/UTC',
     };
 
     try {
-      return (await Sentry.withMonitor(slug, () => handler(req), monitorConfig)) as Response;
+      const result = (await Sentry.withMonitor(slug, () => handler(req), monitorConfig)) as Response;
+      // Flush the monitor check-in before the Vercel serverless container
+      // freezes — otherwise the "ok" event can be buffered and never sent,
+      // which trips Sentry's missed-check-in alert.
+      await Sentry.flush(2000).catch(() => {});
+      return result;
     } catch (err) {
       // Sentry.withMonitor already captured the error + sent an error check-in.
       // Surface the original error to the caller so existing error handling
       // (e.g. the cron-auth 500 path) still runs.
       Sentry.captureException(err, { tags: { cron_slug: slug } });
+      await Sentry.flush(2000).catch(() => {});
       return NextResponse.json(
         { ok: false, error: 'cron_handler_failed', slug },
         { status: 500 },
