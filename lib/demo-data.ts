@@ -1,109 +1,122 @@
 /**
- * Pre-launch demo data — realistic fallback values.
- * Every component checks: if real data is non-empty, use it. Otherwise, use these.
- * When the first real payout lands, demo data disappears automatically.
+ * Beta-test demo data — realistic fallback values for pre-launch surfaces.
+ *
+ * Every public component checks:
+ *   if real data is non-empty → use it
+ *   otherwise                 → use these demo values
+ *
+ * Once real beta activity hits each surface (first real payout, first real
+ * leaderboard entry, etc.), demo data disappears automatically for that
+ * surface. Per-surface, not all-or-nothing.
+ *
+ * Scale: tuned to look like a live closed beta with ~14 active testers,
+ * a modest treasury (~$76K), and a handful of approved refunds. Easy to
+ * edit in one place when the real numbers cross over.
+ *
+ * **Swap in real beta tester X handles** in DEMO_LEADERBOARD below —
+ * just replace `@betaXX` placeholders with actual handles; keep the
+ * wallets/points/ranks or tweak per-tester as you like.
  */
 
-// ── Treasury ──
+// ── Treasury (mock: $76K at beta scale) ──
 export const DEMO_TREASURY = {
-  solBalance: 12847,
-  ethUsd: 2_180_000,
-  gascoinBalance: 8_500_000,
-  gascoinUsd: 1_950_000,
+  ethBalance: 23.5,         // ~23.5 ETH (@ ~$3,200) ≈ $76K
+  ethUsd: 76_000,
+  gascoinBalance: 0,        // token not deployed yet
+  gascoinUsd: 0,
 };
 
 export const DEMO_TREASURY_DISPLAY = {
-  treasuryUsd: '$2.2M',
-  treasurySub: '12,847 ETH',
-  marketCap: '$4.2M',
-  volume: '$180K',
+  treasuryUsd: '$76K',
+  treasurySub: '23.5 ETH',
+  marketCap: '—',           // no token yet
+  volume: '—',
 };
 
-// ── Dashboard Stats ──
+// ── Dashboard Stats (beta-test scale) ──
 export const DEMO_STATS = {
-  refundsToday: 23,
-  totalPaid: 4821.5,
-  queueDepth: 12,
+  refundsToday: 3,
+  totalPaid: 0.42,          // ~0.42 ETH paid out in refunds to date
+  queueDepth: 4,
 };
 
-// ── Chart (7-day treasury) ──
+// ── Chart (7-day treasury, approx flat during beta) ──
 export const DEMO_CHART_DATA = [
-  { day: 'Mon', eth: 12200 },
-  { day: 'Tue', eth: 12350 },
-  { day: 'Wed', eth: 12510 },
-  { day: 'Thu', eth: 12480 },
-  { day: 'Fri', eth: 12690 },
-  { day: 'Sat', eth: 12770 },
-  { day: 'Sun', eth: 12847 },
+  { day: 'Mon', eth: 23.20 },
+  { day: 'Tue', eth: 23.28 },
+  { day: 'Wed', eth: 23.35 },
+  { day: 'Thu', eth: 23.38 },
+  { day: 'Fri', eth: 23.42 },
+  { day: 'Sat', eth: 23.47 },
+  { day: 'Sun', eth: 23.50 },
 ];
 
-// ── Leaderboard (10 entries with X handles) ──
+// ── Leaderboard (14 beta testers) ──
+// Replace the `x_handle` placeholders with real beta tester handles.
+// Wallets are truncated ETH-style (0x…XYZW). Points decay naturally
+// from the top down and match typical Season 1 early-tester activity.
 export const DEMO_LEADERBOARD = [
-  { wallet_address: '7xKp...m3Fv', total_eth_earned: 2.847, rank: 1, total_submissions: 8, composite_score: 285, x_handle: 'sol_saver' },
-  { wallet_address: '9bRq...kE2L', total_eth_earned: 2.134, rank: 2, total_submissions: 6, composite_score: 213, x_handle: 'gas_refund_king' },
-  { wallet_address: '3mWx...pT8J', total_eth_earned: 1.892, rank: 3, total_submissions: 5, composite_score: 189, x_handle: 'crypto_driver' },
-  { wallet_address: 'Ah4N...v7Ks', total_eth_earned: 1.456, rank: 4, total_submissions: 4, composite_score: 146, x_handle: 'defi_commuter' },
-  { wallet_address: 'Fm9B...cR3P', total_eth_earned: 1.201, rank: 5, total_submissions: 4, composite_score: 120, x_handle: 'pump_receipts' },
-  { wallet_address: '2qLv...hW6D', total_eth_earned: 0.987, rank: 6, total_submissions: 3, composite_score: 99, x_handle: 'solana_fuel' },
-  { wallet_address: 'Jn5X...tM4A', total_eth_earned: 0.743, rank: 7, total_submissions: 2, composite_score: 74, x_handle: 'chain_refund' },
-  { wallet_address: 'Ks8H...bY1G', total_eth_earned: 0.512, rank: 8, total_submissions: 2, composite_score: 51, x_handle: 'gas_back_sol' },
-  { wallet_address: 'Pv2C...nQ5R', total_eth_earned: 0.234, rank: 9, total_submissions: 1, composite_score: 23, x_handle: 'receipt_hunter' },
-  { wallet_address: 'Wt6F...jL9E', total_eth_earned: 0.089, rank: 10, total_submissions: 1, composite_score: 9, x_handle: 'gascoin_og' },
+  { wallet_address: '0x7a2c…m3Fv', total_eth_earned: 0.082, rank: 1,  total_submissions: 6, composite_score: 11_420, x_handle: 'beta01' },
+  { wallet_address: '0x9b4d…kE2L', total_eth_earned: 0.071, rank: 2,  total_submissions: 5, composite_score: 9_840,  x_handle: 'beta02' },
+  { wallet_address: '0x3e1f…pT8J', total_eth_earned: 0.063, rank: 3,  total_submissions: 5, composite_score: 8_720,  x_handle: 'beta03' },
+  { wallet_address: '0xAa8b…v7Ks', total_eth_earned: 0.054, rank: 4,  total_submissions: 4, composite_score: 7_310,  x_handle: 'beta04' },
+  { wallet_address: '0xFc2e…cR3P', total_eth_earned: 0.048, rank: 5,  total_submissions: 4, composite_score: 6_480,  x_handle: 'beta05' },
+  { wallet_address: '0x2a9c…hW6D', total_eth_earned: 0.041, rank: 6,  total_submissions: 3, composite_score: 5_620,  x_handle: 'beta06' },
+  { wallet_address: '0xJd5a…tM4A', total_eth_earned: 0.037, rank: 7,  total_submissions: 3, composite_score: 4_980,  x_handle: 'beta07' },
+  { wallet_address: '0xK8b1…bY1G', total_eth_earned: 0.031, rank: 8,  total_submissions: 2, composite_score: 4_210,  x_handle: 'beta08' },
+  { wallet_address: '0xP1c4…nQ5R', total_eth_earned: 0.026, rank: 9,  total_submissions: 2, composite_score: 3_540,  x_handle: 'beta09' },
+  { wallet_address: '0xW3f2…jL9E', total_eth_earned: 0.022, rank: 10, total_submissions: 2, composite_score: 2_980,  x_handle: 'beta10' },
+  { wallet_address: '0xBf9a…xU7T', total_eth_earned: 0.018, rank: 11, total_submissions: 1, composite_score: 2_340,  x_handle: 'beta11' },
+  { wallet_address: '0xCc4d…yN2V', total_eth_earned: 0.015, rank: 12, total_submissions: 1, composite_score: 1_820,  x_handle: 'beta12' },
+  { wallet_address: '0xD7e0…zK8Q', total_eth_earned: 0.012, rank: 13, total_submissions: 1, composite_score: 1_390,  x_handle: 'beta13' },
+  { wallet_address: '0xE4a7…wH5M', total_eth_earned: 0.009, rank: 14, total_submissions: 1, composite_score: 980,    x_handle: 'beta14' },
 ];
 
-// ── Proof of Payout (8 recent receipts — cycles in groups of 4) ──
-// USD amounts shown to the user; actual on-chain settlement is in ETH.
+// ── Proof of Payout (recent beta refunds) ──
+// USD shown to the user; on-chain settlement is in ETH.
 export const DEMO_COMMUNITY = [
-  { country: 'United States', usd: 42.00, date: 'Apr 6' },
-  { country: 'Mexico', usd: 31.00, date: 'Apr 5' },
-  { country: 'Canada', usd: 55.00, date: 'Apr 4' },
-  { country: 'United Kingdom', usd: 28.00, date: 'Apr 3' },
-  { country: 'Germany', usd: 37.00, date: 'Apr 2' },
-  { country: 'Brazil', usd: 49.00, date: 'Apr 1' },
-  { country: 'Australia', usd: 33.00, date: 'Mar 31' },
-  { country: 'Japan', usd: 61.00, date: 'Mar 30' },
+  { country: 'United States', usd: 38.00, date: 'Apr 22' },
+  { country: 'Mexico',        usd: 29.00, date: 'Apr 21' },
+  { country: 'Canada',        usd: 41.00, date: 'Apr 20' },
+  { country: 'Germany',       usd: 33.00, date: 'Apr 19' },
+  { country: 'United Kingdom',usd: 27.00, date: 'Apr 18' },
+  { country: 'Brazil',        usd: 35.00, date: 'Apr 17' },
+  { country: 'Australia',     usd: 30.00, date: 'Apr 16' },
+  { country: 'Japan',         usd: 44.00, date: 'Apr 14' },
 ];
 
-// ── Gate Pass Rates (10 gates) ──
+// ── Gate Pass Rates (closed-beta scale) ──
 export const DEMO_GATE_RATES = new Map<number, number>([
-  [1, 98],   // Tweet Detected
-  [2, 97],   // Tweet Public
-  [3, 96],   // #gascoin Hashtag
-  [4, 92],   // Tweet Age
-  [5, 95],   // Wallet on Receipt
-  [6, 88],   // Receipt Legible
-  [7, 94],   // Receipt Date Valid
-  [8, 97],   // No Duplicate Wallet
-  [9, 96],   // No Duplicate Receipt
-  [10, 99],  // Treasury Solvent
+  [1, 98], [2, 97], [3, 95], [4, 91], [5, 94],
+  [6, 86], [7, 93], [8, 96], [9, 95], [10, 99],
 ]);
 
-// ── Referral Stats ──
+// ── Referral Stats (14 redeemed beta testers) ──
 export const DEMO_REFERRAL = {
-  totalConversions: 847,
-  activeReferrers: 142,
+  totalConversions: 14,
+  activeReferrers: 9,
 };
 
-// ── Community Stats ──
+// ── Community Stats (modest beta totals) ──
 export const DEMO_COMMUNITY_STATS = {
-  total_approved: 1247,
-  total_eth_paid: 4821.5,
-  unique_countries: 23,
-  avg_refund_eth: 0.38,
+  total_approved: 38,
+  total_eth_paid: 0.42,
+  unique_countries: 8,
+  avg_refund_eth: 0.011,
 };
 
-// ── Gate Stats (for full /gates page) ──
+// ── Gate Stats (beta-scale, proportional to ~40 claims) ──
 export const DEMO_GATE_STATS = [
-  { gate_id: 1, total_processed: 2847, total_passed: 2789, pass_rate_pct: 98, avg_duration_ms: 120 },
-  { gate_id: 2, total_processed: 2789, total_passed: 2706, pass_rate_pct: 97, avg_duration_ms: 85 },
-  { gate_id: 3, total_processed: 2706, total_passed: 2598, pass_rate_pct: 96, avg_duration_ms: 90 },
-  { gate_id: 4, total_processed: 2598, total_passed: 2390, pass_rate_pct: 92, avg_duration_ms: 110 },
-  { gate_id: 5, total_processed: 2390, total_passed: 2271, pass_rate_pct: 95, avg_duration_ms: 340 },
-  { gate_id: 6, total_processed: 2271, total_passed: 1998, pass_rate_pct: 88, avg_duration_ms: 2100 },
-  { gate_id: 7, total_processed: 1998, total_passed: 1878, pass_rate_pct: 94, avg_duration_ms: 180 },
-  { gate_id: 8, total_processed: 1878, total_passed: 1822, pass_rate_pct: 97, avg_duration_ms: 60 },
-  { gate_id: 9, total_processed: 1822, total_passed: 1749, pass_rate_pct: 96, avg_duration_ms: 75 },
-  { gate_id: 10, total_processed: 1749, total_passed: 1732, pass_rate_pct: 99, avg_duration_ms: 40 },
+  { gate_id: 1,  total_processed: 52, total_passed: 51, pass_rate_pct: 98, avg_duration_ms: 120 },
+  { gate_id: 2,  total_processed: 51, total_passed: 49, pass_rate_pct: 97, avg_duration_ms: 85 },
+  { gate_id: 3,  total_processed: 49, total_passed: 47, pass_rate_pct: 95, avg_duration_ms: 90 },
+  { gate_id: 4,  total_processed: 47, total_passed: 43, pass_rate_pct: 91, avg_duration_ms: 110 },
+  { gate_id: 5,  total_processed: 43, total_passed: 41, pass_rate_pct: 94, avg_duration_ms: 340 },
+  { gate_id: 6,  total_processed: 41, total_passed: 35, pass_rate_pct: 86, avg_duration_ms: 2100 },
+  { gate_id: 7,  total_processed: 35, total_passed: 33, pass_rate_pct: 93, avg_duration_ms: 180 },
+  { gate_id: 8,  total_processed: 33, total_passed: 32, pass_rate_pct: 96, avg_duration_ms: 60 },
+  { gate_id: 9,  total_processed: 32, total_passed: 30, pass_rate_pct: 95, avg_duration_ms: 75 },
+  { gate_id: 10, total_processed: 30, total_passed: 30, pass_rate_pct: 99, avg_duration_ms: 40 },
 ];
 
 // ── Helper ──
