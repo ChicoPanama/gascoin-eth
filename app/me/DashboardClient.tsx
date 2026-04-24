@@ -283,7 +283,7 @@ export function DashboardClient({ wallet, xHandle, isDryRun = false, claims, pay
       )}
 
       {/* ── Stats Bar ── */}
-      <section className="gc-stats">
+      <section id="overview" className="gc-stats">
         <div className="gc-stats-grid">
           <div className="gc-stat">
             <div className="gc-stat-label">{isDryRun ? 'Season 1 Points' : 'Total Earned'}</div>
@@ -349,7 +349,7 @@ export function DashboardClient({ wallet, xHandle, isDryRun = false, claims, pay
       </section>
 
       {/* ── Points Breakdown ── */}
-      <section className="ud-section">
+      <section id="points" className="ud-section">
         <div className="ud-section__header">
           <h2 className="ud-section__title">Points Breakdown</h2>
           <Link href="/how-it-works#points" className="gc-btn-ghost">How Points Work</Link>
@@ -374,7 +374,7 @@ export function DashboardClient({ wallet, xHandle, isDryRun = false, claims, pay
       </section>
 
       {/* ── Performance Analytics ── */}
-      <section className="ud-section">
+      <section id="analytics" className="ud-section">
         <div className="ud-section__header">
           <h2 className="ud-section__title">Performance Analytics</h2>
         </div>
@@ -508,7 +508,7 @@ export function DashboardClient({ wallet, xHandle, isDryRun = false, claims, pay
       </section>
 
       {/* ── Top Tweets ── */}
-      <section className="ud-section">
+      <section id="engagement" className="ud-section">
         <div className="ud-section__header">
           <h2 className="ud-section__title">Top Performing Tweets</h2>
         </div>
@@ -550,7 +550,7 @@ export function DashboardClient({ wallet, xHandle, isDryRun = false, claims, pay
       </section>
 
       {/* ── Submission History ── */}
-      <section className="ud-section">
+      <section id="claims" className="ud-section">
         <div className="ud-section__header">
           <h2 className="ud-section__title">Submission History</h2>
           <div className="ud-tabs">
@@ -703,7 +703,7 @@ export function DashboardClient({ wallet, xHandle, isDryRun = false, claims, pay
 
       {/* ── Payout History ── */}
       {payouts.length > 0 && (
-        <section className="ud-section">
+        <section id="payouts" className="ud-section">
           <h2 className="ud-section__title">Payout History</h2>
           <div className="ud-payouts">
             <div className="ud-payouts__header">
@@ -759,7 +759,7 @@ export function DashboardClient({ wallet, xHandle, isDryRun = false, claims, pay
       )}
 
       {/* ── Referral Program (full dashboard, blended) ── */}
-      <section className="ud-section">
+      <section id="referrals" className="ud-section">
         <div className="ud-section__header">
           <h2 className="ud-section__title">Referral Program</h2>
           <Link href="/referral" className="gc-btn-ghost">Open full page ↗</Link>
