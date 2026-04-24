@@ -1,14 +1,14 @@
 import { describe, it, expect } from 'vitest';
 
 /**
- * Verifies the cashtag-aware regex used in lib/integrations/x.ts and
- * lib/gate-verifiers/tweet-gates.ts. The pattern must accept either
- * #gascoin (hashtag) or $gascoin (X cashtag, April 2026) case-insensitively
- * with a word boundary so it doesn't false-positive on substrings.
+ * Verifies the ticker-aware regex used in lib/integrations/x.ts. Accepts:
+ *   - #gascoin (hashtag, brand-based)
+ *   - $GAS     (cashtag, current ticker)
+ *   - $GASCOIN (legacy cashtag — accepted during 30-day transition window)
  *
- * If the regex changes in the source files, update this test in lock-step.
+ * If the regex changes in the source file, update this test in lock-step.
  */
-const HASHTAG_OR_CASHTAG = /[#$]gascoin\b/i;
+const HASHTAG_OR_CASHTAG = /#gascoin\b|\$gas(coin)?\b/i;
 
 describe('cashtag-aware tweet detection regex', () => {
   it('accepts plain #gascoin', () => {
@@ -55,8 +55,28 @@ describe('cashtag-aware tweet detection regex', () => {
     expect(HASHTAG_OR_CASHTAG.test('I love gascoin so much')).toBe(false);
   });
 
-  it('rejects #gas alone', () => {
+  it('rejects #gas alone (hashtag form reserved for #gascoin)', () => {
     expect(HASHTAG_OR_CASHTAG.test('Just got #gas at the pump')).toBe(false);
+  });
+
+  it('accepts $GAS (new ticker)', () => {
+    expect(HASHTAG_OR_CASHTAG.test('Just bought $GAS on Uniswap')).toBe(true);
+  });
+
+  it('accepts $gas lowercase', () => {
+    expect(HASHTAG_OR_CASHTAG.test('stacking $gas today')).toBe(true);
+  });
+
+  it('accepts $GAS at tweet start', () => {
+    expect(HASHTAG_OR_CASHTAG.test('$GAS is live. get yours.')).toBe(true);
+  });
+
+  it('rejects $gasoline (substring must fail at word boundary)', () => {
+    expect(HASHTAG_OR_CASHTAG.test('tweet mentions $gasoline price')).toBe(false);
+  });
+
+  it('accepts $GAS + @GasCoinApp + #gascoin together', () => {
+    expect(HASHTAG_OR_CASHTAG.test('Gas refund on ETH @GasCoinApp $GAS #gascoin')).toBe(true);
   });
 
   it('rejects an empty string', () => {

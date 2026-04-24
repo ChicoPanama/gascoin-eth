@@ -13,12 +13,12 @@
 export const GATE_DEFS = [
   { id: 'x_verified',                 label: 'X Verified' },
   { id: 'follows_gascoin',            label: 'Follows @GasCoinApp' },
-  { id: 'tweet_hashtag',              label: 'Tweet #gascoin / $GASCOIN' },
+  { id: 'tweet_hashtag',              label: 'Tweet #gascoin / $GAS' },
   { id: 'tweet_mentions_gascoinapp',  label: 'Tweet Tags @GasCoinApp' },
   { id: 'tweet_live',                 label: 'Tweet Live' },
   { id: 'receipt_hashtag',            label: 'Receipt Hashtag' },
   { id: 'wallet_match',               label: 'Wallet Match on Receipt' },
-  { id: 'gascoin_min_hold',           label: 'GASCOIN Min Hold' },
+  { id: 'gascoin_min_hold',           label: '$GAS Min Hold' },
   { id: 'not_duplicate',              label: 'Not a Duplicate' },
   { id: 'ai_image_check',             label: 'Not AI-Generated' },
   { id: 'tamper_check',               label: 'Not Tampered' },
@@ -84,13 +84,13 @@ export function evaluateClaim(c: ClaimInput){
     // Return retry_later so user can resubmit without penalty
     gates.push({ gate:'x_verified', passed:c.xVerified, reason:'X must be verified' });
     gates.push({ gate:'follows_gascoin', passed:false, reason:'X API unavailable — retry later' });
-    gates.push({ gate:'tweet_hashtag', passed:c.tweetHasGascoin, reason:'Tweet must include #gascoin or $GASCOIN' });
+    gates.push({ gate:'tweet_hashtag', passed:c.tweetHasGascoin, reason:'Tweet must include #gascoin or $GAS' });
     gates.push({ gate:'tweet_mentions_gascoinapp', passed:c.tweetMentionsGascoinApp, reason:'Tweet must tag @GasCoinApp' });
     gates.push({ gate:'tweet_live', passed:c.tweetLive, reason:'Tweet must remain live' });
     gates.push({ gate:'receipt_hashtag', passed:c.receiptHasGascoin, reason:'Receipt must include #gascoin' });
     gates.push({ gate:'wallet_match', passed:!!c.walletOnReceipt && c.connectedWallet.slice(-4).toLowerCase()===c.walletOnReceipt.slice(-4).toLowerCase(), reason:'Last 4 characters on receipt must match connected wallet' });
     const dryRun = process.env.ENABLE_LIVE_PAYOUT !== 'true';
-    gates.push({ gate:'gascoin_min_hold', passed: dryRun || c.gascoinTokenBalance>=1, reason:'Wallet must hold at least 1 GASCOIN' });
+    gates.push({ gate:'gascoin_min_hold', passed: dryRun || c.gascoinTokenBalance>=1, reason:'Wallet must hold at least 1 $GAS' });
     gates.push({ gate:'not_duplicate', passed:!c.duplicateHash && !c.duplicatePhash, reason:'Receipt duplicate detected' });
     gates.push({ gate:'ai_image_check', passed:c.aiScore<AI_IMAGE_REJECT_THRESHOLD, score:c.aiScore, reason:'AI probability too high' });
     gates.push({ gate:'tamper_check', passed:c.tamperScore<0.55, score:c.tamperScore, reason:'Tamper risk too high' });
@@ -107,13 +107,13 @@ export function evaluateClaim(c: ClaimInput){
 
   gates.push({ gate:'x_verified', passed:c.xVerified, reason:'X must be verified' });
   gates.push({ gate:'follows_gascoin', passed:c.followsGascoin, reason:'You must follow @GasCoinApp on X before submitting' });
-  gates.push({ gate:'tweet_hashtag', passed:c.tweetHasGascoin, reason:'Tweet must include #gascoin or $GASCOIN' });
+  gates.push({ gate:'tweet_hashtag', passed:c.tweetHasGascoin, reason:'Tweet must include #gascoin or $GAS' });
   gates.push({ gate:'tweet_mentions_gascoinapp', passed:c.tweetMentionsGascoinApp, reason:'Tweet must tag @GasCoinApp' });
   gates.push({ gate:'tweet_live', passed:c.tweetLive, reason:'Tweet must remain live' });
   gates.push({ gate:'receipt_hashtag', passed:c.receiptHasGascoin, reason:'Receipt must include #gascoin' });
   gates.push({ gate:'wallet_match', passed:!!c.walletOnReceipt && c.connectedWallet.slice(-4).toLowerCase()===c.walletOnReceipt.slice(-4).toLowerCase(), reason:'Last 4 characters on receipt must match connected wallet' });
   const dryRun = process.env.ENABLE_LIVE_PAYOUT !== 'true';
-  gates.push({ gate:'gascoin_min_hold', passed: dryRun || c.gascoinTokenBalance>=1, reason:'Wallet must hold at least 1 GASCOIN' });
+  gates.push({ gate:'gascoin_min_hold', passed: dryRun || c.gascoinTokenBalance>=1, reason:'Wallet must hold at least 1 $GAS' });
   gates.push({ gate:'not_duplicate', passed:!c.duplicateHash && !c.duplicatePhash, reason:'Receipt duplicate detected' });
   gates.push({ gate:'ai_image_check', passed:c.aiScore<0.65, score:c.aiScore, reason:'AI probability too high' });
   gates.push({ gate:'tamper_check', passed:c.tamperScore<0.55, score:c.tamperScore, reason:'Tamper risk too high' });

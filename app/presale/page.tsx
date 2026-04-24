@@ -48,14 +48,14 @@ const PHASES = [
   { label: 'Season 1 Beta',     status: 'done',       body: 'Invite codes, X OAuth, receipt OCR pipeline, admin cockpit, public docs.' },
   { label: 'Presale',           status: 'current',    body: 'ETH-denominated community raise on Ethereum mainnet. Funds seed the refund treasury + seed liquidity for the GASCOIN ERC-20.' },
   { label: 'Season 1 Launch',   status: 'next',       body: 'Live ETH refunds, GASCOIN ERC-20 tiers active, engagement scoring, referral engine.' },
-  { label: 'Station Network',   status: 'future',     body: 'Direct station integrations, $GASCOIN utility expansion, DAO governance.' },
+  { label: 'Station Network',   status: 'future',     body: 'Direct station integrations, $GAS utility expansion, DAO governance.' },
 ];
 
 const FAQ = [
   { q: 'Is this a real protocol or a pitch?',
     a: 'The refund engine is live end-to-end on Ethereum mainnet in dry-run mode today. Submissions, fraud gates, Claude oversight, and payout queuing all work — the presale capitalizes the treasury that pays verified drivers back.' },
   { q: 'What do contributors receive?',
-    a: `Allocation of $GASCOIN (ERC-20 on Ethereum mainnet) proportional to contribution at ${PRESALE.pricePerTokenEth} ETH per token. ${PRESALE.tgeUnlockPct}% unlocks at TGE; the rest vests linearly over ${PRESALE.vestingMonths} months.` },
+    a: `Allocation of $GAS (ERC-20 on Ethereum mainnet) proportional to contribution at ${PRESALE.pricePerTokenEth} ETH per token. ${PRESALE.tgeUnlockPct}% unlocks at TGE; the rest vests linearly over ${PRESALE.vestingMonths} months.` },
   { q: 'What are the raise limits?',
     a: `Soft cap ${PRESALE.softCapEth} ETH, hard cap ${PRESALE.hardCapEth} ETH. Per-wallet minimum ${PRESALE.minContribEth} ETH, maximum ${PRESALE.maxContribEth} ETH.` },
   { q: 'Is there a refund if the soft cap isn\'t reached?',
@@ -118,7 +118,7 @@ export default function PresalePage() {
               <div className="gc-presale-stat">
                 <span className="gc-presale-stat-label">Price</span>
                 <span className="gc-presale-stat-value">{PRESALE.pricePerTokenEth} ETH</span>
-                <span className="gc-presale-stat-sub">per $GASCOIN</span>
+                <span className="gc-presale-stat-sub">per $GAS</span>
               </div>
               <div className="gc-presale-stat">
                 <span className="gc-presale-stat-label">Window</span>

@@ -41,7 +41,7 @@ export interface UserChatProfile {
   walletShort: string;
   /** Token tier name or null if below minimum */
   tier: string | null;
-  /** GASCOIN token balance */
+  /** $GAS token balance */
   tokenBalance: number;
   /** Total approved claims */
   totalClaims: number;

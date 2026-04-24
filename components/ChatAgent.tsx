@@ -205,7 +205,7 @@ function TierCard({ result }: { result: Record<string, unknown> }) {
       <div className="chat-card-header">Token Tier</div>
       <div className="chat-card-tier-row">
         <span className="chat-card-tier-name">{result.tier as string}</span>
-        <span className="chat-card-tier-balance">{Number(result.balance).toLocaleString()} $GASCOIN</span>
+        <span className="chat-card-tier-balance">{Number(result.balance).toLocaleString()} $GAS</span>
       </div>
       {Boolean(result.meetsMinimum) && (
         <p className="chat-card-sub">
@@ -213,7 +213,7 @@ function TierCard({ result }: { result: Record<string, unknown> }) {
         </p>
       )}
       {!result.meetsMinimum && (
-        <p className="chat-card-gate-fix">Buy at least 1 $GASCOIN on Uniswap (app.uniswap.org) to participate.</p>
+        <p className="chat-card-gate-fix">Buy at least 1 $GAS on Uniswap (app.uniswap.org) to participate.</p>
       )}
       {Boolean(result.nextTierName) && (
         <p className="chat-card-sub">

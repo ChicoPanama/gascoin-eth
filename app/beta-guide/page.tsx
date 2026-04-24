@@ -78,7 +78,7 @@ const SECTIONS: Section[] = [
           </li>
           <li>
             <strong>Post quality tweets.</strong> Tag <code>@GasCoinApp</code>,
-            include <code>#gascoin</code> or <code>$GASCOIN</code>. Real
+            include <code>#gascoin</code> or <code>$GAS</code>. Real
             engagement (likes, replies, reposts) earns engagement points via
             the hourly <code>score-engagement</code> worker.
           </li>
@@ -157,7 +157,7 @@ const SECTIONS: Section[] = [
           </li>
           <li>
             <strong>Tweet edge cases.</strong> Post without{' '}
-            <code>#gascoin</code>, with only <code>$GASCOIN</code>, without
+            <code>#gascoin</code>, with only <code>$GAS</code>, without
             the <code>@GasCoinApp</code> tag, with the tweet deleted after
             submission.
           </li>

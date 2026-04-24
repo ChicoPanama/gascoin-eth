@@ -115,7 +115,7 @@ export default function StandingClient() {
       <LadderRung
         index="01"
         title="HOLD"
-        subtitle="Hold GASCOIN to unlock refund cap, queue priority, and platform badges."
+        subtitle="Hold $GAS to unlock refund cap, queue priority, and platform badges."
         headline={isConnected ? tier.name.toUpperCase() : 'CONNECT WALLET'}
         subheadline={
           isConnected
@@ -604,7 +604,7 @@ export default function StandingClient() {
         }}
       >
         <div className="gc-section-num" style={{ marginBottom: 16 }}>
-          Where to Buy GASCOIN
+          Where to Buy $GAS
         </div>
         <p
           style={{

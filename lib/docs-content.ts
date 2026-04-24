@@ -126,7 +126,7 @@ export const DOC_CATEGORIES: DocCategory[] = [
 <p>GASCOIN is a Ethereum protocol that refunds verified real-world fuel purchases in ETH.</p>
 <p>All claims pass through a deterministic ${GATE_COUNT}-gate pipeline before payout is released.</p>
 <pre class="doc-ascii">
-  BUY GAS ──→ WRITE LAST 4 ──→ TWEET $GASCOIN/#GASCOIN ──→ SUBMIT ──→ ${GATE_COUNT} GATES ──→ ETH REFUND
+  BUY GAS ──→ WRITE LAST 4 ──→ TWEET $GAS/#GASCOIN ──→ SUBMIT ──→ ${GATE_COUNT} GATES ──→ ETH REFUND
   (any station)  (on receipt)     (public post)     (upload)   (auto-verify)  (to wallet)
 </pre>
 
@@ -196,7 +196,7 @@ export const DOC_CATEGORIES: DocCategory[] = [
 <li><strong>Required: </strong>A physical gas receipt from a real gas station purchase within the last 7 days</li>
 <li><strong>Required: </strong>A pen to write the last 4 characters of your wallet on the receipt</li>
 <li><strong>Required: </strong>The receipt must be photographed clearly — well-lit, unblurred, full receipt visible</li>
-<li><strong>Optional: </strong>GASCOIN tokens — only needed to access Commuter, Road Warrior, or Fleet tiers</li>
+<li><strong>Optional: </strong>$GAS tokens — only needed to access Commuter, Road Warrior, or Fleet tiers</li>
 </ul>`,
         order: 4,
       },
@@ -248,7 +248,7 @@ export const DOC_CATEGORIES: DocCategory[] = [
         categorySlug: "submitting",
         category: "Submitting",
         description: "",
-        content: `<p>The first step is connecting your Ethereum wallet. This tells the system which wallet address to send your ETH refund to and which address to check for GASCOIN token balance.</p>
+        content: `<p>The first step is connecting your Ethereum wallet. This tells the system which wallet address to send your ETH refund to and which address to check for $GAS token balance.</p>
 <h3>How to connect your wallet</h3>
 <ol>
 <li>Click the Connect Wallet button on Step 1</li>
@@ -256,7 +256,7 @@ export const DOC_CATEGORIES: DocCategory[] = [
 <li>Click the wallet you have installed. Your browser will open a popup from that wallet extension</li>
 <li>Approve the connection in the wallet popup. You are not authorizing any transaction — just a read-only connection</li>
 <li>Once connected, your wallet address appears in truncated form (e.g., GAs...xK92) and Step 1 is marked complete</li>
-<li>The system automatically checks your GASCOIN token balance and displays your tier (Standard, Commuter, Road Warrior, or Fleet)</li>
+<li>The system automatically checks your $GAS token balance and displays your tier (Standard, Commuter, Road Warrior, or Fleet)</li>
 </ol>
 <h3>What happens if your wallet is not installed</h3>
 <p>If you click MetaMask but do not have MetaMask installed, your browser will redirect to the MetaMask website where you can install it as a browser extension. After installing, return to the GASCOIN submit page and connect. The same applies to Rabby, Rainbow, and Coinbase Wallet.</p>
@@ -276,12 +276,12 @@ export const DOC_CATEGORIES: DocCategory[] = [
         categorySlug: "submitting",
         category: "Submitting",
         description: "",
-        content: `<p>Step 2 requires you to post a tweet on X (Twitter) tagging @GasCoinApp and containing the hashtag #gascoin or the $GASCOIN cashtag, then paste the URL of that tweet into the submission portal. The system automatically checks the tweet against 4 verification criteria. The @GasCoinApp tag helps new users find the official profile, and the $GASCOIN cashtag unlocks X's price chart overlay on your post.</p>
+        content: `<p>Step 2 requires you to post a tweet on X (Twitter) tagging @GasCoinApp and containing the hashtag #gascoin or the $GAS cashtag, then paste the URL of that tweet into the submission portal. The system automatically checks the tweet against 4 verification criteria. The @GasCoinApp tag helps new users find the official profile, and the $GAS cashtag unlocks X's price chart overlay on your post.</p>
 <h3>How to post your tweet</h3>
 <ol>
 <li>Open X (Twitter) in a new tab</li>
 <li>Make sure your account is set to public. Private accounts cannot be verified</li>
-<li>Compose a new tweet. Tag @GasCoinApp and include either #gascoin (hashtag) or $GASCOIN (cashtag) — both together is the recommended move. Any other content is acceptable</li>
+<li>Compose a new tweet. Tag @GasCoinApp and include either #gascoin (hashtag) or $GAS (cashtag) — both together is the recommended move. Any other content is acceptable</li>
 <li>Post the tweet</li>
 <li>Click the Share button on your tweet and copy the tweet URL. The URL format is: https://x.com/yourhandle/status/1234567890123456789</li>
 <li>Return to the GASCOIN submit page and paste this URL into the tweet URL input field</li>
@@ -289,7 +289,7 @@ export const DOC_CATEGORIES: DocCategory[] = [
 <h3>What the system checks automatically</h3>
 <p>After you paste the tweet URL and wait approximately 2-8 seconds, the system runs 4 checks automatically:</p>
 <h3>What you see after verification</h3>
-<p>If all 4 tweet checks pass, a preview card appears below the input showing your handle, how long ago the tweet was posted, and confirmation that #gascoin or $GASCOIN was detected. Step 2 advances automatically.</p>
+<p>If all 4 tweet checks pass, a preview card appears below the input showing your handle, how long ago the tweet was posted, and confirmation that #gascoin or $GAS was detected. Step 2 advances automatically.</p>
 <p>If any check fails, a specific error message appears telling you exactly which check failed and why. You must fix the issue and paste the URL again. You do not need to start over from Step 1.</p>`,
         order: 7,
       },
@@ -711,7 +711,7 @@ Inputs(wallet,tweet,receipt)
 
 <h3>What can be faked — and why it still fails</h3>
 <div class="doc-callout doc-callout--warn">
-<p><strong>Partial fakes are caught by other layers.</strong> The receipt check is one of ${GATE_COUNT} gates. Even if someone got past the image check, they'd still need a live X account with 100+ real followers, a valid tweet posted within 48 hours, and a wallet holding GASCOIN tokens.</p>
+<p><strong>Partial fakes are caught by other layers.</strong> The receipt check is one of ${GATE_COUNT} gates. Even if someone got past the image check, they'd still need a live X account with 100+ real followers, a valid tweet posted within 48 hours, and a wallet holding $GAS tokens.</p>
 </div>
 <table class="doc-table">
 <thead><tr><th>Attack</th><th>Why it fails</th></tr></thead>
@@ -885,7 +885,7 @@ Inputs(wallet,tweet,receipt)
 <h3>Treasury Transparency</h3>
 <p>The GASCOIN treasury wallet is a standard Ethereum wallet. Its balance is queried via RPC before every payout. If the treasury cannot cover a refund, the submission is queued (not rejected) until funds are available. The treasury balance is publicly visible on the Dashboard page.</p>
 <h3>Token Holdings Verification</h3>
-<p>Your GASCOIN token balance is checked twice: once at submission time (to determine your tier and cooldown) and again immediately before ETH is dispatched (to ensure you still hold tokens). If you sell your GASCOIN between submission and payout, the payout is blocked.</p>
+<p>Your $GAS token balance is checked twice: once at submission time (to determine your tier and cooldown) and again immediately before ETH is dispatched (to ensure you still hold tokens). If you sell your $GAS between submission and payout, the payout is blocked.</p>
 <h3>Immutable Audit Trail</h3>
 <p>Every admin action — approvals, rejections, gate overrides, payout dispatches — is permanently recorded in the audit log. No admin action can be taken silently. The audit trail cannot be modified or deleted.</p>
 <h3>Ethereum Transaction Receipts</h3>
@@ -919,7 +919,7 @@ Inputs(wallet,tweet,receipt)
 <li><strong>Signal decay</strong> — Historical penalties weaken over time (30% weight at 180+ days) — prevents false positives from legitimate X purges</li>
 <li><strong>Score clamping</strong> — Anomalous upstream values (AI score=999) are clamped and logged for audit. No single signal can produce an out-of-range result</li>
 </ul>
-<p>To successfully game GASCOIN, an attacker would need to: physically obtain a gas receipt, write a wallet ID on it by hand, photograph it convincingly enough to fool Gemini Vision's AI detection, maintain a legitimate X account with real followers and activity, post a public tweet, hold GASCOIN tokens, and pass admin review. The cost of doing this at scale makes it economically irrational.</p>`,
+<p>To successfully game GASCOIN, an attacker would need to: physically obtain a gas receipt, write a wallet ID on it by hand, photograph it convincingly enough to fool Gemini Vision's AI detection, maintain a legitimate X account with real followers and activity, post a public tweet, hold $GAS tokens, and pass admin review. The cost of doing this at scale makes it economically irrational.</p>`,
         order: 34,
       },
       {
@@ -1644,23 +1644,23 @@ Inputs(wallet,tweet,receipt)
         categorySlug: "platform",
         category: "Platform Pages",
         description: "",
-        content: `<p>The Perks page explains the GASCOIN token tier system. Holding GASCOIN tokens in your connected wallet unlocks higher refund caps, priority queue processing, and exclusive badges visible across the platform.</p>
+        content: `<p>The Perks page explains the $GAS token tier system. Holding $GAS tokens in your connected wallet unlocks higher refund caps, priority queue processing, and exclusive badges visible across the platform.</p>
 <h3>The four tiers</h3>
 <p>Standard (1 token), Commuter (100K tokens), Road Warrior (5M tokens), and Fleet (10M tokens). Higher tiers unlock bigger refund caps and faster submission frequency.</p>
 <h3>How tier is determined</h3>
-<p>Your tier is determined by the GASCOIN token balance in your connected wallet at the time of submission. Balance is checked on-chain via a Ethereum blockchain query. The system checks your connected wallet's GASCOIN token balance live on the Ethereum blockchain when you connect. The balance is also cached and refreshed every 5 minutes. If you buy more GASCOIN and want to see your updated tier immediately, click the Refresh Balance button on the Perks page.</p>
+<p>Your tier is determined by the $GAS token balance in your connected wallet at the time of submission. Balance is checked on-chain via a Ethereum blockchain query. The system checks your connected wallet's $GAS token balance live on the Ethereum blockchain when you connect. The balance is also cached and refreshed every 5 minutes. If you buy more $GAS and want to see your updated tier immediately, click the Refresh Balance button on the Perks page.</p>
 <h3>When tier is applied</h3>
 <p>Your tier is snapshotted at the time of submission. The refund cap associated with that tier applies to that submission — even if your holdings later change before dispatch. If you upgrade after submitting, the original tier at submission time still applies.</p>
 <h3>Queue priority</h3>
 <p>Higher tier submissions are processed before lower tier submissions. If multiple submissions are pending in the admin queue, a Fleet tier submission will appear above a Standard tier submission. This does not affect the automated gate processing — it affects the order in which the admin reviews and approves refund amounts.</p>
 <h3>Where tier badges appear</h3>
-<p>Once you have an approved submission, your tier badge appears on your leaderboard row, on your receipt cards in the community feed, and in the wallet tracker.</p><h3>How to acquire GASCOIN tokens</h3>
-<p>GASCOIN tokens are available on Ethereum decentralised exchanges:</p>
+<p>Once you have an approved submission, your tier badge appears on your leaderboard row, on your receipt cards in the community feed, and in the wallet tracker.</p><h3>How to acquire $GAS tokens</h3>
+<p>$GAS tokens are available on Ethereum decentralised exchanges:</p>
 <ul>
 <li><strong>Uniswap</strong> — <a href="https://app.uniswap.org/swap" target="_blank">app.uniswap.org/swap</a></li>
 <li><strong>1inch</strong> — <a href="https://app.uniswap.org" target="_blank">app.uniswap.org</a></li>
 </ul>
-<p>To buy GASCOIN: ensure your wallet has ETH for the purchase and transaction fees, visit the DEX, connect your wallet, swap ETH for GASCOIN, then return to the Perks page and click Refresh Balance to see your updated tier.</p>
+<p>To buy $GAS: ensure your wallet has ETH for the purchase and transaction fees, visit the DEX, connect your wallet, swap ETH for $GAS, then return to the Perks page and click Refresh Balance to see your updated tier.</p>
 <p>Your tier is checked live at submission time. Tier upgrades take effect immediately — no re-connecting required.</p>
 <p>→ See also: Token Tiers for the full tier comparison</p>`,
         order: 29,
@@ -1912,7 +1912,7 @@ Inputs(wallet,tweet,receipt)
 <li>They upload the receipt photo at gascoin.app/submit, linked to the same X account.</li>
 <li>The submission enters the seventeen-gate verification pipeline.</li>
 <li>Gemini Vision OCRs the receipt. xAI Grok reasons over authenticity, fraud risk, and tweet quality. Anthropic Claude oversees borderline cases.</li>
-<li>If every gate passes, an ETH refund is scheduled and $GASCOIN engagement points are awarded according to the user's tier and the tweet's Content Impact.</li>
+<li>If every gate passes, an ETH refund is scheduled and $GAS engagement points are awarded according to the user's tier and the tweet's Content Impact.</li>
 <li>The tweet generates impressions on X. X monetises those impressions to the creator. The same impressions feed the Gas Net influence score.</li>
 <li>The score compounds. Higher-scoring users unlock better tiers, higher caps, faster cooldowns, and greater visibility.</li>
 </ol>
@@ -2003,8 +2003,8 @@ Inputs(wallet,tweet,receipt)
         title: "Tokenomics",
         categorySlug: "learn",
         category: "Learn",
-        description: "$GASCOIN supply, allocation, and the treasury mandate.",
-        content: `<p><strong>$GASCOIN is an ERC-20 token on Ethereum mainnet</strong> with a fixed supply of 1,000,000,000 (one billion) tokens, transparent allocation, and an explicit treasury mandate: every dollar of treasury exists to pay refunds, fund the Gas Net, and deepen liquidity.</p>
+        description: "$GAS supply, allocation, and the treasury mandate.",
+        content: `<p><strong>$GAS is an ERC-20 token on Ethereum mainnet</strong> with a fixed supply of 1,000,000,000 (one billion) tokens, transparent allocation, and an explicit treasury mandate: every dollar of treasury exists to pay refunds, fund the Gas Net, and deepen liquidity.</p>
 <table class="doc-table">
 <thead><tr><th>Allocation</th><th>Share</th><th>Purpose</th></tr></thead>
 <tbody>
@@ -2060,7 +2060,7 @@ Inputs(wallet,tweet,receipt)
         content: `<p>Every protocol gets read through the lens of things that already exist. A short list of what GasCoin is deliberately <em>not</em>:</p>
 <ul>
 <li><strong>Not a rebate program.</strong> Payouts are on-chain and rule-driven. There is no central reimbursement budget and no merchant relationship to renegotiate.</li>
-<li><strong>Not an investment vehicle.</strong> $GASCOIN is a utility token for tier gating and future governance. Nothing in this document is financial advice or a solicitation.</li>
+<li><strong>Not an investment vehicle.</strong> $GAS is a utility token for tier gating and future governance. Nothing in this document is financial advice or a solicitation.</li>
 <li><strong>Not KYC-gated at the protocol layer.</strong> No government ID is collected to submit a claim. Jurisdictional compliance is the user's responsibility.</li>
 <li><strong>Not US-only.</strong> The protocol is available globally wherever X is available; users transact in ETH regardless of local currency.</li>
 <li><strong>Not a loan or credit product.</strong> No obligation, no repayment schedule, no creditworthiness check.</li>
@@ -2077,11 +2077,11 @@ Inputs(wallet,tweet,receipt)
         content: `<ul>
 <li><strong>Platform dependency.</strong> GasCoin depends on X API access, Vercel infrastructure, Supabase, Alchemy, and AI model vendors. Any of them can deprecate or reprice. The system is designed for vendor substitution where possible, but disruption risk is real.</li>
 <li><strong>Adversarial capture.</strong> Sophisticated rings will attempt to fabricate receipts and game the engagement economy. The three-model AI loop, mem0 memory, and graph ring detection are our answer; they are not a guarantee.</li>
-<li><strong>Regulatory drift.</strong> Classification of $GASCOIN and of the consumer-refund mechanic may evolve with jurisdiction. The protocol is structured to adapt.</li>
+<li><strong>Regulatory drift.</strong> Classification of $GAS and of the consumer-refund mechanic may evolve with jurisdiction. The protocol is structured to adapt.</li>
 <li><strong>Market risk.</strong> Token value, ETH price, and gasoline price all affect the subsidy economics. Treasury policy is designed around resilience to these inputs, not dependence on them.</li>
 <li><strong>Reflexive treasury risk.</strong> Refunds are funded by ETH held in the treasury. If treasury ETH is exhausted faster than it is replenished, refunds pause until replenished. Treasury policy is designed to hold a multi-month buffer and to scale caps downward before pausing.</li>
 <li><strong>AI model risk.</strong> False positives lock legitimate drivers out of refunds; false negatives pay fraudsters. The oversight layer and governance review exist to correct both.</li>
-<li><strong>Audit status.</strong> Protocol contracts and platform code have undergone internal adversarial review (April 2026). A third-party external audit of the Marketplace Escrow, Reach Certificate, and $GASCOIN token contracts is scheduled before unrestricted mainnet launch; audit provider, scope, and final report will be published alongside the deployed contract addresses. Readers should assume contracts are pre-external-audit until that disclosure.</li>
+<li><strong>Audit status.</strong> Protocol contracts and platform code have undergone internal adversarial review (April 2026). A third-party external audit of the Marketplace Escrow, Reach Certificate, and $GAS token contracts is scheduled before unrestricted mainnet launch; audit provider, scope, and final report will be published alongside the deployed contract addresses. Readers should assume contracts are pre-external-audit until that disclosure.</li>
 </ul>`,
         order: 89,
       },
@@ -2233,11 +2233,11 @@ Inputs(wallet,tweet,receipt)
       },
       {
         slug: "do-i-need-gascoin-tokens-to-participate",
-        title: "Do I need GASCOIN tokens to participate?",
+        title: "Do I need $GAS tokens to participate?",
         categorySlug: "help",
         category: "Help",
         description: "",
-        content: `<p>The Standard tier requires just 1 GASCOIN token — a minimal buy-in to participate. Higher tiers (Commuter at 100K, Road Warrior at 5M, Fleet at 10M) unlock larger refunds and more submissions per week.</p>`,
+        content: `<p>The Standard tier requires just 1 $GAS token — a minimal buy-in to participate. Higher tiers (Commuter at 100K, Road Warrior at 5M, Fleet at 10M) unlock larger refunds and more submissions per week.</p>`,
         order: 56,
         navHidden: true,
       },
@@ -2295,7 +2295,7 @@ Inputs(wallet,tweet,receipt)
         categorySlug: "help",
         category: "Help",
         description: "",
-        content: `<p>ETH is a real cryptocurrency traded on major exchanges. The ETH you receive in a refund is real and can be converted to USD through any cryptocurrency exchange (Coinbase, Kraken, Binance, etc.). GASCOIN tokens are also real tradeable tokens on the Ethereum blockchain. Their value fluctuates based on market conditions.</p>`,
+        content: `<p>ETH is a real cryptocurrency traded on major exchanges. The ETH you receive in a refund is real and can be converted to USD through any cryptocurrency exchange (Coinbase, Kraken, Binance, etc.). $GAS tokens are also real tradeable tokens on the Ethereum blockchain. Their value fluctuates based on market conditions.</p>`,
         order: 62,
         navHidden: true,
       },
@@ -2508,9 +2508,9 @@ Inputs(wallet,tweet,receipt)
         title: "Points — GASCOIN Holdings",
         categorySlug: "help",
         category: "Help",
-        description: "How holding GASCOIN tokens earns daily points.",
+        description: "How holding $GAS tokens earns daily points.",
         content: `<h3>Holdings Bonus</h3>
-<p>Every day, GASCOIN token holders earn points based on their tier. Holdings bonus is the dominant factor in leaderboard ranking (55% weight). Whales who hold the price are the backbone of the ecosystem — their commitment is rewarded proportionally. Balance is verified on-chain before each daily award to prevent flash-loan gaming.</p>
+<p>Every day, $GAS token holders earn points based on their tier. Holdings bonus is the dominant factor in leaderboard ranking (55% weight). Whales who hold the price are the backbone of the ecosystem — their commitment is rewarded proportionally. Balance is verified on-chain before each daily award to prevent flash-loan gaming.</p>
 
 <table>
 <thead><tr><th>Tier</th><th>GASCOIN Required</th><th>Points Per Day</th><th>Points Per Month (30d)</th></tr></thead>
@@ -2523,7 +2523,7 @@ Inputs(wallet,tweet,receipt)
 </table>
 
 <h3>How It Works</h3>
-<p>Your GASCOIN balance is checked on-chain and cached. Every day at 6am UTC, the daily points worker reads your cached tier and awards the corresponding points. If your tier changes (you buy or sell GASCOIN), the next day's award reflects the new tier.</p>
+<p>Your $GAS balance is checked on-chain and cached. Every day at 6am UTC, the daily points worker reads your cached tier and awards the corresponding points. If your tier changes (you buy or sell $GAS), the next day's award reflects the new tier.</p>
 <p>Holdings points compound over time. A Fleet holder who participates for 6 months accumulates 135,000 points from holdings alone — before any tweets, referrals, or submissions.</p>`,
         order: 74,
       },

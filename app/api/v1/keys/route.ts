@@ -11,7 +11,7 @@ export const dynamic = 'force-dynamic';
 /**
  * POST /api/v1/keys
  * Create a new API key bound to the authenticated wallet. Tier is
- * derived from current $GASCOIN balance. Plaintext returned ONCE.
+ * derived from current $GAS balance. Plaintext returned ONCE.
  */
 export async function POST(req: Request) {
   const ip = getClientIp(req);

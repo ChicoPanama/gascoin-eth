@@ -109,18 +109,18 @@ export const GATES: GateDefinition[] = [
 
   // ─── TWEET (3) ─────────────────────────────────────────────────
   {
-    id: 6, slug: 'tweet-hashtag', policyGate: 'tweet_hashtag', name: 'Tweet #gascoin / $GASCOIN', category: 'tweet',
-    description: 'The tweet body must contain either the #gascoin hashtag OR the $GASCOIN cashtag (case-insensitive). $GASCOIN unlocks the X price chart overlay — recommended for max reach.',
+    id: 6, slug: 'tweet-hashtag', policyGate: 'tweet_hashtag', name: 'Tweet #gascoin / $GAS', category: 'tweet',
+    description: 'The tweet body must contain either the #gascoin hashtag OR the $GAS cashtag (case-insensitive). $GAS unlocks the X price chart overlay — recommended for max reach.',
     what_we_check: 'Case-insensitive regex `[#$]gascoin\\b` against the tweet text from the X API. Also matches the structured hashtags and cashtags entities if X populates them.',
     common_failures: [
       'Hashtag spelled incorrectly — #gasCoin, #gas_coin',
       'Hashtag embedded in a URL or another word',
       '#gascoin in a reply to your tweet, not in the original post',
-      'Used a different cashtag like $GAS instead of $GASCOIN',
+      'Used a different cashtag like $GAS instead of $GAS',
     ],
-    how_to_pass: 'Type both #gascoin and $GASCOIN into your tweet, and tag @GasCoinApp. Either the hashtag or cashtag alone is enough to pass, the @GasCoinApp tag helps new users find the official profile, and $GASCOIN unlocks X\'s price chart overlay. Recommended move: include all three.',
+    how_to_pass: 'Type both #gascoin and $GAS into your tweet, and tag @GasCoinApp. Either the hashtag or cashtag alone is enough to pass, the @GasCoinApp tag helps new users find the official profile, and $GAS unlocks X\'s price chart overlay. Recommended move: include all three.',
     estimated_time_seconds: 3, is_blocking: true,
-    checklist_label: 'My tweet contains #gascoin or $GASCOIN',
+    checklist_label: 'My tweet contains #gascoin or $GAS',
   },
   {
     id: 7, slug: 'tweet-mentions-gascoinapp', policyGate: 'tweet_mentions_gascoinapp', name: 'Tweet Tags @GasCoinApp', category: 'tweet',
@@ -262,16 +262,16 @@ export const GATES: GateDefinition[] = [
   // ─── WALLET (1) ────────────────────────────────────────────────
   {
     id: 17, slug: 'gascoin-min-hold', policyGate: 'gascoin_min_hold', name: 'GASCOIN Min Hold', category: 'wallet',
-    description: 'Your connected wallet must hold at least 1 GASCOIN token at the time of submission. In Season 1 dry-run mode this gate is bypassed so testers can participate without holding the token.',
+    description: 'Your connected wallet must hold at least 1 $GAS token at the time of submission. In Season 1 dry-run mode this gate is bypassed so testers can participate without holding the token.',
     what_we_check: 'On-chain ERC-20 token balance of your connected wallet against the GASCOIN mint. During Season 1 (ENABLE_LIVE_PAYOUT=false) this check auto-passes.',
     common_failures: [
-      'Wallet holds 0 GASCOIN tokens (live mode)',
-      'Wallet holds GASCOIN on a different chain or in a centralized exchange',
+      'Wallet holds 0 $GAS tokens (live mode)',
+      'Wallet holds $GAS on a different chain or in a centralized exchange',
       'Token mint address mismatch',
     ],
-    how_to_pass: 'During Season 1 beta, no action required — this gate is bypassed. After token launch, hold at least 1 GASCOIN in your connected wallet.',
+    how_to_pass: 'During Season 1 beta, no action required — this gate is bypassed. After token launch, hold at least 1 $GAS in your connected wallet.',
     estimated_time_seconds: 6, is_blocking: false,
-    checklist_label: 'I hold at least 1 GASCOIN (or am submitting during Season 1 dry-run)',
+    checklist_label: 'I hold at least 1 $GAS (or am submitting during Season 1 dry-run)',
   },
 
   // ─── FRAUD PIPELINE (1) ────────────────────────────────────────

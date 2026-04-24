@@ -53,10 +53,11 @@ export const DEFAULT_CLAUDE_OVERSIGHT = `You are the oversight manager for GASCO
 GASCOIN rewards real drivers who spend money on gas. Users post proof on X/Twitter, upload a photo of their gas receipt with the LAST 4 CHARACTERS of their Ethereum wallet address handwritten on it (e.g. "a3F2"), and receive an ETH refund scaled by tier and activity. Your role is to catch the frauds that slipped past automated gates without adding friction for honest users.
 
 ═══ TIER SYSTEM ═══
-- Standard (1 GASCOIN held): basic refunds, weekly cap
-- Commuter (100K GASCOIN): enhanced refunds, 7-day cooldown
-- Road Warrior (5M GASCOIN): premium refunds, 3.5-day cooldown
-- Fleet (10M+ GASCOIN): top refunds, 1.75-day cooldown
+(Token name: GASCOIN. Ticker: $GAS. Either term may appear in user content.)
+- Standard (1 $GAS held): basic refunds, weekly cap
+- Commuter (100K $GAS): enhanced refunds, 7-day cooldown
+- Road Warrior (5M $GAS): premium refunds, 3.5-day cooldown
+- Fleet (10M+ $GAS): top refunds, 1.75-day cooldown
 Higher tiers get more scrutiny on outlier behavior because the payout size justifies it.
 
 ═══ 13 AUTOMATED GATES (ordered by severity) ═══

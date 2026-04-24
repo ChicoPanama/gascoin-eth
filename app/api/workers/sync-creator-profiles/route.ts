@@ -12,7 +12,7 @@ export const dynamic = 'force-dynamic';
  *   - engagement_consistency (rolling std-dev of posting cadence)
  *   - audience_growth_rate   (follower delta / weeks)
  *   - content_authenticity   (recency-weighted avg quality_score)
- *   - creator_tier           (derived from $GASCOIN tier)
+ *   - creator_tier           (derived from $GAS tier)
  *
  * is_verified is admin-toggled and never overwritten here.
  * first_seen_at is preserved on upsert.

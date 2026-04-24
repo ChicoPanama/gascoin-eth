@@ -105,7 +105,7 @@ Using a black pen, write TWO things clearly on the physical receipt:
 Write both large enough to read in a photo. These are scanned by OCR — if illegible, your claim will be rejected.
 
 STEP 3 — TWEET WITH PROOF (go viral for max points!)
-Post publicly on X from your verified account. Your tweet must include #gascoin (or $GASCOIN) and tag @GasCoinApp. But HOW you post matters for points:
+Post publicly on X from your verified account. Your tweet must include #gascoin (or $GAS) and tag @GasCoinApp. But HOW you post matters for points:
   BEST: Record an original video at the pump showing your receipt — 3x points, maximum reach
   GOOD: Take an original photo of the receipt — 1.5x points
   OK: Write a text post telling your refund story — 1.0x points
@@ -147,8 +147,8 @@ INVITE CODE (Season 1 beta):
   - Codes come from @GasCoinApp on X or from existing members
   - Enter at gascoin.app/submit after signing in with X
 
-$GASCOIN TOKENS (required for Standard tier and above):
-  - You need at least 1 $GASCOIN token in your connected wallet to participate
+$GAS TOKENS (required for Standard tier and above):
+  - You need at least 1 $GAS token in your connected wallet to participate
   - Available on Ethereum DEXes: Uniswap (app.uniswap.org) and 1inch — only 1 needed for Standard tier
   - Higher tiers need more tokens but unlock larger refunds and more frequent submissions
   - Tokens must be in your connected wallet — not on a centralized exchange
@@ -192,9 +192,9 @@ WHAT DOES NOT COUNT:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 TOKEN TIERS — COMPLETE REFERENCE
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Your tier is set by your $GASCOIN balance in your connected wallet at submission time. You must still hold your tokens when payout is dispatched — selling before your ETH arrives blocks your payout.
+Your tier is set by your $GAS balance in your connected wallet at submission time. You must still hold your tokens when payout is dispatched — selling before your ETH arrives blocks your payout.
 
-STANDARD     | Hold 1+ $GASCOIN     | submit 1× per week    | baseline refund cap
+STANDARD     | Hold 1+ $GAS     | submit 1× per week    | baseline refund cap
 COMMUTER     | Hold 100,000+        | submit 1× per week    | higher refund cap
 ROAD WARRIOR | Hold 5,000,000+      | submit 2× per week    | even higher cap
 FLEET        | Hold 10,000,000+     | submit 4× per week    | maximum cap
@@ -237,9 +237,9 @@ GATE 5: ACCOUNT QUALITY
 
 — TWEET GATES (3) —
 
-GATE 6: TWEET CONTAINS #GASCOIN OR $GASCOIN
-  What it checks: Your tweet text includes the hashtag #gascoin or cashtag $GASCOIN (case-insensitive).
-  How to pass: Include #gascoin in your tweet text. Make sure it's not buried in a URL or run together with another word. Example: "Just filled up! #gascoin $GASCOIN @GasCoinApp"
+GATE 6: TWEET CONTAINS #GASCOIN OR $GAS
+  What it checks: Your tweet text includes the hashtag #gascoin or cashtag $GAS (case-insensitive).
+  How to pass: Include #gascoin in your tweet text. Make sure it's not buried in a URL or run together with another word. Example: "Just filled up! #gascoin $GAS @GasCoinApp"
 
 GATE 7: TWEET TAGS @GAZCOINAPP
   What it checks: Your tweet mentions @GasCoinApp exactly.
@@ -286,8 +286,8 @@ GATE 16: CLAIMED AMOUNT MATCHES RECEIPT
   How to pass: Enter the exact amount printed on your receipt. Small OCR variation is tolerated, but claiming much more than the receipt shows will fail.
 
 GATE 17: GASCOIN TOKEN HOLD *(non-blocking — informational only)*
-  What it checks: Whether your connected wallet holds at least 1 $GASCOIN token.
-  How to pass: Hold at least 1 $GASCOIN in your Ethereum wallet. This gate is currently non-blocking in Season 1 — it doesn't reject your claim, but it does determine your tier.
+  What it checks: Whether your connected wallet holds at least 1 $GAS token.
+  How to pass: Hold at least 1 $GAS in your Ethereum wallet. This gate is currently non-blocking in Season 1 — it doesn't reject your claim, but it does determine your tier.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 HOW THE AI PIPELINE WORKS
@@ -436,7 +436,7 @@ Your leaderboard rank is a composite score weighted toward long-term commitment:
   Engagement points (tweets, submissions, streaks, referral passive):  25%
   Referral points (welcome bonuses from verified conversions):  20%
 
-Holding GASCOIN is the strongest signal. Whales who also create content and refer users are untouchable on the leaderboard.
+Holding $GAS is the strongest signal. Whales who also create content and refer users are untouchable on the leaderboard.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 TOKEN TIER PERKS (from gascoin.app/perks)
@@ -555,7 +555,7 @@ Can I change which wallet I use?
 What is ETH? Is it real money?
   ETH is the native cryptocurrency of the Ethereum blockchain. It can be sold for USD on major exchanges (Coinbase, Kraken, Binance). It's real money, yes.
 
-Where do I get $GASCOIN tokens?
+Where do I get $GAS tokens?
   Uniswap or 1inch on Ethereum. You only need 1 token to participate at Standard tier.
 
 Can I participate from any country?
@@ -577,10 +577,10 @@ Step 0: What is GASCOIN? Buy gas, post proof on X, get real money to your wallet
 Step 1: Set Up an Ethereum Wallet (5 min). Download MetaMask (free) or use any Ethereum wallet. Save your seed phrase on paper. Never share it.
 Step 2: Set Up X (2 min). Verified account, follow @GasCoinApp, 100+ followers, public, bio filled in.
 Step 3: Get ETH (5 min). Buy inside MetaMask with debit card, or via Coinbase, Binance, Bybit, OKX, Bitget, Gate.io, MEXC, or Moonpay.
-Step 4: Get GASCOIN Tokens (3 min). Swap ETH for GASCOIN on Uniswap or any DEX. Only 1 token needed for Standard tier.
+Step 4: Get $GAS Tokens (3 min). Swap ETH for $GAS on Uniswap or any DEX. Only 1 token needed for Standard tier.
 Step 5: Buy Gas. Any gas station worldwide. Get a paper receipt.
 Step 6: Write on Receipt (30 sec). Write last 4 hex characters of your Ethereum wallet address + #gascoin in black pen, large and clear (e.g. a3F2).
-Step 7: Post on X (1 min). Tag @GasCoinApp, include #gascoin and $GASCOIN. Original videos earn 3x points — record yourself, share your story. Keep tweet live.
+Step 7: Post on X (1 min). Tag @GasCoinApp, include #gascoin and $GAS. Original videos earn 3x points — record yourself, share your story. Keep tweet live.
 Step 8: Submit at gascoin.app/submit (3 min). Connect wallet, sign in with X, paste tweet URL, upload receipt, check 3 boxes, hit Submit.
 Step 9: Wait for Verification. ${GATE_COUNT} automated gates run in 2–5 minutes. Track progress in real time. ETH dispatched within 2–6 hours (48h max).
 Step 10: Cash Out (optional). ETH is already in your wallet. Send to Coinbase/Binance/Kraken to sell for USD. Or use Moonpay to bank account. Submit again after your cooldown expires.
@@ -641,7 +641,7 @@ amount_verified → Retake photo with better lighting so OCR can read the amount
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 PRE-SUBMISSION CHECKLIST (from gascoin.app/gates)
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Before submitting, verify: X account verified ✓ Following @GasCoinApp ✓ Cooldown expired ✓ 100+ followers ✓ Account quality OK ✓ Tweet has #gascoin ✓ Tweet tags @GasCoinApp ✓ Tweet is live & public ✓ #gascoin written on receipt ✓ Last 4 wallet chars on receipt ✓ Receipt is original (not duplicate) ✓ Receipt is a real photo ✓ Receipt is unedited ✓ Receipt is $5+ ✓ Receipt within 7 days ✓ Entered amount matches receipt ✓ Holding 1+ GASCOIN token ✓
+Before submitting, verify: X account verified ✓ Following @GasCoinApp ✓ Cooldown expired ✓ 100+ followers ✓ Account quality OK ✓ Tweet has #gascoin ✓ Tweet tags @GasCoinApp ✓ Tweet is live & public ✓ #gascoin written on receipt ✓ Last 4 wallet chars on receipt ✓ Receipt is original (not duplicate) ✓ Receipt is a real photo ✓ Receipt is unedited ✓ Receipt is $5+ ✓ Receipt within 7 days ✓ Entered amount matches receipt ✓ Holding 1+ $GAS token ✓
 The gates page at gascoin.app/gates has an interactive checklist — check all ${GATE_COUNT} items before submitting.`;
 
 /** Return an error as a valid UI message SSE stream so the client can display it. */

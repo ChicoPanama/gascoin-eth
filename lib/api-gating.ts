@@ -1,7 +1,7 @@
 /**
  * Gas Network Piece 3 — Intelligence API gating.
  *
- * $GASCOIN-balance-tiered access to the /api/v1/* surface. Each API key
+ * $GAS-balance-tiered access to the /api/v1/* surface. Each API key
  * is tied to a wallet at creation; the key's effective tier is the
  * wallet's live GASCOIN balance at request time (Redis-cached 75s via
  * getWalletGascoinBalance). Keys themselves are stored hashed in

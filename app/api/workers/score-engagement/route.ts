@@ -209,7 +209,7 @@ export async function POST(req: Request) {
     }
 
     // ─── PHASE 2: Batched search — one X API call per batch of handles ───
-    // Query matches `#gascoin` OR `$GASCOIN` because the /submit UI accepts
+    // Query matches `#gascoin` OR `$GAS` because the /submit UI accepts
     // either. X API's /tweets/search/recent supports `from:` OR-composition,
     // so we batch up to 15 handles per request rather than firing one call
     // per handle. At 1,000 testers this is a ~95% reduction in X API spend
@@ -238,7 +238,7 @@ export async function POST(req: Request) {
 
     for (const batch of batches) {
       const fromClauses = batch.map(([, { handle }]) => `from:${handle}`).join(' OR ');
-      const batchQuery = `(${fromClauses}) (#gascoin OR $GASCOIN)`;
+      const batchQuery = `(${fromClauses}) (#gascoin OR $GAS)`;
 
       try {
         // max_results=100 is X's per-request cap. 15 handles × avg 1-3 matching

@@ -128,7 +128,7 @@ Content type: ${contentTypeLabel}
 
 Scoring rules:
 - Judge only the WORDS and CONTENT TYPE. Do NOT penalize for short text, small follower counts, or low engagement — those are not content-quality signals.
-- Relevant terms (gas, fuel, refund, GASCOIN, $GASCOIN, pump, gas prices, etc.) written in a genuine way → higher quality.
+- Relevant terms (gas, fuel, refund, GASCOIN, $GAS, $GASCOIN, pump, gas prices, etc.) written in a genuine way → higher quality. $GAS is the current ticker; $GASCOIN is the legacy cashtag — either counts.
 - Pure hashtag dumps, copy-paste, "#gascoin" stapled onto irrelevant text → lower quality and higher spam.
 - MEDIA BOOST: when contentType is ORIGINAL_IMAGE or ORIGINAL_VIDEO AND the text mentions any relevant term, add ~0.15 to quality — posting media takes more effort than a text-only post. Do NOT boost media that has irrelevant or off-topic text.
 

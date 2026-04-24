@@ -144,8 +144,8 @@ export function buildChatTools(sessionWallet: string) {
             gates: {
               gate6: {
                 passed: hasHashtag,
-                label: 'Includes #gascoin or $GASCOIN',
-                fix: hasHashtag ? null : 'Add #gascoin or $GASCOIN to the tweet text. Make sure it\'s not inside a URL.',
+                label: 'Includes #gascoin or $GAS',
+                fix: hasHashtag ? null : 'Add #gascoin or $GAS to the tweet text. Make sure it\'s not inside a URL.',
               },
               gate7: {
                 passed: mentionsApp,
@@ -232,7 +232,7 @@ export function buildChatTools(sessionWallet: string) {
     // ── Token tier ────────────────────────────────────────────────────────
     checkTokenTier: tool({
       description:
-        'Check the connected user\'s $GASCOIN token balance and determine their current tier. ' +
+        'Check the connected user\'s $GAS token balance and determine their current tier. ' +
         'Use when the user asks about their tier, token balance, or how many submissions per week they get.',
       inputSchema: z.object({}),
       execute: async () => {
@@ -249,7 +249,7 @@ export function buildChatTools(sessionWallet: string) {
               balance,
               tier: 'None',
               meetsMinimum: false,
-              message: `Your wallet holds ${balance.toLocaleString()} $GASCOIN — below the 1-token minimum for Standard tier. Buy at least 1 $GASCOIN on Uniswap (app.uniswap.org) to participate.`,
+              message: `Your wallet holds ${balance.toLocaleString()} $GAS — below the 1-token minimum for Standard tier. Buy at least 1 $GAS on Uniswap (app.uniswap.org) to participate.`,
             };
           }
 
@@ -264,7 +264,7 @@ export function buildChatTools(sessionWallet: string) {
             nextTierName: nextTier?.name ?? null,
             nextTierMin: nextTier?.min ?? null,
             tokensToNextTier: nextTier ? Math.max(0, nextTier.min - balance) : null,
-            message: `${tier.name} tier — ${balance.toLocaleString()} $GASCOIN · ${tier.perWeek}× per week · ${tier.cooldownDays}d cooldown.`,
+            message: `${tier.name} tier — ${balance.toLocaleString()} $GAS · ${tier.perWeek}× per week · ${tier.cooldownDays}d cooldown.`,
           };
         } catch (err) {
           console.error('[chat-tools] checkTokenTier error', err);

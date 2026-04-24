@@ -93,7 +93,7 @@ export default function DocsSinglePage() {
           <Link href="/submit" className="gcdocs-hero-btn">Submit Receipt</Link>
         </div>
         <pre className="gcdocs-hero-ascii">
-{`  BUY GAS  ──→  WRITE LAST 4  ──→  TWEET $GASCOIN  ──→  SUBMIT  ──→  ${GATE_COUNT} GATES  ──→  ETH REFUND
+{`  BUY GAS  ──→  WRITE LAST 4  ──→  TWEET $GAS  ──→  SUBMIT  ──→  ${GATE_COUNT} GATES  ──→  ETH REFUND
   (any station)    (on receipt)      (public post)      (upload)   (auto-verify)    (to wallet)`}
         </pre>
       </section>
@@ -148,7 +148,7 @@ export default function DocsSinglePage() {
             <h2 className="gcdocs-footer-title">Ready to submit?</h2>
             <p className="gcdocs-footer-lede">
               You've read the full protocol. If your receipt has the last 4 hex characters of your Ethereum wallet address written on it (e.g. if your address ends in <code>...a3F2</code>, write <code>a3F2</code>),
-              your tweet mentions <code>$GASCOIN</code> or <code>#gascoin</code> and tags{' '}
+              your tweet mentions <code>$GAS</code> or <code>#gascoin</code> and tags{' '}
               <code>@GasCoinApp</code>, and your X account is verified with 100+ followers — you're ready.
             </p>
             <div className="gcdocs-footer-cta">

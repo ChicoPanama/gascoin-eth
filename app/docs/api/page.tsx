@@ -3,7 +3,7 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: 'Intelligence API · GASCOIN',
-  description: 'Paywalled creator intelligence + content-impact scoring API. Tiered by $GASCOIN balance.',
+  description: 'Paywalled creator intelligence + content-impact scoring API. Tiered by $GAS balance.',
   robots: { index: false, follow: false, nocache: true },
 };
 
@@ -15,7 +15,7 @@ export default function ApiDocsPage() {
         <p className="gc-docs-sub">
           Verified creator data, content-impact scoring, and signed reach
           certificates. Tier is derived live from your connected wallet's
-          $GASCOIN balance every request.
+          $GAS balance every request.
         </p>
       </header>
 
@@ -25,7 +25,7 @@ export default function ApiDocsPage() {
           <thead>
             <tr>
               <th>Tier</th>
-              <th>Min $GASCOIN</th>
+              <th>Min $GAS</th>
               <th>Daily requests</th>
               <th>Fields</th>
             </tr>
@@ -91,7 +91,7 @@ export default function ApiDocsPage() {
           <li><code>x-gascoin-quota-remaining</code> — requests left in the 24h window</li>
           <li><code>x-gascoin-quota-reset</code> — seconds until quota resets</li>
         </ul>
-        <p>429 response if the quota is exceeded. Tier is recomputed live each request — selling $GASCOIN downgrades your access immediately (Redis cache 75s).</p>
+        <p>429 response if the quota is exceeded. Tier is recomputed live each request — selling $GAS downgrades your access immediately (Redis cache 75s).</p>
       </section>
 
       <footer className="gc-docs-footer">

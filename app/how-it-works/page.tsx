@@ -89,7 +89,7 @@ const STEPS: Step[] = [
     title: 'Get ETH',
     time: '5 min',
     bullets: [
-      'ETH is the native currency of Ethereum — you need it to buy GASCOIN tokens and pay gas (transaction) fees.',
+      'ETH is the native currency of Ethereum — you need it to buy $GAS tokens and pay gas (transaction) fees.',
       'You can buy ETH directly inside MetaMask or Coinbase Wallet with a debit card — easiest option for beginners.',
       'Or buy ETH on an exchange and send it to your wallet address (starts with 0x).',
       'Moonpay also lets you buy ETH with a card and send it straight to your wallet.',
@@ -108,9 +108,9 @@ const STEPS: Step[] = [
     title: 'Get GASCOIN Tokens',
     time: '3 min',
     bullets: [
-      'You need to hold at least 1 GASCOIN token in your Ethereum wallet before you can submit.',
-      'Swap some ETH for GASCOIN on an Ethereum DEX like Uniswap or 1inch — search for the GASCOIN token contract.',
-      'Holding more GASCOIN unlocks higher tiers with bigger refund caps and faster queue priority.',
+      'You need to hold at least 1 $GAS token in your Ethereum wallet before you can submit.',
+      'Swap some ETH for $GAS on an Ethereum DEX like Uniswap or 1inch — search for the $GAS token contract.',
+      'Holding more $GAS unlocks higher tiers with bigger refund caps and faster queue priority.',
     ],
     links: [
       { name: 'Uniswap', url: 'https://app.uniswap.org', icon: brand('uniswap') },
@@ -146,7 +146,7 @@ const STEPS: Step[] = [
     title: 'Post on X',
     time: '1 min',
     bullets: [
-      'Post a tweet on X that tags @GasCoinApp and includes both #gascoin (hashtag) and $GASCOIN (cashtag). The @GasCoinApp tag helps new users find the official profile. The $GASCOIN cashtag unlocks X\'s price chart overlay on your post. Either tag/hashtag/cashtag alone is enough to pass the gate — all three together is the recommended move.',
+      'Post a tweet on X that tags @GasCoinApp and includes both #gascoin (hashtag) and $GAS (cashtag). The @GasCoinApp tag helps new users find the official profile. The $GAS cashtag unlocks X\'s price chart overlay on your post. Either tag/hashtag/cashtag alone is enough to pass the gate — all three together is the recommended move.',
       'Original videos earn 3x points — record yourself, share your story, show your receipt at the pump. Reposts earn almost nothing.',
       'Keep the tweet up. If you delete it, your submission will fail verification.',
       'Copy the URL of your tweet — you\'ll paste it in the next step.',
@@ -384,7 +384,7 @@ function PointsReference() {
           <tr><td>Refer a friend (welcome bonus)</td><td>{POINTS_CONFIG.REFERRAL_WELCOME_BONUS}</td></tr>
           <tr><td>Referral passive income (2% of referred users&apos; points)</td><td>Up to {POINTS_CONFIG.REFERRAL_PASSIVE_CAP_MONTHLY.toLocaleString()}/month</td></tr>
           <tr><td>Submission streak (per 30-day window, max {POINTS_CONFIG.MAX_STREAK_MULTIPLIER}x)</td><td>{POINTS_CONFIG.POINTS_PER_STREAK_WINDOW.toLocaleString()}</td></tr>
-          <tr><td>Hold GASCOIN (daily bonus by tier)</td><td>{POINTS_CONFIG.POINTS_PER_CYCLE_STANDARD.toLocaleString()}–{POINTS_CONFIG.POINTS_PER_CYCLE_FLEET.toLocaleString()}/day</td></tr>
+          <tr><td>Hold $GAS (daily bonus by tier)</td><td>{POINTS_CONFIG.POINTS_PER_CYCLE_STANDARD.toLocaleString()}–{POINTS_CONFIG.POINTS_PER_CYCLE_FLEET.toLocaleString()}/day</td></tr>
         </tbody>
       </table>
       <div className="pts-callout" style={{ marginTop: 24 }}>

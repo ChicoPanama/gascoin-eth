@@ -48,7 +48,7 @@ export async function verifyGate3(tweetUrl: string): Promise<GateVerifyResult> {
   if (!tweet || error) return { gate_id: 3, passed: false, failure_reason: 'Could not retrieve tweet', duration_ms: Date.now() - start };
 
   // Cashtag-aware (X April 2026). Accept either #gascoin hashtag OR
-  // $GASCOIN cashtag via three channels:
+  // $GAS cashtag via three channels:
   //   1. X API v2 `hashtags` entity (structured)
   //   2. X API v2 `cashtags` entity (structured, may or may not be populated
   //      by X yet — speculative fallback)
@@ -62,7 +62,7 @@ export async function verifyGate3(tweetUrl: string): Promise<GateVerifyResult> {
   const hasText = lowerText.includes('#gascoin') || lowerText.includes('$gascoin');
 
   if (!hasHashtagEntity && !hasCashtagEntity && !hasText) {
-    return { gate_id: 3, passed: false, failure_reason: '#gascoin / $GASCOIN not found in tweet', duration_ms: Date.now() - start };
+    return { gate_id: 3, passed: false, failure_reason: '#gascoin / $GAS not found in tweet', duration_ms: Date.now() - start };
   }
 
   return {

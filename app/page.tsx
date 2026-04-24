@@ -250,9 +250,9 @@ export default async function Home() {
             <div className="gc-step">
               <div className="gc-step-ghost">01</div>
               <div className="gc-step-index">Step 01</div>
-              <div className="gc-step-title">Tweet $GASCOIN</div>
+              <div className="gc-step-title">Tweet $GAS</div>
               <p className="gc-step-desc">
-                Post a tweet tagging <strong>@GasCoinApp</strong> with <strong>$GASCOIN</strong> cashtag and <strong>#gascoin</strong> hashtag from your verified X account. Cashtag unlocks X&apos;s price chart overlay.
+                Post a tweet tagging <strong>@GasCoinApp</strong> with <strong>$GAS</strong> cashtag and <strong>#gascoin</strong> hashtag from your verified X account. Cashtag unlocks X&apos;s price chart overlay.
                 This registers your intent and links your social identity to the
                 refund pipeline.
               </p>

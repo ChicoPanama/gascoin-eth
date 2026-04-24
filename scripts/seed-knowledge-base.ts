@@ -75,7 +75,7 @@ const SEED_ENTRIES = [
     title: 'Gate: GASCOIN Minimum Hold',
     category: 'gate_rule',
     tags: ['gates', 'token', 'balance'],
-    content: 'Wallet must hold at least 1 GASCOIN token. Skipped in dry-run mode (ENABLE_LIVE_PAYOUT=false).',
+    content: 'Wallet must hold at least 1 $GAS token. Skipped in dry-run mode (ENABLE_LIVE_PAYOUT=false).',
   },
   {
     slug: 'gates/not-duplicate',
