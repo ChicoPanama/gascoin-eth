@@ -9,6 +9,22 @@ import { isAuthorizedCron as isAuthorized } from '../../../../lib/cron-auth';
 import { writeIntelligence } from '../../../../lib/knowledge-base';
 import { shouldSilenceBetaAlerts } from '../../../../lib/season';
 import { withCronCheckIn } from '../../../../lib/observability/cron';
+import * as Sentry from '@sentry/nextjs';
+
+// Use the full Vercel Pro window. The Claude oversight call in Phase 2
+// is the dominant cost — we cap the batch size below so we never
+// actually need 300s, but giving Sentry + any one slow Claude call
+// headroom here prevents the repeated "timeout check-in detected"
+// monitor alerts from the 60s default.
+export const maxDuration = 300;
+
+// Bounded batch sizes. Claude review is ~2-5s per claim and a single
+// 200-claim backlog was blowing past 60s → Vercel killed the function
+// mid-flight → Sentry never got a finish check-in. With a 25-claim cap
+// and */5 schedule we still process 300 claims/hour, plenty for beta.
+const PHASE_1_LIMIT = 50;
+const PHASE_2_LIMIT = 25;
+const PHASE_3_LIMIT = 50;
 
 async function handler(req: Request) {
   if (!isAuthorized(req)) {
@@ -28,7 +44,7 @@ async function handler(req: Request) {
     .from('claims')
     .select('id,status')
     .eq('status', 'submitted')
-    .limit(200);
+    .limit(PHASE_1_LIMIT);
 
   if (submittedErr) {
     return NextResponse.json({ ok: false, error: 'submitted_query_failed' }, { status: 500 });
@@ -55,7 +71,7 @@ async function handler(req: Request) {
     .from('claims')
     .select('id,wallet,user_id,risk_score,ip_country,users(x_handle)')
     .eq('status', 'ready_for_dispatch')
-    .limit(200);
+    .limit(PHASE_2_LIMIT);
 
   let autoApproved = 0;
   for (const claim of readyClaims || []) {
@@ -246,7 +262,7 @@ async function handler(req: Request) {
     .select('id,claim_id,wallet,amount_eth,attempts,max_attempts,status,next_retry_at')
     .in('status', ['queued', 'retry_scheduled'])
     .order('next_retry_at', { ascending: true })
-    .limit(50);
+    .limit(PHASE_3_LIMIT);
 
   if (jobsErr) {
     return NextResponse.json({ ok: false, error: 'payout_jobs_query_failed' }, { status: 500 });
