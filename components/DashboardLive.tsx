@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { DEMO_CHART_DATA, DEMO_GATE_RATES, DEMO_STATS } from '../lib/demo-data';
+import { DEMO_CHART_DATA, DEMO_GATE_RATES, DEMO_STATS, DEMO_TREASURY } from '../lib/demo-data';
 
 type TreasurySummary = {
   live: boolean;
@@ -126,10 +126,13 @@ export function LiveStatsBar({ refundsToday, totalPaid, queueDepth }: {
     return () => { active = false; clearInterval(id); };
   }, []);
 
-  // Demo fallback until live treasury data exists
+  // Demo fallback until live treasury data exists. Pull values from
+  // lib/demo-data DEMO_TREASURY so home page + dashboard tab show the
+  // same number — they used to drift because this path hard-coded
+  // $2.18M while home used DEMO_TREASURY_DISPLAY.
   const useDemoTreasury = !treasury || !treasury.live || treasury.totalUsd <= 0;
-  const displayBalUsd = useDemoTreasury ? 2_180_000 : treasury.totalUsd;
-  const displayGc = useDemoTreasury ? 8_500_000 : treasury.gascoinBalance;
+  const displayBalUsd = useDemoTreasury ? DEMO_TREASURY.ethUsd : treasury.totalUsd;
+  const displayGc = useDemoTreasury ? DEMO_TREASURY.gascoinBalance : treasury.gascoinBalance;
   const ethPrice = treasury && treasury.ethBalance > 0 ? treasury.ethUsd / treasury.ethBalance : 0;
   const displayRefunds = refundsToday > 0 ? refundsToday : DEMO_STATS.refundsToday;
   const displayPaidUsd = totalPaid > 0 && ethPrice > 0
