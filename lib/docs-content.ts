@@ -1660,7 +1660,7 @@ Inputs(wallet,tweet,receipt)
 <li><strong>Uniswap</strong> — <a href="https://app.uniswap.org/swap" target="_blank">app.uniswap.org/swap</a></li>
 <li><strong>1inch</strong> — <a href="https://app.uniswap.org" target="_blank">app.uniswap.org</a></li>
 </ul>
-<p>To buy GASCOIN: ensure your wallet has ETH for the purchase and transaction fees, visit the DEX, connect your wallet, swap ETH for GASCOIN, then return to the Perks page and click Refresh Balance to see your updated tier.</p>
+<p>To buy $GAS: ensure your wallet has ETH for the purchase and transaction fees, visit the DEX, connect your wallet, swap ETH for $GAS, then return to the Perks page and click Refresh Balance to see your updated tier.</p>
 <p>Your tier is checked live at submission time. Tier upgrades take effect immediately — no re-connecting required.</p>
 <p>→ See also: Token Tiers for the full tier comparison</p>`,
         order: 29,
@@ -2523,7 +2523,7 @@ Inputs(wallet,tweet,receipt)
 </table>
 
 <h3>How It Works</h3>
-<p>Your GASCOIN balance is checked on-chain and cached. Every day at 6am UTC, the daily points worker reads your cached tier and awards the corresponding points. If your tier changes (you buy or sell GASCOIN), the next day's award reflects the new tier.</p>
+<p>Your $GAS balance is checked on-chain and cached. Every day at 6am UTC, the daily points worker reads your cached tier and awards the corresponding points. If your tier changes (you buy or sell $GAS), the next day's award reflects the new tier.</p>
 <p>Holdings points compound over time. A Fleet holder who participates for 6 months accumulates 135,000 points from holdings alone — before any tweets, referrals, or submissions.</p>`,
         order: 74,
       },

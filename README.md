@@ -13,7 +13,7 @@ Implements the 6 requested modules:
 - Tweet must include `#gascoin` and remain live
 - Receipt must contain `#gascoin`
 - Last 4 characters of wallet must be written on receipt and match connected wallet
-- Wallet must hold >= 1 GASCOIN token at submit + pre-payout
+- Wallet must hold >= 1 $GAS token at submit + pre-payout
 - Tier-based cooldowns: Standard/Commuter 7d, Road Warrior 3.5d, Fleet 1.75d
 
 ## Run
@@ -35,7 +35,7 @@ Outputs: `POST_AUDIT_REPORT.json`
 - Anti-AI/tamper hook
 - GASCOIN holdings + pricing hooks
 - Worker APIs for claim processing and payout
-- Pre-payout `$1 GASCOIN` re-check enforced in payout API
+- Pre-payout `1 $GAS` re-check enforced in payout API
 
 See: `docs_PHASE2_IMPLEMENTATION.md`
 

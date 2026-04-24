@@ -266,7 +266,7 @@ export const GATES: GateDefinition[] = [
     what_we_check: 'On-chain ERC-20 token balance of your connected wallet against the GASCOIN mint. During Season 1 (ENABLE_LIVE_PAYOUT=false) this check auto-passes.',
     common_failures: [
       'Wallet holds 0 $GAS tokens (live mode)',
-      'Wallet holds GASCOIN on a different chain or in a centralized exchange',
+      'Wallet holds $GAS on a different chain or in a centralized exchange',
       'Token mint address mismatch',
     ],
     how_to_pass: 'During Season 1 beta, no action required — this gate is bypassed. After token launch, hold at least 1 $GAS in your connected wallet.',

@@ -18,7 +18,7 @@ export const GATE_DEFS = [
   { id: 'tweet_live',                 label: 'Tweet Live' },
   { id: 'receipt_hashtag',            label: 'Receipt Hashtag' },
   { id: 'wallet_match',               label: 'Wallet Match on Receipt' },
-  { id: 'gascoin_min_hold',           label: 'GASCOIN Min Hold' },
+  { id: 'gascoin_min_hold',           label: '$GAS Min Hold' },
   { id: 'not_duplicate',              label: 'Not a Duplicate' },
   { id: 'ai_image_check',             label: 'Not AI-Generated' },
   { id: 'tamper_check',               label: 'Not Tampered' },
@@ -90,7 +90,7 @@ export function evaluateClaim(c: ClaimInput){
     gates.push({ gate:'receipt_hashtag', passed:c.receiptHasGascoin, reason:'Receipt must include #gascoin' });
     gates.push({ gate:'wallet_match', passed:!!c.walletOnReceipt && c.connectedWallet.slice(-4).toLowerCase()===c.walletOnReceipt.slice(-4).toLowerCase(), reason:'Last 4 characters on receipt must match connected wallet' });
     const dryRun = process.env.ENABLE_LIVE_PAYOUT !== 'true';
-    gates.push({ gate:'gascoin_min_hold', passed: dryRun || c.gascoinTokenBalance>=1, reason:'Wallet must hold at least 1 GASCOIN' });
+    gates.push({ gate:'gascoin_min_hold', passed: dryRun || c.gascoinTokenBalance>=1, reason:'Wallet must hold at least 1 $GAS' });
     gates.push({ gate:'not_duplicate', passed:!c.duplicateHash && !c.duplicatePhash, reason:'Receipt duplicate detected' });
     gates.push({ gate:'ai_image_check', passed:c.aiScore<AI_IMAGE_REJECT_THRESHOLD, score:c.aiScore, reason:'AI probability too high' });
     gates.push({ gate:'tamper_check', passed:c.tamperScore<0.55, score:c.tamperScore, reason:'Tamper risk too high' });
@@ -113,7 +113,7 @@ export function evaluateClaim(c: ClaimInput){
   gates.push({ gate:'receipt_hashtag', passed:c.receiptHasGascoin, reason:'Receipt must include #gascoin' });
   gates.push({ gate:'wallet_match', passed:!!c.walletOnReceipt && c.connectedWallet.slice(-4).toLowerCase()===c.walletOnReceipt.slice(-4).toLowerCase(), reason:'Last 4 characters on receipt must match connected wallet' });
   const dryRun = process.env.ENABLE_LIVE_PAYOUT !== 'true';
-  gates.push({ gate:'gascoin_min_hold', passed: dryRun || c.gascoinTokenBalance>=1, reason:'Wallet must hold at least 1 GASCOIN' });
+  gates.push({ gate:'gascoin_min_hold', passed: dryRun || c.gascoinTokenBalance>=1, reason:'Wallet must hold at least 1 $GAS' });
   gates.push({ gate:'not_duplicate', passed:!c.duplicateHash && !c.duplicatePhash, reason:'Receipt duplicate detected' });
   gates.push({ gate:'ai_image_check', passed:c.aiScore<0.65, score:c.aiScore, reason:'AI probability too high' });
   gates.push({ gate:'tamper_check', passed:c.tamperScore<0.55, score:c.tamperScore, reason:'Tamper risk too high' });

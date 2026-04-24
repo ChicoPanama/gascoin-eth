@@ -33,8 +33,8 @@ export const GATE_MESSAGES: Record<string, GateMessage> = {
     fix: 'The last 4 characters of your wallet must be written on the physical receipt. Write them legibly and resubmit with a new photo.',
   },
   gascoin_min_hold: {
-    headline: 'Insufficient GASCOIN balance',
-    fix: 'You need at least 1 GASCOIN token to submit a claim. Buy GASCOIN and try again after your balance updates.',
+    headline: 'Insufficient $GAS balance',
+    fix: 'You need at least 1 $GAS token to submit a claim. Buy $GAS and try again after your balance updates.',
   },
   not_duplicate: {
     headline: 'This receipt has already been submitted',
