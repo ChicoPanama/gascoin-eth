@@ -2217,6 +2217,14 @@ button.docs-footer-link {
   color: rgba(var(--fg-rgb),0.78);
 }
 
+/* Docs rich-text wrapper — min-width:0 lets ASCII children scroll
+   inside instead of bursting the flex parent on mobile. */
+.doc-content { min-width: 0; max-width: 100%; }
+.doc-content pre, .doc-content table, .doc-content img, .doc-content svg {
+  max-width: 100%;
+}
+.doc-content table { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
 .doc-content h3 {
   font-family: var(--font-mono); font-size: 13px; letter-spacing: 0.14em;
   text-transform: uppercase; color: rgba(var(--fg-rgb),0.65); margin: 36px 0 12px;
@@ -2263,17 +2271,27 @@ button.docs-footer-link {
 .doc-callout--warn { border-left-color: #FFD400; background: rgba(255,210,0,0.03); }
 .doc-callout--warn p { color: rgba(var(--fg-rgb),0.82); }
 
-/* ASCII diagrams */
+/* ASCII diagrams — scroll horizontally inside parent instead of
+   bursting the layout on narrow viewports. max-width:100% + min-width:0
+   pin the element to the flex parent; overflow-x:auto scrolls inside. */
 .doc-ascii {
   font-family: var(--font-mono); font-size: 12px; line-height: 1.5;
   color: rgba(var(--fg-rgb),0.7); background: rgba(var(--fg-rgb),0.03);
   border: 1px solid rgba(var(--fg-rgb),0.08); border-radius: 6px;
-  padding: 20px 24px; margin: 20px 0 28px; overflow-x: auto; white-space: pre;
+  padding: 20px 24px; margin: 20px 0 28px;
+  overflow-x: auto; overflow-y: hidden; white-space: pre;
+  max-width: 100%; min-width: 0;
+  -webkit-overflow-scrolling: touch;
+}
+@media (max-width: 640px) {
+  .doc-ascii { font-size: 10px; padding: 14px 16px; line-height: 1.45; }
 }
 
 /* Flow step indicators */
 .doc-flow {
   display: flex; gap: 0; margin: 20px 0 28px; overflow-x: auto; padding: 4px 0;
+  max-width: 100%; min-width: 0;
+  -webkit-overflow-scrolling: touch;
 }
 .doc-flow-step {
   display: flex; align-items: center; gap: 0; white-space: nowrap;
@@ -7465,9 +7483,16 @@ button.docs-footer-link {
   border: 1px solid var(--line);
   padding: 20px 24px;
   overflow-x: auto;
+  overflow-y: hidden;
   white-space: pre;
   margin: 0;
   background: var(--bg);
+  max-width: 100%;
+  min-width: 0;
+  -webkit-overflow-scrolling: touch;
+}
+@media (max-width: 640px) {
+  .gcdocs-hero-ascii { font-size: 9px; padding: 14px 16px; line-height: 1.5; }
 }
 
 /* ── Chapter header ── */
