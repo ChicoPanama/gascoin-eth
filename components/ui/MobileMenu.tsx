@@ -12,7 +12,6 @@ const NAV_LINKS = [
   { href: '/submit', label: 'Submit' },
   { href: '/dashboard', label: 'Treasury' },
   { href: '/leaderboard', label: 'Leaderboard' },
-  { href: '/referral', label: 'Refer' },
   { href: '/standing', label: 'Standing' },
   { href: '/gates', label: 'Gates' },
   { href: '/wallet', label: 'Tracker' },
