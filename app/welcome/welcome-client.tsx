@@ -506,7 +506,7 @@ function Popover({
 // ─── Popover contents ────────────────────────────────────────────────
 
 function EnterPopover({ testersRedeemed }: { testersRedeemed: number }) {
-  const { ready, authenticated, login, getAccessToken, user, linkTwitter } = usePrivy();
+  const { ready, authenticated, login, getAccessToken, user, linkTwitter, linkWallet } = usePrivy();
   const router = useRouter();
   const [code, setCode] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -514,6 +514,15 @@ function EnterPopover({ testersRedeemed }: { testersRedeemed: number }) {
   const [checking, setChecking] = useState(false);
 
   const handle = ((user as any)?.twitter?.username || '').toString();
+
+  // Mirror server's wallet-detection (lib/integrations/privy.ts) — Privy v2
+  // exposes the active wallet on user.wallet.address; older accounts may
+  // only have it in linked_accounts. The redeem endpoint reads the same
+  // field, so checking it client-side avoids letting a wallet-less user
+  // hit the form just to get a "wallet_connect_required" 400 back.
+  const linkedWallet = ((user as any)?.wallet?.address)
+    || (((user as any)?.linked_accounts || []).find((a: any) => a?.type === 'wallet')?.address)
+    || '';
 
   // When user signs in, check if they already have an invite → redirect immediately
   useEffect(() => {
@@ -638,6 +647,34 @@ function EnterPopover({ testersRedeemed }: { testersRedeemed: number }) {
             onClick={() => { try { linkTwitter(); } catch { /* Privy handles UI */ } }}
           >
             LINK X ACCOUNT →
+          </button>
+        </div>
+      </>
+    );
+  }
+
+  // X is linked but no wallet yet. The server pins the Pioneer Bonus
+  // payout to the wallet active at redemption time, so we have to
+  // collect a wallet BEFORE the form — otherwise the user types the
+  // code, hits UNLOCK, and the request 400s with wallet_connect_required.
+  if (!linkedWallet) {
+    return (
+      <>
+        <div className="wlc-pop-kicker">[ SEASON 1 · INVITE REQUIRED ]</div>
+        <h2 className="wlc-pop-title">Connect your wallet</h2>
+        <p className="wlc-pop-body">
+          Signed in as <strong>@{handle}</strong>. Connect the Ethereum
+          wallet you want pinned to your beta account — your Season 1
+          Pioneer Bonus and every refund will land here, so use one you
+          control and will keep.
+        </p>
+        <div className="wlc-pop-actions">
+          <button
+            type="button"
+            className="wlc-pop-btn wlc-pop-btn--primary"
+            onClick={() => { try { linkWallet(); } catch { /* Privy handles UI */ } }}
+          >
+            CONNECT WALLET →
           </button>
         </div>
       </>
