@@ -1005,7 +1005,7 @@ function InviteGate({ children }: { children: React.ReactNode }) {
   // InviteGate still renders so sign-in state is still enforced by the
   // non-authenticated branch below — we just skip the redemption UI.
   const inviteRequired = shouldRequireInviteCode();
-  const { ready, authenticated, login, getAccessToken, user } = usePrivy();
+  const { ready, authenticated, login, linkWallet, getAccessToken, user } = usePrivy();
   const [checking, setChecking] = useState(inviteRequired);
   const [hasInvite, setHasInvite] = useState(!inviteRequired);
   const [code, setCode] = useState('');
@@ -1119,7 +1119,7 @@ function InviteGate({ children }: { children: React.ReactNode }) {
           <button
             type="button"
             className="sf-btn-solid"
-            onClick={() => login()}
+            onClick={() => login({ loginMethods: ['twitter'] })}
             style={{ marginTop: 24 }}
           >
             Sign in with X
@@ -1166,7 +1166,7 @@ function InviteGate({ children }: { children: React.ReactNode }) {
           <button
             type="button"
             className="sf-btn-solid"
-            onClick={() => login()}
+            onClick={() => { try { linkWallet(); } catch { /* Privy handles UI */ } }}
             style={{ marginTop: 24 }}
           >
             Connect wallet
