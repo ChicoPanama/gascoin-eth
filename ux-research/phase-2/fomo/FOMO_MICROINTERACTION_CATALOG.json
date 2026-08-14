@@ -1,0 +1,204 @@
+{
+  "phase": 2,
+  "reference": "fomo",
+  "status": "documented_public_catalog_direct_measurement_pending",
+  "rule": "Catalog behavior and purpose. Do not treat historical UI labels as current until manually observed, and do not convert inferred geometry/timing into measured data.",
+  "items": [
+    {
+      "id": "FMIC01",
+      "name": "slide_to_buy",
+      "documented": "One deliberate slide gesture initiates a buy after amount/context are configured.",
+      "purpose": ["fast execution", "commitment boundary", "reduced accidental activation"],
+      "measure": ["gesture distance", "control size", "pressed/drag feedback", "cancel threshold", "acknowledgementMs", "pending state"]
+    },
+    {
+      "id": "FMIC02",
+      "name": "dollar_presets",
+      "documented": "Preset dollar amounts were added to accelerate buy sizing.",
+      "purpose": ["reduce typing", "familiar fiat sizing", "repeat action speed"],
+      "measure": ["current values", "tap count", "selection state", "custom amount transition", "persistence"]
+    },
+    {
+      "id": "FMIC03",
+      "name": "buy_sell_mode",
+      "documented": "Buy and Sell share the same trade/action context.",
+      "purpose": ["entry/exit symmetry", "compact transaction shell"],
+      "measure": ["selector placement", "state retention", "sell presets", "exit discoverability"]
+    },
+    {
+      "id": "FMIC04",
+      "name": "buy_again_sell_again",
+      "documented": "Completed-trade surfaces gained fast re-entry/repeat actions during Dec 2025-Jan 2026 iterations.",
+      "purpose": ["result-to-next-action compression", "repeat trading"],
+      "measure": ["current label", "placement", "retained amount/context", "confirmation boundary"]
+    },
+    {
+      "id": "FMIC05",
+      "name": "transaction_simulation_toggle",
+      "documented": "Transaction simulation toggle can preview transactions before sending.",
+      "purpose": ["optional confidence", "progressive safety depth"],
+      "measure": ["settings location", "default", "preview content", "failure copy", "impact on execution path"]
+    },
+    {
+      "id": "FMIC06",
+      "name": "verified_token_badge",
+      "documented": "Verified-token cue exists and was moved into the buy/sell header in Feb 2026.",
+      "purpose": ["trust at action boundary", "spoof prevention"],
+      "measure": ["current icon/label", "tooltip/detail", "unverified contrast", "screen locations"]
+    },
+    {
+      "id": "FMIC07",
+      "name": "volatility_scam_liquidity_warnings",
+      "documented": "Fomo describes high-volatility, scam/honeypot, unlocked-liquidity and spoofing warnings.",
+      "purpose": ["risk interruption", "make consequence visible"],
+      "measure": ["severity hierarchy", "dismissibility", "blocking behavior", "non-color semantics", "action impact"]
+    },
+    {
+      "id": "FMIC08",
+      "name": "feed_friends_scope",
+      "documented": "Friends/following can narrow the global social Feed.",
+      "purpose": ["personal relevance", "noise reduction"],
+      "measure": ["control placement", "action count", "persistence", "empty state", "refresh behavior"]
+    },
+    {
+      "id": "FMIC09",
+      "name": "typed_economic_feed_objects",
+      "documented": "Feed supports buys, sells, position states, theses, transfers/deposits and other economic events over time.",
+      "purpose": ["stable social grammar", "economic provenance", "scan speed"],
+      "measure": ["current event taxonomy", "card templates", "fields by type", "density", "insertion behavior"]
+    },
+    {
+      "id": "FMIC10",
+      "name": "trade_thesis",
+      "documented": "Users can attach reasoning to trades; thesis later became globally visible with PnL/balance context.",
+      "purpose": ["narrative context", "social engagement", "decision support"],
+      "measure": ["creation entry point", "character/media options", "fact/comment separation", "like/reply actions", "drilldown"]
+    },
+    {
+      "id": "FMIC11",
+      "name": "threaded_trade_comments",
+      "documented": "Trade comments expanded to threaded replies and reactions and to additional economic event types.",
+      "purpose": ["conversation anchored to economic object", "community memory"],
+      "measure": ["sheet/page pattern", "thread depth", "reply count", "reactions", "moderation/reporting"]
+    },
+    {
+      "id": "FMIC12",
+      "name": "mutual_followers",
+      "documented": "Mutual followers were added to reveal trader-network relationships.",
+      "purpose": ["social trust/context", "network discovery"],
+      "measure": ["profile placement", "count/avatar treatment", "tap-through"]
+    },
+    {
+      "id": "FMIC13",
+      "name": "leaderboard_timeframes",
+      "documented": "Leaderboard supports 24h, 7D, 30D and All-time in official guide material.",
+      "purpose": ["performance context", "discovery by horizon"],
+      "measure": ["current labels", "default timeframe", "switch latency", "persistence", "self-rank behavior"]
+    },
+    {
+      "id": "FMIC14",
+      "name": "position_drilldown",
+      "documented": "Feed trade objects can drill into all buys/sells composing a trader position and associated commentary.",
+      "purpose": ["economic provenance", "performance inspection"],
+      "measure": ["action count", "transaction rows", "chart markers", "position state", "share/follow actions"]
+    },
+    {
+      "id": "FMIC15",
+      "name": "dynamic_pnl_chart_overlay",
+      "documented": "User PnL updates on the chart itself rather than requiring a separate portfolio view.",
+      "purpose": ["context-at-action", "reduce view switching"],
+      "measure": ["value placement", "update animation", "timeframe behavior", "positive/negative semantics"]
+    },
+    {
+      "id": "FMIC16",
+      "name": "social_chart_markers",
+      "documented": "Followed/top-trader/community buy/sell activity can be overlaid directly on TradingView charts.",
+      "purpose": ["social context at financial object", "timing inspection"],
+      "measure": ["toggle controls", "marker density", "hover/click details", "filtering", "clutter control"]
+    },
+    {
+      "id": "FMIC17",
+      "name": "notification_signal_families",
+      "documented": "Price, Friends, Trending, Top Traders, Announcements and New Followers are independently configurable; Friends activity has deeper filtering.",
+      "purpose": ["re-entry", "noise control", "relationship-specific signal"],
+      "measure": ["current families", "master toggle", "threshold controls", "per-user controls", "deep-link behavior"]
+    },
+    {
+      "id": "FMIC18",
+      "name": "price_since_entry_alert_context",
+      "documented": "Feed/notifications can show significant price change relative to the user's first purchase.",
+      "purpose": ["personalized market context", "decision relevance"],
+      "measure": ["copy", "threshold", "entry reference", "tap destination"]
+    },
+    {
+      "id": "FMIC19",
+      "name": "send_with_message_image",
+      "documented": "Transfers between Fomo users can carry a note/image; Fomo states messages are moderated.",
+      "purpose": ["social payment object", "gift/tip/giveaway context"],
+      "measure": ["recipient selection", "message/media fields", "confirmation", "feed/notification representation", "moderation feedback"]
+    },
+    {
+      "id": "FMIC20",
+      "name": "deposit_usd_notification",
+      "documented": "Deposit notifications were updated to display USD amount.",
+      "purpose": ["make money movement immediately understandable"],
+      "measure": ["notification copy", "deep-link", "pending/final distinction"]
+    },
+    {
+      "id": "FMIC21",
+      "name": "qr_withdraw_address",
+      "documented": "Withdrawal can scan a QR address rather than require copy/paste.",
+      "purpose": ["reduce address entry error", "mobile ergonomics"],
+      "measure": ["scanner entry", "confirmation", "network warning", "address verification"]
+    },
+    {
+      "id": "FMIC22",
+      "name": "telegram_external_link_warning",
+      "documented": "Fomo added a warning before external Telegram links.",
+      "purpose": ["step-up caution at risk boundary"],
+      "measure": ["warning copy", "cancel/continue hierarchy", "trusted-link variation"]
+    },
+    {
+      "id": "FMIC23",
+      "name": "search_history",
+      "documented": "Profile/user recent searches were saved as part of Dec 2025 search improvements.",
+      "purpose": ["return efficiency", "remember user intent"],
+      "measure": ["local/synced behavior", "clear controls", "user/token mixing", "privacy cues"]
+    },
+    {
+      "id": "FMIC24",
+      "name": "win_fumble_pnl_share_cards",
+      "documented": "Fomo publishes/mentions win, fumble and PnL cards intended for sharing outside the app.",
+      "purpose": ["social distribution", "identity/performance expression"],
+      "measure": ["creation path", "data fields", "verification branding", "privacy controls", "share destinations"]
+    },
+    {
+      "id": "FMIC25",
+      "name": "referral_in_shared_trade_link",
+      "documented": "Referral code was added to shared-trade links.",
+      "purpose": ["distribution attribution", "user acquisition"],
+      "measure": ["link creation", "disclosure", "landing context preservation", "recipient journey"]
+    },
+    {
+      "id": "FMIC26",
+      "name": "liquid_glass_nav_notifications",
+      "documented": "Nov 2025 redesign introduced translucent/liquid-glass tab bar and notifications.",
+      "purpose": ["visual continuity", "overlay readability", "modern native feel"],
+      "measure": ["actual blur/opacity only from legitimate capture", "safe area", "contrast", "scroll interaction"]
+    },
+    {
+      "id": "FMIC27",
+      "name": "biometric_step_up",
+      "documented": "Biometric security protects app access and sensitive actions such as withdrawal/key export on supported Apple devices.",
+      "purpose": ["consequence-based security", "low routine friction"],
+      "measure": ["prompt timing", "cancel state", "fallback auth", "per-device configuration"]
+    },
+    {
+      "id": "FMIC28",
+      "name": "balance_at_decision_point",
+      "documented": "On-chain/available balance was moved into the trade sheet.",
+      "purpose": ["reduce mental math/view switching", "amount sizing context"],
+      "measure": ["exact balance label", "available vs total distinction", "update timing"]
+    }
+  ]
+}
