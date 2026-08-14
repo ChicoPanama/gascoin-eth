@@ -1,12 +1,16 @@
 # Phase 2 Gate — Fomo Molecular Teardown
 
-**Status:** PASS / CLOSED
+**Status:** ACTIVE / NOT PASSED
 **Roadmap:** `ux-research/ROADMAP.md`
-**Next active phase:** Phase 3 — Specialized cross-category teardowns
+**Active phase:** Phase 2 — Fomo molecular teardown
 
-## Evidence completed
+## Why this gate is open
 
-Phase 2 now contains two complementary evidence layers:
+The documented and public-screenshot corpus is strong, but the project now has a legitimate path to collect substantially deeper authenticated Fomo evidence through the user's Mac/OpenClaw/browser research node. Because Phase 2 is explicitly the **molecular teardown**, we will not advance while that high-value measurement opportunity is still pending.
+
+Prior declarations that Phase 2 was closed are superseded by this gate file and Roadmap v1.5.
+
+## Evidence already completed
 
 ### Canonical Fomo subfolder
 - `fomo/ROUTE_STATE_MAP.md`
@@ -16,77 +20,75 @@ Phase 2 now contains two complementary evidence layers:
 - `fomo/MEASUREMENT_QUEUE.md`
 - `fomo/PHASE_2_STATUS.md`
 
-### Additional evidence captured during active Phase 2
+### Additional Phase 2 evidence
 - `FOMO_PRODUCT_MODEL.md`
 - `FOMO_EVOLUTION_FINDINGS.md`
 - `FOMO_VISUAL_OBSERVATIONS.md`
 - `FOMO_JOURNEY_MATRIX.json`
 
-## Direct public visual observations added
+## Validated public observations
 
-Fomo-published product screenshots directly validate:
-- five persistent mobile bottom destinations;
-- Feed as a center-weighted primary destination;
-- in-context `Friends only` feed scope control;
-- repeated actor/action/time -> financial-object feed grammar;
-- multiple economic events visible in one mobile feed viewport;
-- Friends/Leaderboard shared destination;
-- user rank surfaced before Top traders;
-- compact 24h/7d/30d/All leaderboard timeframe controls;
-- profile identity -> Follow -> social context -> performance hierarchy;
-- prominent performance value/chart;
-- cash balance semantically separated from open positions;
-- open-position rows with value/performance context;
-- consumer sign-in screen without seed phrase/chain/RPC/native-gas vocabulary.
+Fomo-published material already supports:
+- a compact persistent mobile navigation shell;
+- Feed as a primary destination;
+- Friends/following feed scope;
+- actor/action/time -> economic-object feed grammar;
+- leaderboard timeframes and profile discovery;
+- profile identity, Follow and performance hierarchy;
+- cash balance separated from open positions;
+- consumer sign-in without seed phrase/RPC/native-gas vocabulary;
+- unified account/social state across web and mobile;
+- quick action and social-to-economic-action emphasis;
+- desktop preserving the mobile product mental model rather than becoming terminal-first.
 
-## Documented flow evidence retained
+## Required direct-measurement work before PASS
 
-Official Fomo material additionally establishes:
-- email/Apple-ID account model and embedded wallet architecture;
-- unified balance / gas sponsorship / chain abstraction;
-- social feed, following/friends feed, search, profiles and leaderboards;
-- trade thesis and verified performance context;
-- notifications for followed activity;
-- quick-action emphasis;
-- mobile/web continuity for identity, balance, positions and social graph;
-- desktop philosophy that preserves mobile simplicity rather than becoming terminal-first;
-- repeated redesign focus on onboarding, feed scanability, contextual financial information and faster re-entry/action.
+Collect as much legitimate direct evidence as possible for:
 
-## Measurement integrity decision
+1. authenticated mobile/web application shell;
+2. persistent navigation geometry and safe-area behavior;
+3. global Feed and Friends/following feed card anatomy/density;
+4. feed -> profile -> follow;
+5. leaderboard -> profile -> follow;
+6. social object/thesis/trade -> economic action;
+7. search -> user/token/action;
+8. profile performance hierarchy;
+9. portfolio hierarchy and cash/position semantics;
+10. funding/buy/sell/withdraw flows up to final financial confirmation;
+11. notification -> exact context where accessible;
+12. loading, empty, pending and error states;
+13. back navigation and scroll/context restoration;
+14. cross-device state continuity where testable;
+15. exact visible geometry: x/y/w/h, padding, gaps, typography, radii, sticky/fixed behavior;
+16. interaction metrics: intentional actions, screens, modals, visual acknowledgement, navigation time, next-ready state;
+17. animations/transitions and Instant/fast interaction behavior where applicable;
+18. native-vs-web differences that materially affect GAS;
+19. security/funding/recovery friction observed during normal legitimate use;
+20. final Fomo weakness analysis and independent GAS targets.
 
-Exact authenticated CSS geometry, timing, error/session-expiry behavior and private interaction sequences are not publicly measurable with the current authorized access. They remain explicitly `unknown`/queued rather than being guessed.
+## Safety / integrity boundary
 
-This does **not** invalidate Phase 2 because the canonical gate requires direct/public measurement **where public access permits** and explicitly requires unavailable states to remain unavailable rather than fabricated.
+The research runner may navigate and measure authenticated product states but must not automatically execute a final money-moving confirmation, export keys, reveal credentials, or commit authenticated browser state. Dedicated research-browser/session material remains local and gitignored.
 
-The retained `fomo/MEASUREMENT_QUEUE.md` remains a supplemental capture backlog. If legitimate public/authenticated access becomes available later, new measurements may strengthen Phase 4/10 benchmarks without reopening the roadmap numbering.
+## Evidence levels
 
-## Fomo laws carried forward
+- `documented` — official Fomo material;
+- `observed` — directly visible behavior/screenshots;
+- `measured` — repeatable instrumented capture;
+- `inferred` — analysis only, never represented as fact.
 
-1. One application account; infrastructure hidden.
-2. Social activity is an actionable discovery object.
-3. Verified performance/context is part of identity.
-4. Global and Following are filters over one social system.
-5. Desktop adds context without changing the mobile mental model.
-6. Advanced financial depth is progressive disclosure.
-7. Cross-device identity/balance/social state is a product invariant.
-8. High-activity feeds require stable scan grammar.
-9. Social primitives must survive product expansion.
-10. Trust/provenance context travels with financial action.
+Unknown values remain unknown until measured.
 
-## GAS improvement requirements
+## Exit criterion
 
-GAS must improve rather than replicate Fomo by:
-- requiring explicit confirmation before wager/trade actions;
-- separating canonical protocol facts from user commentary;
-- maintaining monetary reserve / game bankroll / future Bracket boundaries;
-- exposing pending/confirmed/settled/reconciled provenance on economic activity;
-- making game results themselves socially replayable through `RESULT -> CONFIG -> TRY -> EXPLICIT IGNITION`;
-- preserving GAS visual identity and instrument/gauge grammar.
+Phase 2 passes only when:
 
-## Gate result
+1. the direct/public measurement queue has been materially exhausted using the legitimately available browser/OpenClaw tooling;
+2. inaccessible states are explicitly recorded as unavailable after attempted capture;
+3. Fomo strengths and weaknesses are translated into GAS-native requirements;
+4. those requirements are mapped to the existing GAS React/account/social substrate;
+5. no exact dimensions/timings are invented.
 
-Phase 2 exit criterion is satisfied: Fomo's useful UX laws are evidence-backed, weaknesses are identified, direct public visual structure has been observed, unavailable measurements are labeled rather than invented, and the findings are mapped to GAS-native requirements and existing React bones.
+**Phase 2: ACTIVE / NOT PASSED**
 
-**Phase 2: CLOSED / PASS**
-
-**Phase 3: ACTIVE**
+**Phase 3: PRE-WORK ONLY / BLOCKED BY PHASE 2 GATE**
