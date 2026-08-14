@@ -1,6 +1,6 @@
 # Phase 2 Status — Fomo Molecular Teardown
 
-**Status:** ACTIVE / DIRECT CAPTURE PENDING  
+**Status:** ACTIVE / PUBLIC LANE SATURATED / DIRECT CAPTURE PENDING  
 **Predecessor gates:** Phase 0 PASS, Phase 1 PASS  
 **Later phases:** blocked at the gate level; later-phase files are pre-work only.
 
@@ -17,44 +17,40 @@ Artifacts:
 - `JOURNEY_MANIFEST.json`
 - `DOCUMENTED_OBSERVATIONS.json`
 - `../FOMO_PRODUCT_MODEL.md`
+- `FOMO_SCREEN_STATE_CATALOG.json`
+- `FOMO_JOURNEY_CAPTURE_STATUS.json`
 
-Evidence now covers:
-- onboarding/funding;
-- mobile navigation;
-- Home/discovery;
-- Search;
-- Feed;
-- Friends/Leaderboard;
-- profiles;
-- notifications;
-- transaction/action boundary;
-- portfolio;
-- withdrawal;
-- desktop web;
-- newer product expansion such as perps.
+Coverage includes onboarding/funding, mobile navigation, Home/discovery, Search, Feed, Friends/Leaderboard, profiles, notifications, transaction/action boundary, portfolio, withdrawal, desktop web and newer product expansion such as perps.
 
-## 2. Official visual anatomy — COMPLETE FOR AVAILABLE PUBLISHED SCREENS
+## 2. Public source / visual anatomy — SATURATED FOR CURRENT PASS
 
 Artifacts:
+- `FOMO_SOURCE_INDEX.md`
+- `FOMO_PUBLIC_RESEARCH_SATURATION.md`
 - `../FOMO_VISUAL_OBSERVATIONS.md`
 - `FOMO_NATIVE_VISUAL_ANATOMY.md`
-- `FOMO_SOURCE_INDEX.md`
+- `FOMO_CURRENT_STATE_CONFLICTS.md`
 
-Public visuals now characterize:
+Available official visuals now characterize:
+- consumer sign-in;
 - five-destination mobile shell;
-- sign-in;
-- current Home;
+- current/historical Home discovery;
 - Feed/social-card grammar;
 - Friends/Leaderboard;
 - profile;
 - position detail;
 - notifications;
 - Apple Pay buy surface;
-- current desktop workspace.
+- desktop workspace.
 
-Exact computed/native geometry remains direct-capture work.
+Freshness check:
+- current indexed Fomo blog feature sequence still ends in June 2026;
+- Apple App Store page refreshed during this pass shows version **1.81.0** as latest visible release, about six days old, following dense July maintenance/performance releases;
+- therefore live app behavior can be newer than public feature documentation.
 
-## 3. Release/evolution research — COMPLETE THROUGH CURRENT 2026 MATERIAL REVIEWED
+Exact live geometry/timing remains direct-capture work.
+
+## 3. Release/evolution research — COMPLETE THROUGH PUBLIC MATERIAL AVAILABLE
 
 Artifacts:
 - `../FOMO_EVOLUTION_FINDINGS.md`
@@ -74,45 +70,21 @@ Repeated durable themes:
 Artifact:
 - `FOMO_ACCOUNT_SECURITY_MODEL.md`
 
-Covers:
-- consumer identity first;
-- embedded/smart wallet abstraction;
-- unified balance;
-- gas sponsorship;
-- stepped-up sensitive-action authentication;
-- key ownership as progressive disclosure;
-- multi-device account continuity.
+Covers consumer identity first, embedded/smart wallet abstraction, unified balance, gas sponsorship, stepped-up sensitive-action authentication, progressive key/security disclosure and multi-device account continuity.
 
 ## 5. SocialFi system model — COMPLETE AS DOCUMENTED MODEL
 
 Artifact:
 - `FOMO_SOCIAL_SYSTEM_MODEL.md`
 
-Covers:
-- one product-wide social graph;
-- global/following/token/profile views;
-- verified economic activity as content;
-- thesis/comment layer;
-- leaderboard discovery loop;
-- Follow consequences;
-- notification re-entry;
-- chart social overlays;
-- product expansion into perps.
+Covers one product-wide social graph, global/following/token/profile views, verified economic activity as content, thesis/comment layer, leaderboard discovery loop, Follow consequences, notification re-entry, chart social overlays and social expansion into perps.
 
 ## 6. Transaction/funding model — COMPLETE AS DOCUMENTED MODEL
 
 Artifact:
 - `FOMO_TRANSACTION_UX_MODEL.md`
 
-Covers:
-- unified USD execution substrate;
-- amount/presets;
-- slide-to-buy boundary;
-- fee/slippage/liquidity context;
-- Apple Pay/debit/crypto funding;
-- bank/crypto withdrawal;
-- portfolio/PnL confirmation loop;
-- repeat-action compression.
+Covers unified USD execution substrate, amount/presets, slide-to-buy detailed flow, fee/slippage/liquidity context, Apple Pay/debit/crypto funding, bank/crypto withdrawal, portfolio/PnL confirmation loop and repeat-action compression.
 
 Current Terms fee rule captured: minimum 0.50% per transaction subject to $0.95 minimum. Live UI disclosure still needs direct observation.
 
@@ -121,62 +93,61 @@ Current Terms fee rule captured: minimum 0.50% per transaction subject to $0.95 
 Artifact:
 - `FOMO_DESKTOP_MOBILE_PARITY.md`
 
-Covers shared:
-- account/profile;
-- balance;
-- positions;
-- social graph;
-- notification settings;
-with device-specific layout expansion.
+Covers shared account/profile, balance, positions, social graph and notification settings with device-specific layout expansion.
 
-## 8. Weakness/friction hypotheses — COMPLETE AS PUBLIC-SIGNAL LOG
+## 8. Public product/frontend architecture — COMPLETE FOR PUBLIC DISCLOSURE
 
 Artifact:
-- `FOMO_FRICTION_SIGNALS.md`
+- `FOMO_PRODUCT_TECH_ARCHITECTURE.md`
 
-Signals include:
-- buy/sell execution-delay complaint;
-- Android sign-in complaint;
-- deposit retry-loop complaint;
-- withdrawal latency/trust anxiety;
-- deposit/withdrawal clarity request;
-- feed scanability scaling problem;
-- social copy pressure;
-- fast-action vs deeper-risk-context tension;
-- fee disclosure question;
-- discovery IA churn;
-- platform parity/reliability concerns.
+Current Fomo Labs hiring material publicly states:
+- mobile = Expo;
+- web = React Router + Vite;
+- backend services = TypeScript;
+- future product work includes new order types, new asset classes including prediction-market examples, and more social features.
+
+This is compatibility evidence, not a reason for GAS to copy Fomo's stack.
+
+## 9. Trust/safety and microinteraction models — COMPLETE AS DOCUMENTED CATALOG
+
+Artifacts:
+- `FOMO_TRUST_SAFETY_MODEL.md`
+- `FOMO_MICROINTERACTION_CATALOG.json`
+
+Catalog includes transaction simulation, slide-to-buy, presets, repeat-trade actions, verification badges, risk warnings, feed scope, typed economic objects, thesis/comments, mutuals, leaderboard timeframes, chart overlays, notification filters, QR withdrawal, external-link warnings, biometric step-up, share/referral behavior and balance-at-decision-point.
+
+## 10. Weakness/friction hypotheses — COMPLETE AS PUBLIC-SIGNAL LOG
+
+Artifacts:
+- `FOMO_FRICTION_SIGNALS.md`
+- `FOMO_EXTERNAL_VALIDATION.md`
+
+Signals include execution-delay complaints, possible mobile chart-context loss at buy boundary, Android sign-in complaint, deposit retry-loop complaint, withdrawal latency/error/clarity, small-order fee impact, PnL/chart trust concerns, leaderboard trader-style mismatch, feed scanability scaling, social/copy pressure, platform parity and accessibility gaps.
 
 Store reviews remain hypotheses, not verified facts.
 
-## 9. GAS compatibility — COMPLETE AS DOCUMENTED HANDOFF / NEEDS FINAL RECONCILIATION AFTER CAPTURE
+## 11. GAS compatibility — COMPLETE AS DOCUMENTED HANDOFF / NEEDS FINAL RECONCILIATION AFTER CAPTURE
 
 Artifact:
 - `FOMO_TO_GAS_MAP.md`
 
-Existing GAS substrates mapped:
-- CommunityFeed;
-- leaderboard;
-- profile/wallet drilldown;
-- navigation;
-- Privy/wallet/account layers;
-- referral/follow prior art;
-- live-state components.
+Existing GAS substrates mapped include CommunityFeed, leaderboard, profile/wallet drilldown, navigation, Privy/wallet/account layers, referral/follow prior art and live-state components.
 
-Final decisions wait until direct capture closes Phase 2.
+Final Phase 2 handoff waits until direct capture closes the remaining unknowns.
 
 # Active Phase 2 lane
 
-## 10. Direct manual/capture measurement — ACTIVE / PENDING USER LOCAL NODE
+## 12. Direct manual/capture measurement — ACTIVE / PENDING USER LOCAL NODE
 
 Artifacts:
 - `MEASUREMENT_QUEUE.md`
 - `FOMO_CAPTURE_HANDOFF.md`
 - `FOMO_RESEARCH_BOUNDARY.md`
+- `FOMO_JOURNEY_CAPTURE_STATUS.json`
 
-The queue now contains M01–M18 covering:
-- feed/profile/follow;
-- leaderboard/profile;
+M01–M18 cover:
+- Feed/Profile/Follow;
+- Leaderboard/Profile;
 - social object -> action boundary;
 - current Home IA;
 - Search;
@@ -194,11 +165,7 @@ Raw captures remain local by default. Only sanitized derived observations/measur
 
 # Research boundary
 
-Current Fomo terms restrict automated extraction/account automation and reverse engineering. The Phase 2 capture plan therefore uses:
-- ordinary user-driven use;
-- user-initiated screenshots/screen recordings/notes;
-- local offline processing;
-- sanitized derived data.
+Current Fomo terms restrict automated extraction/account automation and reverse engineering. The Phase 2 capture plan therefore uses ordinary user-driven use, user-initiated screenshots/screen recordings/notes, local offline processing and sanitized derived data.
 
 OpenClaw is a local processor, not an autonomous Fomo crawler/operator.
 
