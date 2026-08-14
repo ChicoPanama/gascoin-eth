@@ -1,0 +1,135 @@
+{
+  "version": 1,
+  "reference": "Fomo",
+  "capturedAt": "2026-08-15",
+  "evidenceLevel": "documented",
+  "note": "These observations are grounded in official Fomo product documentation/public pages. Geometry/timing measurements are intentionally left null until captured by the harvester or equivalent browser instrumentation.",
+  "observations": [
+    {
+      "id": "FOMO-D01",
+      "capability": "cross-device-account",
+      "source": "https://fomo.family/blog/announcing-fomo-web",
+      "observation": "Fomo Web uses the same account, profile, balance, positions, following graph and notification settings as mobile; trades opened on one device appear on the other.",
+      "whyItWorks": "The product feels like one persistent identity rather than separate mobile and desktop products.",
+      "gasTranslation": "GAS account, profile, balances, preferences, Crews/follows and pending activity must be device-independent.",
+      "gasImprovement": "Extend continuity beyond trading into active/pending game-round recovery and rebase/reserve notifications."
+    },
+    {
+      "id": "FOMO-D02",
+      "capability": "unified-balance-chain-abstraction",
+      "source": "https://fomo.family/blog/announcing-fomo-web",
+      "observation": "Fomo documents cross-chain swaps from one unified USD balance without normal chain switching or bridging.",
+      "whyItWorks": "It removes infrastructure decisions from the consumer task.",
+      "gasTranslation": "Normal GAS flows should not require RPC/network/bridge knowledge where architecture can safely abstract it.",
+      "gasImprovement": "GAS must preserve economic truth: unified presentation cannot flatten cash, GAS, pending wagers, reserve backing or future Bracket positions into the same spendable balance."
+    },
+    {
+      "id": "FOMO-D03",
+      "capability": "social-feed",
+      "source": "https://fomo.family/blog/february-2026-recap/",
+      "observation": "Fomo redesigned its social feed to improve scanability and organization during high-activity periods.",
+      "whyItWorks": "Social/market feeds fail when every row demands equal cognitive attention.",
+      "gasTranslation": "GAS live/social feed needs a compact hierarchy for routine events and stronger treatment for high-signal game/trade/rebase/Crew events.",
+      "gasImprovement": "Use explicit event authority/state and collapse low-signal repeated activity rather than merely increasing feed density."
+    },
+    {
+      "id": "FOMO-D04",
+      "capability": "social-context",
+      "source": "https://fomo.family/blog/february-2026-recap/",
+      "observation": "Trade theses can appear in the global feed with trader PnL and balance context and can be liked/interacted with directly.",
+      "whyItWorks": "The social claim carries performance context at the point of discovery.",
+      "gasTranslation": "Game/trade result cards should carry verified GAS context and a direct path to inspect the player/round/configuration.",
+      "gasImprovement": "Anchor result claims to canonical round/transaction IDs and distinguish verified protocol facts from user commentary."
+    },
+    {
+      "id": "FOMO-D05",
+      "capability": "global-vs-following-feed",
+      "source": "https://fomo.family/blog/september-2025-recap",
+      "observation": "Fomo added a focused friends/following feed distinct from the global feed.",
+      "whyItWorks": "Users can switch between broad discovery and high-relevance personal signals.",
+      "gasTranslation": "GAS should support global network discovery plus a following/Crew-focused feed without fragmenting identity.",
+      "gasImprovement": "Crews can add a third contextual lens while keeping one canonical event stream underneath."
+    },
+    {
+      "id": "FOMO-D06",
+      "capability": "leaderboard-profile-follow",
+      "source": "https://fomo.family/blog/learn/leveraging-fomos-social-features",
+      "observation": "Leaderboards rank traders over multiple timeframes; users can open profiles, inspect portfolio/current positions/cash/recent trades, and follow traders.",
+      "whyItWorks": "Ranking is not a dead-end trophy page; it is a discovery funnel into identity and activity.",
+      "gasTranslation": "Existing GAS leaderboard bones should become player/Crew discovery that leads into profile/activity and follow actions.",
+      "gasImprovement": "Avoid pure-volume ranking; expose rank methodology and favor verified skill/activity metrics resistant to trivial wagering-volume gaming."
+    },
+    {
+      "id": "FOMO-D07",
+      "capability": "mobile-navigation",
+      "source": "https://fomo.family/blog/learn/navigating-your-fomo-app",
+      "observation": "Fomo documents a five-destination bottom-navigation model: home, search, social feed, friends/leaderboard, profile.",
+      "whyItWorks": "Persistent mobile destinations keep the product learnable while social/discovery/account remain one thumb away.",
+      "gasTranslation": "Phase 6 should test a five-destination GAS mobile shell, likely Home/Play/Trade/Crews/Account with search contextual or universal.",
+      "gasImprovement": "Make Play the dominant center action and keep Reserve trust accessible without consuming a scarce bottom-nav slot unless evidence supports it."
+    },
+    {
+      "id": "FOMO-D08",
+      "capability": "search",
+      "source": "https://fomo.family/blog/learn/navigating-your-fomo-app",
+      "observation": "Fomo search spans both assets and user profiles.",
+      "whyItWorks": "One discovery primitive crosses financial and social entities.",
+      "gasTranslation": "GAS universal search should eventually find players, Crews, games, transactions and Bracket markets.",
+      "gasImprovement": "Return contextual actions in results instead of forcing users through an intermediate generic detail page."
+    },
+    {
+      "id": "FOMO-D09",
+      "capability": "profile",
+      "source": "https://fomo.family/blog/learn/navigating-your-fomo-app",
+      "observation": "Personal profiles include volume, followers/following, portfolio performance and detailed activity; cash balance is an entry point to withdrawal.",
+      "whyItWorks": "Identity, performance and account actions are colocated.",
+      "gasTranslation": "GAS profiles should combine social identity, verified activity, performance/game history and relationship context while account/withdraw actions remain obvious for the owner.",
+      "gasImprovement": "Separate public profile information from private account/balance data with explicit visibility rules."
+    },
+    {
+      "id": "FOMO-D10",
+      "capability": "notifications",
+      "source": "https://fomo.family/blog/learn/leveraging-fomos-social-features",
+      "observation": "Fomo notifications can surface top/followed trader activity, market activity, announcements and new followers.",
+      "whyItWorks": "The product extends beyond active sessions and brings users back to high-signal context.",
+      "gasTranslation": "GAS notifications should be event-specific: settled result, followed player, Crew milestone, rebase, deposit/withdrawal and future Bracket position event.",
+      "gasImprovement": "Deep-link to the exact canonical state and apply user-controlled signal thresholds to avoid casino-style spam."
+    },
+    {
+      "id": "FOMO-D11",
+      "capability": "advanced-depth",
+      "source": "https://fomo.family/blog/tradingview-partnership/",
+      "observation": "Fomo integrates TradingView charts and optional indicators/drawing tools while retaining its social/execution shell; social activity can overlay charts.",
+      "whyItWorks": "Power-user depth is added contextually rather than replacing the simple default path.",
+      "gasTranslation": "GAS can later offer advanced trade/Bracket analytics behind progressive disclosure without making Home/Play a terminal.",
+      "gasImprovement": "Use one shared GAS event/social model so advanced views do not fork social context from the simple experience."
+    },
+    {
+      "id": "FOMO-D12",
+      "capability": "cross-product-social-layer",
+      "source": "https://fomo.family/blog/perpetuals-now-on-fomo",
+      "observation": "Fomo perpetuals reuse feed, leaderboard, thesis, profiles and notifications instead of introducing a separate social system.",
+      "whyItWorks": "New financial products inherit network effects and user identity immediately.",
+      "gasTranslation": "Bracket should later inherit GAS identity/profile/feed/notifications instead of becoming a separate UX silo.",
+      "gasImprovement": "GAS can additionally preserve explicit financial-domain labels so social continuity does not imply shared solvency/collateral."
+    },
+    {
+      "id": "FOMO-D13",
+      "capability": "onboarding",
+      "source": "https://fomo.family/blog/learn/navigating-your-fomo-app",
+      "observation": "Fomo documents account creation by email or Apple ID and funding through crypto/debit card/Apple Pay.",
+      "whyItWorks": "The user begins with familiar consumer identity/funding primitives rather than wallet setup terminology.",
+      "gasTranslation": "GAS account onboarding should lead with familiar sign-in/funding methods while still supporting self-custody paths where appropriate.",
+      "gasImprovement": "Make bounded play permissions and withdrawal/recovery semantics explicit in human language rather than hiding custody/account tradeoffs."
+    },
+    {
+      "id": "FOMO-D14",
+      "capability": "product-positioning",
+      "source": "https://fomo.family/",
+      "observation": "Fomo publicly emphasizes easy onboarding, multichain/gasless abstraction, one-click buy, feed, leaderboard and alerts as the core consumer benefits.",
+      "whyItWorks": "The product markets outcomes and behaviors rather than protocol infrastructure.",
+      "gasTranslation": "GAS Home/marketing should lead with GAS/Play/network/social trust outcomes, not share-index/oracle/AMM implementation details.",
+      "gasImprovement": "Use reserve/rebase transparency as trust proof one layer deeper while still surfacing essential backing/rebase state at a glance."
+    }
+  ]
+}
