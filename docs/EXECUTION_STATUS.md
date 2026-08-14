@@ -11,13 +11,13 @@ Current tooling limitation in this session:
 
 - connected GitHub actions can read/write files, branches, issues and PRs;
 - they do not expose repository creation or fork creation;
-- the execution runtime also lacks an authenticated `gh` CLI.
+- the execution runtime has `git` but no authenticated `gh` CLI and no direct repository-create action.
 
 Therefore all work is isolated on the staging branch above rather than overwriting `main`.
 
 When dedicated repository creation becomes available, migrate this branch/history/content into `Project-GAS` and preserve `gascoin-eth` as the legacy/template source.
 
-## Completed in this staging pass
+## Completed foundation work
 
 ### Canonical documentation
 
@@ -28,6 +28,7 @@ When dedicated repository creation becomes available, migrate this branch/histor
 - `docs/ux/03_GAS_ORIGINAL_GAME_UX.md`
 - `docs/ux/04_SOCIAL_AND_LIVE_NETWORK_UX.md`
 - `docs/ux/05_DESIGN_SYSTEM_MIGRATION.md`
+- `docs/ux/06_WALLET_ONBOARDING_STATE_MODEL.md`
 
 ### Research
 
@@ -59,54 +60,76 @@ When dedicated repository creation becomes available, migrate this branch/histor
 - research/specification beads seed as completed
 - implementation beads remain blocked/unblocked according to prerequisites
 
-## First ready execution wave after `bd init && bash scripts/seed-beads.sh`
+## Wave 1 implementation status
 
-### Wave 1A — design system
+### Wave 1A — semantic design system
 
 **Agent:** `design-system-engineer`  
-**Task:** Add Project GAS semantic design tokens
+**Bead:** Add Project GAS semantic design tokens  
+**Status:** implementation landed; CI verification pending
 
-Output:
+Landed:
 
-- GAS energy/gauge/reserve/game semantic tokens;
-- dark/light/reduced-motion parity;
-- contrast validation.
+- `app/tokens.css` now includes GAS energy, gauge, live, reserve, game-bankroll, rebase and safe-area semantic roles;
+- light/dark aliases preserve existing token architecture;
+- core money states reuse existing pass/fail semantic roles rather than proliferating raw colors.
 
 ### Wave 1B — wallet/onboarding contract
 
 **Agent:** `ux-orchestrator`  
-**Task:** Define wallet and onboarding UX contract
+**Bead:** Define wallet and onboarding UX contract  
+**Status:** specification landed
 
-Output:
+Landed:
 
-- disconnected/connecting/connected/wrong-network/insufficient-balance/returning-user states;
-- cross-surface component contract.
+- disconnected/connecting/connected/wrong-network/session-expired model;
+- action-specific funding states;
+- first-use vs returning-user paths;
+- explicit money-action state language;
+- disconnect-after-commit recovery behavior;
+- no auto-wager/auto-trade after reconnect/deep link.
 
 ### Wave 1C — live event contract
 
 **Agent:** `social-ux-engineer`  
-**Task:** Define live network event data contract
+**Bead:** Define live network event data contract  
+**Status:** implementation + unit tests landed; CI verification pending
 
-Output:
+Landed:
 
-- typed game/trade/rebase/reserve/crew event model;
-- authoritative vs derived vs UGC distinction;
-- degraded indexer state.
+- `lib/project-gas/live-events.ts`
+- `tests/unit/lib/project-gas-live-events.test.ts`
 
-### Wave 1D — game state model
+The contract separates game results, trades, rebases, reserve events and crew milestones; distinguishes on-chain/indexer/user authority; uses exact decimal strings for economic values; and exposes live/degraded/offline feed health.
+
+### Wave 1D — GAS Original state model
 
 **Agent:** `game-ux-engineer`  
-**Task:** Implement GAS Original interaction state model
+**Bead:** Implement GAS Original interaction state model  
+**Status:** implementation + unit tests landed; CI verification pending
 
-Output:
+Landed:
 
-- READY -> VALIDATING -> COMMITTING -> LOCKED -> RESOLVING -> RESULT;
-- explicit failure/recovery branches;
-- duplicate-wager protection contract.
+- `lib/project-gas/game-state.ts`
+- `tests/unit/lib/project-gas-game-state.test.ts`
 
-## Wave 2 unlocks
+The state model covers:
 
-When Wave 1 closes, the graph begins unlocking:
+`READY -> VALIDATING -> COMMITTING -> LOCKED -> RESOLVING -> RESULT`
+
+with explicit failure branches and the critical retry invariant:
+
+> Blind retry is only allowed when the system knows no funds moved and no wager was created.
+
+Unknown submission state or a known locked wager prevents unsafe resubmission.
+
+## Verification status
+
+The repository's existing GitHub Actions workflow runs unit tests, a Next.js build check, and Playwright on pull requests to `main`.
+
+A staging/draft PR may be used solely to obtain CI evidence. No staging branch should be merged into the legacy product until Project GAS migration strategy is explicitly finalized.
+
+## Wave 2 unlocks after Wave 1 verification
 
 - navigation refactor;
 - GAS Gauge;
