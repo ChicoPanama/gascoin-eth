@@ -11,6 +11,17 @@
 - `BUILD` — required GAS capability with no adequate existing surface.
 - `RETIRE` — old product surface that should not remain in the primary GAS journey.
 
+## Parallel inventory lanes
+
+Phase 1 is being executed as six parallel lanes whose outputs merge into one compatibility matrix:
+
+1. **Routes/navigation** — every App Router segment, redirects, primary/secondary IA, deep-link behavior.
+2. **Components/design** — reusable React component families, motion primitives, typography, theme, spacing and responsive behavior.
+3. **Account/state** — Privy, wagmi, viem, wallet hooks, query state, persistence, session and chain assumptions.
+4. **API/data** — auth/me/public/referral/social/leaderboard/API surfaces and storage/service dependencies.
+5. **Recovery/testing** — loading/error boundaries, E2E/unit coverage, failure recovery and mobile/desktop test surfaces.
+6. **Compatibility synthesis** — GAS capability → current implementation → action → dependency → acceptance test.
+
 ---
 
 ## 1. Application shell / platform
@@ -297,14 +308,17 @@ Missing GAS-specific tests to add later:
 
 ---
 
-## 12. Parallel Phase 1 sub-inventories still required before gate
+## 12. Phase 1 gate work remaining
 
-1. **Route agent:** recursively inventory every user-facing App Router segment and classify.
-2. **Component agent:** enumerate component families and identify reusable primitives versus old-domain components.
-3. **Design-system agent:** extract canonical tokens, type scale, spacing, breakpoints, surfaces, animation primitives and accessibility rules from `globals.css`/styles.
-4. **Account/state agent:** inspect Privy, wallet hooks, wagmi config, query state and current session persistence.
-5. **API/data agent:** recursively inspect auth/me/public/referral/social/leaderboard/API dependencies and storage models.
-6. **Recovery/test agent:** map current loading/error boundaries, transaction error handling, test coverage and resilience gaps.
+The first pass is committed, but Phase 1 stays open until the six parallel lanes reconcile into a complete matrix. The next agent-ready work is:
+
+- recursively enumerate App Router segments and classify every consumer route;
+- enumerate component subdirectories and detect generic primitives versus old-domain components;
+- extract design tokens/breakpoints/motion primitives from CSS into structured JSON;
+- inspect wallet hooks, wagmi config and persistence/error behavior;
+- inspect auth/me/public/referral/social/leaderboard endpoints and their service dependencies;
+- enumerate loading/error boundaries and current resilience coverage;
+- merge findings into `compatibility-matrix.seed.json` and remove `seed` status at gate.
 
 ### Phase 1 gate
 Phase 1 passes only when the above are merged into a machine-readable compatibility matrix:
