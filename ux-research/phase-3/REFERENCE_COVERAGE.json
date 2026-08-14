@@ -1,0 +1,135 @@
+{
+  "phase": 3,
+  "status": "coverage_complete",
+  "rule": "A journey needs at least one credible external reference OR an explicit GAS-establishes-benchmark finding. References are not a whitelist.",
+  "journeys": [
+    {
+      "id": "J01",
+      "name": "New User to First Meaningful Action",
+      "references": ["Fomo", "Base Account", "Coinbase/Base passkey"],
+      "bestLaws": ["consumer-account-first onboarding", "embedded/app account", "no chain/RPC vocabulary", "cross-device passkey/account continuity"],
+      "gasPosition": "meet_or_beat"
+    },
+    {
+      "id": "J02",
+      "name": "Returning User to IGNITION",
+      "references": ["Stake Originals", "Base Sub Accounts", "Base Spend Permissions"],
+      "bestLaws": ["persistent safe configuration", "high-frequency action without repeated signing", "gas sponsorship", "app-specific transaction account"],
+      "gasPosition": "beat_reference_by_combining_game_and_account_primitives"
+    },
+    {
+      "id": "J03",
+      "name": "Result to Replay",
+      "references": ["Stake Originals"],
+      "bestLaws": ["Instant Bet", "hotkeys", "rapid repeat action", "manual/auto separation"],
+      "gasPosition": "one_action_required"
+    },
+    {
+      "id": "J04",
+      "name": "Configure Risk",
+      "references": ["Stake Plinko", "Stake Darts", "Stake Limbo"],
+      "bestLaws": ["few legible risk controls", "persistent wager controls", "risk configuration adjacent to action"],
+      "gasPosition": "GAS must make CRUISE/BOOST/REDLINE understandable without documentation or color alone"
+    },
+    {
+      "id": "J05",
+      "name": "Social Result to Same Game",
+      "references": ["Fomo", "Robinhood Social", "OKX Orbit"],
+      "bestLaws": ["social object adjacent to economic action", "verified activity", "trade directly from social context"],
+      "gasPosition": "GAS establishes benchmark: RESULT -> CONFIG -> TRY -> EXPLICIT IGNITION; no reference cleanly solves social-to-game replay"
+    },
+    {
+      "id": "J06",
+      "name": "Feed to Profile to Follow",
+      "references": ["Fomo", "Robinhood Social", "OKX Orbit"],
+      "bestLaws": ["verified performance before follow", "profiles tied to real activity", "follow within native financial app"],
+      "gasPosition": "meet_or_beat"
+    },
+    {
+      "id": "J07",
+      "name": "Join Crew",
+      "references": ["OKX Orbit groups/gated communities", "Fomo social graph"],
+      "bestLaws": ["community inside financial product", "performance/reputation context", "group identity"],
+      "gasPosition": "GAS establishes benchmark for game-native Crew joining/ranking/reversibility"
+    },
+    {
+      "id": "J08",
+      "name": "Buy GAS",
+      "references": ["Fomo quick action", "Base Account", "Coinbase/Base passkey"],
+      "bestLaws": ["unified balance", "gas sponsorship", "no manual network setup", "bounded permissions where appropriate", "few-step funding/action"],
+      "gasPosition": "meet_or_beat_with_truthful_fee_and_min_received_preview"
+    },
+    {
+      "id": "J09",
+      "name": "Sell/Withdraw",
+      "references": ["Kalshi Quick Order Sale", "Fomo account/withdrawal", "Coinbase/Base security"],
+      "bestLaws": ["exit as discoverable as entry", "available amount", "average/estimated execution", "stronger authentication for sensitive withdrawal"],
+      "gasPosition": "meet_or_beat; no intentional exit friction asymmetry"
+    },
+    {
+      "id": "J10",
+      "name": "Understand Rebase",
+      "references": ["Ampleforth"],
+      "bestLaws": ["plain-language balance quantity change", "proportional/non-dilutive ownership explanation", "daily cadence/deviation policy disclosure"],
+      "gasPosition": "GAS establishes superior benchmark by adding personal before/after balance impact + reserve context"
+    },
+    {
+      "id": "J11",
+      "name": "Understand Reserve",
+      "references": ["Circle Transparency"],
+      "bestLaws": ["circulation and total reserves together", "reserve composition", "issuance/redemption change", "recurring assurance/report context"],
+      "gasPosition": "meet transparency depth while preserving GAS-specific external-only backing semantics"
+    },
+    {
+      "id": "J12",
+      "name": "Refresh Mid-Round",
+      "references": [],
+      "bestLaws": [],
+      "gasPosition": "GAS establishes benchmark; canonical round/wager state must restore exactly and prevent double-submit. No credible public competitor benchmark is needed to weaken this requirement."
+    },
+    {
+      "id": "J13",
+      "name": "Connectivity Failure",
+      "references": ["consumer finance recovery conventions", "existing GAS global-error/Playwright resilience substrate"],
+      "bestLaws": ["tell user whether money moved", "persist pending state", "one safe recovery action", "hide raw infrastructure errors"],
+      "gasPosition": "GAS establishes explicit financial-state recovery benchmark because public competitor error paths are inconsistently observable"
+    },
+    {
+      "id": "J14",
+      "name": "Permission Expiry",
+      "references": ["Base Spend Permissions", "Base Sub Accounts"],
+      "bestLaws": ["bounded allowance/period/start/end", "user revocation", "first-time explicit approval", "subsequent friction reduction within granted scope"],
+      "gasPosition": "meet_or_beat with plain-language scope and deliberate reauthorization"
+    },
+    {
+      "id": "J15",
+      "name": "Portfolio / Unified Balance",
+      "references": ["Fomo", "Kalshi Portfolio", "Base universal/sub-account model"],
+      "bestLaws": ["one coherent account shell", "cash distinct from marked positions", "current value not confused with executable payout", "infrastructure hidden"],
+      "gasPosition": "GAS must additionally distinguish spendable USDC/GAS, locked game amount, marked Bracket positions, reserve and game bankroll"
+    },
+    {
+      "id": "J16",
+      "name": "Search / Discovery",
+      "references": ["Fomo", "Polymarket", "Robinhood"],
+      "bestLaws": ["unified discovery", "identity and financial objects searchable", "action available from discovery context"],
+      "gasPosition": "one GAS search primitive should expand from people/Crews/games to future markets"
+    },
+    {
+      "id": "J17",
+      "name": "Notification to Action",
+      "references": ["Fomo", "Robinhood"],
+      "bestLaws": ["followed-activity notifications", "push notification tied to real-time activity", "deep-link to relevant financial context"],
+      "gasPosition": "direct deep-link; no home detour"
+    },
+    {
+      "id": "J18",
+      "name": "Future Bracket Event to Position",
+      "references": ["Polymarket", "Kalshi"],
+      "bestLaws": ["price-as-probability simplification", "simple quick order path", "advanced limit-order depth progressively disclosed", "sell before resolution", "liquidity/execution reality visible"],
+      "gasPosition": "Bracket should preserve simple event/outcome comprehension while keeping advanced CLOB depth optional"
+    }
+  ],
+  "referenceAdmissionRule": "Any product may replace a current reference-best if evidence shows it solves the relevant journey better. Brand popularity alone is not sufficient.",
+  "phaseGate": "PASS when all J01-J18 are covered by credible reference evidence or explicit GAS-establishes-benchmark findings."
+}
