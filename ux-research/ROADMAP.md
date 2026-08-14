@@ -1,14 +1,15 @@
 # GAS UX — Canonical Execution Roadmap
 
 **Status:** Source of truth for UX execution  
-**Version:** 1.2  
+**Version:** 1.3  
 **Rule:** There is one numbered UX roadmap. Do not introduce a second phase-numbering system.
 
 ## Current program state
 
 - **Phase 0 — GAS feature freeze for UX: PASS / CLOSED.**
 - **Phase 1 — Existing repo inventory: PASS / CLOSED.**
-- **Official current phase: Phase 2 — Fomo molecular teardown.**
+- **Phase 2 — Fomo molecular teardown: PASS / CLOSED.**
+- **Official current phase: Phase 3 — Specialized cross-category teardowns.**
 
 Some enabling work for later phases has been completed early (reference harvester, benchmark utilities, seed cross-category research, PR #66 implementation prior art). That work is credited to its destination phase, but **pre-work does not skip a phase gate**.
 
@@ -79,16 +80,21 @@ Perform the deepest single-product teardown on Fomo because it is the primary So
 - direct mapping against existing GAS leaderboard/community/account bones;
 - weaknesses and explicit GAS improvements.
 
-### Active artifacts
+### Outputs
 - `ux-research/phase-2/fomo/ROUTE_STATE_MAP.md`
 - `ux-research/phase-2/fomo/JOURNEY_MANIFEST.json`
 - `ux-research/phase-2/fomo/DOCUMENTED_OBSERVATIONS.json`
 - `ux-research/phase-2/fomo/FOMO_TO_GAS_MAP.md`
+- `ux-research/phase-2/FOMO_PRODUCT_MODEL.md`
+- `ux-research/phase-2/FOMO_EVOLUTION_FINDINGS.md`
+- `ux-research/phase-2/FOMO_VISUAL_OBSERVATIONS.md`
+- `ux-research/phase-2/FOMO_JOURNEY_MATRIX.json`
+- `ux-research/phase-2/PHASE_2_GATE.md`
 
 ### Exit gate
 Fomo's useful UX laws are captured as evidence-backed observations, measured where public access permits, weaknesses are identified, and the laws are translated into GAS-native requirements without copying proprietary assets/code.
 
-**Gate status: ACTIVE.**
+**Gate status: PASS.** See `ux-research/phase-2/PHASE_2_GATE.md`.
 
 ---
 
@@ -114,10 +120,13 @@ Search broadly for the best solution to each GAS UX problem. Named products are 
 - molecular observation schema;
 - standardized viewports;
 - open-ended reference registry;
-- seed findings for Fomo, Polymarket, Kalshi, Robinhood/OKX and execution products.
+- seed findings for Fomo, Polymarket, Kalshi, Robinhood/OKX and execution products;
+- `ux-research/phase-3/PREWORK_2026-08-15.md`.
 
 ### Exit gate
 Every canonical GAS journey has at least one credible reference benchmark, or an explicit finding that GAS must establish the benchmark itself.
+
+**Gate status: ACTIVE.**
 
 ---
 
