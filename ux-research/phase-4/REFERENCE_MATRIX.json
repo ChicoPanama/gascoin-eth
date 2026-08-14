@@ -1,0 +1,188 @@
+{
+  "phase": 4,
+  "status": "active_initial_matrix",
+  "rule": "Patterns are organized by user problem and strongest behavior, not by company. External products are evidence sources only.",
+  "patterns": [
+    {
+      "id": "RM01",
+      "name": "ConsumerAccountFirst",
+      "problem": "Crypto infrastructure blocks first meaningful action.",
+      "references": ["Fomo", "Base Account", "Coinbase/Base passkey"],
+      "law": "Lead with an application account and reveal wallet/network mechanics only when needed.",
+      "gasUse": ["J01", "J02", "J15"],
+      "gasTarget": "First screen uses consumer sign-in language; no seed phrase/RPC/chain/native-gas prerequisite in normal onboarding.",
+      "confidence": "high"
+    },
+    {
+      "id": "RM02",
+      "name": "BoundedFrictionlessSession",
+      "problem": "Repeated wallet confirmations destroy high-frequency interaction.",
+      "references": ["Base Spend Permissions", "Base Sub Accounts", "Stake game cadence"],
+      "law": "One explicit bounded authorization may enable repeated eligible actions without repeated prompts while scope remains valid and revocable.",
+      "gasUse": ["J02", "J03", "J14"],
+      "gasTarget": "0 wallet prompts during ordinary authorized Play session; human-readable amount/token/scope/expiry; revocable.",
+      "confidence": "high"
+    },
+    {
+      "id": "RM03",
+      "name": "OneActionReplay",
+      "problem": "Result screens create dead ends and reduce repeat use.",
+      "references": ["Stake Originals"],
+      "law": "After a settled result, the next eligible repetition is one intentional action away and safe configuration is retained.",
+      "gasUse": ["J03"],
+      "gasTarget": "Result -> IGNITION = 1 action, no required scroll on primary mobile viewport.",
+      "confidence": "high"
+    },
+    {
+      "id": "RM04",
+      "name": "DualSpeedPresentation",
+      "problem": "Cinematic feedback is valuable initially but becomes friction for experts.",
+      "references": ["Stake Instant Bet"],
+      "law": "Canonical outcome state is independent of presentation speed; users may choose cinematic or instant rendering.",
+      "gasUse": ["J02", "J03"],
+      "gasTarget": "Instant and cinematic modes resolve from identical canonical round state; reduced-motion mode is first-class.",
+      "confidence": "high"
+    },
+    {
+      "id": "RM05",
+      "name": "FewLegibleRiskChoices",
+      "problem": "Probability math creates cognitive overload.",
+      "references": ["Stake Plinko", "Stake Limbo", "Polymarket probability framing"],
+      "law": "Present the minimum human-readable risk choice first; advanced math stays accessible but secondary.",
+      "gasUse": ["J04", "J18"],
+      "gasTarget": "CRUISE/BOOST/REDLINE are visually and verbally understandable without docs or color alone.",
+      "confidence": "high"
+    },
+    {
+      "id": "RM06",
+      "name": "VerifiedActionableSocialObject",
+      "problem": "Social claims lack trust and are disconnected from action.",
+      "references": ["Fomo", "Robinhood Social", "OKX Orbit"],
+      "law": "Attach verifiable economic context to the social object and place the relevant action adjacent to it.",
+      "gasUse": ["J05", "J06", "J17"],
+      "gasTarget": "Canonical activity ID + verified state + user commentary separation + contextual action; explicit wager/trade confirmation always required.",
+      "confidence": "high"
+    },
+    {
+      "id": "RM07",
+      "name": "GlobalFollowingOneGraph",
+      "problem": "Separate community systems fragment identity and discovery.",
+      "references": ["Fomo", "Robinhood Social", "OKX Orbit"],
+      "law": "Global discovery and following relevance are views over one social graph and one canonical activity stream.",
+      "gasUse": ["J06", "J07", "J16", "J17"],
+      "gasTarget": "One profile/follow graph spans Play, Trade, Crews and future Bracket.",
+      "confidence": "high"
+    },
+    {
+      "id": "RM08",
+      "name": "ContextPreservingDrilldown",
+      "problem": "Drilling into a profile/detail destroys the user's place in a live feed.",
+      "references": ["Fomo product model", "existing GAS leaderboard URL/scroll behavior"],
+      "law": "Detail navigation preserves meaningful source context and returns the user to the same discovery state.",
+      "gasUse": ["J05", "J06", "J16"],
+      "gasTarget": "Back navigation restores feed filter/timeframe/scroll position where technically possible.",
+      "confidence": "medium_high"
+    },
+    {
+      "id": "RM09",
+      "name": "TruthfulUnifiedPortfolio",
+      "problem": "One total can falsely imply all financial values are equivalent/spendable.",
+      "references": ["Fomo unified balance", "Kalshi Portfolio"],
+      "law": "Provide one coherent account shell while preserving distinct semantics for spendable cash, assets, locked amounts, marked positions and potential payout.",
+      "gasUse": ["J09", "J15", "J18"],
+      "gasTarget": "Never combine monetary reserve, game bankroll, user cash, locked wager or marked Bracket value into a misleading balance.",
+      "confidence": "high"
+    },
+    {
+      "id": "RM10",
+      "name": "QuickDefaultAdvancedDepth",
+      "problem": "Order books and advanced controls overwhelm ordinary users.",
+      "references": ["Kalshi Quick Order", "Polymarket limit orders", "Fomo web", "TradingView progressive depth"],
+      "law": "Default to simple execution; reveal limit-order/chart/depth tools progressively without creating a second product mental model.",
+      "gasUse": ["J08", "J09", "J18"],
+      "gasTarget": "Buy/Sell GAS and future Bracket quick execution stay simple; advanced depth is optional.",
+      "confidence": "high"
+    },
+    {
+      "id": "RM11",
+      "name": "PriceProbabilityTranslation",
+      "problem": "Outcome-market pricing is unfamiliar to mainstream users.",
+      "references": ["Polymarket"],
+      "law": "Translate market price into an intuitive probability meaning before exposing exchange mechanics.",
+      "gasUse": ["J18"],
+      "gasTarget": "Future Bracket outcome cards communicate event, probability and payout meaning before order-book terms.",
+      "confidence": "high"
+    },
+    {
+      "id": "RM12",
+      "name": "SensitiveActionStepUpSecurity",
+      "problem": "Uniform authentication either adds constant friction or under-protects withdrawals/permissions.",
+      "references": ["Fomo biometrics", "Coinbase/Base passkey", "Base permission revocation"],
+      "law": "Routine browsing/action inside valid scope is low-friction; withdrawal, permission expansion, key export and other high-consequence changes receive step-up authentication.",
+      "gasUse": ["J09", "J14"],
+      "gasTarget": "Security challenge intensity follows financial consequence.",
+      "confidence": "high"
+    },
+    {
+      "id": "RM13",
+      "name": "PersonalRebaseEvent",
+      "problem": "Elastic supply is confusing when users only see token quantity change.",
+      "references": ["Ampleforth"],
+      "law": "Explain proportional balance change simply, then disclose policy details progressively.",
+      "gasUse": ["J10"],
+      "gasTarget": "Show direction, magnitude, personal before/after balance and reserve context; control law one level deeper.",
+      "confidence": "high"
+    },
+    {
+      "id": "RM14",
+      "name": "ReserveTrustSurface",
+      "problem": "A single reserve number is not auditable or trustworthy.",
+      "references": ["Circle Transparency"],
+      "law": "Show liabilities/circulation, total reserve, composition, changes and verification/assurance context in one hierarchy.",
+      "gasUse": ["J11"],
+      "gasTarget": "At-a-glance coverage plus one-level-deep composition and verification; self-issued GAS/wGAS excluded from external backing.",
+      "confidence": "high"
+    },
+    {
+      "id": "RM15",
+      "name": "CanonicalPendingState",
+      "problem": "Optimistic UI can lie about money movement or lose state during interruption.",
+      "references": [],
+      "law": "GAS establishes benchmark: UI may acknowledge intent immediately but canonical status must remain explicit until settlement; refresh/reconnect restores exact state.",
+      "gasUse": ["J12", "J13"],
+      "gasTarget": "intent -> locked/submitted -> resolving/pending -> settled/failed/recoverable is persistent and idempotent; no double-submit.",
+      "confidence": "gas_native_high"
+    },
+    {
+      "id": "RM16",
+      "name": "HumanRecoveryState",
+      "problem": "Raw network/RPC errors do not tell users whether money moved.",
+      "references": [],
+      "law": "GAS establishes benchmark: every financial error first answers money state, then provides one safe recovery action, with technical detail secondary.",
+      "gasUse": ["J13"],
+      "gasTarget": "No raw RPC/revert string as primary message; pending/failed/retry-safe state explicit.",
+      "confidence": "gas_native_high"
+    },
+    {
+      "id": "RM17",
+      "name": "CrossDeviceCanonicalState",
+      "problem": "Account/social/financial state diverges between mobile and desktop.",
+      "references": ["Fomo", "passkey account systems"],
+      "law": "Identity, balances, social graph, preferences and pending canonical financial states reconcile across devices.",
+      "gasUse": ["J01", "J02", "J12", "J15", "J17"],
+      "gasTarget": "Desktop/mobile share one product model; dangerous financial action is never blindly resumed without canonical-state verification.",
+      "confidence": "high"
+    },
+    {
+      "id": "RM18",
+      "name": "DeepLinkedNotification",
+      "problem": "Notifications create unnecessary navigation when they land on generic home screens.",
+      "references": ["Fomo", "Robinhood"],
+      "law": "A meaningful notification returns directly to the exact relevant object/state.",
+      "gasUse": ["J17"],
+      "gasTarget": "Settlement, followed activity, Crew and rebase notifications deep-link directly with stale-state reconciliation.",
+      "confidence": "high"
+    }
+  ],
+  "phase4Gate": "PASS when each important GAS journey references normalized pattern laws, strongest-reference evidence, weaknesses/tradeoffs and GAS-specific acceptance targets rather than company imitation instructions."
+}
