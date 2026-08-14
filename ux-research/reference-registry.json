@@ -1,0 +1,25 @@
+{
+  "version": 1,
+  "policy": "Reference products are selected by the user problem they solve well, not by category prestige. A product may be added whenever it materially outperforms the current benchmark for a GAS capability.",
+  "primary": [
+    {"product":"Fomo","focus":["social feed","profiles","verified performance context","leaderboards","follow graph","notifications","quick trade","unified balance","mobile-desktop continuity"],"gasCapabilities":["home","social","identity","trade"]},
+    {"product":"Stake Originals","focus":["high-frequency wager ergonomics","instant mode","bet presets","result hierarchy","replay","provably-fair disclosure"],"gasCapabilities":["play"]},
+    {"product":"Pump","focus":["discovery-to-action","token/activity density","fast conversion","market-state presentation"],"gasCapabilities":["home","trade","social"]},
+    {"product":"Polymarket","focus":["market discovery","probability presentation","position/order flow","event hierarchy","portfolio","live market state"],"gasCapabilities":["future-bracket","trade","home"]},
+    {"product":"Kalshi","focus":["regulated prediction-market onboarding","market cards","contracts/order ticket","portfolio","event settlement clarity"],"gasCapabilities":["future-bracket","trade","account"]},
+    {"product":"Robinhood","focus":["consumer finance abstraction","funding","portfolio","prediction markets","social trading","mobile-desktop continuity"],"gasCapabilities":["account","trade","social","future-bracket"]}
+  ],
+  "specialists": [
+    {"product":"ORE","focus":["communal protocol state","network activity","simple primary action"],"gasCapabilities":["home","play","monetary"]},
+    {"product":"Ampleforth","focus":["elastic-money education","rebase communication","monetary state"],"gasCapabilities":["monetary"]},
+    {"product":"OKX Orbit","focus":["trade-linked social content","verified PnL","groups","creator/social execution"],"gasCapabilities":["social","trade"]},
+    {"product":"Hyperliquid","focus":["high-density execution","portfolio/order state","fast market interaction"],"gasCapabilities":["trade","future-bracket"]},
+    {"product":"Axiom","focus":["signal-to-execution","wallet/social tracking","presets","speed"],"gasCapabilities":["trade","social"]},
+    {"product":"Uniswap","focus":["swap state","transaction clarity","token approval","routing"],"gasCapabilities":["trade"]},
+    {"product":"Coinbase","focus":["onboarding","fiat funding","portfolio","consumer crypto education"],"gasCapabilities":["account","trade"]},
+    {"product":"Cash App","focus":["consumer payments","send/receive","identity","simple money movement"],"gasCapabilities":["account","social"]},
+    {"product":"Revolut","focus":["super-app finance navigation","cards/balances","cross-product information architecture"],"gasCapabilities":["account","home"]},
+    {"product":"DraftKings/FanDuel","focus":["sports/event discovery","bet slip ergonomics","live-state hierarchy","one-handed mobile"],"gasCapabilities":["future-bracket","play"]}
+  ],
+  "discoveryRule": "Continuously search outside this registry. Add references only when a concrete GAS journey or component can be improved and record the reason for inclusion."
+}
