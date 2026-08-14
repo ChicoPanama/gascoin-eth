@@ -1,12 +1,14 @@
 # GAS UX — Canonical Execution Roadmap
 
 **Status:** Source of truth for UX execution
-**Version:** 1.0
+**Version:** 1.1
 **Rule:** There is one numbered UX roadmap. Do not introduce a second phase-numbering system.
 
 ## Current program state
 
-**Official current phase: Phase 0 — GAS feature freeze for UX.**
+**Phase 0 — GAS feature freeze for UX: PASS / CLOSED.**
+
+**Official current phase: Phase 1 — Existing repo inventory.**
 
 Some enabling work for later phases has already been completed early (reference harvester, benchmark utilities, seed findings, compatibility seed). That work is credited to its destination phase, but **pre-work does not skip a phase gate**.
 
@@ -33,6 +35,8 @@ Normalize every existing Project GAS feature, economic constraint, terminology d
 ### Exit gate
 A new agent can answer “what must GAS support?” and “what must GAS never imply or combine?” from repository sources without reading chat history.
 
+**Gate status: PASS.** See `ux-research/phase-0/PHASE_0_GATE.md`.
+
 ---
 
 ## Phase 1 — Existing repo inventory
@@ -52,6 +56,11 @@ Catalog every reusable route, component, style, state primitive, API and test su
 - error/recovery components;
 - Playwright/Vitest coverage;
 - `reuse / refactor / extend / build / reject` compatibility matrix.
+
+### Active artifacts
+- `ux-research/phase-1/REPO_INVENTORY.md`
+- `ux-research/phase-1/compatibility-matrix.seed.json`
+- `scripts/ux-repo-inventory.mjs`
 
 ### Exit gate
 Every Phase 5–9 GAS component can be mapped to an existing implementation surface or an explicit new-build requirement.
