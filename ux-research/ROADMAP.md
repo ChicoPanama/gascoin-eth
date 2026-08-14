@@ -1,39 +1,38 @@
 # GAS UX — Canonical Execution Roadmap
 
-**Status:** Source of truth for UX execution
-**Version:** 1.1
+**Status:** Source of truth for UX execution  
+**Version:** 1.2  
 **Rule:** There is one numbered UX roadmap. Do not introduce a second phase-numbering system.
 
 ## Current program state
 
-**Phase 0 — GAS feature freeze for UX: PASS / CLOSED.**
+- **Phase 0 — GAS feature freeze for UX: PASS / CLOSED.**
+- **Phase 1 — Existing repo inventory: PASS / CLOSED.**
+- **Official current phase: Phase 2 — Fomo molecular teardown.**
 
-**Official current phase: Phase 1 — Existing repo inventory.**
+Some enabling work for later phases has been completed early (reference harvester, benchmark utilities, seed cross-category research, PR #66 implementation prior art). That work is credited to its destination phase, but **pre-work does not skip a phase gate**.
 
-Some enabling work for later phases has already been completed early (reference harvester, benchmark utilities, seed findings, compatibility seed). That work is credited to its destination phase, but **pre-work does not skip a phase gate**.
-
-A phase advances only when its exit gate is satisfied.
+A phase advances only when its explicit exit gate is satisfied.
 
 ---
 
 ## Phase 0 — GAS feature freeze for UX
 
 ### Objective
-Normalize every existing Project GAS feature, economic constraint, terminology decision, protocol firewall and user-facing requirement before the interface is redesigned around them.
+Normalize every existing Project GAS feature, economic constraint, terminology decision, protocol firewall and user-facing requirement before redesign.
 
-### Includes
-- canonical feature inventory;
-- LOCKED / CURRENT / OPEN / DEFERRED / DEPRECATED status for each feature;
-- GAS / wGAS / reserved GSD terminology;
+### Core outputs
+- decision-state feature inventory;
+- GAS / wGAS / reserved GSD semantics;
 - CRUISE / BOOST / REDLINE / IGNITION / GAS GAUGE terminology;
-- GAS trading fee semantics versus game-handle economics;
-- simple presale direction and principal-exit requirement;
-- monetary reserve / game bankroll / future Bracket collateral firewalls;
-- account, social, game, trade, monetary and future Bracket capability map;
-- UX non-negotiables and trust constraints.
+- trading-fee vs game-handle economics;
+- presale/principal-exit direction;
+- monetary reserve / game bankroll / future Bracket firewall;
+- account/social/game/trade/monetary capability map;
+- UX trust/non-negotiable requirements.
 
 ### Exit gate
-A new agent can answer “what must GAS support?” and “what must GAS never imply or combine?” from repository sources without reading chat history.
+A new agent can determine what GAS must support and what it must never imply/combine without reading chat history.
 
 **Gate status: PASS.** See `ux-research/phase-0/PHASE_0_GATE.md`.
 
@@ -42,28 +41,21 @@ A new agent can answer “what must GAS support?” and “what must GAS never i
 ## Phase 1 — Existing repo inventory
 
 ### Objective
-Catalog every reusable route, component, style, state primitive, API and test surface in `gascoin-eth`.
+Catalog reusable routes, components, styles, state primitives, APIs and tests in `gascoin-eth`.
 
-### Includes
-- route/navigation inventory;
-- React component inventory;
-- design tokens, typography and responsive primitives;
-- Privy/account/wallet flows;
-- wagmi/viem transaction-state surfaces;
-- React Query/live-state surfaces;
-- community/profile/leaderboard/referral components;
-- Framer Motion primitives;
-- error/recovery components;
-- Playwright/Vitest coverage;
-- `reuse / refactor / extend / build / reject` compatibility matrix.
-
-### Active artifacts
+### Canonical outputs
 - `ux-research/phase-1/REPO_INVENTORY.md`
-- `ux-research/phase-1/compatibility-matrix.seed.json`
-- `scripts/ux-repo-inventory.mjs`
+- `ux-research/phase-1/COMPATIBILITY_MATRIX.json`
+- `ux-research/phase-1/PR66_RECONCILIATION.md`
+- `ux-research/phase-1/PHASE_1_GATE.md`
+
+### Key result
+Every planned GAS capability is mapped to `REUSE`, `REFACTOR`, `EXTEND`, `BUILD`, `RETIRE` or `DEFER_REVIEW`, with dependencies, protocol constraints and later acceptance tests. Prior Project GAS UX work in PR #66 is preserved as phase-appropriate prior art rather than duplicated.
 
 ### Exit gate
-Every Phase 5–9 GAS component can be mapped to an existing implementation surface or an explicit new-build requirement.
+Every Phase 5–9 GAS capability can be mapped to an existing implementation surface or an explicit new-build requirement.
+
+**Gate status: PASS.** See `ux-research/phase-1/PHASE_1_GATE.md`.
 
 ---
 
@@ -72,7 +64,8 @@ Every Phase 5–9 GAS component can be mapped to an existing implementation surf
 ### Objective
 Perform the deepest single-product teardown on Fomo because it is the primary SocialFi/application-shell benchmark for GAS.
 
-### Includes
+### Required workstreams
+- route/state map;
 - feed hierarchy and scan density;
 - global/following discovery;
 - profiles, follows and leaderboards;
@@ -80,80 +73,90 @@ Perform the deepest single-product teardown on Fomo because it is the primary So
 - unified balance/account continuity;
 - mobile ↔ desktop continuity;
 - notification deep links;
-- public geometry, interaction timing and state behavior;
-- empty/loading/error/recovery states;
-- social proof and verified performance context.
+- public geometry and interaction behavior where measurable;
+- empty/loading/error/recovery states where observable;
+- social proof and verified performance context;
+- direct mapping against existing GAS leaderboard/community/account bones;
+- weaknesses and explicit GAS improvements.
+
+### Active artifacts
+- `ux-research/phase-2/fomo/ROUTE_STATE_MAP.md`
+- `ux-research/phase-2/fomo/JOURNEY_MANIFEST.json`
+- `ux-research/phase-2/fomo/DOCUMENTED_OBSERVATIONS.json`
+- `ux-research/phase-2/fomo/FOMO_TO_GAS_MAP.md`
 
 ### Exit gate
-Fomo’s useful UX laws are captured as evidence-backed observations and translated into GAS requirements without copying proprietary assets/code.
+Fomo's useful UX laws are captured as evidence-backed observations, measured where public access permits, weaknesses are identified, and the laws are translated into GAS-native requirements without copying proprietary assets/code.
+
+**Gate status: ACTIVE.**
 
 ---
 
 ## Phase 3 — Specialized cross-category teardowns
 
 ### Objective
-Search broadly for the best solution to each GAS UX problem. The named products are starting references, **not a whitelist**.
+Search broadly for the best solution to each GAS UX problem. Named products are starting references, **not a whitelist**.
 
 ### Required research domains
 - high-frequency game UX: Stake Originals and any superior games;
-- discovery/conversion: Pump and any superior launch/trading product;
+- discovery/conversion: Pump and superior launch/trading products;
 - prediction markets: Polymarket, Kalshi, Robinhood prediction markets and others;
 - social finance: Robinhood Social, OKX Orbit and emerging leaders;
-- high-speed trading: Hyperliquid, Axiom and comparable products;
+- high-speed execution: Hyperliquid, Axiom and comparable products;
 - consumer finance/account abstraction: Robinhood, Coinbase, Cash App, Revolut and others;
 - monetary/protocol state: ORE, AMPL and stronger reserve/transparency interfaces;
 - swap/trade-state UX: Uniswap and comparable products;
-- sportsbooks/games where risk presentation, slip construction, settlement or live-state UX is superior;
+- sportsbook/game products where event discovery, slip construction, risk, settlement or live state is better;
 - any product from any category that materially improves a GAS journey.
 
-### Enabling infrastructure already built early
+### Pre-work already available
 - generic public URL harvester;
-- standardized molecular observation schema;
+- molecular observation schema;
 - standardized viewports;
-- seed cross-category reference registry.
+- open-ended reference registry;
+- seed findings for Fomo, Polymarket, Kalshi, Robinhood/OKX and execution products.
 
 ### Exit gate
-For every canonical GAS journey there is at least one credible reference benchmark, or an explicit finding that GAS must establish the benchmark itself.
+Every canonical GAS journey has at least one credible reference benchmark, or an explicit finding that GAS must establish the benchmark itself.
 
 ---
 
 ## Phase 4 — Reference Matrix
 
 ### Objective
-Normalize evidence across products and extract cross-product UX laws.
+Normalize evidence across products and extract cross-product UX laws instead of product-specific imitation instructions.
 
-### Required output
-For each important pattern:
+### Required output per pattern
 - reference products;
-- observed behavior;
-- measured geometry/timing where available;
+- observed/documented/measured behavior;
+- geometry/timing where available;
 - why it works;
-- weakness/tradeoff;
+- weaknesses/tradeoffs;
 - applicable GAS capability;
-- strongest known benchmark;
-- confidence/evidence level.
+- strongest credible benchmark;
+- evidence confidence.
 
 ### Exit gate
-The team no longer discusses “copy Fomo/Stake/Pump.” It discusses named UX principles with evidence and numerical targets.
+The project discusses named UX principles with evidence and numerical targets rather than “copy Fomo/Stake/Pump.”
 
 ---
 
 ## Phase 5 — GAS Pattern Library
 
 ### Objective
-Convert reference findings into GAS-native reusable UX primitives.
+Convert validated reference laws into GAS-native reusable UX patterns.
 
-### Initial pattern families
+### Initial families
 - unified account/balance;
 - one-action primary CTA;
-- actionable social result;
-- live activity tape;
+- actionable verified social result;
+- global/following live feed;
 - persistent safe preferences;
-- Instant versus cinematic mode;
+- Instant / cinematic / reduced-motion behavior;
 - progressive disclosure;
 - verified activity/profile context;
-- optimistic money-state feedback;
-- sticky mobile thumb-zone actions;
+- optimistic-but-honest money-state feedback;
+- sticky thumb-zone action;
 - contextual onboarding;
 - rebase event;
 - reserve/backing summary;
@@ -162,52 +165,49 @@ Convert reference findings into GAS-native reusable UX primitives.
 - cross-device continuity.
 
 ### Exit gate
-Every important interaction planned for GAS references a GAS pattern rather than an external product name.
+Every important GAS interaction references a GAS pattern, not an external product name.
 
 ---
 
 ## Phase 6 — GAS information architecture
 
 ### Objective
-Lock how the whole product fits together before final screens are implemented.
+Lock the whole product structure before final screens are implemented.
 
 ### Includes
-- primary navigation;
-- Home / Play / Trade / Crews / Reserve / Wallet architecture;
-- mobile bottom navigation;
-- desktop navigation;
-- identity/profile/social graph model;
-- unified-account semantics without falsely merging cash, GAS, game funds, reserve or future Bracket positions;
+- primary navigation and mobile bottom navigation;
+- Home / Play / Trade / Crews / Reserve / Account hierarchy;
+- identity/profile/social graph;
+- truthful unified-account semantics;
 - live activity/feed architecture;
-- account permissions/session authorization;
-- rebase/reserve information hierarchy;
-- future Bracket compatibility;
-- URL/deep-link model;
-- notification model.
+- permissions/session authorization;
+- rebase/reserve hierarchy;
+- URL/deep-link/notification model;
+- future Bracket compatibility without a second identity/account shell.
 
 ### Exit gate
-Every canonical journey has a deterministic route/state path and every screen has a defined primary action.
+Every canonical journey has a deterministic route/state path and every screen has one defined primary action.
 
 ---
 
 ## Phase 7 — Mobile GAS prototype
 
 ### Objective
-Build the first coherent mobile-first prototype using the existing GAS visual identity and React bones.
+Build the first coherent mobile-first prototype using existing GAS visual/React bones.
 
-### First required vertical experience
+### Required vertical experience
 `SIGN IN → UNIFIED ACCOUNT → PLAY → CRUISE/BOOST/REDLINE → WAGER → IGNITION → RESULT → REPLAY`
 
 ### Requirements
-- primary Play flow fits the target mobile viewport without required scroll;
+- primary Play flow fits approved mobile viewport without required scroll;
 - one-handed operation;
 - immediate acknowledgement;
 - safe preferences retained;
-- wallet/chain complexity abstracted wherever architecture permits;
+- wallet/chain complexity abstracted where safely possible;
 - recovery states designed from the start.
 
 ### Exit gate
-The core GAS experience can be used end-to-end on mobile and is ready for benchmark measurement.
+Core GAS experience works end-to-end on mobile and is ready for benchmark measurement.
 
 ---
 
@@ -222,7 +222,7 @@ Adapt the proven mobile product to desktop without turning GAS into a profession
 - sidebar/top-nav decisions;
 - keyboard/hotkey behavior;
 - larger-screen social context;
-- advanced information revealed without degrading the simple path.
+- advanced information through progressive disclosure.
 
 ### Exit gate
 Mobile and desktop share one product model, identity, balance semantics and interaction logic.
@@ -232,56 +232,54 @@ Mobile and desktop share one product model, identity, balance semantics and inte
 ## Phase 9 — Vertical-loop implementation
 
 ### Objective
-Implement complete user loops, not isolated pages.
+Implement complete user loops against real application state, not isolated pages.
 
 ### Required loops
 1. sign in → balance → Play → IGNITION → result → replay;
-2. result → social post → feed → profile → try configuration;
+2. result → social object → feed → profile → try configuration → explicit wager;
 3. buy GAS → balance → Play;
-4. rebase → balance change → rebase event → feed event;
+4. rebase → balance change → rebase/feed event;
 5. Crew → members → activity → ranking;
 6. sell/withdraw → settlement → history;
 7. refresh/reconnect/failure → recovered canonical state;
-8. future-ready market shell that can later accept Bracket positions without redesigning account semantics.
+8. future-ready market shell for Bracket positions without redesigning account semantics.
 
 ### Exit gate
-Core loops function against real application state with explicit recovery behavior and tests.
+Core loops function against real state with explicit recovery behavior and tests.
 
 ---
 
 ## Phase 10 — Automated comparison / benchmarking
 
 ### Objective
-Turn UX quality into a repeatable test and release gate.
+Turn UX quality into repeatable measurements and release gates.
 
-### Enabling infrastructure already built early
+### Enabling infrastructure already built
 - canonical journey definitions;
 - Playwright benchmark utilities;
 - geometry/state/timing capture;
-- 0–100 weighted journey scoring model.
+- weighted 0–100 journey scoring.
 
 ### Required measurements
 - intentional actions;
-- screens;
-- modals;
-- wallet prompts;
+- screens/modals/wallet prompts;
 - scroll distance;
 - perceived acknowledgement;
 - ready-for-next-action latency;
 - cognitive fields;
 - mobile ergonomics;
-- error/recovery performance;
+- error/recovery;
 - accessibility/touch/keyboard behavior.
 
-### Release gate
-Core journeys meet the approved GAS targets, including >=90/100 on designated core journeys with no critical trust/recovery failure.
+### Exit gate
+Approved core journeys meet GAS targets (including >=90/100 where designated) with no critical trust/recovery failure.
 
 ---
 
 ## Phase 11 — Destroy friction
 
 ### Objective
-Repeatedly remove every unnecessary tap, delay, modal, ambiguity, scroll, wallet interruption and dead end until GAS meets or exceeds the strongest credible benchmark.
+Repeatedly remove unnecessary taps, delays, modals, ambiguity, scrolling, wallet interruption and dead ends until GAS meets or exceeds the strongest credible benchmark.
 
 ### Method
 For every canonical journey maintain:
@@ -297,19 +295,20 @@ If GAS is worse and no security/protocol requirement justifies the difference, r
 Repeat Phases 9–11 as necessary.
 
 ### Exit condition
-There is no permanent “done.” The product may release when the current gate is satisfied; optimization continues as references and user behavior evolve.
+There is no permanent optimization “done.” The product may release when the current gate is satisfied; optimization continues as references and user behavior evolve.
 
 ---
 
 # Program rules
 
 1. **No alternate phase numbering.** Sub-work uses bead IDs, not new phase systems.
-2. **Pre-work is allowed; gate-skipping is not.** Work completed early is credited when its phase is reached.
-3. **Beads is the agent task graph.** Phase epics, subtasks, blockers and discoveries live in `bd` once initialized.
-4. **GitHub is the code/review surface.** Pull requests and milestone-level summaries may reference beads, but do not duplicate the entire task graph as GitHub issues.
-5. **Every bead needs acceptance criteria.** No placeholder tasks.
-6. **Every discovery is linked.** New work discovered during execution uses `discovered-from` relationships.
-7. **Every phase has an explicit gate.** Closing individual tasks is not sufficient if the phase outcome is not met.
-8. **UX evidence is permanent.** Reference captures and findings are stored under `ux-research/`.
-9. **GAS identity stays coherent.** References inform behavior; GAS owns the implementation, visual language and product logic.
-10. **Protocol truth overrides convenience.** UX may abstract complexity but may not misrepresent balances, backing, settlement, permissions or risk.
+2. **Pre-work is allowed; gate-skipping is not.** Work completed early is credited when its phase arrives.
+3. **Beads is the detailed agent task graph.** Phase epics, subtasks, blockers and discoveries live in `bd` once initialized.
+4. **GitHub is code/review/human visibility.** Do not mirror every bead into GitHub Issues.
+5. **Every bead requires objective acceptance criteria.**
+6. **Discoveries are linked** with `discovered-from`/related dependencies rather than disappearing into chat.
+7. **Every phase has an explicit gate.** Task completion alone is insufficient if the phase outcome is not true.
+8. **UX evidence is permanent** under `ux-research/`.
+9. **GAS identity remains coherent.** References inform behavior; GAS owns implementation, visual language and product logic.
+10. **Protocol truth overrides convenience.** UX may abstract complexity but may never misrepresent balances, backing, settlement, permissions or risk.
+11. **Prior staging work is harvested, not duplicated.** PR #66 is a prototype/evidence library whose artifacts are revalidated when their canonical phase activates.
