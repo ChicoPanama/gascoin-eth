@@ -1,16 +1,10 @@
 /* ═══════════════════════════════════════════
-   GASCOIN Design Tokens — 2026 Baseline
-   Single source of truth for all design values
+   Project GAS Design Tokens — 2026 Baseline
+   Single source of truth for shared design values
    ═══════════════════════════════════════════ */
 
 :root {
-  /* ── Colors — X.com "Lights Out" exact values ──
-     These are X's actual dark-mode tokens verified against authoritative
-     brand references (March 2026). Primary text is #E7E9EA, NOT pure
-     white — that's what gives X its signature "slightly-warm off-white"
-     reading quality. Secondary text is #71767B and tertiary is #536471
-     — these are discrete shades, not rgba opacities. Dividers are
-     #2F3336 — visible on pure black but subtle. */
+  /* ── Colors — inherited GASCOIN / X "Lights Out" foundation ── */
   --bg: #000000;
   --bg-rgb: 0, 0, 0;
   --fg: #E7E9EA;
@@ -20,20 +14,15 @@
   --muted-decorative: #3D3D3D;
   --line: #2F3336;
   --line-rgb: 47, 51, 54;
-  --card: #16181C;          /* X.com actual card surface on Lights Out */
-  --card-hover: #1D1F23;    /* X.com actual hover state */
+  --card: #16181C;
+  --card-hover: #1D1F23;
 
-  /* ── Semantic text hierarchy (NEW — prefer over rgba opacities) ──
-     X uses discrete grays, not opacity. Use these tokens for any text
-     that needs a specific level of emphasis. Avoid rgba(var(--fg-rgb), x)
-     for text — it produces washed-out grays that don't match X's
-     familiar shades. Borders, backgrounds, and decorative elements can
-     still use the rgba pattern. */
-  --text-primary: #E7E9EA;     /* main body / headings */
-  --text-secondary: #71767B;   /* metadata, captions, muted labels */
-  --text-tertiary: #536471;    /* placeholder / very low emphasis */
+  /* ── Semantic text hierarchy ── */
+  --text-primary: #E7E9EA;
+  --text-secondary: #71767B;
+  --text-tertiary: #536471;
 
-  /* ── Accent (monochrome) ── */
+  /* ── Legacy neutral accent foundation ── */
   --accent: #FFFFFF;
   --accent-rgb: 255, 255, 255;
   --accent-purple: #A8A8A8;
@@ -41,10 +30,7 @@
   --accent-glow-soft: rgba(255, 255, 255, 0.16);
   --accent-purple-glow: rgba(255, 255, 255, 0.10);
 
-  /* ── Button / Nav / Hero semantic tokens ──
-     These exist because many places in globals.css hard-coded values that
-     need to flip between themes. Exposing them as vars lets the light mode
-     block below override in one place. */
+  /* ── Button / Nav / Hero semantic tokens ── */
   --nav-bg: rgba(0, 0, 0, 0.85);
   --btn-solid-bg: linear-gradient(135deg, #FFFFFF 0%, #E7E9EA 100%);
   --btn-solid-fg: #000000;
@@ -64,14 +50,49 @@
   --glass-blur: 16px;
 
   /* ── Status ── */
-  --status-pass: #00BA7C;          /* X green — verification checkmarks */
+  --status-pass: #00BA7C;
   --status-fail: #F4212E;
   --status-pending: #FFD400;
-  --status-warn: #FFC849;       /* banner alerts — Season 1, etc. */
+  --status-warn: #FFC849;
   --status-warn-bg: rgba(255, 200, 80, 0.06);
   --status-warn-border: rgba(255, 200, 80, 0.35);
-  --status-info: #9CB7FF;       /* blue info tags */
+  --status-info: #9CB7FF;
   --status-info-bg: rgba(156, 183, 255, 0.08);
+
+  /* ── Project GAS semantic system ──
+     These aliases keep product meaning separate from raw color values.
+     Components should prefer these semantic roles over new hard-coded colors. */
+  --gas-energy: #FFC849;
+  --gas-energy-strong: #FFD400;
+  --gas-energy-soft: rgba(255, 200, 73, 0.12);
+  --gas-energy-border: rgba(255, 200, 73, 0.45);
+  --gas-energy-fg: #000000;
+
+  --gas-gauge-track: #2F3336;
+  --gas-gauge-neutral: #E7E9EA;
+  --gas-gauge-cruise: #E7E9EA;
+  --gas-gauge-boost: #FFC849;
+  --gas-gauge-redline: var(--status-fail);
+  --gas-gauge-result-win: var(--status-pass);
+  --gas-gauge-result-loss: var(--status-fail);
+
+  --gas-live: var(--status-info);
+  --gas-profit: var(--status-pass);
+  --gas-loss: var(--status-fail);
+  --gas-reserve: #E7E9EA;
+  --gas-game-bankroll: #A8A8A8;
+  --gas-rebase-positive: var(--status-pass);
+  --gas-rebase-negative: var(--status-fail);
+  --gas-degraded: var(--status-warn);
+
+  /* ── Mobile / safe-area system ── */
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+  --mobile-nav-height: 64px;
+  --play-control-gap: 12px;
+  --touch-target-min: 44px;
 
   /* ── Spacing Scale ── */
   --spacing-4: 4px;
@@ -88,7 +109,6 @@
   --font-body: var(--font-plex-sans), 'IBM Plex Sans', sans-serif;
   --font-mono: var(--font-plex-mono), 'IBM Plex Mono', monospace;
 
-  /* Fluid type scale: min @ 375px → max @ 1440px */
   --text-hero: clamp(48px, 6vw + 16px, 80px);
   --text-h2: clamp(36px, 4vw + 12px, 64px);
   --text-h3: clamp(24px, 2vw + 12px, 40px);
@@ -107,25 +127,8 @@
 
 /* ═══════════════════════════════════════════
    LIGHT MODE OVERRIDES
-   ═══════════════════════════════════════════
-
-   Activated when the <html> element has `data-theme="light"`.
-   The ThemeProvider in components/ThemeProvider.tsx sets this
-   attribute via an inline script in <head> before paint to avoid FOUC.
-
-   Design philosophy: brutalist cream-and-ink, NOT airy product-ui light.
-   Think risograph print, graph paper, a tech spec sheet from 1978 — same
-   sharp borders, same IBM Plex Mono, same density. Warm cream paper
-   (#F2EDE0) over warm near-black ink (#141210). All accents are
-   high-contrast darks on light, mirroring dark mode's high-contrast
-   lights on dark. */
+   ═══════════════════════════════════════════ */
 [data-theme="light"] {
-  /* X.com light-mode palette — pure white, near-black text, X brand blue.
-     Matches what x.com actually serves in 2026 (verified March 2026 via
-     authoritative brand references). Dark mode already matches X's
-     "Lights Out" (#000 + near-white), so light mode mirrors X's default. */
-
-  /* ── Core palette ── */
   --bg: #FFFFFF;
   --bg-rgb: 255, 255, 255;
   --fg: #0F1419;
@@ -133,22 +136,15 @@
   --muted: #536471;
   --muted-deep: #3A424A;
   --muted-decorative: #AAB8C2;
-  /* --line matches X.com's stronger divider color. X has two divider
-     tiers: #EFF3F4 (subtle, between list rows) and #CFD9DE (strong,
-     between sections). GASCOIN uses the strong tier as its default
-     because brutalist density requires visible structure. */
   --line: #CFD9DE;
   --line-rgb: 207, 217, 222;
   --card: #FFFFFF;
   --card-hover: #F7F9F9;
 
-  /* Semantic text hierarchy — X.com exact shades. Discrete colors, NOT
-     rgba opacities. These are the shades X users' eyes are trained on. */
   --text-primary: #0F1419;
   --text-secondary: #536471;
   --text-tertiary: #8899A5;
 
-  /* ── Accent inversion — dark chip on white ── */
   --accent: #0F1419;
   --accent-rgb: 15, 20, 25;
   --accent-purple: #536471;
@@ -156,7 +152,6 @@
   --accent-glow-soft: rgba(15, 20, 25, 0.10);
   --accent-purple-glow: rgba(15, 20, 25, 0.06);
 
-  /* ── Nav / button / hero semantic tokens ── */
   --nav-bg: rgba(255, 255, 255, 0.92);
   --btn-solid-bg: linear-gradient(135deg, #0F1419 0%, #1A2025 100%);
   --btn-solid-fg: #FFFFFF;
@@ -168,29 +163,44 @@
   --shadow-card: 0 4px 24px rgba(15, 20, 25, 0.08);
   --shadow-lift: 0 8px 32px rgba(15, 20, 25, 0.14);
 
-  /* ── Glass System ── */
   --glass-bg: rgba(15, 20, 25, 0.03);
   --glass-border: #EFF3F4;
   --glass-highlight: 0 1px 0 0 rgba(15, 20, 25, 0.05) inset;
   --glass-shadow: 0 4px 24px rgba(15, 20, 25, 0.08);
 
-  /* ── Status — X.com brand-aligned ── */
-  /* Status colors retuned for legibility on pure white.
-     Dark amber text (#5A3A00) on pale amber bg (#FFEBA3) gives ~8.5:1
-     contrast — well past WCAG AA (4.5). Solid amber border (#FFAD1F)
-     anchors the banner visually. In dark mode (default :root below),
-     --status-warn stays as the bright amber text color because it
-     reads fine on dark backgrounds. */
-  --status-pass: #00BA7C;          /* X green — verification checkmarks */
-  --status-fail: #C4112E;          /* darker X red — better on white */
-  --status-pending: #8F5A00;       /* dark amber */
-  --status-warn: #5A3A00;          /* dark amber text — 8.5:1 on #FFEBA3 */
-  --status-warn-bg: #FFEBA3;       /* solid pale amber fill */
-  --status-warn-border: #FFAD1F;   /* solid amber border */
-  --status-info: #1D9BF0;          /* X brand blue — confirmed unchanged post-rebrand */
+  --status-pass: #00BA7C;
+  --status-fail: #C4112E;
+  --status-pending: #8F5A00;
+  --status-warn: #5A3A00;
+  --status-warn-bg: #FFEBA3;
+  --status-warn-border: #FFAD1F;
+  --status-info: #1D9BF0;
   --status-info-bg: rgba(29, 155, 240, 0.08);
 
-  /* ── Color-scheme hint for form controls and scrollbars ── */
+  /* Project GAS light-mode roles use darker amber for legibility on white. */
+  --gas-energy: #8F5A00;
+  --gas-energy-strong: #6F4500;
+  --gas-energy-soft: #FFF2C6;
+  --gas-energy-border: #D99100;
+  --gas-energy-fg: #FFFFFF;
+
+  --gas-gauge-track: #CFD9DE;
+  --gas-gauge-neutral: #0F1419;
+  --gas-gauge-cruise: #0F1419;
+  --gas-gauge-boost: #8F5A00;
+  --gas-gauge-redline: var(--status-fail);
+  --gas-gauge-result-win: var(--status-pass);
+  --gas-gauge-result-loss: var(--status-fail);
+
+  --gas-live: var(--status-info);
+  --gas-profit: var(--status-pass);
+  --gas-loss: var(--status-fail);
+  --gas-reserve: #0F1419;
+  --gas-game-bankroll: #536471;
+  --gas-rebase-positive: var(--status-pass);
+  --gas-rebase-negative: var(--status-fail);
+  --gas-degraded: var(--status-warn);
+
   color-scheme: light;
 }
 
