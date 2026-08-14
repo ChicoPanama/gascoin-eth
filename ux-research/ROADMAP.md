@@ -1,7 +1,7 @@
 # GAS UX — Canonical Execution Roadmap
 
 **Status:** Source of truth for UX execution  
-**Version:** 1.3  
+**Version:** 1.4  
 **Rule:** There is one numbered UX roadmap. Do not introduce a second phase-numbering system.
 
 ## Current program state
@@ -9,7 +9,8 @@
 - **Phase 0 — GAS feature freeze for UX: PASS / CLOSED.**
 - **Phase 1 — Existing repo inventory: PASS / CLOSED.**
 - **Phase 2 — Fomo molecular teardown: PASS / CLOSED.**
-- **Official current phase: Phase 3 — Specialized cross-category teardowns.**
+- **Phase 3 — Specialized cross-category teardowns: PASS / CLOSED.**
+- **Official current phase: Phase 4 — Reference Matrix.**
 
 Some enabling work for later phases has been completed early (reference harvester, benchmark utilities, seed cross-category research, PR #66 implementation prior art). That work is credited to its destination phase, but **pre-work does not skip a phase gate**.
 
@@ -65,21 +66,6 @@ Every Phase 5–9 GAS capability can be mapped to an existing implementation sur
 ### Objective
 Perform the deepest single-product teardown on Fomo because it is the primary SocialFi/application-shell benchmark for GAS.
 
-### Required workstreams
-- route/state map;
-- feed hierarchy and scan density;
-- global/following discovery;
-- profiles, follows and leaderboards;
-- social object → economic action flow;
-- unified balance/account continuity;
-- mobile ↔ desktop continuity;
-- notification deep links;
-- public geometry and interaction behavior where measurable;
-- empty/loading/error/recovery states where observable;
-- social proof and verified performance context;
-- direct mapping against existing GAS leaderboard/community/account bones;
-- weaknesses and explicit GAS improvements.
-
 ### Outputs
 - `ux-research/phase-2/fomo/ROUTE_STATE_MAP.md`
 - `ux-research/phase-2/fomo/JOURNEY_MANIFEST.json`
@@ -103,30 +89,19 @@ Fomo's useful UX laws are captured as evidence-backed observations, measured whe
 ### Objective
 Search broadly for the best solution to each GAS UX problem. Named products are starting references, **not a whitelist**.
 
-### Required research domains
-- high-frequency game UX: Stake Originals and any superior games;
-- discovery/conversion: Pump and superior launch/trading products;
-- prediction markets: Polymarket, Kalshi, Robinhood prediction markets and others;
-- social finance: Robinhood Social, OKX Orbit and emerging leaders;
-- high-speed execution: Hyperliquid, Axiom and comparable products;
-- consumer finance/account abstraction: Robinhood, Coinbase, Cash App, Revolut and others;
-- monetary/protocol state: ORE, AMPL and stronger reserve/transparency interfaces;
-- swap/trade-state UX: Uniswap and comparable products;
-- sportsbook/game products where event discovery, slip construction, risk, settlement or live state is better;
-- any product from any category that materially improves a GAS journey.
+### Outputs
+- `ux-research/phase-3/PREWORK_2026-08-15.md`
+- `ux-research/phase-3/REFERENCE_COVERAGE.json`
+- `ux-research/phase-3/CROSS_CATEGORY_FINDINGS.md`
+- `ux-research/phase-3/PHASE_3_GATE.md`
 
-### Pre-work already available
-- generic public URL harvester;
-- molecular observation schema;
-- standardized viewports;
-- open-ended reference registry;
-- seed findings for Fomo, Polymarket, Kalshi, Robinhood/OKX and execution products;
-- `ux-research/phase-3/PREWORK_2026-08-15.md`.
+### Result
+Every canonical GAS journey J01–J18 now has a credible reference class or an explicit GAS-establishes-benchmark determination. The reference universe remains open-ended after this gate.
 
 ### Exit gate
 Every canonical GAS journey has at least one credible reference benchmark, or an explicit finding that GAS must establish the benchmark itself.
 
-**Gate status: ACTIVE.**
+**Gate status: PASS.** See `ux-research/phase-3/PHASE_3_GATE.md`.
 
 ---
 
@@ -135,18 +110,23 @@ Every canonical GAS journey has at least one credible reference benchmark, or an
 ### Objective
 Normalize evidence across products and extract cross-product UX laws instead of product-specific imitation instructions.
 
+### Active output
+- `ux-research/phase-4/REFERENCE_MATRIX.json`
+
 ### Required output per pattern
-- reference products;
+- reference products/evidence;
 - observed/documented/measured behavior;
-- geometry/timing where available;
-- why it works;
+- why the pattern works;
 - weaknesses/tradeoffs;
-- applicable GAS capability;
+- applicable GAS capability/journey;
 - strongest credible benchmark;
+- independent GAS acceptance target;
 - evidence confidence.
 
 ### Exit gate
-The project discusses named UX principles with evidence and numerical targets rather than “copy Fomo/Stake/Pump.”
+The project discusses named UX principles with evidence and numerical/behavioral targets rather than “copy Fomo/Stake/Pump,” and every important GAS journey can point to one or more normalized GAS-ready laws.
+
+**Gate status: ACTIVE.**
 
 ---
 
