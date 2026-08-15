@@ -1,15 +1,15 @@
 # GAS UX — Canonical Execution Roadmap
 
 **Status:** Source of truth for UX execution  
-**Version:** 1.5  
+**Version:** 1.6  
 **Rule:** There is one numbered UX roadmap. Do not introduce a second phase-numbering system and do not advance a phase until its gate is explicitly satisfied.
 
 ## Current program state
 
 - **Phase 0 — GAS feature freeze for UX: PASS / CLOSED.**
 - **Phase 1 — Existing repo inventory: PASS / CLOSED.**
-- **Official current phase: Phase 2 — Fomo molecular teardown: ACTIVE.**
-- **Phase 3 — Specialized cross-category teardowns: PRE-WORK ONLY / NOT GATED.**
+- **Phase 2 — Fomo molecular teardown: PASS / CLOSED.**
+- **Official current phase: Phase 3 — Specialized cross-category teardowns: ACTIVE.**
 - **Phase 4 — Reference Matrix: PRE-WORK ONLY / NOT ACTIVE.**
 - **Phases 5–11: NOT ACTIVE.**
 
@@ -52,129 +52,145 @@ Every later GAS capability can be mapped to an existing implementation surface o
 ### Objective
 Perform the deepest single-product teardown on Fomo because it is the primary SocialFi/application-shell benchmark for GAS.
 
-### Existing evidence
-- `ux-research/phase-2/fomo/ROUTE_STATE_MAP.md`
-- `ux-research/phase-2/fomo/JOURNEY_MANIFEST.json`
-- `ux-research/phase-2/fomo/DOCUMENTED_OBSERVATIONS.json`
-- `ux-research/phase-2/fomo/FOMO_TO_GAS_MAP.md`
-- `ux-research/phase-2/fomo/MEASUREMENT_QUEUE.md`
-- `ux-research/phase-2/fomo/PHASE_2_STATUS.md`
-- `ux-research/phase-2/FOMO_PRODUCT_MODEL.md`
-- `ux-research/phase-2/FOMO_EVOLUTION_FINDINGS.md`
-- `ux-research/phase-2/FOMO_VISUAL_OBSERVATIONS.md`
-- `ux-research/phase-2/FOMO_JOURNEY_MATRIX.json`
+### Canonical evidence families
+- product/route/journey model;
+- official visual anatomy and screen-state catalog;
+- release/evolution research;
+- account/security model;
+- SocialFi system model;
+- transaction/funding model;
+- mobile/desktop continuity;
+- trust/safety and microinteraction catalog;
+- friction/external-validation log;
+- GAS compatibility handoff;
+- direct-capture queue and current-environment exhaustion ledger.
 
-### Required remaining work
-Phase 2 remains open while direct authenticated measurement is being made possible through the user's local Mac/OpenClaw research node. Before the gate can pass, collect as much legitimate direct evidence as possible for:
+### Exit result
+The public/documented Fomo corpus was saturated. Remaining authenticated/native exact measurements were explicitly recorded as unavailable in the current environment rather than invented. Future user-device capture may upgrade evidence without reopening the roadmap.
 
-1. mobile application shell and persistent navigation;
-2. desktop/web shell and responsive transformation;
-3. Feed and Friends/following feed hierarchy, card density and insertion behavior;
-4. feed -> profile -> follow journey;
-5. leaderboard -> profile -> follow journey;
-6. social object/thesis/trade -> economic action journey;
-7. search -> token/user journey;
-8. portfolio/account hierarchy and cash vs position semantics;
-9. buy/sell/funding/withdrawal flows up to, but never automatically through, final financial confirmation;
-10. notification deep links where accessible;
-11. loading, empty, back-navigation, scroll restoration and recovery behavior;
-12. exact geometry, typography, spacing, control sizing, timings and animation behavior where directly measurable;
-13. mobile/native differences where observable;
-14. explicit Fomo weaknesses and independent GAS improvement targets;
-15. final mapping to existing GAS React/account/social bones.
-
-### Evidence integrity
-Use three evidence levels:
-- `documented` — official product material;
-- `observed` — direct visible behavior/screenshots;
-- `measured` — repeatable instrumented capture.
-
-Never promote a documented or inferred value into `measured`.
-
-### Exit gate
-Fomo's useful UX laws are evidence-backed **and the direct authenticated/public measurement queue has been materially exhausted with the tools legitimately available**, including the local OpenClaw/browser runner once configured. Any remaining inaccessible state must be explicitly documented as unavailable after attempted capture. Findings must be translated into GAS-native requirements without copying proprietary assets/code.
-
-**Gate status: ACTIVE / NOT PASSED.**
+**Gate status: PASS.** See `ux-research/phase-2/PHASE_2_GATE.md` and `ux-research/phase-2/fomo/FOMO_CAPTURE_EXHAUSTION.md`.
 
 ---
 
 ## Phase 3 — Specialized cross-category teardowns
 
 ### Objective
-Search broadly for the best solution to each GAS UX problem. Named products are starting references, not a whitelist.
+Search broadly for the best solution to each GAS UX problem. Named products are starting references, **not a whitelist**.
 
-### Current status
-Research already collected for Stake, Pump, Polymarket, Kalshi, Robinhood, OKX, Base Account, AMPL, Circle and others is **preserved as Phase 3 pre-work only**.
+### Active research domains
+- high-frequency game UX;
+- SocialFi / identity;
+- discovery and conversion;
+- prediction/event markets;
+- consumer account abstraction;
+- high-speed trading/execution;
+- monetary/rebase/reserve transparency;
+- general consumer finance;
+- any stronger product discovered.
 
-No Phase 3 gate may be declared until Phase 2 passes.
+### Existing pre-work being revalidated
+Research already exists for Stake Originals, Pump, Polymarket, Kalshi, Robinhood Social, OKX Orbit, Base Account/Coinbase, Hyperliquid/Axiom-class execution, AMPL, Circle, Uniswap and others.
 
 ### Exit gate
-Every canonical GAS journey has at least one credible reference benchmark, or an explicit finding that GAS must establish the benchmark itself.
+Every canonical GAS journey J01–J18 has at least one credible reference benchmark, or an explicit finding that GAS should establish the benchmark itself. Each journey identifies evidence, useful law, weakness/tradeoff and GAS improvement target.
 
-**Gate status: NOT ACTIVE.**
+**Gate status: ACTIVE / NOT PASSED.**
 
 ---
 
 ## Phase 4 — Reference Matrix
 
 ### Objective
-Normalize evidence across products and extract cross-product UX laws instead of product-specific imitation instructions.
+Normalize completed Phase 2–3 evidence across products and extract cross-product UX laws instead of product-specific imitation instructions.
 
 ### Current status
-`ux-research/phase-4/REFERENCE_MATRIX.json` is an **early seed / pre-work artifact only**. It is not a passed or active phase artifact until Phase 3 is complete and the matrix is revalidated against the completed Phase 2 and Phase 3 evidence corpus.
+`ux-research/phase-4/REFERENCE_MATRIX.json` is an **early pre-work artifact only** until Phase 3 passes and the matrix is revalidated against the complete evidence corpus.
 
 ### Exit gate
-The project discusses named UX principles with evidence and numerical/behavioral targets rather than “copy Fomo/Stake/Pump,” and every important GAS journey can point to one or more normalized GAS-ready laws.
+Every important GAS journey can point to normalized GAS-ready laws with evidence, tradeoffs and independent numerical/behavioral targets rather than “copy Fomo/Stake/Pump.”
 
 **Gate status: NOT ACTIVE.**
 
 ---
 
 ## Phase 5 — GAS Pattern Library
-Convert validated reference laws into GAS-native reusable UX patterns.
+
+### Objective
+Convert validated reference laws into GAS-native reusable UX patterns with state, component, accessibility and acceptance contracts.
+
+### Exit gate
+Every important GAS interaction references a GAS-owned pattern, not an external product name.
 
 **Status: NOT ACTIVE.**
 
 ---
 
 ## Phase 6 — GAS information architecture
-Lock the whole product structure, navigation, identity, account semantics, feed architecture, permissions, rebase/reserve hierarchy and future Bracket compatibility.
+
+### Objective
+Lock the whole product structure: primary/mobile navigation, identity, truthful account semantics, Play/Trade/Social/Reserve hierarchy, permissions, deep links, rebase/reserve disclosure and future Bracket compatibility.
+
+### Exit gate
+Every canonical journey has a deterministic route/state path and every screen has one defined primary action.
 
 **Status: NOT ACTIVE.**
 
 ---
 
 ## Phase 7 — Mobile GAS prototype
+
+### Objective
 Build the first coherent mobile-first GAS prototype using existing GAS visual/React bones.
 
-Required core loop: `SIGN IN -> UNIFIED ACCOUNT -> PLAY -> CRUISE/BOOST/REDLINE -> WAGER -> IGNITION -> RESULT -> REPLAY`.
+Required core loop:
+`SIGN IN -> UNIFIED ACCOUNT -> PLAY -> CRUISE/BOOST/REDLINE -> WAGER -> IGNITION -> RESULT -> REPLAY`
+
+### Exit gate
+Core GAS experience works end-to-end on approved mobile viewport and is ready for benchmark measurement.
 
 **Status: NOT ACTIVE.**
 
 ---
 
 ## Phase 8 — Desktop adaptation
+
+### Objective
 Adapt the proven mobile product to desktop without turning GAS into a terminal-first product.
+
+### Exit gate
+Mobile and desktop share one product model, identity, account semantics and interaction logic.
 
 **Status: NOT ACTIVE.**
 
 ---
 
 ## Phase 9 — Vertical-loop implementation
+
+### Objective
 Implement complete user loops against real application state, including recovery behavior.
+
+### Exit gate
+Core loops function against real state with explicit recovery behavior and tests.
 
 **Status: NOT ACTIVE.**
 
 ---
 
 ## Phase 10 — Automated comparison / benchmarking
+
+### Objective
 Turn UX quality into repeatable measurements and release gates using the existing Playwright/harvester infrastructure.
+
+### Exit gate
+Approved core journeys meet GAS targets with no critical trust/recovery failure.
 
 **Status: NOT ACTIVE.**
 
 ---
 
 ## Phase 11 — Destroy friction
+
+### Objective
 Repeatedly remove unnecessary taps, delays, modals, ambiguity, scrolling, wallet interruption and dead ends until GAS meets or exceeds the strongest credible benchmark.
 
 Repeat Phases 9–11 as necessary.
@@ -196,4 +212,4 @@ Repeat Phases 9–11 as necessary.
 9. **UX evidence is permanent** under `ux-research/`.
 10. **GAS identity remains coherent.** References inform behavior; GAS owns implementation, visual language and product logic.
 11. **Protocol truth overrides convenience.** UX may abstract complexity but may never misrepresent balances, backing, settlement, permissions or risk.
-12. **Current work must remain inside Phase 2 until the Phase 2 gate explicitly passes.**
+12. **Current work remains inside Phase 3 until the Phase 3 gate explicitly passes.**
