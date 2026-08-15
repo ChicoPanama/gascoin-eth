@@ -1,6 +1,20 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, type Locator, type Page } from '@playwright/test';
 
 const MOBILE = { width: 390, height: 844 };
+
+async function expectPrimaryAboveNavAtScrollTop(page: Page, primary: Locator) {
+  await expect(primary).toBeAttached();
+  await page.evaluate(() => window.scrollTo(0, 0));
+  expect(await page.evaluate(() => window.scrollY)).toBe(0);
+
+  const nav = page.getByRole('navigation', { name: 'GAS primary navigation' });
+  const [primaryBox, navBox] = await Promise.all([primary.boundingBox(), nav.boundingBox()]);
+
+  expect(primaryBox, 'primary action must have layout geometry').not.toBeNull();
+  expect(navBox, 'bottom nav must have layout geometry').not.toBeNull();
+  expect(primaryBox!.y).toBeGreaterThanOrEqual(0);
+  expect(primaryBox!.y + primaryBox!.height).toBeLessThanOrEqual(navBox!.y - 2);
+}
 
 test.describe('Project GAS mobile shell', () => {
   test.use({ viewport: MOBILE });
@@ -81,5 +95,17 @@ test.describe('GAS Original prototype loop', () => {
     await page.goto('/play/gas');
     await expect(page.getByText(/no funds move · no live RNG/i)).toBeVisible();
     await expect(page.getByText(/payout curves, RNG and bankroll settlement are not represented/i)).toBeVisible();
+  });
+
+  test('GAS16 — IGNITION and settled replay stay above fixed nav without scrolling at 390x844', async ({ page }) => {
+    await page.goto('/play/gas');
+    const ignition = page.getByRole('button', { name: 'IGNITION', exact: true });
+    await expectPrimaryAboveNavAtScrollTop(page, ignition);
+
+    await page.getByRole('button', { name: 'Instant', exact: true }).click();
+    await ignition.click();
+    const replay = page.getByRole('button', { name: 'IGNITION AGAIN', exact: true });
+    await expect(replay).toBeVisible({ timeout: 1500 });
+    await expectPrimaryAboveNavAtScrollTop(page, replay);
   });
 });
