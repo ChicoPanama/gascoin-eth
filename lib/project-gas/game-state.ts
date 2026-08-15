@@ -114,7 +114,8 @@ export function createReadyState(draft?: Partial<WagerDraft>): ReadyState {
   };
 }
 
-export function canIgnite(state: GasOriginalState): state is ReadyState {
+/** Eligibility is a value check, not a type-narrowing predicate. */
+export function canIgnite(state: GasOriginalState): boolean {
   return state.phase === 'ready' && Number(state.draft.amount) > 0;
 }
 
