@@ -16,6 +16,13 @@ async function expectPrimaryAboveNavAtScrollTop(page: Page, primary: Locator) {
   expect(primaryBox!.y + primaryBox!.height).toBeLessThanOrEqual(navBox!.y - 2);
 }
 
+async function expectMinTouchTarget(locator: Locator, minimum = 44) {
+  const box = await locator.boundingBox();
+  expect(box, 'interactive target must have layout geometry').not.toBeNull();
+  expect(box!.height).toBeGreaterThanOrEqual(minimum);
+  expect(box!.width).toBeGreaterThanOrEqual(minimum);
+}
+
 test.describe('Project GAS mobile shell', () => {
   test.use({ viewport: MOBILE });
 
@@ -107,5 +114,15 @@ test.describe('GAS Original prototype loop', () => {
     const replay = page.getByRole('button', { name: 'IGNITION AGAIN', exact: true });
     await expect(replay).toBeVisible({ timeout: 1500 });
     await expectPrimaryAboveNavAtScrollTop(page, replay);
+  });
+
+  test('GAS17 — primary mobile controls preserve a 44px minimum touch target', async ({ page }) => {
+    await page.goto('/play/gas');
+    await expectMinTouchTarget(page.getByRole('button', { name: /CRUISE/i }));
+    await expectMinTouchTarget(page.getByRole('button', { name: /BOOST/i }));
+    await expectMinTouchTarget(page.getByRole('button', { name: /REDLINE/i }));
+    await expectMinTouchTarget(page.getByRole('button', { name: '10', exact: true }));
+    await expectMinTouchTarget(page.getByRole('button', { name: 'Instant', exact: true }));
+    await expectMinTouchTarget(page.getByRole('button', { name: 'IGNITION', exact: true }));
   });
 });
