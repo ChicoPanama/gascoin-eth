@@ -213,16 +213,16 @@ export function GasOriginalPrototype() {
 
   return (
     <>
-      <div className={shared.prototypeBanner} role="note">
+      <div className={`${shared.prototypeBanner} ${local.compactBanner}`} role="note">
         <span>UI prototype · no funds move · no live RNG</span>
-        <span className={shared.prototypePill}>Phase 7</span>
+        <span className={`${shared.prototypePill} ${local.compactBannerPill}`}>Phase 7</span>
       </div>
 
-      <section className={shared.accountStrip} aria-label="Prototype GAS account">
+      <section className={`${shared.accountStrip} ${local.compactAccount}`} aria-label="Prototype GAS account">
         <div>
           <div className={shared.eyebrow}>{authenticated ? 'GAS account' : 'Explore before sign-in'}</div>
-          <div className={shared.balance}>1,240.00 GAS <span className={shared.eyebrow}>DEMO</span></div>
-          <div className={shared.balanceSub}>{authenticated ? accountLabel(user) : 'Prototype balance · not connected to funds'}</div>
+          <div className={`${shared.balance} ${local.compactBalance}`}>1,240.00 GAS <span className={shared.eyebrow}>DEMO</span></div>
+          <div className={`${shared.balanceSub} ${local.compactBalanceSub}`}>{authenticated ? accountLabel(user) : 'Prototype balance · not connected to funds'}</div>
         </div>
         {!authenticated ? (
           <button
@@ -234,30 +234,31 @@ export function GasOriginalPrototype() {
             {authReady ? 'Enter GAS' : 'Loading'}
           </button>
         ) : (
-          <div className={`${shared.statusPill} ${shared.statusReady}`}>
+          <div className={`${shared.statusPill} ${local.compactStatus} ${shared.statusReady}`}>
             <span className={shared.statusDot} /> Account ready
           </div>
         )}
       </section>
 
-      <section className={shared.gameCard} aria-labelledby="gas-original-heading">
-        <div className={shared.gameHeader}>
+      <section className={`${shared.gameCard} ${local.compactGame}`} aria-labelledby="gas-original-heading">
+        <div className={`${shared.gameHeader} ${local.compactGameHeader}`}>
           <div>
-            <h1 id="gas-original-heading" className={shared.gameTitle}>GAS ORIGINAL</h1>
-            <p className={shared.gameDescription}>Choose risk. Choose amount. IGNITION. The protocol detail stays one layer deeper.</p>
+            <h1 id="gas-original-heading" className={`${shared.gameTitle} ${local.compactGameTitle}`}>GAS ORIGINAL</h1>
+            <p className={`${shared.gameDescription} ${local.compactGameDescription}`}>Choose risk. Choose amount. IGNITION. Protocol detail stays one layer deeper.</p>
           </div>
-          <div className={`${shared.statusPill} ${statusClass}`}>
+          <div className={`${shared.statusPill} ${local.compactStatus} ${statusClass}`}>
             <span className={shared.statusDot} /> {statusLabel(state)}
           </div>
         </div>
 
-        <GasGauge state={state} />
+        <GasGauge state={state} compact />
 
-        <RiskSelector value={draft.mode} disabled={!editable} onChange={handleModeChange} />
+        <RiskSelector value={draft.mode} disabled={!editable} compact onChange={handleModeChange} />
 
         <WagerComposer
           draft={draft}
           disabled={!editable}
+          compact
           onAmountChange={handleAmountChange}
           onAssetChange={handleAssetChange}
         />
@@ -304,7 +305,7 @@ export function GasOriginalPrototype() {
 
         <button
           type="button"
-          className={shared.ignition}
+          className={`${shared.ignition} ${local.compactIgnition}`}
           disabled={primaryDisabled}
           onClick={handlePrimary}
           aria-describedby="gas-ignition-trust"
