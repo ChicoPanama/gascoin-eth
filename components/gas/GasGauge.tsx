@@ -1,6 +1,7 @@
 import type { CSSProperties } from 'react';
 import type { GasOriginalState, GasGameMode } from '@/lib/project-gas/game-state';
 import styles from './gas-ui.module.css';
+import local from './GasOriginalPrototype.module.css';
 
 const MODE_COLOR: Record<GasGameMode, string> = {
   CRUISE: 'var(--gas-gauge-cruise)',
@@ -51,7 +52,7 @@ function gaugePresentation(state: GasOriginalState) {
   };
 }
 
-export function GasGauge({ state }: { state: GasOriginalState }) {
+export function GasGauge({ state, compact = false }: { state: GasOriginalState; compact?: boolean }) {
   const view = gaugePresentation(state);
   const gaugeStyle = {
     '--gauge-color': view.color,
@@ -59,8 +60,8 @@ export function GasGauge({ state }: { state: GasOriginalState }) {
   } as CSSProperties;
 
   return (
-    <div className={styles.gaugeWrap} aria-live="polite">
-      <div className={styles.gauge} style={gaugeStyle}>
+    <div className={`${styles.gaugeWrap} ${compact ? local.compactGaugeWrap : ''}`} aria-live="polite">
+      <div className={`${styles.gauge} ${compact ? local.compactGauge : ''}`} style={gaugeStyle}>
         <div className={styles.gaugeCenter}>
           <div className={styles.gaugeState}>{view.stateLabel}</div>
           <div className={styles.gaugeValue}>{view.value}</div>
