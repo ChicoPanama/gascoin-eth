@@ -10,10 +10,6 @@ import { GlobalFooter } from '../components/GlobalFooter';
 import { GlobalChatAgent } from '../components/GlobalChatAgent';
 import { THEME_INIT_SCRIPT } from '../components/ThemeProvider';
 
-// Self-hosted + subsetted fonts. next/font fingerprints the URL and serves
-// with `Cache-Control: public, max-age=31536000, immutable` — zero FOUT,
-// no blocking round-trip to fonts.googleapis.com, and the browser can
-// preload with the document request.
 const bebas = Bebas_Neue({
   subsets: ['latin'],
   weight: '400',
@@ -40,23 +36,23 @@ export const viewport: Viewport = {
   themeColor: '#000000',
 };
 
-// Root metadata remains legacy while the Project GAS prototype is staged on
-// ux-lab. Route-specific Project GAS metadata is used on the new surfaces;
-// the root metadata flips only when the new Home replaces the legacy product.
 export const metadata: Metadata = {
-  title: 'GASCOIN',
-  description: 'Community gas refunds on Ethereum. Post $GAS or #gascoin, submit a receipt, get ETH back.',
+  title: {
+    default: 'GAS — Project GAS',
+    template: '%s · GAS',
+  },
+  description: 'Project GAS UX prototype: elastic money, a high-frequency provably-fair game, reserve transparency and SocialFi in one consumer application.',
   openGraph: {
-    title: 'GASCOIN — Community Gas Refunds on Ethereum',
-    description: 'Post $GAS or #gascoin on X, submit your gas receipt, and receive ETH directly to your wallet. 15 automated verification gates. No middlemen.',
-    siteName: 'GASCOIN',
+    title: 'GAS — Elastic Money, Play and SocialFi',
+    description: 'Project GAS UX prototype for the GAS elastic asset, GAS Original, reserve transparency and a verified social layer.',
+    siteName: 'GAS',
     type: 'website',
     url: process.env.NEXT_PUBLIC_BASE_URL || 'https://gascoin.app',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'GASCOIN — Community Gas Refunds on Ethereum',
-    description: 'Post $GAS or #gascoin on X, submit your gas receipt, and receive ETH directly to your wallet.',
+    title: 'GAS — Project GAS',
+    description: 'Elastic money, high-frequency play, reserve transparency and SocialFi in one consumer application.',
   },
   icons: {
     icon: '/favicon.svg',
@@ -66,11 +62,11 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     statusBarStyle: 'black-translucent',
-    title: 'GASCOIN',
+    title: 'GAS',
   },
   other: {
-    'robots': 'noai, noimageai, max-snippet:0, max-image-preview:none',
-    'googlebot': 'noai, noimageai, max-snippet:0, max-image-preview:none',
+    robots: 'noai, noimageai, max-snippet:0, max-image-preview:none',
+    googlebot: 'noai, noimageai, max-snippet:0, max-image-preview:none',
     'mobile-web-app-capable': 'yes',
   },
 };
@@ -82,10 +78,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       className={`${bebas.variable} ${plexSans.variable} ${plexMono.variable}`}
       suppressHydrationWarning>
       <head>
-        <Script
-          id="gc-theme-init"
-          strategy="beforeInteractive"
-        >{THEME_INIT_SCRIPT}</Script>
+        <Script id="gc-theme-init" strategy="beforeInteractive">{THEME_INIT_SCRIPT}</Script>
       </head>
       <body>
         <a href="#main-content" className="skip-nav">Skip to content</a>
