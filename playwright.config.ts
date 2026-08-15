@@ -1,5 +1,9 @@
 import { defineConfig, devices } from '@playwright/test';
 
+const webServerCommand = process.env.CI
+  ? 'npm run start'
+  : 'npm run build && npm run start';
+
 export default defineConfig({
   testDir: './e2e',
   fullyParallel: false,
@@ -26,7 +30,9 @@ export default defineConfig({
     { name: 'mobile-safari', use: { ...devices['iPhone 13'] }, dependencies: ['setup'] },
   ],
   webServer: {
-    command: 'npm run build && npm run start',
+    // CI already runs `npm run build` immediately before Playwright. Rebuilding
+    // inside webServer consumed the entire startup timeout on cold runners.
+    command: webServerCommand,
     url: 'http://localhost:3000',
     reuseExistingServer: !process.env.CI,
     timeout: 120000,
