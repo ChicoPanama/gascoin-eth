@@ -1,3 +1,113 @@
+.compactBanner {
+  min-height: 24px;
+  margin-bottom: 6px;
+  padding: 4px 7px;
+  gap: 6px;
+  font-size: 8px;
+  line-height: 1.2;
+}
+
+.compactBannerPill {
+  padding: 3px 5px;
+  font-size: 8px;
+}
+
+.compactAccount {
+  min-height: 48px;
+  margin-bottom: 6px;
+  padding: 7px 9px;
+  gap: 8px;
+}
+
+.compactAccount :global(*) {
+  line-height: 1.15;
+}
+
+.compactBalance {
+  font-size: 18px;
+}
+
+.compactBalanceSub {
+  margin-top: 1px;
+  font-size: 8px;
+}
+
+.compactGame {
+  min-height: 0;
+  gap: 6px;
+  padding: 9px;
+}
+
+.compactGameHeader {
+  gap: 8px;
+}
+
+.compactGameTitle {
+  font-size: clamp(31px, 9vw, 40px);
+}
+
+.compactGameDescription {
+  margin-top: 2px;
+  max-width: 32ch;
+  font-size: 10px;
+  line-height: 1.2;
+}
+
+.compactStatus {
+  min-height: 28px;
+  padding-inline: 7px;
+  font-size: 8px;
+}
+
+.compactGaugeWrap {
+  min-height: 124px;
+  flex: 0 0 124px;
+}
+
+.compactGauge {
+  width: min(43vw, 158px);
+}
+
+.compactGauge::before {
+  inset: 12px;
+}
+
+.compactModeGrid {
+  gap: 4px;
+}
+
+.compactModeButton {
+  min-height: 44px;
+  padding: 5px 3px;
+}
+
+.compactWagerPanel {
+  gap: 4px;
+}
+
+.compactAmountField,
+.compactAssetButton {
+  min-height: 46px;
+}
+
+.compactPresets {
+  gap: 4px;
+}
+
+.compactPreset {
+  min-height: 32px;
+}
+
+.compactMeta {
+  min-height: 15px;
+  font-size: 8px;
+}
+
+.compactIgnition {
+  min-height: 58px;
+  font-size: 29px;
+}
+
 .accountAction {
   min-height: 36px;
   padding: 0 10px;
@@ -21,23 +131,24 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
+  gap: 6px;
+  min-height: 30px;
 }
 
 .presentationButtons {
   display: flex;
-  gap: 4px;
+  gap: 3px;
 }
 
 .presentationButton {
-  min-height: 32px;
-  padding: 0 8px;
+  min-height: 30px;
+  padding: 0 7px;
   border: 1px solid var(--line);
   background: transparent;
   color: var(--text-secondary);
   font-family: var(--font-mono);
   font-size: 8px;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
   cursor: pointer;
 }
@@ -51,16 +162,16 @@
 .resultSummary {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
-  gap: 10px;
+  gap: 8px;
   align-items: end;
-  padding: 9px 10px;
+  padding: 6px 8px;
   border: 1px solid var(--line);
   background: var(--bg);
 }
 
 .resultAmount {
   font-family: var(--font-mono);
-  font-size: 18px;
+  font-size: 16px;
   font-variant-numeric: tabular-nums;
 }
 
@@ -70,22 +181,22 @@
 
 .resultMeta {
   font-family: var(--font-mono);
-  font-size: 8px;
-  line-height: 1.4;
+  font-size: 7px;
+  line-height: 1.3;
   color: var(--text-secondary);
   text-align: right;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.04em;
 }
 
 .trustLine {
   display: flex;
   justify-content: space-between;
-  gap: 10px;
+  gap: 8px;
   color: var(--text-secondary);
   font-family: var(--font-mono);
-  font-size: 8px;
-  line-height: 1.35;
+  font-size: 7px;
+  line-height: 1.25;
 }
 
 .trustStrong { color: var(--fg); }
@@ -93,6 +204,22 @@
 .prototypeNote {
   margin: 0;
   color: var(--text-secondary);
-  font-size: 10px;
-  line-height: 1.35;
+  font-size: 8px;
+  line-height: 1.25;
+}
+
+@media (min-height: 900px) {
+  .compactGaugeWrap {
+    min-height: 148px;
+    flex-basis: 148px;
+  }
+
+  .compactGauge {
+    width: min(50vw, 182px);
+  }
+
+  .compactGame {
+    gap: 8px;
+    padding: 11px;
+  }
 }
