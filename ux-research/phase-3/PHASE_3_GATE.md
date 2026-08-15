@@ -1,50 +1,61 @@
 # Phase 3 Gate — Specialized Cross-Category Teardowns
 
-**Status:** ACTIVE / NOT PASSED  
-**Predecessor:** Phase 2 — PASS / CLOSED
+**Status:** PASS / CLOSED  
+**Predecessor:** Phase 2 — PASS / CLOSED  
+**Next active phase:** Phase 4 — Reference Matrix
 
-## Objective
+## Gate conclusion
 
-Search broadly for the strongest solution to each canonical GAS journey. Named products are starting references, **not a whitelist**. A product only matters if it contributes evidence to a specific GAS user problem.
+Phase 3 is complete. The open-ended reference program now covers every canonical GAS journey J01–J18 with either a credible external reference class or an explicit GAS-establishes-benchmark determination.
 
-## Preserved pre-work to revalidate
+## Canonical evidence
 
-- `PREWORK_2026-08-15.md`
-- `REFERENCE_COVERAGE.json`
-- `CROSS_CATEGORY_FINDINGS.md`
-- existing research on Stake Originals, Pump, Polymarket, Kalshi, Robinhood Social, OKX Orbit, Base Account/Coinbase, Hyperliquid/Axiom-class execution, AMPL, Circle, Uniswap and other candidate references.
+- `REFERENCE_COVERAGE.json` — revalidated J01–J18 coverage, 2026-08-16.
+- `CROSS_CATEGORY_FINDINGS.md` — specialized lane synthesis.
+- `PHASE_3_REVALIDATION_2026-08-16.md` — current first-party revalidation after Phase 2.
+- completed Phase 2 Fomo corpus.
 
-## Active research lanes
+## Reference classes retained
 
-1. **High-frequency game UX** — replay, risk selection, instant/cinematic modes, fairness, hotkeys/autoplay controls.
-2. **SocialFi / identity** — verified economic activity, profiles, follows, leaderboards, notifications, social-to-action.
-3. **Discovery / conversion** — search, trending, activity, quick action, intent-to-execution compression.
-4. **Prediction / event markets** — probability/price translation, quick order, order book depth, portfolio/settlement semantics.
-5. **Consumer account abstraction** — passkeys, embedded/smart accounts, funding, gas sponsorship, batching, bounded permissions, recovery.
-6. **High-speed trading** — persistent controls, confirmation policy, state feedback, hotkeys, failure recovery.
-7. **Monetary/rebase/reserve UX** — elastic-supply explanation, personal impact, reserve composition, audit/trust surface.
-8. **General consumer-finance patterns** — portfolio truth, funding/withdrawal parity, sensitive-action step-up security.
-9. **Open discovery lane** — any product from any category that materially beats the current reference for a GAS journey.
+- **Fomo** — SocialFi/application shell, actionable economic social objects, cross-device identity/account.
+- **Stake Originals** — high-frequency game loop, Instant Bet, hotkeys, compact risk controls, fairness access.
+- **Robinhood Social / OKX Orbit** — verified economic identity/performance/social action inside financial products.
+- **Pump** — discovery → intent → action compression and the moderation burden of financial UGC.
+- **Base Account / Coinbase account primitives** — subaccounts, spend permissions, batching, gas sponsorship, passkey/app-account abstraction.
+- **Hyperliquid** — confirmation preference + stale-intent expiry under unstable connectivity.
+- **Uniswap** — failed-step recovery, canonical action-status/error communication.
+- **Polymarket** — price-as-probability, early exit, progressive order-book depth.
+- **Kalshi** — quick execution plus truthful cash/current-value/potential-payout semantics.
+- **Ampleforth** — proportional rebase explanation.
+- **Circle** — reserve/circulation/composition/assurance trust surface.
 
-## Evidence rules
+The registry remains permanently open: stronger evidence may replace a current reference-best later without reopening the phase sequence.
 
-- Current/unstable product behavior must be revalidated with current first-party sources where possible.
-- Exact geometry/timing is only `measured` when directly measured.
-- Marketing claims establish product intent, not independent performance proof.
-- External patterns must be translated into GAS-native requirements; no visual/code cloning.
+## Important strengthened findings
 
-## Gate criterion
+### Stale financial intent
+Hyperliquid provides a useful external reference for expiring stale actions rather than allowing delayed connectivity/retries to execute unexpectedly. GAS extends this with canonical intent IDs, nonces/expiry and idempotent reconciliation.
 
-Every canonical GAS journey J01–J18 must have:
-1. at least one credible reference benchmark, **or**
-2. an explicit evidence-backed determination that GAS should establish the benchmark itself.
+### Smallest safe recovery
+Uniswap provides a useful reference for continuing from a failed step rather than blindly restarting an entire multi-step financial journey. GAS extends this by making money state the first recovery fact shown to the user.
 
-For every journey, the Phase 3 output must identify:
-- strongest reference class;
-- evidence level/source;
-- useful law;
-- weakness/tradeoff;
-- what GAS should preserve/improve;
-- unresolved measurement gap, if any.
+### Social action remains deliberate
+Fomo, Robinhood Social and OKX Orbit independently reinforce the value of verified economic context adjacent to action. GAS preserves explicit wager/trade confirmation rather than automatic copying.
 
-**Phase 3: ACTIVE / NOT PASSED**
+## Gate test
+
+Phase 3 criterion:
+
+> Every canonical GAS journey has at least one credible reference benchmark, or an explicit evidence-backed finding that GAS should establish the benchmark itself.
+
+**Result: PASS.** `REFERENCE_COVERAGE.json` covers J01–J18 and records reference classes, useful laws and GAS positions.
+
+## Measurement integrity
+
+Competitor geometry/timing not directly measurable remains unknown. Phase 3 does not manufacture precision simply to fill a table.
+
+## Phase transition
+
+**Phase 3: CLOSED / PASS**
+
+**Phase 4: ACTIVE — Reference Matrix**
