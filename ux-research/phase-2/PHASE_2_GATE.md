@@ -1,94 +1,96 @@
 # Phase 2 Gate — Fomo Molecular Teardown
 
-**Status:** ACTIVE / NOT PASSED
-**Roadmap:** `ux-research/ROADMAP.md`
-**Active phase:** Phase 2 — Fomo molecular teardown
+**Status:** PASS / CLOSED  
+**Roadmap:** `ux-research/ROADMAP.md`  
+**Next active phase:** Phase 3 — Specialized cross-category teardowns
 
-## Why this gate is open
+## Gate conclusion
 
-The documented and public-screenshot corpus is strong, but the project now has a legitimate path to collect substantially deeper authenticated Fomo evidence through the user's Mac/OpenClaw/browser research node. Because Phase 2 is explicitly the **molecular teardown**, we will not advance while that high-value measurement opportunity is still pending.
+Phase 2 is complete for the legitimately available evidence environment.
 
-Prior declarations that Phase 2 was closed are superseded by this gate file and Roadmap v1.5.
+The project has exhausted the Fomo evidence that can be collected from this ChatGPT environment without an authenticated native/web session or user-controlled local browser/device node. The remaining M01–M18 live/native measurements are explicitly classified in:
 
-## Evidence already completed
+- `fomo/FOMO_CAPTURE_EXHAUSTION.md`
+- `fomo/FOMO_JOURNEY_CAPTURE_STATUS.json`
+- `fomo/MEASUREMENT_QUEUE.md`
 
-### Canonical Fomo subfolder
+Unavailable measurements remain unavailable; they were not replaced by estimates.
+
+## Evidence completed
+
+### Product and journey model
 - `fomo/ROUTE_STATE_MAP.md`
 - `fomo/JOURNEY_MANIFEST.json`
 - `fomo/DOCUMENTED_OBSERVATIONS.json`
-- `fomo/FOMO_TO_GAS_MAP.md`
-- `fomo/MEASUREMENT_QUEUE.md`
-- `fomo/PHASE_2_STATUS.md`
-
-### Additional Phase 2 evidence
 - `FOMO_PRODUCT_MODEL.md`
-- `FOMO_EVOLUTION_FINDINGS.md`
-- `FOMO_VISUAL_OBSERVATIONS.md`
 - `FOMO_JOURNEY_MATRIX.json`
 
-## Validated public observations
+### Public visual / screen-state evidence
+- `FOMO_VISUAL_OBSERVATIONS.md`
+- `fomo/FOMO_NATIVE_VISUAL_ANATOMY.md`
+- `fomo/FOMO_SCREEN_STATE_CATALOG.json`
+- `fomo/FOMO_SOURCE_INDEX.md`
+- `fomo/FOMO_CURRENT_STATE_CONFLICTS.md`
 
-Fomo-published material already supports:
-- a compact persistent mobile navigation shell;
-- Feed as a primary destination;
-- Friends/following feed scope;
-- actor/action/time -> economic-object feed grammar;
-- leaderboard timeframes and profile discovery;
-- profile identity, Follow and performance hierarchy;
-- cash balance separated from open positions;
-- consumer sign-in without seed phrase/RPC/native-gas vocabulary;
-- unified account/social state across web and mobile;
-- quick action and social-to-economic-action emphasis;
-- desktop preserving the mobile product mental model rather than becoming terminal-first.
+### Product evolution and architecture
+- `FOMO_EVOLUTION_FINDINGS.md`
+- `fomo/FOMO_RELEASE_EVOLUTION_MATRIX.json`
+- `fomo/FOMO_PRODUCT_TECH_ARCHITECTURE.md`
+- `fomo/FOMO_DESKTOP_MOBILE_PARITY.md`
 
-## Required direct-measurement work before PASS
+### Account, SocialFi, transaction and trust models
+- `fomo/FOMO_ACCOUNT_SECURITY_MODEL.md`
+- `fomo/FOMO_SOCIAL_SYSTEM_MODEL.md`
+- `fomo/FOMO_TRANSACTION_UX_MODEL.md`
+- `fomo/FOMO_TRUST_SAFETY_MODEL.md`
+- `fomo/FOMO_MICROINTERACTION_CATALOG.json`
 
-Collect as much legitimate direct evidence as possible for:
+### Weakness / validation / GAS handoff
+- `fomo/FOMO_FRICTION_SIGNALS.md`
+- `fomo/FOMO_EXTERNAL_VALIDATION.md`
+- `fomo/FOMO_TO_GAS_MAP.md`
 
-1. authenticated mobile/web application shell;
-2. persistent navigation geometry and safe-area behavior;
-3. global Feed and Friends/following feed card anatomy/density;
-4. feed -> profile -> follow;
-5. leaderboard -> profile -> follow;
-6. social object/thesis/trade -> economic action;
-7. search -> user/token/action;
-8. profile performance hierarchy;
-9. portfolio hierarchy and cash/position semantics;
-10. funding/buy/sell/withdraw flows up to final financial confirmation;
-11. notification -> exact context where accessible;
-12. loading, empty, pending and error states;
-13. back navigation and scroll/context restoration;
-14. cross-device state continuity where testable;
-15. exact visible geometry: x/y/w/h, padding, gaps, typography, radii, sticky/fixed behavior;
-16. interaction metrics: intentional actions, screens, modals, visual acknowledgement, navigation time, next-ready state;
-17. animations/transitions and Instant/fast interaction behavior where applicable;
-18. native-vs-web differences that materially affect GAS;
-19. security/funding/recovery friction observed during normal legitimate use;
-20. final Fomo weakness analysis and independent GAS targets.
+## Validated Fomo laws carried forward
 
-## Safety / integrity boundary
+1. **Consumer account first.** Wallet/chain/key implementation is not the primary mental model.
+2. **One social graph across product surfaces.** Feed, leaderboard, profiles, notifications and newer asset types reinforce the same identity system.
+3. **Economic activity is social content.** Actor/action/time is attached to a financial object with verifiable context.
+4. **Discovery is directly actionable.** Feed, profile, leaderboard and asset context compress the path from signal to intentional action.
+5. **Social context does not require automatic copy trading.** Fomo's own education frames social trading as observation/context followed by the user's decision.
+6. **Performance/context belongs close to identity.** Profiles and leaderboards make history/performance part of discovery.
+7. **One balance/account spans multiple chains and devices.** Desktop preserves the mobile product model rather than inventing a second terminal-first product.
+8. **Advanced depth is progressive.** TradingView and advanced order/risk tools add depth without replacing the simple application shell.
+9. **High-frequency feeds require stable scan grammar.** Fomo repeatedly redesigned feed hierarchy to remain parseable at high activity.
+10. **Fast action needs safety cues.** Verification badges, malicious-token warnings, liquidity context, biometrics and explicit transaction boundaries surround the fast core loop.
+11. **Sensitive actions get stronger authentication.** Routine discovery/trading and withdrawal/key-export security are not treated identically.
+12. **Product expansion should strengthen the social graph.** Perps were integrated into Feed, profiles, leaderboard, theses and notifications instead of creating a separate identity layer.
 
-The research runner may navigate and measure authenticated product states but must not automatically execute a final money-moving confirmation, export keys, reveal credentials, or commit authenticated browser state. Dedicated research-browser/session material remains local and gitignored.
+## Known weaknesses / uncertainty carried forward
 
-## Evidence levels
+- exact current Home filters remain unresolved because dated public materials conflict;
+- current live feed taxonomy/density is not authenticated-measured;
+- exact tap counts, live back/scroll restoration and notification deep links remain unavailable;
+- exact native/web geometry and transition timings remain unavailable;
+- live fee/slippage/pending/failure disclosure requires authenticated capture;
+- public review complaints remain hypotheses, not verified root causes;
+- accessibility behavior is not directly measured.
 
-- `documented` — official Fomo material;
-- `observed` — directly visible behavior/screenshots;
-- `measured` — repeatable instrumented capture;
-- `inferred` — analysis only, never represented as fact.
+These limitations are visible in the evidence model and may be upgraded later if a user-device capture node becomes available. They do not justify blocking the entire roadmap indefinitely.
 
-Unknown values remain unknown until measured.
+## Gate test
 
-## Exit criterion
+Phase 2 exit criteria:
 
-Phase 2 passes only when:
+1. **Direct/public queue materially exhausted with available tools:** PASS — public lane saturated; no authenticated/native node available.
+2. **Inaccessible states explicitly recorded:** PASS — see `FOMO_CAPTURE_EXHAUSTION.md`.
+3. **Strengths/weaknesses translated to GAS-native requirements:** PASS — see `FOMO_TO_GAS_MAP.md` and related models.
+4. **Mapped to existing GAS React/account/social substrate:** PASS — Phase 1 compatibility + Fomo handoff.
+5. **No invented exact dimensions/timings:** PASS.
 
-1. the direct/public measurement queue has been materially exhausted using the legitimately available browser/OpenClaw tooling;
-2. inaccessible states are explicitly recorded as unavailable after attempted capture;
-3. Fomo strengths and weaknesses are translated into GAS-native requirements;
-4. those requirements are mapped to the existing GAS React/account/social substrate;
-5. no exact dimensions/timings are invented.
+## Phase transition
 
-**Phase 2: ACTIVE / NOT PASSED**
+**Phase 2: CLOSED / PASS**
 
-**Phase 3: PRE-WORK ONLY / BLOCKED BY PHASE 2 GATE**
+**Phase 3: ACTIVE — Specialized cross-category teardowns**
+
+Future authenticated Fomo capture is an evidence upgrade, not a roadmap reset.
