@@ -1,14 +1,14 @@
 {
-  "name": "GASCOIN",
-  "short_name": "GASCOIN",
-  "description": "Community gas refunds on Ethereum. Post on X, submit a receipt, get ETH back.",
+  "name": "GAS",
+  "short_name": "GAS",
+  "description": "Project GAS: elastic money, high-frequency play, reserve transparency and SocialFi.",
   "start_url": "/",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#000000",
   "theme_color": "#000000",
   "scope": "/",
-  "categories": ["finance", "utilities"],
+  "categories": ["finance", "games", "social"],
   "icons": [
     {
       "src": "/favicon.svg",
