@@ -1,6 +1,7 @@
 import type { CSSProperties } from 'react';
 import type { GasGameMode } from '@/lib/project-gas/game-state';
 import styles from './gas-ui.module.css';
+import local from './GasOriginalPrototype.module.css';
 
 const MODES: readonly { mode: GasGameMode; hint: string; color: string }[] = [
   { mode: 'CRUISE', hint: 'lower variance', color: 'var(--gas-gauge-cruise)' },
@@ -11,19 +12,21 @@ const MODES: readonly { mode: GasGameMode; hint: string; color: string }[] = [
 export function RiskSelector({
   value,
   disabled,
+  compact = false,
   onChange,
 }: {
   value: GasGameMode;
   disabled?: boolean;
+  compact?: boolean;
   onChange: (mode: GasGameMode) => void;
 }) {
   return (
-    <div className={styles.modeGrid} role="group" aria-label="GAS risk mode">
+    <div className={`${styles.modeGrid} ${compact ? local.compactModeGrid : ''}`} role="group" aria-label="GAS risk mode">
       {MODES.map(({ mode, hint, color }) => (
         <button
           key={mode}
           type="button"
-          className={styles.segmentButton}
+          className={`${styles.segmentButton} ${compact ? local.compactModeButton : ''}`}
           style={{ '--mode-color': color } as CSSProperties}
           aria-pressed={value === mode}
           disabled={disabled}
