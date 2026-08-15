@@ -1,0 +1,98 @@
+.accountAction {
+  min-height: 36px;
+  padding: 0 10px;
+  border: 1px solid var(--gas-energy-border);
+  background: transparent;
+  color: var(--gas-energy);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.accountAction:hover,
+.accountAction:focus-visible {
+  background: var(--gas-energy-soft);
+}
+
+.presentationRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.presentationButtons {
+  display: flex;
+  gap: 4px;
+}
+
+.presentationButton {
+  min-height: 32px;
+  padding: 0 8px;
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: 8px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.presentationButton[aria-pressed='true'] {
+  color: var(--fg);
+  border-color: var(--gas-energy-border);
+  background: var(--gas-energy-soft);
+}
+
+.resultSummary {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: end;
+  padding: 9px 10px;
+  border: 1px solid var(--line);
+  background: var(--bg);
+}
+
+.resultAmount {
+  font-family: var(--font-mono);
+  font-size: 18px;
+  font-variant-numeric: tabular-nums;
+}
+
+.resultPositive { color: var(--gas-profit); }
+.resultNegative { color: var(--gas-loss); }
+.resultNeutral { color: var(--fg); }
+
+.resultMeta {
+  font-family: var(--font-mono);
+  font-size: 8px;
+  line-height: 1.4;
+  color: var(--text-secondary);
+  text-align: right;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.trustLine {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: 8px;
+  line-height: 1.35;
+}
+
+.trustStrong { color: var(--fg); }
+
+.prototypeNote {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 10px;
+  line-height: 1.35;
+}
