@@ -140,6 +140,7 @@
 }
 
 .presentationButton {
+  min-width: var(--gas-touch-target-min);
   min-height: var(--gas-touch-target-min);
   padding: 0 6px;
   border: 1px solid var(--line);
