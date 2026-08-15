@@ -1,0 +1,132 @@
+{
+  "phase": 6,
+  "rule": "Each canonical journey has a deterministic route/state path and each state has one primary action.",
+  "journeys": [
+    {
+      "id": "J01",
+      "name": "New User to First Meaningful Action",
+      "path": ["/ [signed_out]", "/ [authenticating]", "/ [account_ready]", "/trade [fund_if_needed]", "/play/gas [ready]"],
+      "primaryActions": ["SIGN IN", "CONTINUE AUTH", "PLAY or FUND", "FUND/BUY", "IGNITION when eligible"],
+      "patterns": ["GP01", "GP02", "GP05", "GP17"]
+    },
+    {
+      "id": "J02",
+      "name": "Returning User to IGNITION",
+      "path": ["/ [account_ready]", "/play/gas [restored_config]", "/play/gas [ready]"],
+      "primaryActions": ["PLAY/RESUME", "AUTHORIZE if required otherwise IGNITION", "IGNITION"],
+      "patterns": ["GP01", "GP03", "GP07", "GP08", "GP10"]
+    },
+    {
+      "id": "J03",
+      "name": "Result to Replay",
+      "path": ["/play/gas [settled_result]", "/play/gas [ready_next_round]"],
+      "primaryActions": ["IGNITION AGAIN", "IGNITION"],
+      "patterns": ["GP09", "GP10", "GP11"]
+    },
+    {
+      "id": "J04",
+      "name": "Configure Risk",
+      "path": ["/play/gas [ready]", "/play/gas [mode_selected]"],
+      "primaryActions": ["SELECT CRUISE/BOOST/REDLINE", "IGNITION"],
+      "patterns": ["GP05", "GP06", "GP07"]
+    },
+    {
+      "id": "J05",
+      "name": "Social Result to Same Game",
+      "path": ["/ [activity_feed] or /activity/[id]", "/play/gas [preconfigured_from_activity]", "/play/gas [ready]"],
+      "primaryActions": ["TRY CONFIG", "IGNITION", "IGNITION"],
+      "patterns": ["GP11", "GP12", "GP16"]
+    },
+    {
+      "id": "J06",
+      "name": "Feed to Profile to Follow",
+      "path": ["/ [activity_feed]", "/profile/[handle]", "/profile/[handle] [followed]"],
+      "primaryActions": ["OPEN PROFILE", "FOLLOW", "CONTEXTUAL NEXT ACTION"],
+      "patterns": ["GP12", "GP13", "GP14", "GP16"]
+    },
+    {
+      "id": "J07",
+      "name": "Join Crew",
+      "path": ["/crews", "/crews/[slug]", "/crews/[slug] [member]"],
+      "primaryActions": ["OPEN CREW", "JOIN CREW", "VIEW/PLAY WITH CREW CONTEXT"],
+      "patterns": ["GP13", "GP14", "GP15"]
+    },
+    {
+      "id": "J08",
+      "name": "Buy GAS",
+      "path": ["/trade [buy]", "/trade [quote_ready]", "/transaction/[id] [pending_or_settled]"],
+      "primaryActions": ["ENTER AMOUNT", "CONFIRM BUY", "VIEW ACCOUNT/PLAY"],
+      "patterns": ["GP17", "GP18", "GP09"]
+    },
+    {
+      "id": "J09",
+      "name": "Sell/Withdraw",
+      "path": ["/account or /trade", "/trade [sell] or /account [withdraw]", "/transaction/[id]"],
+      "primaryActions": ["SELL/WITHDRAW", "CONFIRM", "VIEW STATUS"],
+      "patterns": ["GP02", "GP04", "GP17", "GP18", "GP09"]
+    },
+    {
+      "id": "J10",
+      "name": "Understand Rebase",
+      "path": ["/ [rebase_summary]", "/rebase/[id] or /reserve [rebase_detail]"],
+      "primaryActions": ["VIEW REBASE", "VERIFY/LEARN MORE"],
+      "patterns": ["GP05", "GP19"]
+    },
+    {
+      "id": "J11",
+      "name": "Understand Reserve",
+      "path": ["/ [reserve_summary]", "/reserve [coverage]", "/reserve [composition_or_verification]"],
+      "primaryActions": ["VIEW RESERVE", "INSPECT BACKING", "VERIFY"],
+      "patterns": ["GP20"]
+    },
+    {
+      "id": "J12",
+      "name": "Refresh Mid-Round",
+      "path": ["/play/gas [resolving]", "/play/gas [reload]", "/play/gas [reconciled_pending_or_result]"],
+      "primaryActions": ["NONE while canonical action pending", "RESTORE", "VIEW RESULT or SAFE RECOVERY"],
+      "patterns": ["GP08", "GP09", "GP21"]
+    },
+    {
+      "id": "J13",
+      "name": "Connectivity Failure",
+      "path": ["any financial/game route [degraded]", "same canonical object [reconciling]", "same object [pending/settled/retry_safe]"],
+      "primaryActions": ["WAIT/RECONNECT only if needed", "RECONCILE", "SAFE RETRY or CONTINUE"],
+      "patterns": ["GP09", "GP21"]
+    },
+    {
+      "id": "J14",
+      "name": "Permission Expiry",
+      "path": ["/play/gas [permission_expired]", "/account or inline permission sheet [reauthorize]", "/play/gas [ready]"],
+      "primaryActions": ["REAUTHORIZE", "APPROVE SCOPE", "IGNITION"],
+      "patterns": ["GP03", "GP04", "GP21"]
+    },
+    {
+      "id": "J15",
+      "name": "Portfolio / Unified Balance",
+      "path": ["/ or /account [summary]", "/account [components]", "/transaction/[id] or future position detail"],
+      "primaryActions": ["VIEW ACCOUNT", "OPEN COMPONENT", "CONTEXTUAL SAFE ACTION"],
+      "patterns": ["GP01", "GP02"]
+    },
+    {
+      "id": "J16",
+      "name": "Search / Discovery",
+      "path": ["any shell [search affordance]", "/search [query]", "typed result route"],
+      "primaryActions": ["SEARCH", "OPEN RESULT", "CONTEXTUAL ACTION"],
+      "patterns": ["GP13", "GP14", "GP16", "GP22"]
+    },
+    {
+      "id": "J17",
+      "name": "Notification to Action",
+      "path": ["notification", "/notifications or direct object deep link [reconciling]", "canonical target [current state]"],
+      "primaryActions": ["OPEN", "RECONCILE", "CONTEXTUAL ACTION"],
+      "patterns": ["GP12", "GP13", "GP23"]
+    },
+    {
+      "id": "J18",
+      "name": "Future Bracket Event to Position",
+      "path": ["future /markets", "future /markets/[event]", "future quick trade/advanced depth", "future /positions/[id]"],
+      "primaryActions": ["OPEN EVENT", "SELECT OUTCOME", "CONFIRM POSITION", "MANAGE POSITION"],
+      "patterns": ["GP02", "GP18", "GP24"]
+    }
+  ]
+}
