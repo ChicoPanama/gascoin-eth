@@ -10,20 +10,67 @@ permissions:
   contents: read
 
 jobs:
-  metadata:
+  audit:
+    name: solana-${{ matrix.strategy }}
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        strategy: [child-dollar, exact-child-dollar, parent-dollar]
     steps:
+      - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Show constrained package contracts
+          cache: npm
+
+      - name: Apply shared security graph and Solana strategy
         shell: bash
         run: |
-          echo 'SOLANA_CHANNEL_5_5_1'
-          npm view @solana/rpc-subscriptions-channel-websocket@5.5.1 version dependencies peerDependencies peerDependenciesMeta engines --json
-          echo 'SOLANA_SUBSCRIPTIONS_5_5_1'
-          npm view @solana/rpc-subscriptions@5.5.1 version dependencies peerDependencies engines --json
-          echo 'SOLANA_KIT_5_5_1'
-          npm view @solana/kit@5.5.1 version dependencies peerDependencies engines --json
-          echo 'SUPABASE_REALTIME_2_101_1'
-          npm view @supabase/realtime-js@2.101.1 version dependencies peerDependencies engines --json
+          node <<'NODE'
+          const fs = require('fs');
+          const p = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+          p.dependencies.ws = '8.21.3';
+          p.overrides = {
+            ...(p.overrides || {}),
+            '@coinbase/cdp-sdk': { axios: '1.18.0' },
+            'styled-components': '6.5.3',
+            '@walletconnect/utils': '2.22.4',
+            '@walletconnect/jsonrpc-ws-connection': { ws: '7.5.13' }
+          };
+          const strategy = '${{ matrix.strategy }}';
+          if (strategy === 'child-dollar') {
+            p.overrides['@solana/rpc-subscriptions-channel-websocket'] = { ws: '$ws' };
+          } else if (strategy === 'exact-child-dollar') {
+            p.overrides['@solana/rpc-subscriptions-channel-websocket@5.5.1'] = { ws: '$ws' };
+          } else {
+            p.overrides['@solana/rpc-subscriptions'] = {
+              '@solana/rpc-subscriptions-channel-websocket': { ws: '$ws' }
+            };
+          }
+          fs.writeFileSync('package.json', JSON.stringify(p, null, 2) + '\n');
+          NODE
+          npm install --ignore-scripts
+          npm update ws --ignore-scripts
+          npm dedupe --ignore-scripts
+
+      - name: Audit production graph
+        shell: bash
+        run: |
+          npm audit --omit=dev --json > /tmp/audit.json || true
+          node <<'NODE'
+          const fs = require('fs');
+          const audit = JSON.parse(fs.readFileSync('/tmp/audit.json', 'utf8'));
+          const meta = audit.metadata?.vulnerabilities || {};
+          const blockers = Object.entries(audit.vulnerabilities || {})
+            .filter(([, v]) => v.severity === 'high' || v.severity === 'critical')
+            .map(([name, v]) => ({ name, severity: v.severity, nodes: v.nodes, range: v.range }));
+          console.log('STRATEGY=${{ matrix.strategy }}');
+          console.log('AUDIT_METADATA=' + JSON.stringify(meta));
+          console.log('HIGH_CRITICAL=' + JSON.stringify(blockers));
+          if (blockers.length) process.exit(2);
+          NODE
+
+      - name: Show Solana websocket resolution
+        if: always()
+        run: npm ls @solana/rpc-subscriptions-channel-websocket ws --all || true
