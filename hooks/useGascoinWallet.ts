@@ -2,6 +2,7 @@
 'use client';
 
 import { useBalance, useConnection } from 'wagmi';
+import { formatUnits } from 'viem';
 import { truncateEthAddress } from '@/lib/validate-wallet';
 
 /**
@@ -17,12 +18,15 @@ export function useGascoinWallet() {
   });
 
   const shortAddress = address ? truncateEthAddress(address) : null;
+  const ethBalance = balanceData
+    ? Number.parseFloat(formatUnits(balanceData.value, balanceData.decimals))
+    : 0;
 
   return {
     address: address ?? null,
     shortAddress,
     isConnected,
-    ethBalance: balanceData ? parseFloat(balanceData.formatted) : 0,
+    ethBalance,
     ethBalanceLoading: balanceLoading,
   };
 }
