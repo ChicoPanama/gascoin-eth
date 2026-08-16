@@ -11,12 +11,12 @@ permissions:
 
 jobs:
   audit:
-    name: ${{ matrix.strategy }}
+    name: solana-${{ matrix.solana_version }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        strategy: [exact-solana-parent, update-solana-parent, latest-solana-parent]
+        solana_version: ['6.0.0', '6.1.0', '6.10.0', '7.0.0', '7.1.0']
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -42,39 +42,9 @@ jobs:
             '@walletconnect/jsonrpc-ws-connection': {
               ...((p.overrides || {})['@walletconnect/jsonrpc-ws-connection'] || {}),
               ws: '7.5.13'
-            }
+            },
+            '@solana/rpc-subscriptions-channel-websocket': '${{ matrix.solana_version }}'
           };
-          fs.writeFileSync('package.json', JSON.stringify(p, null, 2) + '\n');
-          NODE
-          npm install --package-lock-only --ignore-scripts
-
-      - name: Patch exact Solana websocket parent
-        if: matrix.strategy == 'exact-solana-parent'
-        shell: bash
-        run: |
-          node <<'NODE'
-          const fs = require('fs');
-          const p = JSON.parse(fs.readFileSync('package.json', 'utf8'));
-          p.overrides['@solana/rpc-subscriptions-channel-websocket@5.5.1'] = { ws: '8.21.3' };
-          fs.writeFileSync('package.json', JSON.stringify(p, null, 2) + '\n');
-          NODE
-          npm install --package-lock-only --ignore-scripts
-
-      - name: Update Solana websocket parent within declared ranges
-        if: matrix.strategy == 'update-solana-parent'
-        run: npm update @solana/rpc-subscriptions-channel-websocket --package-lock-only --ignore-scripts
-
-      - name: Test latest Solana websocket parent override
-        if: matrix.strategy == 'latest-solana-parent'
-        shell: bash
-        run: |
-          LATEST=$(npm view @solana/rpc-subscriptions-channel-websocket version)
-          echo "LATEST_SOLANA_WS_PARENT=$LATEST"
-          node - "$LATEST" <<'NODE'
-          const fs = require('fs');
-          const latest = process.argv[2];
-          const p = JSON.parse(fs.readFileSync('package.json', 'utf8'));
-          p.overrides['@solana/rpc-subscriptions-channel-websocket'] = latest;
           fs.writeFileSync('package.json', JSON.stringify(p, null, 2) + '\n');
           NODE
           npm install --package-lock-only --ignore-scripts
@@ -90,11 +60,14 @@ jobs:
           const blockers = Object.entries(audit.vulnerabilities || {})
             .filter(([, v]) => v.severity === 'high' || v.severity === 'critical')
             .map(([name, v]) => ({ name, severity: v.severity, range: v.range, nodes: v.nodes, effects: v.effects, fixAvailable: v.fixAvailable }));
+          console.log('SOLANA_VERSION=${{ matrix.solana_version }}');
           console.log('AUDIT_METADATA=' + JSON.stringify(meta));
           console.log('HIGH_CRITICAL=' + JSON.stringify(blockers));
           if (blockers.length) process.exit(2);
           NODE
 
-      - name: Show final ownership
+      - name: Show selected package metadata
         if: always()
-        run: npm ls @solana/rpc-subscriptions-channel-websocket @walletconnect/utils ws viem isows --all || true
+        shell: bash
+        run: |
+          npm view @solana/rpc-subscriptions-channel-websocket@${{ matrix.solana_version }} version dependencies peerDependencies engines --json || true
