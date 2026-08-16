@@ -23,7 +23,7 @@ env:
 
 jobs:
   candidate:
-    name: final-zero-high-security-graph
+    name: semver-safe-deduped-security-graph
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -39,7 +39,7 @@ jobs:
         shell: bash
         run: npm ls --all --json > /tmp/baseline-ls.json || true
 
-      - name: Apply final zero-high remediation in runner only
+      - name: Apply manifest-level security remediation
         shell: bash
         run: |
           node <<'NODE'
@@ -57,16 +57,17 @@ jobs:
             '@walletconnect/jsonrpc-ws-connection': {
               ...((p.overrides || {})['@walletconnect/jsonrpc-ws-connection'] || {}),
               ws: '7.5.13'
-            },
-            '@supabase/realtime-js': {
-              ...((p.overrides || {})['@supabase/realtime-js'] || {}),
-              ws: '8.21.3'
-            },
-            '@solana/rpc-subscriptions-channel-websocket': '6.0.0'
+            }
           };
           fs.writeFileSync('package.json', JSON.stringify(p, null, 2) + '\n');
           NODE
-          npm install --package-lock-only --ignore-scripts
+          npm install --ignore-scripts
+
+      - name: Refresh and dedupe websocket resolutions only
+        shell: bash
+        run: |
+          npm update ws --ignore-scripts
+          npm dedupe --ignore-scripts
 
       - name: Verify reproducible clean install
         shell: bash
@@ -130,7 +131,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: security-candidate-final-zero-high
+          name: security-candidate-semver-safe-deduped
           path: |
             package.json
             package-lock.json
