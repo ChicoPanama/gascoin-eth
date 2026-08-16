@@ -1,34 +1,25 @@
 'use client';
 
 import { PrivyProvider } from '@privy-io/react-auth';
-import { WagmiProvider } from 'wagmi';
+import { WagmiProvider } from '@privy-io/wagmi';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { mainnet } from 'viem/chains';
 import { ThemeProvider, useTheme } from '../components/ThemeProvider';
 import { wagmiConfig, queryClient } from '../lib/wagmi-config';
 
 /**
- * Shared account provider for the transition application.
+ * Project GAS hybrid account provider.
  *
- * Project GAS uses a hybrid account model:
- * - email/social entry can create an embedded EVM wallet for users who need one;
- * - users who already control a wallet can log in with it or link additional
- *   external wallets to the same GAS identity.
+ * Privy owns authentication, embedded-wallet provisioning and external-wallet
+ * connection/linking. @privy-io/wagmi mirrors Privy's active wallet into
+ * wagmi/viem so application reads and writes use one synchronized wallet state.
  *
- * Wagmi remains temporarily around this provider because legacy GASCOIN routes
- * still use wagmi hooks. New Project GAS account/wallet UX should prefer Privy
- * so we can retire duplicated connector UI as legacy routes are decommissioned.
- *
- * Mainnet remains the transition repo's configured chain. This is not a final
- * Project GAS chain decision; Phase 0 keeps final chain selection OPEN.
+ * Ethereum mainnet remains a transition-repo chain configuration only. The
+ * final Project GAS deployment chain is still an explicit protocol decision.
  */
 function PrivyInner({ children }: { children: React.ReactNode }) {
   const { resolved } = useTheme();
   const appId = (process.env.NEXT_PUBLIC_PRIVY_APP_ID || 'cmnj8z4po008b0dl74uza4zv7').trim();
-
-  if (!appId || appId.length < 10) {
-    return <>{children}</>;
-  }
 
   return (
     <PrivyProvider
@@ -38,10 +29,6 @@ function PrivyInner({ children }: { children: React.ReactNode }) {
         appearance: {
           theme: resolved,
           walletChainType: 'ethereum-only',
-          // Named mobile-friendly choices first, installed EVM extensions next,
-          // then WalletConnect as the long-tail fallback. `base_account` keeps
-          // the door open for app-specific subaccounts/spend permissions later
-          // without making Base the final chain decision today.
           walletList: [
             'metamask',
             'coinbase_wallet',
@@ -60,19 +47,17 @@ function PrivyInner({ children }: { children: React.ReactNode }) {
         },
       }}
     >
-      {children}
+      <QueryClientProvider client={queryClient}>
+        <WagmiProvider config={wagmiConfig}>{children}</WagmiProvider>
+      </QueryClientProvider>
     </PrivyProvider>
   );
 }
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
-    <WagmiProvider config={wagmiConfig}>
-      <QueryClientProvider client={queryClient}>
-        <ThemeProvider>
-          <PrivyInner>{children}</PrivyInner>
-        </ThemeProvider>
-      </QueryClientProvider>
-    </WagmiProvider>
+    <ThemeProvider>
+      <PrivyInner>{children}</PrivyInner>
+    </ThemeProvider>
   );
 }
