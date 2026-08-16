@@ -28,8 +28,9 @@ Current state:
 - Phase 4 — Reference Matrix: PASS
 - Phase 5 — GAS Pattern Library: PASS
 - Phase 6 — GAS information architecture: PASS
-- **Phase 7 — Mobile GAS prototype: ACTIVE**
-- Phases 8–11 are not active until their gates open.
+- Phase 7 — Mobile GAS prototype: PASS
+- **Phase 8 — Desktop adaptation: ACTIVE**
+- Phases 9–11 are not active until their gates open.
 
 Pre-work is allowed; gate-skipping is not.
 
@@ -43,6 +44,7 @@ Read these before making product-level decisions:
 - `ux-research/phase-5/GAS_PATTERN_LIBRARY.md`
 - `ux-research/phase-6/GAS_INFORMATION_ARCHITECTURE.md`
 - `ux-research/phase-7/PHASE_7_GATE.md`
+- `ux-research/phase-8/PHASE_8_GATE.md`
 - GitHub issue #67 for high-level status
 - PR #74 for the current integration workbench
 
@@ -75,7 +77,7 @@ Additional invariants:
 
 ## Current prototype truth boundary
 
-The Phase 7 GAS Original implementation is an interaction prototype:
+The verified Phase 7 GAS Original implementation remains an interaction prototype while Phase 8 adapts the same product model to desktop:
 
 - no funds move;
 - no live RNG/VRF;
@@ -114,6 +116,7 @@ Never fabricate measurements that were not directly observed. Mark inaccessible/
 - No hidden wallet/RPC/network jargon in normal consumer flows.
 - Minimum primary mobile touch target: 44px.
 - Core Play action/replay must remain reachable above the fixed nav at 390×844.
+- Phase 8 must preserve the same routes, state semantics and primary action model on desktop rather than inventing a terminal-only second product.
 
 ## Test commands
 

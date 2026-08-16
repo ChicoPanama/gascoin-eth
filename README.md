@@ -21,8 +21,8 @@ This repository is the current Project GAS implementation workspace. The histori
 4. Reference Matrix — **PASS**
 5. GAS Pattern Library — **PASS**
 6. GAS information architecture — **PASS**
-7. Mobile GAS prototype — **ACTIVE**
-8. Desktop adaptation
+7. Mobile GAS prototype — **PASS**
+8. Desktop adaptation — **ACTIVE**
 9. Vertical-loop implementation
 10. Automated comparison / benchmarking
 11. Destroy friction
@@ -98,6 +98,7 @@ High-value source-of-truth files:
 - `ux-research/phase-5/GAS_PATTERN_LIBRARY.md`
 - `ux-research/phase-6/GAS_INFORMATION_ARCHITECTURE.md`
 - `ux-research/phase-7/PHASE_7_GATE.md`
+- `ux-research/phase-8/PHASE_8_GATE.md`
 
 ## Development
 
@@ -164,4 +165,4 @@ Reference evidence is normalized into GAS-owned patterns before implementation; 
 
 ## Current status
 
-See GitHub issue **#67** and draft PR **#74** for the current phase/gate status.
+Phases 0–7 are closed. Phase 8 — Desktop adaptation — is active. See GitHub issue **#67** and draft PR **#74** for the current phase/gate status.

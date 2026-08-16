@@ -1,7 +1,8 @@
 # Phase 7 Gate — Mobile GAS Prototype
 
-**Status:** ACTIVE / NOT PASSED  
-**Predecessor:** Phase 6 — PASS / CLOSED
+**Status:** PASS / CLOSED  
+**Predecessor:** Phase 6 — PASS / CLOSED  
+**Successor:** Phase 8 — ACTIVE
 
 ## Objective
 
@@ -11,7 +12,7 @@ Required loop:
 
 `SIGN IN -> TRUTHFUL ACCOUNT -> PLAY -> CRUISE/BOOST/REDLINE -> WAGER -> IGNITION -> CANONICAL ACTION STATE -> RESULT -> REPLAY`
 
-## Current implemented surface
+## Implemented surface
 
 ### Shell / identity
 - Project GAS root Home
@@ -53,39 +54,60 @@ Required loop:
 - `/search`
 - `/notifications`
 
-### Tests
-- Project GAS canonical game-state unit tests
-- verified live-event unit tests
-- rewritten Project GAS Home Playwright tests
-- new Project GAS mobile journey Playwright tests
+### Code/verification cleanup completed before closure
+- GAS Original prototype controller extracted from the React view so live adapters can replace simulated state later without rebuilding the UI;
+- Project GAS E2E and legacy compatibility E2E separated into explicit CI lanes;
+- deterministic UI readiness replaced inappropriate `networkidle` waits;
+- mutable legacy counts/selectors were converted to semantic assertions;
+- one production build artifact is reused by both browser lanes;
+- superseded PR runs cancel automatically;
+- stale repository/agent documentation was replaced or quarantined.
 
-## Gate requirements
+## Gate verification
 
-Phase 7 passes only when all are true:
+Phase 7 gate requirements are satisfied:
 
-1. **Build/unit/E2E:** current `ux-lab` head passes repository CI.
-2. **Primary viewport:** core Play loop is usable at 390×844.
-3. **Reachability:** risk, amount, IGNITION and settled replay action are reachable without unnecessary scroll; no horizontal overflow.
-4. **Replay:** settled result -> next round is one intentional action.
-5. **Risk control:** CRUISE/BOOST/REDLINE switch in one action and retain safe wager amount.
-6. **State truth:** UI visibly distinguishes ready/locking/locked/resolving/settled/recovery state.
-7. **Presentation independence:** Cinematic/Instant/Reduced modes use identical canonical round/result state.
-8. **Prototype boundary:** no real-money/RNG/reserve/social claim can be mistaken for live protocol state.
-9. **Consumer entry:** ordinary sign-in path does not require RPC/chain configuration knowledge.
-10. **Accessibility:** selected state is programmatic, critical state not color-only, reduced-motion mode works, primary targets meet prototype touch-size requirements.
-11. **Legacy interference:** old footer/chat/navigation do not overlap the Project GAS mobile shell.
-12. **Known limitations:** anything not yet wired to protocol truth is explicitly unavailable/prototype-labeled.
+1. **Build/unit/E2E:** PASS on code-bearing head `ec86665cec3fdd2cbb3b498e9a28709f263ede70`, GitHub Actions run #306.
+2. **Primary viewport:** core Play loop verified at 390×844.
+3. **Reachability:** risk, amount, IGNITION and settled replay remain above the fixed nav without required scroll; no horizontal overflow.
+4. **Replay:** settled result -> next round is one intentional `IGNITION AGAIN` action.
+5. **Risk control:** CRUISE/BOOST/REDLINE switch in one action and retain wager amount.
+6. **State truth:** ready/locking/locked/resolving/settled/recovery semantics are explicit.
+7. **Presentation independence:** Cinematic/Instant/Reduced use the same canonical state.
+8. **Prototype boundary:** no real-money/RNG/reserve/social claim is presented as live protocol state.
+9. **Consumer entry:** ordinary entry does not require RPC/chain configuration knowledge.
+10. **Accessibility:** primary controls preserve the 44px prototype touch-target floor; selected state is programmatic; critical state is not color-only; reduced-motion mode exists.
+11. **Legacy interference:** old footer/chat do not overlap the Project GAS shell.
+12. **Known limitations:** unwired protocol truth remains explicitly prototype/unavailable.
 
-## Verification evidence required before PASS
+## Authoritative CI evidence
 
-- successful current-head GitHub Actions run;
-- Playwright Project GAS tests green;
-- mobile viewport geometry/reachability assertion for IGNITION and result/replay controls;
-- no critical console/page errors on core routes;
-- final Phase 7 limitations list.
+Final Phase 7 code-bearing head `ec86665…` completed the refactored **Project GAS CI** with all four jobs green:
 
-## Current blocker
+- Unit Tests — PASS
+- Production Build — PASS
+- Project GAS E2E — PASS
+- Legacy Compatibility E2E — PASS
 
-GitHub Actions runs are currently queued behind prior `ux-lab` PR runs. No failing current-head verification boundary has been observed yet. The phase remains ACTIVE until an authoritative green run exists.
+Earlier dedicated Project GAS browser verification also established:
 
-**Do not activate Phase 8 before this file is updated to PASS.**
+- `GAS16` — IGNITION and settled replay remain above fixed nav at 390×844;
+- `GAS17` — primary mobile controls maintain a 44px minimum touch target;
+- Home, five-destination shell, one-action replay, Instant mode, state truth, and canonical verification route all pass.
+
+## Known limitations carried into later phases
+
+Phase 7 proves the interaction/product model, not protocol readiness. It does **not** prove:
+
+- live RNG/VRF;
+- bankroll settlement;
+- live monetary/rebase/reserve adapters;
+- funded account/passkey/session authorization behavior;
+- live SocialFi data;
+- roulette;
+- final chain selection;
+- production regulatory/operational readiness.
+
+Those remain later-phase work and must not be implied by this PASS.
+
+**Phase 7 is closed. Phase 8 — Desktop adaptation — may proceed.**

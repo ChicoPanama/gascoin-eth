@@ -1,7 +1,7 @@
 # GAS UX — Canonical Execution Roadmap
 
 **Status:** Source of truth for UX execution  
-**Version:** 1.7  
+**Version:** 1.8  
 **Rule:** There is exactly one numbered UX roadmap. Pre-work may happen early; a phase advances only after its explicit gate passes.
 
 ## Current program state
@@ -13,8 +13,9 @@
 - **Phase 4 — Reference Matrix: PASS / CLOSED**
 - **Phase 5 — GAS Pattern Library: PASS / CLOSED**
 - **Phase 6 — GAS information architecture: PASS / CLOSED**
-- **Official current phase: Phase 7 — Mobile GAS prototype: ACTIVE / NOT PASSED**
-- **Phases 8–11: NOT ACTIVE**
+- **Phase 7 — Mobile GAS prototype: PASS / CLOSED**
+- **Official current phase: Phase 8 — Desktop adaptation: ACTIVE**
+- **Phases 9–11: NOT ACTIVE**
 
 The corresponding gate files are authoritative evidence for each closed phase. A later-phase artifact by itself never advances the roadmap.
 
@@ -118,15 +119,13 @@ Financial semantics remain explicit:
 
 ## Phase 7 — Mobile GAS prototype
 
-**ACTIVE PHASE.**
-
-Build the first coherent mobile-first GAS experience using existing GAS visual/React bones and the Phase 5/6 contracts.
+Build and verify the first coherent mobile-first GAS experience using existing GAS visual/React bones and the Phase 5/6 contracts.
 
 Required core loop:
 
 `SIGN IN -> TRUTHFUL ACCOUNT -> PLAY -> CRUISE/BOOST/REDLINE -> WAGER -> IGNITION -> CANONICAL ACTION STATE -> RESULT -> REPLAY`
 
-### Current implementation scope on `ux-lab`
+### Verified implementation scope
 
 - semantic Project GAS token layer;
 - consumer-first Privy entry path while preserving transition compatibility;
@@ -141,33 +140,44 @@ Required core loop:
 - Trade/Crews/Account/Reserve/Search/Notifications prototype shells;
 - canonical round detail;
 - unit and Playwright prototype tests;
-- explicit prototype/no-funds/no-live-RNG labels; no fabricated reserve/social activity.
+- explicit prototype/no-funds/no-live-RNG labels; no fabricated reserve/social activity;
+- deterministic, separated Project GAS and legacy CI lanes;
+- controller/view separation for GAS Original so real adapters can replace prototype state later.
 
-### Phase 7 gate
+### Phase 7 gate evidence
 
-Pass only when:
-1. build/unit/E2E checks pass;
-2. the primary 390x844 mobile core loop works end-to-end;
-3. wager/IGNITION/result/replay does not require horizontal overflow and the primary action remains reachable without unnecessary scrolling;
-4. result -> replay is one intentional action;
-5. CRUISE/BOOST/REDLINE is one-action configuration and retains safe wager state;
-6. Instant/Cinematic/Reduced modes share canonical state;
-7. prototype vs real-money state is unambiguous;
-8. auth/account entry does not require normal users to understand RPC/chain setup;
-9. accessibility/reduced-motion/financial-truth constraints survive the prototype;
-10. known limitations are documented rather than hidden.
+Final code-bearing head `ec86665cec3fdd2cbb3b498e9a28709f263ede70`, GitHub Actions run #306:
 
-**Status:** ACTIVE / NOT PASSED — verification in progress.
+- Unit Tests — PASS
+- Production Build — PASS
+- Project GAS E2E — PASS
+- Legacy Compatibility E2E — PASS
+
+Dedicated mobile assertions include 390×844 no-scroll action/replay reachability and 44px minimum primary touch targets.
+
+**Status:** PASS / CLOSED — `ux-research/phase-7/PHASE_7_GATE.md`.
 
 ---
 
 ## Phase 8 — Desktop adaptation
 
-Adapt the verified mobile product to desktop without creating a terminal-first second product model. Increase simultaneous context while retaining routes, identity, account semantics and canonical interaction states.
+**ACTIVE PHASE.**
 
-**Exit gate:** mobile and desktop share one product model and critical journeys work at the approved desktop viewport.
+Adapt the verified mobile product to desktop without creating a terminal-first second product model. Increase simultaneous context while retaining routes, identity, account semantics, canonical interaction states and the same primary actions.
 
-**Status:** NOT ACTIVE.
+### Phase 8 working rules
+
+- mobile remains the behavioral source of truth;
+- desktop adds context, not a different product ontology;
+- the desktop shell exposes Home / Play / Trade / Crews / Reserve persistently, with Search / Notifications / Account as utilities;
+- GAS Original retains the same CRUISE / BOOST / REDLINE → wager → IGNITION → result → replay state machine;
+- additional width may expose live/history/trust/social context simultaneously, but cannot hide or duplicate the primary action;
+- responsive behavior must be deterministic between mobile, tablet and desktop breakpoints;
+- legacy GASCOIN desktop navigation must not re-enter Project GAS routes.
+
+**Exit gate:** mobile and desktop share one product model and critical journeys work at approved desktop viewports with no state/financial-truth divergence.
+
+**Status:** ACTIVE — `ux-research/phase-8/PHASE_8_GATE.md`.
 
 ---
 
@@ -219,4 +229,4 @@ Repeat Phases 9–11 until GAS meets or exceeds the strongest credible benchmark
 11. Protocol truth overrides convenience.
 12. No fake activity, reserve state, payouts or settlement.
 13. Unknown measurements remain unknown until measured.
-14. **Current work stays inside Phase 7 until the Phase 7 gate explicitly passes.**
+14. **Current work stays inside Phase 8 until the Phase 8 gate explicitly passes.**
