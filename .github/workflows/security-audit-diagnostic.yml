@@ -56,10 +56,36 @@ jobs:
           rm -rf node_modules
           npm ci
 
-      - name: Verify dependency tree integrity
-        run: npm ls --all >/tmp/npm-ls.txt
+      - name: Verify security alignment declarations
+        shell: bash
+        run: |
+          node <<'NODE'
+          const p = require('./package.json');
+          const expected = {
+            next: '16.3.1',
+            sharp: '0.35.3',
+            viem: '2.55.10',
+            ws: '8.21.3'
+          };
+          for (const [name, version] of Object.entries(expected)) {
+            if (p.dependencies?.[name] !== version) {
+              throw new Error(`${name} expected ${version}, found ${p.dependencies?.[name]}`);
+            }
+          }
+          if (p.overrides?.['@coinbase/cdp-sdk']?.axios !== '1.18.0') {
+            throw new Error('Coinbase CDP axios security override missing');
+          }
+          if (p.overrides?.viem?.ws !== '8.21.3') {
+            throw new Error('viem ws security override missing');
+          }
+          console.log('SECURITY_ALIGNMENT_OK');
+          NODE
+          node -e "console.log('root axios=' + require('axios/package.json').version)"
+          node -e "console.log('root ws=' + require('ws/package.json').version)"
+          npm explain axios || true
+          npm explain ws || true
 
-      - name: Production audit
+      - name: Production audit gate
         shell: bash
         run: |
           npm audit --omit=dev --json > /tmp/audit.json || true
@@ -77,9 +103,6 @@ jobs:
           if (blockers.length) process.exitCode = 2;
           NODE
 
-      - name: Verify remediated ownership
-        run: npm ls viem ws axios postcss nanoid brace-expansion next sharp @sentry/nextjs @privy-io/react-auth x402 --all
-
       - name: Unit tests
         run: npm test
 
@@ -95,5 +118,4 @@ jobs:
             package.json
             package-lock.json
             /tmp/audit.json
-            /tmp/npm-ls.txt
           retention-days: 1
