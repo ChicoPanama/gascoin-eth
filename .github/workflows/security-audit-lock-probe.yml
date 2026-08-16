@@ -1,4 +1,4 @@
-name: Solana 5.x security compatibility probe
+name: Normalized lock security probe
 
 on:
   push:
@@ -10,27 +10,56 @@ permissions:
   contents: read
 
 jobs:
-  metadata:
+  audit:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Inspect Privy dependency and compatible Solana 5.x releases
+          cache: npm
+      - name: Build normalized candidate lock
         shell: bash
         run: |
-          echo 'PRIVY_0_12_DEPENDENCIES'
-          npm view @privy-io/node@0.12.0 dependencies --json
           node <<'NODE'
-          const { execFileSync } = require('child_process');
-          const versions = JSON.parse(execFileSync('npm',['view','@solana/kit','versions','--json'],{encoding:'utf8'}));
-          const stable5 = versions.filter(v => /^5\.\d+\.\d+$/.test(v));
-          console.log('SOLANA_5X=' + JSON.stringify(stable5));
-          for (const v of stable5) {
-            let ws = null;
-            let subs = null;
-            try { ws = execFileSync('npm',['view',`@solana/rpc-subscriptions-channel-websocket@${v}`,'dependencies.ws'],{encoding:'utf8'}).trim(); } catch {}
-            try { subs = execFileSync('npm',['view',`@solana/kit@${v}`,'dependencies.@solana/rpc-subscriptions'],{encoding:'utf8'}).trim(); } catch {}
-            console.log(JSON.stringify({version:v, channelWs:ws, kitSubscriptions:subs}));
+          const fs = require('fs');
+          const p = JSON.parse(fs.readFileSync('package.json','utf8'));
+          p.dependencies.ws = '8.21.3';
+          p.overrides = {
+            '@coinbase/cdp-sdk': { axios: '1.18.0' },
+            'styled-components': '6.5.3',
+            '@walletconnect/utils': '2.22.4',
+            '@walletconnect/jsonrpc-ws-connection': { ws: '7.5.13' }
+          };
+          fs.writeFileSync('package.json', JSON.stringify(p,null,2)+'\n');
+          NODE
+          npm install --package-lock-only --ignore-scripts
+          npm update ws --package-lock-only --ignore-scripts
+          npm dedupe --package-lock-only --ignore-scripts
+          node <<'NODE'
+          const fs = require('fs');
+          const lock = JSON.parse(fs.readFileSync('package-lock.json','utf8'));
+          const parentKey = 'node_modules/@solana/rpc-subscriptions-channel-websocket';
+          const staleKey = parentKey + '/node_modules/ws';
+          const parent = lock.packages[parentKey];
+          const rootWs = lock.packages['node_modules/ws'];
+          if (parent?.version !== '5.5.1' || parent?.dependencies?.ws !== '^8.19.0' || rootWs?.version !== '8.21.3') {
+            throw new Error('Lock assumptions changed');
           }
+          console.log('STALE_SOLANA_WS=' + JSON.stringify(lock.packages[staleKey]?.version || null));
+          delete lock.packages[staleKey];
+          fs.writeFileSync('package-lock.json', JSON.stringify(lock,null,2)+'\n');
+          NODE
+      - name: Audit normalized production lock
+        shell: bash
+        run: |
+          npm audit --omit=dev --package-lock-only --json > /tmp/audit.json || true
+          node <<'NODE'
+          const fs = require('fs');
+          const a = JSON.parse(fs.readFileSync('/tmp/audit.json','utf8'));
+          const meta = a.metadata?.vulnerabilities || {};
+          const blockers = Object.entries(a.vulnerabilities || {}).filter(([,v]) => ['high','critical'].includes(v.severity)).map(([name,v]) => ({name,severity:v.severity,nodes:v.nodes,range:v.range}));
+          console.log('AUDIT_METADATA=' + JSON.stringify(meta));
+          console.log('HIGH_CRITICAL=' + JSON.stringify(blockers));
+          if (blockers.length) process.exit(2);
           NODE
