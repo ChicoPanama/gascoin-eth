@@ -23,7 +23,7 @@ env:
 
 jobs:
   candidate:
-    name: walletconnect-owned-viem-safe
+    name: final-scoped-security-graph
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -39,7 +39,7 @@ jobs:
         shell: bash
         run: npm ls --all --json > /tmp/baseline-ls.json || true
 
-      - name: Apply owner-scoped security remediation in runner only
+      - name: Apply final scoped security remediation in runner only
         shell: bash
         run: |
           node <<'NODE'
@@ -53,24 +53,14 @@ jobs:
               axios: '1.18.0'
             },
             'styled-components': '6.5.3',
-            '@solana/rpc-subscriptions-channel-websocket': {
-              ...((p.overrides || {})['@solana/rpc-subscriptions-channel-websocket'] || {}),
-              ws: '8.21.3'
-            },
-            '@supabase/realtime-js': {
-              ...((p.overrides || {})['@supabase/realtime-js'] || {}),
-              ws: '8.21.3'
-            },
+            '@walletconnect/utils': '2.22.4',
             '@walletconnect/jsonrpc-ws-connection': {
               ...((p.overrides || {})['@walletconnect/jsonrpc-ws-connection'] || {}),
               ws: '7.5.13'
             },
-            '@walletconnect/utils': {
-              ...((p.overrides || {})['@walletconnect/utils'] || {}),
-              viem: {
-                ...((((p.overrides || {})['@walletconnect/utils'] || {}).viem) || {}),
-                ws: '8.21.3'
-              }
+            '@solana/rpc-subscriptions-channel-websocket': {
+              ...((p.overrides || {})['@solana/rpc-subscriptions-channel-websocket'] || {}),
+              ws: '8.21.3'
             }
           };
           fs.writeFileSync('package.json', JSON.stringify(p, null, 2) + '\n');
@@ -113,7 +103,7 @@ jobs:
           const meta = audit.metadata?.vulnerabilities || {};
           const blockers = Object.entries(audit.vulnerabilities || {})
             .filter(([, v]) => v.severity === 'high' || v.severity === 'critical')
-            .map(([name, v]) => ({ name, severity: v.severity, range: v.range, effects: v.effects, fixAvailable: v.fixAvailable }));
+            .map(([name, v]) => ({ name, severity: v.severity, range: v.range, nodes: v.nodes, effects: v.effects, fixAvailable: v.fixAvailable }));
           console.log('AUDIT_METADATA=' + JSON.stringify(meta));
           console.log('HIGH_CRITICAL=' + JSON.stringify(blockers));
           if (blockers.length) process.exit(2);
@@ -121,7 +111,7 @@ jobs:
 
       - name: Security ownership snapshot
         if: always()
-        run: npm ls @privy-io/node @privy-io/react-auth @vercel/functions @supabase/supabase-js @supabase/realtime-js styled-components postcss ws axios viem @solana/rpc-subscriptions-channel-websocket @walletconnect/jsonrpc-ws-connection @walletconnect/utils --all || true
+        run: npm ls @privy-io/node @privy-io/react-auth @vercel/functions @supabase/supabase-js styled-components postcss ws axios viem @solana/rpc-subscriptions-channel-websocket @walletconnect/jsonrpc-ws-connection @walletconnect/utils --all || true
 
       - name: Unit tests
         if: always()
@@ -139,7 +129,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: security-candidate-walletconnect-owned-viem-safe
+          name: security-candidate-final-scoped
           path: |
             package.json
             package-lock.json
