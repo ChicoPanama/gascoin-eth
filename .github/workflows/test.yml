@@ -1,4 +1,4 @@
-name: GASCOIN Test Suite
+name: Project GAS CI
 
 on:
   push:
@@ -6,80 +6,100 @@ on:
   pull_request:
     branches: [main]
 
+concurrency:
+  group: project-gas-ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+env:
+  NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.TEST_SUPABASE_URL }}
+  NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.TEST_SUPABASE_ANON_KEY }}
+  SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.TEST_SERVICE_ROLE_KEY }}
+  NEXT_PUBLIC_SOLANA_RPC_URL: https://api.mainnet-beta.solana.com
+  NEXT_PUBLIC_GASCOIN_MINT_ADDRESS: placeholder
+  GASCOIN_TREASURY_WALLET: placeholder
+  ADMIN_WALLET_ADDRESSES: placeholder
+  ADMIN_SESSION_SECRET: placeholder_32_chars_minimum_length
+  X_BEARER_TOKEN: placeholder
+  X_API_BEARER_TOKEN: placeholder
+
 jobs:
   unit-tests:
-    name: Unit Tests (Vitest)
+    name: Unit Tests
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'npm'
+          node-version: '22'
+          cache: npm
       - run: npm ci
       - run: npm run test
-        env:
-          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.TEST_SUPABASE_URL }}
-          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.TEST_SUPABASE_ANON_KEY }}
-          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.TEST_SERVICE_ROLE_KEY }}
 
   build-check:
-    name: Build Check
+    name: Production Build
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'npm'
+          node-version: '22'
+          cache: npm
       - run: npm ci
       - run: npm run build
-        env:
-          # URL-shaped placeholders: any code that eagerly validates URL
-          # format (e.g. Supabase createClient) must not crash the build.
-          # Real creds come from Vercel env at deploy time.
-          NEXT_PUBLIC_SUPABASE_URL: https://placeholder.supabase.co
-          NEXT_PUBLIC_SUPABASE_ANON_KEY: placeholder-anon-key
-          SUPABASE_SERVICE_ROLE_KEY: placeholder-service-role-key
-          NEXT_PUBLIC_SOLANA_RPC_URL: https://api.mainnet-beta.solana.com
-          NEXT_PUBLIC_GASCOIN_MINT_ADDRESS: placeholder
-          GASCOIN_TREASURY_WALLET: placeholder
-          ADMIN_WALLET_ADDRESSES: placeholder
-          ADMIN_SESSION_SECRET: placeholder_32_chars_minimum_length
-          X_BEARER_TOKEN: placeholder
-          X_API_BEARER_TOKEN: placeholder
+      - name: Upload production build
+        uses: actions/upload-artifact@v4
+        with:
+          name: next-production-build
+          path: |
+            .next
+            !.next/cache
+          include-hidden-files: true
+          retention-days: 1
 
-  e2e-tests:
-    name: E2E Tests (Playwright)
+  project-gas-e2e:
+    name: Project GAS E2E
     runs-on: ubuntu-latest
     needs: [unit-tests, build-check]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'npm'
+          node-version: '22'
+          cache: npm
       - run: npm ci
+      - uses: actions/download-artifact@v4
+        with:
+          name: next-production-build
+          path: .next
       - run: npx playwright install --with-deps chromium
-      - run: npm run build
-        env:
-          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.TEST_SUPABASE_URL }}
-          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.TEST_SUPABASE_ANON_KEY }}
-          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.TEST_SERVICE_ROLE_KEY }}
-          NEXT_PUBLIC_SOLANA_RPC_URL: https://api.mainnet-beta.solana.com
-          NEXT_PUBLIC_GASCOIN_MINT_ADDRESS: placeholder
-          GASCOIN_TREASURY_WALLET: placeholder
-          ADMIN_WALLET_ADDRESSES: placeholder
-          ADMIN_SESSION_SECRET: placeholder_32_chars_minimum_length
-          X_BEARER_TOKEN: placeholder
-          X_API_BEARER_TOKEN: placeholder
-      - run: npx playwright test --project=chromium
-        env:
-          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.TEST_SUPABASE_URL }}
-          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.TEST_SUPABASE_ANON_KEY }}
+      - run: npm run test:e2e:gas
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: playwright-report
+          name: playwright-project-gas
+          path: playwright-report/
+          retention-days: 14
+
+  legacy-regression:
+    name: Legacy Compatibility E2E
+    runs-on: ubuntu-latest
+    needs: [unit-tests, build-check]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - uses: actions/download-artifact@v4
+        with:
+          name: next-production-build
+          path: .next
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e:legacy
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-legacy-compatibility
           path: playwright-report/
           retention-days: 14
