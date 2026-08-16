@@ -105,7 +105,7 @@ jobs:
       - name: Production build
         run: npm run build
 
-      - name: Commit hardened dependency graph
+      - name: Commit hardened dependency graph safely
         shell: bash
         run: |
           git config user.name 'github-actions[bot]'
@@ -116,4 +116,15 @@ jobs:
             exit 0
           fi
           git commit -m 'chore: harden production dependency graph'
-          git push origin HEAD:ux-lab
+
+          for attempt in 1 2 3; do
+            git fetch origin ux-lab
+            git rebase origin/ux-lab
+            if git push origin HEAD:ux-lab; then
+              echo "Promoted on attempt ${attempt}."
+              exit 0
+            fi
+            echo "Push raced with another ux-lab update; retrying (${attempt}/3)."
+          done
+          echo 'Unable to promote without overwriting newer ux-lab work.' >&2
+          exit 1
