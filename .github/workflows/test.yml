@@ -23,6 +23,32 @@ env:
   X_API_BEARER_TOKEN: placeholder
 
 jobs:
+  production-security:
+    name: Production Dependency Security
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - name: Block high and critical production advisories
+        shell: bash
+        run: |
+          npm audit --omit=dev --json > /tmp/audit.json || true
+          node <<'NODE'
+          const fs = require('fs');
+          const audit = JSON.parse(fs.readFileSync('/tmp/audit.json', 'utf8'));
+          const meta = audit.metadata?.vulnerabilities || {};
+          const blockers = Object.entries(audit.vulnerabilities || {})
+            .filter(([, v]) => v.severity === 'high' || v.severity === 'critical')
+            .map(([name, v]) => ({ name, severity: v.severity, range: v.range, nodes: v.nodes }));
+          console.log('AUDIT_METADATA=' + JSON.stringify(meta));
+          console.log('HIGH_CRITICAL=' + JSON.stringify(blockers));
+          if (blockers.length) process.exit(2);
+          NODE
+
   unit-tests:
     name: Unit Tests
     runs-on: ubuntu-latest
@@ -59,7 +85,7 @@ jobs:
   project-gas-e2e:
     name: Project GAS E2E
     runs-on: ubuntu-latest
-    needs: [unit-tests, build-check]
+    needs: [production-security, unit-tests, build-check]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -83,7 +109,7 @@ jobs:
   legacy-regression:
     name: Legacy Compatibility E2E
     runs-on: ubuntu-latest
-    needs: [unit-tests, build-check]
+    needs: [production-security, unit-tests, build-check]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
