@@ -1,55 +1,61 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { useAccount, useConnect, useDisconnect } from "wagmi";
-import { WalletConnectModal } from "../WalletConnectModal";
+import { useState } from "react";
+import { useConnectWallet } from "@privy-io/react-auth";
+import { useAccount } from "wagmi";
 
-const CONNECT_TIMEOUT_MS = 15000;
+const EXTERNAL_WALLETS = [
+  "metamask",
+  "coinbase_wallet",
+  "base_account",
+  "rainbow",
+  "uniswap",
+  "safe",
+  "detected_ethereum_wallets",
+  "wallet_connect",
+] as const;
 
+function truncate(address: string) {
+  return `${address.slice(0, 6)}...${address.slice(-4)}`;
+}
+
+/**
+ * Compatibility button used by legacy routes.
+ *
+ * Privy owns the actual wallet picker and connection state. wagmi only reads
+ * the active wallet that @privy-io/wagmi synchronizes. We deliberately do not
+ * call wagmi useDisconnect: injected wallets cannot be truly disconnected by
+ * the page and a shimmed wagmi-only disconnect can desynchronize Privy/wagmi.
+ */
 export function WalletButton() {
-  const { address, isConnected, isConnecting } = useAccount();
-  const { disconnect } = useDisconnect();
-  const [modalOpen, setModalOpen] = useState(false);
-  const [timedOut, setTimedOut] = useState(false);
-  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const { address, isConnected } = useAccount();
+  const [connecting, setConnecting] = useState(false);
+  const [message, setMessage] = useState<string | null>(null);
 
-  // Connection timeout — reset to idle if wallet hangs
-  useEffect(() => {
-    if (isConnecting) {
-      setTimedOut(false);
-      timerRef.current = setTimeout(() => setTimedOut(true), CONNECT_TIMEOUT_MS);
-    } else {
-      if (timerRef.current) clearTimeout(timerRef.current);
-      setTimedOut(false);
-    }
-    return () => {
-      if (timerRef.current) clearTimeout(timerRef.current);
-    };
-  }, [isConnecting]);
+  const { connectWallet } = useConnectWallet({
+    onSuccess: () => {
+      setConnecting(false);
+      setMessage(null);
+    },
+    onError: (error) => {
+      setConnecting(false);
+      setMessage(typeof error === "string" ? error : "Wallet connection was not completed.");
+    },
+  });
 
-  const truncate = (addr: string) =>
-    `${addr.slice(0, 6)}...${addr.slice(-4)}`;
+  const openWalletPicker = () => {
+    setConnecting(true);
+    setMessage(null);
+    void connectWallet({
+      description: isConnected
+        ? "Connect or switch the wallet used for this session."
+        : "Connect a wallet you already control.",
+      walletChainType: "ethereum-only",
+      walletList: [...EXTERNAL_WALLETS],
+    });
+  };
 
-  // Timed out — let user retry
-  if (isConnecting && timedOut) {
-    return (
-      <>
-        <button
-          className="wallet-btn"
-          onClick={() => {
-            disconnect();
-            setTimeout(() => setModalOpen(true), 100);
-          }}
-        >
-          RETRY
-        </button>
-        <WalletConnectModal open={modalOpen} onClose={() => setModalOpen(false)} />
-      </>
-    );
-  }
-
-  // Connecting — show loading state
-  if (isConnecting) {
+  if (connecting) {
     return (
       <button className="wallet-btn wallet-btn--loading" disabled>
         CONNECTING...
@@ -57,22 +63,13 @@ export function WalletButton() {
     );
   }
 
-  // Connected — show wallet address
-  if (isConnected && address) {
-    return (
-      <button className="wallet-btn wallet-btn--connected" onClick={() => disconnect()}>
-        {truncate(address)} ✕
-      </button>
-    );
-  }
-
-  // Idle — show connect button + custom modal
   return (
-    <>
-      <button className="wallet-btn" onClick={() => setModalOpen(true)}>
-        CONNECT WALLET
-      </button>
-      <WalletConnectModal open={modalOpen} onClose={() => setModalOpen(false)} />
-    </>
+    <button
+      className={isConnected && address ? "wallet-btn wallet-btn--connected" : "wallet-btn"}
+      onClick={openWalletPicker}
+      title={message || (isConnected ? "Connect or switch wallet" : "Connect wallet")}
+    >
+      {isConnected && address ? `${truncate(address)} ↔` : "CONNECT WALLET"}
+    </button>
   );
 }
