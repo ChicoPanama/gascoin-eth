@@ -8,7 +8,7 @@ import {
   useWallets,
 } from '@privy-io/react-auth';
 import { useSetActiveWallet } from '@privy-io/wagmi';
-import { useAccount } from 'wagmi';
+import { useConnection } from 'wagmi';
 import styles from './gas-ui.module.css';
 
 function truncate(address: string) {
@@ -30,7 +30,7 @@ export function GasWalletAccess() {
   const { ready, authenticated } = usePrivy();
   const { login } = useLogin();
   const { ready: walletsReady, wallets } = useWallets();
-  const { address: activeAddress } = useAccount();
+  const { address: activeAddress } = useConnection();
   const { setActiveWallet } = useSetActiveWallet();
   const [message, setMessage] = useState<string | null>(null);
 
