@@ -1,4 +1,4 @@
-name: Normalized lock security probe
+name: Promote hardened production dependency graph
 
 on:
   push:
@@ -7,23 +7,42 @@ on:
       - '.github/workflows/security-audit-lock-probe.yml'
 
 permissions:
-  contents: read
+  contents: write
+
+env:
+  NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.TEST_SUPABASE_URL }}
+  NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.TEST_SUPABASE_ANON_KEY }}
+  SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.TEST_SERVICE_ROLE_KEY }}
+  NEXT_PUBLIC_SOLANA_RPC_URL: https://api.mainnet-beta.solana.com
+  NEXT_PUBLIC_GASCOIN_MINT_ADDRESS: placeholder
+  GASCOIN_TREASURY_WALLET: placeholder
+  ADMIN_WALLET_ADDRESSES: placeholder
+  ADMIN_SESSION_SECRET: placeholder_32_chars_minimum_length
+  X_BEARER_TOKEN: placeholder
+  X_API_BEARER_TOKEN: placeholder
 
 jobs:
-  audit:
+  promote:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ux-lab
+          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
           cache: npm
-      - name: Build normalized candidate lock
+
+      - name: Verify baseline install
+        run: npm ci
+
+      - name: Build hardened dependency graph
         shell: bash
         run: |
           node <<'NODE'
           const fs = require('fs');
-          const p = JSON.parse(fs.readFileSync('package.json','utf8'));
+          const p = JSON.parse(fs.readFileSync('package.json', 'utf8'));
           p.dependencies.ws = '8.21.3';
           p.overrides = {
             '@coinbase/cdp-sdk': { axios: '1.18.0' },
@@ -31,44 +50,70 @@ jobs:
             '@walletconnect/utils': '2.22.4',
             '@walletconnect/jsonrpc-ws-connection': { ws: '7.5.13' }
           };
-          fs.writeFileSync('package.json', JSON.stringify(p,null,2)+'\n');
+          fs.writeFileSync('package.json', JSON.stringify(p, null, 2) + '\n');
           NODE
           npm install --package-lock-only --ignore-scripts
           npm update ws --package-lock-only --ignore-scripts
           npm dedupe --package-lock-only --ignore-scripts
+
           node <<'NODE'
           const fs = require('fs');
-          const lock = JSON.parse(fs.readFileSync('package-lock.json','utf8'));
+          const lock = JSON.parse(fs.readFileSync('package-lock.json', 'utf8'));
           const parentKey = 'node_modules/@solana/rpc-subscriptions-channel-websocket';
           const staleKey = parentKey + '/node_modules/ws';
-          const parent = lock.packages[parentKey];
-          const rootWs = lock.packages['node_modules/ws'];
-          if (parent?.version !== '5.5.1' || parent?.dependencies?.ws !== '^8.19.0' || rootWs?.version !== '8.21.3') {
-            throw new Error('Lock assumptions changed');
+          const parent = lock.packages?.[parentKey];
+          const rootWs = lock.packages?.['node_modules/ws'];
+          if (parent?.version !== '5.5.1') throw new Error(`Unexpected Solana websocket parent: ${parent?.version}`);
+          if (parent?.dependencies?.ws !== '^8.19.0') throw new Error(`Unexpected Solana ws range: ${parent?.dependencies?.ws}`);
+          if (rootWs?.version !== '8.21.3') throw new Error(`Expected root ws@8.21.3, got ${rootWs?.version}`);
+          if (lock.packages[staleKey]) {
+            console.log(`Normalizing stale nested Solana ws@${lock.packages[staleKey].version}`);
+            delete lock.packages[staleKey];
           }
-          console.log('STALE_SOLANA_WS=' + JSON.stringify(lock.packages[staleKey]?.version || null));
-          delete lock.packages[staleKey];
-          fs.writeFileSync('package-lock.json', JSON.stringify(lock,null,2)+'\n');
+          fs.writeFileSync('package-lock.json', JSON.stringify(lock, null, 2) + '\n');
           NODE
-      - name: Audit normalized production lock
+
+      - name: Verify reproducible normalized graph
         shell: bash
         run: |
-          npm audit --omit=dev --package-lock-only --json > /tmp/audit.json || true
+          rm -rf node_modules
+          npm ci
+          npm ls @solana/rpc-subscriptions-channel-websocket @supabase/realtime-js @walletconnect/utils ws axios styled-components --all || true
+
+      - name: Production security gate
+        shell: bash
+        run: |
+          npm audit --omit=dev --json > /tmp/audit.json || true
           node <<'NODE'
           const fs = require('fs');
-          const a = JSON.parse(fs.readFileSync('/tmp/audit.json','utf8'));
-          const meta = a.metadata?.vulnerabilities || {};
-          const blockers = Object.entries(a.vulnerabilities || {}).filter(([,v]) => ['high','critical'].includes(v.severity)).map(([name,v]) => ({name,severity:v.severity,nodes:v.nodes,range:v.range}));
+          const audit = JSON.parse(fs.readFileSync('/tmp/audit.json', 'utf8'));
+          const meta = audit.metadata?.vulnerabilities || {};
+          const blockers = Object.entries(audit.vulnerabilities || {})
+            .filter(([, v]) => v.severity === 'high' || v.severity === 'critical')
+            .map(([name, v]) => ({ name, severity: v.severity, range: v.range, nodes: v.nodes }));
           console.log('AUDIT_METADATA=' + JSON.stringify(meta));
           console.log('HIGH_CRITICAL=' + JSON.stringify(blockers));
           if (blockers.length) process.exit(2);
           NODE
-      - name: Upload normalized dependency candidate
-        uses: actions/upload-artifact@v4
-        with:
-          name: normalized-security-dependency-files
-          path: |
-            package.json
-            package-lock.json
-            /tmp/audit.json
-          retention-days: 1
+
+      - name: Unit tests
+        run: npm test
+
+      - name: TypeScript check
+        run: npx tsc --noEmit
+
+      - name: Production build
+        run: npm run build
+
+      - name: Commit hardened dependency graph
+        shell: bash
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add package.json package-lock.json
+          if git diff --cached --quiet; then
+            echo 'Dependency graph already promoted.'
+            exit 0
+          fi
+          git commit -m 'chore: harden production dependency graph'
+          git push origin HEAD:ux-lab
