@@ -37,7 +37,7 @@ jobs:
       - name: Apply non-forced audit remediation to lockfile only
         shell: bash
         run: |
-          npm audit fix --package-lock-only --ignore-scripts
+          npm audit fix --package-lock-only --ignore-scripts || true
           git diff --stat -- package-lock.json
 
       - name: Reinstall remediated graph
@@ -83,7 +83,6 @@ jobs:
         run: npx tsc --noEmit
 
       - name: Upload candidate lockfile
-        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: dev-security-remediated-lockfile
