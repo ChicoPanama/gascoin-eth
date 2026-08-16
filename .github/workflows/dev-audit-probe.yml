@@ -1,0 +1,35 @@
+name: Dev dependency audit probe
+
+on:
+  push:
+    branches: [ux-lab]
+    paths:
+      - '.github/workflows/dev-audit-probe.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - name: Report full high and critical advisories
+        shell: bash
+        run: |
+          npm audit --json > /tmp/audit.json || true
+          node <<'NODE'
+          const fs = require('fs');
+          const audit = JSON.parse(fs.readFileSync('/tmp/audit.json', 'utf8'));
+          console.log('AUDIT_METADATA=' + JSON.stringify(audit.metadata?.vulnerabilities || {}));
+          for (const [name, v] of Object.entries(audit.vulnerabilities || {})) {
+            if (v.severity !== 'high' && v.severity !== 'critical') continue;
+            console.log('\n=== ' + name + ' ===');
+            console.log(JSON.stringify({severity:v.severity,isDirect:v.isDirect,range:v.range,nodes:v.nodes,effects:v.effects,fixAvailable:v.fixAvailable,via:v.via}, null, 2));
+          }
+          NODE
