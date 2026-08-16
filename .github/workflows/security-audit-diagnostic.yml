@@ -25,7 +25,38 @@ jobs:
       - name: Refresh allowed production transitive dependencies
         run: npm update --omit=dev
 
-      - name: Production audit after reconciliation
+      - name: Apply scoped security overrides in runner only
+        shell: bash
+        run: |
+          node <<'NODE'
+          const fs = require('fs');
+          const p = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+          p.overrides = {
+            ...(p.overrides || {}),
+            '@coinbase/cdp-sdk': {
+              ...((p.overrides || {})['@coinbase/cdp-sdk'] || {}),
+              axios: '1.18.0'
+            },
+            viem: {
+              ...((p.overrides || {}).viem || {}),
+              ws: '8.21.3'
+            },
+            '@vercel/functions': {
+              ...((p.overrides || {})['@vercel/functions'] || {}),
+              ws: '8.21.3'
+            }
+          };
+          fs.writeFileSync('package.json', JSON.stringify(p, null, 2) + '\n');
+          NODE
+          npm install
+
+      - name: Verify reproducible clean install
+        shell: bash
+        run: |
+          rm -rf node_modules
+          npm ci
+
+      - name: Production audit after scoped remediation
         shell: bash
         run: |
           npm audit --omit=dev --json > /tmp/audit.json || true
@@ -41,17 +72,22 @@ jobs:
             console.log('\n=== VULNERABILITY ' + v.name + ' ===');
             console.log(JSON.stringify({severity:v.severity,isDirect:v.isDirect,range:v.range,effects:v.effects,fixAvailable:v.fixAvailable,via:v.via}, null, 2));
           }
-          console.log('\nHIGH_CRITICAL_PACKAGES=' + JSON.stringify(rows.filter(v => v.severity === 'high' || v.severity === 'critical').map(v => v.name)));
+          const blockers = rows.filter(v => v.severity === 'high' || v.severity === 'critical').map(v => v.name);
+          console.log('\nHIGH_CRITICAL_PACKAGES=' + JSON.stringify(blockers));
+          if (blockers.length) process.exitCode = 2;
           NODE
 
       - name: Verify dependency ownership
+        if: always()
         run: |
           npm ls next sharp @sentry/nextjs @privy-io/react-auth x402 @walletconnect/ethereum-provider ws axios postcss nanoid brace-expansion --all || true
 
       - name: Unit tests
+        if: always()
         run: npm test
 
       - name: TypeScript check
+        if: always()
         run: npx tsc --noEmit
 
       - name: Upload reconciled manifest and lockfile
