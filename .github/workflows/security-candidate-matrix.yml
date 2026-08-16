@@ -58,7 +58,11 @@ jobs:
               ...((p.overrides || {})['@walletconnect/jsonrpc-ws-connection'] || {}),
               ws: '7.5.13'
             },
-            '@solana/rpc-subscriptions-channel-websocket': '7.1.0'
+            '@supabase/realtime-js': {
+              ...((p.overrides || {})['@supabase/realtime-js'] || {}),
+              ws: '8.21.3'
+            },
+            '@solana/rpc-subscriptions-channel-websocket': '6.0.0'
           };
           fs.writeFileSync('package.json', JSON.stringify(p, null, 2) + '\n');
           NODE
@@ -108,7 +112,7 @@ jobs:
 
       - name: Security ownership snapshot
         if: always()
-        run: npm ls @privy-io/react-auth styled-components postcss ws axios viem @solana/rpc-subscriptions-channel-websocket @walletconnect/jsonrpc-ws-connection @walletconnect/utils --all || true
+        run: npm ls @privy-io/node @privy-io/react-auth @supabase/realtime-js styled-components postcss ws axios viem @solana/rpc-subscriptions-channel-websocket @walletconnect/jsonrpc-ws-connection @walletconnect/utils --all || true
 
       - name: Unit tests
         if: always()
