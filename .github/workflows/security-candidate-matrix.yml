@@ -23,7 +23,7 @@ env:
 
 jobs:
   candidate:
-    name: semver-safe-deduped-security-graph
+    name: normalized-lock-zero-high
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -39,7 +39,7 @@ jobs:
         shell: bash
         run: npm ls --all --json > /tmp/baseline-ls.json || true
 
-      - name: Apply manifest-level security remediation
+      - name: Apply scoped manifest fixes
         shell: bash
         run: |
           node <<'NODE'
@@ -47,33 +47,43 @@ jobs:
           const p = JSON.parse(fs.readFileSync('package.json', 'utf8'));
           p.dependencies.ws = '8.21.3';
           p.overrides = {
-            ...(p.overrides || {}),
-            '@coinbase/cdp-sdk': {
-              ...((p.overrides || {})['@coinbase/cdp-sdk'] || {}),
-              axios: '1.18.0'
-            },
+            '@coinbase/cdp-sdk': { axios: '1.18.0' },
             'styled-components': '6.5.3',
             '@walletconnect/utils': '2.22.4',
-            '@walletconnect/jsonrpc-ws-connection': {
-              ...((p.overrides || {})['@walletconnect/jsonrpc-ws-connection'] || {}),
-              ws: '7.5.13'
-            }
+            '@walletconnect/jsonrpc-ws-connection': { ws: '7.5.13' }
           };
           fs.writeFileSync('package.json', JSON.stringify(p, null, 2) + '\n');
           NODE
-          npm install --ignore-scripts
+          npm install --package-lock-only --ignore-scripts
+          npm update ws --package-lock-only --ignore-scripts
+          npm dedupe --package-lock-only --ignore-scripts
 
-      - name: Refresh and dedupe websocket resolutions only
+      - name: Normalize stale Solana websocket lock entry
         shell: bash
         run: |
-          npm update ws --ignore-scripts
-          npm dedupe --ignore-scripts
+          node <<'NODE'
+          const fs = require('fs');
+          const lock = JSON.parse(fs.readFileSync('package-lock.json', 'utf8'));
+          const parentKey = 'node_modules/@solana/rpc-subscriptions-channel-websocket';
+          const staleKey = parentKey + '/node_modules/ws';
+          const parent = lock.packages?.[parentKey];
+          const rootWs = lock.packages?.['node_modules/ws'];
+          if (!parent || parent.version !== '5.5.1') throw new Error('Unexpected Solana websocket parent: ' + JSON.stringify(parent?.version));
+          if (parent.dependencies?.ws !== '^8.19.0') throw new Error('Unexpected Solana ws range: ' + JSON.stringify(parent.dependencies?.ws));
+          if (!rootWs || rootWs.version !== '8.21.3') throw new Error('Expected root ws@8.21.3');
+          if (lock.packages[staleKey]) {
+            console.log('Removing stale nested Solana ws entry version=' + lock.packages[staleKey].version);
+            delete lock.packages[staleKey];
+          }
+          fs.writeFileSync('package-lock.json', JSON.stringify(lock, null, 2) + '\n');
+          NODE
 
-      - name: Verify reproducible clean install
+      - name: Verify reproducible normalized lockfile
         shell: bash
         run: |
           rm -rf node_modules
           npm ci
+          npm ls @solana/rpc-subscriptions-channel-websocket ws --all
 
       - name: Reject newly introduced dependency-tree problems
         shell: bash
@@ -81,21 +91,18 @@ jobs:
           npm ls --all --json > /tmp/candidate-ls.json || true
           node <<'NODE'
           const fs = require('fs');
-          const read = (p) => JSON.parse(fs.readFileSync(p, 'utf8'));
+          const read = p => JSON.parse(fs.readFileSync(p, 'utf8'));
           const baseline = new Set(read('/tmp/baseline-ls.json').problems || []);
           const candidate = read('/tmp/candidate-ls.json').problems || [];
-          const added = candidate.filter((p) => !baseline.has(p));
-          const removed = [...baseline].filter((p) => !candidate.includes(p));
-          fs.writeFileSync('/tmp/new-problems.json', JSON.stringify({ added, removed }, null, 2));
-          console.log('BASELINE_PROBLEMS=' + JSON.stringify([...baseline]));
-          console.log('CANDIDATE_PROBLEMS=' + JSON.stringify(candidate));
+          const added = candidate.filter(p => !baseline.has(p));
+          const removed = [...baseline].filter(p => !candidate.includes(p));
+          fs.writeFileSync('/tmp/new-problems.json', JSON.stringify({added, removed}, null, 2));
           console.log('NEW_PROBLEMS=' + JSON.stringify(added));
           console.log('REMOVED_PROBLEMS=' + JSON.stringify(removed));
           if (added.length) process.exit(3);
           NODE
 
       - name: Production audit gate
-        if: always()
         shell: bash
         run: |
           npm audit --omit=dev --json > /tmp/audit.json || true
@@ -104,16 +111,12 @@ jobs:
           const audit = JSON.parse(fs.readFileSync('/tmp/audit.json', 'utf8'));
           const meta = audit.metadata?.vulnerabilities || {};
           const blockers = Object.entries(audit.vulnerabilities || {})
-            .filter(([, v]) => v.severity === 'high' || v.severity === 'critical')
-            .map(([name, v]) => ({ name, severity: v.severity, range: v.range, nodes: v.nodes, effects: v.effects, fixAvailable: v.fixAvailable }));
+            .filter(([,v]) => v.severity === 'high' || v.severity === 'critical')
+            .map(([name,v]) => ({name,severity:v.severity,nodes:v.nodes,range:v.range}));
           console.log('AUDIT_METADATA=' + JSON.stringify(meta));
           console.log('HIGH_CRITICAL=' + JSON.stringify(blockers));
           if (blockers.length) process.exit(2);
           NODE
-
-      - name: Security ownership snapshot
-        if: always()
-        run: npm ls @privy-io/node @privy-io/react-auth @supabase/realtime-js styled-components postcss ws axios viem @solana/rpc-subscriptions-channel-websocket @walletconnect/jsonrpc-ws-connection @walletconnect/utils --all || true
 
       - name: Unit tests
         if: always()
@@ -131,7 +134,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: security-candidate-semver-safe-deduped
+          name: security-candidate-normalized-lock-zero-high
           path: |
             package.json
             package-lock.json
