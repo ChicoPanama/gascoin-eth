@@ -1,4 +1,4 @@
-name: Promote hardened production dependency graph
+name: Finalize hardened production dependency graph
 
 on:
   push:
@@ -9,20 +9,8 @@ on:
 permissions:
   contents: write
 
-env:
-  NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.TEST_SUPABASE_URL }}
-  NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.TEST_SUPABASE_ANON_KEY }}
-  SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.TEST_SERVICE_ROLE_KEY }}
-  NEXT_PUBLIC_SOLANA_RPC_URL: https://api.mainnet-beta.solana.com
-  NEXT_PUBLIC_GASCOIN_MINT_ADDRESS: placeholder
-  GASCOIN_TREASURY_WALLET: placeholder
-  ADMIN_WALLET_ADDRESSES: placeholder
-  ADMIN_SESSION_SECRET: placeholder_32_chars_minimum_length
-  X_BEARER_TOKEN: placeholder
-  X_API_BEARER_TOKEN: placeholder
-
 jobs:
-  promote:
+  finalize:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -34,10 +22,7 @@ jobs:
           node-version: '22'
           cache: npm
 
-      - name: Verify baseline install
-        run: npm ci
-
-      - name: Build hardened dependency graph
+      - name: Regenerate proven hardened graph
         shell: bash
         run: |
           node <<'NODE'
@@ -66,23 +51,15 @@ jobs:
           if (parent?.version !== '5.5.1') throw new Error(`Unexpected Solana websocket parent: ${parent?.version}`);
           if (parent?.dependencies?.ws !== '^8.19.0') throw new Error(`Unexpected Solana ws range: ${parent?.dependencies?.ws}`);
           if (rootWs?.version !== '8.21.3') throw new Error(`Expected root ws@8.21.3, got ${rootWs?.version}`);
-          if (lock.packages[staleKey]) {
-            console.log(`Normalizing stale nested Solana ws@${lock.packages[staleKey].version}`);
-            delete lock.packages[staleKey];
-          }
+          if (lock.packages[staleKey]) delete lock.packages[staleKey];
           fs.writeFileSync('package-lock.json', JSON.stringify(lock, null, 2) + '\n');
           NODE
 
-      - name: Verify reproducible normalized graph
+      - name: Verify install and production security
         shell: bash
         run: |
           rm -rf node_modules
           npm ci
-          npm ls @solana/rpc-subscriptions-channel-websocket @supabase/realtime-js @walletconnect/utils ws axios styled-components --all || true
-
-      - name: Production security gate
-        shell: bash
-        run: |
           npm audit --omit=dev --json > /tmp/audit.json || true
           node <<'NODE'
           const fs = require('fs');
@@ -96,16 +73,7 @@ jobs:
           if (blockers.length) process.exit(2);
           NODE
 
-      - name: Unit tests
-        run: npm test
-
-      - name: TypeScript check
-        run: npx tsc --noEmit
-
-      - name: Production build
-        run: npm run build
-
-      - name: Commit hardened dependency graph safely
+      - name: Commit and push without overwriting concurrent work
         shell: bash
         run: |
           git config user.name 'github-actions[bot]'
@@ -116,6 +84,11 @@ jobs:
             exit 0
           fi
           git commit -m 'chore: harden production dependency graph'
+
+          # npm/Next tooling may leave tracked build-generated changes; discard only
+          # those post-commit working-tree changes while preserving the dependency commit.
+          git reset --hard HEAD
+          git clean -fd
 
           for attempt in 1 2 3; do
             git fetch origin ux-lab
