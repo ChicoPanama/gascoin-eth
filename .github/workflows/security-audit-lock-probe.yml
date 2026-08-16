@@ -16,7 +16,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        strategy: [update-ws, dedupe-ws, global-ws-with-v7-exception]
+        strategy: [walletconnect-utils, walletconnect-utils-dedupe]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -24,7 +24,7 @@ jobs:
           node-version: '22'
           cache: npm
 
-      - name: Apply shared security fixes
+      - name: Apply parent-level security fixes
         shell: bash
         run: |
           node <<'NODE'
@@ -38,14 +38,7 @@ jobs:
               axios: '1.18.0'
             },
             'styled-components': '6.5.3',
-            '@solana/rpc-subscriptions-channel-websocket': {
-              ...((p.overrides || {})['@solana/rpc-subscriptions-channel-websocket'] || {}),
-              ws: '8.21.3'
-            },
-            '@supabase/realtime-js': {
-              ...((p.overrides || {})['@supabase/realtime-js'] || {}),
-              ws: '8.21.3'
-            },
+            '@walletconnect/utils': '2.22.4',
             '@walletconnect/jsonrpc-ws-connection': {
               ...((p.overrides || {})['@walletconnect/jsonrpc-ws-connection'] || {}),
               ws: '7.5.13'
@@ -55,32 +48,9 @@ jobs:
           NODE
           npm install --package-lock-only --ignore-scripts
 
-      - name: Update compatible ws copies
-        if: matrix.strategy == 'update-ws'
-        run: npm update ws --package-lock-only --ignore-scripts
-
-      - name: Dedupe compatible ws copies
-        if: matrix.strategy == 'dedupe-ws'
+      - name: Dedupe compatible copies
+        if: matrix.strategy == 'walletconnect-utils-dedupe'
         run: npm dedupe --package-lock-only --ignore-scripts
-
-      - name: Force v8 copies to root spec with v7 exception
-        if: matrix.strategy == 'global-ws-with-v7-exception'
-        shell: bash
-        run: |
-          node <<'NODE'
-          const fs = require('fs');
-          const p = JSON.parse(fs.readFileSync('package.json', 'utf8'));
-          p.overrides = {
-            ...(p.overrides || {}),
-            ws: '$ws',
-            '@walletconnect/jsonrpc-ws-connection': {
-              ...((p.overrides || {})['@walletconnect/jsonrpc-ws-connection'] || {}),
-              ws: '7.5.13'
-            }
-          };
-          fs.writeFileSync('package.json', JSON.stringify(p, null, 2) + '\n');
-          NODE
-          npm install --package-lock-only --ignore-scripts
 
       - name: Audit production lock graph
         shell: bash
@@ -98,6 +68,6 @@ jobs:
           if (blockers.length) process.exit(2);
           NODE
 
-      - name: Show ws ownership
+      - name: Show ownership
         if: always()
-        run: npm ls ws viem isows @walletconnect/jsonrpc-ws-connection --all || true
+        run: npm ls @walletconnect/utils ws viem isows @walletconnect/jsonrpc-ws-connection --all || true
