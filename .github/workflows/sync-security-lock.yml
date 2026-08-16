@@ -25,6 +25,27 @@ jobs:
         run: npm install --package-lock-only --ignore-scripts
       - name: Validate install graph
         run: npm ci --ignore-scripts
+      - name: Measure production audit
+        shell: bash
+        run: |
+          npm audit --omit=dev --json > /tmp/prod-audit.json || true
+          node <<'NODE'
+          const fs = require('fs');
+          const audit = JSON.parse(fs.readFileSync('/tmp/prod-audit.json', 'utf8'));
+          const summary = audit.metadata?.vulnerabilities || {};
+          const blockers = Object.entries(audit.vulnerabilities || {})
+            .filter(([, value]) => value.severity === 'high' || value.severity === 'critical')
+            .map(([name, value]) => ({
+              name,
+              severity: value.severity,
+              isDirect: value.isDirect,
+              range: value.range,
+              fixAvailable: value.fixAvailable,
+              effects: value.effects,
+            }));
+          console.log('PROD_AUDIT_SUMMARY=' + JSON.stringify(summary));
+          console.log('PROD_AUDIT_BLOCKERS=' + JSON.stringify(blockers));
+          NODE
       - name: Commit lockfile
         shell: bash
         run: |
