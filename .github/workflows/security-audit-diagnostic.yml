@@ -1,0 +1,61 @@
+name: Production dependency audit diagnostic
+
+on:
+  push:
+    branches: [ux-lab]
+    paths:
+      - '.github/workflows/security-audit-diagnostic.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Install exact graph
+        run: npm ci
+      - name: Print production advisory inventory
+        shell: bash
+        run: |
+          npm audit --omit=dev --json > /tmp/audit.json || true
+          node <<'NODE'
+          const fs = require('fs');
+          const audit = JSON.parse(fs.readFileSync('/tmp/audit.json', 'utf8'));
+          console.log('AUDIT_METADATA=' + JSON.stringify(audit.metadata?.vulnerabilities || {}));
+          const vulns = audit.vulnerabilities || {};
+          const rows = Object.entries(vulns)
+            .map(([name, v]) => ({ name, ...v }))
+            .sort((a,b) => ({critical:5,high:4,moderate:3,low:2,info:1}[b.severity]||0)-({critical:5,high:4,moderate:3,low:2,info:1}[a.severity]||0) || a.name.localeCompare(b.name));
+          for (const v of rows) {
+            console.log('\n=== VULNERABILITY ' + v.name + ' ===');
+            console.log(JSON.stringify({severity:v.severity,isDirect:v.isDirect,range:v.range,nodes:v.nodes,effects:v.effects,fixAvailable:v.fixAvailable,via:v.via}, null, 2));
+          }
+          const high = rows.filter(v => v.severity === 'high' || v.severity === 'critical').map(v => v.name);
+          fs.writeFileSync('/tmp/high-packages.txt', high.join('\n'));
+          console.log('\nHIGH_CRITICAL_PACKAGES=' + JSON.stringify(high));
+          NODE
+      - name: Explain high and critical package ownership
+        shell: bash
+        run: |
+          while IFS= read -r pkg; do
+            [ -z "$pkg" ] && continue
+            echo "===== npm explain $pkg ====="
+            npm explain "$pkg" || true
+          done < /tmp/high-packages.txt
+      - name: Non-breaking audit-fix dry run
+        shell: bash
+        run: |
+          npm audit fix --omit=dev --dry-run --json > /tmp/fix.json || true
+          node <<'NODE'
+          const fs = require('fs');
+          const data = JSON.parse(fs.readFileSync('/tmp/fix.json', 'utf8'));
+          console.log('FIX_DRY_RUN=' + JSON.stringify({added:data.added,removed:data.removed,changed:data.changed,audit:data.audit?.metadata?.vulnerabilities || data.metadata?.vulnerabilities || null}, null, 2));
+          NODE
+      - name: Direct dependency freshness
+        run: npm outdated --json || true
