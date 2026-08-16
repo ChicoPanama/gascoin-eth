@@ -1,0 +1,64 @@
+name: Scoped security lock audit probe
+
+on:
+  push:
+    branches: [ux-lab]
+    paths:
+      - '.github/workflows/security-audit-lock-probe.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Apply exact scoped candidate to manifest
+        shell: bash
+        run: |
+          node <<'NODE'
+          const fs = require('fs');
+          const p = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+          p.overrides = {
+            ...(p.overrides || {}),
+            '@coinbase/cdp-sdk': {
+              ...((p.overrides || {})['@coinbase/cdp-sdk'] || {}),
+              axios: '1.18.0'
+            },
+            'styled-components': '6.5.3',
+            '@solana/rpc-subscriptions-channel-websocket': {
+              ...((p.overrides || {})['@solana/rpc-subscriptions-channel-websocket'] || {}),
+              ws: '8.21.3'
+            },
+            '@supabase/realtime-js': {
+              ...((p.overrides || {})['@supabase/realtime-js'] || {}),
+              ws: '8.21.3'
+            },
+            '@walletconnect/jsonrpc-ws-connection': {
+              ...((p.overrides || {})['@walletconnect/jsonrpc-ws-connection'] || {}),
+              ws: '7.5.13'
+            }
+          };
+          fs.writeFileSync('package.json', JSON.stringify(p, null, 2) + '\n');
+          NODE
+          npm install --package-lock-only --ignore-scripts
+      - name: Audit production lock graph
+        shell: bash
+        run: |
+          npm audit --omit=dev --package-lock-only --json > /tmp/audit.json || true
+          node <<'NODE'
+          const fs = require('fs');
+          const audit = JSON.parse(fs.readFileSync('/tmp/audit.json', 'utf8'));
+          const meta = audit.metadata?.vulnerabilities || {};
+          const blockers = Object.entries(audit.vulnerabilities || {})
+            .filter(([, v]) => v.severity === 'high' || v.severity === 'critical')
+            .map(([name, v]) => ({ name, severity: v.severity, range: v.range, effects: v.effects }));
+          console.log('AUDIT_METADATA=' + JSON.stringify(meta));
+          console.log('HIGH_CRITICAL=' + JSON.stringify(blockers));
+          if (blockers.length) process.exit(2);
+          NODE
