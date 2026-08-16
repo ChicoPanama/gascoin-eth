@@ -10,9 +10,14 @@ import { wagmiConfig, queryClient } from '../lib/wagmi-config';
 /**
  * Shared account provider for the transition application.
  *
- * Project GAS Phase 7 adds email as the consumer-first entry path and creates
- * an embedded EVM wallet for users who do not already have one. Twitter and
- * external-wallet login remain temporarily available for legacy GASCOIN routes.
+ * Project GAS uses a hybrid account model:
+ * - email/social entry can create an embedded EVM wallet for users who need one;
+ * - users who already control a wallet can log in with it or link additional
+ *   external wallets to the same GAS identity.
+ *
+ * Wagmi remains temporarily around this provider because legacy GASCOIN routes
+ * still use wagmi hooks. New Project GAS account/wallet UX should prefer Privy
+ * so we can retire duplicated connector UI as legacy routes are decommissioned.
  *
  * Mainnet remains the transition repo's configured chain. This is not a final
  * Project GAS chain decision; Phase 0 keeps final chain selection OPEN.
@@ -30,7 +35,24 @@ function PrivyInner({ children }: { children: React.ReactNode }) {
       appId={appId}
       config={{
         loginMethods: ['email', 'twitter', 'wallet'],
-        appearance: { theme: resolved, walletChainType: 'ethereum-only' },
+        appearance: {
+          theme: resolved,
+          walletChainType: 'ethereum-only',
+          // Named mobile-friendly choices first, installed EVM extensions next,
+          // then WalletConnect as the long-tail fallback. `base_account` keeps
+          // the door open for app-specific subaccounts/spend permissions later
+          // without making Base the final chain decision today.
+          walletList: [
+            'metamask',
+            'coinbase_wallet',
+            'base_account',
+            'rainbow',
+            'uniswap',
+            'safe',
+            'detected_ethereum_wallets',
+            'wallet_connect',
+          ],
+        },
         defaultChain: mainnet,
         supportedChains: [mainnet],
         embeddedWallets: {
