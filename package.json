@@ -32,7 +32,7 @@
     "@privy-io/node": "^0.12.0",
     "@privy-io/react-auth": "3.36.1",
     "@privy-io/wagmi": "4.0.15",
-    "@sentry/nextjs": "^10.49.0",
+    "@sentry/nextjs": "10.55.0",
     "@stripe/stripe-js": "9.13.0",
     "@supabase/supabase-js": "^2.49.8",
     "@tanstack/react-query": "^5.99.1",
@@ -42,11 +42,11 @@
     "@vercel/functions": "^3.4.4",
     "ai": "^6.0.158",
     "framer-motion": "^12.38.0",
-    "next": "16.2.2",
+    "next": "16.2.12",
     "p-limit": "^7.3.0",
     "react": "19.0.0",
     "react-dom": "19.0.0",
-    "sharp": "^0.34.5",
+    "sharp": "0.35.3",
     "viem": "2.55.8",
     "wagmi": "3.7.5",
     "zod": "^4.3.6"
@@ -65,8 +65,5 @@
     "msw": "^2.12.14",
     "typescript": "5.9.3",
     "vitest": "^4.1.2"
-  },
-  "optionalDependencies": {
-    "@farcaster/mini-app-solana": "^2.0.0"
   }
 }
