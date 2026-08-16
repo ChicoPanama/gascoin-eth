@@ -1,14 +1,19 @@
 // hooks/useGascoinWallet.ts
 'use client';
 
-import { useAccount, useBalance } from 'wagmi';
+import { useBalance, useConnection } from 'wagmi';
 import { truncateEthAddress } from '@/lib/validate-wallet';
 
+/**
+ * Legacy compatibility view of the Privy-synchronized active EVM wallet.
+ * New Project GAS account UX should prefer Privy's useWallets +
+ * @privy-io/wagmi useSetActiveWallet when it needs multi-wallet context.
+ */
 export function useGascoinWallet() {
-  const { address, isConnected } = useAccount();
+  const { address, isConnected } = useConnection();
   const { data: balanceData, isLoading: balanceLoading } = useBalance({
     address,
-    query: { enabled: !!address },
+    query: { enabled: Boolean(address) },
   });
 
   const shortAddress = address ? truncateEthAddress(address) : null;
