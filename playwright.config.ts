@@ -8,8 +8,8 @@ export default defineConfig({
   testDir: './e2e',
   fullyParallel: false,
   forbidOnly: !!process.env.CI,
-  retries: process.env.CI ? 2 : 0,
-  workers: 1,
+  retries: process.env.CI ? 1 : 0,
+  workers: process.env.CI ? 2 : 1,
   reporter: [
     ['list'],
     ['html', { outputFolder: 'playwright-report', open: 'never' }],
@@ -30,11 +30,9 @@ export default defineConfig({
     { name: 'mobile-safari', use: { ...devices['iPhone 13'] }, dependencies: ['setup'] },
   ],
   webServer: {
-    // CI already runs `npm run build` immediately before Playwright. Rebuilding
-    // inside webServer consumed the entire startup timeout on cold runners.
     command: webServerCommand,
     url: 'http://localhost:3000',
     reuseExistingServer: !process.env.CI,
-    timeout: 120000,
+    timeout: process.env.CI ? 60000 : 120000,
   },
 });
