@@ -1,4 +1,4 @@
-name: Privy Node dependency security probe
+name: Privy Node security version matrix
 
 on:
   push:
@@ -10,36 +10,57 @@ permissions:
   contents: read
 
 jobs:
-  metadata:
+  audit:
+    name: privy-node-${{ matrix.privy }}
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        privy: ['0.12.0','0.13.0','0.14.0','0.15.0','0.16.0','0.18.0','0.20.0','0.24.0','0.28.0']
     steps:
+      - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Find nearest Privy Node releases and Solana dependencies
+          cache: npm
+
+      - name: Build candidate lock graph
         shell: bash
         run: |
           node <<'NODE'
-          const { execFileSync } = require('child_process');
-          const versions = JSON.parse(execFileSync('npm', ['view','@privy-io/node','versions','--json'], {encoding:'utf8'}));
-          const candidates = versions.filter(v => {
-            const m = v.match(/^(\d+)\.(\d+)\.(\d+)$/);
-            if (!m) return false;
-            const [maj,min] = [Number(m[1]),Number(m[2])];
-            return maj === 0 && min >= 12;
-          }).slice(-30);
-          console.log('CANDIDATES=' + JSON.stringify(candidates));
-          for (const v of candidates) {
-            let raw;
-            try {
-              raw = execFileSync('npm', ['view',`@privy-io/node@${v}`,'version','dependencies','peerDependencies','engines','--json'], {encoding:'utf8'});
-            } catch (e) {
-              console.log('ERROR ' + v + ' ' + e.message);
-              continue;
-            }
-            const data = JSON.parse(raw);
-            const deps = data.dependencies || {};
-            const solana = Object.fromEntries(Object.entries(deps).filter(([k]) => k.startsWith('@solana/')));
-            console.log(JSON.stringify({version:v, solana, engines:data.engines, viem:deps.viem, axios:deps.axios}));
-          }
+          const fs = require('fs');
+          const p = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+          p.dependencies['@privy-io/node'] = '${{ matrix.privy }}';
+          p.dependencies.ws = '8.21.3';
+          p.overrides = {
+            '@coinbase/cdp-sdk': { axios: '1.18.0' },
+            'styled-components': '6.5.3',
+            '@walletconnect/utils': '2.22.4',
+            '@walletconnect/jsonrpc-ws-connection': { ws: '7.5.13' }
+          };
+          fs.writeFileSync('package.json', JSON.stringify(p, null, 2) + '\n');
           NODE
+          npm install --package-lock-only --ignore-scripts
+          npm update ws --package-lock-only --ignore-scripts
+          npm dedupe --package-lock-only --ignore-scripts
+
+      - name: Production audit
+        shell: bash
+        run: |
+          npm audit --omit=dev --package-lock-only --json > /tmp/audit.json || true
+          node <<'NODE'
+          const fs = require('fs');
+          const a = JSON.parse(fs.readFileSync('/tmp/audit.json','utf8'));
+          const meta = a.metadata?.vulnerabilities || {};
+          const blockers = Object.entries(a.vulnerabilities || {})
+            .filter(([,v]) => v.severity === 'high' || v.severity === 'critical')
+            .map(([name,v]) => ({name,severity:v.severity,nodes:v.nodes,range:v.range}));
+          console.log('PRIVY=${{ matrix.privy }}');
+          console.log('AUDIT_METADATA=' + JSON.stringify(meta));
+          console.log('HIGH_CRITICAL=' + JSON.stringify(blockers));
+          if (blockers.length) process.exit(2);
+          NODE
+
+      - name: Dependency ownership snapshot
+        if: always()
+        run: npm ls @privy-io/node @solana/kit @solana/rpc-subscriptions-channel-websocket ws --all || true
