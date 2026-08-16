@@ -78,6 +78,14 @@ jobs:
           if (blockers.length) process.exitCode = 2;
           NODE
 
+      - name: Upload production audit report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: production-security-audit-report
+          path: /tmp/audit.json
+          retention-days: 1
+
       - name: Verify dependency ownership
         if: always()
         run: |
