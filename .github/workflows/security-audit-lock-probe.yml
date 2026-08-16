@@ -10,71 +10,20 @@ permissions:
   contents: read
 
 jobs:
-  audit:
-    name: ${{ matrix.strategy }}
+  metadata:
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        strategy: [targeted-ws-update, targeted-ws-update-dedupe, child-overrides]
     steps:
-      - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-          cache: npm
-
-      - name: Apply shared security fixes
+      - name: Show constrained package contracts
         shell: bash
         run: |
-          node <<'NODE'
-          const fs = require('fs');
-          const p = JSON.parse(fs.readFileSync('package.json', 'utf8'));
-          p.dependencies.ws = '8.21.3';
-          p.overrides = {
-            ...(p.overrides || {}),
-            '@coinbase/cdp-sdk': {
-              ...((p.overrides || {})['@coinbase/cdp-sdk'] || {}),
-              axios: '1.18.0'
-            },
-            'styled-components': '6.5.3',
-            '@walletconnect/utils': '2.22.4'
-          };
-          if ('${{ matrix.strategy }}' === 'child-overrides') {
-            p.overrides['@walletconnect/jsonrpc-ws-connection'] = { ws: '7.5.13' };
-            p.overrides['@supabase/realtime-js'] = { ws: '8.21.3' };
-            p.overrides['@solana/rpc-subscriptions-channel-websocket'] = { ws: '8.21.3' };
-          }
-          fs.writeFileSync('package.json', JSON.stringify(p, null, 2) + '\n');
-          NODE
-          npm install --package-lock-only --ignore-scripts
-
-      - name: Target only websocket resolutions
-        if: matrix.strategy != 'child-overrides'
-        shell: bash
-        run: |
-          npm update ws --package-lock-only --ignore-scripts
-          if [ '${{ matrix.strategy }}' = 'targeted-ws-update-dedupe' ]; then
-            npm dedupe --package-lock-only --ignore-scripts
-          fi
-
-      - name: Audit production lock graph
-        shell: bash
-        run: |
-          npm audit --omit=dev --package-lock-only --json > /tmp/audit.json || true
-          node <<'NODE'
-          const fs = require('fs');
-          const audit = JSON.parse(fs.readFileSync('/tmp/audit.json', 'utf8'));
-          const meta = audit.metadata?.vulnerabilities || {};
-          const blockers = Object.entries(audit.vulnerabilities || {})
-            .filter(([, v]) => v.severity === 'high' || v.severity === 'critical')
-            .map(([name, v]) => ({ name, severity: v.severity, range: v.range, nodes: v.nodes, effects: v.effects, fixAvailable: v.fixAvailable }));
-          console.log('STRATEGY=${{ matrix.strategy }}');
-          console.log('AUDIT_METADATA=' + JSON.stringify(meta));
-          console.log('HIGH_CRITICAL=' + JSON.stringify(blockers));
-          if (blockers.length) process.exit(2);
-          NODE
-
-      - name: Show websocket ownership
-        if: always()
-        run: npm ls ws @solana/rpc-subscriptions-channel-websocket @supabase/realtime-js @walletconnect/utils viem --all || true
+          echo 'SOLANA_CHANNEL_5_5_1'
+          npm view @solana/rpc-subscriptions-channel-websocket@5.5.1 version dependencies peerDependencies peerDependenciesMeta engines --json
+          echo 'SOLANA_SUBSCRIPTIONS_5_5_1'
+          npm view @solana/rpc-subscriptions@5.5.1 version dependencies peerDependencies engines --json
+          echo 'SOLANA_KIT_5_5_1'
+          npm view @solana/kit@5.5.1 version dependencies peerDependencies engines --json
+          echo 'SUPABASE_REALTIME_2_101_1'
+          npm view @supabase/realtime-js@2.101.1 version dependencies peerDependencies engines --json
