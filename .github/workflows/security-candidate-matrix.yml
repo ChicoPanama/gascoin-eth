@@ -1,0 +1,128 @@
+name: Zero-high dependency candidate matrix
+
+on:
+  push:
+    branches: [ux-lab]
+    paths:
+      - '.github/workflows/security-candidate-matrix.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  candidate:
+    name: ${{ matrix.strategy }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        strategy: [targeted-update, scoped-overrides]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Verify clean baseline
+        run: npm ci
+
+      - name: Remove dormant direct SDKs and align core versions
+        shell: bash
+        run: |
+          node <<'NODE'
+          const fs = require('fs');
+          const p = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+          delete p.dependencies['@privy-io/node'];
+          delete p.dependencies['@vercel/functions'];
+          p.dependencies['@supabase/supabase-js'] = '2.111.0';
+          p.overrides = {
+            ...(p.overrides || {}),
+            '@coinbase/cdp-sdk': {
+              ...((p.overrides || {})['@coinbase/cdp-sdk'] || {}),
+              axios: '1.18.0'
+            }
+          };
+          fs.writeFileSync('package.json', JSON.stringify(p, null, 2) + '\n');
+          NODE
+          npm install --ignore-scripts
+
+      - name: Targeted transitive refresh
+        if: matrix.strategy == 'targeted-update'
+        run: npm update ws postcss styled-components --ignore-scripts
+
+      - name: Scoped override alignment
+        if: matrix.strategy == 'scoped-overrides'
+        shell: bash
+        run: |
+          node <<'NODE'
+          const fs = require('fs');
+          const p = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+          p.overrides = {
+            ...(p.overrides || {}),
+            'styled-components': '6.4.4',
+            'viem': {
+              ...((p.overrides || {}).viem || {}),
+              ws: '8.21.1'
+            },
+            '@supabase/realtime-js': {
+              ...((p.overrides || {})['@supabase/realtime-js'] || {}),
+              ws: '8.21.1'
+            },
+            '@walletconnect/jsonrpc-ws-connection': {
+              ...((p.overrides || {})['@walletconnect/jsonrpc-ws-connection'] || {}),
+              ws: '7.5.13'
+            }
+          };
+          fs.writeFileSync('package.json', JSON.stringify(p, null, 2) + '\n');
+          NODE
+          npm install --ignore-scripts
+
+      - name: Verify reproducible clean install
+        shell: bash
+        run: |
+          rm -rf node_modules
+          npm ci
+
+      - name: Verify dependency tree integrity
+        run: npm ls --all > /tmp/npm-ls.txt
+
+      - name: Production audit gate
+        shell: bash
+        run: |
+          npm audit --omit=dev --json > /tmp/audit.json || true
+          node <<'NODE'
+          const fs = require('fs');
+          const audit = JSON.parse(fs.readFileSync('/tmp/audit.json', 'utf8'));
+          const meta = audit.metadata?.vulnerabilities || {};
+          const blockers = Object.entries(audit.vulnerabilities || {})
+            .filter(([, v]) => v.severity === 'high' || v.severity === 'critical')
+            .map(([name, v]) => ({ name, severity: v.severity, range: v.range, effects: v.effects }));
+          console.log('AUDIT_METADATA=' + JSON.stringify(meta));
+          console.log('HIGH_CRITICAL=' + JSON.stringify(blockers));
+          if (blockers.length) process.exit(2);
+          NODE
+
+      - name: Security ownership snapshot
+        if: always()
+        run: npm ls @privy-io/node @vercel/functions @supabase/supabase-js @supabase/realtime-js styled-components postcss ws axios viem @walletconnect/jsonrpc-ws-connection --all || true
+
+      - name: Unit tests
+        if: always()
+        run: npm test
+
+      - name: TypeScript check
+        if: always()
+        run: npx tsc --noEmit
+
+      - name: Upload candidate
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-candidate-${{ matrix.strategy }}
+          path: |
+            package.json
+            package-lock.json
+            /tmp/audit.json
+            /tmp/npm-ls.txt
+          retention-days: 1
