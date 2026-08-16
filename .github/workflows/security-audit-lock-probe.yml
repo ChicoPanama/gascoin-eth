@@ -63,3 +63,12 @@ jobs:
           console.log('HIGH_CRITICAL=' + JSON.stringify(blockers));
           if (blockers.length) process.exit(2);
           NODE
+      - name: Upload normalized dependency candidate
+        uses: actions/upload-artifact@v4
+        with:
+          name: normalized-security-dependency-files
+          path: |
+            package.json
+            package-lock.json
+            /tmp/audit.json
+          retention-days: 1
