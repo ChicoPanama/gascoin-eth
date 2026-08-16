@@ -23,7 +23,7 @@ env:
 
 jobs:
   candidate:
-    name: version-scoped-safe
+    name: zero-high-scoped-with-ws-peer
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -39,7 +39,7 @@ jobs:
         shell: bash
         run: npm ls --all --json > /tmp/baseline-ls.json || true
 
-      - name: Apply version-scoped security remediation in runner only
+      - name: Apply proven zero-high remediation plus ws peer in runner only
         shell: bash
         run: |
           node <<'NODE'
@@ -53,8 +53,22 @@ jobs:
               axios: '1.18.0'
             },
             'styled-components': '6.5.3',
-            'ws@>=8.0.0 <8.21.0': '8.21.3',
-            'ws@>=7.0.0 <8.0.0': '7.5.13'
+            '@solana/rpc-subscriptions-channel-websocket': {
+              ...((p.overrides || {})['@solana/rpc-subscriptions-channel-websocket'] || {}),
+              ws: '8.21.3'
+            },
+            '@supabase/realtime-js': {
+              ...((p.overrides || {})['@supabase/realtime-js'] || {}),
+              ws: '8.21.3'
+            },
+            '@walletconnect/jsonrpc-ws-connection': {
+              ...((p.overrides || {})['@walletconnect/jsonrpc-ws-connection'] || {}),
+              ws: '7.5.13'
+            },
+            viem: {
+              ...((p.overrides || {}).viem || {}),
+              ws: '8.21.3'
+            }
           };
           fs.writeFileSync('package.json', JSON.stringify(p, null, 2) + '\n');
           NODE
@@ -122,7 +136,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: security-candidate-version-scoped-safe
+          name: security-candidate-zero-high-scoped-with-ws-peer
           path: |
             package.json
             package-lock.json
