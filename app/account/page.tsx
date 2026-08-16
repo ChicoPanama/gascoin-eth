@@ -1,17 +1,18 @@
 import type { Metadata } from 'next';
 import { GasPrototypeShell } from '@/components/gas/GasPrototypeShell';
+import { GasWalletAccess } from '@/components/gas/GasWalletAccess';
 import styles from '@/components/gas/gas-ui.module.css';
 
 export const metadata: Metadata = {
   title: 'Account — Project GAS',
-  description: 'Project GAS account, available funds, history, permissions and security.',
+  description: 'Project GAS account, available funds, linked wallets, permissions and security.',
 };
 
 export default function AccountPage() {
   return (
     <GasPrototypeShell>
       <div className={styles.prototypeBanner} role="note">
-        <span>Prototype account values are labeled demo · no wallet balances read here</span>
+        <span>Prototype balances remain demo · wallet connection state is real when Privy is configured</span>
         <span className={styles.prototypePill}>Account</span>
       </div>
 
@@ -33,6 +34,7 @@ export default function AccountPage() {
       </header>
 
       <div className={styles.cardGrid}>
+        <GasWalletAccess />
         <div className={styles.actionCard}>
           <span className={styles.actionCardMeta}>Spendable</span>
           <span className={styles.actionCardTitle}>GAS / USDC</span>
