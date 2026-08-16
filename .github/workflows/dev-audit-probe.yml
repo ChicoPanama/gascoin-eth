@@ -1,4 +1,4 @@
-name: Dev dependency audit probe
+name: Dev dependency high remediation probe
 
 on:
   push:
@@ -9,8 +9,20 @@ on:
 permissions:
   contents: read
 
+env:
+  NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.TEST_SUPABASE_URL }}
+  NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.TEST_SUPABASE_ANON_KEY }}
+  SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.TEST_SERVICE_ROLE_KEY }}
+  NEXT_PUBLIC_SOLANA_RPC_URL: https://api.mainnet-beta.solana.com
+  NEXT_PUBLIC_GASCOIN_MINT_ADDRESS: placeholder
+  GASCOIN_TREASURY_WALLET: placeholder
+  ADMIN_WALLET_ADDRESSES: placeholder
+  ADMIN_SESSION_SECRET: placeholder_32_chars_minimum_length
+  X_BEARER_TOKEN: placeholder
+  X_API_BEARER_TOKEN: placeholder
+
 jobs:
-  audit:
+  candidate:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -18,18 +30,62 @@ jobs:
         with:
           node-version: '22'
           cache: npm
-      - run: npm ci
-      - name: Report full high and critical advisories
+
+      - name: Verify current lock
+        run: npm ci
+
+      - name: Apply non-forced audit remediation to lockfile only
         shell: bash
         run: |
-          npm audit --json > /tmp/audit.json || true
+          npm audit fix --package-lock-only --ignore-scripts
+          git diff --stat -- package-lock.json
+
+      - name: Reinstall remediated graph
+        shell: bash
+        run: |
+          rm -rf node_modules
+          npm ci
+          npm ls vite undici --all || true
+
+      - name: Full dependency high-critical gate
+        shell: bash
+        run: |
+          npm audit --json > /tmp/full-audit.json || true
           node <<'NODE'
           const fs = require('fs');
-          const audit = JSON.parse(fs.readFileSync('/tmp/audit.json', 'utf8'));
-          console.log('AUDIT_METADATA=' + JSON.stringify(audit.metadata?.vulnerabilities || {}));
-          for (const [name, v] of Object.entries(audit.vulnerabilities || {})) {
-            if (v.severity !== 'high' && v.severity !== 'critical') continue;
-            console.log('\n=== ' + name + ' ===');
-            console.log(JSON.stringify({severity:v.severity,isDirect:v.isDirect,range:v.range,nodes:v.nodes,effects:v.effects,fixAvailable:v.fixAvailable,via:v.via}, null, 2));
-          }
+          const audit = JSON.parse(fs.readFileSync('/tmp/full-audit.json', 'utf8'));
+          const meta = audit.metadata?.vulnerabilities || {};
+          const blockers = Object.entries(audit.vulnerabilities || {})
+            .filter(([,v]) => v.severity === 'high' || v.severity === 'critical')
+            .map(([name,v]) => ({name,severity:v.severity,range:v.range,nodes:v.nodes}));
+          console.log('FULL_AUDIT_METADATA=' + JSON.stringify(meta));
+          console.log('HIGH_CRITICAL=' + JSON.stringify(blockers));
+          if (blockers.length) process.exit(2);
           NODE
+
+      - name: Production security regression gate
+        shell: bash
+        run: |
+          npm audit --omit=dev --json > /tmp/prod-audit.json || true
+          node <<'NODE'
+          const fs = require('fs');
+          const audit = JSON.parse(fs.readFileSync('/tmp/prod-audit.json', 'utf8'));
+          const blockers = Object.entries(audit.vulnerabilities || {})
+            .filter(([,v]) => v.severity === 'high' || v.severity === 'critical');
+          console.log('PROD_AUDIT_METADATA=' + JSON.stringify(audit.metadata?.vulnerabilities || {}));
+          if (blockers.length) process.exit(3);
+          NODE
+
+      - name: Unit tests
+        run: npm test
+
+      - name: TypeScript check
+        run: npx tsc --noEmit
+
+      - name: Upload candidate lockfile
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dev-security-remediated-lockfile
+          path: package-lock.json
+          retention-days: 1
