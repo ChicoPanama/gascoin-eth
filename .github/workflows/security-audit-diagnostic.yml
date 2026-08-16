@@ -25,27 +25,20 @@ jobs:
       - name: Refresh allowed production transitives
         run: npm update --omit=dev
 
-      - name: Apply final security alignment in runner only
+      - name: Apply minimal security alignment in runner only
         shell: bash
         run: |
           node <<'NODE'
           const fs = require('fs');
           const p = JSON.parse(fs.readFileSync('package.json', 'utf8'));
           p.dependencies.viem = '2.55.10';
-          p.dependencies.ws = '8.21.3';
+          delete p.dependencies.ws;
           p.overrides = {
-            ...(p.overrides || {}),
             '@coinbase/cdp-sdk': {
-              ...((p.overrides || {})['@coinbase/cdp-sdk'] || {}),
               axios: '1.18.0'
             },
-            viem: {
-              ...((p.overrides || {}).viem || {}),
-              ws: '8.21.3'
-            }
+            'ws@>=8.0.0 <8.21.0': '8.21.3'
           };
-          delete p.overrides['styled-components'];
-          delete p.overrides['@vercel/functions'];
           fs.writeFileSync('package.json', JSON.stringify(p, null, 2) + '\n');
           NODE
           npm install
@@ -56,32 +49,18 @@ jobs:
           rm -rf node_modules
           npm ci
 
-      - name: Verify security alignment declarations
+      - name: Verify targeted dependency resolutions
         shell: bash
         run: |
           node <<'NODE'
           const p = require('./package.json');
-          const expected = {
-            next: '16.3.1',
-            sharp: '0.35.3',
-            viem: '2.55.10',
-            ws: '8.21.3'
-          };
-          for (const [name, version] of Object.entries(expected)) {
-            if (p.dependencies?.[name] !== version) {
-              throw new Error(`${name} expected ${version}, found ${p.dependencies?.[name]}`);
-            }
-          }
-          if (p.overrides?.['@coinbase/cdp-sdk']?.axios !== '1.18.0') {
-            throw new Error('Coinbase CDP axios security override missing');
-          }
-          if (p.overrides?.viem?.ws !== '8.21.3') {
-            throw new Error('viem ws security override missing');
-          }
+          if (p.dependencies?.next !== '16.3.1') throw new Error('Next security upgrade missing');
+          if (p.dependencies?.sharp !== '0.35.3') throw new Error('sharp security upgrade missing');
+          if (p.dependencies?.viem !== '2.55.10') throw new Error('viem Privy peer alignment missing');
+          if (p.overrides?.['@coinbase/cdp-sdk']?.axios !== '1.18.0') throw new Error('Coinbase CDP axios override missing');
+          if (p.overrides?.['ws@>=8.0.0 <8.21.0'] !== '8.21.3') throw new Error('version-scoped ws override missing');
           console.log('SECURITY_ALIGNMENT_OK');
           NODE
-          node -e "console.log('root axios=' + require('axios/package.json').version)"
-          node -e "console.log('root ws=' + require('ws/package.json').version)"
           npm explain axios || true
           npm explain ws || true
 
@@ -94,9 +73,7 @@ jobs:
           const audit = JSON.parse(fs.readFileSync('/tmp/audit.json', 'utf8'));
           const meta = audit.metadata?.vulnerabilities || {};
           console.log('AUDIT_METADATA=' + JSON.stringify(meta));
-          const rows = Object.entries(audit.vulnerabilities || {})
-            .map(([name, v]) => ({ name, ...v }))
-            .sort((a,b) => ({critical:5,high:4,moderate:3,low:2,info:1}[b.severity]||0)-({critical:5,high:4,moderate:3,low:2,info:1}[a.severity]||0) || a.name.localeCompare(b.name));
+          const rows = Object.entries(audit.vulnerabilities || {}).map(([name, v]) => ({ name, ...v }));
           console.log('ADVISORY_PACKAGES=' + JSON.stringify(rows.map(v => ({name:v.name,severity:v.severity,isDirect:v.isDirect}))));
           const blockers = rows.filter(v => v.severity === 'high' || v.severity === 'critical').map(v => v.name);
           console.log('HIGH_CRITICAL_PACKAGES=' + JSON.stringify(blockers));
@@ -109,11 +86,11 @@ jobs:
       - name: TypeScript check
         run: npx tsc --noEmit
 
-      - name: Upload final candidate
+      - name: Upload verified candidate
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: production-security-final-candidate
+          name: production-security-minimal-candidate
           path: |
             package.json
             package-lock.json
