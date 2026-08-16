@@ -131,9 +131,17 @@ const nextConfig = {
       path: false,
       crypto: false,
     };
-    // Privy pulls in Farcaster Solana compat transitively; we don't use it on ETH.
+    // Project GAS does not use the optional Tempo Accounts connector exposed
+    // by wagmi v3. Webpack eagerly resolves that optional dynamic import even
+    // when the Tempo connector is unused, so explicitly mark it absent. If GAS
+    // ever adopts Tempo, remove this alias and install wagmi's compatible
+    // `accounts` optional peer before enabling the connector.
+    //
+    // Privy also pulls in Farcaster Solana compat transitively; GAS does not use
+    // those modules on the current EVM application surface.
     config.resolve.alias = {
       ...config.resolve.alias,
+      accounts: false,
       '@farcaster/mini-app-solana': false,
       '@farcaster/miniapp-sdk': false,
     };
