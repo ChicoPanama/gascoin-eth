@@ -1,4 +1,4 @@
-name: Scoped security lock audit probe
+name: Privy Node dependency security probe
 
 on:
   push:
@@ -10,67 +10,36 @@ permissions:
   contents: read
 
 jobs:
-  audit:
-    name: solana-${{ matrix.strategy }}
+  metadata:
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        strategy: [child-dollar, exact-child-dollar, parent-dollar]
     steps:
-      - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-          cache: npm
-
-      - name: Apply shared security graph and Solana strategy
+      - name: Find nearest Privy Node releases and Solana dependencies
         shell: bash
         run: |
           node <<'NODE'
-          const fs = require('fs');
-          const p = JSON.parse(fs.readFileSync('package.json', 'utf8'));
-          p.dependencies.ws = '8.21.3';
-          p.overrides = {
-            ...(p.overrides || {}),
-            '@coinbase/cdp-sdk': { axios: '1.18.0' },
-            'styled-components': '6.5.3',
-            '@walletconnect/utils': '2.22.4',
-            '@walletconnect/jsonrpc-ws-connection': { ws: '7.5.13' }
-          };
-          const strategy = '${{ matrix.strategy }}';
-          if (strategy === 'child-dollar') {
-            p.overrides['@solana/rpc-subscriptions-channel-websocket'] = { ws: '$ws' };
-          } else if (strategy === 'exact-child-dollar') {
-            p.overrides['@solana/rpc-subscriptions-channel-websocket@5.5.1'] = { ws: '$ws' };
-          } else {
-            p.overrides['@solana/rpc-subscriptions'] = {
-              '@solana/rpc-subscriptions-channel-websocket': { ws: '$ws' }
-            };
+          const { execFileSync } = require('child_process');
+          const versions = JSON.parse(execFileSync('npm', ['view','@privy-io/node','versions','--json'], {encoding:'utf8'}));
+          const candidates = versions.filter(v => {
+            const m = v.match(/^(\d+)\.(\d+)\.(\d+)$/);
+            if (!m) return false;
+            const [maj,min] = [Number(m[1]),Number(m[2])];
+            return maj === 0 && min >= 12;
+          }).slice(-30);
+          console.log('CANDIDATES=' + JSON.stringify(candidates));
+          for (const v of candidates) {
+            let raw;
+            try {
+              raw = execFileSync('npm', ['view',`@privy-io/node@${v}`,'version','dependencies','peerDependencies','engines','--json'], {encoding:'utf8'});
+            } catch (e) {
+              console.log('ERROR ' + v + ' ' + e.message);
+              continue;
+            }
+            const data = JSON.parse(raw);
+            const deps = data.dependencies || {};
+            const solana = Object.fromEntries(Object.entries(deps).filter(([k]) => k.startsWith('@solana/')));
+            console.log(JSON.stringify({version:v, solana, engines:data.engines, viem:deps.viem, axios:deps.axios}));
           }
-          fs.writeFileSync('package.json', JSON.stringify(p, null, 2) + '\n');
           NODE
-          npm install --ignore-scripts
-          npm update ws --ignore-scripts
-          npm dedupe --ignore-scripts
-
-      - name: Audit production graph
-        shell: bash
-        run: |
-          npm audit --omit=dev --json > /tmp/audit.json || true
-          node <<'NODE'
-          const fs = require('fs');
-          const audit = JSON.parse(fs.readFileSync('/tmp/audit.json', 'utf8'));
-          const meta = audit.metadata?.vulnerabilities || {};
-          const blockers = Object.entries(audit.vulnerabilities || {})
-            .filter(([, v]) => v.severity === 'high' || v.severity === 'critical')
-            .map(([name, v]) => ({ name, severity: v.severity, nodes: v.nodes, range: v.range }));
-          console.log('STRATEGY=${{ matrix.strategy }}');
-          console.log('AUDIT_METADATA=' + JSON.stringify(meta));
-          console.log('HIGH_CRITICAL=' + JSON.stringify(blockers));
-          if (blockers.length) process.exit(2);
-          NODE
-
-      - name: Show Solana websocket resolution
-        if: always()
-        run: npm ls @solana/rpc-subscriptions-channel-websocket ws --all || true
