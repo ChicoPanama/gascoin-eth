@@ -11,12 +11,12 @@ permissions:
 
 jobs:
   audit:
-    name: solana-${{ matrix.solana_version }}
+    name: ${{ matrix.strategy }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        solana_version: ['6.0.0', '6.1.0', '6.10.0', '7.0.0', '7.1.0']
+        strategy: [targeted-ws-update, targeted-ws-update-dedupe, child-overrides]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -24,7 +24,7 @@ jobs:
           node-version: '22'
           cache: npm
 
-      - name: Apply proven parent-level fixes
+      - name: Apply shared security fixes
         shell: bash
         run: |
           node <<'NODE'
@@ -38,16 +38,25 @@ jobs:
               axios: '1.18.0'
             },
             'styled-components': '6.5.3',
-            '@walletconnect/utils': '2.22.4',
-            '@walletconnect/jsonrpc-ws-connection': {
-              ...((p.overrides || {})['@walletconnect/jsonrpc-ws-connection'] || {}),
-              ws: '7.5.13'
-            },
-            '@solana/rpc-subscriptions-channel-websocket': '${{ matrix.solana_version }}'
+            '@walletconnect/utils': '2.22.4'
           };
+          if ('${{ matrix.strategy }}' === 'child-overrides') {
+            p.overrides['@walletconnect/jsonrpc-ws-connection'] = { ws: '7.5.13' };
+            p.overrides['@supabase/realtime-js'] = { ws: '8.21.3' };
+            p.overrides['@solana/rpc-subscriptions-channel-websocket'] = { ws: '8.21.3' };
+          }
           fs.writeFileSync('package.json', JSON.stringify(p, null, 2) + '\n');
           NODE
           npm install --package-lock-only --ignore-scripts
+
+      - name: Target only websocket resolutions
+        if: matrix.strategy != 'child-overrides'
+        shell: bash
+        run: |
+          npm update ws --package-lock-only --ignore-scripts
+          if [ '${{ matrix.strategy }}' = 'targeted-ws-update-dedupe' ]; then
+            npm dedupe --package-lock-only --ignore-scripts
+          fi
 
       - name: Audit production lock graph
         shell: bash
@@ -60,14 +69,12 @@ jobs:
           const blockers = Object.entries(audit.vulnerabilities || {})
             .filter(([, v]) => v.severity === 'high' || v.severity === 'critical')
             .map(([name, v]) => ({ name, severity: v.severity, range: v.range, nodes: v.nodes, effects: v.effects, fixAvailable: v.fixAvailable }));
-          console.log('SOLANA_VERSION=${{ matrix.solana_version }}');
+          console.log('STRATEGY=${{ matrix.strategy }}');
           console.log('AUDIT_METADATA=' + JSON.stringify(meta));
           console.log('HIGH_CRITICAL=' + JSON.stringify(blockers));
           if (blockers.length) process.exit(2);
           NODE
 
-      - name: Show selected package metadata
+      - name: Show websocket ownership
         if: always()
-        shell: bash
-        run: |
-          npm view @solana/rpc-subscriptions-channel-websocket@${{ matrix.solana_version }} version dependencies peerDependencies engines --json || true
+        run: npm ls ws @solana/rpc-subscriptions-channel-websocket @supabase/realtime-js @walletconnect/utils viem --all || true
