@@ -16,7 +16,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        strategy: [walletconnect-utils, walletconnect-utils-dedupe]
+        strategy: [exact-solana-parent, update-solana-parent, latest-solana-parent]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -24,7 +24,7 @@ jobs:
           node-version: '22'
           cache: npm
 
-      - name: Apply parent-level security fixes
+      - name: Apply proven parent-level fixes
         shell: bash
         run: |
           node <<'NODE'
@@ -48,9 +48,36 @@ jobs:
           NODE
           npm install --package-lock-only --ignore-scripts
 
-      - name: Dedupe compatible copies
-        if: matrix.strategy == 'walletconnect-utils-dedupe'
-        run: npm dedupe --package-lock-only --ignore-scripts
+      - name: Patch exact Solana websocket parent
+        if: matrix.strategy == 'exact-solana-parent'
+        shell: bash
+        run: |
+          node <<'NODE'
+          const fs = require('fs');
+          const p = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+          p.overrides['@solana/rpc-subscriptions-channel-websocket@5.5.1'] = { ws: '8.21.3' };
+          fs.writeFileSync('package.json', JSON.stringify(p, null, 2) + '\n');
+          NODE
+          npm install --package-lock-only --ignore-scripts
+
+      - name: Update Solana websocket parent within declared ranges
+        if: matrix.strategy == 'update-solana-parent'
+        run: npm update @solana/rpc-subscriptions-channel-websocket --package-lock-only --ignore-scripts
+
+      - name: Test latest Solana websocket parent override
+        if: matrix.strategy == 'latest-solana-parent'
+        shell: bash
+        run: |
+          LATEST=$(npm view @solana/rpc-subscriptions-channel-websocket version)
+          echo "LATEST_SOLANA_WS_PARENT=$LATEST"
+          node - "$LATEST" <<'NODE'
+          const fs = require('fs');
+          const latest = process.argv[2];
+          const p = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+          p.overrides['@solana/rpc-subscriptions-channel-websocket'] = latest;
+          fs.writeFileSync('package.json', JSON.stringify(p, null, 2) + '\n');
+          NODE
+          npm install --package-lock-only --ignore-scripts
 
       - name: Audit production lock graph
         shell: bash
@@ -68,6 +95,6 @@ jobs:
           if (blockers.length) process.exit(2);
           NODE
 
-      - name: Show ownership
+      - name: Show final ownership
         if: always()
-        run: npm ls @walletconnect/utils ws viem isows @walletconnect/jsonrpc-ws-connection --all || true
+        run: npm ls @solana/rpc-subscriptions-channel-websocket @walletconnect/utils ws viem isows --all || true
