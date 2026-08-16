@@ -19,11 +19,8 @@ jobs:
           node-version: '22'
           cache: npm
 
-      - name: Reconcile lockfile to declared dependency graph
-        run: npm install
-
-      - name: Refresh allowed production transitive dependencies
-        run: npm update --omit=dev
+      - name: Verify clean baseline
+        run: npm ci
 
       - name: Apply scoped security overrides in runner only
         shell: bash
@@ -37,6 +34,10 @@ jobs:
               ...((p.overrides || {})['@coinbase/cdp-sdk'] || {}),
               axios: '1.18.0'
             },
+            'styled-components': {
+              ...((p.overrides || {})['styled-components'] || {}),
+              postcss: '8.5.23'
+            },
             viem: {
               ...((p.overrides || {}).viem || {}),
               ws: '8.21.3'
@@ -48,9 +49,9 @@ jobs:
           };
           fs.writeFileSync('package.json', JSON.stringify(p, null, 2) + '\n');
           NODE
-          npm install
+          npm install --package-lock-only --ignore-scripts
 
-      - name: Verify reproducible clean install
+      - name: Verify reproducible overridden graph
         shell: bash
         run: |
           rm -rf node_modules
@@ -90,11 +91,11 @@ jobs:
         if: always()
         run: npx tsc --noEmit
 
-      - name: Upload reconciled manifest and lockfile
+      - name: Upload scoped candidate manifest and lockfile
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: production-security-remediation-candidate
+          name: production-security-scoped-candidate
           path: |
             package.json
             package-lock.json
