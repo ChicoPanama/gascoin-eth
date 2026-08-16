@@ -24,6 +24,7 @@ jobs:
           node <<'NODE'
           const fs = require('fs');
           const p = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+          p.dependencies.ws = '8.21.3';
           p.overrides = {
             ...(p.overrides || {}),
             '@coinbase/cdp-sdk': {
@@ -61,7 +62,7 @@ jobs:
           const meta = audit.metadata?.vulnerabilities || {};
           const blockers = Object.entries(audit.vulnerabilities || {})
             .filter(([, v]) => v.severity === 'high' || v.severity === 'critical')
-            .map(([name, v]) => ({ name, severity: v.severity, range: v.range, effects: v.effects }));
+            .map(([name, v]) => ({ name, severity: v.severity, range: v.range, effects: v.effects, fixAvailable: v.fixAvailable }));
           console.log('AUDIT_METADATA=' + JSON.stringify(meta));
           console.log('HIGH_CRITICAL=' + JSON.stringify(blockers));
           if (blockers.length) process.exit(2);
