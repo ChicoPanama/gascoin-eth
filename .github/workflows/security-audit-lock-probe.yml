@@ -11,14 +11,20 @@ permissions:
 
 jobs:
   audit:
+    name: ${{ matrix.strategy }}
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        strategy: [update-ws, dedupe-ws, global-ws-with-v7-exception]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
           cache: npm
-      - name: Apply exact scoped candidate to manifest
+
+      - name: Apply shared security fixes
         shell: bash
         run: |
           node <<'NODE'
@@ -43,15 +49,39 @@ jobs:
             '@walletconnect/jsonrpc-ws-connection': {
               ...((p.overrides || {})['@walletconnect/jsonrpc-ws-connection'] || {}),
               ws: '7.5.13'
-            },
-            viem: {
-              ...((p.overrides || {}).viem || {}),
-              ws: '8.21.3'
             }
           };
           fs.writeFileSync('package.json', JSON.stringify(p, null, 2) + '\n');
           NODE
           npm install --package-lock-only --ignore-scripts
+
+      - name: Update compatible ws copies
+        if: matrix.strategy == 'update-ws'
+        run: npm update ws --package-lock-only --ignore-scripts
+
+      - name: Dedupe compatible ws copies
+        if: matrix.strategy == 'dedupe-ws'
+        run: npm dedupe --package-lock-only --ignore-scripts
+
+      - name: Force v8 copies to root spec with v7 exception
+        if: matrix.strategy == 'global-ws-with-v7-exception'
+        shell: bash
+        run: |
+          node <<'NODE'
+          const fs = require('fs');
+          const p = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+          p.overrides = {
+            ...(p.overrides || {}),
+            ws: '$ws',
+            '@walletconnect/jsonrpc-ws-connection': {
+              ...((p.overrides || {})['@walletconnect/jsonrpc-ws-connection'] || {}),
+              ws: '7.5.13'
+            }
+          };
+          fs.writeFileSync('package.json', JSON.stringify(p, null, 2) + '\n');
+          NODE
+          npm install --package-lock-only --ignore-scripts
+
       - name: Audit production lock graph
         shell: bash
         run: |
@@ -62,8 +92,12 @@ jobs:
           const meta = audit.metadata?.vulnerabilities || {};
           const blockers = Object.entries(audit.vulnerabilities || {})
             .filter(([, v]) => v.severity === 'high' || v.severity === 'critical')
-            .map(([name, v]) => ({ name, severity: v.severity, range: v.range, effects: v.effects, fixAvailable: v.fixAvailable }));
+            .map(([name, v]) => ({ name, severity: v.severity, range: v.range, nodes: v.nodes, effects: v.effects, fixAvailable: v.fixAvailable }));
           console.log('AUDIT_METADATA=' + JSON.stringify(meta));
           console.log('HIGH_CRITICAL=' + JSON.stringify(blockers));
           if (blockers.length) process.exit(2);
           NODE
+
+      - name: Show ws ownership
+        if: always()
+        run: npm ls ws viem isows @walletconnect/jsonrpc-ws-connection --all || true
