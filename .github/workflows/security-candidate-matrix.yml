@@ -9,14 +9,22 @@ on:
 permissions:
   contents: read
 
+env:
+  NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.TEST_SUPABASE_URL }}
+  NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.TEST_SUPABASE_ANON_KEY }}
+  SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.TEST_SERVICE_ROLE_KEY }}
+  NEXT_PUBLIC_SOLANA_RPC_URL: https://api.mainnet-beta.solana.com
+  NEXT_PUBLIC_GASCOIN_MINT_ADDRESS: placeholder
+  GASCOIN_TREASURY_WALLET: placeholder
+  ADMIN_WALLET_ADDRESSES: placeholder
+  ADMIN_SESSION_SECRET: placeholder_32_chars_minimum_length
+  X_BEARER_TOKEN: placeholder
+  X_API_BEARER_TOKEN: placeholder
+
 jobs:
   candidate:
-    name: ${{ matrix.strategy }}
+    name: scoped-safe
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        strategy: [targeted-update, scoped-overrides]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -27,47 +35,30 @@ jobs:
       - name: Verify clean baseline
         run: npm ci
 
-      - name: Remove dormant direct SDKs and align core versions
+      - name: Snapshot baseline dependency problems
+        shell: bash
+        run: npm ls --all --json > /tmp/baseline-ls.json || true
+
+      - name: Apply owner-scoped security remediation in runner only
         shell: bash
         run: |
           node <<'NODE'
           const fs = require('fs');
           const p = JSON.parse(fs.readFileSync('package.json', 'utf8'));
-          delete p.dependencies['@privy-io/node'];
-          delete p.dependencies['@vercel/functions'];
-          p.dependencies['@supabase/supabase-js'] = '2.111.0';
           p.overrides = {
             ...(p.overrides || {}),
             '@coinbase/cdp-sdk': {
               ...((p.overrides || {})['@coinbase/cdp-sdk'] || {}),
               axios: '1.18.0'
-            }
-          };
-          fs.writeFileSync('package.json', JSON.stringify(p, null, 2) + '\n');
-          NODE
-          npm install --ignore-scripts
-
-      - name: Targeted transitive refresh
-        if: matrix.strategy == 'targeted-update'
-        run: npm update ws postcss styled-components --ignore-scripts
-
-      - name: Scoped override alignment
-        if: matrix.strategy == 'scoped-overrides'
-        shell: bash
-        run: |
-          node <<'NODE'
-          const fs = require('fs');
-          const p = JSON.parse(fs.readFileSync('package.json', 'utf8'));
-          p.overrides = {
-            ...(p.overrides || {}),
-            'styled-components': '6.4.4',
-            'viem': {
-              ...((p.overrides || {}).viem || {}),
-              ws: '8.21.1'
+            },
+            'styled-components': '6.5.3',
+            '@solana/rpc-subscriptions-channel-websocket': {
+              ...((p.overrides || {})['@solana/rpc-subscriptions-channel-websocket'] || {}),
+              ws: '8.21.3'
             },
             '@supabase/realtime-js': {
               ...((p.overrides || {})['@supabase/realtime-js'] || {}),
-              ws: '8.21.1'
+              ws: '8.21.3'
             },
             '@walletconnect/jsonrpc-ws-connection': {
               ...((p.overrides || {})['@walletconnect/jsonrpc-ws-connection'] || {}),
@@ -76,7 +67,7 @@ jobs:
           };
           fs.writeFileSync('package.json', JSON.stringify(p, null, 2) + '\n');
           NODE
-          npm install --ignore-scripts
+          npm install --package-lock-only --ignore-scripts
 
       - name: Verify reproducible clean install
         shell: bash
@@ -84,8 +75,23 @@ jobs:
           rm -rf node_modules
           npm ci
 
-      - name: Verify dependency tree integrity
-        run: npm ls --all > /tmp/npm-ls.txt
+      - name: Reject newly introduced dependency-tree problems
+        shell: bash
+        run: |
+          npm ls --all --json > /tmp/candidate-ls.json || true
+          node <<'NODE'
+          const fs = require('fs');
+          const read = (p) => JSON.parse(fs.readFileSync(p, 'utf8'));
+          const baseline = new Set(read('/tmp/baseline-ls.json').problems || []);
+          const candidate = read('/tmp/candidate-ls.json').problems || [];
+          const added = candidate.filter((p) => !baseline.has(p));
+          const removed = [...baseline].filter((p) => !candidate.includes(p));
+          console.log('BASELINE_PROBLEMS=' + JSON.stringify([...baseline]));
+          console.log('CANDIDATE_PROBLEMS=' + JSON.stringify(candidate));
+          console.log('NEW_PROBLEMS=' + JSON.stringify(added));
+          console.log('REMOVED_PROBLEMS=' + JSON.stringify(removed));
+          if (added.length) process.exit(3);
+          NODE
 
       - name: Production audit gate
         shell: bash
@@ -105,7 +111,7 @@ jobs:
 
       - name: Security ownership snapshot
         if: always()
-        run: npm ls @privy-io/node @vercel/functions @supabase/supabase-js @supabase/realtime-js styled-components postcss ws axios viem @walletconnect/jsonrpc-ws-connection --all || true
+        run: npm ls @privy-io/node @privy-io/react-auth @vercel/functions @supabase/supabase-js @supabase/realtime-js styled-components postcss ws axios viem @solana/rpc-subscriptions-channel-websocket @walletconnect/jsonrpc-ws-connection --all || true
 
       - name: Unit tests
         if: always()
@@ -115,14 +121,19 @@ jobs:
         if: always()
         run: npx tsc --noEmit
 
+      - name: Production build
+        if: always()
+        run: npm run build
+
       - name: Upload candidate
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: security-candidate-${{ matrix.strategy }}
+          name: security-candidate-scoped-safe
           path: |
             package.json
             package-lock.json
             /tmp/audit.json
-            /tmp/npm-ls.txt
+            /tmp/baseline-ls.json
+            /tmp/candidate-ls.json
           retention-days: 1
