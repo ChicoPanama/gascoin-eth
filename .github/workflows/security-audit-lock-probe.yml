@@ -42,6 +42,10 @@ jobs:
             '@walletconnect/jsonrpc-ws-connection': {
               ...((p.overrides || {})['@walletconnect/jsonrpc-ws-connection'] || {}),
               ws: '7.5.13'
+            },
+            viem: {
+              ...((p.overrides || {}).viem || {}),
+              ws: '8.21.3'
             }
           };
           fs.writeFileSync('package.json', JSON.stringify(p, null, 2) + '\n');
