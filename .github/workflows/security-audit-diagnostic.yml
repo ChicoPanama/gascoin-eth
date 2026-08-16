@@ -48,14 +48,7 @@ jobs:
             echo "===== npm explain $pkg ====="
             npm explain "$pkg" || true
           done < /tmp/high-packages.txt
-      - name: Non-breaking audit-fix dry run
-        shell: bash
-        run: |
-          npm audit fix --omit=dev --dry-run --json > /tmp/fix.json || true
-          node <<'NODE'
-          const fs = require('fs');
-          const data = JSON.parse(fs.readFileSync('/tmp/fix.json', 'utf8'));
-          console.log('FIX_DRY_RUN=' + JSON.stringify({added:data.added,removed:data.removed,changed:data.changed,audit:data.audit?.metadata?.vulnerabilities || data.metadata?.vulnerabilities || null}, null, 2));
-          NODE
+      - name: Show semver-safe audit fix plan
+        run: npm audit fix --omit=dev --dry-run || true
       - name: Direct dependency freshness
-        run: npm outdated --json || true
+        run: npm outdated || true
