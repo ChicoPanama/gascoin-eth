@@ -23,7 +23,7 @@ env:
 
 jobs:
   candidate:
-    name: scoped-safe-with-root-ws
+    name: version-scoped-safe
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -39,7 +39,7 @@ jobs:
         shell: bash
         run: npm ls --all --json > /tmp/baseline-ls.json || true
 
-      - name: Apply owner-scoped security remediation in runner only
+      - name: Apply version-scoped security remediation in runner only
         shell: bash
         run: |
           node <<'NODE'
@@ -53,18 +53,8 @@ jobs:
               axios: '1.18.0'
             },
             'styled-components': '6.5.3',
-            '@solana/rpc-subscriptions-channel-websocket': {
-              ...((p.overrides || {})['@solana/rpc-subscriptions-channel-websocket'] || {}),
-              ws: '8.21.3'
-            },
-            '@supabase/realtime-js': {
-              ...((p.overrides || {})['@supabase/realtime-js'] || {}),
-              ws: '8.21.3'
-            },
-            '@walletconnect/jsonrpc-ws-connection': {
-              ...((p.overrides || {})['@walletconnect/jsonrpc-ws-connection'] || {}),
-              ws: '7.5.13'
-            }
+            'ws@>=8.0.0 <8.21.0': '8.21.3',
+            'ws@>=7.0.0 <8.0.0': '7.5.13'
           };
           fs.writeFileSync('package.json', JSON.stringify(p, null, 2) + '\n');
           NODE
@@ -106,7 +96,7 @@ jobs:
           const meta = audit.metadata?.vulnerabilities || {};
           const blockers = Object.entries(audit.vulnerabilities || {})
             .filter(([, v]) => v.severity === 'high' || v.severity === 'critical')
-            .map(([name, v]) => ({ name, severity: v.severity, range: v.range, effects: v.effects }));
+            .map(([name, v]) => ({ name, severity: v.severity, range: v.range, effects: v.effects, fixAvailable: v.fixAvailable }));
           console.log('AUDIT_METADATA=' + JSON.stringify(meta));
           console.log('HIGH_CRITICAL=' + JSON.stringify(blockers));
           if (blockers.length) process.exit(2);
@@ -132,7 +122,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: security-candidate-scoped-safe-with-root-ws
+          name: security-candidate-version-scoped-safe
           path: |
             package.json
             package-lock.json
