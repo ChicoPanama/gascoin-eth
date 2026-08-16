@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useConnectWallet } from "@privy-io/react-auth";
-import { useAccount } from "wagmi";
+import { useConnection } from "wagmi";
 
 const EXTERNAL_WALLETS = [
   "metamask",
@@ -20,15 +20,14 @@ function truncate(address: string) {
 }
 
 /**
- * Compatibility button used by legacy routes.
+ * Compatibility wallet action used by legacy routes.
  *
- * Privy owns the actual wallet picker and connection state. wagmi only reads
- * the active wallet that @privy-io/wagmi synchronizes. We deliberately do not
- * call wagmi useDisconnect: injected wallets cannot be truly disconnected by
- * the page and a shimmed wagmi-only disconnect can desynchronize Privy/wagmi.
+ * Privy owns connection/discovery. Wagmi only exposes the active wallet that
+ * @privy-io/wagmi synchronizes. We intentionally do not use wagmi disconnect:
+ * a local connector disconnect can diverge from Privy's true wallet state.
  */
 export function WalletButton() {
-  const { address, isConnected } = useAccount();
+  const { address, isConnected } = useConnection();
   const [connecting, setConnecting] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
 
@@ -48,7 +47,7 @@ export function WalletButton() {
     setMessage(null);
     void connectWallet({
       description: isConnected
-        ? "Connect or switch the wallet used for this session."
+        ? "Connect another wallet you control. You can choose the active wallet from Account."
         : "Connect a wallet you already control.",
       walletChainType: "ethereum-only",
       walletList: [...EXTERNAL_WALLETS],
@@ -67,9 +66,9 @@ export function WalletButton() {
     <button
       className={isConnected && address ? "wallet-btn wallet-btn--connected" : "wallet-btn"}
       onClick={openWalletPicker}
-      title={message || (isConnected ? "Connect or switch wallet" : "Connect wallet")}
+      title={message || (isConnected ? "Connect another wallet" : "Connect wallet")}
     >
-      {isConnected && address ? `${truncate(address)} ↔` : "CONNECT WALLET"}
+      {isConnected && address ? `${truncate(address)} +` : "CONNECT WALLET"}
     </button>
   );
 }
