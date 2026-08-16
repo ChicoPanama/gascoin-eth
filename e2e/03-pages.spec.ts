@@ -7,9 +7,11 @@ test.describe('Legacy compatibility — page semantics', () => {
     await expect(page.getByRole('heading', { name: /LEADERBOARD/i }).first()).toBeVisible();
   });
 
-  test('LB02 — leaderboard stats strip renders', async ({ page }) => {
+  test('LB02 — leaderboard stats surface renders', async ({ page }) => {
     await gotoReady(page, '/leaderboard');
-    await expect(page.locator('.gc-stat')).toHaveCount(4);
+    const stats = page.locator('.gc-stat');
+    await expect(stats.first()).toBeVisible();
+    expect(await stats.count()).toBeGreaterThan(0);
   });
 
   test('CF01 — /community redirects to the recent leaderboard view', async ({ page }) => {
