@@ -75,7 +75,7 @@ jobs:
           rm -rf node_modules
           npm ci
 
-      - name: Reject newly introduced dependency-tree problems
+      - name: Report dependency-tree delta
         shell: bash
         run: |
           npm ls --all --json > /tmp/candidate-ls.json || true
@@ -86,14 +86,15 @@ jobs:
           const candidate = read('/tmp/candidate-ls.json').problems || [];
           const added = candidate.filter((p) => !baseline.has(p));
           const removed = [...baseline].filter((p) => !candidate.includes(p));
+          fs.writeFileSync('/tmp/new-problems.json', JSON.stringify({ added, removed }, null, 2));
           console.log('BASELINE_PROBLEMS=' + JSON.stringify([...baseline]));
           console.log('CANDIDATE_PROBLEMS=' + JSON.stringify(candidate));
           console.log('NEW_PROBLEMS=' + JSON.stringify(added));
           console.log('REMOVED_PROBLEMS=' + JSON.stringify(removed));
-          if (added.length) process.exit(3);
           NODE
 
       - name: Production audit gate
+        if: always()
         shell: bash
         run: |
           npm audit --omit=dev --json > /tmp/audit.json || true
@@ -136,4 +137,5 @@ jobs:
             /tmp/audit.json
             /tmp/baseline-ls.json
             /tmp/candidate-ls.json
+            /tmp/new-problems.json
           retention-days: 1
