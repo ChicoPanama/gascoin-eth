@@ -23,7 +23,7 @@ env:
 
 jobs:
   candidate:
-    name: scoped-safe
+    name: scoped-safe-with-root-ws
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -45,6 +45,7 @@ jobs:
           node <<'NODE'
           const fs = require('fs');
           const p = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+          p.dependencies.ws = '8.21.3';
           p.overrides = {
             ...(p.overrides || {}),
             '@coinbase/cdp-sdk': {
@@ -75,7 +76,7 @@ jobs:
           rm -rf node_modules
           npm ci
 
-      - name: Report dependency-tree delta
+      - name: Reject newly introduced dependency-tree problems
         shell: bash
         run: |
           npm ls --all --json > /tmp/candidate-ls.json || true
@@ -91,6 +92,7 @@ jobs:
           console.log('CANDIDATE_PROBLEMS=' + JSON.stringify(candidate));
           console.log('NEW_PROBLEMS=' + JSON.stringify(added));
           console.log('REMOVED_PROBLEMS=' + JSON.stringify(removed));
+          if (added.length) process.exit(3);
           NODE
 
       - name: Production audit gate
@@ -130,7 +132,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: security-candidate-scoped-safe
+          name: security-candidate-scoped-safe-with-root-ws
           path: |
             package.json
             package-lock.json
