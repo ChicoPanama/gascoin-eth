@@ -43,6 +43,15 @@ test.describe('Project GAS mobile shell', () => {
     await expect(page).toHaveURL(/\/reserve$/);
     await expect(page.getByRole('heading', { name: 'RESERVE' })).toBeVisible();
   });
+
+  test('GAS03 — Account preserves both easy entry and self-custody wallet choice', async ({ page }) => {
+    await page.goto('/account');
+    await expect(page.getByText('YOUR ACCOUNT, YOUR CHOICE', { exact: true })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Use my wallet', exact: true })).toBeVisible();
+    await expect(page.getByText(/Embedded optional|\d+ embedded/)).toBeVisible();
+    await expect(page.getByText(/External optional|\d+ external connected/)).toBeVisible();
+    await expect(page.getByText(/Wallet connection never merges assets with GAS reserves/i)).toBeVisible();
+  });
 });
 
 test.describe('GAS Original prototype loop', () => {
