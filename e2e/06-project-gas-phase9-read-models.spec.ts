@@ -49,4 +49,41 @@ test.describe('Phase 9 read-only authority models', () => {
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth + 2);
     expect(overflow).toBe(false);
   });
+
+  test('GAS24 — activity API returns explicit unavailable state when no approved source is configured', async ({ request }) => {
+    const response = await request.get('/api/project-gas/activity');
+    expect(response.ok()).toBe(true);
+
+    const body = await response.json();
+    expect(body).toMatchObject({
+      version: 1,
+      status: 'unavailable',
+      authority: 'unavailable',
+      health: 'offline',
+      events: [],
+    });
+    expect(body.message).toMatch(/No approved Project GAS activity read source is configured/i);
+  });
+
+  test('GAS25 — Home uses the canonical activity projection and never inserts synthetic activity', async ({ page }) => {
+    await page.setViewportSize(MOBILE);
+    await page.goto('/');
+
+    const activity = page.getByRole('region', { name: 'GAS canonical activity' });
+    await expect(activity).toBeVisible();
+    await expect(activity).toHaveAttribute('data-activity-authority', 'unavailable');
+    await expect(activity).toHaveAttribute('data-activity-status', 'unavailable');
+    await expect(activity.getByText('NO LIVE ACTIVITY', { exact: true })).toBeVisible();
+    await expect(activity.getByText(/No synthetic players, wins, trades or Crew events/i)).toBeVisible();
+  });
+
+  test('GAS26 — canonical activity deep link preserves honest unavailable state', async ({ page }) => {
+    await page.setViewportSize(DESKTOP);
+    await page.goto('/activity/evt-does-not-exist');
+
+    await expect(page.getByRole('heading', { name: 'ACTIVITY' })).toBeVisible();
+    await expect(page.getByText('UNAVAILABLE', { exact: true })).toBeVisible();
+    await expect(page.getByText(/No approved Project GAS activity read source is configured/i)).toBeVisible();
+    await expect(page.getByRole('complementary', { name: 'GAS desktop navigation' })).toBeVisible();
+  });
 });
