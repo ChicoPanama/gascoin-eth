@@ -11,7 +11,7 @@ test.describe('Project GAS Home', () => {
     await page.goto('/');
     await expect(page.getByRole('heading', { name: 'GAS', exact: true })).toBeVisible();
     await expect(page.getByText(/Elastic money · live game · social network/i)).toBeVisible();
-    await expect(page.getByText(/Project GAS UX prototype/i)).toBeVisible();
+    await expect(page.getByText(/Phase 9 transition · each surface labels its own authority/i)).toBeVisible();
   });
 
   test('HP03 — primary actions expose Play and Trade', async ({ page }) => {
