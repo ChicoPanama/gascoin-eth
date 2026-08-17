@@ -1,6 +1,6 @@
 # Phase 8 Gate — Desktop Adaptation
 
-**Status:** ACTIVE / NOT PASSED  
+**Status:** ACTIVE / IMPLEMENTATION COMPLETE / CI PENDING  
 **Predecessor:** Phase 7 — PASS / CLOSED
 
 ## Objective
@@ -20,9 +20,9 @@ Before continuing substantial Phase 8 UX, frontend, state-model, wallet/account 
 - the required Phase 2 Fomo corpus listed in the Codex addendum;
 - `ux-research/phase-3/CROSS_CATEGORY_FINDINGS.md`;
 - `ux-research/phase-3/PHASE_3_REVALIDATION_2026-08-16.md`;
-- `ux-research/reference-matrix/REFERENCE_MATRIX.md`;
-- `ux-research/phase-5/GAS_PATTERN_LIBRARY.md`;
-- `ux-research/phase-6/GAS_INFORMATION_ARCHITECTURE.md`.
+- `ux-research/phase-4/REFERENCE_MATRIX.json`;
+- `ux-research/phase-5/PATTERN_LIBRARY.md`;
+- `ux-research/phase-6/INFORMATION_ARCHITECTURE.md`.
 
 Before building a meaningful research-derived behavior, internally map:
 
@@ -62,6 +62,16 @@ Utilities:
 The exact visual rail/header composition may evolve during Phase 8, but those information-architecture roles are fixed by Phase 6.
 
 Desktop is not a separate application. Bigger screen means more simultaneous context, not more required actions.
+
+## Implemented Phase 8 surface
+
+- `components/gas/GasDesktopNav.tsx` — persistent desktop primary navigation;
+- `components/gas/GasResponsiveShell.module.css` — explicit mobile/tablet/desktop transformations;
+- `components/gas/GasPrototypeShell.tsx` — one responsive shell with desktop utilities and retained mobile navigation;
+- `components/gas/GasOriginalPrototype.tsx` + module CSS — desktop trust/session context around the unchanged core Play loop;
+- responsive density on Home, Play, Trade, Crews, Reserve and Account;
+- `e2e/05-project-gas.spec.ts` — explicit 390×844, 768×1024, 1440×900 and 1920×1080 gates;
+- `ux-research/phase-8/PHASE_8_RESEARCH_INTEGRATION_REVIEW.md` — research-to-implementation traceability review.
 
 ## Required adaptations
 
@@ -129,18 +139,18 @@ The existing 390×844 Phase 7 mobile gate remains a regression check.
 
 ## Required research-integration review before PASS
 
-Before Phase 8 closes, explicitly review the implementation against:
+Completed in `ux-research/phase-8/PHASE_8_RESEARCH_INTEGRATION_REVIEW.md` against:
 
 - `ux-research/phase-2/fomo/FOMO_DESKTOP_MOBILE_PARITY.md`;
 - `ux-research/phase-2/fomo/FOMO_TO_GAS_MAP.md`;
 - `ux-research/phase-3/CROSS_CATEGORY_FINDINGS.md`;
 - `ux-research/phase-3/PHASE_3_REVALIDATION_2026-08-16.md`;
-- `ux-research/reference-matrix/REFERENCE_MATRIX.md`;
-- `ux-research/phase-5/GAS_PATTERN_LIBRARY.md`;
+- `ux-research/phase-4/REFERENCE_MATRIX.json`;
+- `ux-research/phase-5/PATTERN_LIBRARY.md`;
 - `ux-research/phase-1/COMPATIBILITY_MATRIX.json`;
-- `ux-research/phase-6/GAS_INFORMATION_ARCHITECTURE.md`.
+- `ux-research/phase-6/INFORMATION_ARCHITECTURE.md`.
 
-The review must confirm:
+The review confirms at implementation level:
 
 - desktop preserved mobile ontology;
 - social/account state remains canonical;
@@ -150,8 +160,6 @@ The review must confirm:
 - financial semantics and provenance remain truthful;
 - backend/frontend authorities are clear;
 - no legacy refund ontology re-entered.
-
-Only then may the Phase 8 gate pass.
 
 ## Exit requirements
 
@@ -173,6 +181,8 @@ Phase 8 passes only when all are true:
 14. React views do not become the source of authoritative financial settlement/state where a controller/query/adapter boundary is required.
 15. No duplicate social graph or duplicate per-feed economic-event truth is introduced by desktop adaptation.
 16. No mature generic GASCOIN infrastructure is replaced solely because the old product domain is being retired.
+
+Requirements 1–7 and 10–16 are implemented/reviewed. Requirements 8–9 remain gated by the latest CI run and must not be marked passed from prose alone.
 
 ## Out of scope for Phase 8
 
