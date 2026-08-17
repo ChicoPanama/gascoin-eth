@@ -33,8 +33,13 @@ export function GasReserveReadModel() {
     : snapshot.status.toUpperCase();
 
   return (
-    <div data-reserve-authority={snapshot.authority} data-reserve-status={snapshot.status}>
-      <section className={styles.accountStrip} aria-label="GAS reserve summary">
+    <div>
+      <section
+        className={styles.accountStrip}
+        aria-label="GAS reserve summary"
+        data-reserve-authority={snapshot.authority}
+        data-reserve-status={snapshot.status}
+      >
         <div>
           <div className={styles.eyebrow}>Adjusted external backing coverage</div>
           <div className={styles.balance}>{reserveCoverageLabel(snapshot)} <span className={styles.eyebrow}>{authorityLabel}</span></div>
