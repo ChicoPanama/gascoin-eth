@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { GasPrototypeShell } from '@/components/gas/GasPrototypeShell';
 import styles from '@/components/gas/gas-ui.module.css';
+import responsive from '@/components/gas/GasResponsiveShell.module.css';
 
 export const metadata: Metadata = {
   title: 'Trade — Project GAS',
@@ -19,8 +20,8 @@ export default function TradePage() {
         <h1 className={styles.pageTitle}>TRADE</h1>
         <p className={styles.pageIntro}>Buy, Sell, Fund and Withdraw share one account model. Advanced market depth will be progressive, never required for the ordinary path.</p>
       </header>
-      <div className={styles.cardGrid}>
-        <div className={styles.actionCard}>
+      <div className={`${styles.cardGrid} ${responsive.contentGrid}`}>
+        <div className={`${styles.actionCard} ${responsive.primaryWide}`}>
           <span className={styles.actionCardMeta}>GP17 QuickTradeSheet · wiring pending</span>
           <span className={styles.actionCardTitle}>BUY GAS</span>
           <p className={styles.actionCardBody}>A real quote must show amount, fee, estimated output, minimum received and meaningful price impact before confirmation.</p>
@@ -28,7 +29,7 @@ export default function TradePage() {
         <div className={styles.actionCard}>
           <span className={styles.actionCardMeta}>Exit parity</span>
           <span className={styles.actionCardTitle}>SELL GAS</span>
-          <p className={styles.actionCardBody}>The exit path is deliberately as visible as entry. No transaction is available in this Phase 7 interaction prototype.</p>
+          <p className={styles.actionCardBody}>The exit path is deliberately as visible as entry. No transaction is available in this interaction prototype.</p>
         </div>
         <div className={styles.actionCard}>
           <span className={styles.actionCardMeta}>Account rails</span>
