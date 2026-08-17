@@ -1,17 +1,38 @@
 # Phase 8 Gate — Desktop Adaptation
 
-**Status:** ACTIVE / IMPLEMENTATION COMPLETE / CI PENDING  
-**Predecessor:** Phase 7 — PASS / CLOSED
+**Status:** PASS / CLOSED  
+**Predecessor:** Phase 7 — PASS / CLOSED  
+**Final code-bearing head:** `6e1f80218570e9bbe1bd95447dec0009c6ca2acc`  
+**Closure CI:** Project GAS CI run #414 — PASS
 
 ## Objective
 
 Adapt the verified Project GAS mobile product to desktop without creating a second, terminal-first product model.
 
-Desktop should use extra width to expose more simultaneous context while preserving the same identity, routes, financial semantics, action state machine and primary user decisions proven in Phase 7.
+Desktop uses extra width to expose more simultaneous context while preserving the same identity, routes, financial semantics, action state machine and primary user decisions proven in Phase 7.
+
+## Closure evidence
+
+Project GAS CI run #414 passed on the final Phase 8 code-bearing head `6e1f80218570e9bbe1bd95447dec0009c6ca2acc`:
+
+- Full Dependency Security — **PASS**
+- Unit Tests — **PASS**
+- Production Build — **PASS**
+- Project GAS E2E — **PASS**
+- Legacy Compatibility E2E — **PASS**
+
+The Project GAS browser gate includes explicit responsive checks at:
+
+- 390×844 — Phase 7 mobile regression;
+- 768×1024 — tablet transition;
+- 1440×900 — desktop;
+- 1920×1080 — wide desktop.
+
+The first Phase 8 CI attempt exposed an ambiguous Playwright selector for the desktop Account utility. The application rendered correctly; the test matched both the utility Account link and the Home account-summary Account link. The assertion was scoped to the explicitly labeled utility and run #414 then passed the full gate. No production behavior was weakened to satisfy the test.
 
 ## Mandatory implementation context
 
-Before continuing substantial Phase 8 UX, frontend, state-model, wallet/account or backend-integration work, read:
+Phase 8 implementation was reviewed against:
 
 - `ux-research/CODEX_RESEARCH_FRONTEND_BACKEND_INTEGRATION_ADDENDUM.md`;
 - `ux-research/phase-1/REPO_INVENTORY.md`;
@@ -24,7 +45,7 @@ Before continuing substantial Phase 8 UX, frontend, state-model, wallet/account 
 - `ux-research/phase-5/PATTERN_LIBRARY.md`;
 - `ux-research/phase-6/INFORMATION_ARCHITECTURE.md`.
 
-Before building a meaningful research-derived behavior, internally map:
+Research-derived behavior is traceable as:
 
 ```text
 USER PROBLEM
@@ -35,21 +56,21 @@ USER PROBLEM
 -> ACCEPTANCE TEST
 ```
 
-Do not create a new roadmap document for this mapping. `ux-research/ROADMAP.md` remains the sole numbered roadmap.
+`ux-research/ROADMAP.md` remains the sole numbered roadmap.
 
 ## Behavioral source of truth
 
-Phase 7 mobile behavior remains canonical:
+Phase 7 mobile behavior remained canonical throughout Phase 8:
 
 `SIGN IN -> TRUTHFUL ACCOUNT -> PLAY -> CRUISE/BOOST/REDLINE -> WAGER -> IGNITION -> CANONICAL ACTION STATE -> RESULT -> REPLAY`
 
-Desktop may rearrange or expose supporting context around that loop. It may not alter the loop's economic meaning or create a different settlement model.
+Desktop rearranges and exposes supporting context around that loop without altering its economic meaning or creating a different settlement model.
 
-The cross-device invariant is:
+The cross-device invariant remains:
 
 > Identity, relationships, economic objects and account state remain canonical even when presentation changes.
 
-## Target desktop shell
+## Implemented desktop shell
 
 Persistent product destinations:
 
@@ -58,8 +79,6 @@ Persistent product destinations:
 Utilities:
 
 `Search | Notifications | Account`
-
-The exact visual rail/header composition may evolve during Phase 8, but those information-architecture roles are fixed by Phase 6.
 
 Desktop is not a separate application. Bigger screen means more simultaneous context, not more required actions.
 
@@ -73,71 +92,51 @@ Desktop is not a separate application. Bigger screen means more simultaneous con
 - `e2e/05-project-gas.spec.ts` — explicit 390×844, 768×1024, 1440×900 and 1920×1080 gates;
 - `ux-research/phase-8/PHASE_8_RESEARCH_INTEGRATION_REVIEW.md` — research-to-implementation traceability review.
 
-## Required adaptations
+## Verified adaptations
 
 ### Shell
-- responsive desktop navigation using the same routes as mobile;
-- no legacy GASCOIN nav on Project GAS routes;
-- clear active state and keyboard-accessible navigation;
-- desktop does not require chain/RPC knowledge for ordinary use;
+- desktop navigation uses the same canonical routes as mobile;
+- no legacy GASCOIN navigation re-entered Project GAS routes;
+- active state is explicit and navigation remains keyboard-addressable;
+- ordinary desktop use does not require chain/RPC knowledge;
 - account/identity semantics remain canonical across mobile and desktop;
 - wallet addresses remain linked financial credentials rather than the primary social identity.
 
 ### Home
-- preserve one primary action hierarchy;
-- use wider layout for monetary state, activity and social context without fabricating unavailable data;
-- Reserve remains first-class and persistent on desktop;
-- reserve/rebase values must preserve source authority and freshness semantics rather than being invented in components.
+- one primary action hierarchy is preserved;
+- wider layout adds simultaneous monetary/action context without fabricating unavailable data;
+- Reserve is first-class and persistent on desktop;
+- reserve/rebase values remain unavailable rather than being invented in components.
 
 ### Play / GAS Original
-- preserve CRUISE / BOOST / REDLINE, wager, IGNITION and one-action replay;
-- keep GAS Gauge as the primary game-state focal point;
-- keep the primary desktop hierarchy `GAS GAUGE -> RISK -> WAGER -> IGNITION`;
-- use extra width for history/social/trust/fairness/advanced context rather than additional required steps;
-- canonical ready/locking/locked/resolving/settled/recovery state remains identical to mobile;
-- presentation modes such as Instant or Reduced Motion may change presentation latency only, never probability/economics/settlement;
-- do not invent cryptographic proof during the prototype phase;
-- preserve controller/adapter separation so Phase 9+ can replace prototype data without rebinding the view directly to a contract function.
+- CRUISE / BOOST / REDLINE, wager, IGNITION and one-action replay are preserved;
+- GAS Gauge remains the primary game-state focal point;
+- primary hierarchy remains `GAS GAUGE -> RISK -> WAGER -> IGNITION`;
+- extra width exposes trust/session context without adding required steps;
+- canonical ready/locking/resolving/result/recovery semantics remain controller-owned;
+- presentation modes change presentation only, never probability/economics/settlement;
+- no cryptographic proof is fabricated during the prototype phase;
+- controller/view separation is preserved for Phase 9 real adapters.
 
 ### Trade / Account / Reserve / Crews
-- adapt existing Phase 7 shells to desktop density and hierarchy;
-- preserve truthful separation of spendable funds, locked wagers, marked positions, potential payouts, protocol reserve and GameBankroll;
-- no fake activity, liquidity, backing or rankings;
-- advanced execution/data may expand through progressive disclosure but may not dominate the default consumer action;
-- social/account surfaces must preserve a single canonical relationship/activity ontology rather than creating Play/Trade/Crew-specific identities or duplicate economic events.
+- Phase 7 shells adapt to desktop density without a second state model;
+- spendable funds, locked wagers, future marked positions, potential payouts, protocol reserve and GameBankroll remain distinct concepts;
+- no fake activity, liquidity, backing or rankings were introduced;
+- advanced execution/data remains progressive rather than dominating the default consumer path;
+- no duplicate desktop social graph or account identity system was created.
 
 ### Frontend/backend authority
 - React components remain presentation, not the authoritative financial system;
-- preserve the architecture `presentation -> feature controller/query layer -> domain adapter -> authoritative sources`;
-- React Query remains the client/server-state boundary where appropriate;
-- important data must preserve authority/provenance class: canonical, backend/indexer-derived, user-authored or presentation/prototype;
-- optimistic UI may acknowledge action receipt but must not claim financial settlement before settlement is canonical;
-- if finality is uncertain, reconcile before retry; do not blind-submit a second money action.
+- the target architecture remains `presentation -> feature controller/query layer -> domain adapter -> authoritative sources`;
+- optimistic acknowledgement is not represented as financial settlement;
+- unknown finality must still reconcile before retry in Phase 9 money-moving flows.
 
 ### Existing-repo compatibility
-- use the Phase 1 compatibility matrix before rebuilding or deleting an existing surface;
-- retain/evaluate reusable auth, health, `/me`, public-data, RPC, API versioning, webhook, observability, rate-limit, audit-log, cache, Supabase/storage and test infrastructure;
-- isolate/retire refund-specific claims/receipt/refund/gates/standing semantics only after generic utilities are extracted or proven unused;
-- do not perform a wholesale CSS/framework rewrite for cleanliness or competitor parity.
+- mature auth, provider, wallet, React Query, token, testing and observability infrastructure was reused/evaluated rather than replaced for cosmetic parity;
+- refund-specific ontology did not re-enter the Project GAS shell;
+- no wholesale CSS/framework rewrite was performed.
 
-### Responsive system
-- define intentional transformations for mobile, tablet and desktop rather than accidental CSS wrapping;
-- no horizontal document overflow at approved desktop/tablet widths;
-- primary actions remain visually dominant and reachable;
-- desktop layout must not degrade mobile geometry already proven in Phase 7;
-- extra context surrounds the primary action instead of displacing it.
-
-## Verification viewports
-
-At minimum:
-
-- 768×1024 tablet transition
-- 1440×900 desktop
-- 1920×1080 wide desktop
-
-The existing 390×844 Phase 7 mobile gate remains a regression check.
-
-## Required research-integration review before PASS
+## Research-integration review
 
 Completed in `ux-research/phase-8/PHASE_8_RESEARCH_INTEGRATION_REVIEW.md` against:
 
@@ -150,7 +149,7 @@ Completed in `ux-research/phase-8/PHASE_8_RESEARCH_INTEGRATION_REVIEW.md` agains
 - `ux-research/phase-1/COMPATIBILITY_MATRIX.json`;
 - `ux-research/phase-6/INFORMATION_ARCHITECTURE.md`.
 
-The review confirms at implementation level:
+The review confirms:
 
 - desktop preserved mobile ontology;
 - social/account state remains canonical;
@@ -161,41 +160,37 @@ The review confirms at implementation level:
 - backend/frontend authorities are clear;
 - no legacy refund ontology re-entered.
 
-## Exit requirements
+## Exit requirements — final result
 
-Phase 8 passes only when all are true:
+1. One coherent desktop shell / Phase 6 IA — **PASS**.
+2. Home, Play, Trade, Crews, Reserve and Account remain one product/state model — **PASS**.
+3. GAS Original retains one-action configuration and replay — **PASS**.
+4. Extra desktop context does not obscure the primary action or invent facts — **PASS**.
+5. Financial/account semantics remain cross-device consistent — **PASS**.
+6. Explicit tablet/desktop responsive behavior with no tested horizontal overflow — **PASS**.
+7. Keyboard/focus and pointer interaction on critical navigation/controls — **PASS**.
+8. Phase 7 390×844 mobile requirements remain green — **PASS**.
+9. Production build, unit tests and Project GAS E2E remain green — **PASS**.
+10. Desktop-specific Playwright assertions cover approved viewports — **PASS**.
+11. Known limitations remain explicitly prototype/unavailable — **PASS**.
+12. Required research-integration review completed and reflected in implementation/tests — **PASS**.
+13. Major behaviors trace problem -> law -> GAS pattern -> repo surface -> implementation -> test — **PASS**.
+14. React views did not become authoritative financial settlement state — **PASS**.
+15. No duplicate social graph/economic-event truth introduced — **PASS**.
+16. Mature generic infrastructure was not replaced solely because legacy domain is retiring — **PASS**.
 
-1. Project GAS desktop routes use one coherent shell and the Phase 6 IA.
-2. Home, Play, Trade, Crews, Reserve and Account remain the same product/state model as mobile.
-3. GAS Original desktop flow retains one-action configuration and one-action replay with no new mandatory step.
-4. Extra desktop context does not obscure the primary action or invent live protocol facts.
-5. Financial/account semantics are identical across mobile and desktop.
-6. Responsive behavior is explicit at tablet/desktop breakpoints and does not introduce horizontal overflow.
-7. Keyboard/focus and desktop pointer interactions are usable on critical controls.
-8. Phase 7 390×844 mobile requirements remain green.
-9. Production build, unit tests and Project GAS E2E remain green.
-10. Desktop-specific Playwright assertions cover critical layout/state transformations at approved viewports.
-11. Known limitations remain explicitly prototype/unavailable rather than silently mocked as live.
-12. The required research-integration review above is completed and its findings are reflected in implementation/tests, not merely acknowledged in prose.
-13. Major research-derived behaviors can be traced through `problem -> reference law -> GAS pattern -> repo surface -> implementation -> acceptance test`.
-14. React views do not become the source of authoritative financial settlement/state where a controller/query/adapter boundary is required.
-15. No duplicate social graph or duplicate per-feed economic-event truth is introduced by desktop adaptation.
-16. No mature generic GASCOIN infrastructure is replaced solely because the old product domain is being retired.
+## Phase boundary
 
-Requirements 1–7 and 10–16 are implemented/reviewed. Requirements 8–9 remain gated by the latest CI run and must not be marked passed from prose alone.
-
-## Out of scope for Phase 8
-
-Do not use desktop adaptation as an excuse to begin Phase 9 implementation. The following remain later work:
+Phase 8 intentionally did **not** implement:
 
 - real RNG/VRF;
 - real bankroll settlement;
 - live reserve/rebase adapters;
-- production account/session permissions, except narrowly scoped wallet cleanup specifically required to preserve the Phase 8 account model;
+- production bounded play permissions;
 - live social graph/activity;
 - final Bracket integration;
 - protocol contract wiring.
 
-Research may define the future adapter/state boundaries for these systems. Production wiring remains gated to its owning phase.
+Those responsibilities now move to Phase 9 under its own vertical-loop gate.
 
-**Do not activate Phase 9 before this file is updated to PASS.**
+**Phase 8 is PASS / CLOSED. Phase 9 may now activate.**
