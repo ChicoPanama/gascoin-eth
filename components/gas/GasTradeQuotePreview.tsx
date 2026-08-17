@@ -58,17 +58,20 @@ export function GasTradeQuotePreview() {
         </button>
       </div>
 
-      <label className={styles.amountField}>
-        <span className={styles.eyebrow} style={{ paddingLeft: 12 }}>Amount</span>
-        <input
-          className={styles.amountInput}
-          aria-label="Trade amount"
-          inputMode="decimal"
-          value={amount}
-          onChange={(event) => setAmount(event.target.value.trim())}
-        />
-        <span className={styles.assetButton} aria-hidden>{payAsset}</span>
-      </label>
+      <div className={styles.wagerPanel}>
+        <label className={styles.eyebrow} htmlFor="gas-trade-amount">Amount to {side === 'buy' ? 'spend' : 'sell'}</label>
+        <div className={styles.amountField}>
+          <input
+            id="gas-trade-amount"
+            className={styles.amountInput}
+            aria-label="Trade amount"
+            inputMode="decimal"
+            value={amount}
+            onChange={(event) => setAmount(event.target.value.trim())}
+          />
+          <span className={styles.assetButton} aria-hidden>{payAsset}</span>
+        </div>
+      </div>
 
       <div className={styles.cardGrid}>
         <div className={styles.actionCard}>
