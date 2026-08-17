@@ -35,9 +35,18 @@ test.describe('Project GAS Home', () => {
     expect(overflow).toBe(false);
   });
 
-  test('HP06 — unavailable live monetary/social data is not fabricated', async ({ page }) => {
+  test('HP06 — unavailable monetary and social authority never becomes fabricated live state', async ({ page }) => {
     await page.goto('/');
-    await expect(page.getByText(/no fabricated backing ratio/i)).toBeVisible();
-    await expect(page.getByText(/no fake players/i)).toBeVisible();
+
+    const account = page.getByRole('region', { name: 'GAS account summary' });
+    await expect(account).toHaveAttribute('data-account-authority', 'unavailable');
+    await expect(account).toHaveAttribute('data-gas-status', 'unavailable');
+
+    const activity = page.getByRole('region', { name: 'GAS canonical activity' });
+    await expect(activity).toHaveAttribute('data-activity-authority', 'unavailable');
+    await expect(activity.getByText('NO LIVE ACTIVITY', { exact: true })).toBeVisible();
+    await expect(activity.getByText(/No synthetic players, wins, trades or Crew events/i)).toBeVisible();
+
+    await expect(page.getByText(/Unconfigured state remains unavailable rather than estimated/i)).toBeVisible();
   });
 });
