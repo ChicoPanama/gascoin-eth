@@ -157,6 +157,43 @@ test.describe('Project GAS responsive shell', () => {
   });
 });
 
+test.describe('Phase 9 account authority boundary', () => {
+  test.use({ viewport: MOBILE });
+
+  test('GAS18 — unconfigured Project GAS assets render unavailable, never demo money', async ({ page }) => {
+    await page.goto('/account');
+
+    const summary = page.getByRole('region', { name: 'GAS account summary' });
+    await expect(summary).toBeVisible();
+    await expect(summary.getByText('— GAS', { exact: false })).toBeVisible();
+    await expect(summary.getByText(/GAS contract is not configured/i)).toBeVisible();
+    await expect(summary.getByText(/legacy GASCOIN addresses are not used/i)).toBeVisible();
+    await expect(page.getByText(/1,240\.00 GAS/i)).toHaveCount(0);
+  });
+
+  test('GAS19 — Home and Account share the same canonical spendable authority model', async ({ page }) => {
+    await page.goto('/');
+    const homeSummary = page.getByRole('region', { name: 'GAS account summary' });
+    await expect(homeSummary).toHaveAttribute('data-account-authority', 'unavailable');
+    await expect(homeSummary).toHaveAttribute('data-gas-status', 'unavailable');
+
+    await page.goto('/account');
+    const accountSummary = page.getByRole('region', { name: 'GAS account summary' });
+    await expect(accountSummary).toHaveAttribute('data-account-authority', 'unavailable');
+    await expect(accountSummary).toHaveAttribute('data-gas-status', 'unavailable');
+  });
+
+  test('GAS20 — GAS Original no longer invents a spendable demo balance while the game remains prototype', async ({ page }) => {
+    await page.goto('/play/gas');
+    const account = page.getByRole('region', { name: 'GAS account state' });
+    await expect(account).toHaveAttribute('data-account-authority', 'unavailable');
+    await expect(account.getByText('— GAS', { exact: false })).toBeVisible();
+    await expect(page.getByText(/1,240\.00 GAS/i)).toHaveCount(0);
+    await expect(page.getByText(/no live RNG/i)).toBeVisible();
+    await expect(page.getByText(/illustrative UX data only/i)).toBeVisible();
+  });
+});
+
 test.describe('GAS Original prototype loop', () => {
   test.use({ viewport: MOBILE });
 
@@ -211,7 +248,7 @@ test.describe('GAS Original prototype loop', () => {
 
   test('GAS15 — prototype explicitly states no funds and no live RNG', async ({ page }) => {
     await page.goto('/play/gas');
-    await expect(page.getByText(/no funds move · no live RNG/i)).toBeVisible();
+    await expect(page.getByText(/no live RNG/i)).toBeVisible();
     await expect(page.getByText(/payout curves, RNG and bankroll settlement are not represented/i)).toBeVisible();
   });
 
