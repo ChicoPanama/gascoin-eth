@@ -29,8 +29,9 @@ Current state:
 - Phase 5 — GAS Pattern Library: PASS
 - Phase 6 — GAS information architecture: PASS
 - Phase 7 — Mobile GAS prototype: PASS
-- **Phase 8 — Desktop adaptation: ACTIVE**
-- Phases 9–11 are not active until their gates open.
+- Phase 8 — Desktop adaptation: PASS
+- **Phase 9 — Vertical-loop implementation: ACTIVE**
+- Phases 10–11 are not active until their gates open.
 
 Pre-work is allowed; gate-skipping is not.
 
@@ -41,11 +42,13 @@ Read these before making product-level decisions:
 - `ux-research/ROADMAP.md`
 - **`ux-research/CODEX_RESEARCH_FRONTEND_BACKEND_INTEGRATION_ADDENDUM.md` — mandatory research/integration context**
 - `ux-research/phase-0/GAS_UX_FEATURE_FREEZE.md`
-- `ux-research/reference-matrix/REFERENCE_MATRIX.md`
-- `ux-research/phase-5/GAS_PATTERN_LIBRARY.md`
-- `ux-research/phase-6/GAS_INFORMATION_ARCHITECTURE.md`
+- `ux-research/phase-4/REFERENCE_MATRIX.json`
+- `ux-research/phase-5/PATTERN_LIBRARY.md`
+- `ux-research/phase-6/INFORMATION_ARCHITECTURE.md`
 - `ux-research/phase-7/PHASE_7_GATE.md`
 - `ux-research/phase-8/PHASE_8_GATE.md`
+- `ux-research/phase-8/PHASE_8_RESEARCH_INTEGRATION_REVIEW.md`
+- `ux-research/phase-9/PHASE_9_GATE.md`
 - GitHub issue #67 for high-level status
 - PR #74 for the current integration workbench
 
@@ -53,7 +56,7 @@ The addendum is subordinate to the existing roadmap/gates; it does not create a 
 
 ## Mandatory research-first implementation protocol
 
-Before making a substantial UX, frontend, state-model, wallet/account or backend-integration change during Phase 8 or later:
+Before making a substantial UX, frontend, state-model, wallet/account or backend-integration change during Phase 9 or later:
 
 1. read the relevant Phase 1 inventory/compatibility artifacts;
 2. read the required Fomo corpus and relevant Phase 3 cross-category research identified in the Codex addendum;
@@ -64,7 +67,7 @@ Before making a substantial UX, frontend, state-model, wallet/account or backend
 
 Do **not** create a new roadmap document for this mapping. Do **not** copy competitor code, assets, trade dress, vocabulary or framework choices merely because a reference product uses them.
 
-## Locked UX shell
+## Locked responsive shell
 
 Primary mobile navigation:
 
@@ -84,9 +87,20 @@ Desktop utilities:
 Search | Notifications | Account
 ```
 
-Reserve is one action from Home and persistent on larger desktop layouts. Search and Notifications are utilities, not permanent mobile bottom-nav destinations.
+Phase 8 closed on final code-bearing head `6e1f80218570e9bbe1bd95447dec0009c6ca2acc`, Project GAS CI run #414, with Full Dependency Security, Unit Tests, Production Build, Project GAS E2E and Legacy Compatibility E2E all passing.
+
+Approved responsive verification viewports:
+
+- 390×844 mobile regression;
+- 768×1024 tablet;
+- 1440×900 desktop;
+- 1920×1080 wide desktop.
+
+Reserve is one action from Home on mobile and persistent on desktop. Search and Notifications are utilities, not permanent mobile bottom-nav destinations.
 
 The layout may change by surface. Identity, relationships, economic objects and account state must remain canonical across surfaces.
+
+Do not redesign the shell during Phase 9 merely because live adapters are being introduced.
 
 ## Frontend/backend authority law
 
@@ -150,7 +164,7 @@ Additional invariants:
 
 ## Money-action state/recovery law
 
-Real financial intents must eventually have canonical action identity, expiry/idempotency and reconciliation behavior so stale requests cannot unexpectedly execute twice.
+Real financial intents need canonical action identity, expiry/idempotency and reconciliation behavior so stale requests cannot unexpectedly execute twice.
 
 The consumer recovery hierarchy is:
 
@@ -161,19 +175,81 @@ The consumer recovery hierarchy is:
 
 If finality is uncertain, reconcile before retry. Do not surface raw RPC or `execution reverted` text as the primary recovery experience.
 
-## Current prototype truth boundary
+## Phase 9 active vertical-loop contract
 
-The verified Phase 7 GAS Original implementation remains an interaction prototype while Phase 8 adapts the same product model to desktop:
+`ux-research/phase-9/PHASE_9_GATE.md` is the active implementation gate.
 
-- no funds move;
-- no live RNG/VRF;
-- illustrative results are labeled;
-- no fabricated reserve/rebase/social data;
-- real settlement, bankroll, oracle and RNG adapters enter later.
+Dependency order inside Phase 9:
 
-Do not convert illustrative prototype data into claims of live protocol behavior.
+1. canonical account read model;
+2. GAS Original real adapter boundary and idempotent intent/round identity;
+3. RNG/fairness/bankroll settlement integration;
+4. reserve/rebase authoritative read model;
+5. Trade quote/intent/settlement loop;
+6. one canonical verified activity projection;
+7. Crews/rankings live read path;
+8. funding/withdrawal/permissions/recovery.
 
-The Phase 7 controller/view separation is intentional. Phase 9+ should replace prototype adapters behind the controller boundary rather than rewriting the view around a single contract call.
+This is dependency ordering within Phase 9, not a competing numbered roadmap.
+
+### Required canonical money-action semantics
+
+Game and Trade adapters must distinguish acknowledgement from settlement.
+
+Game lifecycle target:
+
+```text
+READY
+-> INTENT_CREATED
+-> LOCKING
+-> LOCKED
+-> RESOLVING
+-> SETTLED
+-> RESULT
+```
+
+Interrupted/unknown flow:
+
+```text
+UNKNOWN / INTERRUPTED
+-> RECONCILING
+-> SETTLED | FAILED_RETRY_SAFE | FAILED_NOT_RETRY_SAFE | ACTION_REQUIRED
+```
+
+Every wager must have a stable `intentId`; every resolved game must have a canonical `roundId`. Duplicate click/retry must not create a second wager while a prior intent may have executed.
+
+Trade lifecycle target:
+
+```text
+AMOUNT
+-> QUOTE
+-> REVIEW
+-> INTENT_CREATED
+-> SUBMITTED/PENDING
+-> SETTLED | FAILED/RECOVERY
+```
+
+Quotes must expose expiry and financially material fee/output information before confirmation.
+
+## Prototype/live truth boundary during Phase 9
+
+Phase 9 may contain mixed maturity. That is acceptable when each surface states its authority accurately.
+
+Examples:
+
+- real account + prototype game;
+- real account/game + unavailable reserve;
+- live reserve read model + unavailable social activity.
+
+Until an authoritative adapter is connected and tested, preserve the explicit Phase 7/8 prototype/unavailable behavior:
+
+- no claim that funds moved when they did not;
+- no claim of live RNG/VRF without the real verification path;
+- illustrative results remain labeled;
+- no fabricated reserve/rebase/social values;
+- no fabricated live player counts, bankroll or rankings.
+
+The Phase 7 controller/view separation and Phase 8 responsive shell are intentional. Phase 9 replaces prototype data/state **behind** those boundaries rather than rewriting the view around a single contract call.
 
 ## Deprecated concepts
 
@@ -209,7 +285,7 @@ USER PROBLEM
 
 - Next.js App Router / React / TypeScript.
 - Prefer GAS-native feature modules under `components/gas/` and protocol/state contracts under `lib/project-gas/`.
-- Keep view components separate from protocol/adapter/state orchestration where practical.
+- Keep view components separate from protocol/adapter/state orchestration.
 - Reuse/evaluate mature generic infrastructure before replacing it: auth, health, `/me`/public-data patterns, RPC abstraction, API versioning, webhooks, Sentry, rate limits, audit logs, caching, Supabase/storage and test infrastructure.
 - Retire refund-specific claims/receipt/refund/gates/standing semantics only after generic utilities are extracted or proven unused.
 - Money-moving flows must use explicit states and reconciliation before retry when finality is uncertain.
@@ -217,10 +293,11 @@ USER PROBLEM
 - No hidden wallet/RPC/network jargon in normal consumer flows.
 - Minimum primary mobile touch target: 44px.
 - Core Play action/replay must remain reachable above the fixed nav at 390×844.
-- Phase 8 must preserve the same routes, identity/account semantics, state semantics and primary action model on desktop rather than inventing a terminal-only second product.
+- Phase 9 must preserve the Phase 8 responsive routes, identity/account semantics, state semantics and primary action model rather than introducing a live terminal-only second product.
 - Advanced depth belongs behind progressive disclosure; it may expand on desktop but may not displace GAS Gauge -> risk -> wager -> IGNITION.
-- Do not fabricate social activity, liquidity, reserve values, rankings or cryptographic proof to make a prototype appear alive.
+- Do not fabricate social activity, liquidity, reserve values, rankings or cryptographic proof to make an unwired surface appear alive.
 - New GAS feature styles should prefer scoped GAS modules/tokens and incremental migration rather than a wholesale `globals.css` rewrite.
+- Contracts/oracles/providers must be configuration-driven; never hard-code an unapproved production address simply to make a vertical loop appear complete.
 
 ## Test commands
 
@@ -231,27 +308,13 @@ npm run test:e2e:legacy
 npm run build
 ```
 
-`Project GAS CI` separates Unit, Production Build, Project GAS E2E and Legacy Compatibility E2E.
-
-## Phase 8 research-integration gate
-
-Before Phase 8 can pass, explicitly review the implementation against:
-
-- `ux-research/phase-2/fomo/FOMO_DESKTOP_MOBILE_PARITY.md`;
-- `ux-research/phase-2/fomo/FOMO_TO_GAS_MAP.md`;
-- `ux-research/phase-3/CROSS_CATEGORY_FINDINGS.md`;
-- `ux-research/phase-3/PHASE_3_REVALIDATION_2026-08-16.md`;
-- `ux-research/reference-matrix/REFERENCE_MATRIX.md`;
-- `ux-research/phase-5/GAS_PATTERN_LIBRARY.md`;
-- `ux-research/phase-1/COMPATIBILITY_MATRIX.json`;
-- `ux-research/phase-6/GAS_INFORMATION_ARCHITECTURE.md`.
-
-Confirm desktop/mobile ontology parity, canonical social/account state, Play action dominance, progressive advanced depth, truthful financial semantics/provenance, no fake activity, and no return of the legacy refund ontology.
+`Project GAS CI` separates Full Dependency Security, Unit Tests, Production Build, Project GAS E2E and Legacy Compatibility E2E.
 
 ## Task/control model
 
 - **Roadmap** = sequencing and phase gates.
 - **Codex research/integration addendum** = mandatory research-to-implementation and frontend/backend authority law.
+- **Phase 9 gate** = current vertical-loop implementation contract.
 - **Beads** = detailed dependency-aware agent work graph when available.
 - **GitHub issue #67** = high-level human-visible status.
 - **PR #74 / ux-lab** = current code/research workbench.
