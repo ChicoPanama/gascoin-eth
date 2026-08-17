@@ -2,6 +2,12 @@
 
 import Link from 'next/link';
 import { usePrivy } from '@privy-io/react-auth';
+import { useProjectGasAccount } from '@/hooks/useProjectGasAccount';
+import {
+  formatProjectGasBalanceForDisplay,
+  hasAuthoritativeSpendableBalance,
+  projectGasAccountAuthorityLabel,
+} from '@/lib/project-gas/account-state';
 import { GasGauge } from './GasGauge';
 import { RiskSelector } from './RiskSelector';
 import { WagerComposer } from './WagerComposer';
@@ -12,14 +18,6 @@ import {
 } from './useGasOriginalPrototype';
 import shared from './gas-ui.module.css';
 import local from './GasOriginalPrototype.module.css';
-
-function accountLabel(user: ReturnType<typeof usePrivy>['user']) {
-  if (!user) return 'Prototype account';
-  if (user.email?.address) return user.email.address;
-  if (user.twitter?.username) return `@${user.twitter.username}`;
-  if (user.wallet?.address) return `${user.wallet.address.slice(0, 6)}…${user.wallet.address.slice(-4)}`;
-  return 'GAS account';
-}
 
 function DesktopTrustContext() {
   return (
@@ -54,7 +52,10 @@ function DesktopSessionContext() {
 }
 
 export function GasOriginalPrototype() {
-  const { ready: authReady, authenticated, login, user } = usePrivy();
+  const { ready: authReady, authenticated, login } = usePrivy();
+  const { model: accountModel } = useProjectGasAccount();
+  const gasBalance = accountModel.spendable.gas;
+  const gasBalanceAuthoritative = hasAuthoritativeSpendableBalance(gasBalance);
   const {
     state,
     draft,
@@ -82,15 +83,26 @@ export function GasOriginalPrototype() {
   return (
     <>
       <div className={`${shared.prototypeBanner} ${local.compactBanner}`} role="note">
-        <span>UI prototype · no funds move · no live RNG</span>
-        <span className={`${shared.prototypePill} ${local.compactBannerPill}`}>Phase 8</span>
+        <span>Phase 9 transition · account reads may be live · game still moves no funds · no live RNG</span>
+        <span className={`${shared.prototypePill} ${local.compactBannerPill}`}>Phase 9</span>
       </div>
 
-      <section className={`${shared.accountStrip} ${local.compactAccount}`} aria-label="Prototype GAS account">
+      <section
+        className={`${shared.accountStrip} ${local.compactAccount}`}
+        aria-label="GAS account state"
+        data-account-authority={gasBalance.authority}
+        data-gas-status={gasBalance.status}
+      >
         <div>
-          <div className={shared.eyebrow}>{authenticated ? 'GAS account' : 'Explore before sign-in'}</div>
-          <div className={`${shared.balance} ${local.compactBalance}`}>1,240.00 GAS <span className={shared.eyebrow}>DEMO</span></div>
-          <div className={`${shared.balanceSub} ${local.compactBalanceSub}`}>{authenticated ? accountLabel(user) : 'Prototype balance · not connected to funds'}</div>
+          <div className={shared.eyebrow}>{authenticated ? 'Available to use' : 'Explore before sign-in'}</div>
+          <div className={`${shared.balance} ${local.compactBalance}`}>
+            {formatProjectGasBalanceForDisplay(gasBalance)} <span className={shared.eyebrow}>{gasBalanceAuthoritative ? 'LIVE READ' : 'UNAVAILABLE'}</span>
+          </div>
+          <div className={`${shared.balanceSub} ${local.compactBalanceSub}`}>
+            {authenticated
+              ? accountModel.identity.label || gasBalance.message || 'GAS account'
+              : gasBalance.message || 'Sign in or activate a wallet to read configured Project GAS assets.'}
+          </div>
         </div>
         {!authenticated ? (
           <button
@@ -102,8 +114,8 @@ export function GasOriginalPrototype() {
             {authReady ? 'Enter GAS' : 'Loading'}
           </button>
         ) : (
-          <div className={`${shared.statusPill} ${local.compactStatus} ${shared.statusReady}`}>
-            <span className={shared.statusDot} /> Account ready
+          <div className={`${shared.statusPill} ${local.compactStatus} ${gasBalance.status === 'degraded' ? shared.statusFailed : gasBalance.status === 'loading' ? shared.statusPending : shared.statusReady}`}>
+            <span className={shared.statusDot} /> {projectGasAccountAuthorityLabel(accountModel)}
           </div>
         )}
       </section>
@@ -163,7 +175,7 @@ export function GasOriginalPrototype() {
           {state.phase === 'result' ? (
             <div className={local.resultSummary} aria-live="polite">
               <div>
-                <div className={shared.eyebrow}>Prototype account delta</div>
+                <div className={shared.eyebrow}>Illustrative result delta</div>
                 <div className={`${local.resultAmount} ${state.result.outcome === 'win' ? local.resultPositive : state.result.outcome === 'loss' ? local.resultNegative : local.resultNeutral}`}>
                   {resultDelta}
                 </div>
