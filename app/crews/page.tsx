@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { GasPrototypeShell } from '@/components/gas/GasPrototypeShell';
 import styles from '@/components/gas/gas-ui.module.css';
+import responsive from '@/components/gas/GasResponsiveShell.module.css';
 
 export const metadata: Metadata = {
   title: 'Crews — Project GAS',
@@ -19,7 +20,7 @@ export default function CrewsPage() {
         <h1 className={styles.pageTitle}>CREWS</h1>
         <p className={styles.pageIntro}>Crews become competitive identity around real GAS activity. Membership never bundles a hidden wager, trade or financial permission.</p>
       </header>
-      <div className={styles.cardGrid}>
+      <div className={`${styles.cardGrid} ${responsive.contentGrid}`}>
         <div className={styles.actionCard}>
           <span className={styles.actionCardMeta}>Following</span>
           <span className={styles.actionCardTitle}>NO LIVE CREWS YET</span>
