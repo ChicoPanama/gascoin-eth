@@ -153,7 +153,7 @@ test.describe('Project GAS responsive shell', () => {
     await expect(nav.getByRole('link', { name: 'Account', exact: true })).toHaveCount(0);
     await expect(page.getByRole('link', { name: 'Search GAS' })).toHaveAttribute('href', '/search');
     await expect(page.getByRole('link', { name: 'Notifications' })).toHaveAttribute('href', '/notifications');
-    await expect(page.getByRole('link', { name: 'Account', exact: true })).toHaveAttribute('href', '/account');
+    await expect(page.getByLabel('Account', { exact: true })).toHaveAttribute('href', '/account');
   });
 });
 
