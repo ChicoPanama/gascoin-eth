@@ -1,7 +1,7 @@
 # GAS UX — Canonical Execution Roadmap
 
 **Status:** Source of truth for UX execution  
-**Version:** 1.8  
+**Version:** 1.9  
 **Rule:** There is exactly one numbered UX roadmap. Pre-work may happen early; a phase advances only after its explicit gate passes.
 
 ## Current program state
@@ -14,8 +14,9 @@
 - **Phase 5 — GAS Pattern Library: PASS / CLOSED**
 - **Phase 6 — GAS information architecture: PASS / CLOSED**
 - **Phase 7 — Mobile GAS prototype: PASS / CLOSED**
-- **Official current phase: Phase 8 — Desktop adaptation: ACTIVE**
-- **Phases 9–11: NOT ACTIVE**
+- **Phase 8 — Desktop adaptation: PASS / CLOSED**
+- **Official current phase: Phase 9 — Vertical-loop implementation: ACTIVE**
+- **Phases 10–11: NOT ACTIVE**
 
 The corresponding gate files are authoritative evidence for each closed phase. A later-phase artifact by itself never advances the roadmap.
 
@@ -102,7 +103,7 @@ Lock the product shell, routes, truthful account semantics, Play/Social/Trade/Re
 ### Mobile primary navigation
 `Home | Play | Trade | Crews | Account`
 
-### Desktop primary navigation target
+### Desktop primary navigation
 `Home | Play | Trade | Crews | Reserve` with `Search | Notifications | Account` utilities.
 
 ### Canonical consumer routes
@@ -161,33 +162,58 @@ Dedicated mobile assertions include 390×844 no-scroll action/replay reachabilit
 
 ## Phase 8 — Desktop adaptation
 
-**ACTIVE PHASE.**
-
 Adapt the verified mobile product to desktop without creating a terminal-first second product model. Increase simultaneous context while retaining routes, identity, account semantics, canonical interaction states and the same primary actions.
 
-### Phase 8 working rules
+### Verified implementation scope
 
-- mobile remains the behavioral source of truth;
-- desktop adds context, not a different product ontology;
-- the desktop shell exposes Home / Play / Trade / Crews / Reserve persistently, with Search / Notifications / Account as utilities;
-- GAS Original retains the same CRUISE / BOOST / REDLINE → wager → IGNITION → result → replay state machine;
-- additional width may expose live/history/trust/social context simultaneously, but cannot hide or duplicate the primary action;
-- responsive behavior must be deterministic between mobile, tablet and desktop breakpoints;
-- legacy GASCOIN desktop navigation must not re-enter Project GAS routes.
+- persistent desktop rail: Home / Play / Trade / Crews / Reserve;
+- Search / Notifications / Account utility cluster;
+- one responsive Project GAS shell rather than separate mobile/desktop applications;
+- intentional tablet and desktop content-density transformations;
+- GAS Original desktop trust/session context surrounding the unchanged core Play loop;
+- responsive Home, Play, Trade, Crews, Reserve and Account surfaces;
+- no fabricated live activity, reserve, liquidity, bankroll or rankings;
+- research-integration traceability review;
+- explicit browser coverage at 390×844, 768×1024, 1440×900 and 1920×1080.
 
-**Exit gate:** mobile and desktop share one product model and critical journeys work at approved desktop viewports with no state/financial-truth divergence.
+### Phase 8 gate evidence
 
-**Status:** ACTIVE — `ux-research/phase-8/PHASE_8_GATE.md`.
+Final code-bearing head `6e1f80218570e9bbe1bd95447dec0009c6ca2acc`, Project GAS CI run #414:
+
+- Full Dependency Security — PASS
+- Unit Tests — PASS
+- Production Build — PASS
+- Project GAS E2E — PASS
+- Legacy Compatibility E2E — PASS
+
+The desktop implementation preserves `GAS GAUGE -> RISK -> WAGER -> IGNITION`, one-action replay and the Phase 7 mobile regression contract while adding simultaneous desktop context.
+
+**Status:** PASS / CLOSED — `ux-research/phase-8/PHASE_8_GATE.md`.
 
 ---
 
 ## Phase 9 — Vertical-loop implementation
 
-Replace prototype state with real application/protocol adapters and complete end-to-end loops: account/funding, Play/settlement/replay, verified social activity, rebase/reserve, Crews, withdrawal, recovery and future-ready Bracket shell.
+**ACTIVE PHASE.**
 
-**Exit gate:** core loops function against authoritative real state with explicit recovery behavior and tests.
+Replace prototype-only state behind stable controller/view boundaries with authoritative application/protocol adapters and complete real end-to-end loops.
 
-**Status:** NOT ACTIVE.
+Dependency order inside this phase:
+
+1. canonical account read model;
+2. GAS Original real adapter boundary and idempotent intent/round identity;
+3. RNG/fairness/bankroll settlement integration;
+4. reserve/rebase authoritative read model;
+5. Trade quote/intent/settlement loop;
+6. one canonical verified activity projection;
+7. Crews/rankings live read path;
+8. funding/withdrawal/permissions/recovery.
+
+This dependency order is part of the Phase 9 gate, not a second numbered roadmap.
+
+**Exit gate:** core loops function against authoritative real state with explicit recovery behavior, financial-domain firewalls and tests; no production-looking surface fabricates live state.
+
+**Status:** ACTIVE — `ux-research/phase-9/PHASE_9_GATE.md`.
 
 ---
 
@@ -229,4 +255,4 @@ Repeat Phases 9–11 until GAS meets or exceeds the strongest credible benchmark
 11. Protocol truth overrides convenience.
 12. No fake activity, reserve state, payouts or settlement.
 13. Unknown measurements remain unknown until measured.
-14. **Current work stays inside Phase 8 until the Phase 8 gate explicitly passes.**
+14. **Current work stays inside Phase 9 until the Phase 9 gate explicitly passes.**
