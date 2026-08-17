@@ -127,4 +127,51 @@ test.describe('Phase 9 read-only authority models', () => {
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth + 2);
     expect(overflow).toBe(false);
   });
+
+  test('GAS30 — Crew API refuses to fabricate rankings without an approved indexer', async ({ request }) => {
+    const response = await request.get('/api/project-gas/crews');
+    expect(response.ok()).toBe(true);
+
+    const body = await response.json();
+    expect(body).toMatchObject({
+      version: 1,
+      status: 'unavailable',
+      authority: 'unavailable',
+      rows: [],
+    });
+    expect(body.message).toMatch(/No approved Project GAS Crew ranking read source is configured/i);
+  });
+
+  test('GAS31 — Crews renders no synthetic leaders when ranking authority is unavailable', async ({ page }) => {
+    await page.setViewportSize(MOBILE);
+    await page.goto('/crews');
+
+    const rankings = page.getByRole('region', { name: 'GAS Crew rankings' });
+    await expect(rankings).toBeVisible();
+    await expect(rankings).toHaveAttribute('data-crews-authority', 'unavailable');
+    await expect(rankings.getByText('NO LIVE RANKINGS', { exact: true })).toBeVisible();
+    await expect(rankings.getByText(/Synthetic Crew names, scores, members and rank movement are not inserted/i)).toBeVisible();
+  });
+
+  test('GAS32 — Crew deep link preserves the canonical unavailable state', async ({ page }) => {
+    await page.setViewportSize(DESKTOP);
+    await page.goto('/crews/not-live');
+
+    await expect(page.getByRole('heading', { name: 'CREW', exact: true })).toBeVisible();
+    await expect(page.getByText('UNAVAILABLE', { exact: true })).toBeVisible();
+    await expect(page.getByText(/No approved Project GAS Crew ranking read source is configured/i)).toBeVisible();
+  });
+
+  test('GAS33 — Account exposes recovery-first boundaries without enabling unavailable money actions', async ({ page }) => {
+    await page.setViewportSize(MOBILE);
+    await page.goto('/account');
+
+    const operations = page.getByRole('region', { name: 'GAS account operations' });
+    await expect(operations).toBeVisible();
+    await expect(operations.getByText('DID MONEY MOVE?', { exact: true })).toBeVisible();
+    await expect(operations.getByText(/Funding is unavailable until an approved provider/i)).toBeVisible();
+    await expect(operations.getByText(/Withdrawal is unavailable until an approved provider/i)).toBeVisible();
+    await expect(operations.getByText(/No production bounded-spend permission is active/i)).toBeVisible();
+    await expect(operations.getByText(/reconcile before retry/i)).toBeVisible();
+  });
 });
