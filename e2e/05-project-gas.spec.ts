@@ -105,6 +105,56 @@ test.describe('Project GAS responsive shell', () => {
     await expect(page.getByText(/no fabricated backing ratio/i)).toBeVisible();
     await expectNoHorizontalOverflow(page);
   });
+
+  test('GAS07 — desktop primary routes preserve the same product destinations', async ({ page }) => {
+    await page.setViewportSize(DESKTOP);
+    const routes = [
+      { path: '/', heading: 'GAS' },
+      { path: '/play', heading: 'PLAY' },
+      { path: '/trade', heading: 'TRADE' },
+      { path: '/crews', heading: 'CREWS' },
+      { path: '/reserve', heading: 'RESERVE' },
+      { path: '/account', heading: 'ACCOUNT' },
+    ];
+
+    for (const route of routes) {
+      const response = await page.goto(route.path);
+      expect(response?.ok()).toBe(true);
+      await expect(page.getByRole('heading', { name: route.heading, exact: true })).toBeVisible();
+      await expect(page.getByRole('complementary', { name: 'GAS desktop navigation' })).toBeVisible();
+      await expectNoHorizontalOverflow(page);
+    }
+  });
+
+  test('GAS08 — desktop Play adds truthful side context without displacing IGNITION', async ({ page }) => {
+    await page.setViewportSize(DESKTOP);
+    await page.goto('/play/gas');
+
+    await expect(page.getByRole('complementary', { name: 'Round trust context' })).toBeVisible();
+    await expect(page.getByRole('complementary', { name: 'Session context' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'VERIFY WHAT MATTERS' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'NO FAKE ACTIVITY' })).toBeVisible();
+    await expect(page.getByText('Not connected', { exact: true }).first()).toBeVisible();
+
+    const ignition = page.getByRole('button', { name: 'IGNITION', exact: true });
+    await expect(ignition).toBeVisible();
+    await page.getByRole('button', { name: /REDLINE/i }).click();
+    await expect(page.getByRole('button', { name: /REDLINE/i })).toHaveAttribute('aria-pressed', 'true');
+    await ignition.click();
+    await expect(page.getByRole('button', { name: 'IGNITION AGAIN', exact: true })).toBeVisible({ timeout: 4000 });
+  });
+
+  test('GAS09 — desktop shell keeps Search, Notifications and Account as utilities', async ({ page }) => {
+    await page.setViewportSize(DESKTOP);
+    await page.goto('/');
+
+    const rail = page.getByRole('complementary', { name: 'GAS desktop navigation' });
+    const nav = rail.getByRole('navigation', { name: 'GAS primary navigation' });
+    await expect(nav.getByRole('link', { name: 'Account', exact: true })).toHaveCount(0);
+    await expect(page.getByRole('link', { name: 'Search GAS' })).toHaveAttribute('href', '/search');
+    await expect(page.getByRole('link', { name: 'Notifications' })).toHaveAttribute('href', '/notifications');
+    await expect(page.getByRole('link', { name: 'Account', exact: true })).toHaveAttribute('href', '/account');
+  });
 });
 
 test.describe('GAS Original prototype loop', () => {
