@@ -1,6 +1,9 @@
 import { test, expect, type Locator, type Page } from '@playwright/test';
 
 const MOBILE = { width: 390, height: 844 };
+const TABLET = { width: 768, height: 1024 };
+const DESKTOP = { width: 1440, height: 900 };
+const WIDE_DESKTOP = { width: 1920, height: 1080 };
 
 async function expectPrimaryAboveNavAtScrollTop(page: Page, primary: Locator) {
   await expect(primary).toBeAttached();
@@ -21,6 +24,11 @@ async function expectMinTouchTarget(locator: Locator, minimum = 44) {
   expect(box, 'interactive target must have layout geometry').not.toBeNull();
   expect(box!.height).toBeGreaterThanOrEqual(minimum);
   expect(box!.width).toBeGreaterThanOrEqual(minimum);
+}
+
+async function expectNoHorizontalOverflow(page: Page) {
+  const overflow = await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth + 2);
+  expect(overflow).toBe(false);
 }
 
 test.describe('Project GAS mobile shell', () => {
@@ -54,6 +62,51 @@ test.describe('Project GAS mobile shell', () => {
   });
 });
 
+test.describe('Project GAS responsive shell', () => {
+  test('GAS04 — tablet keeps the consumer bottom navigation and expands content intentionally', async ({ page }) => {
+    await page.setViewportSize(TABLET);
+    await page.goto('/play');
+
+    await expect(page.getByRole('navigation', { name: 'GAS primary navigation' })).toBeVisible();
+    await expect(page.getByRole('complementary', { name: 'GAS desktop navigation' })).toBeHidden();
+    await expect(page.getByRole('heading', { name: 'PLAY' })).toBeVisible();
+    await expectNoHorizontalOverflow(page);
+  });
+
+  test('GAS05 — desktop exposes canonical primary destinations plus utility account', async ({ page }) => {
+    await page.setViewportSize(DESKTOP);
+    await page.goto('/play/gas');
+
+    const rail = page.getByRole('complementary', { name: 'GAS desktop navigation' });
+    await expect(rail).toBeVisible();
+
+    const nav = rail.getByRole('navigation', { name: 'GAS primary navigation' });
+    await expect(nav.getByRole('link')).toHaveCount(5);
+    await expect(nav.getByRole('link', { name: 'Home', exact: true })).toBeVisible();
+    await expect(nav.getByRole('link', { name: 'Play', exact: true })).toHaveAttribute('aria-current', 'page');
+    await expect(nav.getByRole('link', { name: 'Trade', exact: true })).toBeVisible();
+    await expect(nav.getByRole('link', { name: 'Crews', exact: true })).toBeVisible();
+    await expect(nav.getByRole('link', { name: 'Reserve', exact: true })).toBeVisible();
+    await expect(nav.getByRole('link', { name: 'Account', exact: true })).toHaveCount(0);
+
+    await expect(page.getByRole('link', { name: 'Search GAS' })).toBeVisible();
+    await expect(page.getByRole('link', { name: 'Notifications' })).toBeVisible();
+    await expect(page.getByRole('link', { name: 'Account', exact: true })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'IGNITION', exact: true })).toBeVisible();
+    await expectNoHorizontalOverflow(page);
+  });
+
+  test('GAS06 — wide desktop preserves one product shell without overflow', async ({ page }) => {
+    await page.setViewportSize(WIDE_DESKTOP);
+    await page.goto('/reserve');
+
+    await expect(page.getByRole('complementary', { name: 'GAS desktop navigation' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'RESERVE' })).toBeVisible();
+    await expect(page.getByText(/no fabricated backing ratio/i)).toBeVisible();
+    await expectNoHorizontalOverflow(page);
+  });
+});
+
 test.describe('GAS Original prototype loop', () => {
   test.use({ viewport: MOBILE });
 
@@ -65,8 +118,7 @@ test.describe('GAS Original prototype loop', () => {
     await expect(page.getByRole('button', { name: /REDLINE/i })).toBeVisible();
     await expect(page.getByRole('button', { name: 'IGNITION', exact: true })).toBeVisible();
 
-    const overflow = await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth + 2);
-    expect(overflow).toBe(false);
+    await expectNoHorizontalOverflow(page);
   });
 
   test('GAS11 — risk mode changes in one action and retains wager amount', async ({ page }) => {
