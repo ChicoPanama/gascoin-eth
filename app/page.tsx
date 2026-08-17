@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { GasAccountSummary } from '@/components/gas/GasAccountSummary';
+import { GasActivityFeed } from '@/components/gas/GasActivityFeed';
 import { GasPrototypeShell } from '@/components/gas/GasPrototypeShell';
 import styles from '@/components/gas/gas-ui.module.css';
 import responsive from '@/components/gas/GasResponsiveShell.module.css';
@@ -34,16 +35,12 @@ export default function Home() {
         </Link>
 
         <Link href="/reserve" className={styles.actionCard}>
-          <span className={styles.actionCardMeta}>Rebase + reserve · data not connected</span>
-          <span className={styles.actionCardTitle}>MONETARY STATE —</span>
-          <p className={styles.actionCardBody}>No fabricated backing ratio or countdown is shown. Authoritative reserve/index/oracle adapters will replace this unavailable state.</p>
+          <span className={styles.actionCardMeta}>Rebase + reserve · read model connected</span>
+          <span className={styles.actionCardTitle}>MONETARY STATE →</span>
+          <p className={styles.actionCardBody}>The Reserve route now consumes one authoritative read boundary with freshness and backing exclusions. Unconfigured state remains unavailable rather than estimated.</p>
         </Link>
 
-        <div className={styles.actionCard}>
-          <span className={styles.actionCardMeta}>Following / live · intentionally empty</span>
-          <span className={styles.actionCardTitle}>ACTIVITY</span>
-          <p className={styles.actionCardBody}>No fake players, wins or transactions. Live activity remains empty until the canonical Phase 9 activity projection is connected.</p>
-        </div>
+        <GasActivityFeed />
       </div>
     </GasPrototypeShell>
   );
