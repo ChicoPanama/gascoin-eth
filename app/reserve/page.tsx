@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { GasPrototypeShell } from '@/components/gas/GasPrototypeShell';
 import styles from '@/components/gas/gas-ui.module.css';
+import responsive from '@/components/gas/GasResponsiveShell.module.css';
 
 export const metadata: Metadata = {
   title: 'Reserve — Project GAS',
@@ -19,8 +20,8 @@ export default function ReservePage() {
         <h1 className={styles.pageTitle}>RESERVE</h1>
         <p className={styles.pageIntro}>The trust surface will show circulation, adjusted external reserves, composition, freshness and verification without counting GAS itself as backing.</p>
       </header>
-      <div className={styles.cardGrid}>
-        <div className={styles.actionCard}>
+      <div className={`${styles.cardGrid} ${responsive.contentGrid}`}>
+        <div className={`${styles.actionCard} ${responsive.primaryWide}`}>
           <span className={styles.actionCardMeta}>Coverage</span>
           <span className={styles.actionCardTitle}>—</span>
           <p className={styles.actionCardBody}>Unavailable until ReserveVault/index/oracle adapters provide canonical values. Stale or unavailable data is labeled rather than guessed.</p>
