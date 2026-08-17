@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { GasPrototypeShell } from '@/components/gas/GasPrototypeShell';
 import { GasWalletAccess } from '@/components/gas/GasWalletAccess';
 import styles from '@/components/gas/gas-ui.module.css';
+import responsive from '@/components/gas/GasResponsiveShell.module.css';
 
 export const metadata: Metadata = {
   title: 'Account — Project GAS',
@@ -33,8 +34,8 @@ export default function AccountPage() {
         <p className={styles.pageIntro}>One consumer account shell, without collapsing financially different things into one misleading balance.</p>
       </header>
 
-      <div className={styles.cardGrid}>
-        <GasWalletAccess />
+      <div className={`${styles.cardGrid} ${responsive.contentGrid}`}>
+        <div className={responsive.primaryWide}><GasWalletAccess /></div>
         <div className={styles.actionCard}>
           <span className={styles.actionCardMeta}>Spendable</span>
           <span className={styles.actionCardTitle}>GAS / USDC</span>
