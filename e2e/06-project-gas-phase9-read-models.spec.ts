@@ -86,4 +86,45 @@ test.describe('Phase 9 read-only authority models', () => {
     await expect(page.getByText(/No approved Project GAS activity read source is configured/i)).toBeVisible();
     await expect(page.getByRole('complementary', { name: 'GAS desktop navigation' })).toBeVisible();
   });
+
+  test('GAS27 — quote API refuses to fabricate a quote without an approved provider', async ({ request }) => {
+    const response = await request.get('/api/project-gas/trade/quote?side=buy&amount=100&payAsset=USDC&receiveAsset=GAS');
+    expect(response.ok()).toBe(true);
+
+    const body = await response.json();
+    expect(body).toMatchObject({
+      version: 1,
+      status: 'unavailable',
+      authority: 'unavailable',
+    });
+    expect(body.message).toMatch(/No approved Project GAS trade quote read source is configured/i);
+  });
+
+  test('GAS28 — Trade renders quote truth and an explicit no-execution boundary', async ({ page }) => {
+    await page.setViewportSize(MOBILE);
+    await page.goto('/trade');
+
+    const quote = page.getByRole('region', { name: 'GAS trade quote' });
+    await expect(quote).toBeVisible();
+    await expect(quote).toHaveAttribute('data-quote-authority', 'unavailable');
+    await expect(quote).toHaveAttribute('data-quote-status', 'unavailable');
+    await expect(quote.getByText(/No approved Project GAS trade quote read source is configured/i)).toBeVisible();
+    await expect(quote.getByText(/Execution is not enabled here/i)).toBeVisible();
+    await expect(page.getByRole('button', { name: /BUY/i })).toHaveAttribute('aria-pressed', 'true');
+  });
+
+  test('GAS29 — Buy and Sell share one read-only quote model on desktop', async ({ page }) => {
+    await page.setViewportSize(DESKTOP);
+    await page.goto('/trade');
+
+    const quote = page.getByRole('region', { name: 'GAS trade quote' });
+    await page.getByRole('button', { name: /SELL/i }).click();
+    await expect(page.getByRole('button', { name: /SELL/i })).toHaveAttribute('aria-pressed', 'true');
+    await expect(quote.getByText('SELL GAS', { exact: true })).toBeVisible();
+    await expect(page.getByLabel('Trade amount')).toHaveValue('100');
+    await expect(quote).toHaveAttribute('data-quote-authority', 'unavailable');
+
+    const overflow = await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth + 2);
+    expect(overflow).toBe(false);
+  });
 });
