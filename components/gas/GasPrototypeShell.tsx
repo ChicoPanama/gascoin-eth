@@ -3,6 +3,7 @@ import type { ReactNode } from 'react';
 import { GasDesktopNav } from './GasDesktopNav';
 import { GasMobileNav } from './GasMobileNav';
 import styles from './gas-ui.module.css';
+import responsive from './GasResponsiveShell.module.css';
 
 function SearchIcon() {
   return <svg viewBox="0 0 24 24" aria-hidden width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.7"><circle cx="11" cy="11" r="6" /><path d="m16 16 4 4" /></svg>;
@@ -18,19 +19,19 @@ function AccountIcon() {
 
 export function GasPrototypeShell({ children }: { children: ReactNode }) {
   return (
-    <div className={styles.shell}>
+    <div className={`${styles.shell} ${responsive.shell}`}>
       <GasDesktopNav />
 
-      <div className={styles.shellBody}>
-        <header className={styles.topBar}>
-          <Link href="/" className={`${styles.brand} ${styles.mobileBrand}`} aria-label="GAS home">
+      <div className={responsive.shellBody}>
+        <header className={`${styles.topBar} ${responsive.topBar}`}>
+          <Link href="/" className={`${styles.brand} ${responsive.mobileBrand}`} aria-label="GAS home">
             <span className={styles.brandWord}>GAS</span>
             <span className={styles.brandPhase}>UX prototype</span>
           </Link>
 
-          <div className={styles.desktopContext} aria-hidden>
+          <div className={responsive.desktopContext} aria-hidden>
             <span className={styles.eyebrow}>Project GAS</span>
-            <span className={styles.desktopContextText}>Responsive prototype</span>
+            <span className={responsive.desktopContextText}>Responsive prototype</span>
           </div>
 
           <div className={styles.utilityRow} aria-label="GAS utilities">
@@ -40,13 +41,13 @@ export function GasPrototypeShell({ children }: { children: ReactNode }) {
             <Link href="/notifications" className={styles.iconButton} aria-label="Notifications">
               <BellIcon />
             </Link>
-            <Link href="/account" className={`${styles.iconButton} ${styles.desktopAccountUtility}`} aria-label="Account">
+            <Link href="/account" className={`${styles.iconButton} ${responsive.desktopAccountUtility}`} aria-label="Account">
               <AccountIcon />
             </Link>
           </div>
         </header>
 
-        <main id="main-content" className={styles.main}>{children}</main>
+        <main id="main-content" className={`${styles.main} ${responsive.main}`}>{children}</main>
       </div>
 
       <GasMobileNav />
