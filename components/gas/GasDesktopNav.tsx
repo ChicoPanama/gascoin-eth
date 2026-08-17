@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import styles from './gas-ui.module.css';
+import styles from './GasResponsiveShell.module.css';
 
 type DesktopNavItem = {
   href: string;
