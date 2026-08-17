@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { GasPrototypeShell } from '@/components/gas/GasPrototypeShell';
 import styles from '@/components/gas/gas-ui.module.css';
+import responsive from '@/components/gas/GasResponsiveShell.module.css';
 
 export default function Home() {
   return (
@@ -25,8 +26,8 @@ export default function Home() {
         <p className={styles.pageIntro}>Play is immediate. Monetary state stays understandable. Social activity becomes useful without exposing protocol plumbing first.</p>
       </header>
 
-      <div className={styles.cardGrid}>
-        <Link href="/play/gas" className={styles.actionCard}>
+      <div className={`${styles.cardGrid} ${responsive.contentGrid}`}>
+        <Link href="/play/gas" className={`${styles.actionCard} ${responsive.primaryWide}`}>
           <span className={styles.actionCardMeta}>Primary action</span>
           <span className={styles.actionCardTitle}>IGNITION →</span>
           <p className={styles.actionCardBody}>Resume GAS Original with CRUISE, BOOST or REDLINE. The prototype loop is interactive and moves no funds.</p>
