@@ -244,6 +244,31 @@ export function failExpiredIntent(state: CommittingState): FailedState {
   };
 }
 
+export function failRejectedSubmission(
+  state: CommittingState,
+  code: Extract<
+    GameFailureCode,
+    | 'validation-failed'
+    | 'authorization-required'
+    | 'authorization-expired'
+    | 'signature-rejected'
+    | 'transaction-failed'
+    | 'intent-expired'
+  >,
+  message: string,
+): FailedState {
+  return {
+    phase: 'failed',
+    code,
+    message,
+    fundsMoved: 'no',
+    wagerCreated: false,
+    requestId: state.requestId,
+    recoverTo: 'ready',
+    draft: { ...state.draft },
+  };
+}
+
 export function failUnknownSubmission(state: CommittingState, message: string): FailedState {
   return {
     phase: 'failed',

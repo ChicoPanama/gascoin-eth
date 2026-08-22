@@ -9,6 +9,7 @@ import {
   failAfterLock,
   failBeforeSubmission,
   failExpiredIntent,
+  failRejectedSubmission,
   failUnknownSubmission,
   fundsStateLabel,
   isActionPending,
@@ -132,6 +133,18 @@ describe('Project GAS Original canonical state model', () => {
     const unknown = failUnknownSubmission(commitReady('unknown-1'), 'RPC timed out after send');
     expect(canBlindRetry(unknown)).toBe(false);
     expect(fundsStateLabel(unknown)).toContain('not yet known');
+  });
+
+  it('makes an explicit pre-movement source rejection safe to rebuild', () => {
+    const rejected = failRejectedSubmission(
+      commitReady('rejected-1'),
+      'transaction-failed',
+      'Source rejected before execution.',
+    );
+
+    expect(canBlindRetry(rejected)).toBe(true);
+    expect(rejected.requestId).toBe('rejected-1');
+    expect(rejected.fundsMoved).toBe('no');
   });
 
   it('never offers blind retry after a wager is known to exist', () => {

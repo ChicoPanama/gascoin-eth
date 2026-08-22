@@ -14,12 +14,12 @@ import { WagerComposer } from './WagerComposer';
 import {
   PRESENTATION_OPTIONS,
   gasOriginalStatusLabel,
-  useGasOriginalPrototype,
 } from './useGasOriginalPrototype';
+import { useGasOriginalController } from './useGasOriginalController';
 import shared from './gas-ui.module.css';
 import local from './GasOriginalPrototype.module.css';
 
-function DesktopTrustContext() {
+function DesktopTrustContext({ live }: { live: boolean }) {
   return (
     <aside className={local.desktopContextPanel} aria-label="Round trust context">
       <span className={shared.eyebrow}>Round truth</span>
@@ -27,22 +27,24 @@ function DesktopTrustContext() {
       <p className={local.desktopContextBody}>Desktop adds trust context beside the game without inserting another step into the wager flow.</p>
       <dl className={local.desktopContextList}>
         <div><dt>State</dt><dd>Explicit</dd></div>
-        <div><dt>Live RNG</dt><dd>Not connected</dd></div>
-        <div><dt>Funds</dt><dd>Do not move</dd></div>
+        <div><dt>Live RNG</dt><dd>{live ? 'Authoritative' : 'Not connected'}</dd></div>
+        <div><dt>Funds</dt><dd>{live ? 'Explicit state' : 'Do not move'}</dd></div>
         <div><dt>Verification</dt><dd>One action after result</dd></div>
       </dl>
     </aside>
   );
 }
 
-function DesktopSessionContext() {
+function DesktopSessionContext({ live }: { live: boolean }) {
   return (
     <aside className={local.desktopContextPanel} aria-label="Session context">
       <span className={shared.eyebrow}>Session context</span>
       <h2 className={local.desktopContextTitle}>NO FAKE ACTIVITY</h2>
-      <p className={local.desktopContextBody}>History, players and bankroll settlement remain unavailable until canonical adapters exist.</p>
+      <p className={local.desktopContextBody}>{live
+        ? 'Authoritative wager and round state comes from the configured Base execution source. Missing history or bankroll data stays unavailable.'
+        : 'History, players and bankroll settlement remain unavailable until canonical adapters exist.'}</p>
       <dl className={local.desktopContextList}>
-        <div><dt>Recent rounds</dt><dd>Unavailable</dd></div>
+        <div><dt>Recent rounds</dt><dd>{live ? 'Per-round proof' : 'Unavailable'}</dd></div>
         <div><dt>Live players</dt><dd>Unavailable</dd></div>
         <div><dt>Bankroll</dt><dd>Not connected</dd></div>
         <div><dt>Primary action</dt><dd>IGNITION</dd></div>
@@ -71,7 +73,9 @@ export function GasOriginalPrototype() {
     handlePrimary,
     handleModeChange,
     handleAmountChange,
-  } = useGasOriginalPrototype();
+    executionMode,
+  } = useGasOriginalController();
+  const live = executionMode === 'live';
 
   const statusClass = state.phase === 'failed'
     ? shared.statusFailed
@@ -82,7 +86,9 @@ export function GasOriginalPrototype() {
   return (
     <>
       <div className={`${shared.prototypeBanner} ${local.compactBanner}`} role="note">
-        <span>USDC entry · automatic GAS sourcing · GAS payout · prototype moves no funds · no live RNG</span>
+        <span>{live
+          ? 'USDC entry · automatic GAS sourcing · GAS payout · authoritative Base execution mode'
+          : 'USDC entry · automatic GAS sourcing · GAS payout · prototype moves no funds · no live RNG'}</span>
         <span className={`${shared.prototypePill} ${local.compactBannerPill}`}>Phase 9</span>
       </div>
 
@@ -121,7 +127,7 @@ export function GasOriginalPrototype() {
       </section>
 
       <div className={local.desktopPlayLayout}>
-        <DesktopTrustContext />
+        <DesktopTrustContext live={live} />
 
         <section className={`${shared.gameCard} ${local.compactGame} ${local.desktopGame}`} aria-labelledby="gas-original-heading">
           <div className={`${shared.gameHeader} ${local.compactGameHeader}`}>
@@ -174,7 +180,7 @@ export function GasOriginalPrototype() {
           {state.phase === 'result' ? (
             <div className={local.resultSummary} aria-live="polite">
               <div>
-                <div className={shared.eyebrow}>Illustrative result delta</div>
+                <div className={shared.eyebrow}>{live ? 'Settled result delta' : 'Illustrative result delta'}</div>
                 <div className={`${local.resultAmount} ${state.result.outcome === 'win' ? local.resultPositive : state.result.outcome === 'loss' ? local.resultNegative : local.resultNeutral}`}>
                   {resultDelta}
                 </div>
@@ -190,8 +196,8 @@ export function GasOriginalPrototype() {
           <button
             type="button"
             className={`${shared.ignition} ${local.compactIgnition}`}
-            disabled={primaryDisabled}
-            onClick={handlePrimary}
+            disabled={primaryDisabled || (!authenticated && !authReady)}
+            onClick={() => authenticated || !live ? handlePrimary() : login()}
             aria-describedby="gas-ignition-trust"
           >
             {primaryLabel}
@@ -208,11 +214,13 @@ export function GasOriginalPrototype() {
               <Link className={shared.secondaryButton} href={state.result.verificationHref}>Verify round</Link>
             </div>
           ) : (
-            <p className={local.prototypeNote}>Outcomes and GAS credit are illustrative UX data only. No live sourcing quote. Payout curves, RNG and bankroll settlement are not represented.</p>
+            <p className={local.prototypeNote}>{live
+              ? 'A stable intent is stored before submission. Unknown money state must be reconciled before another wager can be sent.'
+              : 'Outcomes and GAS credit are illustrative UX data only. No live sourcing quote. Payout curves, RNG and bankroll settlement are not represented.'}</p>
           )}
         </section>
 
-        <DesktopSessionContext />
+        <DesktopSessionContext live={live} />
       </div>
     </>
   );
