@@ -94,14 +94,14 @@
       "family": "play",
       "sourceLaws": ["RM03", "RM05"],
       "journeys": ["J02", "J03", "J04"],
-      "intent": "Keep amount, asset and risk configuration adjacent to IGNITION with minimal state loss between rounds.",
+      "intent": "Keep the fixed USDC entry amount and risk configuration adjacent to IGNITION while the adapter preserves GAS-native wager accounting.",
       "states": ["empty", "valid", "insufficient_balance", "outside_permission", "disabled", "validation_error"],
       "persist": ["ordinary_amount", "last_safe_mode", "presentation_mode"],
       "neverPersistSilently": ["MAX", "one_time_override", "out_of_scope_amount"],
-      "truthConstraints": ["Available balance and wager asset are visible", "Permission/bankroll constraints are authoritative", "No wager submits from an invalid state"],
+      "truthConstraints": ["Player-facing Phase 1 entry is USDC-only with no GAS/USDC selector", "Available USDC entry balance is visible", "Automatic GAS sourcing and the accepted GAS wager amount belong to the authoritative adapter/router", "Internal wager and payout are GAS-native", "Permission/bankroll constraints are authoritative", "No wager submits from an invalid state"],
       "repoMapping": [],
       "action": "BUILD",
-      "acceptance": ["Returning eligible user reaches valid wager with <=2 intentional actions", "Amount is not reset by ordinary mode switch", "Invalid state explains one corrective action"]
+      "acceptance": ["Returning eligible user reaches valid wager with <=2 intentional actions", "No direct GAS player-entry action is exposed", "USDC amount is not reset by ordinary mode switch", "Invalid state explains one corrective action"]
     },
     {
       "id": "GP08",

@@ -28,7 +28,7 @@ Required loop:
 - `/play/gas`
 - GAS Gauge
 - CRUISE / BOOST / REDLINE selector
-- GAS/USDC wager composer + safe presets
+- historical GAS/USDC wager composer + safe presets (the Phase 7 prototype state at closure; direct GAS entry was superseded by Source of Truth v1.1 and reconciled during Phase 9)
 - IGNITION
 - validating -> committing -> locked -> resolving -> result
 - Cinematic / Instant / Reduced presentation modes
@@ -45,6 +45,10 @@ Required loop:
 - reconcile-before-retry model
 - blind retry only when authoritative state says no wager/funds moved
 - verified activity contract separating protocol facts and user commentary
+
+### Post-closure Phase 9 reconciliation
+
+Phase 7's dual-asset selector is historical closure evidence, not the current product law. Source of Truth v1.1 locks Phase 1 player entry to USDC-only, followed by automatic/invisible GAS sourcing, GAS-native internal wagering and GAS payout. Phase 9 owns that reconciliation without reopening the Phase 7 gate.
 
 ### Supporting prototype routes
 - `/trade`

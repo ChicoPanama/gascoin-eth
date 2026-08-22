@@ -22,8 +22,8 @@ This repository is the current Project GAS implementation workspace. The histori
 5. GAS Pattern Library — **PASS**
 6. GAS information architecture — **PASS**
 7. Mobile GAS prototype — **PASS**
-8. Desktop adaptation — **ACTIVE**
-9. Vertical-loop implementation
+8. Desktop adaptation — **PASS**
+9. Vertical-loop implementation — **ACTIVE**
 10. Automated comparison / benchmarking
 11. Destroy friction
 
@@ -47,16 +47,22 @@ Additional first-class surfaces:
 Current GAS Original prototype:
 
 ```text
+       USDC entry
+            ↓
+automatic GAS sourcing
+            ↓
 CRUISE / BOOST / REDLINE
         ↓
-   wager amount
+ GAS-native wager
         ↓
      IGNITION
         ↓
 LOCKING → LOCKED → RESOLVING → SETTLED
         ↓
- IGNITION AGAIN
+ GAS payout → IGNITION AGAIN
 ```
+
+Direct player-facing GAS entry is superseded. The current prototype keeps the player boundary fixed to USDC while preserving separate internal GAS wager/payout accounting; its sourcing credit remains illustrative until an authoritative Game Entry Router is connected.
 
 ## Prototype truth boundary
 

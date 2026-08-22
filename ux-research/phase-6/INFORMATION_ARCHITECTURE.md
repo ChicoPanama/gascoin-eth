@@ -181,6 +181,8 @@ Future games may enter only if they preserve the one-machine simplicity principl
 
 The primary approved viewport should require **no vertical scrolling for the wager/IGNITION/result loop**.
 
+Source of Truth v1.1 fixes the Phase 1 player boundary to USDC. GAS sourcing/credit is automatic and invisible; the game remains GAS-native internally and pays out GAS. No player-facing GAS/USDC selector is part of the canonical IA.
+
 ```text
 Compact account/balance row
 
@@ -188,8 +190,9 @@ GAS GAUGE / canonical result zone
 
 CRUISE | BOOST | REDLINE
 
-Wager amount + asset
-presets / available balance
+USDC entry amount
+presets / available USDC balance
+automatic GAS sourcing + GAS payout context
 
 IGNITION
 

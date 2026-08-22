@@ -183,12 +183,15 @@ test.describe('Phase 9 account authority boundary', () => {
     await expect(accountSummary).toHaveAttribute('data-gas-status', 'unavailable');
   });
 
-  test('GAS20 — GAS Original no longer invents a spendable demo balance while the game remains prototype', async ({ page }) => {
+  test('GAS20 — GAS Original reads the USDC entry balance and never invents demo money', async ({ page }) => {
     await page.goto('/play/gas');
     const account = page.getByRole('region', { name: 'GAS account state' });
     await expect(account).toHaveAttribute('data-account-authority', 'unavailable');
-    await expect(account.getByText('— GAS', { exact: false })).toBeVisible();
+    await expect(account).toHaveAttribute('data-entry-asset', 'USDC');
+    await expect(account).toHaveAttribute('data-usdc-status', 'unavailable');
+    await expect(account.getByText('— USDC', { exact: false })).toBeVisible();
     await expect(page.getByText(/1,240\.00 GAS/i)).toHaveCount(0);
+    await expect(page.getByText(/Prototype available/i)).toHaveCount(0);
     await expect(page.getByText(/no live RNG/i)).toBeVisible();
     await expect(page.getByText(/illustrative UX data only/i)).toBeVisible();
   });
@@ -206,6 +209,22 @@ test.describe('GAS Original prototype loop', () => {
     await expect(page.getByRole('button', { name: 'IGNITION', exact: true })).toBeVisible();
 
     await expectNoHorizontalOverflow(page);
+  });
+
+  test('GAS34 — player entry is fixed to USDC while the round and payout remain GAS-native', async ({ page }) => {
+    await page.goto('/play/gas');
+    const game = page.getByRole('region', { name: 'GAS ORIGINAL' });
+
+    await expect(game.getByLabel('USDC entry amount')).toHaveValue('25');
+    await expect(game.getByLabel('Player entry asset USDC')).toHaveText('USDC');
+    await expect(game.getByText(/USDC in · GAS sourced automatically/i)).toBeVisible();
+    await expect(game.getByText(/Payout in GAS/i)).toBeVisible();
+    await expect(game.getByRole('button', { name: /Wager asset|Switch to/i })).toHaveCount(0);
+
+    await game.getByRole('button', { name: 'Instant', exact: true }).click();
+    await game.getByRole('button', { name: 'IGNITION', exact: true }).click();
+    await expect(game.getByText('GAS-NATIVE ROUND', { exact: true })).toBeVisible({ timeout: 1500 });
+    await expect(game.getByText('35.00 GAS', { exact: true })).toBeVisible();
   });
 
   test('GAS11 — risk mode changes in one action and retains wager amount', async ({ page }) => {

@@ -1,5 +1,8 @@
 export type GasGameMode = 'CRUISE' | 'BOOST' | 'REDLINE';
-export type WagerAsset = 'GAS' | 'USDC';
+/** Phase 1 player funding boundary. Direct GAS entry is explicitly superseded. */
+export type GameEntryAsset = 'USDC';
+/** GAS Original remains GAS-native after the entry router sources GAS. */
+export type WagerAsset = 'GAS';
 export type PresentationMode = 'cinematic' | 'instant' | 'reduced-motion';
 
 export type GameFailureCode =
@@ -19,11 +22,14 @@ export type FundsMovedState = 'no' | 'yes' | 'unknown';
 /** Decimal strings only. Atomic-unit conversion belongs in the protocol adapter. */
 export interface WagerDraft {
   mode: GasGameMode;
-  asset: WagerAsset;
-  amount: string;
+  entryAsset: GameEntryAsset;
+  entryAmount: string;
 }
 
 export interface CommittedWager extends WagerDraft {
+  wagerAsset: WagerAsset;
+  /** Canonical GAS amount sourced/credited by the game entry authority. */
+  wagerAmount: string;
   requestId: string;
   roundId: string;
   submittedAt: string;
@@ -108,15 +114,19 @@ export function createReadyState(draft?: Partial<WagerDraft>): ReadyState {
     phase: 'ready',
     draft: {
       mode: draft?.mode ?? 'BOOST',
-      asset: draft?.asset ?? 'GAS',
-      amount: draft?.amount ?? '25',
+      entryAsset: 'USDC',
+      entryAmount: draft?.entryAmount ?? '25',
     },
   };
 }
 
 /** Eligibility is a value check, not a type-narrowing predicate. */
 export function canIgnite(state: GasOriginalState): boolean {
-  return state.phase === 'ready' && Number(state.draft.amount) > 0;
+  const entryAmount = state.phase === 'ready' ? Number(state.draft.entryAmount) : Number.NaN;
+  return state.phase === 'ready'
+    && state.draft.entryAsset === 'USDC'
+    && Number.isFinite(entryAmount)
+    && entryAmount > 0;
 }
 
 export function canBlindRetry(state: GasOriginalState): boolean {
@@ -129,6 +139,9 @@ export function isActionPending(state: GasOriginalState): boolean {
 }
 
 export function beginValidation(state: ReadyState): ValidatingState {
+  if (state.draft.entryAsset !== 'USDC') {
+    throw new Error('GAS Original player entry must use USDC');
+  }
   return { phase: 'validating', draft: { ...state.draft } };
 }
 
@@ -150,12 +163,18 @@ export function isIntentExpired(state: CommittingState, nowIso: string): boolean
 
 export function lockWager(
   state: CommittingState,
-  committed: Omit<CommittedWager, keyof WagerDraft | 'requestId' | 'expiresAt'>,
+  committed: Omit<CommittedWager, keyof WagerDraft | 'wagerAsset' | 'requestId' | 'expiresAt'>,
 ): LockedState {
+  const wagerAmount = Number(committed.wagerAmount);
+  if (!Number.isFinite(wagerAmount) || wagerAmount <= 0) {
+    throw new Error('Canonical GAS wager amount must be greater than zero');
+  }
+
   return {
     phase: 'locked',
     wager: {
       ...state.draft,
+      wagerAsset: 'GAS',
       requestId: state.requestId,
       expiresAt: state.expiresAt,
       ...committed,
@@ -168,6 +187,9 @@ export function beginResolution(state: LockedState): ResolvingState {
 }
 
 export function resolveRound(state: ResolvingState, result: GameResult): ResultState {
+  if (result.payoutAsset !== 'GAS') {
+    throw new Error('GAS Original payout asset must be GAS');
+  }
   return { phase: 'result', wager: state.wager, result };
 }
 
@@ -176,17 +198,20 @@ export function repeatSameConfiguration(state: ResultState): ReadyState {
     phase: 'ready',
     draft: {
       mode: state.wager.mode,
-      asset: state.wager.asset,
-      amount: state.wager.amount,
+      entryAsset: 'USDC',
+      entryAmount: state.wager.entryAmount,
     },
     lastRound: { wager: state.wager, result: state.result },
   };
 }
 
-export function updateReadyDraft(state: ReadyState, patch: Partial<WagerDraft>): ReadyState {
+export function updateReadyDraft(
+  state: ReadyState,
+  patch: Partial<Pick<WagerDraft, 'mode' | 'entryAmount'>>,
+): ReadyState {
   return {
     ...state,
-    draft: { ...state.draft, ...patch },
+    draft: { ...state.draft, ...patch, entryAsset: 'USDC' },
   };
 }
 

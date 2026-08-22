@@ -137,11 +137,14 @@ Allocation:
 ### Result language
 **LOCKED:** GAS GAUGE is the signature visual/result instrument.
 
-### Inputs
-**LOCKED:** support USDC and GAS.
+### Player-facing entry asset
+**LOCKED / SOURCE OF TRUTH v1.1 SUPERSESSION:** Phase 1 GAS Original entry is USDC-only. The earlier direct GAS entry option is superseded and must not appear as a player-facing asset selector.
 
-### Primary distribution loop
-**CURRENT / STRONG DEFAULT:** USDC in → gameplay → GAS out, while GAS holders can also play with GAS.
+### Canonical entry and payout loop
+**LOCKED:** USDC enters at the player boundary → GAS is sourced/credited automatically and invisibly → the wager, bankroll liability and game settlement are GAS-native → payout is GAS.
+
+### Game Entry Router policy
+**OPEN:** exact sourcing venue, quote authority, inventory/netting, slippage limits, expiry and failure/recovery policy. UX must preserve the adapter boundary and render unavailable/degraded state rather than invent these mechanics.
 
 ### Game-bankroll rule
 **LOCKED:** game operational inventory/liability belongs to GameBankroll, not ReserveVault.

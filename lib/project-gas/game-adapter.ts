@@ -27,6 +27,11 @@ export interface AcceptedGameIntent {
   intentId: string;
   roundId: string;
   acceptedAt: string;
+  /** GAS sourced/credited by the authoritative entry router for the internal wager. */
+  wagerAsset: 'GAS';
+  wagerAmount: string;
+  /** Quote/credit identity when the entry router exposes one. */
+  sourcingQuoteId?: string;
   fundsMoved: boolean;
   txHash?: `0x${string}`;
 }

@@ -19,7 +19,6 @@ import {
   type GasOriginalState,
   type PresentationMode,
   type ReadyState,
-  type WagerAsset,
   type WagerDraft,
 } from '@/lib/project-gas/game-state';
 
@@ -50,27 +49,31 @@ function draftForState(state: GasOriginalState): WagerDraft {
   return createReadyState().draft;
 }
 
-function makePrototypeResult(draft: WagerDraft, index: number, roundId: string): GameResult {
+function makePrototypeResult(
+  wagerAmount: string,
+  index: number,
+  roundId: string,
+): GameResult {
   const sample = PROTOTYPE_RESULTS[index % PROTOTYPE_RESULTS.length];
-  const wager = Number(draft.amount || 0);
+  const wager = Number(wagerAmount || 0);
   const payout = Number.isFinite(wager) ? wager * sample.multiplier : 0;
 
   return {
     outcome: sample.outcome,
     multiplier: sample.multiplier.toFixed(2),
     payoutAmount: payout.toFixed(2),
-    payoutAsset: draft.asset,
+    payoutAsset: 'GAS',
     settledAt: new Date().toISOString(),
     verificationHref: `/round/${roundId}`,
   };
 }
 
 function resultDelta(state: Extract<GasOriginalState, { phase: 'result' }>) {
-  const wager = Number(state.wager.amount || 0);
+  const wager = Number(state.wager.wagerAmount || 0);
   const payout = Number(state.result.payoutAmount || 0);
   const delta = payout - wager;
   if (!Number.isFinite(delta)) return '—';
-  return `${delta > 0 ? '+' : ''}${delta.toFixed(2)} ${state.wager.asset}`;
+  return `${delta > 0 ? '+' : ''}${delta.toFixed(2)} GAS`;
 }
 
 export function gasOriginalStatusLabel(state: GasOriginalState) {
@@ -106,7 +109,7 @@ export function useGasOriginalPrototype() {
 
   const startRound = (readyState: ReadyState) => {
     if (!canIgnite(readyState)) {
-      setState(failBeforeSubmission(readyState.draft, 'validation-failed', 'Enter a wager amount greater than zero.'));
+      setState(failBeforeSubmission(readyState.draft, 'validation-failed', 'Enter a USDC amount greater than zero.'));
       return;
     }
 
@@ -121,9 +124,17 @@ export function useGasOriginalPrototype() {
 
     const validating = beginValidation(readyState);
     const committing = beginCommit(validating, requestId, createdAt.toISOString(), expiresAt);
-    const locked = lockWager(committing, { roundId, submittedAt: new Date().toISOString() });
+    const locked = lockWager(committing, {
+      roundId,
+      submittedAt: new Date().toISOString(),
+      // Prototype-only 1:1 credit keeps the interaction demonstrable. It is not a live quote.
+      wagerAmount: readyState.draft.entryAmount,
+    });
     const resolving = beginResolution(locked);
-    const result = resolveRound(resolving, makePrototypeResult(readyState.draft, roundNumber - 1, roundId));
+    const result = resolveRound(
+      resolving,
+      makePrototypeResult(locked.wager.wagerAmount, roundNumber - 1, roundId),
+    );
     const speed = PRESENTATION_SPEED[presentation];
 
     setState(validating);
@@ -139,7 +150,7 @@ export function useGasOriginalPrototype() {
     if (state.phase === 'failed' && canBlindRetry(state)) return startRound(createReadyState(state.draft));
   };
 
-  const updateDraft = (patch: Partial<WagerDraft>) => {
+  const updateDraft = (patch: Partial<Pick<WagerDraft, 'mode' | 'entryAmount'>>) => {
     if (state.phase === 'ready') return setState(updateReadyDraft(state, patch));
     if (state.phase === 'result') return setState(updateReadyDraft(repeatSameConfiguration(state), patch));
     if (state.phase === 'failed' && canBlindRetry(state)) {
@@ -188,7 +199,6 @@ export function useGasOriginalPrototype() {
     resultDelta: state.phase === 'result' ? resultDelta(state) : null,
     handlePrimary,
     handleModeChange: (mode: GasGameMode) => updateDraft({ mode }),
-    handleAmountChange: (amount: string) => updateDraft({ amount }),
-    handleAssetChange: (asset: WagerAsset) => updateDraft({ asset }),
+    handleAmountChange: (entryAmount: string) => updateDraft({ entryAmount }),
   };
 }

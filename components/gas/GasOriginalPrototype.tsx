@@ -54,8 +54,8 @@ function DesktopSessionContext() {
 export function GasOriginalPrototype() {
   const { ready: authReady, authenticated, login } = usePrivy();
   const { model: accountModel } = useProjectGasAccount();
-  const gasBalance = accountModel.spendable.gas;
-  const gasBalanceAuthoritative = hasAuthoritativeSpendableBalance(gasBalance);
+  const entryBalance = accountModel.spendable.usdc;
+  const entryBalanceAuthoritative = hasAuthoritativeSpendableBalance(entryBalance);
   const {
     state,
     draft,
@@ -71,7 +71,6 @@ export function GasOriginalPrototype() {
     handlePrimary,
     handleModeChange,
     handleAmountChange,
-    handleAssetChange,
   } = useGasOriginalPrototype();
 
   const statusClass = state.phase === 'failed'
@@ -83,25 +82,26 @@ export function GasOriginalPrototype() {
   return (
     <>
       <div className={`${shared.prototypeBanner} ${local.compactBanner}`} role="note">
-        <span>Phase 9 transition · account reads may be live · game still moves no funds · no live RNG</span>
+        <span>USDC entry · automatic GAS sourcing · GAS payout · prototype moves no funds · no live RNG</span>
         <span className={`${shared.prototypePill} ${local.compactBannerPill}`}>Phase 9</span>
       </div>
 
       <section
         className={`${shared.accountStrip} ${local.compactAccount}`}
         aria-label="GAS account state"
-        data-account-authority={gasBalance.authority}
-        data-gas-status={gasBalance.status}
+        data-account-authority={entryBalance.authority}
+        data-entry-asset="USDC"
+        data-usdc-status={entryBalance.status}
       >
         <div>
-          <div className={shared.eyebrow}>{authenticated ? 'Available to use' : 'Explore before sign-in'}</div>
+          <div className={shared.eyebrow}>{authenticated ? 'Available to enter' : 'Explore before sign-in'}</div>
           <div className={`${shared.balance} ${local.compactBalance}`}>
-            {formatProjectGasBalanceForDisplay(gasBalance)} <span className={shared.eyebrow}>{gasBalanceAuthoritative ? 'LIVE READ' : 'UNAVAILABLE'}</span>
+            {formatProjectGasBalanceForDisplay(entryBalance)} <span className={shared.eyebrow}>{entryBalanceAuthoritative ? 'LIVE READ' : 'UNAVAILABLE'}</span>
           </div>
           <div className={`${shared.balanceSub} ${local.compactBalanceSub}`}>
             {authenticated
-              ? accountModel.identity.label || gasBalance.message || 'GAS account'
-              : gasBalance.message || 'Sign in or activate a wallet to read configured Project GAS assets.'}
+              ? accountModel.identity.label || entryBalance.message || 'GAS account'
+              : entryBalance.message || 'Sign in or activate a wallet to read configured Project GAS USDC.'}
           </div>
         </div>
         {!authenticated ? (
@@ -114,7 +114,7 @@ export function GasOriginalPrototype() {
             {authReady ? 'Enter GAS' : 'Loading'}
           </button>
         ) : (
-          <div className={`${shared.statusPill} ${local.compactStatus} ${gasBalance.status === 'degraded' ? shared.statusFailed : gasBalance.status === 'loading' ? shared.statusPending : shared.statusReady}`}>
+          <div className={`${shared.statusPill} ${local.compactStatus} ${entryBalance.status === 'degraded' ? shared.statusFailed : entryBalance.status === 'loading' ? shared.statusPending : shared.statusReady}`}>
             <span className={shared.statusDot} /> {projectGasAccountAuthorityLabel(accountModel)}
           </div>
         )}
@@ -127,7 +127,7 @@ export function GasOriginalPrototype() {
           <div className={`${shared.gameHeader} ${local.compactGameHeader}`}>
             <div>
               <h1 id="gas-original-heading" className={`${shared.gameTitle} ${local.compactGameTitle}`}>GAS ORIGINAL</h1>
-              <p className={`${shared.gameDescription} ${local.compactGameDescription}`}>Choose risk. Choose amount. IGNITION. Protocol detail stays one layer deeper.</p>
+              <p className={`${shared.gameDescription} ${local.compactGameDescription}`}>Choose risk. Enter USDC. IGNITION. GAS is sourced automatically and payouts are GAS.</p>
             </div>
             <div className={`${shared.statusPill} ${local.compactStatus} ${statusClass}`}>
               <span className={shared.statusDot} /> {gasOriginalStatusLabel(state)}
@@ -143,7 +143,6 @@ export function GasOriginalPrototype() {
             disabled={!editable}
             compact
             onAmountChange={handleAmountChange}
-            onAssetChange={handleAssetChange}
           />
 
           <div className={local.presentationRow}>
@@ -181,7 +180,7 @@ export function GasOriginalPrototype() {
                 </div>
               </div>
               <div className={local.resultMeta}>
-                {state.wager.mode}<br />{state.wager.amount} {state.wager.asset}<br />illustrative result
+                {state.wager.mode}<br />{state.wager.entryAmount} USDC ENTRY<br />GAS-NATIVE ROUND
               </div>
             </div>
           ) : null}
@@ -207,7 +206,7 @@ export function GasOriginalPrototype() {
               <Link className={shared.secondaryButton} href={state.result.verificationHref}>Verify round</Link>
             </div>
           ) : (
-            <p className={local.prototypeNote}>Prototype outcomes are illustrative UX data only. Final payout curves, RNG and bankroll settlement are not represented here.</p>
+            <p className={local.prototypeNote}>Outcomes and GAS credit are illustrative UX data only. No live sourcing quote. Payout curves, RNG and bankroll settlement are not represented.</p>
           )}
         </section>
 

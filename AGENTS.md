@@ -15,6 +15,24 @@ Project GAS combines:
 5. **Reserve transparency** — backing and rebase state;
 6. **future Bracket integration** — separate collateral/settlement domain and separate solvency.
 
+## Canonical GAS Original entry boundary
+
+Source of Truth v1.1 supersedes the older dual-asset player-entry prototype.
+
+Phase 1 player flow is:
+
+```text
+USDC entry
+-> automatic/invisible GAS sourcing or credit
+-> CRUISE / BOOST / REDLINE
+-> IGNITION
+-> GAS-native wager
+-> RNG / settlement
+-> GAS payout
+```
+
+Do not expose a player-facing GAS/USDC selector or direct GAS entry. Preserve GAS-native wager, bankroll, liability and payout accounting behind the Game Entry Router/adapter boundary. Exact sourcing, netting, slippage and failure policy remain OPEN and must not be invented.
+
 ## Canonical roadmap
 
 `ux-research/ROADMAP.md` is the sole numbered UX roadmap.
@@ -217,6 +235,8 @@ UNKNOWN / INTERRUPTED
 ```
 
 Every wager must have a stable `intentId`; every resolved game must have a canonical `roundId`. Duplicate click/retry must not create a second wager while a prior intent may have executed.
+
+The adapter must preserve the entry-domain split: player intent is denominated in USDC, while the accepted/locked internal wager and payout are denominated in GAS. React must not fabricate the sourced GAS amount; the authoritative entry adapter/router owns it.
 
 Trade lifecycle target:
 

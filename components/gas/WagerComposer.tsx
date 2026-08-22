@@ -1,4 +1,4 @@
-import type { WagerAsset, WagerDraft } from '@/lib/project-gas/game-state';
+import type { WagerDraft } from '@/lib/project-gas/game-state';
 import styles from './gas-ui.module.css';
 import local from './GasOriginalPrototype.module.css';
 
@@ -9,19 +9,15 @@ export function WagerComposer({
   disabled,
   compact = false,
   onAmountChange,
-  onAssetChange,
 }: {
   draft: WagerDraft;
   disabled?: boolean;
   compact?: boolean;
   onAmountChange: (amount: string) => void;
-  onAssetChange: (asset: WagerAsset) => void;
 }) {
-  const nextAsset: WagerAsset = draft.asset === 'GAS' ? 'USDC' : 'GAS';
-
   return (
     <div className={`${styles.wagerPanel} ${compact ? local.compactWagerPanel : ''}`}>
-      <label className={styles.eyebrow} htmlFor="gas-wager-amount">Wager amount</label>
+      <label className={styles.eyebrow} htmlFor="gas-wager-amount">USDC entry amount</label>
       <div className={styles.wagerTop}>
         <div className={`${styles.amountField} ${compact ? local.compactAmountField : ''}`}>
           <input
@@ -31,20 +27,17 @@ export function WagerComposer({
             inputMode="decimal"
             min="0"
             step="any"
-            value={draft.amount}
+            value={draft.entryAmount}
             disabled={disabled}
             onChange={(event) => onAmountChange(event.currentTarget.value)}
             aria-describedby="gas-wager-balance"
           />
-          <button
-            className={`${styles.assetButton} ${compact ? local.compactAssetButton : ''}`}
-            type="button"
-            disabled={disabled}
-            onClick={() => onAssetChange(nextAsset)}
-            aria-label={`Wager asset ${draft.asset}. Switch to ${nextAsset}.`}
+          <span
+            className={`${styles.assetBadge} ${compact ? local.compactAssetBadge : ''}`}
+            aria-label="Player entry asset USDC"
           >
-            {draft.asset}
-          </button>
+            {draft.entryAsset}
+          </span>
         </div>
       </div>
       <div className={`${styles.presetRow} ${compact ? local.compactPresets : ''}`} aria-label="Wager presets">
@@ -61,8 +54,8 @@ export function WagerComposer({
         ))}
       </div>
       <div id="gas-wager-balance" className={`${styles.primaryMetaRow} ${compact ? local.compactMeta : ''}`}>
-        <span>Prototype available: 1,240 GAS</span>
-        <span>MAX never persists</span>
+        <span>USDC in · GAS sourced automatically</span>
+        <span>Payout in GAS</span>
       </div>
     </div>
   );

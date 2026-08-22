@@ -108,6 +108,13 @@ Required IDs:
 - `roundId` — canonical game-round identity;
 - transaction/request IDs where the authoritative execution layer provides them.
 
+Required entry-domain split:
+- player-facing entry is USDC-only;
+- no direct GAS player-entry selector;
+- the authoritative Game Entry Router/adapter returns the sourced/credited GAS wager amount;
+- locked wager, GameBankroll liability and payout remain GAS-native;
+- missing/stale/failed sourcing authority is unavailable/recoverable state, never a React-calculated live quote.
+
 A duplicate click/retry must not create a second wager when the prior intent may have executed.
 
 ### V3 — RNG / fairness / settlement integration
@@ -219,6 +226,8 @@ Phase 9 must extend unit/integration/E2E coverage for at least:
 - delayed settlement/reconciliation;
 - safe retry vs unsafe retry;
 - insufficient spendable balance;
+- direct-GAS player-entry rejection and fixed USDC entry rendering;
+- authoritative GAS sourcing amount separated from USDC entry amount;
 - stale/expired trade quote;
 - reserve freshness/stale state;
 - social object provenance separation;

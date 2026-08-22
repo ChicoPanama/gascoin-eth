@@ -122,6 +122,8 @@ Important state cannot be communicated by color only. Patterns define programmat
 
 ## Core Play composition
 
+Phase 1 player entry is fixed to USDC. `GP07` collects the USDC entry amount; the authoritative game adapter/router sources or credits GAS invisibly; the locked wager, bankroll liability and payout remain GAS-native. Direct player-facing GAS entry is superseded.
+
 ```text
 GP01 ConsumerAccountEntry
         ↓
