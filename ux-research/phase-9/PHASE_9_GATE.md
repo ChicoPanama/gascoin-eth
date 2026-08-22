@@ -122,6 +122,13 @@ Required entry-domain split:
 
 A duplicate click/retry must not create a second wager when the prior intent may have executed.
 
+Current implementation checkpoint: the application now has strict runtime
+parsers, authenticated/idempotent submit and reconciliation routes, persisted
+client recovery and canonical round polling behind an explicit live flag. This
+does not complete V2/V3: the source is unconfigured by default, and no
+GameBankroll, Game Entry Router, payout table or RNG/finality provider is
+approved or implemented as authoritative production truth.
+
 ### V3 — RNG / fairness / settlement integration
 
 Production game mode requires:

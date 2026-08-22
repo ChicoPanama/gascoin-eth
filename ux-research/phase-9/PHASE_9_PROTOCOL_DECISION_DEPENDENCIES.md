@@ -280,7 +280,14 @@ Selection of A does **not** approve:
 - a proxy/upgrade architecture;
 - Phase 9 closure or Phase 10 activation.
 
-The next engineering checkpoint is a Foundry-only simulation/invariant scaffold for D02 share/index/wGAS. It must contain no deployable production economics and must keep all D03+ constants OPEN.
+The Foundry-only D02 share/index/wGAS candidate scaffold now exists at
+`contracts/project-gas/test/simulation/ShareIndexCandidateModel.t.sol`, with its
+unapproved decision boundary recorded in
+`D02_SHARE_INDEX_WGAS_CANDIDATE.md`. It contains no production monetary source
+and keeps the exact precision, rounding, wrapper-unit, dust and all D03+
+constants OPEN. The next D02 checkpoint is explicit approval of those exact
+semantics after the listed full-precision and repeated-sequence evidence—not a
+silent move of the candidate into `src/`.
 
 ## Primary evidence reviewed
 

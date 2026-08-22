@@ -96,9 +96,13 @@ function resultDelta(state: Extract<GasOriginalState, { phase: 'result' }>) {
 
 export function useGasOriginalLive(enabled: boolean) {
   const { getAccessToken } = usePrivy();
+  const getAccessTokenRef = useRef(getAccessToken);
+  useEffect(() => {
+    getAccessTokenRef.current = getAccessToken;
+  }, [getAccessToken]);
   const adapter = useMemo(
-    () => createProjectGasGameHttpAdapter(getAccessToken),
-    [getAccessToken],
+    () => createProjectGasGameHttpAdapter(() => getAccessTokenRef.current()),
+    [],
   );
   const [state, setState] = useState<GasOriginalState>(() => createReadyState());
   const [presentation, setPresentation] = useState<PresentationMode>('cinematic');

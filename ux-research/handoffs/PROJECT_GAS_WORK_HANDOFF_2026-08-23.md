@@ -494,22 +494,39 @@ Do not make Bracket a Phase 9 dependency.
 
 ## Current Phase 9 implementation truth
 
-Verified foundation already includes:
+Current implementation now includes:
 
 - canonical account read model;
-- game adapter boundary with `intentId` / `roundId` architecture only;
+- D01-hard-coded Base (`8453`) / Base Sepolia (`84532`) application config and
+  Foundry workspace, with no mainnet deployment manifest;
+- strict game intent/round parsers, authenticated/idempotent server action
+  routes, provider-neutral authoritative source transport and a client HTTP
+  adapter;
+- a disabled-by-default live game controller that persists an intent before
+  submit, reconciles unknown POST finality before retry, restores accepted
+  wagers after refresh and polls canonical round settlement;
 - reserve/rebase read model and backing exclusions;
 - read-only Trade quote truth;
 - one canonical verified activity projection;
 - Crew/ranking read path;
-- shared financial recovery law: `DID MONEY MOVE? -> canonical state -> safe next action`.
+- shared financial recovery law: `DID MONEY MOVE? -> canonical state -> safe next action`;
+- a test-only D02 share/index/wGAS Foundry candidate scaffold. Its `1e27`
+  precision and rounding/wrapper semantics are evidence inputs, not approved
+  production economics.
+
+The game live path is gated by
+`NEXT_PUBLIC_PROJECT_GAS_GAME_LIVE_ENABLED=false` and server-only
+`PROJECT_GAS_GAME_EXECUTION_URL` / `PROJECT_GAS_GAME_EXECUTION_TOKEN`. Absence
+of approved configuration remains a confirmed no-funds-moved rejection. A POST
+that may have reached the source but loses its response becomes `unknown` and
+must reconcile; it never becomes a blind retry.
 
 Still not production-live:
 
-- real wager execution/locking;
+- an approved execution source that performs real Base wager locking;
 - GameBankroll mutation/solvency integration;
 - live RNG/VRF and verifiable round authority;
-- real wager reconnect/reconciliation;
+- end-to-end wager reconnect/reconciliation against that approved source;
 - Trade signing/submission/settlement;
 - live funding/withdrawal providers;
 - production bounded permissions/revoke flow;
@@ -521,10 +538,10 @@ Do not describe research decisions as implemented code.
 
 Stay inside the existing Phase 9 dependency program.
 
-1. Reconcile any remaining player-facing direct-GAS entry divergence to canonical USDC-only entry.
+1. Reconcile any remaining player-facing direct-GAS entry divergence to canonical USDC-only entry. **Implemented in the current shell/controller boundary.**
 2. Update/extend the existing Phase 9 decision packet rather than creating a new roadmap.
-3. Implement the approved D01 Base/Base Sepolia + Foundry baseline without implying mainnet deployment approval.
-4. D02: freeze and test share/index/wGAS exact semantics.
+3. Implement the approved D01 Base/Base Sepolia + Foundry baseline without implying mainnet deployment approval. **Implemented; no deployment is authorized or recorded.**
+4. D02: freeze and test share/index/wGAS exact semantics. **Test-only candidate scaffold exists; exact semantics remain OPEN pending explicit approval.**
 5. D03: simulate oracle/rebase/AMO controller and failure cases.
 6. D04: define external-only Reserve policy, haircuts, strategy adapter/cap model.
 7. D05: define GameBankroll solvency/admission and invariants.
