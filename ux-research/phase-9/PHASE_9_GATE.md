@@ -62,6 +62,11 @@ Additional invariants:
 
 The order below is a dependency order inside Phase 9, not a second roadmap.
 
+Protocol decisions and their approval boundaries are tracked in
+[`PHASE_9_PROTOCOL_DECISION_DEPENDENCIES.md`](./PHASE_9_PROTOCOL_DECISION_DEPENDENCIES.md).
+D01 chain/tooling remains OPEN; the packet makes a recommendation but grants no
+deployment or downstream economic authority.
+
 ### V1 — Canonical account read model
 
 Create the domain contract that the rest of GAS consumes.
