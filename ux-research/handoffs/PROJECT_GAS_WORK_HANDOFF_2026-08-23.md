@@ -98,17 +98,15 @@ Locked shell remains:
 - Desktop: `Home | Play | Trade | Crews | Reserve`
 - Desktop utilities: `Search | Notifications | Account`
 
-## Base direction — compatible with current D01
+## Base direction — D01 approved
 
-`PHASE_9_PROTOCOL_DECISION_DEPENDENCIES.md` already recommends Base + Foundry, but D01 remains formally **OPEN** until explicitly approved.
+The user explicitly approved the recommended Base + Foundry posture on
+22 August 2026. Work must now treat Base as the fixed Phase 1 chain, not merely
+the leading candidate.
 
-Therefore Work must treat Base as:
+Approved posture:
 
-**leading / recommended Phase 1 chain candidate, not yet a frozen production chain.**
-
-Current preferred posture if/when D01 is approved:
-
-- Base provisional Phase 1 execution target;
+- Base fixed Phase 1 execution target;
 - Base Sepolia first public integration testnet;
 - Foundry canonical Solidity build/test/deploy toolchain;
 - standard EVM Solidity core with portability;
@@ -525,7 +523,7 @@ Stay inside the existing Phase 9 dependency program.
 
 1. Reconcile any remaining player-facing direct-GAS entry divergence to canonical USDC-only entry.
 2. Update/extend the existing Phase 9 decision packet rather than creating a new roadmap.
-3. Resolve D01 explicitly before chain-specific contract workspace/live integrations.
+3. Implement the approved D01 Base/Base Sepolia + Foundry baseline without implying mainnet deployment approval.
 4. D02: freeze and test share/index/wGAS exact semantics.
 5. D03: simulate oracle/rebase/AMO controller and failure cases.
 6. D04: define external-only Reserve policy, haircuts, strategy adapter/cap model.
@@ -584,7 +582,6 @@ No Reserve-to-game bailout. No referral payment from Reserve. No Bracket circula
 
 Still OPEN unless explicitly approved later:
 
-- D01 final chain/toolchain approval (Base + Foundry recommended);
 - exact share precision/rounding/wrap edge law;
 - oracle set/deadband/caps/rebase/AMO controller;
 - Reserve minimums/assets/haircuts/custody/oracles/strategy caps;

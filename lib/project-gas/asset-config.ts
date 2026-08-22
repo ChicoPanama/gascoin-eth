@@ -1,8 +1,10 @@
 import { getAddress, isAddress, type Address } from 'viem';
-import { mainnet } from 'viem/chains';
+import { base, baseSepolia } from 'viem/chains';
+
+export type ProjectGasChainId = typeof base.id | typeof baseSepolia.id;
 
 export interface ProjectGasAssetConfig {
-  chainId: number;
+  chainId: ProjectGasChainId;
   gasAddress?: Address;
   usdcAddress?: Address;
 }
@@ -13,7 +15,14 @@ export interface ProjectGasPublicAssetEnv {
   usdcAddress?: string;
 }
 
-export const TRANSITION_PROJECT_GAS_CHAIN_ID = mainnet.id;
+/**
+ * D01 is approved: Project GAS Phase 1 executes on Base. Base Sepolia is the
+ * only supported public integration testnet. Arbitrary EVM chain IDs are not a
+ * runtime product setting.
+ */
+export const PROJECT_GAS_MAINNET_CHAIN_ID: ProjectGasChainId = base.id;
+export const PROJECT_GAS_TESTNET_CHAIN_ID: ProjectGasChainId = baseSepolia.id;
+export const PROJECT_GAS_DEFAULT_CHAIN_ID = PROJECT_GAS_MAINNET_CHAIN_ID;
 
 function normalizeAddress(value: string | undefined): Address | undefined {
   const candidate = value?.trim();
@@ -21,12 +30,12 @@ function normalizeAddress(value: string | undefined): Address | undefined {
   return getAddress(candidate);
 }
 
-function normalizeChainId(value: string | undefined): number {
+function normalizeChainId(value: string | undefined): ProjectGasChainId {
   const candidate = value?.trim();
-  if (!candidate) return TRANSITION_PROJECT_GAS_CHAIN_ID;
+  if (!candidate) return PROJECT_GAS_DEFAULT_CHAIN_ID;
   const parsed = Number(candidate);
-  if (!Number.isSafeInteger(parsed) || parsed <= 0) return TRANSITION_PROJECT_GAS_CHAIN_ID;
-  return parsed;
+  if (parsed === PROJECT_GAS_TESTNET_CHAIN_ID) return PROJECT_GAS_TESTNET_CHAIN_ID;
+  return PROJECT_GAS_DEFAULT_CHAIN_ID;
 }
 
 export function parseProjectGasAssetConfig(env: ProjectGasPublicAssetEnv): ProjectGasAssetConfig {
@@ -53,5 +62,6 @@ export function getProjectGasAssetConfig(): ProjectGasAssetConfig {
 }
 
 export function isProjectGasChainEnabled(config: ProjectGasAssetConfig): boolean {
-  return config.chainId === TRANSITION_PROJECT_GAS_CHAIN_ID;
+  return config.chainId === PROJECT_GAS_MAINNET_CHAIN_ID
+    || config.chainId === PROJECT_GAS_TESTNET_CHAIN_ID;
 }

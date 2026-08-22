@@ -6,8 +6,9 @@ import {
   hasAuthoritativeSpendableBalance,
 } from '../../../lib/project-gas/account-state';
 import {
+  PROJECT_GAS_DEFAULT_CHAIN_ID,
+  PROJECT_GAS_TESTNET_CHAIN_ID,
   parseProjectGasAssetConfig,
-  TRANSITION_PROJECT_GAS_CHAIN_ID,
 } from '../../../lib/project-gas/asset-config';
 
 const GAS = '0x1111111111111111111111111111111111111111';
@@ -17,12 +18,12 @@ const WALLET = '0x3333333333333333333333333333333333333333';
 describe('Project GAS asset configuration', () => {
   it('accepts only explicit Project GAS asset inputs', () => {
     const config = parseProjectGasAssetConfig({
-      chainId: '1',
+      chainId: '8453',
       gasAddress: GAS,
       usdcAddress: USDC,
     });
 
-    expect(config.chainId).toBe(1);
+    expect(config.chainId).toBe(8453);
     expect(config.gasAddress).toBe(getAddress(GAS));
     expect(config.usdcAddress).toBe(getAddress(USDC));
   });
@@ -33,14 +34,16 @@ describe('Project GAS asset configuration', () => {
       usdcAddress: '',
     });
 
-    expect(config.chainId).toBe(TRANSITION_PROJECT_GAS_CHAIN_ID);
+    expect(config.chainId).toBe(PROJECT_GAS_DEFAULT_CHAIN_ID);
     expect(config.gasAddress).toBeUndefined();
     expect(config.usdcAddress).toBeUndefined();
   });
 
-  it('falls back to the transition chain for invalid chain configuration', () => {
-    expect(parseProjectGasAssetConfig({ chainId: '-1' }).chainId).toBe(TRANSITION_PROJECT_GAS_CHAIN_ID);
-    expect(parseProjectGasAssetConfig({ chainId: 'nope' }).chainId).toBe(TRANSITION_PROJECT_GAS_CHAIN_ID);
+  it('supports only Base and Base Sepolia and falls back to Base mainnet', () => {
+    expect(parseProjectGasAssetConfig({ chainId: '84532' }).chainId).toBe(PROJECT_GAS_TESTNET_CHAIN_ID);
+    expect(parseProjectGasAssetConfig({ chainId: '1' }).chainId).toBe(PROJECT_GAS_DEFAULT_CHAIN_ID);
+    expect(parseProjectGasAssetConfig({ chainId: '-1' }).chainId).toBe(PROJECT_GAS_DEFAULT_CHAIN_ID);
+    expect(parseProjectGasAssetConfig({ chainId: 'nope' }).chainId).toBe(PROJECT_GAS_DEFAULT_CHAIN_ID);
   });
 });
 

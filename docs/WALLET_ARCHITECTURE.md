@@ -77,7 +77,7 @@ Do not use wagmi `useDisconnect` as the primary disconnect mechanism with Privy.
 
 ## Current chain note
 
-Ethereum mainnet remains the transition repository's configured EVM chain. This file does **not** lock the final Project GAS deployment chain.
+Project GAS Phase 1 is fixed to Base, with Base Sepolia as its integration testnet. Ethereum mainnet remains configured only for legacy GASCOIN compatibility and a possible future reserve/settlement role.
 
 ## Financial invariants
 

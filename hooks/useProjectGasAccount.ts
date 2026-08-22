@@ -14,7 +14,7 @@ import {
 import {
   getProjectGasAssetConfig,
   isProjectGasChainEnabled,
-  TRANSITION_PROJECT_GAS_CHAIN_ID,
+  type ProjectGasChainId,
 } from '@/lib/project-gas/asset-config';
 
 const ERC20_ACCOUNT_ABI = parseAbi([
@@ -45,7 +45,7 @@ function useConfiguredAssetBalance({
 }: {
   asset: ProjectGasAssetSymbol;
   contractAddress?: Address;
-  configuredChainId: number;
+  configuredChainId: ProjectGasChainId;
   walletAddress?: Address;
   walletChainId?: number;
   chainEnabled: boolean;
@@ -62,7 +62,7 @@ function useConfiguredAssetBalance({
     abi: ERC20_ACCOUNT_ABI,
     functionName: 'balanceOf',
     args: [walletAddress ?? zeroAddress],
-    chainId: TRANSITION_PROJECT_GAS_CHAIN_ID,
+    chainId: configuredChainId,
     query: {
       enabled,
       staleTime: 15_000,
@@ -75,7 +75,7 @@ function useConfiguredAssetBalance({
     address: contractAddress ?? zeroAddress,
     abi: ERC20_ACCOUNT_ABI,
     functionName: 'decimals',
-    chainId: TRANSITION_PROJECT_GAS_CHAIN_ID,
+    chainId: configuredChainId,
     query: {
       enabled,
       staleTime: Infinity,

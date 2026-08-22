@@ -23,6 +23,28 @@ env:
   X_API_BEARER_TOKEN: placeholder
 
 jobs:
+  project-gas-contracts:
+    name: Project GAS Contracts
+    runs-on: ubuntu-latest
+    env:
+      FOUNDRY_PROFILE: ci
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install pinned Foundry
+        uses: foundry-rs/foundry-toolchain@908c540300062bd5a7e473851cdb4282204cee09
+        with:
+          version: v1.5.0
+          cache: false
+      - name: Verify format
+        working-directory: contracts/project-gas
+        run: forge fmt --check
+      - name: Build contracts
+        working-directory: contracts/project-gas
+        run: forge build --sizes
+      - name: Run contract tests
+        working-directory: contracts/project-gas
+        run: forge test -vvv
+
   dependency-security:
     name: Full Dependency Security
     runs-on: ubuntu-latest

@@ -3,7 +3,7 @@
 import { PrivyProvider } from '@privy-io/react-auth';
 import { WagmiProvider } from '@privy-io/wagmi';
 import { QueryClientProvider } from '@tanstack/react-query';
-import { mainnet } from 'viem/chains';
+import { base, baseSepolia, mainnet } from 'viem/chains';
 import { ThemeProvider, useTheme } from '../components/ThemeProvider';
 import { wagmiConfig, queryClient } from '../lib/wagmi-config';
 
@@ -14,8 +14,9 @@ import { wagmiConfig, queryClient } from '../lib/wagmi-config';
  * connection/linking. @privy-io/wagmi mirrors Privy's active wallet into
  * wagmi/viem so application reads and writes use one synchronized wallet state.
  *
- * Ethereum mainnet remains a transition-repo chain configuration only. The
- * final Project GAS deployment chain is still an explicit protocol decision.
+ * D01 fixes Project GAS Phase 1 to Base, with Base Sepolia as the integration
+ * testnet. Ethereum remains supported only for legacy GASCOIN compatibility
+ * and a possible future reserve/settlement domain.
  */
 function PrivyInner({ children }: { children: React.ReactNode }) {
   const { resolved } = useTheme();
@@ -40,8 +41,8 @@ function PrivyInner({ children }: { children: React.ReactNode }) {
             'wallet_connect',
           ],
         },
-        defaultChain: mainnet,
-        supportedChains: [mainnet],
+        defaultChain: base,
+        supportedChains: [base, baseSepolia, mainnet],
         embeddedWallets: {
           ethereum: { createOnLogin: 'users-without-wallets' },
         },

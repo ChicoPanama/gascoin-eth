@@ -3,7 +3,7 @@
 **Date:** 2026-08-22  
 **Status:** Phase 9 subordinate decision packet / recommendations only  
 **Authority:** subordinate to newest explicit instruction, Source of Truth v1.1, `AGENTS.md`, `ux-research/ROADMAP.md`, and `ux-research/phase-9/PHASE_9_GATE.md`  
-**Decision state:** D01 chain/tooling is OPEN and requires user approval. Nothing in this document authorizes a production deployment, live address, economic parameter, provider, oracle, RNG source, upgrade design, or move to Phase 10.
+**Decision state:** D01 Base + Foundry chain/tooling was APPROVED by the user on 22 August 2026. Nothing in this document authorizes a production deployment, live address, D02+ economic parameter, provider, oracle, RNG source, upgrade design, or move to Phase 10.
 
 ## Purpose
 
@@ -30,8 +30,8 @@ The repository contains no Solidity source, `foundry.toml`, Hardhat configuratio
 
 Existing EVM state is transitional:
 
-- `app/providers.tsx` and `lib/wagmi-config.ts` configure Ethereum mainnet for the existing app shell, with comments explicitly saying that this does not lock the Project GAS deployment chain;
-- `lib/project-gas/asset-config.ts` accepts a configured Project GAS chain ID but intentionally enables authoritative reads only on the transition chain until the chain decision is implemented;
+- `app/providers.tsx` and `lib/wagmi-config.ts` default Project GAS to Base, support Base Sepolia for integration, and retain Ethereum mainnet for legacy compatibility;
+- `lib/project-gas/asset-config.ts` accepts only the approved Base/Base Sepolia chain IDs and defaults to Base mainnet;
 - `hooks/useProjectGasAccount.ts` uses Privy-synchronized wagmi/viem reads and renders unconfigured/wrong-chain state unavailable;
 - `scripts/devnet-smoke-test.ts` is legacy Sepolia connectivity prior art, not a Project GAS deployment pipeline;
 - no Project GAS production addresses exist and none may be inferred from legacy GASCOIN variables.
@@ -58,20 +58,25 @@ Each downstream packet must state recommendation, alternatives, failure modes, e
 
 ---
 
-## D01 — Chain posture and contract toolchain
+## D01 — Chain posture and contract toolchain — APPROVED
 
-### Decision requested
+**Decision:** Option A was explicitly approved by the user on 22 August 2026.
+Base is the fixed Phase 1 execution chain, Base Sepolia is the first public
+integration testnet, and Foundry is the canonical Solidity toolchain. This
+approval does not authorize a mainnet deployment or any D02+ parameter/provider.
 
-Approve or reject this combined posture:
+### Approved decision
 
-1. **Base is the provisional Phase 1 production target and Base Sepolia is the first public integration testnet.** "Provisional" guides chain-specific test adapters; it does not authorize mainnet deployment and remains reversible before production contracts/addresses are approved.
+The approved combined posture is:
+
+1. **Base is the fixed Phase 1 production target and Base Sepolia is the first public integration testnet.** This authorizes chain-specific implementation and testing; it does not authorize mainnet deployment or unverified production contracts/addresses.
 2. **Foundry is the canonical Solidity build/test/deploy toolchain.** The Next.js application keeps Privy + `@privy-io/wagmi` + wagmi + viem; it does not gain a second wallet stack.
 3. **Robinhood Chain remains an explicit portability/test candidate and future RWA distribution option, not a Phase 1 dependency.** Pure monetary/game contracts must remain standard EVM Solidity and avoid Base-only precompiles.
 4. **Ethereum L1 remains a possible settlement/reserve anchor, not the high-frequency game execution chain.** No cross-chain architecture is introduced in Phase 1 without a later approved packet.
 
-### Recommendation
+### Decision rationale
 
-**Approve the combined posture above.**
+**The combined posture above is approved.**
 
 Why:
 
@@ -258,15 +263,15 @@ Cost: repeated game actions, permissions, settlements and consumer transaction r
 
 ---
 
-## Exact approval boundary
+## Approval record and boundary
 
-The user is asked to approve one of:
+The decision packet originally presented:
 
-- **A — Base + Foundry (recommended):** Base provisional Phase 1 target, Base Sepolia first public testnet, Foundry canonical contract toolchain, Robinhood testnet retained for portability evidence.
+- **A — Base + Foundry (selected 22 August 2026):** Base fixed Phase 1 target, Base Sepolia first public testnet, Foundry canonical contract toolchain, Robinhood testnet retained for portability evidence.
 - **B — Robinhood + Foundry:** Robinhood provisional Phase 1 target, contingent on a separate canonical USDC decision before any public money flow.
 - **C — Foundry only / two-chain bakeoff:** approve the toolchain and chain-portability rules, but keep the production target open until a scored Base Sepolia vs Robinhood testnet spike is complete.
 
-Approval of A/B/C does **not** approve:
+Selection of A does **not** approve:
 
 - any mainnet deployment;
 - live contract/token/oracle/provider addresses;
@@ -275,7 +280,7 @@ Approval of A/B/C does **not** approve:
 - a proxy/upgrade architecture;
 - Phase 9 closure or Phase 10 activation.
 
-If A is approved, the next engineering checkpoint is a Foundry-only simulation/invariant scaffold for D02 share/index/wGAS. It must contain no deployable production economics and must keep all D03+ constants OPEN.
+The next engineering checkpoint is a Foundry-only simulation/invariant scaffold for D02 share/index/wGAS. It must contain no deployable production economics and must keep all D03+ constants OPEN.
 
 ## Primary evidence reviewed
 

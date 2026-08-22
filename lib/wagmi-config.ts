@@ -7,31 +7,48 @@
 
 import { createConfig } from '@privy-io/wagmi';
 import { fallback, http } from 'wagmi';
-import { mainnet } from 'viem/chains';
+import { base, baseSepolia, mainnet } from 'viem/chains';
 import { QueryClient } from '@tanstack/react-query';
 
-const rpcUrls = [
+function configuredTransport(urls: Array<string | undefined>, publicFallback: string) {
+  const normalized = [...urls, publicFallback]
+    .map((url) => url?.trim())
+    .filter((url, index, values): url is string => Boolean(url) && values.indexOf(url) === index);
+
+  const transports = normalized.map((url) => http(url, {
+    retryCount: 1,
+    retryDelay: 150,
+  }));
+
+  return transports.length > 1 ? fallback(transports) : transports[0];
+}
+
+const baseTransport = configuredTransport([
+  process.env.NEXT_PUBLIC_BASE_RPC_URL,
+  process.env.NEXT_PUBLIC_BASE_RPC_URL_FALLBACK_1,
+  process.env.NEXT_PUBLIC_BASE_RPC_URL_FALLBACK_2,
+], base.rpcUrls.default.http[0]);
+
+const baseSepoliaTransport = configuredTransport([
+  process.env.NEXT_PUBLIC_BASE_SEPOLIA_RPC_URL,
+  process.env.NEXT_PUBLIC_BASE_SEPOLIA_RPC_URL_FALLBACK_1,
+], baseSepolia.rpcUrls.default.http[0]);
+
+// Ethereum remains available only for legacy GASCOIN routes and a possible
+// future reserve/settlement domain. Project GAS financial actions are limited
+// to Base/Base Sepolia by lib/project-gas/asset-config.ts.
+const legacyMainnetTransport = configuredTransport([
   process.env.NEXT_PUBLIC_ETH_RPC_URL,
   process.env.NEXT_PUBLIC_ETH_RPC_URL_FALLBACK_1,
   process.env.NEXT_PUBLIC_ETH_RPC_URL_FALLBACK_2,
-  'https://rpc.ankr.com/eth',
-].filter((url): url is string => Boolean(url && url.trim()));
-
-const rpcTransports = rpcUrls.map((url) =>
-  http(url, {
-    retryCount: 1,
-    retryDelay: 150,
-  }),
-);
-
-const mainnetTransport = rpcTransports.length > 1
-  ? fallback(rpcTransports)
-  : rpcTransports[0];
+], 'https://rpc.ankr.com/eth');
 
 export const wagmiConfig = createConfig({
-  chains: [mainnet],
+  chains: [base, baseSepolia, mainnet],
   transports: {
-    [mainnet.id]: mainnetTransport,
+    [base.id]: baseTransport,
+    [baseSepolia.id]: baseSepoliaTransport,
+    [mainnet.id]: legacyMainnetTransport,
   },
   ssr: true,
 });

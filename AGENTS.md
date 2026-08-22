@@ -15,6 +15,20 @@ Project GAS combines:
 5. **Reserve transparency** — backing and rebase state;
 6. **future Bracket integration** — separate collateral/settlement domain and separate solvency.
 
+## Canonical Phase 1 chain
+
+D01 was explicitly approved on 22 August 2026:
+
+- Base is the fixed Project GAS Phase 1 execution chain;
+- Base Sepolia is the public integration testnet;
+- Foundry is the canonical Solidity build/test/deploy toolchain;
+- Ethereum may later serve a reserve/settlement role but is not the high-frequency game chain;
+- Robinhood Chain remains a portability/RWA research target, not a Phase 1 dependency.
+
+Provider URLs, contract addresses, paymasters, onramps, liquidity venues, RNG
+providers and downstream economic parameters remain configuration/approval
+boundaries. Fixing Base does not authorize a mainnet deployment.
+
 ## Canonical GAS Original entry boundary
 
 Source of Truth v1.1 supersedes the older dual-asset player-entry prototype.
