@@ -180,7 +180,9 @@ export function GasOriginalPrototype() {
                 </div>
               </div>
               <div className={local.resultMeta}>
-                {state.wager.mode}<br />{state.wager.entryAmount} USDC ENTRY<br />GAS-NATIVE ROUND
+                <span>{state.wager.mode}</span>
+                <span>{state.wager.entryAmount} USDC ENTRY</span>
+                <span>GAS-NATIVE ROUND</span>
               </div>
             </div>
           ) : null}

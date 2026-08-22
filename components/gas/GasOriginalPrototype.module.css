@@ -189,6 +189,10 @@
   letter-spacing: 0.03em;
 }
 
+.resultMeta span {
+  display: block;
+}
+
 .trustLine {
   display: flex;
   justify-content: space-between;
