@@ -16,7 +16,15 @@ export interface ReserveComponent {
 }
 
 export interface ReserveExclusion {
-  id: 'gas' | 'wgas' | 'self-pol' | 'game-bankroll' | 'bracket-collateral' | 'other';
+  id:
+    | 'gas'
+    | 'wgas'
+    | 'self-pol'
+    | 'protocol-liquidity'
+    | 'game-bankroll'
+    | 'referral-reward-pool'
+    | 'bracket-collateral'
+    | 'other';
   label: string;
   reason: string;
 }
@@ -104,9 +112,19 @@ export const PROJECT_GAS_RESERVE_EXCLUSIONS: ReserveExclusion[] = [
     reason: 'The GAS side of protocol-owned liquidity is endogenous and excluded from backing.',
   },
   {
+    id: 'protocol-liquidity',
+    label: 'Protocol-owned liquidity',
+    reason: 'Protocol liquidity is a separate accounting domain; only approved external reserve assets may count as GAS backing.',
+  },
+  {
     id: 'game-bankroll',
     label: 'GameBankroll',
     reason: 'Game solvency is a separate accounting domain and cannot be presented as monetary backing.',
+  },
+  {
+    id: 'referral-reward-pool',
+    label: 'Referral Reward Pool',
+    reason: 'USDC encumbered for referral liabilities and GAS held for referral conversion are acquisition capital, not monetary backing.',
   },
   {
     id: 'bracket-collateral',

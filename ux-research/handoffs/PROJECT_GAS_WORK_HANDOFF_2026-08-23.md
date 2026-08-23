@@ -265,20 +265,21 @@ Exact score, thresholds, tiers and benefits remain OPEN.
 
 Copy the successful **structural distribution laws**, not competitor code/assets/trade dress.
 
-**Latest explicit economic law: referral/partner payouts are USDC, not GAS.**
+**Latest explicit economic law: referral/partner liabilities are denominated
+and fully backed in USDC, but recipient delivery is GAS-only.**
 
 Rationale:
 
 - no GAS emissions to buy growth;
-- no automatic referral-induced GAS sell pressure;
-- creator economics are legible;
-- payout can be bounded by realized revenue.
+- creator economics and protocol liability remain legible in USDC;
+- payout remains bounded by realized revenue and segregated USDC;
+- the protocol captures its approved conversion economics internally rather than leaking controlled referral flow to an external venue.
 
 Financial firewall becomes:
 
 `GAS Reserve != GameBankroll != Referral Reward Pool != future Bracket collateral`
 
-Referral Reward Pool is funded only from realized protocol revenue allocated to acquisition. It is not monetary backing and cannot draw on ReserveVault or GameBankroll.
+Referral Reward Pool is funded only from realized protocol revenue allocated to acquisition. It is not monetary backing and cannot draw on ReserveVault or GameBankroll. Its cleared USDC liability is converted to GAS only through the approved internal GAS router/AMM. GAS inventory used by that route is not backing, is not free, and must be economically purchased by the encumbered USDC.
 
 Desired mechanics:
 
@@ -287,18 +288,24 @@ Desired mechanics:
 - referred users should receive a real benefit/discount/rebate funded from acquisition economics rather than a higher house edge;
 - one-level referrals initially; avoid MLM-style multi-level chains;
 - approved CT creators/communities can become GAS Partners;
-- USDC commissions accrue in a claimable/reconciled ledger and settle efficiently rather than as one transfer per micro-event;
+- USDC-denominated commissions accrue in a stable-`claimId` claimable/reconciled ledger and deliver GAS efficiently rather than as one transfer per micro-event;
 - self-referral/wash/Sybil activity must be cleared before payout becomes claimable.
+
+There is no USDC payout option. Aerodrome, Uniswap and aggregators are
+prohibited referral-conversion routes by default. Unsafe inventory, liquidity,
+price/oracle, slippage or contract state leaves a claim paused/claimable and
+reconciling; it does not trigger an external fallback.
 
 Exact percentages, attribution windows, partner tiers, discounts and payout thresholds remain OPEN and must be simulated against locked fee economics.
 
 ## Holder-adjusted referrals
 
-Holding GAS can improve referral economics while payout stays in USDC.
+Holding GAS can improve referral economics while the liability remains
+USDC-denominated and delivery remains GAS-only.
 
 Conceptual formula:
 
-`eligible realized protocol acquisition revenue -> base USDC referral share -> time-weighted holder/alignment multiplier -> final USDC payout`
+`eligible realized protocol acquisition revenue -> base USDC referral liability -> time-weighted holder/alignment multiplier -> final USDC-denominated liability -> internal GAS conversion under the approved fee law -> net GAS delivered`
 
 This allows ordinary holders and creators to become aligned distributors.
 
@@ -581,7 +588,7 @@ Stay inside the existing Phase 9 dependency program.
 5. D03: simulate oracle/rebase/AMO controller and failure cases.
 6. D04: define external-only Reserve policy, haircuts, strategy adapter/cap model.
 7. D05: define GameBankroll solvency/admission and invariants.
-8. D06: define Game Entry Router sourcing/netting/slippage/idempotency/recovery.
+8. D06: define Game Entry Router sourcing/netting/slippage/idempotency/recovery and the financially isolated internal referral conversion route.
 9. D07: solve exact CRUISE/BOOST/REDLINE math to locked RTP epochs.
 10. D08: select/provider-neutral RNG/finality/failure recovery.
 11. D09–D13 thereafter: genesis, fee routing, roles/governance, account rails/permissions/funding, legal/release.
@@ -604,6 +611,11 @@ At minimum preserve/add coverage for:
 - duplicate intent/randomness/settlement prevention;
 - referral attribution durability;
 - self-referral/Sybil rejection;
+- USDC liability coverage with GAS-only delivery and no USDC payout path;
+- internal-router-only conversion with explicit external-DEX/aggregator rejection;
+- canonical conversion-fee capture without a second arbitrary referral tax;
+- insufficient liquidity, stale/divergent price and excessive-slippage pause behavior;
+- stable-`claimId` duplicate prevention and interrupted-claim reconciliation;
 - Referral Reward Pool isolation from Reserve/GameBankroll;
 - time-weighted holder alignment resistant to snapshot gaming;
 - permission expiry/revoke/recovery;
@@ -641,6 +653,7 @@ Still OPEN unless explicitly approved later:
 - ETH/wstETH/RWA allocation and providers;
 - GameBankroll capital/exposure limits;
 - Game Entry Router venue/inventory/netting/slippage/failure policy;
+- internal referral router inventory, pricing/oracle guard, liquidity formula, claim sizing/batching, slippage, pause/reconciliation and D10 fee-routing policy;
 - exact CRUISE/BOOST/REDLINE tables;
 - RNG provider/fallback/finality;
 - presale terms/team principal exit;

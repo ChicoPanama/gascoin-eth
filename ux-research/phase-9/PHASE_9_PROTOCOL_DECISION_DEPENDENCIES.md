@@ -18,7 +18,9 @@ The first decision is isolated because contract simulations and invariant scaffo
 - Wagers, GameBankroll liabilities and payouts are GAS-native.
 - GAS uses the share/index model; wGAS is fixed-balance and exactly share-backed.
 - GAS, wGAS, self-issued POL, GameBankroll and Bracket collateral do not count as monetary backing.
+- Protocol-owned liquidity and Referral Reward Pool assets do not count as monetary backing.
 - ReserveVault cannot bail out GameBankroll.
+- Referral liabilities are USDC-denominated, fully covered by segregated USDC, and delivered only in GAS through the approved internal GAS router/AMM; there is no USDC or external-DEX payout path.
 - Bracket is financially separate and not a Phase 1 dependency.
 - The buy/sell fee is 2%; a fee-on-transfer token tax is rejected.
 - Privy remains canonical account identity/orchestration for Phase 9; wagmi/viem remain the EVM application read/write/signature layer unless an explicit later decision changes them.
@@ -26,15 +28,16 @@ The first decision is isolated because contract simulations and invariant scaffo
 
 ## Current repository facts
 
-The repository contains no Solidity source, `foundry.toml`, Hardhat configuration or authoritative deployment manifest today.
+Audited at `ux-lab` parent head `985e461e7d882d484f7c04c957721bc9a58a000b` on 23 August 2026:
 
-Existing EVM state is transitional:
-
-- `app/providers.tsx` and `lib/wagmi-config.ts` default Project GAS to Base, support Base Sepolia for integration, and retain Ethereum mainnet for legacy compatibility;
-- `lib/project-gas/asset-config.ts` accepts only the approved Base/Base Sepolia chain IDs and defaults to Base mainnet;
-- `hooks/useProjectGasAccount.ts` uses Privy-synchronized wagmi/viem reads and renders unconfigured/wrong-chain state unavailable;
-- `scripts/devnet-smoke-test.ts` is legacy Sepolia connectivity prior art, not a Project GAS deployment pipeline;
-- no Project GAS production addresses exist and none may be inferred from legacy GASCOIN variables.
+- `contracts/project-gas/foundry.toml`, pinned Foundry CI, the D01 chain guard and the D02 test-only share/index/wGAS simulation scaffold exist;
+- there is still no deployable Project GAS monetary, ReserveVault, GameBankroll, referral-pool, internal-router, RNG or revenue-routing implementation and no authoritative deployment manifest;
+- `app/providers.tsx`, `lib/wagmi-config.ts` and `lib/project-gas/asset-config.ts` fix the application posture to Base mainnet/Base Sepolia while preserving standard EVM wallet fallbacks;
+- `hooks/useProjectGasAccount.ts` keeps Privy as canonical GAS identity/orchestration and renders unconfigured or wrong-chain financial state unavailable;
+- V1–V8 controller/query/adapter boundaries, strict parsers, idempotent game intent persistence/reconciliation, and reserve/activity/trade/Crew read projections exist, but live money-moving sources remain disabled or unconfigured;
+- legacy referral code is wallet/refund/points-oriented and cookie/device-assisted. It is not a Project GAS `AttributionIntent`, USDC liability ledger, Referral Reward Pool, stable-`claimId` conversion flow or GAS-only payout implementation;
+- `lib/project-gas/referral-claim-preflight.ts` encodes only the settled funding, delivery, internal-route, pause and reconciliation laws. It moves no money and approves no D06/D10 parameters;
+- no Project GAS production address/provider is approved, and none may be inferred from legacy GASCOIN variables.
 
 ## Dependency order
 
@@ -42,19 +45,44 @@ Existing EVM state is transitional:
 |---|---|---|---|---|
 | D01 | Chain posture + contract toolchain | Locked product/account laws | Reproducible simulations, contract workspace, chain config boundary | Base, Robinhood, Ethereum, Foundry, Hardhat, provider, live address |
 | D02 | GAS share/index + wGAS exact accounting | D01 | Monetary kernel model and invariants | Rounding direction, precision, wrap/unwrap edge law |
-| D03 | Oracle + rebase controller | D01–D02 | Rebase simulation and guarded controller | source set, cadence, deadband, caps, fallback |
-| D04 | Reserve policy | D02–D03 | ReserveVault and backing invariants | minimums, buckets, assets, haircuts, RWA custody |
-| D05 | GameBankroll solvency | D02–D04 | Wager acceptance and liability reservation | capital ratio, exposure caps, bailout path |
-| D06 | Game Entry Router | D01–D05 | Authoritative USDC-to-GAS intent path | venue, inventory, netting, slippage, expiry, recovery |
+| D03 | Oracle + rebase/AMO controller | D01–D02 | Rebase simulation and bounded Reserve AMO | source set, cadence, deadband, caps, persistence, fallback |
+| D04 | Reserve policy | D02–D03 | ReserveVault, strategy adapters and backing invariants | minimums, buckets, assets, haircuts, exposure/liquidity caps, ETH/RWA custody |
+| D05 | GameBankroll solvency | D02–D04 | Wager acceptance and worst-case liability reservation | capital ratio, exposure/correlation caps, sourcing safety margin, bailout path |
+| D06 | Game Entry Router + internal referral conversion route | D01–D05 | Authoritative USDC-to-GAS game intent and funded GAS-only referral claim paths | inventory ownership, pricing/oracle guard, internal liquidity, netting, slippage, sizing/batching, expiry, pause/recovery |
 | D07 | CRUISE/BOOST/REDLINE math | D05–D06 | Exact epoch RTP and payout tables | outcome weights, multipliers, mode fee split |
 | D08 | RNG/finality/failure recovery | D01, D05–D07 | Verifiable wager settlement | VRF/beacon/provider, timeout, refund, fallback |
 | D09 | Presale + team principal exit | D02–D04 | Genesis state machine | price, caps, vesting, principal exit law |
-| D10 | Trading/game fee routing | D03–D09 | Revenue Router and allocation accounting | venue enforcement, bucket allocation, AMO split |
+| D10 | Trading/game/referral-conversion fee routing | D03–D09 | Revenue Router, acquisition allocation and conversion accounting | venue enforcement, bucket allocation, AMO split, canonical fee application to internal claims |
 | D11 | Governance/roles/pause/upgrade | D01–D10 | Production authority wiring | multisig, timelock, guardian, mutability |
-| D12 | Account rails/permissions/funding/withdrawal | D01, D06, D11 | Live consumer money actions | provider, sponsorship, limits, revoke/recovery |
+| D12 | Account rails/permissions/funding/withdrawal | D01, D06, D11 | Live consumer money actions with provider degradation/fallback | provider, sponsorship allowlist/caps, limits, revoke/recovery |
 | D13 | Legal/regulatory release structure | D01–D12 | Jurisdictional launch approval | availability, disclosures, entity/custody structure |
 
 Each downstream packet must state recommendation, alternatives, failure modes, exact approval parameters and objective tests. A downstream implementation may not backfill an upstream OPEN choice.
+
+## Strategy reconciliation additions — OPEN, not approvals
+
+These additions place the accepted NetNet/Base/Coinbase/Fomo/holder laws at
+their existing dependency points. They do not create new roadmap phases or
+approve parameter values.
+
+| Decision | Recommendation to simulate/decide | Alternatives | Principal failure modes | Evidence required before approval | Exact approval request |
+|---|---|---|---|---|---|
+| D03 AMO | Test market liquidity -> bounded Reserve AMO -> visible rebase as one controller | rebase-only; liquidity + rebase without AMO | reserve depletion, oscillation, oracle manipulation, stale execution | expansion/contraction shocks, manipulation/staleness, persistence and cap sweeps | approve oracle set, target/deadband, persistence, caps, cadence and pause/fallback |
+| D04 reserve quality | Count only approved external assets at approved haircuts, with liquidity floors and adapter exposure caps | stable-only reserve; broader productive reserve | circular backing, illiquidity, custody/issuer failure, double counting | haircut/exposure/stale-oracle tests and liquidation/redemption scenarios | approve asset list, classes, haircuts, floors, caps, custody/oracle and strategy roles |
+| D05 GameBankroll | Admit wagers only after worst-case liability, pending/correlated exposure, liquid GAS sourcing and safety margin pass | static wager cap; fully prefunded per-round inventory | insolvency, Reserve bailout pressure, sourcing slippage, duplicate liability | maximum-liability and concurrent/correlated-wager simulations | approve capital ratio, exposure caps, sourcing assumptions and rejection/recovery rules |
+| D06 internal referral route | Use segregated USDC to purchase GAS through protocol-controlled inventory/liquidity; pause with no external fallback | inventory quote; bounded internal pool/router | stale/manipulated price, insufficient GAS, slippage, insolvency, circular backing | inventory/liquidity shocks, oracle divergence, sizing/batching, interruption and reconciliation tests | approve inventory source/accounting, pricing/oracle guard, liquidity formula, claim limits, slippage, batching and pause policy |
+| D08 randomness | Keep `RandomnessAdapter` provider-neutral with canonical proof/finality evidence | VRF; beacon/commit-reveal; approved fallback | delayed/withheld randomness, remapping, duplicate settlement, false fairness claims | provider outage, delayed proof, replay and mapping-version tests | approve provider(s), mapping, timeout/fallback/refund and settlement-finality thresholds |
+| D10 referral economics | Apply the already-approved canonical GAS routing fee law to internal conversion and route realized acquisition revenue once | fee-waived internal conversion; protocol inventory spread under the same accounting law | arbitrary second tax, fee leakage, revenue/asset double count | fee-path/accounting invariants and end-to-end liability-to-GAS reconciliation | approve referral allocation, canonical fee application and protocol/team routing; do not approve a second tax |
+| D12 account rails | Keep Privy/GAS identity canonical; capability-discover Base Account enhancements with normal-wallet fallback | provider-neutral external wallet only; other embedded provider | provider lock-in, permission abuse, unrecoverable smart account, sponsored-action abuse | expiry/revoke, wrong-chain, degradation/fallback, caps/allowlist and abuse tests | approve providers, sponsorship actions/caps, permission scopes/expiry and recovery policy |
+
+X proof, durable `AttributionIntent`, Partner clearance and time-weighted
+GAS+wGAS alignment are V6/V7 identity/distribution inputs. Their verification
+mechanism, attribution window, anti-Sybil thresholds, referral percentages and
+holder multiplier remain OPEN; they must resolve to the GAS-owned canonical
+identity and may not become a parallel custody or economic truth system.
+
+The repo-grounded classification and acceptance mapping is maintained in
+[`NETNET_BASE_COINBASE_FOMO_HOLDER_GAP_ANALYSIS_2026-08-23.md`](./NETNET_BASE_COINBASE_FOMO_HOLDER_GAP_ANALYSIS_2026-08-23.md).
 
 ---
 

@@ -83,7 +83,9 @@ describe('Project GAS reserve read model', () => {
       'gas',
       'wgas',
       'self-pol',
+      'protocol-liquidity',
       'game-bankroll',
+      'referral-reward-pool',
       'bracket-collateral',
     ]);
     expect(state.rebase).toMatchObject({

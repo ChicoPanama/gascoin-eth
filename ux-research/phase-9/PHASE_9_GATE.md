@@ -47,13 +47,16 @@ user spendable GAS/USDC
 != GameBankroll
 != GAS monetary ReserveVault
 != protocol-owned liquidity
+!= Referral Reward Pool
 != future Bracket collateral/settlement
 ```
 
 Additional invariants:
 
 - GAS/wGAS/self-issued LP value does not count as external GAS backing;
+- GAS inventory held for internal referral conversion and USDC encumbered for referral liabilities do not count as GAS backing;
 - game liabilities cannot call the monetary reserve for solvency;
+- Referral Reward Pool cannot draw from ReserveVault or GameBankroll, and its USDC liability must be funded before conversion;
 - Bracket remains separately solvent and optional;
 - marked value/potential payout is not spendable cash;
 - wGAS remains exactly share-backed by its canonical GAS/share accounting.
@@ -197,6 +200,14 @@ Every economic activity object separates:
 
 Do not create different economic truth per feed.
 
+Shareable verified rounds, profiles, Crews, modes, Trade activity and
+Reserve/rebase events must preserve an `AttributionIntent` boundary containing
+the referrer, source, campaign, shared object and time/session metadata. Cookie
+or device state may assist acquisition UX, but durable attribution resolves to
+the canonical GAS identity under an approved attribution policy. X, Farcaster,
+Base/Basename and wallets remain linked proofs, never alternate financial
+identities.
+
 ### V7 — Crews / rankings live read path
 
 Only after canonical identity/activity exists:
@@ -204,6 +215,7 @@ Only after canonical identity/activity exists:
 - ranking formulas are explicit;
 - ranking inputs are canonical/derived with provenance;
 - anti-Sybil/anti-manipulation assumptions are documented;
+- holder alignment normalizes direct GAS and wGAS into time-weighted underlying shares without one-block snapshots;
 - empty/degraded state remains truthful.
 
 ### V8 — Funding / withdrawal / permissions / recovery
@@ -216,6 +228,20 @@ Sensitive account actions require:
 - visible revoke/exit path;
 - no raw RPC error as the primary message.
 
+Referral claim recovery uses the same authoritative action law:
+
+```text
+EARNED -> PENDING_CLEARANCE -> CLEARED -> CLAIMABLE -> CONVERTING -> GAS_DELIVERED
+UNKNOWN / INTERRUPTED -> RECONCILING -> GAS_DELIVERED | STILL_CLAIMABLE | ACTION_REQUIRED
+```
+
+Every claim has a stable `claimId`. The recorded liability is USDC-denominated
+and fully covered by segregated Referral Reward Pool USDC, but recipient
+delivery is GAS-only through the approved internal GAS router/AMM. If internal
+inventory, price/oracle, liquidity, slippage, fee policy or contract health is
+unsafe, the claim pauses/remains claimable and reconciles; it does not fall back
+to Aerodrome, Uniswap or an aggregator.
+
 ## Implementation constraints
 
 - Reuse mature repo infrastructure from the Phase 1 compatibility matrix before creating substitutes.
@@ -226,6 +252,7 @@ Sensitive account actions require:
 - No wholesale CSS or shell redesign during Phase 9.
 - Do not delete legacy generic infrastructure merely because its original GASCOIN domain is retiring.
 - Contracts/oracles/providers must be configuration-driven; do not hard-code unapproved production addresses.
+- Referral conversion may not call an external venue, manufacture an unfunded GAS liability, or introduce a referral-only fee outside the approved D10 GAS fee law.
 
 ## Required tests
 
@@ -242,7 +269,16 @@ Phase 9 must extend unit/integration/E2E coverage for at least:
 - authoritative GAS sourcing amount separated from USDC entry amount;
 - stale/expired trade quote;
 - reserve freshness/stale state;
+- Reserve exclusion of protocol liquidity, Referral Reward Pool, GameBankroll and Bracket collateral;
 - social object provenance separation;
+- durable referral attribution and canonical-identity resolution;
+- self-referral/Sybil/wash rejection before clearance;
+- USDC referral-liability coverage with GAS-only delivery;
+- internal-router-only conversion and explicit external-venue rejection;
+- insufficient liquidity, stale/divergent price, excessive slippage and paused-state behavior;
+- stable `claimId` duplicate prevention and interrupted-claim reconciliation;
+- canonical fee-policy application without a second arbitrary referral tax;
+- direct GAS + wGAS underlying-share normalization and snapshot-gaming resistance;
 - mobile and desktop parity for the same canonical state.
 
 Phase 7/8 responsive and legacy compatibility gates remain regressions throughout Phase 9.
@@ -273,5 +309,7 @@ Phase 9 passes only when:
 10. unit, production build, Project GAS E2E and legacy compatibility remain green;
 11. no production-looking surface fabricates live activity, reserve, liquidity, RNG, settlement or rankings;
 12. frontend/backend authority boundaries remain explicit and testable.
+13. referral liabilities are segregated and fully USDC-backed, while claims are delivered only in GAS through the approved internal route with pause/reconciliation and duplicate-delivery protection;
+14. referral, GameBankroll, ReserveVault, protocol-liquidity and Bracket accounting cannot be double-counted or used as bailout paths.
 
 **Do not activate Phase 10 before this gate is PASS.**

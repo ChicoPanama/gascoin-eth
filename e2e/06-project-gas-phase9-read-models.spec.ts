@@ -20,7 +20,9 @@ test.describe('Phase 9 read-only authority models', () => {
       'gas',
       'wgas',
       'self-pol',
+      'protocol-liquidity',
       'game-bankroll',
+      'referral-reward-pool',
       'bracket-collateral',
     ]);
   });
