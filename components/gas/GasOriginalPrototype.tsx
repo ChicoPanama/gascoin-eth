@@ -129,7 +129,11 @@ export function GasOriginalPrototype() {
       <div className={local.desktopPlayLayout}>
         <DesktopTrustContext live={live} />
 
-        <section className={`${shared.gameCard} ${local.compactGame} ${local.desktopGame}`} aria-labelledby="gas-original-heading">
+        <section
+          className={`${shared.gameCard} ${local.compactGame} ${local.desktopGame}`}
+          data-phase={state.phase}
+          aria-labelledby="gas-original-heading"
+        >
           <div className={`${shared.gameHeader} ${local.compactGameHeader}`}>
             <div>
               <h1 id="gas-original-heading" className={`${shared.gameTitle} ${local.compactGameTitle}`}>GAS ORIGINAL</h1>
