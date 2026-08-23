@@ -8,7 +8,7 @@ const WIDE_DESKTOP = { width: 1920, height: 1080 };
 async function expectPrimaryAboveNavAtScrollTop(page: Page, primary: Locator) {
   await expect(primary).toBeAttached();
   await page.evaluate(() => window.scrollTo(0, 0));
-  expect(await page.evaluate(() => window.scrollY)).toBe(0);
+  await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0);
 
   const nav = page.getByRole('navigation', { name: 'GAS primary navigation' });
   const [primaryBox, navBox] = await Promise.all([primary.boundingBox(), nav.boundingBox()]);
