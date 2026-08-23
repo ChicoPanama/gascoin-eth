@@ -32,7 +32,7 @@
   font-size: 8px;
 }
 
-.compactGame {
+.compactGame.compactGame {
   min-height: 0;
   gap: 6px;
   padding: 9px;
@@ -53,18 +53,18 @@
   line-height: 1.2;
 }
 
-.compactStatus {
+.compactStatus.compactStatus {
   min-height: 28px;
   padding-inline: 7px;
   font-size: 8px;
 }
 
-.compactGaugeWrap {
+.compactGaugeWrap.compactGaugeWrap {
   min-height: 116px;
   flex: 0 0 116px;
 }
 
-.compactGauge {
+.compactGauge.compactGauge {
   width: min(41vw, 150px);
 }
 
@@ -76,7 +76,7 @@
   gap: 4px;
 }
 
-.compactModeButton {
+.compactModeButton.compactModeButton {
   min-height: var(--gas-touch-target-min);
   padding: 4px 3px;
 }
@@ -85,8 +85,8 @@
   gap: 3px;
 }
 
-.compactAmountField,
-.compactAssetBadge {
+.compactAmountField.compactAmountField,
+.compactAssetBadge.compactAssetBadge {
   min-height: 46px;
 }
 
@@ -94,7 +94,7 @@
   gap: 4px;
 }
 
-.compactPreset {
+.compactPresets .compactPreset {
   min-height: var(--gas-touch-target-min);
 }
 
@@ -103,7 +103,7 @@
   font-size: 7px;
 }
 
-.compactIgnition {
+.compactIgnition.compactIgnition {
   min-height: 60px;
   font-size: 29px;
 }
@@ -252,12 +252,12 @@
     font-size: clamp(38px, 4vw, 52px);
   }
 
-  .compactGaugeWrap {
+  .compactGaugeWrap.compactGaugeWrap {
     min-height: 154px;
     flex-basis: 154px;
   }
 
-  .compactGauge {
+  .compactGauge.compactGauge {
     width: min(15vw, 188px);
   }
 }
@@ -339,23 +339,23 @@
 }
 
 @media (min-height: 900px) {
-  .compactGaugeWrap {
+  .compactGaugeWrap.compactGaugeWrap {
     min-height: 148px;
     flex-basis: 148px;
   }
 
-  .compactGauge {
+  .compactGauge.compactGauge {
     width: min(50vw, 182px);
   }
 
-  .compactGame {
+  .compactGame.compactGame {
     gap: 8px;
     padding: 11px;
   }
 }
 
 @media (min-width: 1180px) and (min-height: 900px) {
-  .compactGauge {
+  .compactGauge.compactGauge {
     width: min(15vw, 196px);
   }
 }

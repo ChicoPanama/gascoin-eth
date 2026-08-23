@@ -151,24 +151,6 @@ export function GasOriginalPrototype() {
             onAmountChange={handleAmountChange}
           />
 
-          <div className={local.presentationRow}>
-            <span className={shared.eyebrow}>Presentation</span>
-            <div className={local.presentationButtons} role="group" aria-label="Result presentation mode">
-              {PRESENTATION_OPTIONS.map((option) => (
-                <button
-                  key={option.value}
-                  type="button"
-                  className={local.presentationButton}
-                  aria-pressed={presentation === option.value}
-                  disabled={pending}
-                  onClick={() => setPresentation(option.value)}
-                >
-                  {option.label}
-                </button>
-              ))}
-            </div>
-          </div>
-
           {state.phase === 'failed' ? (
             <div className={shared.errorNotice} role="alert">
               <span className={shared.errorTitle}>Money state first</span>
@@ -206,6 +188,24 @@ export function GasOriginalPrototype() {
           <div id="gas-ignition-trust" className={local.trustLine}>
             <span className={local.trustStrong}>{presentation === 'instant' ? 'Instant presentation' : presentation === 'reduced-motion' ? 'Reduced motion' : 'Cinematic presentation'}</span>
             <span>Canonical state stays explicit</span>
+          </div>
+
+          <div className={local.presentationRow}>
+            <span className={shared.eyebrow}>Presentation</span>
+            <div className={local.presentationButtons} role="group" aria-label="Result presentation mode">
+              {PRESENTATION_OPTIONS.map((option) => (
+                <button
+                  key={option.value}
+                  type="button"
+                  className={local.presentationButton}
+                  aria-pressed={presentation === option.value}
+                  disabled={pending}
+                  onClick={() => setPresentation(option.value)}
+                >
+                  {option.label}
+                </button>
+              ))}
+            </div>
           </div>
 
           {state.phase === 'result' ? (

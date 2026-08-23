@@ -22,6 +22,7 @@ export function GasBrand({ variant = 'compact', sublabel }: GasBrandProps) {
           height={800}
           priority={variant === 'compact' || variant === 'rail'}
           sizes={variant === 'hero' ? '64px' : variant === 'rail' ? '48px' : '36px'}
+          unoptimized
         />
       </span>
       {!markOnly ? (

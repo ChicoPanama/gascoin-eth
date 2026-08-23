@@ -8,7 +8,7 @@
 
 .desktopRail,
 .desktopContext,
-.desktopAccountUtility {
+.topBar .desktopAccountUtility {
   display: none;
 }
 
@@ -165,7 +165,7 @@
     text-transform: uppercase;
   }
 
-  .desktopAccountUtility {
+  .topBar .desktopAccountUtility {
     display: inline-grid !important;
   }
 

@@ -47,6 +47,6 @@ test.describe('Project GAS Home', () => {
     await expect(activity.getByText('NO LIVE ACTIVITY', { exact: true })).toBeVisible();
     await expect(activity.getByText(/No synthetic players, wins, trades or Crew events/i)).toBeVisible();
 
-    await expect(page.getByText(/Unconfigured state remains unavailable rather than estimated/i)).toBeVisible();
+    await expect(page.getByText(/Missing values remain unavailable rather than estimated/i)).toBeVisible();
   });
 });

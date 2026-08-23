@@ -205,10 +205,8 @@ test.describe('Phase 9 account authority boundary', () => {
   });
 
   test('GAS21 — Base rails expose runtime truth without claiming unavailable services', async ({ page }) => {
-    const consoleErrors: string[] = [];
-    page.on('console', (message) => {
-      if (message.type() === 'error') consoleErrors.push(message.text());
-    });
+    const pageErrors: string[] = [];
+    page.on('pageerror', (error) => pageErrors.push(error.message));
 
     await page.goto('/account');
     const rails = page.getByRole('region', { name: 'GAS ON BASE' });
@@ -221,7 +219,7 @@ test.describe('Phase 9 account authority boundary', () => {
     await expect(rails.getByText('NOT CONFIGURED', { exact: true })).toBeVisible();
     await expect(rails.getByText(/does not promise a free transaction/i)).toBeVisible();
     await expectNoHorizontalOverflow(page);
-    expect(consoleErrors).toEqual([]);
+    expect(pageErrors).toEqual([]);
   });
 });
 
