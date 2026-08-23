@@ -24,7 +24,7 @@ function DesktopTrustContext({ live }: { live: boolean }) {
     <aside className={local.desktopContextPanel} aria-label="Round trust context">
       <span className={shared.eyebrow}>Round truth</span>
       <h2 className={local.desktopContextTitle}>VERIFY WHAT MATTERS</h2>
-      <p className={local.desktopContextBody}>Desktop adds trust context beside the game without inserting another step into the wager flow.</p>
+      <p className={local.desktopContextBody}>Wager state, randomness and settlement stay visible without adding another step to Play.</p>
       <dl className={local.desktopContextList}>
         <div><dt>State</dt><dd>Explicit</dd></div>
         <div><dt>Live RNG</dt><dd>{live ? 'Authoritative' : 'Not connected'}</dd></div>
@@ -39,10 +39,10 @@ function DesktopSessionContext({ live }: { live: boolean }) {
   return (
     <aside className={local.desktopContextPanel} aria-label="Session context">
       <span className={shared.eyebrow}>Session context</span>
-      <h2 className={local.desktopContextTitle}>NO FAKE ACTIVITY</h2>
+      <h2 className={local.desktopContextTitle}>VERIFIED ACTIVITY ONLY</h2>
       <p className={local.desktopContextBody}>{live
         ? 'Authoritative wager and round state comes from the configured Base execution source. Missing history or bankroll data stays unavailable.'
-        : 'History, players and bankroll settlement remain unavailable until canonical adapters exist.'}</p>
+        : 'History, players and bankroll settlement remain unavailable until a verified execution source is available.'}</p>
       <dl className={local.desktopContextList}>
         <div><dt>Recent rounds</dt><dd>{live ? 'Per-round proof' : 'Unavailable'}</dd></div>
         <div><dt>Live players</dt><dd>Unavailable</dd></div>
@@ -88,8 +88,8 @@ export function GasOriginalPrototype() {
       <div className={`${shared.prototypeBanner} ${local.compactBanner}`} role="note">
         <span>{live
           ? 'USDC entry · automatic GAS sourcing · GAS payout · authoritative Base execution mode'
-          : 'USDC entry · automatic GAS sourcing · GAS payout · prototype moves no funds · no live RNG'}</span>
-        <span className={`${shared.prototypePill} ${local.compactBannerPill}`}>Phase 9</span>
+          : 'USDC entry · automatic GAS sourcing · GAS payout · preview moves no funds · no live RNG'}</span>
+        <span className={`${shared.prototypePill} ${local.compactBannerPill}`}>{live ? 'Live' : 'Preview'}</span>
       </div>
 
       <section
@@ -216,7 +216,7 @@ export function GasOriginalPrototype() {
           ) : (
             <p className={local.prototypeNote}>{live
               ? 'A stable intent is stored before submission. Unknown money state must be reconciled before another wager can be sent.'
-              : 'Outcomes and GAS credit are illustrative UX data only. No live sourcing quote. Payout curves, RNG and bankroll settlement are not represented.'}</p>
+              : 'Results and GAS amounts are preview data only. No live sourcing quote, RNG or bankroll settlement is represented.'}</p>
           )}
         </section>
 

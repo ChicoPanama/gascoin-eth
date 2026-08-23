@@ -17,7 +17,7 @@ export function GasActivityDetail({ activityId }: { activityId: string }) {
     <div className={styles.cardGrid} data-activity-authority={snapshot.authority} data-activity-status={snapshot.status}>
       {!event ? (
         <div className={styles.actionCard}>
-          <span className={styles.actionCardMeta}>Canonical activity detail · {snapshot.status}</span>
+          <span className={styles.actionCardMeta}>Activity detail · {snapshot.status}</span>
           <span className={styles.actionCardTitle}>UNAVAILABLE</span>
           <p className={styles.actionCardBody}>{snapshot.message || `Activity ${activityId} was not found in the current canonical projection.`}</p>
         </div>
@@ -36,7 +36,7 @@ export function GasActivityDetail({ activityId }: { activityId: string }) {
       <Link href="/" className={styles.actionCard}>
         <span className={styles.actionCardMeta}>Return</span>
         <span className={styles.actionCardTitle}>HOME →</span>
-        <p className={styles.actionCardBody}>The same canonical activity object can be projected into Home, profiles, Crews, notifications and search without duplicating economic truth.</p>
+        <p className={styles.actionCardBody}>The same verified event can appear across Home, profiles, Crews, notifications and search without changing its financial meaning.</p>
       </Link>
     </div>
   );

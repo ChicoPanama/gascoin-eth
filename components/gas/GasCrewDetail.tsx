@@ -16,7 +16,7 @@ export function GasCrewDetail({ slug }: { slug: string }) {
     <div className={styles.cardGrid} data-crews-authority={snapshot.authority} data-crews-status={snapshot.status}>
       {!crew ? (
         <div className={styles.actionCard}>
-          <span className={styles.actionCardMeta}>Canonical Crew detail · {snapshot.status}</span>
+          <span className={styles.actionCardMeta}>Crew detail · {snapshot.status}</span>
           <span className={styles.actionCardTitle}>UNAVAILABLE</span>
           <p className={styles.actionCardBody}>{snapshot.message || `Crew ${slug} was not found in the current canonical ranking projection.`}</p>
         </div>
@@ -32,7 +32,7 @@ export function GasCrewDetail({ slug }: { slug: string }) {
       <Link href="/crews" className={styles.actionCard}>
         <span className={styles.actionCardMeta}>Return</span>
         <span className={styles.actionCardTitle}>CREWS →</span>
-        <p className={styles.actionCardBody}>Crew detail and ranking list consume the same canonical source; this route does not invent a second Crew identity or score.</p>
+        <p className={styles.actionCardBody}>Crew detail and rankings use the same verified source, identity and score.</p>
       </Link>
     </div>
   );

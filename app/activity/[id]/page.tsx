@@ -19,7 +19,7 @@ export default async function ActivityPage({ params }: ActivityPageProps) {
   return (
     <GasPrototypeShell>
       <div className={styles.prototypeBanner} role="note">
-        <span>Canonical activity deep link · one economic object across surfaces</span>
+        <span>Verified activity only · source and confirmation stay visible</span>
         <span className={styles.prototypePill}>Activity</span>
       </div>
       <header className={styles.pageHeader}>

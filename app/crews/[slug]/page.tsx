@@ -19,7 +19,7 @@ export default async function CrewPage({ params }: CrewPageProps) {
   return (
     <GasPrototypeShell>
       <div className={styles.prototypeBanner} role="note">
-        <span>Canonical Crew deep link · one identity/ranking projection</span>
+        <span>One GAS identity · verified rankings only</span>
         <span className={styles.prototypePill}>Crew</span>
       </div>
       <header className={styles.pageHeader}>

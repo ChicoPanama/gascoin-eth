@@ -1,7 +1,7 @@
 {
   "name": "GAS",
   "short_name": "GAS",
-  "description": "Project GAS: elastic money, high-frequency play, reserve transparency and SocialFi.",
+  "description": "GAS: elastic money, high-frequency play, reserve transparency and a verified social layer.",
   "start_url": "/",
   "display": "standalone",
   "orientation": "portrait",
@@ -11,22 +11,10 @@
   "categories": ["finance", "games", "social"],
   "icons": [
     {
-      "src": "/favicon.svg",
-      "sizes": "any",
-      "type": "image/svg+xml",
+      "src": "/logo/gascoin-g.jpg",
+      "sizes": "800x800",
+      "type": "image/jpeg",
       "purpose": "any"
-    },
-    {
-      "src": "/logo/gascoin-g.jpg",
-      "sizes": "192x192",
-      "type": "image/jpeg",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "/logo/gascoin-g.jpg",
-      "sizes": "512x512",
-      "type": "image/jpeg",
-      "purpose": "any maskable"
     }
   ]
 }

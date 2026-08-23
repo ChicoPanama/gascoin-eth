@@ -160,7 +160,7 @@ export function useGasOriginalPrototype() {
 
   const copyPrototypeResult = async () => {
     if (state.phase !== 'result') return;
-    const text = `GAS UX prototype — ${state.wager.mode} · ${state.result.outcome.toUpperCase()} · ${state.result.multiplier}×. No real wager or payout occurred.`;
+    const text = `GAS Original preview — ${state.wager.mode} · ${state.result.outcome.toUpperCase()} · ${state.result.multiplier}×. No real wager or payout occurred.`;
 
     try {
       await navigator.clipboard.writeText(text);

@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { GasBrand } from './GasBrand';
 import styles from './GasResponsiveShell.module.css';
 
 type DesktopNavItem = {
@@ -28,8 +29,7 @@ export function GasDesktopNav() {
   return (
     <aside className={styles.desktopRail} aria-label="GAS desktop navigation">
       <Link href="/" className={styles.desktopBrand} aria-label="GAS home">
-        <span className={styles.desktopBrandWord}>GAS</span>
-        <span className={styles.desktopBrandPhase}>UX prototype</span>
+        <GasBrand variant="rail" sublabel="Standalone app" />
       </Link>
 
       <nav className={styles.desktopPrimaryNav} aria-label="GAS primary navigation">
@@ -43,7 +43,7 @@ export function GasDesktopNav() {
               aria-current={active ? 'page' : undefined}
             >
               <span>{item.label}</span>
-              <span className={styles.desktopNavMark} aria-hidden>{active ? '—' : ''}</span>
+              <span className={styles.desktopNavMark} aria-hidden>—</span>
             </Link>
           );
         })}
@@ -51,7 +51,7 @@ export function GasDesktopNav() {
 
       <div className={styles.desktopRailFooter}>
         <span className={styles.desktopRailLabel}>Project GAS</span>
-        <span className={styles.desktopRailMeta}>One product model · responsive presentation</span>
+        <span className={styles.desktopRailMeta}>Base infrastructure · GAS experience</span>
       </div>
     </aside>
   );

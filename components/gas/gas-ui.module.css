@@ -23,26 +23,19 @@
 
 .brand {
   display: inline-flex;
-  align-items: baseline;
-  gap: 8px;
+  align-items: center;
   color: var(--fg);
   text-decoration: none;
 }
 
-.brandWord {
-  font-family: var(--font-display);
-  font-size: 30px;
-  line-height: 1;
-  letter-spacing: 0.08em;
+.routeStage {
+  min-width: 0;
+  animation: gas-route-enter var(--duration-fast) var(--ease-out-expo) both;
 }
 
-.brandPhase {
-  font-family: var(--font-mono);
-  font-size: 9px;
-  line-height: 1;
-  letter-spacing: 0.16em;
-  color: var(--gas-energy);
-  text-transform: uppercase;
+@keyframes gas-route-enter {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .utilityRow {
@@ -72,7 +65,10 @@
   height: 44px;
   padding: 0;
   border-radius: 999px;
+  transition: border-color var(--duration-fast) var(--ease-out-expo), background-color var(--duration-fast) var(--ease-out-expo), color var(--duration-fast) var(--ease-out-expo), transform var(--duration-fast) var(--ease-out-expo);
 }
+
+.iconButton:active { transform: translateY(1px) scale(0.98); }
 
 .iconButton:hover,
 .iconButton:focus-visible,
@@ -238,6 +234,24 @@
   border-radius: 50%;
   background: conic-gradient(from 215deg, var(--gauge-color) 0 var(--gauge-progress), var(--gas-gauge-track) var(--gauge-progress) 74%, transparent 74% 100%);
   transform: rotate(0deg);
+  transition: background var(--duration-normal) var(--ease-out-expo), box-shadow var(--duration-normal) var(--ease-out-expo), filter var(--duration-normal) var(--ease-out-expo);
+}
+
+.gauge[data-mode='boost'] {
+  box-shadow: 0 0 0 1px var(--gas-energy-soft);
+}
+
+.gauge[data-mode='redline'] {
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--gas-gauge-redline) 18%, transparent);
+}
+
+.gauge[data-active='true'] {
+  animation: gas-gauge-pending 900ms ease-in-out infinite alternate;
+}
+
+@keyframes gas-gauge-pending {
+  from { filter: brightness(0.92); }
+  to { filter: brightness(1.08); }
 }
 
 .gauge::before {
@@ -247,6 +261,33 @@
   border-radius: inherit;
   background: var(--card);
   border: 1px solid rgba(var(--fg-rgb), 0.08);
+}
+
+.gaugeNeedle {
+  position: absolute;
+  z-index: 1;
+  left: 50%;
+  bottom: 50%;
+  width: 2px;
+  height: 35%;
+  background: linear-gradient(to top, var(--gauge-color), var(--fg));
+  box-shadow: 0 0 0 1px rgba(var(--bg-rgb), 0.35);
+  transform: translateX(-50%) rotate(var(--gauge-angle, 8deg));
+  transform-origin: 50% 100%;
+  transition: transform var(--duration-normal) var(--ease-out-expo), background var(--duration-normal) var(--ease-out-expo);
+}
+
+.gaugeNeedle::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: -4px;
+  width: 8px;
+  height: 8px;
+  border: 1px solid var(--gauge-color);
+  border-radius: 50%;
+  background: var(--card);
+  transform: translateX(-50%);
 }
 
 .gaugeCenter {
@@ -293,6 +334,13 @@
   border-radius: 0;
   font-family: var(--font-mono);
   text-align: center;
+  transition: border-color var(--duration-fast) var(--ease-out-expo), background-color var(--duration-fast) var(--ease-out-expo), box-shadow var(--duration-fast) var(--ease-out-expo), transform var(--duration-fast) var(--ease-out-expo);
+}
+
+.segmentButton:active:not(:disabled),
+.presetButton:active:not(:disabled),
+.secondaryButton:active:not(:disabled) {
+  transform: translateY(1px) scale(0.99);
 }
 
 .segmentButton[aria-pressed='true'] {
@@ -479,6 +527,18 @@
   font-size: 8px;
   letter-spacing: 0.05em;
   text-transform: uppercase;
+  transition: color var(--duration-fast) var(--ease-out-expo), background-color var(--duration-fast) var(--ease-out-expo);
+}
+
+.navItem::after {
+  content: '';
+  position: absolute;
+  bottom: 5px;
+  width: 18px;
+  height: 2px;
+  background: var(--gas-energy);
+  transform: scaleX(0);
+  transition: transform var(--duration-fast) var(--ease-out-expo);
 }
 
 .navItemActive {
@@ -486,12 +546,7 @@
 }
 
 .navItemActive::after {
-  content: '';
-  position: absolute;
-  bottom: 5px;
-  width: 18px;
-  height: 2px;
-  background: var(--gas-energy);
+  transform: scaleX(1);
 }
 
 .navIcon {
@@ -525,6 +580,10 @@
   letter-spacing: 0.04em;
 }
 
+.brandHeading {
+  margin: 0;
+}
+
 .pageIntro {
   margin: 0;
   max-width: 50ch;
@@ -546,6 +605,7 @@
   background: var(--card);
   color: var(--fg);
   text-decoration: none;
+  transition: border-color var(--duration-fast) var(--ease-out-expo), background-color var(--duration-fast) var(--ease-out-expo), transform var(--duration-fast) var(--ease-out-expo);
 }
 
 .actionCard:hover,
@@ -553,6 +613,8 @@
   border-color: var(--gas-energy-border);
   background: var(--card-hover);
 }
+
+a.actionCard:active { transform: translateY(1px); }
 
 .actionCardTitle {
   font-family: var(--font-display);
@@ -601,7 +663,11 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .routeStage,
+  .gauge,
+  .gaugeNeedle,
   .ignition {
+    animation: none;
     transition: none;
   }
 }

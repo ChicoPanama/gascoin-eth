@@ -13,7 +13,7 @@ export default function CrewsPage() {
   return (
     <GasPrototypeShell>
       <div className={styles.prototypeBanner} role="note">
-        <span>Phase 9 Crew read model · no fabricated crews or rankings</span>
+        <span>Verified Crew activity only · unavailable rankings stay empty</span>
         <span className={styles.prototypePill}>Crews</span>
       </div>
       <header className={styles.pageHeader}>
@@ -26,9 +26,9 @@ export default function CrewsPage() {
           <GasCrewRankings />
         </div>
         <div className={styles.actionCard}>
-          <span className={styles.actionCardMeta}>Following graph · not connected</span>
-          <span className={styles.actionCardTitle}>NO LIVE FOLLOWING</span>
-          <p className={styles.actionCardBody}>The same GAS account identity will own social relationships across Play, Trade, Crews and activity. No Crew-specific duplicate identity graph is created here.</p>
+          <span className={styles.actionCardMeta}>Following · Unavailable</span>
+          <span className={styles.actionCardTitle}>ONE GAS IDENTITY</span>
+          <p className={styles.actionCardBody}>Your GAS account will carry the same verified identity across Play, Trade, Crews and activity.</p>
         </div>
         <div className={styles.actionCard}>
           <span className={styles.actionCardMeta}>Ranking integrity</span>

@@ -13,13 +13,13 @@ export default function TradePage() {
   return (
     <GasPrototypeShell>
       <div className={styles.prototypeBanner} role="note">
-        <span>Phase 9 quote read model · no transaction submission or wallet signing</span>
+        <span>Review quotes safely · trading and wallet signing are not live yet</span>
         <span className={styles.prototypePill}>Trade</span>
       </div>
       <header className={styles.pageHeader}>
         <div className={styles.eyebrow}>Simple by default · financially material quote truth first</div>
         <h1 className={styles.pageTitle}>TRADE</h1>
-        <p className={styles.pageIntro}>Buy and Sell share one quote model. Amount, fee, output, minimum received, price impact, expiry and source must be canonical before any future confirmation layer is allowed.</p>
+        <p className={styles.pageIntro}>Buy and Sell use the same quote truth: amount, fees, output, minimum received, price impact, expiry and source.</p>
       </header>
 
       <div className={`${styles.cardGrid} ${responsive.contentGrid}`}>
@@ -34,9 +34,9 @@ export default function TradePage() {
         </div>
 
         <div className={styles.actionCard}>
-          <span className={styles.actionCardMeta}>Account rails · not connected</span>
+          <span className={styles.actionCardMeta}>Funding · Unavailable</span>
           <span className={styles.actionCardTitle}>FUND / WITHDRAW</span>
-          <p className={styles.actionCardBody}>Funding and withdrawal remain unavailable until an approved provider, bounded permission model, reconciliation path and step-up security are connected.</p>
+          <p className={styles.actionCardBody}>Funding and withdrawal unlock only with an approved provider, bounded permissions, reconciliation and step-up security.</p>
         </div>
       </div>
     </GasPrototypeShell>

@@ -20,19 +20,19 @@ export default async function RoundPage({ params }: RoundPageProps) {
   return (
     <GasPrototypeShell>
       <div className={styles.prototypeBanner} role="note">
-        <span>{isPrototype ? 'Prototype round · no live RNG or settlement proof exists' : 'Round adapter not connected'}</span>
+        <span>{isPrototype ? 'Preview round · no verified RNG or settlement record exists' : 'Round verification is unavailable'}</span>
         <span className={styles.prototypePill}>Verify</span>
       </div>
       <header className={styles.pageHeader}>
-        <div className={styles.eyebrow}>GP11 ResultActionRail · canonical round object</div>
+        <div className={styles.eyebrow}>Wager · outcome · proof · settlement</div>
         <h1 className={styles.pageTitle}>ROUND</h1>
         <p className={styles.pageIntro}>{id}</p>
       </header>
       <div className={styles.cardGrid}>
         <div className={styles.actionCard}>
           <span className={styles.actionCardMeta}>Verification state</span>
-          <span className={styles.actionCardTitle}>{isPrototype ? 'PROTOTYPE ONLY' : 'UNAVAILABLE'}</span>
-          <p className={styles.actionCardBody}>A production round will expose wager, outcome, canonical status, RNG commitment/proof and settlement references. The UX prototype does not fabricate any of those values.</p>
+          <span className={styles.actionCardTitle}>{isPrototype ? 'PREVIEW ONLY' : 'UNAVAILABLE'}</span>
+          <p className={styles.actionCardBody}>A verified round will show wager, outcome, canonical status, RNG commitment and proof, plus settlement references. Missing values are never invented.</p>
         </div>
         <Link href="/play/gas" className={styles.actionCard}>
           <span className={styles.actionCardMeta}>Return to Play</span>

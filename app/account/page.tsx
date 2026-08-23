@@ -17,16 +17,16 @@ export default function AccountPage() {
   return (
     <GasPrototypeShell>
       <div className={styles.prototypeBanner} role="note">
-        <span>Phase 9 account transition · each financial surface labels its authority and retry safety</span>
+        <span>Your money state · source, availability and retry safety stay explicit</span>
         <span className={styles.prototypePill}>Account</span>
       </div>
 
       <GasAccountSummary />
 
       <header className={styles.pageHeader}>
-        <div className={styles.eyebrow}>GP02 TruthfulUnifiedAccount</div>
+        <div className={styles.eyebrow}>Identity · funds · permissions · recovery</div>
         <h1 className={styles.pageTitle}>ACCOUNT</h1>
-        <p className={styles.pageIntro}>One consumer account shell, without collapsing financially different things into one misleading balance.</p>
+        <p className={styles.pageIntro}>One GAS account, with spendable funds, protocol reserves and game bankroll kept visibly separate.</p>
       </header>
 
       <div className={`${styles.cardGrid} ${responsive.contentGrid}`}>

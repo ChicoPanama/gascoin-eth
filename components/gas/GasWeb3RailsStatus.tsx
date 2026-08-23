@@ -55,9 +55,9 @@ export function GasWeb3RailsStatus() {
   return (
     <section aria-labelledby="gas-web3-rails-title">
       <header className={styles.pageHeader}>
-        <div className={styles.eyebrow}>Base contract railways · runtime truth</div>
-        <h2 id="gas-web3-rails-title" className={styles.actionCardTitle}>WEB3 RAIL STATUS</h2>
-        <p className={styles.pageIntro}>Capability detection is progressive enhancement. Standard wallet transactions remain first-class, and no provider or contract is presented as live from research alone.</p>
+        <div className={styles.eyebrow}>Fast play · funding · network fees</div>
+        <h2 id="gas-web3-rails-title" className={styles.actionCardTitle}>GAS ON BASE</h2>
+        <p className={styles.pageIntro}>GAS uses standard wallet transactions by default. Faster play, sponsored fees and funding appear only when the connected account and approved services support them.</p>
       </header>
 
       <div className={styles.cardGrid}>

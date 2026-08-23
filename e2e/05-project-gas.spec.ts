@@ -42,6 +42,14 @@ test.describe('Project GAS mobile shell', () => {
     }
   });
 
+  test('GAS01B — the approved GAS identity anchors the mobile shell and metadata', async ({ page }) => {
+    await page.goto('/');
+    const homeLink = page.getByRole('link', { name: 'GAS home' });
+    await expect(homeLink.locator('[data-gas-brand="compact"]')).toBeVisible();
+    await expect(homeLink.locator('img')).toHaveAttribute('src', /gascoin-g/);
+    await expect(page.locator('link[rel="icon"]')).toHaveAttribute('href', /gascoin-g/);
+  });
+
   test('GAS02 — Reserve remains one action from Home without occupying bottom nav', async ({ page }) => {
     await page.goto('/');
     const nav = page.getByRole('navigation', { name: 'GAS primary navigation' });
@@ -102,7 +110,7 @@ test.describe('Project GAS responsive shell', () => {
 
     await expect(page.getByRole('complementary', { name: 'GAS desktop navigation' })).toBeVisible();
     await expect(page.getByRole('heading', { name: 'RESERVE' })).toBeVisible();
-    await expect(page.getByText(/no fabricated backing ratio/i)).toBeVisible();
+    await expect(page.getByText(/Live reserve values appear only when a verified source is available/i)).toBeVisible();
     await expectNoHorizontalOverflow(page);
   });
 
@@ -133,7 +141,7 @@ test.describe('Project GAS responsive shell', () => {
     await expect(page.getByRole('complementary', { name: 'Round trust context' })).toBeVisible();
     await expect(page.getByRole('complementary', { name: 'Session context' })).toBeVisible();
     await expect(page.getByRole('heading', { name: 'VERIFY WHAT MATTERS' })).toBeVisible();
-    await expect(page.getByRole('heading', { name: 'NO FAKE ACTIVITY' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'VERIFIED ACTIVITY ONLY' })).toBeVisible();
     await expect(page.getByText('Not connected', { exact: true }).first()).toBeVisible();
 
     const ignition = page.getByRole('button', { name: 'IGNITION', exact: true });
@@ -193,7 +201,7 @@ test.describe('Phase 9 account authority boundary', () => {
     await expect(page.getByText(/1,240\.00 GAS/i)).toHaveCount(0);
     await expect(page.getByText(/Prototype available/i)).toHaveCount(0);
     await expect(page.getByText(/no live RNG/i)).toBeVisible();
-    await expect(page.getByText(/illustrative UX data only/i)).toBeVisible();
+    await expect(page.getByText(/preview data only/i)).toBeVisible();
   });
 
   test('GAS21 — Base rails expose runtime truth without claiming unavailable services', async ({ page }) => {
@@ -203,7 +211,7 @@ test.describe('Phase 9 account authority boundary', () => {
     });
 
     await page.goto('/account');
-    const rails = page.getByRole('region', { name: 'WEB3 RAIL STATUS' });
+    const rails = page.getByRole('region', { name: 'GAS ON BASE' });
 
     await expect(rails).toBeVisible();
     await expect(rails.getByText('BASE', { exact: true })).toBeVisible();
@@ -253,6 +261,7 @@ test.describe('GAS Original prototype loop', () => {
     await amount.fill('50');
     await page.getByRole('button', { name: /REDLINE/i }).click();
     await expect(page.getByRole('button', { name: /REDLINE/i })).toHaveAttribute('aria-pressed', 'true');
+    await expect(page.locator('[data-phase="ready"][data-mode="redline"]')).toBeVisible();
     await expect(amount).toHaveValue('50');
   });
 
@@ -282,13 +291,13 @@ test.describe('GAS Original prototype loop', () => {
     await expect(verify).toBeVisible({ timeout: 1500 });
     await verify.click();
     await expect(page).toHaveURL(/\/round\/prototype-round-1$/);
-    await expect(page.getByText(/Prototype round/i)).toBeVisible();
+    await expect(page.getByText(/Preview round/i)).toBeVisible();
   });
 
   test('GAS15 — prototype explicitly states no funds and no live RNG', async ({ page }) => {
     await page.goto('/play/gas');
     await expect(page.getByText(/no live RNG/i)).toBeVisible();
-    await expect(page.getByText(/payout curves, RNG and bankroll settlement are not represented/i)).toBeVisible();
+    await expect(page.getByText(/No live sourcing quote, RNG or bankroll settlement is represented/i)).toBeVisible();
   });
 
   test('GAS16 — IGNITION and settled replay stay above fixed nav without scrolling at 390x844', async ({ page }) => {

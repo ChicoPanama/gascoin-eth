@@ -12,13 +12,13 @@ export default function ReservePage() {
   return (
     <GasPrototypeShell>
       <div className={styles.prototypeBanner} role="note">
-        <span>Phase 9 read model · canonical source required · no fabricated backing ratio</span>
+        <span>Live reserve values appear only when a verified source is available</span>
         <span className={styles.prototypePill}>Reserve</span>
       </div>
       <header className={styles.pageHeader}>
         <div className={styles.eyebrow}>External backing only · monetary truth first</div>
         <h1 className={styles.pageTitle}>RESERVE</h1>
-        <p className={styles.pageIntro}>Circulation, adjusted external reserves, composition, freshness and rebase state come from one read-only authority boundary. GAS itself never counts as its own backing.</p>
+        <p className={styles.pageIntro}>See circulation, adjusted external reserves, composition, freshness and rebase state. GAS never counts as its own backing.</p>
       </header>
       <GasReserveReadModel />
     </GasPrototypeShell>

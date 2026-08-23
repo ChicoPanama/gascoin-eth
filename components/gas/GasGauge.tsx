@@ -9,6 +9,12 @@ const MODE_COLOR: Record<GasGameMode, string> = {
   REDLINE: 'var(--gas-gauge-redline)',
 };
 
+const MODE_ANGLE: Record<GasGameMode, string> = {
+  CRUISE: '-42deg',
+  BOOST: '8deg',
+  REDLINE: '54deg',
+};
+
 function gaugePresentation(state: GasOriginalState) {
   if (state.phase === 'result') {
     return {
@@ -17,6 +23,9 @@ function gaugePresentation(state: GasOriginalState) {
       meta: `${state.result.payoutAmount} ${state.result.payoutAsset}`,
       color: state.result.outcome === 'win' ? 'var(--gas-gauge-result-win)' : state.result.outcome === 'loss' ? 'var(--gas-gauge-result-loss)' : 'var(--gas-gauge-neutral)',
       progress: state.result.outcome === 'win' ? '88%' : state.result.outcome === 'loss' ? '32%' : '58%',
+      angle: state.result.outcome === 'win' ? '62deg' : state.result.outcome === 'loss' ? '-52deg' : '0deg',
+      mode: state.wager.mode,
+      active: false,
     };
   }
 
@@ -27,20 +36,23 @@ function gaugePresentation(state: GasOriginalState) {
       meta: state.fundsMoved === 'no' ? 'SAFE STATE' : 'CHECKING WAGER',
       color: 'var(--gas-degraded)',
       progress: '46%',
+      angle: '-10deg',
+      mode: state.wager?.mode ?? state.draft?.mode ?? 'BOOST',
+      active: false,
     };
   }
 
   if (state.phase === 'resolving') {
-    return { stateLabel: 'RESOLVING', value: 'LIVE', meta: state.wager.mode, color: MODE_COLOR[state.wager.mode], progress: '73%' };
+    return { stateLabel: 'RANDOMNESS PENDING', value: 'LIVE', meta: state.wager.mode, color: MODE_COLOR[state.wager.mode], progress: '73%', angle: MODE_ANGLE[state.wager.mode], mode: state.wager.mode, active: true };
   }
 
   if (state.phase === 'locked') {
-    return { stateLabel: 'LOCKED', value: 'ON', meta: state.wager.mode, color: MODE_COLOR[state.wager.mode], progress: '66%' };
+    return { stateLabel: 'ACKNOWLEDGED', value: 'ON', meta: state.wager.mode, color: MODE_COLOR[state.wager.mode], progress: '66%', angle: MODE_ANGLE[state.wager.mode], mode: state.wager.mode, active: true };
   }
 
   if (state.phase === 'committing' || state.phase === 'validating') {
     const mode = state.draft.mode;
-    return { stateLabel: 'LOCKING', value: '•••', meta: mode, color: MODE_COLOR[mode], progress: '58%' };
+    return { stateLabel: 'SUBMITTED', value: '•••', meta: mode, color: MODE_COLOR[mode], progress: '58%', angle: MODE_ANGLE[mode], mode, active: true };
   }
 
   return {
@@ -49,6 +61,9 @@ function gaugePresentation(state: GasOriginalState) {
     meta: 'CHOOSE AMOUNT · IGNITE',
     color: MODE_COLOR[state.draft.mode],
     progress: state.draft.mode === 'CRUISE' ? '47%' : state.draft.mode === 'BOOST' ? '68%' : '86%',
+    angle: MODE_ANGLE[state.draft.mode],
+    mode: state.draft.mode,
+    active: false,
   };
 }
 
@@ -57,11 +72,25 @@ export function GasGauge({ state, compact = false }: { state: GasOriginalState; 
   const gaugeStyle = {
     '--gauge-color': view.color,
     '--gauge-progress': view.progress,
+    '--gauge-angle': view.angle,
   } as CSSProperties;
 
   return (
-    <div className={`${styles.gaugeWrap} ${compact ? local.compactGaugeWrap : ''}`} aria-live="polite">
-      <div className={`${styles.gauge} ${compact ? local.compactGauge : ''}`} style={gaugeStyle}>
+    <div
+      className={`${styles.gaugeWrap} ${compact ? local.compactGaugeWrap : ''}`}
+      aria-label={`${view.stateLabel}. ${view.value}. ${view.meta}.`}
+      aria-live="polite"
+      role="status"
+    >
+      <div
+        className={`${styles.gauge} ${compact ? local.compactGauge : ''}`}
+        style={gaugeStyle}
+        data-mode={view.mode.toLowerCase()}
+        data-phase={state.phase}
+        data-active={view.active ? 'true' : 'false'}
+        aria-hidden="true"
+      >
+        <span className={styles.gaugeNeedle} />
         <div className={styles.gaugeCenter}>
           <div className={styles.gaugeState}>{view.stateLabel}</div>
           <div className={styles.gaugeValue}>{view.value}</div>

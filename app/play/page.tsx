@@ -13,7 +13,7 @@ export default function PlayPage() {
   return (
     <GasPrototypeShell>
       <div className={styles.prototypeBanner} role="note">
-        <span>Phase 8 responsive prototype · no funds move</span>
+        <span>Preview mode · no funds move until live execution is verified</span>
         <span className={styles.prototypePill}>Play</span>
       </div>
 
@@ -25,15 +25,15 @@ export default function PlayPage() {
 
       <div className={`${styles.cardGrid} ${responsive.contentGrid}`}>
         <Link href="/play/gas" className={`${styles.actionCard} ${responsive.primaryWide}`}>
-          <span className={styles.actionCardMeta}>Signature · Prototype ready</span>
+          <span className={styles.actionCardMeta}>Signature game · Preview available</span>
           <span className={styles.actionCardTitle}>GAS ORIGINAL →</span>
           <p className={styles.actionCardBody}>CRUISE / BOOST / REDLINE → amount → IGNITION → GAS Gauge → result → replay.</p>
         </Link>
 
         <div className={styles.actionCard} aria-disabled="true">
-          <span className={styles.actionCardMeta}>Secondary · Interface pending</span>
+          <span className={styles.actionCardMeta}>Secondary game · Coming later</span>
           <span className={styles.actionCardTitle}>ROULETTE</span>
-          <p className={styles.actionCardBody}>Provably-fair roulette remains in Phase 1 protocol scope. Its interaction surface follows after the GAS Original loop is benchmarked.</p>
+          <p className={styles.actionCardBody}>Provably-fair roulette follows after the GAS Original money loop is live and verified.</p>
         </div>
       </div>
     </GasPrototypeShell>

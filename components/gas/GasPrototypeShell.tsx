@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import type { ReactNode } from 'react';
+import { GasBrand } from './GasBrand';
 import { GasDesktopNav } from './GasDesktopNav';
 import { GasMobileNav } from './GasMobileNav';
 import styles from './gas-ui.module.css';
@@ -25,13 +26,12 @@ export function GasPrototypeShell({ children }: { children: ReactNode }) {
       <div className={responsive.shellBody}>
         <header className={`${styles.topBar} ${responsive.topBar}`}>
           <Link href="/" className={`${styles.brand} ${responsive.mobileBrand}`} aria-label="GAS home">
-            <span className={styles.brandWord}>GAS</span>
-            <span className={styles.brandPhase}>UX prototype</span>
+            <GasBrand variant="compact" sublabel="Standalone app" />
           </Link>
 
           <div className={responsive.desktopContext} aria-hidden>
             <span className={styles.eyebrow}>Project GAS</span>
-            <span className={responsive.desktopContextText}>Responsive prototype</span>
+            <span className={responsive.desktopContextText}>Consumer application</span>
           </div>
 
           <div className={styles.utilityRow} aria-label="GAS utilities">
@@ -47,7 +47,9 @@ export function GasPrototypeShell({ children }: { children: ReactNode }) {
           </div>
         </header>
 
-        <main id="main-content" className={`${styles.main} ${responsive.main}`}>{children}</main>
+        <main id="main-content" className={`${styles.main} ${responsive.main}`}>
+          <div className={styles.routeStage}>{children}</div>
+        </main>
       </div>
 
       <GasMobileNav />

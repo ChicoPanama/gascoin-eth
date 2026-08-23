@@ -33,6 +33,6 @@ export default defineConfig({
     command: webServerCommand,
     url: 'http://127.0.0.1:3000',
     reuseExistingServer: !process.env.CI,
-    timeout: process.env.CI ? 60000 : 120000,
+    timeout: process.env.CI ? 60000 : 300000,
   },
 });

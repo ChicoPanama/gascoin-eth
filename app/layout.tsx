@@ -37,25 +37,34 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_BASE_URL || 'https://gascoin.app'),
   title: {
     default: 'GAS — Project GAS',
     template: '%s · GAS',
   },
-  description: 'Project GAS UX prototype: elastic money, a high-frequency provably-fair game, reserve transparency and SocialFi in one consumer application.',
+  description: 'GAS combines elastic money, high-frequency provably-fair play, reserve transparency and a verified social layer in one consumer application.',
   openGraph: {
     title: 'GAS — Elastic Money, Play and SocialFi',
-    description: 'Project GAS UX prototype for the GAS elastic asset, GAS Original, reserve transparency and a verified social layer.',
+    description: 'Enter with USDC, play GAS Original, then hold, trade and build your Crew with financial state kept explicit.',
     siteName: 'GAS',
     type: 'website',
-    url: process.env.NEXT_PUBLIC_BASE_URL || 'https://gascoin.app',
+    url: '/',
+    images: [{
+      url: '/logo/gascoin-g.jpg',
+      width: 800,
+      height: 800,
+      alt: 'GAS',
+    }],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'GAS — Project GAS',
     description: 'Elastic money, high-frequency play, reserve transparency and SocialFi in one consumer application.',
+    images: ['/logo/gascoin-g.jpg'],
   },
   icons: {
-    icon: '/favicon.svg',
+    icon: '/logo/gascoin-g.jpg',
+    shortcut: '/logo/gascoin-g.jpg',
     apple: '/logo/gascoin-g.jpg',
   },
   manifest: '/manifest.webmanifest',

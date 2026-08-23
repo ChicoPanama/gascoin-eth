@@ -60,31 +60,16 @@
   }
 
   .desktopBrand {
-    display: grid;
-    gap: 5px;
+    display: block;
     padding: 8px 10px 24px;
     color: var(--fg);
     text-decoration: none;
   }
 
-  .desktopBrandWord {
-    font-family: var(--font-display);
-    font-size: 38px;
-    line-height: 0.9;
-    letter-spacing: 0.08em;
-  }
-
-  .desktopBrandPhase,
   .desktopRailLabel,
   .desktopRailMeta {
     font-family: var(--font-mono);
     text-transform: uppercase;
-  }
-
-  .desktopBrandPhase {
-    color: var(--gas-energy);
-    font-size: 9px;
-    letter-spacing: 0.14em;
   }
 
   .desktopPrimaryNav {
@@ -106,6 +91,7 @@
     letter-spacing: 0.08em;
     text-decoration: none;
     text-transform: uppercase;
+    transition: border-color var(--duration-fast) var(--ease-out-expo), background-color var(--duration-fast) var(--ease-out-expo), color var(--duration-fast) var(--ease-out-expo);
   }
 
   .desktopNavItem:hover,
@@ -124,6 +110,14 @@
   .desktopNavMark {
     color: var(--gas-energy);
     font-size: 16px;
+    opacity: 0;
+    transform: translateX(-5px);
+    transition: opacity var(--duration-fast) var(--ease-out-expo), transform var(--duration-fast) var(--ease-out-expo);
+  }
+
+  .desktopNavItemActive .desktopNavMark {
+    opacity: 1;
+    transform: translateX(0);
   }
 
   .desktopRailFooter {

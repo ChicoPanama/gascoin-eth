@@ -4,7 +4,7 @@ import { GasPrototypeShell } from '@/components/gas/GasPrototypeShell';
 
 export const metadata: Metadata = {
   title: 'GAS Original — Project GAS',
-  description: 'Project GAS responsive UX prototype for CRUISE, BOOST, REDLINE and IGNITION.',
+  description: 'Choose CRUISE, BOOST or REDLINE, enter with USDC and play GAS Original.',
 };
 
 export default function GasOriginalPage() {
