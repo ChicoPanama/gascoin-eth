@@ -87,7 +87,8 @@ Base App can provide:
 - discovery;
 - social cards;
 - deep links;
-- optional embedded/mini-app compatibility;
+- standard-web-app distribution through Base.dev;
+- wallet-address notifications and Builder Code attribution when configured;
 - Base Account convenience.
 
 But it is a distribution layer into the same GAS product, not a replacement for the GAS app.
@@ -128,6 +129,17 @@ Use adapters for:
 - XMTP Crew messaging vs GAS-native notifications;
 - Aerodrome/Uniswap/future venues;
 - Base MCP/agent features later.
+
+Current Base App implementation correction:
+
+- after 9 April 2026, Base App treats apps as standard web apps rather than
+  requiring the legacy Farcaster mini-app manifest/SDK model;
+- GAS should register the same standalone app through Base.dev only when the
+  external registration is authorized;
+- Base.dev metadata, ERC-8021 Builder Code attribution and wallet-address
+  notifications are distribution adapters, not GAS economic authority;
+- Farcaster remains an optional outbound social channel and must not be used as
+  Base App authentication or financial truth.
 
 The user-facing product should say things like `FAST PLAY`, `ADD FUNDS`, `FREE NETWORK FEE`, not expose SDK/provider jargon.
 
@@ -533,6 +545,30 @@ Still not production-live:
 - approved production asset/read-source configuration.
 
 Do not describe research decisions as implemented code.
+
+## Current Work execution slice
+
+The structured continuation prompt now lives at
+`ux-research/handoffs/PROJECT_GAS_PHASE_9_WORK_EXECUTION_PROMPT_2026-08-23.md`.
+Its immediate decision-neutral slice has been executed:
+
+- `lib/project-gas/web3-rails.ts` defines the provider-neutral Base chain,
+  wallet-kind, EIP-5792 capability and progressive-enhancement read model;
+- `hooks/useProjectGasWeb3Rails.ts` queries `wallet_getCapabilities` only for
+  the active wallet on the configured Base network and preserves a standard
+  signed-transaction fallback;
+- `/account` exposes truthful Base execution, wallet, fast-play, network-fee,
+  native-USDC funding and ERC-8021 attribution states;
+- native USDC configuration is accepted only when it matches Circle's
+  canonical Base/Base Sepolia deployment for the selected chain; the address
+  remains explicit configuration and is not silently enabled;
+- paymaster, Base Pay, Onramp and Builder Code flags default false and contain
+  no provider endpoint, secret or invented readiness;
+- focused unit and E2E assertions cover capability parsing, canonical USDC and
+  unavailable rail truth.
+
+This slice does not approve D02-D13 parameters, deploy a contract, register the
+app with Base.dev or make a money-moving path live.
 
 ## Immediate Work priority order
 

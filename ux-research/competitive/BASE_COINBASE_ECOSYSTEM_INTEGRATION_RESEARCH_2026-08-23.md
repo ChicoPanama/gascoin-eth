@@ -11,7 +11,7 @@ The strongest GAS strategy is not merely `deploy contracts on Base`. GAS should 
 - Base Account / Sign in with Base for identity and wallet abstraction;
 - app-specific subaccounts + bounded spend permissions for repeated low-friction game actions;
 - CDP Paymaster/Bundler for gas sponsorship and batched operations;
-- Base App mini-app compatibility and discovery;
+- Base App standard-web-app compatibility and Base.dev discovery;
 - USDC-first funding via Coinbase Onramp/Base Pay where permitted;
 - Farcaster/Base App social distribution and XMTP Crew communication;
 - Aerodrome/Uniswap for liquidity execution, Morpho/Moonwell for selectively approved yield/credit primitives, wstETH for productive reserve exposure where policy allows;
@@ -19,21 +19,34 @@ The strongest GAS strategy is not merely `deploy contracts on Base`. GAS should 
 - Base Builder Codes / attribution where available;
 - preserve Project GAS financial firewalls and authoritative-state architecture.
 
-The desired player experience is:
+The desired optional Base-distribution experience is:
 
-`open GAS in Base App -> Sign in with Base -> fund with USDC -> bounded app permission -> CRUISE/BOOST/REDLINE -> IGNITION -> GAS GAUGE -> replay/share/hold/trade`
+`discover GAS in Base App -> open the same standalone GAS web app -> connect/link a Base Account or another supported wallet -> fund with USDC -> bounded app permission when supported -> CRUISE/BOOST/REDLINE -> IGNITION -> GAS GAUGE -> replay/share/hold/trade`
 
 No seed phrase requirement, no ETH gas management, no repeated token approval prompts, no manual bridge requirement, and no fake optimistic settlement.
 
 ## Current Base / Coinbase capabilities relevant to GAS
 
-### Base App
+### Base App — current standard web app model
 
-Base App is now a global consumer surface combining social, trading, payments, app discovery, chat and earning. It supports mini apps in-feed; its social feed is built on Farcaster, posts can be tokenized through Zora, and chat is powered by XMTP. Base App therefore can be treated as a distribution surface for GAS rather than only a wallet.
+Base App is a distribution and wallet surface for GAS, not the GAS product
+shell. Current Base documentation states that after 9 April 2026 Base App
+treats apps as standard web apps powered by Base.dev rather than requiring the
+legacy Farcaster mini-app manifest/SDK model. Discovery uses Base.dev app
+metadata and Builder Codes; authentication and contract interaction use
+standard wallet/SIWE/wagmi/viem paths; Base App notifications target opted-in
+wallet addresses.
 
 GAS implications:
 
-- Build GAS Original as a Base App-compatible mini app/surface.
+- Keep the standalone GAS web/PWA responsive and register the same app through
+  Base.dev when external registration is authorized.
+- Do not add a legacy `/.well-known/farcaster.json` manifest merely for Base
+  App compatibility.
+- Add ERC-8021 Builder Code attribution behind capability-aware transaction
+  clients once a real Base.dev Builder Code exists.
+- Add wallet-address Base notifications only through an approved server-side
+  adapter; the notification target remains a canonical GAS route.
 - Deep links from Base feed activity directly into a replayable GAS round or GAS profile.
 - Use GAS social events (wins, Crew milestones, verified activity) as shareable Base-native objects, but avoid making every activity a speculative coin.
 - Keep GAS identity canonical internally while supporting Base Account/Farcaster identity binding.
@@ -299,7 +312,8 @@ RESERVE STRATEGY ROUTER
         +-- per-strategy haircuts + caps
 
 SOCIAL/DISTRIBUTION
-        +-- Base App mini app
+        +-- Base App standard web app / Base.dev registration
+        +-- Builder Code attribution / wallet-address notifications
         +-- Farcaster social graph/deep links
         +-- XMTP Crew chat
         +-- Base notifications
@@ -352,14 +366,18 @@ This research does not create a new numbered roadmap. For the existing Phase 9 d
 6. Freeze ReserveStrategyAdapter interface inspired by Morpho V2 caps/reporting.
 7. Decide initial liquidity routing between Aerodrome/Uniswap and POL policy.
 8. Complete GameBankroll, Game Entry Router, randomness and wager execution.
-9. Add Base App mini-app manifest/discovery/social deep-link compatibility.
+9. Register the standalone GAS web app on Base.dev and add Builder Code,
+   wallet-address notification and social deep-link compatibility. Do not add
+   the superseded Farcaster mini-app manifest as the Base App integration.
 10. Add XMTP/Farcaster social integrations only after economic vertical loop is authoritative.
 11. Add agent/x402 integrations after human financial flows and bounded permissions are proven.
 12. Consider Base Appchain only if real usage proves Base L2 itself insufficient.
 
 ## Current recommendation
 
-Base should now be the leading chain candidate for GAS Phase 1, subject to formal validation of legal/provider availability and final chain decision approval.
+Base is the approved fixed Phase 1 execution chain for GAS. Base Sepolia is the
+public integration testnet and Foundry is the canonical Solidity toolchain.
+Provider, legal, release and mainnet-deployment approvals remain separate.
 
 The target differentiation is:
 

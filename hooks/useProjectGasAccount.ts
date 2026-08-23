@@ -114,6 +114,7 @@ export interface UseProjectGasAccountResult {
     chainId: number;
     gasConfigured: boolean;
     usdcConfigured: boolean;
+    usdcConfigurationStatus: 'missing' | 'canonical' | 'invalid';
     chainEnabled: boolean;
   };
 }
@@ -223,6 +224,7 @@ export function useProjectGasAccount(): UseProjectGasAccountResult {
       chainId: config.chainId,
       gasConfigured: Boolean(config.gasAddress),
       usdcConfigured: Boolean(config.usdcAddress),
+      usdcConfigurationStatus: config.usdcConfigurationStatus,
       chainEnabled,
     },
   };

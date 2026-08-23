@@ -1,8 +1,8 @@
 import { defineConfig, devices } from '@playwright/test';
 
 const webServerCommand = process.env.CI
-  ? 'npm run start'
-  : 'npm run build && npm run start';
+  ? './node_modules/.bin/next start --hostname 127.0.0.1'
+  : 'npm run build && ./node_modules/.bin/next start --hostname 127.0.0.1';
 
 export default defineConfig({
   testDir: './e2e',
@@ -16,7 +16,7 @@ export default defineConfig({
     ['json', { outputFile: 'test-results/results.json' }],
   ],
   use: {
-    baseURL: 'http://localhost:3000',
+    baseURL: 'http://127.0.0.1:3000',
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',
@@ -31,7 +31,7 @@ export default defineConfig({
   ],
   webServer: {
     command: webServerCommand,
-    url: 'http://localhost:3000',
+    url: 'http://127.0.0.1:3000',
     reuseExistingServer: !process.env.CI,
     timeout: process.env.CI ? 60000 : 120000,
   },

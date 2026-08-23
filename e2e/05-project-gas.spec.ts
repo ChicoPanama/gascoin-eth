@@ -195,6 +195,26 @@ test.describe('Phase 9 account authority boundary', () => {
     await expect(page.getByText(/no live RNG/i)).toBeVisible();
     await expect(page.getByText(/illustrative UX data only/i)).toBeVisible();
   });
+
+  test('GAS21 — Base rails expose runtime truth without claiming unavailable services', async ({ page }) => {
+    const consoleErrors: string[] = [];
+    page.on('console', (message) => {
+      if (message.type() === 'error') consoleErrors.push(message.text());
+    });
+
+    await page.goto('/account');
+    const rails = page.getByRole('region', { name: 'WEB3 RAIL STATUS' });
+
+    await expect(rails).toBeVisible();
+    await expect(rails.getByText('BASE', { exact: true })).toBeVisible();
+    await expect(rails.getByText('STANDARD SIGNING', { exact: true })).toBeVisible();
+    await expect(rails.getByText('NORMAL BASE FEE', { exact: true })).toBeVisible();
+    await expect(rails.getByText('FUNDING UNAVAILABLE', { exact: true })).toBeVisible();
+    await expect(rails.getByText('NOT CONFIGURED', { exact: true })).toBeVisible();
+    await expect(rails.getByText(/does not promise a free transaction/i)).toBeVisible();
+    await expectNoHorizontalOverflow(page);
+    expect(consoleErrors).toEqual([]);
+  });
 });
 
 test.describe('GAS Original prototype loop', () => {

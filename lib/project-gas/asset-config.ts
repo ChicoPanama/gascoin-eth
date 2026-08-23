@@ -7,6 +7,7 @@ export interface ProjectGasAssetConfig {
   chainId: ProjectGasChainId;
   gasAddress?: Address;
   usdcAddress?: Address;
+  usdcConfigurationStatus: 'missing' | 'canonical' | 'invalid';
 }
 
 export interface ProjectGasPublicAssetEnv {
@@ -24,6 +25,17 @@ export const PROJECT_GAS_MAINNET_CHAIN_ID: ProjectGasChainId = base.id;
 export const PROJECT_GAS_TESTNET_CHAIN_ID: ProjectGasChainId = baseSepolia.id;
 export const PROJECT_GAS_DEFAULT_CHAIN_ID = PROJECT_GAS_MAINNET_CHAIN_ID;
 
+/**
+ * Official native USDC deployments published by Circle for the only two
+ * Project GAS networks. These are validation values, not implicit runtime
+ * configuration: an operator must still explicitly configure the selected
+ * address before the app performs an authoritative balance read.
+ */
+export const PROJECT_GAS_CANONICAL_USDC_ADDRESSES: Readonly<Record<ProjectGasChainId, Address>> = {
+  [PROJECT_GAS_MAINNET_CHAIN_ID]: getAddress('0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913'),
+  [PROJECT_GAS_TESTNET_CHAIN_ID]: getAddress('0x036CbD53842c5426634e7929541eC2318f3dCF7e'),
+};
+
 function normalizeAddress(value: string | undefined): Address | undefined {
   const candidate = value?.trim();
   if (!candidate || !isAddress(candidate, { strict: false })) return undefined;
@@ -39,11 +51,25 @@ function normalizeChainId(value: string | undefined): ProjectGasChainId {
 }
 
 export function parseProjectGasAssetConfig(env: ProjectGasPublicAssetEnv): ProjectGasAssetConfig {
+  const chainId = normalizeChainId(env.chainId);
+  const requestedUsdcAddress = normalizeAddress(env.usdcAddress);
+  const canonicalUsdcAddress = PROJECT_GAS_CANONICAL_USDC_ADDRESSES[chainId];
+  const usdcIsCanonical = requestedUsdcAddress?.toLowerCase() === canonicalUsdcAddress.toLowerCase();
+
   return {
-    chainId: normalizeChainId(env.chainId),
+    chainId,
     gasAddress: normalizeAddress(env.gasAddress),
-    usdcAddress: normalizeAddress(env.usdcAddress),
+    usdcAddress: usdcIsCanonical ? requestedUsdcAddress : undefined,
+    usdcConfigurationStatus: !env.usdcAddress?.trim()
+      ? 'missing'
+      : usdcIsCanonical
+        ? 'canonical'
+        : 'invalid',
   };
+}
+
+export function getCanonicalProjectGasUsdcAddress(chainId: ProjectGasChainId): Address {
+  return PROJECT_GAS_CANONICAL_USDC_ADDRESSES[chainId];
 }
 
 /**

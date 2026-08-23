@@ -7,12 +7,13 @@ import {
 } from '../../../lib/project-gas/account-state';
 import {
   PROJECT_GAS_DEFAULT_CHAIN_ID,
+  PROJECT_GAS_CANONICAL_USDC_ADDRESSES,
   PROJECT_GAS_TESTNET_CHAIN_ID,
   parseProjectGasAssetConfig,
 } from '../../../lib/project-gas/asset-config';
 
 const GAS = '0x1111111111111111111111111111111111111111';
-const USDC = '0x2222222222222222222222222222222222222222';
+const USDC = PROJECT_GAS_CANONICAL_USDC_ADDRESSES[8453];
 const WALLET = '0x3333333333333333333333333333333333333333';
 
 describe('Project GAS asset configuration', () => {
@@ -26,6 +27,7 @@ describe('Project GAS asset configuration', () => {
     expect(config.chainId).toBe(8453);
     expect(config.gasAddress).toBe(getAddress(GAS));
     expect(config.usdcAddress).toBe(getAddress(USDC));
+    expect(config.usdcConfigurationStatus).toBe('canonical');
   });
 
   it('keeps invalid or absent asset addresses unavailable', () => {
@@ -37,6 +39,28 @@ describe('Project GAS asset configuration', () => {
     expect(config.chainId).toBe(PROJECT_GAS_DEFAULT_CHAIN_ID);
     expect(config.gasAddress).toBeUndefined();
     expect(config.usdcAddress).toBeUndefined();
+    expect(config.usdcConfigurationStatus).toBe('missing');
+  });
+
+  it('rejects a valid address that is not canonical native USDC for the selected Base chain', () => {
+    const config = parseProjectGasAssetConfig({
+      chainId: '8453',
+      usdcAddress: '0x2222222222222222222222222222222222222222',
+    });
+
+    expect(config.usdcAddress).toBeUndefined();
+    expect(config.usdcConfigurationStatus).toBe('invalid');
+  });
+
+  it('accepts Circle native USDC on Base Sepolia only when that network is selected', () => {
+    const sepoliaUsdc = PROJECT_GAS_CANONICAL_USDC_ADDRESSES[PROJECT_GAS_TESTNET_CHAIN_ID];
+    const config = parseProjectGasAssetConfig({
+      chainId: String(PROJECT_GAS_TESTNET_CHAIN_ID),
+      usdcAddress: sepoliaUsdc,
+    });
+
+    expect(config.usdcAddress).toBe(sepoliaUsdc);
+    expect(config.usdcConfigurationStatus).toBe('canonical');
   });
 
   it('supports only Base and Base Sepolia and falls back to Base mainnet', () => {
