@@ -39,8 +39,13 @@ adapter boundaries.
    financial identity.
 8. Phase 1 player entry is USDC-only. The Game Entry Router sources or credits
    GAS invisibly; wagers, bankroll liabilities and payouts remain GAS-native.
-9. Referral and Partner rewards settle in USDC from an isolated Referral Reward
-   Pool. They never mint GAS and never draw from ReserveVault or GameBankroll.
+9. Referral and Partner obligations are denominated and fully reserved in USDC
+   inside an isolated Referral Reward Pool, but recipients have **no USDC payout
+   option**. Every cleared referral claim settles only in GAS by routing the
+   backing USDC through the protocol-controlled internal GAS AMM/router. The
+   internal route captures the applicable GAS conversion/trading fee; Aerodrome,
+   Uniswap and other external venues are not referral-payout execution routes.
+   Referral payouts never draw from ReserveVault or GameBankroll.
 10. GAS and wGAS holders receive the same rebase economics through underlying
     shares/GAS-per-wGAS. Holder alignment prefers time-weighted underlying
     shares over balance snapshots.
@@ -124,11 +129,18 @@ canonical economic event
 
 REFERRAL RAIL
 eligible realized acquisition revenue
-               -> isolated Referral Reward Pool
+               -> isolated USDC Referral Reward Pool
                -> anti-Sybil clearance
-               -> claimable USDC ledger
-               -> reconciled USDC payout
+               -> USDC-denominated covered claim
+               -> protocol-controlled internal GAS AMM/router
+               -> applicable GAS conversion/trading fee captured internally
+               -> GAS payout only
+               -> hold / wGAS / play / normal GAS sale
 ```
+
+Referral conversion must not route through Aerodrome, Uniswap or another
+external venue. External venues may remain candidates for ordinary user Trade
+routing, but not for protocol-controlled referral payout execution.
 
 React components may display these rails but may not become their authority.
 The implementation boundary remains:
@@ -160,8 +172,8 @@ UNKNOWN | INTERRUPTED | DROPPED | REORGED
 -> SETTLED | FAILED_RETRY_SAFE | FAILED_NOT_RETRY_SAFE | ACTION_REQUIRED
 ```
 
-The irreversible game payout/funding/trade policy must use the approved
-finality threshold for its domain. No view may infer that threshold.
+The irreversible game payout/funding/trade/referral policy must use the
+approved finality threshold for its domain. No view may infer that threshold.
 
 ## Required implementation order
 
@@ -172,9 +184,13 @@ Stay within the existing Phase 9 dependency order:
 3. V3 GameBankroll, RNG, fairness, finality and settlement.
 4. V4 reserve/rebase authoritative read model and D02–D04 monetary contracts.
 5. V5 Trade quote/intent/submission/settlement.
-6. V6 canonical verified activity projection.
-7. V7 Crews/rankings from canonical identity/activity.
-8. V8 funding, withdrawal, bounded permissions and recovery.
+6. V6 canonical verified activity projection plus durable referral attribution.
+7. V7 Crews/rankings from canonical identity/activity plus referral/Partner identity relationships.
+8. V8 funding, withdrawal, bounded permissions and recovery, including the isolated Referral Reward Pool claim/reconciliation path.
+
+The internal referral AMM/router belongs under D06/D10 routing/fee design and
+must be reconciled with Trade/liquidity architecture without giving it access
+to ReserveVault or GameBankroll.
 
 Base account/funding/distribution pre-work is allowed before V8 only when it is
 decision-neutral, disabled by default and does not fake live provider state.
@@ -194,9 +210,33 @@ decision-neutral, disabled by default and does not fake live provider state.
 | Game | stable intent/round IDs and authoritative sourcing/settlement | no-funds or reconcile state | duplicate/refresh/delay E2E |
 | Trade | quote expiry, fee, output, impact and settlement | alternate approved venue/unavailable | stale quote + recovery tests |
 | Holder | GAS/wGAS underlying-share equivalence and personal rebase impact | unavailable until D02 source | invariant + UI tests |
+| Referral | USDC-covered liability; no USDC claim; internal AMM GAS-only payout; internal fee capture; no external DEX route | unavailable until internal route is approved/liquid | coverage + route + fee + duplicate-claim tests |
 | Distribution | absolute verified links with referral attribution | ordinary web/X/direct link | deep-link durability tests |
 | Base App | standard web app, Base.dev metadata/Builder Code/notifications | standalone GAS PWA | metadata + target-path tests |
 | Crews | GAS-owned membership/activity/economics | native GAS notifications | provenance/anti-Sybil tests |
+
+## Referral payout invariants
+
+The referral path is protocol-controlled because GAS controls the reward payout.
+It must therefore optimize for GAS alignment and protocol fee capture without
+creating circular backing or hidden insolvency.
+
+Required invariants:
+
+- `outstandingReferralLiabilityUSDC <= segregatedReferralPoolUSDC` before a claim can execute;
+- Referral Reward Pool USDC is encumbered and excluded from monetary backing;
+- a claim has one stable `claimId` and cannot settle twice;
+- the claim amount is denominated in USDC until execution so GAS price movement does not change the dollar liability;
+- at execution, the internal AMM/router produces the GAS output from the covered USDC under approved oracle/price/slippage bounds;
+- the internal route applies the approved GAS conversion/trading fee policy and records the fee destination explicitly;
+- Aerodrome/Uniswap/external routers are invalid referral claim destinations;
+- insufficient internal AMM liquidity or stale pricing yields a reconciled unavailable/pending state, not an external-route fallback;
+- delivered referral GAS is ordinary GAS with normal rebase, wrap, play and sell semantics;
+- no ReserveVault or GameBankroll liquidity may be silently borrowed to complete a referral claim.
+
+Exact internal AMM curve, inventory source, liquidity floor, pricing source,
+slippage cap and fee implementation must be specified under D06/D10 before the
+route can be production-live.
 
 ## Immediate executable slice
 
@@ -218,6 +258,10 @@ Before selecting OPEN D02–D13 economics/providers:
 5. Add unit/E2E coverage for Base capability parsing, wrong-chain behavior,
    normal-wallet fallback and truthful unavailable provider states.
 6. Preserve the shell and all mobile/desktop regressions.
+7. Add the referral internal-AMM requirement to the D06/D10 decision work and
+   model USDC liability coverage, GAS output, internal fee capture, liquidity
+   exhaustion and duplicate-claim/reconciliation failure cases before writing a
+   live claim path.
 
 ## Completion rules
 
@@ -225,8 +269,7 @@ Before selecting OPEN D02–D13 economics/providers:
 - Do not overwrite unrelated user work.
 - Keep provider endpoints and secrets server-side.
 - Do not expose a paymaster URL or Onramp secret to the client.
-- Do not claim Base App registration, provider readiness or production
-  settlement without verified external state.
+- Do not claim Base App registration, provider readiness, internal referral-AMM readiness or production settlement without verified external/onchain state.
 - Run targeted tests, complete unit tests, production build, Project GAS E2E,
   legacy E2E and Foundry tests relevant to the change.
 - Run the React quality review after editing multiple TSX components.
