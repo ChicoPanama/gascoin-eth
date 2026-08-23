@@ -1,7 +1,7 @@
 # GAS UX — Canonical Execution Roadmap
 
 **Status:** Source of truth for UX execution  
-**Version:** 1.9  
+**Version:** 2.0  
 **Rule:** There is exactly one numbered UX roadmap. Pre-work may happen early; a phase advances only after its explicit gate passes.
 
 ## Current program state
@@ -211,7 +211,32 @@ Dependency order inside this phase:
 
 This dependency order is part of the Phase 9 gate, not a second numbered roadmap.
 
-**Exit gate:** core loops function against authoritative real state with explicit recovery behavior, financial-domain firewalls and tests; no production-looking surface fabricates live state.
+### Phase 9 referral / holder distribution requirement
+
+The Fomo-derived referral/distribution system is now an explicit Phase 9 integration requirement and must be implemented through the existing identity, activity, holder, routing and revenue boundaries rather than as a parallel subsystem.
+
+Canonical referral economics:
+
+- referral and Partner obligations are **denominated and fully reserved in USDC** inside an isolated Referral Reward Pool;
+- the Referral Reward Pool is not GAS monetary backing and cannot draw from ReserveVault, GameBankroll or future Bracket capital;
+- recipients have **no USDC payout option**;
+- every cleared referral claim settles only in **GAS**;
+- claim execution routes the backing USDC through the **protocol-controlled internal GAS AMM/router** and delivers the resulting GAS to the recipient;
+- Aerodrome, Uniswap and other external venues are **not** referral-payout execution routes;
+- the internal referral conversion must apply the approved GAS conversion/trading fee policy so the protocol-controlled route captures the applicable fee rather than donating that execution revenue to an external venue;
+- after payout, referral GAS is ordinary GAS: it participates in rebase economics, may be wrapped into wGAS, played, held or sold, and receives no special transfer/exit exemption;
+- holder alignment may improve future referral economics, but exact thresholds/multipliers remain subject to simulation and approval;
+- referral attribution must survive deep links/account creation and must pass self-referral/Sybil/wash checks before a claim becomes executable.
+
+Required referral flow:
+
+`eligible realized protocol revenue -> segregated USDC Referral Reward Pool -> cleared USDC-denominated claim -> internal GAS AMM/router -> applicable GAS conversion fee -> GAS payout -> hold / wGAS / play / sell`
+
+Implementation must preserve price/oracle integrity, slippage bounds, idempotent claim identity, duplicate-claim prevention, internal-AMM solvency/liquidity checks, and reconciled finality before retry.
+
+The internal AMM/router design itself must be reconciled with D06/D10 and existing Trade/liquidity architecture; do not silently invent pricing curves, inventory rules, fee exemptions or reserve access.
+
+**Exit gate:** core loops function against authoritative real state with explicit recovery behavior, financial-domain firewalls and tests; no production-looking surface fabricates live state. Referral distribution must additionally prove USDC liability coverage, GAS-only settlement, internal-route fee capture, duplicate-claim prevention and isolation from Reserve/GameBankroll before being called live.
 
 **Status:** ACTIVE — `ux-research/phase-9/PHASE_9_GATE.md`.
 
