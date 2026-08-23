@@ -46,7 +46,11 @@ test.describe('Project GAS mobile shell', () => {
     await page.goto('/');
     const homeLink = page.getByRole('link', { name: 'GAS home' });
     await expect(homeLink.locator('[data-gas-brand="compact"]')).toBeVisible();
-    await expect(homeLink.locator('img')).toHaveAttribute('src', /gascoin-g/);
+    const brandImage = homeLink.locator('img');
+    await expect(brandImage).toHaveAttribute('src', /gascoin-g/);
+    await expect.poll(() => brandImage.evaluate((image) => (
+      image instanceof HTMLImageElement && image.complete && image.naturalWidth > 0
+    ))).toBe(true);
     await expect(page.locator('link[rel="icon"]')).toHaveAttribute('href', /gascoin-g/);
   });
 
