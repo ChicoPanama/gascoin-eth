@@ -16,6 +16,40 @@ export class ActionSourceError extends Error {
   }
 }
 
+const MAX_RESPONSE_BYTES = 1_000_000;
+
+async function readBoundedResponseText(
+  response: Response,
+  mayHaveReachedSource: boolean,
+): Promise<string> {
+  if (!response.body) return '';
+
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+  let bytesRead = 0;
+  let text = '';
+
+  try {
+    while (true) {
+      const chunk = await reader.read();
+      if (chunk.done) break;
+      bytesRead += chunk.value.byteLength;
+      if (bytesRead > MAX_RESPONSE_BYTES) {
+        await reader.cancel();
+        throw new ActionSourceError(
+          'invalid-response',
+          mayHaveReachedSource,
+          'Action source response exceeded the size limit.',
+        );
+      }
+      text += decoder.decode(chunk.value, { stream: true });
+    }
+    return text + decoder.decode();
+  } finally {
+    reader.releaseLock();
+  }
+}
+
 function sourceEnv(domain: ProjectGasActionDomain): { url?: string; token?: string } {
   if (domain === 'game') {
     return {
@@ -111,14 +145,11 @@ export async function requestProjectGasActionSource({
     });
 
     const contentLength = Number(response.headers.get('content-length') || '0');
-    if (contentLength > 1_000_000) {
+    if (contentLength > MAX_RESPONSE_BYTES) {
       throw new ActionSourceError('invalid-response', mayHaveReachedSource, 'Action source response exceeded the size limit.');
     }
 
-    const text = await response.text();
-    if (text.length > 1_000_000) {
-      throw new ActionSourceError('invalid-response', mayHaveReachedSource, 'Action source response exceeded the size limit.');
-    }
+    const text = await readBoundedResponseText(response, mayHaveReachedSource);
 
     let parsed: unknown = {};
     if (text) {

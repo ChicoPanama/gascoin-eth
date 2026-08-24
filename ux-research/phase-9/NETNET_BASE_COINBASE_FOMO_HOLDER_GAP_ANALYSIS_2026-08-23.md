@@ -4,11 +4,11 @@
 
 **Scope:** subordinate repo-grounded reconciliation; not a roadmap
 
-**Audited parent:** `ux-lab` at `985e461e7d882d484f7c04c957721bc9a58a000b`
+**Audited parent:** `ux-lab` at `b809931cd2383b61b558ea1f8111637c04dd6540`
 
 **Pull request:** #74, OPEN / DRAFT
 
-**Parent-head CI:** Project GAS CI #488 passed on the exact parent head; the separate Vercel deployment status was blocked/failed and is not release authority
+**Parent-head CI:** Project GAS CI #489 passed on the exact parent head; the separate Vercel deployment status was blocked/failed and is not release authority
 
 **Phase posture:** Phase 9 ACTIVE; Phase 10 is not authorized
 
@@ -80,3 +80,29 @@ It does **not** implement a Referral Reward Pool, liability ledger, internal
 AMM/router, pricing source, fee allocation, token contract, GameBankroll, RNG,
 AMO, production provider or deployment. Those remain at the dependency and
 approval boundaries above.
+
+## 24 August 2026 D0 readiness audit
+
+The full frontend/backend inspection at the audited parent found five bounded
+implementation defects in otherwise-correct Phase 9 seams. They were corrected
+without adding a provider, economic parameter, deployment or parallel roadmap:
+
+- invalid `NEXT_PUBLIC_PROJECT_GAS_CHAIN_ID` values now fail closed instead of
+  silently enabling Base mainnet actions through the render fallback;
+- all existing Reserve, activity, Crew and trade-quote server adapters share one
+  HTTPS-only, no-redirect, bounded-response read transport, so bearer credentials
+  cannot follow an upstream redirect and oversized/invalid JSON fails unavailable;
+- a game intent is accepted as locked only when the authoritative source returns
+  `fundsMoved: true`; an acknowledgement with `fundsMoved: false` is rejected as
+  contradictory rather than advanced optimistically;
+- referral claim preflight now proves the segregated pool covers the complete
+  authoritative outstanding USDC liability, not merely the current claim, and
+  rejects a malformed or oversized stable `claimId`;
+- enabling the execution adapter no longer labels the UI itself “Live” or calls
+  RNG authoritative before a source-confirmed accepted/settled round exists.
+
+These changes improve readiness at V1/V2/V4/V5/V6/V7/V8, but they do not change
+the classification table or pass the Phase 9 gate. D02–D13 remain subject to the
+existing approval boundaries, and the missing monetary, ReserveVault,
+GameBankroll, internal referral router, RNG, revenue-routing and production
+deployment authorities remain missing.

@@ -20,6 +20,8 @@ export interface ReferralClaimPreflightInput {
   claimId: string;
   lifecycle: ReferralClaimLifecycle;
   liabilityUsdc: string;
+  /** Total covered obligations, including this claim, before conversion. */
+  outstandingLiabilityUsdc: string;
   referralPoolUsdc: string;
   payoutAsset: 'GAS' | 'USDC';
   fundingSource: 'referral-reward-pool' | 'reserve-vault' | 'game-bankroll' | 'protocol-liquidity';
@@ -45,6 +47,7 @@ export interface ReferralClaimPreflightResult {
 
 const USDC_DECIMALS = 6;
 const DECIMAL_PATTERN = /^\d+(?:\.\d+)?$/;
+const CLAIM_ID_PATTERN = /^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$/;
 
 function parseUsdc(value: string): bigint | undefined {
   const normalized = value.trim();
@@ -75,10 +78,12 @@ export function preflightReferralClaim(
 ): ReferralClaimPreflightResult {
   const claimId = input.claimId.trim();
   const liability = parseUsdc(input.liabilityUsdc);
+  const outstandingLiability = parseUsdc(input.outstandingLiabilityUsdc);
   const pool = parseUsdc(input.referralPoolUsdc);
 
-  if (!claimId || liability === undefined || liability <= 0n || pool === undefined) {
-    return result(input, 'reject', 'Claim identity and exact non-zero USDC accounting are required.');
+  if (!CLAIM_ID_PATTERN.test(claimId) || liability === undefined || liability <= 0n
+    || outstandingLiability === undefined || outstandingLiability <= 0n || pool === undefined) {
+    return result(input, 'reject', 'Canonical claim identity and exact non-zero USDC accounting are required.');
   }
 
   if (input.lifecycle === 'gas-delivered') {
@@ -104,8 +109,12 @@ export function preflightReferralClaim(
     return result(input, 'reject', 'External venues and aggregators are prohibited for referral conversion.');
   }
 
-  if (pool < liability) {
-    return result(input, 'pause-claimable', 'Segregated USDC assets do not fully cover this liability.');
+  if (liability > outstandingLiability) {
+    return result(input, 'reject', 'The claim exceeds the authoritative outstanding referral liability.');
+  }
+
+  if (pool < outstandingLiability) {
+    return result(input, 'pause-claimable', 'Segregated USDC assets do not fully cover all outstanding referral liabilities.');
   }
 
   if (input.lifecycle !== 'claimable' && input.lifecycle !== 'still-claimable') {

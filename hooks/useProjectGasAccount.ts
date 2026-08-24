@@ -112,6 +112,7 @@ export interface UseProjectGasAccountResult {
   model: ProjectGasAccountReadModel;
   configuration: {
     chainId: number;
+    chainConfigurationStatus: 'default' | 'configured' | 'invalid';
     gasConfigured: boolean;
     usdcConfigured: boolean;
     usdcConfigurationStatus: 'missing' | 'canonical' | 'invalid';
@@ -222,6 +223,7 @@ export function useProjectGasAccount(): UseProjectGasAccountResult {
     },
     configuration: {
       chainId: config.chainId,
+      chainConfigurationStatus: config.chainConfigurationStatus,
       gasConfigured: Boolean(config.gasAddress),
       usdcConfigured: Boolean(config.usdcAddress),
       usdcConfigurationStatus: config.usdcConfigurationStatus,

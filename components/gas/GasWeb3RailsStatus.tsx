@@ -37,14 +37,17 @@ function RailCard({
 export function GasWeb3RailsStatus() {
   const rails = useProjectGasWeb3Rails();
   const assetConfig = getProjectGasAssetConfig();
+  const chainConfigurationInvalid = assetConfig.chainConfigurationStatus === 'invalid';
   const fastPlayReady = rails.capabilities.atomic === 'ready'
     || rails.capabilities.atomic === 'supported';
   const sponsoredReady = rails.features.paymasterEnabled && rails.capabilities.paymasterService;
   const attributionReady = rails.features.builderCodeConfigured && rails.capabilities.dataSuffix;
-  const fundingReady = Boolean(assetConfig.usdcAddress)
+  const fundingReady = !chainConfigurationInvalid && Boolean(assetConfig.usdcAddress)
     && (rails.features.basePayEnabled || rails.features.onrampEnabled);
 
-  const usdcMessage = assetConfig.usdcConfigurationStatus === 'invalid'
+  const usdcMessage = chainConfigurationInvalid
+    ? 'The configured chain ID is invalid. GAS accepts only Base or Base Sepolia and disables financial rails instead of falling back to mainnet.'
+    : assetConfig.usdcConfigurationStatus === 'invalid'
     ? 'The configured USDC address is not Circle’s canonical deployment for this network, so GAS refuses to use it.'
     : assetConfig.usdcConfigurationStatus === 'missing'
       ? 'Canonical native USDC is not configured. Funding remains unavailable.'

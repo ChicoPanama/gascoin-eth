@@ -51,6 +51,18 @@ describe('Project GAS game adapter boundary', () => {
     }, intent.intentId)).toMatchObject({ status: 'rejected', fundsMoved: false });
   });
 
+  it('does not convert an acknowledgement with no fund movement into a locked wager', () => {
+    expect(parseSubmitGameIntentResult({
+      status: 'accepted',
+      intentId: 'gas-intent-1',
+      roundId: 'round-1',
+      acceptedAt: '2026-08-22T12:00:00.000Z',
+      wagerAsset: 'GAS',
+      wagerAmount: '24.5',
+      fundsMoved: false,
+    }, 'gas-intent-1')).toBeUndefined();
+  });
+
   it('requires explicit safe-not-found or accepted state during reconciliation', () => {
     expect(parseReconcileGameIntentResult({
       status: 'not-found',

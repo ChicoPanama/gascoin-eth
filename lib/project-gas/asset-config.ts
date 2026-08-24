@@ -5,6 +5,7 @@ export type ProjectGasChainId = typeof base.id | typeof baseSepolia.id;
 
 export interface ProjectGasAssetConfig {
   chainId: ProjectGasChainId;
+  chainConfigurationStatus: 'default' | 'configured' | 'invalid';
   gasAddress?: Address;
   usdcAddress?: Address;
   usdcConfigurationStatus: 'missing' | 'canonical' | 'invalid';
@@ -42,22 +43,32 @@ function normalizeAddress(value: string | undefined): Address | undefined {
   return getAddress(candidate);
 }
 
-function normalizeChainId(value: string | undefined): ProjectGasChainId {
+function normalizeChainId(value: string | undefined): {
+  chainId: ProjectGasChainId;
+  status: ProjectGasAssetConfig['chainConfigurationStatus'];
+} {
   const candidate = value?.trim();
-  if (!candidate) return PROJECT_GAS_DEFAULT_CHAIN_ID;
+  if (!candidate) return { chainId: PROJECT_GAS_DEFAULT_CHAIN_ID, status: 'default' };
   const parsed = Number(candidate);
-  if (parsed === PROJECT_GAS_TESTNET_CHAIN_ID) return PROJECT_GAS_TESTNET_CHAIN_ID;
-  return PROJECT_GAS_DEFAULT_CHAIN_ID;
+  if (parsed === PROJECT_GAS_MAINNET_CHAIN_ID || parsed === PROJECT_GAS_TESTNET_CHAIN_ID) {
+    return { chainId: parsed, status: 'configured' };
+  }
+  // Keep a deterministic render target while making the configuration
+  // unusable. A typo must never silently turn into a Base mainnet action.
+  return { chainId: PROJECT_GAS_DEFAULT_CHAIN_ID, status: 'invalid' };
 }
 
 export function parseProjectGasAssetConfig(env: ProjectGasPublicAssetEnv): ProjectGasAssetConfig {
-  const chainId = normalizeChainId(env.chainId);
+  const normalizedChain = normalizeChainId(env.chainId);
+  const chainId = normalizedChain.chainId;
   const requestedUsdcAddress = normalizeAddress(env.usdcAddress);
   const canonicalUsdcAddress = PROJECT_GAS_CANONICAL_USDC_ADDRESSES[chainId];
-  const usdcIsCanonical = requestedUsdcAddress?.toLowerCase() === canonicalUsdcAddress.toLowerCase();
+  const usdcIsCanonical = normalizedChain.status !== 'invalid'
+    && requestedUsdcAddress?.toLowerCase() === canonicalUsdcAddress.toLowerCase();
 
   return {
     chainId,
+    chainConfigurationStatus: normalizedChain.status,
     gasAddress: normalizeAddress(env.gasAddress),
     usdcAddress: usdcIsCanonical ? requestedUsdcAddress : undefined,
     usdcConfigurationStatus: !env.usdcAddress?.trim()
@@ -88,6 +99,7 @@ export function getProjectGasAssetConfig(): ProjectGasAssetConfig {
 }
 
 export function isProjectGasChainEnabled(config: ProjectGasAssetConfig): boolean {
-  return config.chainId === PROJECT_GAS_MAINNET_CHAIN_ID
-    || config.chainId === PROJECT_GAS_TESTNET_CHAIN_ID;
+  return config.chainConfigurationStatus !== 'invalid'
+    && (config.chainId === PROJECT_GAS_MAINNET_CHAIN_ID
+      || config.chainId === PROJECT_GAS_TESTNET_CHAIN_ID);
 }

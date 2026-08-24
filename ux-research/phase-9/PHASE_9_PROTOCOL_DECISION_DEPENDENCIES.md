@@ -28,15 +28,15 @@ The first decision is isolated because contract simulations and invariant scaffo
 
 ## Current repository facts
 
-Audited at `ux-lab` parent head `985e461e7d882d484f7c04c957721bc9a58a000b` on 23 August 2026:
+Audited through `ux-lab` parent head `b809931cd2383b61b558ea1f8111637c04dd6540` on 24 August 2026:
 
 - `contracts/project-gas/foundry.toml`, pinned Foundry CI, the D01 chain guard and the D02 test-only share/index/wGAS simulation scaffold exist;
 - there is still no deployable Project GAS monetary, ReserveVault, GameBankroll, referral-pool, internal-router, RNG or revenue-routing implementation and no authoritative deployment manifest;
-- `app/providers.tsx`, `lib/wagmi-config.ts` and `lib/project-gas/asset-config.ts` fix the application posture to Base mainnet/Base Sepolia while preserving standard EVM wallet fallbacks;
+- `app/providers.tsx`, `lib/wagmi-config.ts` and `lib/project-gas/asset-config.ts` fix the application posture to Base mainnet/Base Sepolia while preserving standard EVM wallet fallbacks; an invalid configured chain now fails closed rather than silently enabling the Base mainnet fallback;
 - `hooks/useProjectGasAccount.ts` keeps Privy as canonical GAS identity/orchestration and renders unconfigured or wrong-chain financial state unavailable;
-- V1–V8 controller/query/adapter boundaries, strict parsers, idempotent game intent persistence/reconciliation, and reserve/activity/trade/Crew read projections exist, but live money-moving sources remain disabled or unconfigured;
+- V1–V8 controller/query/adapter boundaries, strict parsers, idempotent game intent persistence/reconciliation, and reserve/activity/trade/Crew read projections exist; accepted wagers require source-confirmed fund movement, and the read projections share one guarded no-redirect transport, but live money-moving sources remain disabled or unconfigured;
 - legacy referral code is wallet/refund/points-oriented and cookie/device-assisted. It is not a Project GAS `AttributionIntent`, USDC liability ledger, Referral Reward Pool, stable-`claimId` conversion flow or GAS-only payout implementation;
-- `lib/project-gas/referral-claim-preflight.ts` encodes only the settled funding, delivery, internal-route, pause and reconciliation laws. It moves no money and approves no D06/D10 parameters;
+- `lib/project-gas/referral-claim-preflight.ts` encodes only the settled funding, total-outstanding-liability coverage, delivery, internal-route, pause and reconciliation laws. It moves no money and approves no D06/D10 parameters;
 - no Project GAS production address/provider is approved, and none may be inferred from legacy GASCOIN variables.
 
 ## Dependency order

@@ -9,6 +9,7 @@ function claim(overrides: Partial<ReferralClaimPreflightInput> = {}): ReferralCl
     claimId: 'claim-001',
     lifecycle: 'claimable',
     liabilityUsdc: '100.000001',
+    outstandingLiabilityUsdc: '100.000001',
     referralPoolUsdc: '100.000001',
     payoutAsset: 'GAS',
     fundingSource: 'referral-reward-pool',
@@ -55,6 +56,30 @@ describe('Project GAS referral claim preflight', () => {
     expect(preflightReferralClaim(claim({ referralPoolUsdc: '100.000000' })).decision).toBe('pause-claimable');
   });
 
+  it('requires the pool to cover every outstanding referral liability, not only this claim', () => {
+    const result = preflightReferralClaim(claim({
+      liabilityUsdc: '25',
+      outstandingLiabilityUsdc: '125',
+      referralPoolUsdc: '100',
+    }));
+
+    expect(result.decision).toBe('pause-claimable');
+    expect(result.reason).toMatch(/all outstanding/i);
+  });
+
+  it('rejects a claim amount larger than the authoritative outstanding liability', () => {
+    expect(preflightReferralClaim(claim({
+      liabilityUsdc: '101',
+      outstandingLiabilityUsdc: '100',
+      referralPoolUsdc: '200',
+    })).decision).toBe('reject');
+  });
+
+  it('requires a bounded canonical claim id', () => {
+    expect(preflightReferralClaim(claim({ claimId: '../claim' })).decision).toBe('reject');
+    expect(preflightReferralClaim(claim({ claimId: `c${'x'.repeat(128)}` })).decision).toBe('reject');
+  });
+
   it.each(['stale', 'divergent', 'unavailable'] as const)(
     'pauses when price state is %s',
     (priceState) => {
@@ -97,6 +122,7 @@ describe('Project GAS referral claim preflight', () => {
   it('compares large decimal liabilities exactly without floating-point coercion', () => {
     expect(preflightReferralClaim(claim({
       liabilityUsdc: '9007199254740993.000001',
+      outstandingLiabilityUsdc: '9007199254740993.000001',
       referralPoolUsdc: '9007199254740993.000001',
     })).decision).toBe('execute-internal');
   });

@@ -7,27 +7,16 @@ import {
   type TradeAsset,
   type TradeSide,
 } from '@/lib/project-gas/trade-state';
+import {
+  getProjectGasReadSource,
+  requestProjectGasReadSource,
+} from '@/lib/project-gas/authoritative-read-source';
 
 export const dynamic = 'force-dynamic';
 
 const NO_STORE_HEADERS = {
   'Cache-Control': 'no-store, max-age=0',
 };
-
-function quoteSourceUrl(): URL | undefined {
-  const raw = process.env.PROJECT_GAS_TRADE_QUOTE_READ_URL?.trim();
-  if (!raw) return undefined;
-
-  try {
-    const url = new URL(raw);
-    const localDevelopment = process.env.NODE_ENV !== 'production'
-      && (url.hostname === 'localhost' || url.hostname === '127.0.0.1');
-    if (url.protocol !== 'https:' && !localDevelopment) return undefined;
-    return url;
-  } catch {
-    return undefined;
-  }
-}
 
 function queryParams(request: NextRequest): {
   side?: TradeSide;
@@ -48,23 +37,6 @@ function queryParams(request: NextRequest): {
   };
 }
 
-async function fetchQuoteSource(url: URL): Promise<Response> {
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), 5_000);
-
-  try {
-    const token = process.env.PROJECT_GAS_TRADE_QUOTE_READ_TOKEN?.trim();
-    return await fetch(url, {
-      method: 'GET',
-      cache: 'no-store',
-      headers: token ? { Authorization: `Bearer ${token}` } : undefined,
-      signal: controller.signal,
-    });
-  } finally {
-    clearTimeout(timer);
-  }
-}
-
 export async function GET(request: NextRequest) {
   const input = queryParams(request);
   if (!input.side || !input.amount || !validTradeInputAmount(input.amount) || !input.payAsset || !input.receiveAsset || input.payAsset === input.receiveAsset) {
@@ -74,39 +46,40 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  const source = quoteSourceUrl();
-  if (!source) {
+  let source;
+  try {
+    source = getProjectGasReadSource('trade-quote');
+  } catch {
     return NextResponse.json(
       unavailableTradeQuote('No approved Project GAS trade quote read source is configured.'),
       { status: 200, headers: NO_STORE_HEADERS },
     );
   }
 
-  source.searchParams.set('side', input.side);
-  source.searchParams.set('amount', input.amount);
-  source.searchParams.set('payAsset', input.payAsset);
-  source.searchParams.set('receiveAsset', input.receiveAsset);
-
   try {
-    const response = await fetchQuoteSource(source);
-    if (!response.ok) {
+    const response = await requestProjectGasReadSource({
+      source,
+      searchParams: {
+        side: input.side,
+        amount: input.amount,
+        payAsset: input.payAsset,
+        receiveAsset: input.receiveAsset,
+      },
+    });
+    if (response.status < 200 || response.status >= 300) {
       return NextResponse.json(
         unavailableTradeQuote(`Trade quote source returned HTTP ${response.status}.`),
         { status: 200, headers: NO_STORE_HEADERS },
       );
     }
 
-    const raw = await response.json() as RawProjectGasTradeQuote;
+    const raw = response.body as RawProjectGasTradeQuote;
     return NextResponse.json(parseProjectGasTradeQuote(raw), {
       status: 200,
       headers: NO_STORE_HEADERS,
     });
-  } catch (error) {
-    const message = error instanceof Error && error.name === 'AbortError'
-      ? 'Trade quote source timed out.'
-      : 'Trade quote source could not be reconciled.';
-
-    return NextResponse.json(unavailableTradeQuote(message), {
+  } catch {
+    return NextResponse.json(unavailableTradeQuote('Trade quote source could not be reconciled.'), {
       status: 200,
       headers: NO_STORE_HEADERS,
     });

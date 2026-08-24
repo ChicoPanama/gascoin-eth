@@ -3,7 +3,10 @@
 import { useWallets } from '@privy-io/react-auth';
 import { useQuery } from '@tanstack/react-query';
 import { useConnection } from 'wagmi';
-import { getProjectGasAssetConfig } from '@/lib/project-gas/asset-config';
+import {
+  getProjectGasAssetConfig,
+  isProjectGasChainEnabled,
+} from '@/lib/project-gas/asset-config';
 import {
   getProjectGasRailFeatureConfig,
   parseProjectGasWalletCapabilities,
@@ -36,12 +39,13 @@ export function useProjectGasWeb3Rails(): ProjectGasWeb3RailsModel {
   const connection = useConnection();
   const { ready: walletsReady, wallets } = useWallets();
   const config = getProjectGasAssetConfig();
+  const chainEnabled = isProjectGasChainEnabled(config);
   const features = getProjectGasRailFeatureConfig();
   const activeWallet = wallets.find(
     (wallet) => connection.address?.toLowerCase() === wallet.address.toLowerCase(),
   ) as CapabilityWallet | undefined;
   const connected = connection.status === 'connected' && Boolean(connection.address);
-  const onConfiguredChain = connection.chainId === config.chainId;
+  const onConfiguredChain = chainEnabled && connection.chainId === config.chainId;
 
   const capabilityQuery = useQuery({
     queryKey: ['project-gas', 'wallet-capabilities', activeWallet?.address, config.chainId],
@@ -79,6 +83,15 @@ export function useProjectGasWeb3Rails(): ProjectGasWeb3RailsModel {
         dataSuffix: false,
         message: 'Connect a wallet before GAS can inspect Base transaction capabilities.',
       }
+    : !chainEnabled
+      ? {
+          status: 'unavailable' as const,
+          authority: 'unavailable' as const,
+          atomic: 'unknown' as const,
+          paymasterService: false,
+          dataSuffix: false,
+          message: 'Project GAS chain configuration is invalid. Only Base and Base Sepolia are accepted.',
+        }
     : !onConfiguredChain
       ? {
           status: 'unavailable' as const,
@@ -115,13 +128,15 @@ export function useProjectGasWeb3Rails(): ProjectGasWeb3RailsModel {
     chain: {
       configuredChainId: config.chainId,
       activeChainId: connection.chainId,
-      status: !connected
+      status: !chainEnabled || !connected
         ? 'unavailable'
         : onConfiguredChain
           ? 'ready'
           : 'unavailable',
       label: projectGasChainLabel(config.chainId),
-      message: !connected
+      message: !chainEnabled
+        ? 'Project GAS chain configuration is invalid. Money actions are disabled.'
+        : !connected
         ? `GAS executes on ${projectGasChainLabel(config.chainId)}; connect a wallet to verify its network.`
         : onConfiguredChain
           ? `The active wallet is on ${projectGasChainLabel(config.chainId)}.`

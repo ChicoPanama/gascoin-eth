@@ -19,7 +19,7 @@ import { useGasOriginalController } from './useGasOriginalController';
 import shared from './gas-ui.module.css';
 import local from './GasOriginalPrototype.module.css';
 
-function DesktopTrustContext({ live }: { live: boolean }) {
+function DesktopTrustContext({ executionEnabled }: { executionEnabled: boolean }) {
   return (
     <aside className={local.desktopContextPanel} aria-label="Round trust context">
       <span className={shared.eyebrow}>Round truth</span>
@@ -27,24 +27,24 @@ function DesktopTrustContext({ live }: { live: boolean }) {
       <p className={local.desktopContextBody}>Wager state, randomness and settlement stay visible without adding another step to Play.</p>
       <dl className={local.desktopContextList}>
         <div><dt>State</dt><dd>Explicit</dd></div>
-        <div><dt>Live RNG</dt><dd>{live ? 'Authoritative' : 'Not connected'}</dd></div>
-        <div><dt>Funds</dt><dd>{live ? 'Explicit state' : 'Do not move'}</dd></div>
+        <div><dt>RNG authority</dt><dd>{executionEnabled ? 'Verified per round' : 'Not connected'}</dd></div>
+        <div><dt>Funds</dt><dd>{executionEnabled ? 'Source-confirmed' : 'Do not move'}</dd></div>
         <div><dt>Verification</dt><dd>One action after result</dd></div>
       </dl>
     </aside>
   );
 }
 
-function DesktopSessionContext({ live }: { live: boolean }) {
+function DesktopSessionContext({ executionEnabled }: { executionEnabled: boolean }) {
   return (
     <aside className={local.desktopContextPanel} aria-label="Session context">
       <span className={shared.eyebrow}>Session context</span>
       <h2 className={local.desktopContextTitle}>VERIFIED ACTIVITY ONLY</h2>
-      <p className={local.desktopContextBody}>{live
-        ? 'Authoritative wager and round state comes from the configured Base execution source. Missing history or bankroll data stays unavailable.'
+      <p className={local.desktopContextBody}>{executionEnabled
+        ? 'Accepted wagers and settled rounds must come from the configured Base execution source. Missing history or bankroll data stays unavailable.'
         : 'History, players and bankroll settlement remain unavailable until a verified execution source is available.'}</p>
       <dl className={local.desktopContextList}>
-        <div><dt>Recent rounds</dt><dd>{live ? 'Per-round proof' : 'Unavailable'}</dd></div>
+        <div><dt>Recent rounds</dt><dd>{executionEnabled ? 'Proof after settlement' : 'Unavailable'}</dd></div>
         <div><dt>Live players</dt><dd>Unavailable</dd></div>
         <div><dt>Bankroll</dt><dd>Not connected</dd></div>
         <div><dt>Primary action</dt><dd>IGNITION</dd></div>
@@ -75,7 +75,7 @@ export function GasOriginalPrototype() {
     handleAmountChange,
     executionMode,
   } = useGasOriginalController();
-  const live = executionMode === 'live';
+  const executionEnabled = executionMode === 'live';
 
   const statusClass = state.phase === 'failed'
     ? shared.statusFailed
@@ -86,10 +86,10 @@ export function GasOriginalPrototype() {
   return (
     <>
       <div className={`${shared.prototypeBanner} ${local.compactBanner}`} role="note">
-        <span>{live
-          ? 'USDC entry · automatic GAS sourcing · GAS payout · authoritative Base execution mode'
+        <span>{executionEnabled
+          ? 'USDC entry · automatic GAS sourcing · GAS payout · configured execution rail required'
           : 'USDC entry · automatic GAS sourcing · GAS payout · preview moves no funds · no live RNG'}</span>
-        <span className={`${shared.prototypePill} ${local.compactBannerPill}`}>{live ? 'Live' : 'Preview'}</span>
+        <span className={`${shared.prototypePill} ${local.compactBannerPill}`}>{executionEnabled ? 'Execution enabled' : 'Preview'}</span>
       </div>
 
       <section
@@ -127,7 +127,7 @@ export function GasOriginalPrototype() {
       </section>
 
       <div className={local.desktopPlayLayout}>
-        <DesktopTrustContext live={live} />
+        <DesktopTrustContext executionEnabled={executionEnabled} />
 
         <section
           className={`${shared.gameCard} ${local.compactGame} ${local.desktopGame}`}
@@ -166,7 +166,7 @@ export function GasOriginalPrototype() {
           {state.phase === 'result' ? (
             <div className={local.resultSummary} aria-live="polite">
               <div>
-                <div className={shared.eyebrow}>{live ? 'Settled result delta' : 'Illustrative result delta'}</div>
+                <div className={shared.eyebrow}>{executionEnabled ? 'Settled result delta' : 'Illustrative result delta'}</div>
                 <div className={`${local.resultAmount} ${state.result.outcome === 'win' ? local.resultPositive : state.result.outcome === 'loss' ? local.resultNegative : local.resultNeutral}`}>
                   {resultDelta}
                 </div>
@@ -183,7 +183,7 @@ export function GasOriginalPrototype() {
             type="button"
             className={`${shared.ignition} ${local.compactIgnition}`}
             disabled={primaryDisabled || (!authenticated && !authReady)}
-            onClick={() => authenticated || !live ? handlePrimary() : login()}
+            onClick={() => authenticated || !executionEnabled ? handlePrimary() : login()}
             aria-describedby="gas-ignition-trust"
           >
             {primaryLabel}
@@ -218,13 +218,13 @@ export function GasOriginalPrototype() {
               <Link className={shared.secondaryButton} href={state.result.verificationHref}>Verify round</Link>
             </div>
           ) : (
-            <p className={local.prototypeNote}>{live
-              ? 'A stable intent is stored before submission. Unknown money state must be reconciled before another wager can be sent.'
+            <p className={local.prototypeNote}>{executionEnabled
+              ? 'A stable intent is stored before submission. Only source-confirmed locked funds advance; unknown money state must reconcile before retry.'
               : 'Results and GAS amounts are preview data only. No live sourcing quote, RNG or bankroll settlement is represented.'}</p>
           )}
         </section>
 
-        <DesktopSessionContext live={live} />
+        <DesktopSessionContext executionEnabled={executionEnabled} />
       </div>
     </>
   );

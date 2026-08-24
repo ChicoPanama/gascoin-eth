@@ -25,6 +25,7 @@ describe('Project GAS asset configuration', () => {
     });
 
     expect(config.chainId).toBe(8453);
+    expect(config.chainConfigurationStatus).toBe('configured');
     expect(config.gasAddress).toBe(getAddress(GAS));
     expect(config.usdcAddress).toBe(getAddress(USDC));
     expect(config.usdcConfigurationStatus).toBe('canonical');
@@ -37,6 +38,7 @@ describe('Project GAS asset configuration', () => {
     });
 
     expect(config.chainId).toBe(PROJECT_GAS_DEFAULT_CHAIN_ID);
+    expect(config.chainConfigurationStatus).toBe('default');
     expect(config.gasAddress).toBeUndefined();
     expect(config.usdcAddress).toBeUndefined();
     expect(config.usdcConfigurationStatus).toBe('missing');
@@ -63,11 +65,25 @@ describe('Project GAS asset configuration', () => {
     expect(config.usdcConfigurationStatus).toBe('canonical');
   });
 
-  it('supports only Base and Base Sepolia and falls back to Base mainnet', () => {
-    expect(parseProjectGasAssetConfig({ chainId: '84532' }).chainId).toBe(PROJECT_GAS_TESTNET_CHAIN_ID);
-    expect(parseProjectGasAssetConfig({ chainId: '1' }).chainId).toBe(PROJECT_GAS_DEFAULT_CHAIN_ID);
-    expect(parseProjectGasAssetConfig({ chainId: '-1' }).chainId).toBe(PROJECT_GAS_DEFAULT_CHAIN_ID);
-    expect(parseProjectGasAssetConfig({ chainId: 'nope' }).chainId).toBe(PROJECT_GAS_DEFAULT_CHAIN_ID);
+  it('supports only Base and Base Sepolia and fails closed on invalid configuration', () => {
+    expect(parseProjectGasAssetConfig({ chainId: '84532' })).toMatchObject({
+      chainId: PROJECT_GAS_TESTNET_CHAIN_ID,
+      chainConfigurationStatus: 'configured',
+    });
+    for (const chainId of ['1', '-1', 'nope']) {
+      expect(parseProjectGasAssetConfig({ chainId })).toMatchObject({
+        chainId: PROJECT_GAS_DEFAULT_CHAIN_ID,
+        chainConfigurationStatus: 'invalid',
+      });
+    }
+  });
+
+  it('does not accept a mainnet USDC address when the configured chain is invalid', () => {
+    const config = parseProjectGasAssetConfig({ chainId: '1', usdcAddress: USDC });
+
+    expect(config.chainConfigurationStatus).toBe('invalid');
+    expect(config.usdcConfigurationStatus).toBe('invalid');
+    expect(config.usdcAddress).toBeUndefined();
   });
 });
 

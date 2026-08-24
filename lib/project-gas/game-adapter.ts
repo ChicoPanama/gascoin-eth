@@ -32,7 +32,8 @@ export interface AcceptedGameIntent {
   wagerAmount: string;
   /** Quote/credit identity when the entry router exposes one. */
   sourcingQuoteId?: string;
-  fundsMoved: boolean;
+  /** Accepted means the wager is canonically locked, not merely acknowledged. */
+  fundsMoved: true;
   txHash?: `0x${string}`;
 }
 
@@ -192,7 +193,7 @@ function parseAcceptedIntent(value: unknown, expectedIntentId?: string): Accepte
   const hash = input?.txHash === undefined ? undefined : txHash(input.txHash);
 
   if (!input || input.status !== 'accepted' || !intentId || !roundId || !acceptedAt
-    || input.wagerAsset !== 'GAS' || !wagerAmount || typeof input.fundsMoved !== 'boolean'
+    || input.wagerAsset !== 'GAS' || !wagerAmount || input.fundsMoved !== true
     || (expectedIntentId && intentId !== expectedIntentId)
     || (input.txHash !== undefined && !hash)) return undefined;
 
@@ -204,7 +205,7 @@ function parseAcceptedIntent(value: unknown, expectedIntentId?: string): Accepte
     wagerAsset: 'GAS',
     wagerAmount,
     sourcingQuoteId: canonicalId(input.sourcingQuoteId),
-    fundsMoved: input.fundsMoved,
+    fundsMoved: true,
     txHash: hash,
   };
 }
