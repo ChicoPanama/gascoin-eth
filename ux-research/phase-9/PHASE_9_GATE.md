@@ -61,6 +61,60 @@ Additional invariants:
 - marked value/potential payout is not spendable cash;
 - wGAS remains exactly share-backed by its canonical GAS/share accounting.
 
+### Canonical economic-domain flow map
+
+```text
+User Wallet --market order--> GAS Router --> Protocol-owned Liquidity / approved external venue
+                               |      |
+                               |      +--> Reserve Ignition --> ReserveVault (external principal only)
+                               +--> fee-once ledger --> ReserveVault | Growth/Liquidity | Defense | Operations | Team
+
+User Wallet --wager--> GameBankroll --result/payout--> User Wallet
+Referral Reward Pool --cleared USDC claim--> internal-only Router/AMM --GAS--> User Wallet
+
+ReserveVault  -X-> GameBankroll / Referral Reward Pool / Team / Operations / Bracket
+GameBankroll  -X-> ReserveVault / Referral Reward Pool / Bracket
+Referral Pool -X-> ReserveVault / GameBankroll / external venues / Bracket
+Bracket       -X-> ReserveVault / GameBankroll / Referral Reward Pool
+```
+
+`-X->` means prohibited. Protocol-owned liquidity, GAS/wGAS and self-issued LP
+are never Reserve backing. Reserve Mint principal is deposited atomically into
+ReserveVault and is never revenue. Team/Operations may receive only the locked
+share of ordinary buy/base-sell routing revenue or other realized business
+revenue; it receives no pressure surcharge or protected-domain principal.
+
+### Bootstrap fee law — approved 26 August 2026
+
+- buy: 4% (2% ReserveVault, 0.75% Growth/Liquidity, 0.50%
+  Distribution/Referral Growth, 0.50% Team/Operations, 0.25% Defense);
+- sell: 5% base (3% ReserveVault, 1% Growth/Liquidity, 0.50%
+  Team/Operations, 0.50% Defense);
+- sell pressure: source-driven 0–2%, allocated 75% ReserveVault, 15% Defense
+  and 10% Liquidity, with no team allocation;
+- maximum sell fee: 7%; routine bootstrap buy/burn: zero.
+
+The canonical implementation is `lib/project-gas/fee-policy.ts`, mirrored by
+the pure Solidity router library. Frontends display an authoritative quote;
+they never calculate pressure. Wallet transfers, wrapping/unwrapping, internal
+accounting, wager locks and protocol settlement are fee-exempt non-market
+movements.
+
+### 26 August 2026 hardening checkpoint
+
+The repository now additionally provides fail-closed, non-money-moving
+admission boundaries for one-fee-per-intent router execution, internal-only
+referral routing, atomic/capped excess-demand Reserve Ignition, worst-case
+GameBankroll liability reservation, reserve strategy NAV/backing/yield
+separation, time-weighted GAS+wGAS underlying shares, and runtime role
+separation. Trade quotes bind the policy version, pressure evidence, exact fee
+amount and full allocation before they may parse as ready.
+
+These boundaries deliberately do **not** make their verticals live. No router,
+ReserveVault, mint authority, GameBankroll, strategy, holder payout or role
+registry moves money until its upstream OPEN decisions, authoritative source,
+contract implementation and acceptance tests are approved and connected.
+
 ## Phase 9 implementation order
 
 The order below is a dependency order inside Phase 9, not a second roadmap.
@@ -311,5 +365,8 @@ Phase 9 passes only when:
 12. frontend/backend authority boundaries remain explicit and testable.
 13. referral liabilities are segregated and fully USDC-backed, while claims are delivered only in GAS through the approved internal route with pause/reconciliation and duplicate-delivery protection;
 14. referral, GameBankroll, ReserveVault, protocol-liquidity and Bracket accounting cannot be double-counted or used as bailout paths.
+15. every executable trade quote binds the canonical fee-policy version,
+    pressure evidence, exact fee amount and conserving allocation; a canonical
+    intent cannot charge that fee twice.
 
 **Do not activate Phase 10 before this gate is PASS.**

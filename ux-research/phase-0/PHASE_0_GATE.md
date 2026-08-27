@@ -15,7 +15,8 @@ Phase 0 is complete. The feature-freeze artifact is sufficient for downstream UX
 - Share/index and daily-rebase UX constraints
 - External-only reserve/backing rule
 - Presale direction and unresolved launch parameters
-- 2% GAS trading fee split versus distinct game-handle economics
+- historical 2% GAS trading fee split versus distinct game-handle economics
+  (superseded by the 26 August 2026 Phase 9 bootstrap fee decision)
 - GAS Original: CRUISE / BOOST / REDLINE / IGNITION / GAS GAUGE
 - USDC + GAS input model and game-bankroll firewall
 - Four-epoch game economics

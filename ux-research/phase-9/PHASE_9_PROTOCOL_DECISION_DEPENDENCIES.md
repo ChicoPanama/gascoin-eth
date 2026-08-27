@@ -3,7 +3,10 @@
 **Date:** 2026-08-22  
 **Status:** Phase 9 subordinate decision packet / recommendations only  
 **Authority:** subordinate to newest explicit instruction, Source of Truth v1.1, `AGENTS.md`, `ux-research/ROADMAP.md`, and `ux-research/phase-9/PHASE_9_GATE.md`  
-**Decision state:** D01 Base + Foundry chain/tooling was APPROVED by the user on 22 August 2026. Nothing in this document authorizes a production deployment, live address, D02+ economic parameter, provider, oracle, RNG source, upgrade design, or move to Phase 10.
+**Decision state:** D01 Base + Foundry chain/tooling was APPROVED on 22 August
+2026. The bootstrap fee rates and allocations in D10 were APPROVED on 26 August
+2026. Nothing here authorizes deployment, a live address/provider, or the
+remaining OPEN D02–D13 parameters.
 
 ## Purpose
 
@@ -22,7 +25,13 @@ The first decision is isolated because contract simulations and invariant scaffo
 - ReserveVault cannot bail out GameBankroll.
 - Referral liabilities are USDC-denominated, fully covered by segregated USDC, and delivered only in GAS through the approved internal GAS router/AMM; there is no USDC or external-DEX payout path.
 - Bracket is financially separate and not a Phase 1 dependency.
-- The buy/sell fee is 2%; a fee-on-transfer token tax is rejected.
+- Bootstrap routing fees are 4% buy and 5% base sell plus a source-driven 0–2%
+  pressure surcharge (7% maximum); a fee-on-transfer token tax is rejected.
+- Buy allocation is 2% ReserveVault, 0.75% Growth/Liquidity, 0.50%
+  Distribution/Referral Growth, 0.50% Team/Operations and 0.25% Defense.
+- Base sell allocation is 3% ReserveVault, 1% Growth/Liquidity, 0.50%
+  Team/Operations and 0.50% Defense. Pressure is 75% ReserveVault, 15% Defense,
+  10% Liquidity and never Team/Operations. Routine bootstrap buy/burn is zero.
 - Privy remains canonical account identity/orchestration for Phase 9; wagmi/viem remain the EVM application read/write/signature layer unless an explicit later decision changes them.
 - No mainnet deployment occurs without explicit approval after testnet, adversarial testing, security review and the Phase 9 gate.
 
@@ -37,6 +46,12 @@ Audited through `ux-lab` parent head `b809931cd2383b61b558ea1f8111637c04dd6540` 
 - V1–V8 controller/query/adapter boundaries, strict parsers, idempotent game intent persistence/reconciliation, and reserve/activity/trade/Crew read projections exist; accepted wagers require source-confirmed fund movement, and the read projections share one guarded no-redirect transport, but live money-moving sources remain disabled or unconfigured;
 - legacy referral code is wallet/refund/points-oriented and cookie/device-assisted. It is not a Project GAS `AttributionIntent`, USDC liability ledger, Referral Reward Pool, stable-`claimId` conversion flow or GAS-only payout implementation;
 - `lib/project-gas/referral-claim-preflight.ts` encodes only the settled funding, total-outstanding-liability coverage, delivery, internal-route, pause and reconciliation laws. It moves no money and approves no D06/D10 parameters;
+- `lib/project-gas/economic-admission.ts` now encodes fee-once router,
+  referral-route, Reserve Ignition and GameBankroll admission firewalls without
+  moving funds or inventing open ratios/providers; reserve-strategy,
+  holder-alignment and role-separation boundaries are likewise non-deploying;
+- trade quotes must bind the bootstrap policy version, live pressure evidence,
+  exact fee amount and conserving allocation before the read model is ready;
 - no Project GAS production address/provider is approved, and none may be inferred from legacy GASCOIN variables.
 
 ## Dependency order
@@ -52,7 +67,7 @@ Audited through `ux-lab` parent head `b809931cd2383b61b558ea1f8111637c04dd6540` 
 | D07 | CRUISE/BOOST/REDLINE math | D05–D06 | Exact epoch RTP and payout tables | outcome weights, multipliers, mode fee split |
 | D08 | RNG/finality/failure recovery | D01, D05–D07 | Verifiable wager settlement | VRF/beacon/provider, timeout, refund, fallback |
 | D09 | Presale + team principal exit | D02–D04 | Genesis state machine | price, caps, vesting, principal exit law |
-| D10 | Trading/game/referral-conversion fee routing | D03–D09 | Revenue Router, acquisition allocation and conversion accounting | venue enforcement, bucket allocation, AMO split, canonical fee application to internal claims |
+| D10 | Trading/game/referral-conversion fee routing — RATES/BOOTSTRAP ALLOCATION APPROVED; execution dependencies OPEN | D03–D09 | Revenue Router, acquisition allocation and conversion accounting | venue enforcement, controller state, fee-once execution and canonical fee application to internal claims |
 | D11 | Governance/roles/pause/upgrade | D01–D10 | Production authority wiring | multisig, timelock, guardian, mutability |
 | D12 | Account rails/permissions/funding/withdrawal | D01, D06, D11 | Live consumer money actions with provider degradation/fallback | provider, sponsorship allowlist/caps, limits, revoke/recovery |
 | D13 | Legal/regulatory release structure | D01–D12 | Jurisdictional launch approval | availability, disclosures, entity/custody structure |
@@ -135,7 +150,7 @@ A simultaneous Base + Robinhood launch would multiply:
 - Reserve and GameBankroll reconciliation;
 - USDC provenance and bridge risk;
 - oracle, finality and incident-recovery paths;
-- liquidity fragmentation and 2% fee enforcement;
+- liquidity fragmentation and canonical bootstrap router-fee enforcement;
 - upgrade/role wiring and audit surface.
 
 Phase 1 should prove one authoritative monetary/game loop. Portability tests are allowed; live multi-chain monetary state is not.
@@ -147,7 +162,7 @@ Robinhood Chain should be reconsidered for canonical Phase 1 or later RWA module
 1. a canonical USDC path approved by product, risk and legal review, without silently substituting USDG;
 2. Privy embedded/external wallet, smart-wallet, bundler and paymaster behavior validated on chain ID 46630;
 3. oracle freshness, sequencer health and finality semantics available to the guarded controller;
-4. Game Entry Router inventory/liquidity and 2% venue fee enforcement demonstrated;
+4. Game Entry Router inventory/liquidity and canonical fee-once enforcement demonstrated;
 5. geographic eligibility and Stock Token restrictions enforced outside the monetary kernel;
 6. deposits, withdrawals, indexer recovery and provider failover adversarially tested;
 7. no assumption that an RWA asset counts as GAS backing without D04 approval.

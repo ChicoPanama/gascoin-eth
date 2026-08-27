@@ -196,6 +196,15 @@ The desktop implementation preserves `GAS GAUGE -> RISK -> WAGER -> IGNITION`, o
 
 **ACTIVE PHASE.**
 
+**Bootstrap economics decision (approved 26 August 2026):** the former 2%
+symmetric routing fee is superseded by one canonical router policy: 4% buy, 5%
+base sell, a source-driven 0–2% sell-pressure surcharge, and a 7% maximum sell
+fee. Bootstrap allocation is reserve-first, routine buy/burn is zero, and the
+pressure surcharge has no Team/Operations allocation. Token transfers,
+GAS/wGAS conversion, wager movement and protocol settlement are not market
+sales. Phase 9 remains ACTIVE until the full exit gate passes; this decision
+does not authorize deployment or activate Phase 10.
+
 Replace prototype-only state behind stable controller/view boundaries with authoritative application/protocol adapters and complete real end-to-end loops.
 
 Dependency order inside this phase:
