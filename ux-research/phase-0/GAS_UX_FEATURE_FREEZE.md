@@ -106,14 +106,25 @@ These may share one application shell but may not be represented as the same eco
 ## 5. GAS trading economics
 
 ### Base GAS buy/sell fee
-**LOCKED:** 2.00%.
+**SUPERSEDED on 26 August 2026:** the former 2.00% symmetric fee is historical.
+The bootstrap router policy is now **4.00% buy; 5.00% base sell; 0–2.00%
+authoritative sell-pressure surcharge; 7.00% maximum sell**. This is a
+router/protocol fee, never an ERC-20 fee-on-transfer tax.
 
 Allocation:
-- **1.50% → GAS protocol**
-- **0.50% → team**
+- buy: **2.00% ReserveVault; 0.75% Growth/Liquidity; 0.50%
+  Distribution/Referral Growth; 0.50% Team/Operations; 0.25% Defense**;
+- base sell: **3.00% ReserveVault; 1.00% Growth/Liquidity; 0.50%
+  Team/Operations; 0.50% Defense**;
+- pressure surcharge: **75% ReserveVault; 15% Defense; 10% Liquidity; 0%
+  Team/Operations**.
+- bootstrap routine buy/burn: **0%**.
 
 ### Internal protocol allocation
-**OPEN:** exact split of the protocol 1.50% among reserve, POL, stabilization and other protocol-owned infrastructure.
+**LOCKED FOR BOOTSTRAP:** the allocation above. Later maturity reductions remain
+governed/configurable, but cannot exceed the approved caps or redirect reserve
+principal, pressure surcharge, Referral Reward Pool principal, GameBankroll
+principal or Bracket capital to Team/Operations.
 
 ### UX requirement
 **LOCKED:** trading fees and expected received amount must be visible before confirmation where the trade flow requires a quote/preview.

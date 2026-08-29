@@ -465,7 +465,10 @@ Share cards should resolve to canonical round verification pages.
 
 ## Trade / liquidity
 
-Locked GAS buy/sell fee remains 2.00% = 1.50% protocol + 0.50% team.
+**Superseded 26 August 2026:** the former 2.00% symmetric fee is historical.
+Bootstrap routing is now 4% buy, 5% base sell, 0–2% authoritative pressure and
+7% maximum sell, with the reserve-first allocations recorded in the Phase 9
+gate. Routine bootstrap burn is zero and pressure never routes to Team/Ops.
 
 Do not introduce fee-on-transfer GAS or wGAS.
 
@@ -657,7 +660,8 @@ Still OPEN unless explicitly approved later:
 - exact CRUISE/BOOST/REDLINE tables;
 - RNG provider/fallback/finality;
 - presale terms/team principal exit;
-- internal protocol fee allocations;
+- D10 router execution, fee-once settlement and controller wiring (bootstrap
+  rates/allocations are locked; later maturity policy remains governed);
 - governance/roles/pause/upgrade;
 - funding/withdrawal/onramp/paymaster/permission provider details;
 - X/Base Verify integration implementation;
@@ -685,6 +689,28 @@ npm run test:e2e:legacy
 When the Foundry workspace is approved/created, also require its build/unit/fuzz/invariant/static-analysis lanes defined by the D01 packet.
 
 No fake activity/reserve/RNG/settlement/rankings. No invented production address/provider. No weakening economic/security tests to make CI pass. No mainnet broadcast without explicit approval.
+
+## 26 August 2026 follow-on hardening
+
+The bootstrap fee slice was extended after review to bind each ready Trade
+quote to the canonical policy version, exact fee amount, conserving allocation,
+and unexpired authoritative pressure evidence. Pure admission boundaries now
+fail closed for duplicate/uncertain router intents, external referral routes,
+Reserve Mint without atomic consideration or verified excess demand,
+GameBankroll overexposure, endogenous reserve backing, snapshot-only holder
+weight and collapsed runtime roles. These are acceptance boundaries, not claims
+that the missing monetary authorities are deployed or live.
+
+### Adversarial launch review
+
+If launched with real money at this checkpoint, the system would still face
+catastrophic risk because the production share kernel, ReserveVault, router
+executor/fee ledger, Reserve Ignition mint authority, GameBankroll, referral
+liability ledger, RNG/finality verifier, role registry/timelock and live
+provider reconciliation are not deployed. Consequently all corresponding
+money-moving feature flags must remain unavailable. Phase 9 and the existing
+draft PR must not be marked PASS until those authorities and their
+unit/fuzz/invariant/fork/E2E evidence exist on the exact CI head.
 
 ## Work completion report
 

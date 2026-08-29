@@ -74,7 +74,8 @@ RWA direction is accepted; exact issuers/custody/oracles remain OPEN. Preserve l
 - Launch direction = simple presale, not CCA.
 - CCA/SEAL/CRACK deprecated.
 - Team principal-exit requirement retained; exact mechanics OPEN.
-- GAS buy/sell fee LOCKED: 2.00% = 1.50% protocol + 0.50% team.
+- Historical at handoff: GAS buy/sell fee was 2.00% = 1.50% protocol + 0.50%
+  team. **Superseded by the 26 August 2026 Phase 9 bootstrap fee decision.**
 - Protocol 1.50% internal allocation remains OPEN.
 - Trading volume, game handle, reserve yield and future Bracket revenue are separate bases; never double count.
 

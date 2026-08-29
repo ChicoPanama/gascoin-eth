@@ -96,7 +96,7 @@
       "currentPaths": [],
       "action": "build",
       "dependencies": ["phase-3-conversion-research", "liquidity/quote-interface"],
-      "constraint": "2% GAS trading fee must remain distinct from game economics and expected receive/fees must be clear before confirmation.",
+      "constraint": "Canonical bootstrap 4% buy / 5-7% sell router fees must remain distinct from game economics and expected receive/fees must be clear before confirmation.",
       "acceptanceTest": "Buy/Sell GAS journeys meet J08/J09 and never require manual contract/RPC knowledge in normal supported flow."
     },
     {

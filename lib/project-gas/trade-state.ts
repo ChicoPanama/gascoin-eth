@@ -1,3 +1,10 @@
+import {
+  PROJECT_GAS_BOOTSTRAP_FEE_POLICY,
+  allocateMarketFee,
+  feeAmountMatchesPolicy,
+  marketFeeBps,
+} from './fee-policy';
+
 export type TradeSide = 'buy' | 'sell';
 export type TradeAsset = 'GAS' | 'USDC';
 export type TradeQuoteStatus = 'ready' | 'stale' | 'expired' | 'degraded' | 'unavailable';
@@ -5,6 +12,13 @@ export type TradeQuoteStatus = 'ready' | 'stale' | 'expired' | 'degraded' | 'una
 export interface TradeAmount {
   asset: TradeAsset;
   amount: string;
+}
+export interface TradeFeeAllocation {
+  reserveVault: TradeAmount;
+  growthLiquidity: TradeAmount;
+  distributionReferralGrowth: TradeAmount;
+  teamOperations: TradeAmount;
+  defense: TradeAmount;
 }
 
 export interface ProjectGasTradeQuote {
@@ -16,7 +30,13 @@ export interface ProjectGasTradeQuote {
   pay?: TradeAmount;
   receive?: TradeAmount;
   fee?: TradeAmount;
+  feeAllocation?: TradeFeeAllocation;
   feeBps?: number;
+  feePolicyVersion?: string;
+  pressureFeeBps?: number;
+  pressureSource?: string;
+  pressureObservedAt?: string;
+  pressureValidUntil?: string;
   minimumReceived?: TradeAmount;
   priceImpactBps?: number;
   quotedAt?: string;
@@ -32,7 +52,13 @@ export interface RawProjectGasTradeQuote {
   pay?: unknown;
   receive?: unknown;
   fee?: unknown;
+  feeAllocation?: unknown;
   feeBps?: unknown;
+  feePolicyVersion?: unknown;
+  pressureFeeBps?: unknown;
+  pressureSource?: unknown;
+  pressureObservedAt?: unknown;
+  pressureValidUntil?: unknown;
   minimumReceived?: unknown;
   priceImpactBps?: unknown;
   quotedAt?: unknown;
@@ -75,6 +101,49 @@ function parseAmount(raw: unknown): TradeAmount | undefined {
   return { asset, amount };
 }
 
+function parseFeeAllocation(raw: unknown, asset: TradeAsset | undefined): TradeFeeAllocation | undefined {
+  if (!raw || typeof raw !== 'object' || !asset) return undefined;
+  const record = raw as Record<string, unknown>;
+  const allocation = {
+    reserveVault: parseAmount(record.reserveVault),
+    growthLiquidity: parseAmount(record.growthLiquidity),
+    distributionReferralGrowth: parseAmount(record.distributionReferralGrowth),
+    teamOperations: parseAmount(record.teamOperations),
+    defense: parseAmount(record.defense),
+  };
+  if (Object.values(allocation).some((amount) => !amount || amount.asset !== asset)) return undefined;
+  return allocation as TradeFeeAllocation;
+}
+
+function decimalSumMatches(values: readonly string[], expected: string): boolean {
+  const all = [...values, expected];
+  const fractions = all.map((value) => value.split('.')[1]?.length ?? 0);
+  const scale = Math.max(...fractions);
+  if (scale > 36) return false;
+  const units = (value: string) => {
+    const [whole, fraction = ''] = value.split('.');
+    return BigInt(whole) * 10n ** BigInt(scale) + BigInt(fraction.padEnd(scale, '0') || '0');
+  };
+  return values.reduce((sum, value) => sum + units(value), 0n) === units(expected);
+}
+
+function allocationMatchesPolicy(
+  payAmount: string,
+  allocation: TradeFeeAllocation,
+  side: TradeSide,
+  pressureFeeBps: number,
+): boolean {
+  const values = [payAmount, ...Object.values(allocation).map((item) => item.amount)];
+  const scale = Math.max(...values.map((value) => value.split('.')[1]?.length ?? 0));
+  if (scale > 36) return false;
+  const units = (value: string) => {
+    const [whole, fraction = ''] = value.split('.');
+    return BigInt(whole) * 10n ** BigInt(scale) + BigInt(fraction.padEnd(scale, '0') || '0');
+  };
+  const expected = allocateMarketFee(units(payAmount), side, pressureFeeBps);
+  return Object.entries(expected).every(([bucket, amount]) => units(allocation[bucket as keyof TradeFeeAllocation].amount) === amount);
+}
+
 export function unavailableTradeQuote(message: string): ProjectGasTradeQuote {
   return {
     version: 1,
@@ -97,21 +166,58 @@ export function parseProjectGasTradeQuote(
   const pay = parseAmount(raw.pay);
   const receive = parseAmount(raw.receive);
   const fee = parseAmount(raw.fee);
+  const feeAllocation = parseFeeAllocation(raw.feeAllocation, fee?.asset);
   const minimumReceived = parseAmount(raw.minimumReceived);
   const feeBps = bps(raw.feeBps);
+  const feePolicyVersion = nonEmpty(raw.feePolicyVersion);
+  const pressureFeeBps = bps(raw.pressureFeeBps);
+  const pressureSource = nonEmpty(raw.pressureSource);
+  const pressureObservedAt = iso(raw.pressureObservedAt);
+  const pressureValidUntil = iso(raw.pressureValidUntil);
   const priceImpactBps = bps(raw.priceImpactBps);
 
   if (
     !quoteId || !source || !quotedAt || !expiresAt
     || (side !== 'buy' && side !== 'sell')
-    || !pay || !receive || !fee || !minimumReceived
+    || !pay || !receive || !fee || !feeAllocation || !minimumReceived
     || feeBps === undefined || priceImpactBps === undefined
+    || feePolicyVersion !== PROJECT_GAS_BOOTSTRAP_FEE_POLICY.version
   ) {
     return unavailableTradeQuote('Canonical trade quote fields are incomplete or invalid.');
   }
 
-  if (pay.asset === receive.asset || minimumReceived.asset !== receive.asset) {
+  if (pay.asset === receive.asset || minimumReceived.asset !== receive.asset || fee.asset !== pay.asset) {
     return unavailableTradeQuote('Trade quote asset relationships are invalid.');
+  }
+
+  const boundPressureFeeBps = side === 'sell' ? (pressureFeeBps ?? -1) : 0;
+  if (
+    (side === 'buy' && pressureFeeBps !== 0)
+    || (side === 'sell' && (
+      pressureFeeBps === undefined || !pressureSource || !pressureObservedAt || !pressureValidUntil
+      || nowMs < Date.parse(pressureObservedAt) || nowMs - Date.parse(pressureObservedAt) > staleAfterMs
+      || nowMs >= Date.parse(pressureValidUntil) || Date.parse(pressureValidUntil) < Date.parse(expiresAt)
+    ))
+  ) {
+    return unavailableTradeQuote('Trade quote pressure evidence is incomplete, expired, or not quote-bound.');
+  }
+  let expectedFeeBps: number;
+  try {
+    expectedFeeBps = marketFeeBps(side, boundPressureFeeBps);
+  } catch {
+    return unavailableTradeQuote('Trade quote fee is outside the canonical bootstrap policy.');
+  }
+  if (feeBps !== expectedFeeBps) {
+    return unavailableTradeQuote('Trade quote fee does not match the canonical bootstrap policy.');
+  }
+  if (!feeAmountMatchesPolicy(pay.amount, fee.amount, feeBps)) {
+    return unavailableTradeQuote('Trade quote fee amount does not match its canonical fee rate.');
+  }
+  if (!decimalSumMatches(Object.values(feeAllocation).map((item) => item.amount), fee.amount)) {
+    return unavailableTradeQuote('Trade quote fee allocation does not conserve the authoritative fee amount.');
+  }
+  if (!allocationMatchesPolicy(pay.amount, feeAllocation, side, boundPressureFeeBps)) {
+    return unavailableTradeQuote('Trade quote fee allocation does not match the canonical reserve-first policy.');
   }
 
   const expiresAtMs = Date.parse(expiresAt);
@@ -128,6 +234,12 @@ export function parseProjectGasTradeQuote(
       receive,
       fee,
       feeBps,
+      feeAllocation,
+      feePolicyVersion,
+      pressureFeeBps: boundPressureFeeBps,
+      pressureSource,
+      pressureObservedAt,
+      pressureValidUntil,
       minimumReceived,
       priceImpactBps,
       quotedAt,
@@ -148,6 +260,12 @@ export function parseProjectGasTradeQuote(
     receive,
     fee,
     feeBps,
+    feeAllocation,
+    feePolicyVersion,
+    pressureFeeBps: boundPressureFeeBps,
+    pressureSource,
+    pressureObservedAt,
+    pressureValidUntil,
     minimumReceived,
     priceImpactBps,
     quotedAt,

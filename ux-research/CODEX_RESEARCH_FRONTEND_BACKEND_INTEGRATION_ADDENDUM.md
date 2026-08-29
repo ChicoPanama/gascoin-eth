@@ -1267,7 +1267,8 @@ Quote must expose financially material fields such as:
 
 - input;
 - estimated output;
-- 2% GAS trade fee;
+- authoritative canonical GAS router fee (bootstrap decision approved 26
+  August 2026: 4% buy; 5% base sell plus 0–2% pressure; 7% maximum sell);
 - price / rate;
 - price impact or equivalent if relevant;
 - expiry.
