@@ -1,0 +1,200 @@
+{
+  "phase": 2,
+  "reference": "fomo",
+  "status": "public_documented_catalog_direct_capture_pending",
+  "evidenceLevels": ["documented", "official_published_visual", "manual_observed", "capture_measured", "unavailable", "inferred"],
+  "screens": [
+    {
+      "id": "FS01",
+      "name": "sign_in",
+      "known": ["consumer identity first", "email/Apple documented", "Apple/Google visible in a current published visual", "no seed/RPC/native-gas vocabulary in published primary screen"],
+      "unknown": ["current provider list by platform", "screen count", "loading/error behavior", "recovery"],
+      "capture": ["M11"],
+      "evidence": ["documented", "official_published_visual"]
+    },
+    {
+      "id": "FS02",
+      "name": "home_discovery",
+      "known": ["portfolio/balance prominence", "Deposit CTA", "social/top-trader discovery", "token categories/list"],
+      "unknown": ["current filter names/order/default", "filter persistence", "exact density"],
+      "capture": ["M04", "M06"],
+      "evidence": ["documented", "official_published_visual"]
+    },
+    {
+      "id": "FS03",
+      "name": "search_zero",
+      "known": ["search is persistent mobile destination", "supports tokens and user profiles"],
+      "unknown": ["autofocus", "recent searches", "suggestions", "zero-state content"],
+      "capture": ["M05"],
+      "evidence": ["documented"]
+    },
+    {
+      "id": "FS04",
+      "name": "search_results",
+      "known": ["tokens/users searchable", "send-from-search historically added"],
+      "unknown": ["grouping", "ranking", "result fields", "current quick actions"],
+      "capture": ["M05"],
+      "evidence": ["documented"]
+    },
+    {
+      "id": "FS05",
+      "name": "feed_global",
+      "known": ["central mobile destination", "economic activity/social content", "scan-oriented redesign", "typed events"],
+      "unknown": ["current default population", "live event taxonomy", "insertion mechanics", "density"],
+      "capture": ["M01", "M07"],
+      "evidence": ["documented", "official_published_visual"]
+    },
+    {
+      "id": "FS06",
+      "name": "feed_following_friends",
+      "known": ["Friends/following narrowing exists in product history/current social model"],
+      "unknown": ["current control name", "placement", "persistence", "empty state", "whether top traders remain"],
+      "capture": ["M01", "M15"],
+      "evidence": ["documented", "official_published_visual"]
+    },
+    {
+      "id": "FS07",
+      "name": "feed_thesis_object",
+      "known": ["thesis can appear globally", "PnL and balance context documented", "likes/interactions"],
+      "unknown": ["exact current fields", "fact vs commentary visual separation", "drilldown action"],
+      "capture": ["M03", "M07"],
+      "evidence": ["documented", "official_published_visual"]
+    },
+    {
+      "id": "FS08",
+      "name": "trade_position_detail",
+      "known": ["position can show constituent buys/sells", "chart", "entry/performance", "share", "commentary"],
+      "unknown": ["current sheet/page behavior", "state labels", "social CTA placement", "back restoration"],
+      "capture": ["M03"],
+      "evidence": ["documented", "official_published_visual"]
+    },
+    {
+      "id": "FS09",
+      "name": "friends_leaderboard",
+      "known": ["shared Friends/Leaderboard destination", "self rank", "timeframe rankings", "dense trader rows"],
+      "unknown": ["current timeframe labels", "row sorting", "sticky controls", "current Friends tab behavior"],
+      "capture": ["M02", "M09"],
+      "evidence": ["documented", "official_published_visual"]
+    },
+    {
+      "id": "FS10",
+      "name": "trader_profile",
+      "known": ["identity", "Follow", "followers/following", "performance chart", "cash balance", "open positions", "recent activity", "behavioral stats"],
+      "unknown": ["current section order", "follow acknowledgement", "mutuals", "sticky actions", "privacy controls"],
+      "capture": ["M01", "M02", "M08"],
+      "evidence": ["documented", "official_published_visual"]
+    },
+    {
+      "id": "FS11",
+      "name": "own_profile_portfolio",
+      "known": ["personal profile/performance", "cash balance", "positions", "activity", "withdraw entry documented from cash/balance"],
+      "unknown": ["current primary actions", "allocation view", "history layout", "cash vs positions total semantics"],
+      "capture": ["M08", "M13", "M16"],
+      "evidence": ["documented", "official_published_visual"]
+    },
+    {
+      "id": "FS12",
+      "name": "token_asset_detail_mobile",
+      "known": ["asset info/holders/social links", "About/deeper stats", "buy button near bottom in older guide", "token feed and trade thesis added"],
+      "unknown": ["current hierarchy", "risk markers above fold", "social feed position", "chart mode"],
+      "capture": ["M03", "M10"],
+      "evidence": ["documented"]
+    },
+    {
+      "id": "FS13",
+      "name": "buy_sell_action",
+      "known": ["amount", "presets", "balance context", "slide-to-buy documented", "fee/risk cues added over time"],
+      "unknown": ["current final gesture", "fee exact display", "slippage/price impact", "quote state", "pending state"],
+      "capture": ["M03", "M10", "M14"],
+      "evidence": ["documented", "official_published_visual"]
+    },
+    {
+      "id": "FS14",
+      "name": "deposit_options",
+      "known": ["Apple Pay", "debit", "crypto", "USD amount framing", "crypto transfer requires network correctness"],
+      "unknown": ["current option order", "fees", "ETA", "validation/retry", "region-dependent options"],
+      "capture": ["M12"],
+      "evidence": ["documented"]
+    },
+    {
+      "id": "FS15",
+      "name": "apple_pay_buy_funding",
+      "known": ["Apple Pay direct funding/buy flow documented", "large amount/preset/payment CTA visible in published marketing"],
+      "unknown": ["system sheet sequence", "fees", "biometric timing", "result state"],
+      "capture": ["M10", "M12"],
+      "evidence": ["documented", "official_published_visual"]
+    },
+    {
+      "id": "FS16",
+      "name": "withdraw",
+      "known": ["bank and crypto flows documented", "network/address warning for crypto", "FaceID sensitive-action protection", "QR withdrawal added historically"],
+      "unknown": ["live rails by region", "entry path", "fee/ETA", "pending history", "support recovery"],
+      "capture": ["M13"],
+      "evidence": ["documented"]
+    },
+    {
+      "id": "FS17",
+      "name": "notification_settings",
+      "known": ["master/settings concept", "Price/Friends/Trending/Top Traders/Announcements/New Followers", "Friends thresholds and per-user controls documented"],
+      "unknown": ["current UI", "defaults", "permission education", "deep-link behavior"],
+      "capture": ["M15", "M16"],
+      "evidence": ["documented", "official_published_visual"]
+    },
+    {
+      "id": "FS18",
+      "name": "settings_security",
+      "known": ["biometric security section documented", "key export available", "EVM address quick access historically added"],
+      "unknown": ["current organization", "recovery options", "device session controls", "permission/revoke UX"],
+      "capture": ["M11", "M16"],
+      "evidence": ["documented"]
+    },
+    {
+      "id": "FS19",
+      "name": "desktop_token_workspace",
+      "known": ["left discovery rail", "global search", "central TradingView chart", "social overlays", "right execution rail", "lower holders/trades/thesis"],
+      "unknown": ["exact live proportions", "breakpoints", "panel persistence/collapse", "keyboard/hover behavior"],
+      "capture": ["M17"],
+      "evidence": ["documented", "official_published_visual"]
+    },
+    {
+      "id": "FS20",
+      "name": "desktop_feed_leaderboard",
+      "known": ["web retains Feed/Leaderboard/social graph and same account"],
+      "unknown": ["current feed density", "leaderboard density", "drilldown style", "back restoration"],
+      "capture": ["M16", "M17"],
+      "evidence": ["documented"]
+    },
+    {
+      "id": "FS21",
+      "name": "loading_pending_error",
+      "known": ["public product/terms acknowledge possible failed transactions/congestion; public screenshots do not sufficiently expose state model"],
+      "unknown": ["skeletons", "spinners", "pending labels", "failed state", "retry safety", "session-expiry UI"],
+      "capture": ["M14", "M15"],
+      "evidence": ["documented"]
+    },
+    {
+      "id": "FS22",
+      "name": "share_card",
+      "known": ["wins/fumbles/PnL/share cards documented/published; referral attribution added to shared trade links"],
+      "unknown": ["current card data", "privacy", "verification/provenance", "share destinations", "recipient landing state"],
+      "capture": ["M03"],
+      "evidence": ["documented"]
+    },
+    {
+      "id": "FS23",
+      "name": "comments_threads",
+      "known": ["trade comments", "threaded replies", "reactions", "additional economic events commentable", "thesis interactions"],
+      "unknown": ["current moderation/report controls", "sheet/page structure", "thread depth", "composer behavior"],
+      "capture": ["M07"],
+      "evidence": ["documented"]
+    },
+    {
+      "id": "FS24",
+      "name": "risk_warning_state",
+      "known": ["volatility/scam/honeypot/unlocked-liquidity/spoofing/verification cues documented"],
+      "unknown": ["current severity hierarchy", "blocking vs advisory", "dismissibility", "non-color semantics"],
+      "capture": ["M10", "M18"],
+      "evidence": ["documented"]
+    }
+  ]
+}

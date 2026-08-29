@@ -1,0 +1,83 @@
+.brand {
+  display: inline-flex;
+  min-width: 0;
+  align-items: center;
+  gap: 9px;
+  color: var(--fg);
+}
+
+.markFrame {
+  display: inline-grid;
+  width: 36px;
+  aspect-ratio: 1;
+  flex: 0 0 auto;
+  place-items: center;
+  overflow: hidden;
+  border: 1px solid rgba(var(--fg-rgb), 0.18);
+  background: #ffffff;
+}
+
+.markImage {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.lockup {
+  display: grid;
+  min-width: 0;
+  gap: 2px;
+}
+
+.word {
+  font-family: var(--font-display);
+  font-size: 30px;
+  line-height: 0.86;
+  letter-spacing: 0.08em;
+}
+
+.sublabel {
+  overflow: hidden;
+  color: var(--gas-energy);
+  font-family: var(--font-mono);
+  font-size: 8px;
+  line-height: 1.15;
+  letter-spacing: 0.12em;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.rail {
+  gap: 11px;
+}
+
+.rail .markFrame {
+  width: 48px;
+}
+
+.rail .word {
+  font-size: 38px;
+}
+
+.hero {
+  gap: 14px;
+}
+
+.hero .markFrame {
+  width: clamp(54px, 14vw, 68px);
+}
+
+.hero .word {
+  font-size: clamp(48px, 14vw, 70px);
+}
+
+.hero .sublabel {
+  color: var(--text-secondary);
+  font-size: 9px;
+}
+
+.mark .markFrame {
+  width: 40px;
+}

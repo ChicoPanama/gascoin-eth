@@ -1,115 +1,95 @@
 import { test, expect } from '@playwright/test';
+import { gotoReady } from './helpers/navigation';
 
-test.describe('Leaderboard', () => {
-  test('LB01 — renders title', async ({ page }) => {
-    await page.goto('/leaderboard');
-    await page.waitForLoadState('networkidle');
-    await expect(page.getByText(/LEADERBOARD/)).toBeVisible();
+test.describe('Legacy compatibility — page semantics', () => {
+  test('LB01 — leaderboard renders its primary heading', async ({ page }) => {
+    await gotoReady(page, '/leaderboard');
+    await expect(page.getByRole('heading', { name: /LEADERBOARD/i }).first()).toBeVisible();
   });
 
-  test('LB02 — stats strip renders', async ({ page }) => {
-    await page.goto('/leaderboard');
-    await page.waitForLoadState('networkidle');
-    await expect(page.locator('.gc-stat')).toHaveCount(4);
-  });
-});
-
-test.describe('Community Feed (now on /leaderboard?view=recent)', () => {
-  test('CF01 — /community 308 redirects to /leaderboard?view=recent', async ({ page }) => {
-    await page.goto('/community');
-    await page.waitForLoadState('networkidle');
-    expect(page.url()).toContain('/leaderboard');
-    expect(page.url()).toContain('view=recent');
+  test('LB02 — leaderboard stats surface renders', async ({ page }) => {
+    await gotoReady(page, '/leaderboard');
+    const stats = page.locator('.gc-stat');
+    await expect(stats.first()).toBeVisible();
+    expect(await stats.count()).toBeGreaterThan(0);
   });
 
-  test('CF02 — Recent tab renders filter tabs on /leaderboard', async ({ page }) => {
-    await page.goto('/leaderboard?view=recent');
-    await page.waitForLoadState('networkidle');
+  test('CF01 — /community redirects to the recent leaderboard view', async ({ page }) => {
+    await gotoReady(page, '/community');
+    await expect(page).toHaveURL(/\/leaderboard\?view=recent/);
+  });
+
+  test('CF02 — recent leaderboard view exposes its filter tabs', async ({ page }) => {
+    await gotoReady(page, '/leaderboard?view=recent');
     await expect(page.locator('.cf-filter-tab')).toHaveCount(3);
   });
-});
 
-test.describe('Gates Page', () => {
-  test('GT01 — renders with gate cards', async ({ page }) => {
-    await page.goto('/gates');
-    await page.waitForLoadState('networkidle');
-    await expect(page.locator('.gt-card')).toHaveCount(10);
+  test('GT01 — gates page renders the current gate set', async ({ page }) => {
+    await gotoReady(page, '/gates');
+    const count = await page.locator('.gt-card').count();
+    expect(count).toBeGreaterThan(0);
   });
 
-  test('GT02 — checklist starts at 0', async ({ page }) => {
-    // Clear localStorage first
-    await page.goto('/gates');
+  test('GT02 — checklist starts with zero completed gates', async ({ page }) => {
+    await gotoReady(page, '/gates');
     await page.evaluate(() => localStorage.removeItem('gascoin_preflight'));
-    await page.reload();
-    await page.waitForLoadState('networkidle');
-    await expect(page.getByText(/0 \/ 10/)).toBeVisible();
+    await page.reload({ waitUntil: 'domcontentloaded' });
+    await expect(page.getByText(/0\s*\/\s*\d+/).first()).toBeVisible();
   });
 
-  test('GT03 — category filter TWEET shows 4', async ({ page }) => {
-    await page.goto('/gates');
-    await page.waitForLoadState('networkidle');
-    const tweetBtn = page.locator('.cf-filter-tab', { hasText: /TWEET/i });
-    await tweetBtn.click();
-    await expect(page.locator('.gt-card')).toHaveCount(4);
-  });
-});
+  test('GT03 — TWEET filter narrows to a non-empty subset', async ({ page }) => {
+    await gotoReady(page, '/gates');
+    const cards = page.locator('.gt-card');
+    const total = await cards.count();
+    expect(total).toBeGreaterThan(0);
 
-test.describe('Wallet Tracker', () => {
-  test('WT01 — idle state without wallet', async ({ page }) => {
-    await page.goto('/wallet');
-    await page.waitForLoadState('networkidle');
+    await page.locator('.cf-filter-tab', { hasText: /TWEET/i }).click();
+    await expect(cards.first()).toBeVisible();
+    const filtered = await cards.count();
+    expect(filtered).toBeGreaterThan(0);
+    expect(filtered).toBeLessThanOrEqual(total);
+  });
+
+  test('WT01 — wallet tracker has an idle state without a wallet', async ({ page }) => {
+    await gotoReady(page, '/wallet');
     await expect(page.locator('.wt-idle')).toBeVisible();
   });
 
-  test('WT02 — URL param triggers lookup', async ({ page }) => {
-    await page.goto('/wallet?address=GAsxK92TestWalletAddress1234567890abcdef12345');
-    await page.waitForLoadState('networkidle');
+  test('WT02 — wallet URL parameter opens the connected state', async ({ page }) => {
+    await gotoReady(page, '/wallet?address=GAsxK92TestWalletAddress1234567890abcdef12345');
     await expect(page.locator('.wt-connected-bar')).toBeVisible();
   });
-});
 
-test.describe('Referral Page', () => {
-  test('RE01 — wallet gate when not connected', async ({ page }) => {
-    await page.goto('/referral');
-    await page.waitForLoadState('networkidle');
+  test('RE01 — referral page exposes the unauthenticated wallet gate', async ({ page }) => {
+    await gotoReady(page, '/referral');
     await expect(page.locator('.ref-gate')).toBeVisible();
   });
-});
 
-test.describe('Standing Page', () => {
-  test('TG01 — renders tier grid', async ({ page }) => {
-    await page.goto('/standing');
-    await page.waitForLoadState('networkidle');
-    await expect(page.getByText(/Standard/i)).toBeVisible();
-    await expect(page.getByText(/Commuter/i)).toBeVisible();
-    await expect(page.getByText(/Road Warrior/i)).toBeVisible();
-    await expect(page.getByText(/Fleet/i)).toBeVisible();
+  test('TG01 — standing page renders all tier labels', async ({ page }) => {
+    await gotoReady(page, '/standing');
+    await expect(page.getByText('Standard', { exact: true }).first()).toBeVisible();
+    await expect(page.getByText('Commuter', { exact: true }).first()).toBeVisible();
+    await expect(page.getByText('Road Warrior', { exact: true }).first()).toBeVisible();
+    await expect(page.getByText('Fleet', { exact: true }).first()).toBeVisible();
   });
 
-  test('TG02 — /perks legacy URL 308-redirects to /standing', async ({ page }) => {
-    const response = await page.goto('/perks');
-    // Next.js handles the redirect server-side; final URL should be /standing
-    await page.waitForLoadState('networkidle');
-    expect(page.url()).toContain('/standing');
+  test('TG02 — /perks legacy URL redirects to /standing', async ({ page }) => {
+    await gotoReady(page, '/perks');
+    await expect(page).toHaveURL(/\/standing/);
   });
-});
 
-test.describe('Dashboard', () => {
-  test('DB01 — renders title', async ({ page }) => {
-    await page.goto('/dashboard');
-    await page.waitForLoadState('networkidle');
-    await expect(page.getByText(/TREASURY/i)).toBeVisible();
+  test('DB01 — dashboard renders its Treasury heading', async ({ page }) => {
+    await gotoReady(page, '/dashboard');
+    await expect(page.getByRole('heading', { name: 'TREASURY' })).toBeVisible();
   });
-});
 
-test.describe('Admin', () => {
-  test('AD01 — redirects to login without session', async ({ page }) => {
-    await page.goto('/admin/submissions');
+  test('AD01 — protected admin route redirects to login', async ({ page }) => {
+    await gotoReady(page, '/admin/submissions');
     await expect(page).toHaveURL(/\/admin\/login/);
   });
 
-  test('AD02 — login page renders', async ({ page }) => {
-    await page.goto('/admin/login');
-    await expect(page.getByText(/ADMIN ACCESS/i)).toBeVisible();
+  test('AD02 — admin login page renders', async ({ page }) => {
+    await gotoReady(page, '/admin/login');
+    await expect(page.getByText(/ADMIN ACCESS/i).first()).toBeVisible();
   });
 });

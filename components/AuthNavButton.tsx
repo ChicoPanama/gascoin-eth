@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from 'react';
 import { usePrivy } from '@privy-io/react-auth';
-import { useAccount } from 'wagmi';
+import { useConnection } from 'wagmi';
 
 function readHandle(user: any): string {
   if (user?.twitter?.username) return String(user.twitter.username).replace(/^@/, '');
@@ -29,30 +29,33 @@ function readProfilePicture(user: any): string {
   return String(tw?.profilePictureUrl || tw?.profile_picture_url || '');
 }
 
+/**
+ * Legacy navigation identity control.
+ *
+ * Privy is the source of authentication truth. Wagmi v3 only exposes the
+ * currently active Privy-synchronized wallet for display/onchain actions.
+ * New users are not forced through X; the configured GAS account picker offers
+ * email, X and wallet entry while preserving the historical X-link sync when
+ * an authenticated user actually has an X handle.
+ */
 export function AuthNavButton() {
   const { ready, authenticated, login, logout, user, getAccessToken } = usePrivy();
-  const { address, isConnected } = useAccount();
+  const { address, isConnected } = useConnection();
   const linkedRef = useRef(false);
 
   const handle = readHandle(user as any);
   const xUserId = readXUserId(user as any);
-
-  // Reset link lock when wallet address changes (user switches wallet)
   const lastLinkedWallet = useRef<string | null>(null);
 
-  // Auto-link wallet ↔ X handle when both are connected
   useEffect(() => {
     if (!authenticated || !isConnected || !address || !handle) return;
 
     const wallet = address;
-
-    // Skip if already linked this exact wallet+handle combo
     if (linkedRef.current && lastLinkedWallet.current === wallet) return;
 
     linkedRef.current = true;
     lastLinkedWallet.current = wallet;
 
-    // Send Privy access token for server-side auth verification
     getAccessToken().then((token) => {
       fetch('/api/link-x', {
         method: 'POST',
@@ -63,7 +66,12 @@ export function AuthNavButton() {
           'x-privy-handle': handle,
           'x-privy-wallet': wallet,
         },
-        body: JSON.stringify({ wallet, x_handle: handle, x_user_id: xUserId, profile_image_url: readProfilePicture(user) }),
+        body: JSON.stringify({
+          wallet,
+          x_handle: handle,
+          x_user_id: xUserId,
+          profile_image_url: readProfilePicture(user),
+        }),
       }).catch(() => {
         linkedRef.current = false;
         lastLinkedWallet.current = null;
@@ -72,9 +80,8 @@ export function AuthNavButton() {
       linkedRef.current = false;
       lastLinkedWallet.current = null;
     });
-  }, [authenticated, isConnected, address, handle, xUserId, getAccessToken]);
+  }, [authenticated, isConnected, address, handle, xUserId, getAccessToken, user]);
 
-  // Loading — show placeholder so button never vanishes
   if (!ready) {
     return (
       <button className="btn" type="button" disabled style={{ opacity: 0.4 }}>
@@ -83,30 +90,23 @@ export function AuthNavButton() {
     );
   }
 
-  // Not signed in — show sign-in button
   if (!authenticated) {
     return (
-      <button className="btn" type="button" onClick={() => login({ loginMethods: ['twitter'] })}>
-        Sign in with X
+      <button className="btn" type="button" onClick={() => login()}>
+        Enter GAS
       </button>
     );
   }
 
-  // Signed in — show unified identity
   const walletAddr = isConnected && address ? truncateWallet(address) : null;
+  const identity = handle ? `@${handle}` : user?.email?.address || 'GAS account';
 
   return (
     <div className="auth-signed-in" style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-      {walletAddr && handle ? (
-        <span className="auth-identity">
-          <span className="auth-handle">@{handle}</span>
-          <span className="auth-wallet">{walletAddr}</span>
-        </span>
-      ) : handle ? (
-        <span className="auth-handle-solo">@{handle}</span>
-      ) : (
-        <span className="auth-handle-solo">Signed in</span>
-      )}
+      <span className="auth-identity">
+        <span className="auth-handle">{identity}</span>
+        {walletAddr ? <span className="auth-wallet">{walletAddr}</span> : null}
+      </span>
       <button className="btn" type="button" onClick={logout}>Logout</button>
     </div>
   );

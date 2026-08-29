@@ -33,6 +33,11 @@ export type SessionHints = {
 
 export type VerifyPrivyOptions = {
   allowHintFallback?: boolean;
+  /**
+   * Legacy GASCOIN routes require an X handle. Project GAS uses the Privy DID
+   * as canonical identity and must permit email/wallet-only accounts.
+   */
+  requireXHandle?: boolean;
 };
 
 let _privy: PrivyClient | null = null;
@@ -136,7 +141,7 @@ export async function verifyPrivySession(
       // keep token-verified identity + client hints fallback
     }
 
-    if (!xHandle) return null;
+    if (!xHandle && options?.requireXHandle !== false) return null;
 
     return {
       xId,

@@ -18,6 +18,9 @@ supabase/.temp/
 coverage/
 .turbo/
 *.tsbuildinfo
+contracts/project-gas/cache/
+contracts/project-gas/out/
+contracts/project-gas/broadcast/
 .env*.local
 pnpm-lock.yaml
 .worktrees/

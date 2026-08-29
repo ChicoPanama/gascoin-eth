@@ -1,0 +1,216 @@
+.shell {
+  min-width: 0;
+}
+
+.shellBody {
+  min-width: 0;
+}
+
+.desktopRail,
+.desktopContext,
+.topBar .desktopAccountUtility {
+  display: none;
+}
+
+.contentGrid {
+  min-width: 0;
+}
+
+@media (min-width: 768px) and (max-width: 900px) {
+  .main {
+    width: min(100%, 760px) !important;
+    padding-inline: 24px !important;
+  }
+
+  .contentGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 901px) {
+  .shell {
+    display: grid;
+    grid-template-columns: 232px minmax(0, 1fr);
+    min-height: 100dvh;
+    padding-bottom: 0 !important;
+  }
+
+  .shell > :global(nav[aria-label='GAS primary navigation']) {
+    display: none;
+  }
+
+  .shellBody {
+    grid-column: 2;
+    min-height: 100dvh;
+  }
+
+  .desktopRail {
+    position: sticky;
+    top: 0;
+    grid-column: 1;
+    grid-row: 1;
+    display: flex;
+    height: 100dvh;
+    min-width: 0;
+    flex-direction: column;
+    padding: 24px 18px 20px;
+    border-right: 1px solid var(--line);
+    background: var(--nav-bg);
+    backdrop-filter: blur(18px);
+  }
+
+  .desktopBrand {
+    display: block;
+    padding: 8px 10px 24px;
+    color: var(--fg);
+    text-decoration: none;
+  }
+
+  .desktopRailLabel,
+  .desktopRailMeta {
+    font-family: var(--font-mono);
+    text-transform: uppercase;
+  }
+
+  .desktopPrimaryNav {
+    display: grid;
+    gap: 4px;
+  }
+
+  .desktopNavItem {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    min-height: 48px;
+    padding: 0 12px;
+    border: 1px solid transparent;
+    color: var(--text-secondary);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-decoration: none;
+    text-transform: uppercase;
+    transition: border-color var(--duration-fast) var(--ease-out-expo), background-color var(--duration-fast) var(--ease-out-expo), color var(--duration-fast) var(--ease-out-expo);
+  }
+
+  .desktopNavItem:hover,
+  .desktopNavItem:focus-visible {
+    border-color: var(--line);
+    color: var(--fg);
+    background: var(--card-hover);
+  }
+
+  .desktopNavItemActive {
+    border-color: var(--gas-energy-border);
+    color: var(--fg);
+    background: var(--gas-energy-soft);
+  }
+
+  .desktopNavMark {
+    color: var(--gas-energy);
+    font-size: 16px;
+    opacity: 0;
+    transform: translateX(-5px);
+    transition: opacity var(--duration-fast) var(--ease-out-expo), transform var(--duration-fast) var(--ease-out-expo);
+  }
+
+  .desktopNavItemActive .desktopNavMark {
+    opacity: 1;
+    transform: translateX(0);
+  }
+
+  .desktopRailFooter {
+    display: grid;
+    gap: 5px;
+    margin-top: auto;
+    padding: 18px 10px 4px;
+    border-top: 1px solid var(--line);
+  }
+
+  .desktopRailLabel {
+    color: var(--fg);
+    font-size: 9px;
+    letter-spacing: 0.12em;
+  }
+
+  .desktopRailMeta {
+    max-width: 19ch;
+    color: var(--text-tertiary);
+    font-size: 8px;
+    line-height: 1.5;
+    letter-spacing: 0.05em;
+  }
+
+  .topBar {
+    min-height: 64px !important;
+    padding: 10px 24px !important;
+  }
+
+  .mobileBrand {
+    display: none !important;
+  }
+
+  .desktopContext {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+  }
+
+  .desktopContextText {
+    color: var(--text-secondary);
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .topBar .desktopAccountUtility {
+    display: inline-grid !important;
+  }
+
+  .main {
+    width: min(100%, 1440px) !important;
+    max-width: none !important;
+    margin: 0 auto !important;
+    padding: 28px 32px 56px !important;
+  }
+
+  .contentGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+  }
+
+  .primaryWide {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (min-width: 1280px) {
+  .shell {
+    grid-template-columns: 248px minmax(0, 1fr);
+  }
+
+  .desktopRail {
+    padding-inline: 22px;
+  }
+
+  .main {
+    padding-inline: 40px !important;
+  }
+
+  .contentGrid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .primaryWide {
+    grid-column: span 2;
+  }
+}
+
+@media (min-width: 1760px) {
+  .main {
+    width: min(100%, 1520px) !important;
+    padding-inline: 48px !important;
+  }
+}

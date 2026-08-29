@@ -1,0 +1,162 @@
+{
+  "phase": 2,
+  "reference": "fomo",
+  "captured": "2026-08-15",
+  "purpose": "Distinguish durable Fomo UX principles from historical UI states by tracking repeated product changes over time.",
+  "releases": [
+    {
+      "date": "2025-09-30",
+      "source": "https://fomo.family/blog/september-2025-recap",
+      "changes": [
+        "Base trading added behind a single app and single balance",
+        "Friends feed introduced as aggregated activity from followed users",
+        "Featured token sections added to discovery",
+        "Unlocked-liquidity and spoofing warnings added",
+        "Leaderboard and PnL made multichain"
+      ],
+      "durableSignals": ["following feed", "single account abstraction", "curated discovery", "risk warnings", "cross-domain performance aggregation"]
+    },
+    {
+      "date": "2025-10-31",
+      "source": "https://fomo.family/blog/october-2025-recap",
+      "changes": [
+        "BNB Chain added to the same USD balance",
+        "PnL overlaid directly on price charts in real time",
+        "Trade Spotlight sorted for faster scanning",
+        "Following toggle added to the main feed",
+        "Trade comments expanded to all holders",
+        "Average hold time added to holder lists and profiles"
+      ],
+      "durableSignals": ["context-at-point-of-action", "scanability", "one graph/filter model", "behavioral identity metrics"]
+    },
+    {
+      "date": "2025-11-30",
+      "source": "https://fomo.family/blog/november-2025-recap",
+      "changes": [
+        "Five-part full-app visual redesign",
+        "New app icons/splash branding",
+        "Liquid-glass tab bar",
+        "Liquid-glass notifications",
+        "Onboarding flow redesigned",
+        "Profile header expanded with average hold time",
+        "Search integrated with the tab bar",
+        "More chart resolutions/time windows",
+        "Trade comment reactions",
+        "Mutual followers"
+      ],
+      "durableSignals": ["navigation as a product primitive", "new-user-first redesign", "search in persistent shell", "social graph depth", "fast contextual feedback"]
+    },
+    {
+      "date": "2025-12-31",
+      "source": "https://fomo.family/blog/december-2025-recap",
+      "changes": [
+        "Threaded comments/nested replies",
+        "Likes/unlikes and reply counts on feed/trade/holder surfaces",
+        "Comments expanded to profit milestones, first buys and transfer events",
+        "Deposits and large transfers became feed objects",
+        "Personalized year-in-review",
+        "Dollar preset buy amounts",
+        "Buy Again button after closing a position",
+        "On-chain balance displayed in trade sheet",
+        "Other users' activity added to profiles",
+        "Profile search history saved"
+      ],
+      "durableSignals": ["economic events become social objects", "repeat-action compression", "balance at decision point", "identity accumulates history", "search remembers intent"]
+    },
+    {
+      "date": "2026-01-31",
+      "source": "https://fomo.family/blog/january-2026-recap",
+      "changes": [
+        "Native Coinbase Apple Pay onramp",
+        "Biometric app security controls",
+        "Token-specific feeds",
+        "Trade Thesis attached to buy/sell reasoning",
+        "AI token and TikTok discovery sections",
+        "Gainers filter",
+        "Low-fees banner on coin pages"
+      ],
+      "durableSignals": ["funding inside primary flow", "step-up security", "economic action plus narrative", "discovery filters", "fee context near action"]
+    },
+    {
+      "date": "2026-02-28",
+      "source": "https://fomo.family/blog/february-2026-recap",
+      "changes": [
+        "Feed UI redesigned for easier high-activity scanning",
+        "Trade Thesis promoted from token feeds into the global feed",
+        "Thesis cards expose trader PnL and balance",
+        "Crypto transfers support notes/images",
+        "Deposit notifications show USD amount",
+        "Price tracking since first purchase exposed in feed/notifications",
+        "Home token filters revised",
+        "Verified badge moved into token header in buy/sell view"
+      ],
+      "durableSignals": ["feed scan grammar", "verified context accompanies social narrative", "money values normalized to user-understandable units", "trust cues at execution boundary"]
+    },
+    {
+      "date": "2026-03-04",
+      "source": "https://fomo.family/blog/learn/fomo-security-wallet-architecture",
+      "changes": [
+        "Email/Apple identity explicitly documented as account layer",
+        "Embedded wallet architecture explained",
+        "FaceID required for sensitive actions such as withdrawals/key export",
+        "Gas sponsorship documented",
+        "Cross-chain wallet abstraction documented"
+      ],
+      "durableSignals": ["consumer account first", "infrastructure hidden", "step-up security proportional to consequence", "no native gas prerequisite"]
+    },
+    {
+      "date": "2026-04-14",
+      "source": "https://fomo.family/blog/tradingview-partnership",
+      "changes": [
+        "TradingView charting integrated into web",
+        "100+ indicators/drawing tools available",
+        "Multiple timeframes preserved",
+        "Followed/top-trader/community signals overlaid directly on charts"
+      ],
+      "durableSignals": ["advanced depth can be added without abandoning simple/social shell", "social data remains contextual to financial object"]
+    },
+    {
+      "date": "2026-04-29",
+      "source": "https://fomo.family/blog/announcing-fomo-web",
+      "changes": [
+        "Desktop web launched",
+        "Same identity/balance/positions/following/settings across mobile and desktop",
+        "Unified USD balance across chains with no bridge or chain-switch workflow",
+        "Social feed, trending, alerts, leaderboard, theses and quick buys retained",
+        "New profile and coin pages add desktop context"
+      ],
+      "durableSignals": ["cross-device canonical state", "desktop adds information not a new mental model", "social-first shell survives platform expansion"]
+    },
+    {
+      "date": "2026-06-11",
+      "source": "https://fomo.family/blog/perpetuals-now-on-fomo",
+      "changes": [
+        "Perpetual products integrated into feed/leaderboard/thesis/profiles/notifications",
+        "Position half-sheets/share cards expanded rather than replaced",
+        "Position direction/leverage/notional/equity added",
+        "Stop-loss/take-profit exposed through advanced charts"
+      ],
+      "durableSignals": ["social graph is product-wide infrastructure", "new financial product extends existing identity/object grammar", "complex fields are added contextually"]
+    },
+    {
+      "date": "2026-06-22",
+      "source": "https://fomo.family/blog/fomo-series-b",
+      "changes": [
+        "Fomo explicitly frames the product as financial identity plus real-time social network",
+        "Company reports 625K+ users, $4B+ trading volume and 110M+ social interactions",
+        "Company reports 68K+ first-time crypto buyers via Apple Pay"
+      ],
+      "durableSignals": ["social activity is a core network asset", "consumer onboarding is a growth surface", "financial identity is strategic rather than decorative"]
+    }
+  ],
+  "repeatedThemes": {
+    "social_everywhere": ["friends feed", "following filter", "mutual followers", "comments", "thesis", "profiles", "chart overlays", "perps integration", "notifications"],
+    "action_compression": ["Apple Pay", "dollar presets", "Buy Again", "quick buys", "no bridge/chain switching"],
+    "context_at_action": ["dynamic PnL on chart", "on-chain balance in trade sheet", "low-fee banner", "verified badge in buy/sell", "thesis PnL/balance", "position half-sheets"],
+    "identity_depth": ["profile performance", "hold time", "trade history", "mutual followers", "activity", "financial identity"],
+    "feed_scanability": ["Trade Spotlight sorting", "following filter", "February feed redesign", "typed economic/social events"],
+    "trust_and_security": ["token safety warnings", "biometrics", "verified badges", "embedded-wallet explanation", "gas sponsorship"],
+    "one_product_across_platforms": ["single balance across chains", "mobile-to-web continuity", "same social primitives for perps"]
+  },
+  "phase2Conclusion": "The most useful Fomo reference is not any single screenshot. It is the set of patterns that survived repeated redesigns and new-product expansion. Direct current-state capture should verify how these durable principles are expressed today."
+}

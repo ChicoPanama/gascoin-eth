@@ -1,0 +1,161 @@
+{
+  "phase": 2,
+  "reference": "fomo",
+  "status": "documented_plus_observed_measurements_pending",
+  "evidencePolicy": {
+    "documented": "official Fomo product material",
+    "observed": "direct public product observation",
+    "measured": "repeatable browser/harvester instrumentation",
+    "inferred": "analysis; never treated as measured"
+  },
+  "journeys": [
+    {
+      "id": "FJ01",
+      "name": "new_user_to_account",
+      "gasMapsTo": "J01",
+      "documentedFacts": ["email or Apple ID account path", "web signup described as under 30 seconds", "embedded wallet created within app architecture"],
+      "observed": {"source": "Fomo published create-an-account screenshot", "facts": ["large consumer sign-in controls dominate lower actionable region", "concise promise immediately precedes sign-in", "no wallet extension, seed phrase, chain, RPC or native-gas vocabulary visible on first screen"]},
+      "measure": ["actions", "screens", "fields", "elapsedMs", "walletVocabularyExposed", "recoveryPath"],
+      "measured": null
+    },
+    {
+      "id": "FJ02",
+      "name": "returning_user_to_home",
+      "gasMapsTo": "J02/J15",
+      "documentedFacts": ["same identity, balance, positions and following on web/mobile"],
+      "observed": null,
+      "measure": ["actions", "timeToUsefulStateMs", "authInterruptions", "primaryBalancePlacement"],
+      "measured": null
+    },
+    {
+      "id": "FJ03",
+      "name": "feed_to_action",
+      "gasMapsTo": "J05",
+      "documentedFacts": ["social feed surfaces trader activity", "activity links into token/trading context", "quick buys are promoted"],
+      "observed": {"source": "Fomo published social-feed screenshot", "facts": ["actor/action/time line sits directly above associated financial object", "buy/position events are vertically stacked and visually distinct", "token/activity card exposes values inside feed without requiring detail navigation", "Feed is center-weighted in persistent five-destination bottom shell"]},
+      "measure": ["actions", "screens", "modalCount", "scrollRetention", "contextPreserved", "explicitConfirmation"],
+      "measured": null
+    },
+    {
+      "id": "FJ04",
+      "name": "feed_to_profile_to_follow",
+      "gasMapsTo": "J06",
+      "documentedFacts": ["profiles searchable from app", "portfolio/history/performance visible", "follow drives future feed/notifications"],
+      "observed": {"source": "Fomo published profile screenshot", "facts": ["Follow is a prominent profile-header action", "identity/follower context appears before portfolio performance", "performance value/chart and open positions are visible in the same profile surface", "cash balance is semantically separated from open positions"]},
+      "measure": ["actions", "screens", "profileAboveFoldContent", "followControlPlacement", "backScrollPreserved"],
+      "measured": null
+    },
+    {
+      "id": "FJ05",
+      "name": "leaderboard_to_profile",
+      "gasMapsTo": "J06/J16",
+      "documentedFacts": ["leaderboards rank profitable traders across multiple timeframes"],
+      "observed": {"source": "Fomo published friends-and-leaderboard screenshot", "facts": ["Friends and Leaderboard share one primary destination with top tab switch", "user's own rank appears before Top traders", "24h/7d/30d/All timeframe selectors are compact and adjacent to list heading", "rows consistently show rank, avatar, identity and performance"]},
+      "measure": ["actions", "timeframeControlCount", "rowDensity", "profileEntryTargetSize", "sort/filterPersistence"],
+      "measured": null
+    },
+    {
+      "id": "FJ06",
+      "name": "global_to_following_feed",
+      "gasMapsTo": "social_feed",
+      "documentedFacts": ["following toggle/friends feed exists", "global feed supports broader discovery"],
+      "observed": {"source": "Fomo published social-feed screenshot", "facts": ["Friends only control is exposed at the upper-right of Feed rather than hidden in settings", "feed scope is therefore switchable in-context"]},
+      "measure": ["actions", "controlPlacement", "statePersistence", "feedRefreshBehavior", "emptyState"],
+      "measured": null
+    },
+    {
+      "id": "FJ07",
+      "name": "search_to_token_or_user",
+      "gasMapsTo": "J16",
+      "documentedFacts": ["search supports tokens and profiles"],
+      "observed": {"source": "Fomo navigation guide", "facts": ["Search is a primary bottom-shell destination adjacent to Home", "same search surface is described for tokens and user profiles"]},
+      "measure": ["actions", "queryLatencyMs", "resultGrouping", "keyboardBehavior", "zeroState", "noResultRecovery"],
+      "measured": null
+    },
+    {
+      "id": "FJ08",
+      "name": "token_to_quick_buy",
+      "gasMapsTo": "J08",
+      "documentedFacts": ["quick buys are a core web feature", "one-click/fast buy language", "gas sponsorship and chain abstraction"],
+      "observed": null,
+      "measure": ["actions", "screens", "inputCount", "feeDisclosureDepth", "confirmationMechanism", "acknowledgementMs", "readyStateMs"],
+      "measured": null
+    },
+    {
+      "id": "FJ09",
+      "name": "position_to_exit",
+      "gasMapsTo": "J09",
+      "documentedFacts": ["positions persist across mobile/web", "position/PnL context updates in real time"],
+      "observed": {"source": "Fomo published profile screenshot", "facts": ["cash balance and open positions are distinct profile sections", "open-position rows show value and percentage context"]},
+      "measure": ["actions", "exitDiscoverability", "feeDisclosure", "confirmation", "settlementState", "errorRecovery"],
+      "measured": null
+    },
+    {
+      "id": "FJ10",
+      "name": "notification_to_context",
+      "gasMapsTo": "J17",
+      "documentedFacts": ["followed-trader move notifications", "price/deposit alerts", "settings travel across platforms"],
+      "observed": null,
+      "measure": ["deepLinkAccuracy", "screens", "contextRestoration", "staleNotificationHandling"],
+      "measured": null
+    },
+    {
+      "id": "FJ11",
+      "name": "mobile_desktop_continuity",
+      "gasMapsTo": "cross_device",
+      "documentedFacts": ["same account, balance, positions, following and notification settings", "desktop intentionally preserves mobile journeys"],
+      "observed": {"source": "Fomo published mobile screenshots plus web launch documentation", "facts": ["mobile uses five persistent primary destinations", "web product is explicitly positioned as preserving the same journeys rather than becoming a terminal"]},
+      "measure": ["navigationParity", "stateParity", "preferenceParity", "pendingActionReconciliation", "responsiveDivergence"],
+      "measured": null
+    },
+    {
+      "id": "FJ12",
+      "name": "high_activity_feed_scan",
+      "gasMapsTo": "activity_feed",
+      "documentedFacts": ["February 2026 feed redesign targeted faster parsing during high activity", "PnL and balance context can appear with thesis/activity"],
+      "observed": {"source": "Fomo published social-feed screenshot", "facts": ["feed uses repeated actor/action/object hierarchy", "cards are vertically compact enough to expose multiple economic events in one mobile viewport", "pinned content is structurally distinguishable from live activity"]},
+      "measure": ["cardHeight", "visibleCardsPerViewport", "informationFieldsPerCard", "newItemInsertionBehavior", "layoutShift", "animationDuration"],
+      "measured": null
+    },
+    {
+      "id": "FJ13",
+      "name": "fund_account",
+      "gasMapsTo": "J01/J08/J15",
+      "documentedFacts": ["crypto funding on web", "mobile Apple Pay/debit onramps", "unified USD balance"],
+      "observed": null,
+      "measure": ["actions", "screens", "paymentOptions", "networkVocabulary", "arrivalConfirmation", "balanceUpdateLatency"],
+      "measured": null
+    },
+    {
+      "id": "FJ14",
+      "name": "withdraw_sensitive_action",
+      "gasMapsTo": "J09/J14",
+      "documentedFacts": ["biometric confirmation documented for withdrawals on Apple devices", "non-custodial key export path documented"],
+      "observed": null,
+      "measure": ["actions", "securityChallenge", "destinationClarity", "feeClarity", "pendingState", "recovery"],
+      "measured": null
+    },
+    {
+      "id": "FJ15",
+      "name": "simple_to_advanced_charting",
+      "gasMapsTo": "progressive_disclosure",
+      "documentedFacts": ["TradingView tools integrated into web", "social overlays layered onto charts", "simple social product thesis retained"],
+      "observed": null,
+      "measure": ["disclosureActions", "advancedSurfaceDensity", "returnToPrimaryAction", "settingPersistence"],
+      "measured": null
+    }
+  ],
+  "gate": {
+    "requiredBeforePass": [
+      "mobile shell measured",
+      "desktop shell measured",
+      "feed density measured",
+      "profile hierarchy measured",
+      "leaderboard hierarchy measured",
+      "quick-action flow observed/measured",
+      "responsive transformation documented",
+      "loading/error/back-navigation behavior observed",
+      "GAS target values derived without copying proprietary visual assets"
+    ]
+  }
+}

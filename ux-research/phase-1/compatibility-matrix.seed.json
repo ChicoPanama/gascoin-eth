@@ -1,0 +1,127 @@
+{
+  "version": 1,
+  "phase": 1,
+  "status": "active-seed",
+  "entries": [
+    {
+      "gasCapability": "application-shell",
+      "currentPaths": ["app/layout.tsx", "app/providers.tsx"],
+      "action": "reuse",
+      "dependencies": [],
+      "constraint": "Replace old refund metadata/semantics without replacing the mature Next/React shell.",
+      "acceptanceTest": "Root shell remains responsive/PWA-safe and renders Project GAS identity without old refund copy."
+    },
+    {
+      "gasCapability": "account-authentication",
+      "currentPaths": ["app/providers.tsx", "components/AuthNavButton.tsx", "lib/wagmi-config.ts"],
+      "action": "refactor",
+      "dependencies": ["phase-6-account-policy", "final-chain/account-architecture"],
+      "constraint": "Current Privy policy is Twitter/external-wallet and mainnet specific; GAS requires consumer account continuity and bounded financial intent.",
+      "acceptanceTest": "Auth path matches GAS account policy, preserves explicit authorization scope, and does not expose unnecessary chain configuration."
+    },
+    {
+      "gasCapability": "navigation",
+      "currentPaths": ["components/Nav.tsx", "components/HomeNav.tsx", "components/NavActionsMenu.tsx"],
+      "action": "refactor",
+      "dependencies": ["phase-6-information-architecture"],
+      "constraint": "Do not preserve old GasCoin destination hierarchy merely because components exist.",
+      "acceptanceTest": "Desktop and mobile navigation implement approved GAS IA and primary journeys within benchmark action counts."
+    },
+    {
+      "gasCapability": "social-feed",
+      "currentPaths": ["components/community/CommunityFeed.tsx", "app/leaderboard/LeaderboardClient.tsx", "app/community/page.tsx"],
+      "action": "extend",
+      "dependencies": ["phase-2-fomo-teardown", "phase-5-pattern-library"],
+      "constraint": "Social is a product layer; do not recreate /community as a disconnected forum.",
+      "acceptanceTest": "Global/following activity integrates with identity and actionable GAS result objects while preserving feed position/navigation state."
+    },
+    {
+      "gasCapability": "leaderboards",
+      "currentPaths": ["app/leaderboard/LeaderboardClient.tsx", "components/leaderboard"],
+      "action": "extend",
+      "dependencies": ["phase-2-social-benchmarks"],
+      "constraint": "Old refund/points metrics cannot silently become GAS reputation metrics.",
+      "acceptanceTest": "Player/Crew rankings derive from approved verifiable GAS metrics and expose loading/error/recovery states."
+    },
+    {
+      "gasCapability": "live-home-state",
+      "currentPaths": ["components/DashboardLive.tsx", "components/LiveTreasuryBar.tsx"],
+      "action": "refactor",
+      "dependencies": ["phase-6-information-architecture", "reserve-data-model"],
+      "constraint": "Old treasury semantics must never imply that game bankroll or GAS-denominated liquidity equals external backing.",
+      "acceptanceTest": "Home live state separates account, network, reserve and game activity truthfully."
+    },
+    {
+      "gasCapability": "design-system",
+      "currentPaths": ["app/globals.css", "styles/me-sidebar.css", "styles/wallet-override.css", "components/ThemeProvider.tsx"],
+      "action": "reuse-normalize",
+      "dependencies": ["phase-1-token-extraction", "phase-5-pattern-library"],
+      "constraint": "Preserve GAS visual identity; references provide behavioral evidence, not replacement branding.",
+      "acceptanceTest": "Canonical token map documents typography, surfaces, spacing, motion and breakpoints and is used by GAS components."
+    },
+    {
+      "gasCapability": "data-query-state",
+      "currentPaths": ["app/providers.tsx", "hooks", "lib/cache.ts"],
+      "action": "reuse-extend",
+      "dependencies": [],
+      "constraint": "Live game/social/monetary state must distinguish optimistic UI from canonical settlement truth.",
+      "acceptanceTest": "Query/state layer supports explicit pending/settled/error states and safe reconciliation after refresh."
+    },
+    {
+      "gasCapability": "identity-profile-api",
+      "currentPaths": ["app/api/auth", "app/api/me", "app/api/public", "lib/account-quality.ts"],
+      "action": "review-extend",
+      "dependencies": ["phase-1-api-recursive-audit", "phase-2-social-model"],
+      "constraint": "Only approved GAS identity/reputation signals may be surfaced as verified performance.",
+      "acceptanceTest": "Identity API exposes canonical profile/activity data with privacy and integrity rules documented."
+    },
+    {
+      "gasCapability": "referral-invites",
+      "currentPaths": ["app/api/referral", "app/api/invites"],
+      "action": "review-extend",
+      "dependencies": ["open-crew-referral-economics", "anti-sybil-design"],
+      "constraint": "UX may not invent referral emissions or reward economics.",
+      "acceptanceTest": "Referral/invite UX uses approved economics and prevents misleading pending/earned states."
+    },
+    {
+      "gasCapability": "gas-original-play",
+      "currentPaths": [],
+      "action": "build",
+      "dependencies": ["phase-3-game-research", "open-payout-tables", "rng/settlement-interface"],
+      "constraint": "CRUISE/BOOST/REDLINE, IGNITION, GAS GAUGE, GameBankroll firewall and informed risk presentation are canonical.",
+      "acceptanceTest": "Core Play journeys J02/J03/J04/J12/J13 meet approved benchmark/recovery targets."
+    },
+    {
+      "gasCapability": "trade-gas",
+      "currentPaths": [],
+      "action": "build",
+      "dependencies": ["phase-3-conversion-research", "liquidity/quote-interface"],
+      "constraint": "Canonical bootstrap 4% buy / 5-7% sell router fees must remain distinct from game economics and expected receive/fees must be clear before confirmation.",
+      "acceptanceTest": "Buy/Sell GAS journeys meet J08/J09 and never require manual contract/RPC knowledge in normal supported flow."
+    },
+    {
+      "gasCapability": "rebase-reserve",
+      "currentPaths": ["components/LiveTreasuryBar.tsx"],
+      "action": "refactor-build",
+      "dependencies": ["phase-3-monetary-research", "oracle/reserve-data-interfaces"],
+      "constraint": "External-only backing; rebase must show direction, magnitude and personal balance impact without inventing open monetary parameters.",
+      "acceptanceTest": "J10/J11 pass and reserve/game/account/Bracket domains cannot be visually conflated."
+    },
+    {
+      "gasCapability": "error-recovery",
+      "currentPaths": ["app/global-error.tsx", "app/leaderboard/error.tsx", "app/leaderboard/loading.tsx", "e2e"],
+      "action": "extend",
+      "dependencies": ["phase-9-state-machines", "phase-10-benchmarking"],
+      "constraint": "Raw provider/RPC errors cannot be the primary consumer message; money state and one safe action must be clear.",
+      "acceptanceTest": "Refresh, reconnect, duplicate-submit, delayed settlement and provider failure tests pass without money-state ambiguity."
+    },
+    {
+      "gasCapability": "automated-ux-benchmarking",
+      "currentPaths": ["playwright.config.ts", "e2e", "e2e/ux/benchmark.ts"],
+      "action": "reuse-extend",
+      "dependencies": ["implemented-vertical-slices"],
+      "constraint": "Use the existing runner rather than a parallel test framework.",
+      "acceptanceTest": "Core journeys emit comparable action/timing/state metrics and approved regressions fail CI."
+    }
+  ]
+}

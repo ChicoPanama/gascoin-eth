@@ -1,0 +1,29 @@
+{
+  "phase": 2,
+  "reference": "fomo",
+  "status": "public_lane_saturated_direct_capture_pending",
+  "rule": "FJ journeys describe product flows; M tasks define the remaining user-driven measurements. A journey is not 'measured' until capture-derived data exists.",
+  "journeys": [
+    {"journey":"FJ01","name":"new_user_to_account","publicEvidence":"strong_documented_plus_published_visual","capture":["M11","M12"],"open":["live provider list","screen count","elapsed time","failure/recovery","first funding placement"]},
+    {"journey":"FJ02","name":"returning_user_to_home","publicEvidence":"strong_documented","capture":["M11","M16"],"open":["time to useful state","auth interruption","resume behavior","cross-device reconciliation"]},
+    {"journey":"FJ03","name":"feed_to_action","publicEvidence":"strong_documented_plus_published_visual","capture":["M03","M07","M10"],"open":["tap count","context preservation","current card CTA","trade-sheet boundary","back restoration"]},
+    {"journey":"FJ04","name":"feed_to_profile_to_follow","publicEvidence":"strong_documented_plus_published_visual","capture":["M01","M08"],"open":["tap count","profile transition","follow acknowledgement","scroll restoration"]},
+    {"journey":"FJ05","name":"leaderboard_to_profile","publicEvidence":"strong_documented_plus_published_visual","capture":["M02","M09"],"open":["live timeframe controls","row density","transition","return state"]},
+    {"journey":"FJ06","name":"global_to_following_feed","publicEvidence":"strong_documented_plus_published_visual","capture":["M01","M15"],"open":["current control name/placement","persistence","empty state","live refresh"]},
+    {"journey":"FJ07","name":"search_to_token_or_user","publicEvidence":"strong_documented","capture":["M05"],"open":["result grouping","autofocus","recent searches","no-result state","action count"]},
+    {"journey":"FJ08","name":"token_to_quick_buy","publicEvidence":"strong_documented_plus_published_visual","capture":["M03","M10","M14"],"open":["current final gesture","fee/slippage disclosure","visual acknowledgement","pending state","portfolio update"]},
+    {"journey":"FJ09","name":"position_to_exit","publicEvidence":"strong_documented_plus_published_visual","capture":["M10","M13","M14"],"open":["sell/exit parity","fee disclosure","step-up auth","pending/settled recovery","repeat action"]},
+    {"journey":"FJ10","name":"notification_to_context","publicEvidence":"strong_documented_plus_published_visual","capture":["M15","M16"],"open":["deep-link destination","stale-state handling","device parity"]},
+    {"journey":"FJ11","name":"mobile_desktop_continuity","publicEvidence":"strong_documented","capture":["M16","M17"],"open":["state parity","layout transformation","preferences","pending action reconciliation"]},
+    {"journey":"FJ12","name":"high_activity_feed_scan","publicEvidence":"strong_documented_plus_published_visual","capture":["M07","M15"],"open":["live card density","current taxonomy","insertion behavior","layout shift","scan timing"]},
+    {"journey":"FJ13","name":"fund_account","publicEvidence":"strong_documented_plus_marketing_visual","capture":["M12","M14"],"open":["live option order","fees","ETA","network language","pending/retry state"]},
+    {"journey":"FJ14","name":"withdraw_sensitive_action","publicEvidence":"strong_documented","capture":["M13","M14"],"open":["current rails","entry path","biometric timing","fee/ETA","pending/history/support"]},
+    {"journey":"FJ15","name":"simple_to_advanced_charting","publicEvidence":"strong_documented_plus_desktop_visual","capture":["M10","M17"],"open":["disclosure actions","tool density","social overlay controls","return to primary action","web breakpoint"]}
+  ],
+  "crossCuttingCapture": {
+    "M04": "resolves live Home/filter conflicts relevant to FJ02/FJ07/FJ08/FJ13",
+    "M06": "quantifies native mobile shell across most mobile journeys",
+    "M18": "adds accessibility/ergonomic evidence across all core journeys"
+  },
+  "completionRule": "After capture, update FOMO_JOURNEY_MATRIX.json measured fields only from sanitized capture-derived evidence. Unknown/unavailable values remain explicit."
+}

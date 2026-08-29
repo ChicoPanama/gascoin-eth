@@ -1,18 +1,22 @@
 import { defineConfig, devices } from '@playwright/test';
 
+const webServerCommand = process.env.CI
+  ? './node_modules/.bin/next start --hostname 127.0.0.1'
+  : 'npm run build && ./node_modules/.bin/next start --hostname 127.0.0.1';
+
 export default defineConfig({
   testDir: './e2e',
   fullyParallel: false,
   forbidOnly: !!process.env.CI,
-  retries: process.env.CI ? 2 : 0,
-  workers: 1,
+  retries: process.env.CI ? 1 : 0,
+  workers: process.env.CI ? 2 : 1,
   reporter: [
     ['list'],
     ['html', { outputFolder: 'playwright-report', open: 'never' }],
     ['json', { outputFile: 'test-results/results.json' }],
   ],
   use: {
-    baseURL: 'http://localhost:3000',
+    baseURL: 'http://127.0.0.1:3000',
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',
@@ -26,9 +30,9 @@ export default defineConfig({
     { name: 'mobile-safari', use: { ...devices['iPhone 13'] }, dependencies: ['setup'] },
   ],
   webServer: {
-    command: 'npm run build && npm run start',
-    url: 'http://localhost:3000',
+    command: webServerCommand,
+    url: 'http://127.0.0.1:3000',
     reuseExistingServer: !process.env.CI,
-    timeout: 120000,
+    timeout: process.env.CI ? 60000 : 300000,
   },
 });

@@ -1,0 +1,62 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "GAS UX Observation",
+  "type": "object",
+  "required": ["id","reference","capturedAt","evidenceLevel","viewport","route","state","gasCapability","observation"],
+  "properties": {
+    "id": {"type":"string"},
+    "reference": {"type":"string"},
+    "capturedAt": {"type":"string","format":"date-time"},
+    "evidenceLevel": {"enum":["observed","documented","measured","inferred"]},
+    "source": {"type":"string"},
+    "viewport": {
+      "type":"object",
+      "required":["width","height"],
+      "properties":{"width":{"type":"integer"},"height":{"type":"integer"},"device":{"type":"string"}}
+    },
+    "route": {"type":"string"},
+    "state": {"type":"string"},
+    "gasCapability": {"type":"string"},
+    "element": {
+      "type":"object",
+      "properties": {
+        "name":{"type":"string"},"role":{"type":"string"},"x":{"type":"number"},"y":{"type":"number"},"width":{"type":"number"},"height":{"type":"number"},
+        "fontFamily":{"type":"string"},"fontSize":{"type":"number"},"fontWeight":{"type":"number"},"lineHeight":{"type":"number"},
+        "padding":{"type":"string"},"gap":{"type":"number"},"radius":{"type":"number"},"opacity":{"type":"number"},"position":{"type":"string"},
+        "sticky":{"type":"boolean"},"scrollRequired":{"type":"boolean"},"touchTarget":{"type":"number"}
+      }
+    },
+    "interaction": {
+      "type":"object",
+      "properties": {
+        "journey":{"type":"string"},"trigger":{"type":"string"},"fromState":{"type":"string"},"toState":{"type":"string"},
+        "actionNumber":{"type":"integer"},"modalCount":{"type":"integer"},"walletPromptCount":{"type":"integer"},"screenCount":{"type":"integer"},
+        "preservesInput":{"type":"boolean"},"preservesScroll":{"type":"boolean"},"keyboardShortcut":{"type":"string"},"backBehavior":{"type":"string"}
+      }
+    },
+    "timing": {
+      "type":"object",
+      "properties": {
+        "visualAcknowledgementMs":{"type":"number"},"navigationMs":{"type":"number"},"animationMs":{"type":"number"},"resultMs":{"type":"number"},"readyForNextActionMs":{"type":"number"}
+      }
+    },
+    "motion": {
+      "type":"object",
+      "properties": {"property":{"type":"string"},"durationMs":{"type":"number"},"easing":{"type":"string"},"from":{"type":"string"},"to":{"type":"string"}}
+    },
+    "information": {
+      "type":"object",
+      "properties": {"primaryFocalPoints":{"type":"integer"},"visibleFinancialNumbers":{"type":"integer"},"primaryActions":{"type":"integer"},"secondaryActions":{"type":"integer"},"disclosureDepth":{"type":"integer"}}
+    },
+    "recovery": {
+      "type":"object",
+      "properties": {"refreshSafe":{"type":"boolean"},"offlineSafe":{"type":"boolean"},"recoverable":{"type":"boolean"},"userMessage":{"type":"string"},"nextAction":{"type":"string"}}
+    },
+    "observation": {"type":"string"},
+    "whyItWorks": {"type":"string"},
+    "weakness": {"type":"string"},
+    "gasTranslation": {"type":"string"},
+    "gasAcceptanceCriterion": {"type":"string"},
+    "confidence": {"type":"number","minimum":0,"maximum":1}
+  }
+}

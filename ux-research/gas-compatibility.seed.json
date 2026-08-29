@@ -1,0 +1,46 @@
+{
+  "version": 1,
+  "status": "seed — expand under issue #72",
+  "stack": {
+    "framework": "Next.js 16 / React 19",
+    "motion": "Framer Motion",
+    "auth": "Privy",
+    "evm": ["wagmi","viem"],
+    "serverState": "TanStack React Query",
+    "testing": ["Vitest","Playwright"]
+  },
+  "existing": [
+    {"path":"components/HomeNav.tsx","capability":"navigation","action":"refactor","target":"GAS Home/Play/Trade/Crews/Wallet information architecture"},
+    {"path":"components/Nav.tsx","capability":"navigation","action":"inventory","target":"determine reuse vs consolidation with HomeNav"},
+    {"path":"components/NavActionsMenu.tsx","capability":"quick-actions","action":"refactor","target":"candidate GAS universal action sheet"},
+    {"path":"components/AuthNavButton.tsx","capability":"identity/auth","action":"extend","target":"consumer account entry with wallet details progressively disclosed"},
+    {"path":"components/PrivySubmit.tsx","capability":"wallet/auth transaction","action":"inventory","target":"identify reusable Privy transaction/auth patterns"},
+    {"path":"components/DashboardLive.tsx","capability":"live-state","action":"refactor","target":"GAS Home activity/portfolio/network modules"},
+    {"path":"components/LiveTreasuryBar.tsx","capability":"treasury-state","action":"refactor","target":"Reserve/Backing state; must reflect new GAS reserve semantics"},
+    {"path":"components/CinematicIntro.tsx","capability":"motion","action":"inventory","target":"reuse motion primitives selectively; never block returning-user play"},
+    {"path":"app/community","capability":"social","action":"refactor","target":"social layer / profiles / feed / Crews"},
+    {"path":"app/leaderboard","capability":"social-ranking","action":"refactor","target":"player/Crew leaderboards"},
+    {"path":"app/dashboard","capability":"account/home","action":"refactor","target":"unified GAS account/home"}
+  ],
+  "build": [
+    {"component":"GasGauge","capability":"play"},
+    {"component":"IgnitionButton","capability":"play"},
+    {"component":"RiskSelector","capability":"play"},
+    {"component":"WagerControls","capability":"play"},
+    {"component":"GameResultCard","capability":"play/social"},
+    {"component":"LiveActivityTape","capability":"home/social"},
+    {"component":"RebaseClock","capability":"monetary"},
+    {"component":"RebaseEvent","capability":"monetary/social"},
+    {"component":"ReserveGauge","capability":"monetary"},
+    {"component":"UnifiedBalance","capability":"account"},
+    {"component":"QuickTradeGas","capability":"trade"},
+    {"component":"CrewCard","capability":"social"}
+  ],
+  "constraints": [
+    "Game UX may not imply that ReserveVault guarantees game liabilities.",
+    "Reserve UX may not count GAS/wGAS as external backing.",
+    "Future Bracket positions must remain semantically distinct from spendable cash while still fitting the unified account shell.",
+    "Returning-user Play flow must not be blocked by cinematic/marketing UI.",
+    "Reference-product patterns may alter GAS interaction architecture but not GAS brand identity by default."
+  ]
+}

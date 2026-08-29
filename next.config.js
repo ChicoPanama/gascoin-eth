@@ -65,7 +65,7 @@ const nextConfig = {
           // WalletConnect explorer-api powers Privy's wallet picker (list of
           // supported WalletConnect-compatible wallets). pulse.walletconnect
           // is their telemetry. Both required for the wallet login flow.
-          "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://auth.privy.io https://*.privy.io https://eth-mainnet.g.alchemy.com https://mainnet.infura.io https://api.etherscan.io https://api.coingecko.com https://*.walletconnect.com https://*.walletconnect.org wss://*.walletconnect.com wss://*.walletconnect.org https://*.sentry.io https://*.ingest.sentry.io https://*.ingest.us.sentry.io",
+          "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://auth.privy.io https://*.privy.io https://*.base.org https://*.g.alchemy.com https://*.infura.io https://api.etherscan.io https://api.basescan.org https://api-sepolia.basescan.org https://api.coingecko.com https://*.walletconnect.com https://*.walletconnect.org wss://*.walletconnect.com wss://*.walletconnect.org https://*.sentry.io https://*.ingest.sentry.io https://*.ingest.us.sentry.io",
           // Privy's WalletConnect modal + Coinbase/Base wallet SDKs use
           // iframes for QR display and deep-link handoff.
           "frame-src https://auth.privy.io https://*.privy.io https://*.walletconnect.com https://*.walletconnect.org https://*.coinbase.com",
@@ -131,9 +131,17 @@ const nextConfig = {
       path: false,
       crypto: false,
     };
-    // Privy pulls in Farcaster Solana compat transitively; we don't use it on ETH.
+    // Project GAS does not use the optional Tempo Accounts connector exposed
+    // by wagmi v3. Webpack eagerly resolves that optional dynamic import even
+    // when the Tempo connector is unused, so explicitly mark it absent. If GAS
+    // ever adopts Tempo, remove this alias and install wagmi's compatible
+    // `accounts` optional peer before enabling the connector.
+    //
+    // Privy also pulls in Farcaster Solana compat transitively; GAS does not use
+    // those modules on the current EVM application surface.
     config.resolve.alias = {
       ...config.resolve.alias,
+      accounts: false,
       '@farcaster/mini-app-solana': false,
       '@farcaster/miniapp-sdk': false,
     };

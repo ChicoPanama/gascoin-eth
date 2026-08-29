@@ -1,0 +1,109 @@
+{
+  "version": 1,
+  "phase": 2,
+  "reference": "Fomo",
+  "status": "active",
+  "purpose": "Define every Fomo journey that must be documented or measured before Phase 2 can close.",
+  "standardViewports": ["390x844", "430x932", "768x1024", "1440x900", "1920x1080"],
+  "journeys": [
+    {
+      "id": "F01",
+      "name": "New user -> account",
+      "gasMapping": "J01",
+      "evidenceNeeded": ["documented", "observed", "measured-where-public"],
+      "metrics": ["intentionalActions", "screens", "requiredFields", "timeToUsableAccount", "walletKnowledgeExposed"]
+    },
+    {
+      "id": "F02",
+      "name": "Account -> fund",
+      "gasMapping": "J08/J15",
+      "evidenceNeeded": ["documented", "observed"],
+      "metrics": ["fundingOptions", "screens", "amountEntrySteps", "feeDisclosure", "chainKnowledgeExposed"]
+    },
+    {
+      "id": "F03",
+      "name": "Home discovery -> asset detail",
+      "gasMapping": "J16/J08",
+      "evidenceNeeded": ["documented", "measured"],
+      "metrics": ["actions", "filters", "visibleSignals", "scrollDistance", "detailContext"]
+    },
+    {
+      "id": "F04",
+      "name": "Asset detail -> buy",
+      "gasMapping": "J08",
+      "evidenceNeeded": ["documented", "measured"],
+      "metrics": ["actions", "primaryCTAPlacement", "modals", "quoteClarity", "readyToConfirmMs"]
+    },
+    {
+      "id": "F05",
+      "name": "Global feed -> trader profile",
+      "gasMapping": "J06",
+      "evidenceNeeded": ["documented", "measured"],
+      "metrics": ["actions", "profileContext", "scrollPreservation", "backBehavior"]
+    },
+    {
+      "id": "F06",
+      "name": "Profile -> follow",
+      "gasMapping": "J06",
+      "evidenceNeeded": ["documented", "measured"],
+      "metrics": ["actions", "performanceContextBeforeFollow", "acknowledgementMs"]
+    },
+    {
+      "id": "F07",
+      "name": "Leaderboard -> profile -> follow",
+      "gasMapping": "J06/J07",
+      "evidenceNeeded": ["documented", "measured"],
+      "metrics": ["timeframeFilters", "actions", "profileDepth", "followSteps"]
+    },
+    {
+      "id": "F08",
+      "name": "Feed trade/thesis -> asset action",
+      "gasMapping": "J05",
+      "evidenceNeeded": ["documented", "measured"],
+      "metrics": ["actions", "contextPreserved", "PnLContext", "balanceContext", "explicitConfirmation"]
+    },
+    {
+      "id": "F09",
+      "name": "Notification -> relevant trader/asset/action",
+      "gasMapping": "J17",
+      "evidenceNeeded": ["documented", "observed"],
+      "metrics": ["deepLinkDepth", "screens", "contextPreserved"]
+    },
+    {
+      "id": "F10",
+      "name": "Profile -> withdraw",
+      "gasMapping": "J09",
+      "evidenceNeeded": ["documented", "observed"],
+      "metrics": ["discoverability", "actions", "destinationClarity", "exitFriction"]
+    },
+    {
+      "id": "F11",
+      "name": "Mobile -> desktop continuity",
+      "gasMapping": "J15/J17",
+      "evidenceNeeded": ["documented"],
+      "metrics": ["identityContinuity", "balanceContinuity", "positionContinuity", "followingContinuity", "notificationContinuity"]
+    },
+    {
+      "id": "F12",
+      "name": "Global feed -> following/friends feed",
+      "gasMapping": "social feed architecture",
+      "evidenceNeeded": ["documented", "measured"],
+      "metrics": ["actions", "filterVisibility", "densityChange", "scrollState"]
+    },
+    {
+      "id": "F13",
+      "name": "Advanced chart depth without leaving product",
+      "gasMapping": "future advanced Trade/Bracket disclosure",
+      "evidenceNeeded": ["documented", "observed"],
+      "metrics": ["disclosureDepth", "defaultComplexity", "socialOverlay", "contextSwitches"]
+    },
+    {
+      "id": "F14",
+      "name": "Perpetuals product -> same social identity/layer",
+      "gasMapping": "future Bracket compatibility",
+      "evidenceNeeded": ["documented"],
+      "metrics": ["identityReuse", "feedReuse", "profileReuse", "leaderboardReuse", "notificationReuse"]
+    }
+  ],
+  "gateRule": "Phase 2 does not pass until F05-F08 are deeply characterized and Fomo's useful laws are translated into GAS-native patterns with explicit weaknesses/improvements. Measurements unavailable behind authenticated/private states must be labeled rather than invented."
+}

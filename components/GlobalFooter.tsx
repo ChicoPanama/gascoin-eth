@@ -1,6 +1,31 @@
+'use client';
+
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+
+const PROJECT_GAS_PREFIXES = [
+  '/play',
+  '/trade',
+  '/crews',
+  '/account',
+  '/reserve',
+  '/search',
+  '/notifications',
+  '/profile',
+  '/activity',
+  '/round',
+  '/transaction',
+  '/rebase',
+];
+
+function isProjectGasRoute(pathname: string) {
+  return pathname === '/' || PROJECT_GAS_PREFIXES.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`));
+}
 
 export function GlobalFooter() {
+  const pathname = usePathname();
+  if (isProjectGasRoute(pathname)) return null;
+
   return (
     <footer className="gc-footer">
       <div className="gc-footer-brand">GASCOIN</div>

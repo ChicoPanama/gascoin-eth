@@ -1,0 +1,71 @@
+name: UX Reference Harvest
+
+on:
+  workflow_dispatch:
+    inputs:
+      url:
+        description: Public HTTPS URL to capture
+        required: true
+        type: string
+      slug:
+        description: Short reference name (for example fomo-home)
+        required: true
+        type: string
+      viewport:
+        description: WIDTHxHEIGHT
+        required: true
+        default: 390x844
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  harvest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      TARGET_URL: ${{ inputs.url }}
+      TARGET_SLUG: ${{ inputs.slug }}
+      TARGET_VIEWPORT: ${{ inputs.viewport }}
+    steps:
+      - name: Validate public HTTPS target
+        shell: bash
+        run: |
+          set -euo pipefail
+          case "$TARGET_URL" in
+            https://*) ;;
+            *) echo "Only public HTTPS URLs are allowed" >&2; exit 1 ;;
+          esac
+          if echo "$TARGET_URL" | grep -Eqi '(^https://(localhost|127\.0\.0\.1|0\.0\.0\.0|\[::1\])([/:]|$))'; then
+            echo "Loopback targets are not allowed" >&2
+            exit 1
+          fi
+
+      - name: Checkout ux-lab
+        uses: actions/checkout@v4
+        with:
+          ref: ux-lab
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Harvest reference
+        run: node scripts/ux-harvest.mjs --url "$TARGET_URL" --slug "$TARGET_SLUG" --viewport "$TARGET_VIEWPORT" --out ux-research/captures
+
+      - name: Upload molecular capture
+        uses: actions/upload-artifact@v4
+        with:
+          name: ux-${{ inputs.slug }}-${{ inputs.viewport }}
+          path: ux-research/captures/
+          if-no-files-found: error
+          retention-days: 30
