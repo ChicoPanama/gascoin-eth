@@ -18,15 +18,15 @@ contract BootstrapFeePolicyHarness {
 }
 
 contract BootstrapFeePolicyTest {
-    BootstrapFeePolicyHarness private immutable policy = new BootstrapFeePolicyHarness();
+    BootstrapFeePolicyHarness private immutable POLICY = new BootstrapFeePolicyHarness();
 
     function test_LockedExamples() external view {
-        require(policy.fee(10_000, true, 0) == 400, "buy fee");
-        require(policy.fee(10_000, false, 0) == 500, "sell fee");
-        require(policy.fee(10_000, false, 100) == 600, "pressure fee");
-        require(policy.fee(10_000, false, 200) == 700, "max fee");
+        require(POLICY.fee(10_000, true, 0) == 400, "buy fee");
+        require(POLICY.fee(10_000, false, 0) == 500, "sell fee");
+        require(POLICY.fee(10_000, false, 100) == 600, "pressure fee");
+        require(POLICY.fee(10_000, false, 200) == 700, "max fee");
 
-        BootstrapFeePolicy.Allocation memory a = policy.allocation(10_000, false, 200);
+        BootstrapFeePolicy.Allocation memory a = POLICY.allocation(10_000, false, 200);
         require(a.reserveVault == 450, "reserve");
         require(a.growthLiquidity == 120, "growth/liquidity");
         require(a.teamOperations == 50, "team/ops");
@@ -36,22 +36,22 @@ contract BootstrapFeePolicyTest {
     function testFuzz_FeeAndAllocationRemainBounded(uint256 rawAmount, uint16 rawPressure) external view {
         uint256 amount = rawAmount % (type(uint256).max / 10_000);
         uint16 pressure = rawPressure % 201;
-        uint256 charged = policy.fee(amount, false, pressure);
-        BootstrapFeePolicy.Allocation memory a = policy.allocation(amount, false, pressure);
-        uint256 allocated = a.reserveVault + a.growthLiquidity + a.distributionReferralGrowth
-            + a.teamOperations + a.defense;
+        uint256 charged = POLICY.fee(amount, false, pressure);
+        BootstrapFeePolicy.Allocation memory a = POLICY.allocation(amount, false, pressure);
+        uint256 allocated =
+            a.reserveVault + a.growthLiquidity + a.distributionReferralGrowth + a.teamOperations + a.defense;
         require(charged == allocated, "allocation conservation");
         require(charged <= amount * 700 / 10_000, "sell cap");
         require(a.teamOperations == amount * 50 / 10_000, "pressure cannot reach team");
     }
 
     function test_PressureOverCapReverts() external {
-        (bool ok,) = address(policy).call(abi.encodeCall(policy.fee, (10_000, false, 201)));
+        (bool ok,) = address(POLICY).call(abi.encodeCall(POLICY.fee, (10_000, false, 201)));
         require(!ok, "pressure cap bypass");
     }
 
     function test_OverflowingAmountFailsClosed() external {
-        (bool ok,) = address(policy).call(abi.encodeCall(policy.fee, (type(uint256).max, false, 200)));
+        (bool ok,) = address(POLICY).call(abi.encodeCall(POLICY.fee, (type(uint256).max, false, 200)));
         require(!ok, "overflow bound bypass");
     }
 }

@@ -58,8 +58,8 @@ library BootstrapFeePolicy {
             allocation.defense = amount * 50 / BPS + pressure * 15 / 100;
         }
 
-        uint256 allocated = allocation.reserveVault + allocation.growthLiquidity
-            + allocation.distributionReferralGrowth + allocation.teamOperations + allocation.defense;
+        uint256 allocated = allocation.reserveVault + allocation.growthLiquidity + allocation.distributionReferralGrowth
+            + allocation.teamOperations + allocation.defense;
         // Reserve-first deterministic dust policy makes allocation conservation exact.
         allocation.reserveVault += total - allocated;
     }
